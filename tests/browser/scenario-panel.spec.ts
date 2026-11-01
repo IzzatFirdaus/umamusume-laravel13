@@ -4,13 +4,14 @@ import { deleteRun } from '../utils/delete-run';
 import { expectTapTargets } from '../utils/tap-targets';
 
 /*
- * The scenario panel registry's browser seam, `SCR-CAR-019` (SCREEN-014 / 015 / 016, plan §9 E1).
- * `ScenarioPanelTest` pins the payload and the G-33 property.
+ * The scenario panel shell, `SCR-CAR-019` (SCREEN-014 / 015 / 016, plan §9 E1). `ScenarioPanelTest`
+ * pins the payload and the G-33 property; these cases assert what only a browser reaches.
  *
- * The rendered half of this spec went with the panel shell in the HFW parity pass: the cockpit no
- * longer mounts `ScenarioPanel`, so there is no disclosure to open and no fallback line to read on a
- * page. What survives is the registry resolution (a widget key resolves the panel component and the
- * map resolves its own kind) and the two page-level sweeps that never depended on the panel.
+ * **The fallback chain's arms are separate cases on purpose**, because their failure messages differ
+ * and a parametrised case would collapse them into one: a registered renderer draws its own content,
+ * an ON flag with no renderer names the flag, an unlabelled widget names the key. Two of the three
+ * are config-gated — the registry is empty until E3 registers, and no Global scenario declares an
+ * unlabelled widget — so each case states what it can reach and where the rendered half lands.
  *
  * A run is created through the assistant screens the way the other career specs do it, then walked
  * to the Cockpit. Writes get 60s because `php artisan serve` is a single-process `php -S`.
@@ -72,13 +73,132 @@ test('keeps a widget key from resolving a panel component, and each map resolves
     expect(resolveWidget('probe_widget')).toBe(widgetProbe);
 });
 
+test('draws a resource the matrix labels through the meter, with the number and a labelled bar', async ({ page }) => {
+    await openUnityCupCockpit(page);
+
+    const section = page.getByRole('region', { name: 'Scenario' });
+    await expect(section).toBeVisible();
+
+    // Unity Cup's own two widgets, asserted through the meter's accessible name. Since E3, the
+    // Team Panel below the strip also prints a "Team Rank" heading, so the exact-text locator that
+    // used to be unique now matches two nodes — the meter's name is the collision-proof handle.
+    // No column holds either reading yet, so each is `not recorded` rather than a zero (D-220).
+    // The Team Panel is drawn inside this same region and now carries a meter of its own
+    // (`UnityCupPanel.vue` "Current Spirit"), so document order no longer makes the first bar the
+    // widget strip's Team Rank. Each meter is addressed by its accessible name instead, which is the
+    // handle that cannot collide: the Spirit meter's position in the reading order is the design.
+    await expect(section.getByRole('img', { name: /Team Rank: not recorded/ })).toBeVisible();
+    await expect(section.getByRole('img', { name: /Spirit Bursts: not recorded/ })).toBeVisible();
+    await expect(section.getByRole('img', { name: /Current Spirit: not recorded/ })).toBeVisible();
+
+    // The baseline three are the header's figures and are not repeated inside the panel.
+    await expect(section.getByText('Turn', { exact: true })).toHaveCount(0);
+});
+
+test('names no fallback line, because every flag the matrix turns on now has a renderer', async ({ page }) => {
+    await openUnityCupCockpit(page);
+
+    const section = page.getByRole('region', { name: 'Scenario' });
+
+    // E1 shipped this case as "an ON panel with no renderer prints a notice naming itself". E2, E3
+    // and E4 have since claimed every flag `panel_labels` declares, so no Global scenario can reach
+    // that arm any more, and the notice would have to be provoked by a config the app never loads.
+    // The property the line guarded still holds two ways: the registry seam above proves `resolve()`
+    // returns undefined for a key nobody claims, and `ScenarioPanelTest` proves an unlabelled widget
+    // key travels so the shell can name it. What this case now pins is the shipped state: Unity Cup
+    // composes three panels and none of them falls back.
+    await expect(section.getByText(/cannot draw yet/)).toHaveCount(0);
+    await expect(section.getByText(/this build cannot draw/)).toHaveCount(0);
+});
+
+test('draws nothing at all for a panel the scenario leaves off', async ({ page }) => {
+    await openUnityCupCockpit(page);
+
+    const section = page.getByRole('region', { name: 'Scenario' });
+
+    // Unity Cup's OFF flags. An OFF flag is not a missing renderer: the region must not mention a
+    // system this scenario does not compose, and a future config edit must not turn OFF into
+    // "fallback shown".
+    for (const label of ['Pro Shop', 'Grade Point objectives', 'Epithet routes']) {
+        await expect(section.getByText(label, { exact: true })).toHaveCount(0);
+        await expect(section.getByText(new RegExp(`cannot draw yet: ${label}`))).toHaveCount(0);
+    }
+});
+
+test('states the scenario, its documentation and the ruleset absence in the baseline strip', async ({ page }) => {
+    await openUnityCupCockpit(page);
+
+    const section = page.getByRole('region', { name: 'Scenario' });
+    await expect(section.getByText('Unity Cup', { exact: true })).toBeVisible();
+    await expect(section.getByText('Documented', { exact: true })).toBeVisible();
+    await expect(section.getByText(/No source defines a Global ruleset version/).first()).toBeVisible();
+
+    // R2-05's residual: the strip is the Cockpit's only ruleset fact, and it was headed plain
+    // `Ruleset` while the setup wizard's card had split into `Ruleset version` and `Rule family`. One
+    // heading on one surface is fine, but it has to say which fact it is. Anchored, not `exact: true`:
+    // the heading is a bare text node inside the paragraph that carries the refusal, so no element's
+    // whole text is the heading alone, and a regex matcher is not whitespace-normalised, hence `\s*`
+    // for the template's own indentation. The second line is the red-before-green half — the paragraph
+    // opened with `Ruleset:` until the rename, so it cannot pass by matching nothing.
+    await expect(section.getByText(/^\s*Ruleset version:/)).toBeVisible();
+    await expect(section.getByText(/^\s*Ruleset:/)).toHaveCount(0);
+
+    // DESIGN.md §5 (a), 2026-10-17: one absence channel, and it is reachable without a mouse. The
+    // marker was a `<span title>` and the sentence followed it as loose text, so a screen reader heard
+    // "N/A" and a keyboard user got nothing. It is now `AbsenceValue`'s `<details>`, whose summary
+    // carries the reason as its accessible name and which opens with no script. Red before this case:
+    // the strip rendered no `<summary>` at all.
+    const marker = section.locator('summary').first();
+    await expect(marker).toContainText('N/A');
+    await expect(marker).toHaveAccessibleName(/No source defines a Global ruleset version/);
+
+    // Keyboard-reachable and it actually opens: the reason is a visible statement, not a tooltip.
+    await marker.focus();
+    await expect(marker).toBeFocused();
+    await page.keyboard.press('Enter');
+    await expect(section.locator('details[open]').first()).toBeVisible();
+    await expect(section.locator('details[open]').first()).toContainText(/No source defines a Global ruleset version/);
+});
+
+test('renders only the baseline strip for a scenario that composes no panel', async ({ page }) => {
+    // Our Grand Concert is the scenario whose every panel flag is off, so this is the shell's empty
+    // branch. The strip's own copy and its caps table have their own spec
+    // (`grand-concert-panel.spec.ts`); this case is the shell's view of it, so that the branch E1
+    // shipped stays covered where E1 put it.
+    await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await page.locator('#trainee-combobox').fill('Rice Shower');
+    await page.keyboard.press('Enter');
+    await page.selectOption('select[name="scenario"]', { value: 'our_grand_concert' });
+    await page.getByRole('button', { name: 'Create run' }).click();
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
+    const runUrl = page.url().replace(/\/cockpit$/, '');
+    createdRunUrls.push(runUrl);
+
+    await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const section = page.getByRole('region', { name: 'Scenario' });
+    await expect(section.getByText('Our Grand Concert', { exact: true })).toBeVisible();
+
+    // The badge's partial arm, reachable since the owner's 2026-10-07 ruling put the badge on
+    // `partially_documented` (plan §4.1 item 6, `SCREEN_SPEC.md` SCR-CAR-019).
+    await expect(section.getByText('Partially documented', { exact: true })).toBeVisible();
+    await expect(section.getByText('Documented', { exact: true })).toHaveCount(0);
+
+    // Every panel is off, so no renderer mounts and no fallback row does.
+    await expect(section.getByText(/cannot draw yet/)).toHaveCount(0);
+});
+
 test('keeps the 44px floor across the cockpit and reflows at 320 px', async ({ page }) => {
     await openUnityCupCockpit(page);
 
-    // The scenario panel shell was removed with the HFW parity pass, but the page-level sweep still
-    // earns its keep: it covers every control the cockpit carries. `expectTapTargets` skips what a
-    // collapsed disclosure hides and asserts it measured something; 10 is well under the ~16 controls
-    // this page carries, so a selector that stopped matching still fails.
+    // The panel adds no control of its own in E1 — every resource it draws is a reading, and its
+    // panels arrive with E2 to E4 — so a sweep of the panel alone would be a check that cannot
+    // fail. The sweep runs over the page with the panel mounted instead, which is where a target
+    // the panel displaced would show up. `expectTapTargets` skips what a collapsed disclosure hides
+    // and asserts it measured something; 10 is well under the ~17 controls this page carries, so a
+    // selector that stopped matching still fails.
     await expectTapTargets(page.locator('main a, main button'), 10);
 
     await page.setViewportSize({ width: 320, height: 700 });

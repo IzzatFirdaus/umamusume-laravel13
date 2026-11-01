@@ -70,8 +70,8 @@ function recordedCard(page: import('@playwright/test').Page) {
 }
 
 /*
- * `C6b.11` deleted the "Career tools" disclosure, and the HFW parity pass removed the action grid it
- * used to reveal: the cockpit's doors are the "Where to go" list. The helper that opened the grid is
+ * `C6b.11` deleted the "Career tools" disclosure, so there is nothing to open before reading the
+ * action grid: `ActionGrid` now renders at page level (C6b.4). The helper that used to open it is
  * gone rather than left as a no-op, so a future caller cannot believe it is still hiding a region.
  */
 
@@ -165,6 +165,7 @@ test('names every absent value and refuses to rank until Energy is entered', asy
     // with a reason rather than a zero (D-220). No dash is printed anywhere (AGENTS.md §5).
     await expect(page.getByRole('heading', { name: 'Stats and state' })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Advisor' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Actions' })).toBeVisible();
 
     await expect(page.getByText('N/A').first()).toBeVisible();
     // No em dash anywhere in shipped copy: an unrecorded value is `N/A` with a reason (AGENTS.md §5).
@@ -184,6 +185,21 @@ test('names every absent value and refuses to rank until Energy is entered', asy
     // (design-2.0 §2), so a scan that printed both would be one generic empty message again.
     await expect(advisorRegion.getByText('No suitable action found.')).toHaveCount(0);
     await expect(advisorRegion.getByRole('heading', { name: 'Recommended action' })).toHaveCount(0);
+
+    // Seven entries, and no RECOMMENDED marker at all while the advisor declines.
+    //
+    // Scoped to the Actions region (slice 4.1): the section nav renders real `Training`, `Events` and
+    // `Race` links, so a page-scoped `/^Training/` matches the nav's own tab as well as the grid's
+    // entry, and Playwright refuses the ambiguity. The `actions` locator moved up here so the two
+    // entries below and the marker assertion share it.
+    const actions = page.getByRole('region', { name: 'Actions' });
+    await expect(actions.getByRole('link', { name: /^Training/ })).toBeVisible();
+    await expect(actions.getByRole('link', { name: /^Inheritance/ })).toBeVisible();
+    // Scoped to the Actions region the way the ranked case below is, and for the same reason:
+    // `getByText` matches case-insensitively as a substring, and since Phase E the word also occurs
+    // in panel prose naming a held field ("Recommended timing and projected benefit are not built",
+    // Unity Cup's SCREEN-015 absence). The claim here is about the grid's marker, not about the word.
+    await expect(actions.getByText('RECOMMENDED')).toHaveCount(0);
 });
 
 test('lists the career obligations the calendar states, each as a mark and a word', async ({ page }) => {
@@ -286,7 +302,7 @@ test('puts the obligations table below the recommendation, as the wireframe draw
 
         return {
             afterRecommendation: follows(recommendation),
-            afterPriority: priority === undefined ? null : follows(priority),
+            afterPriority: priority === null ? null : follows(priority),
         };
     });
 
@@ -307,42 +323,65 @@ test('lays out at 1280, 768 and 320 without a horizontal scroll', async ({ page 
         expect(overflow, `the cockpit scrolls sideways at ${width}px`).toBeLessThanOrEqual(1);
 
         // Every region is in the accessibility tree at every width: nothing is hidden by a breakpoint.
+        await expect(page.getByRole('heading', { name: 'Actions' })).toBeVisible();
         await expect(page.getByRole('heading', { name: 'Advisor' })).toBeVisible();
         await expect(page.getByRole('heading', { name: 'Scenario' })).toBeVisible();
     }
 
-    // The spec's mobile order: the recommendation stays above the doors it leads to (design-2.0 §40).
+    // The spec's mobile order: the recommendation stays above the actions (design-2.0 §40).
     await page.setViewportSize({ width: 320, height: 900 });
     const advisor = await page.getByRole('heading', { name: 'Advisor' }).boundingBox();
-    const doors = await page.getByRole('heading', { name: 'Where to go' }).boundingBox();
-    expect((advisor?.y ?? 0), 'the recommendation is not above the doors on mobile').toBeLessThan(doors?.y ?? 0);
+    const actions = await page.getByRole('heading', { name: 'Actions' }).boundingBox();
+    expect((advisor?.y ?? 0), 'the recommendation is not above the actions on mobile').toBeLessThan(actions?.y ?? 0);
 });
 
-test('walks the Where to go doors from the keyboard with a visible focus ring', async ({ page }) => {
+test('walks the action grid from the keyboard with a visible focus ring', async ({ page }) => {
     await openCockpit(page);
 
-    // The cockpit's doors are the "Where to go" list; the action grid that used to sit beside it was
-    // removed with the HFW parity pass, so the keyboard walk follows the surviving list.
-    const doors = page.getByRole('region', { name: 'Where to go' });
-    const training = doors.getByRole('link', { name: 'Training decision' });
+    // Scoped to the Actions region: the section nav (audit 2026-10-12 §3.6) adds a "Races in this
+    // run" link whose name also starts with "Race", and the grid's own entry is the one meant here.
+    const actions = page.getByRole('region', { name: 'Actions' });
+    const training = actions.getByRole('link', { name: /^Training/ });
     await training.focus();
     await expect(training).toBeFocused();
 
-    // Tab moves through the list in reading order; the next door takes focus, and it carries the
+    // Tab moves through the grid in reading order; the next entry takes focus, and it carries the
     // global `:focus-visible` ring rather than relying on a hover state (WCAG 2.4.7).
     await page.keyboard.press('Tab');
-    const race = doors.getByRole('link', { name: 'Race decision' });
+    const race = actions.getByRole('link', { name: /^Race/ });
     await expect(race).toBeFocused();
     await expect(race).toBeInViewport();
 
     const outline = await race.evaluate((el) => getComputedStyle(el).outlineWidth);
-    expect(parseFloat(outline), 'the focused door has no focus ring').toBeGreaterThanOrEqual(2);
+    expect(parseFloat(outline), 'the focused grid entry has no focus ring').toBeGreaterThanOrEqual(2);
 
-    // And the last door is reachable without being hidden under the sticky mobile nav (SC 2.4.11).
+    // And the last entry is reachable without being hidden under the sticky mobile nav (SC 2.4.11).
     await page.setViewportSize({ width: 320, height: 700 });
-    const settings = doors.getByRole('link', { name: 'Run settings' });
-    await settings.focus();
-    await expect(settings).toBeInViewport();
+    const inheritance = page.getByRole('link', { name: /^Inheritance/ });
+    await inheritance.focus();
+    await expect(inheritance).toBeInViewport();
+});
+
+test('routes Rest and Recreation to the Training screen holding their choice', async ({ page }) => {
+    await openCockpit(page);
+
+    // SCR-CAR-011 gap 1 says no entry is a dead link; these two used to loop back to this screen. They
+    // are turn choices rather than training options (SCR-CAR-012), and the Training screen's one record
+    // form writes them, so the entry arrives with the choice already picked. Rest's address carries the
+    // value the row is written under; Recreation's carries the client's own word, which the Training
+    // screen normalises back to the stored `mood` literal at its boundary.
+    await expect(page.locator('[data-action="rest"]')).toHaveAttribute(
+        'href',
+        /\/training-runs\/\d+\/training\?choice=rest$/,
+    );
+    await expect(page.locator('[data-action="recreation"]')).toHaveAttribute(
+        'href',
+        /\/training-runs\/\d+\/training\?choice=recreation$/,
+    );
+
+    // The note names the path, not the old absence.
+    await expect(page.locator('[data-action="rest"]')).toContainText('Records a Rest turn through the Training screen.');
+    await expect(page.locator('[data-action="recreation"]')).toContainText('Records a Recreation turn through the Training screen.');
 });
 
 test('quiets transitions when the operating system asks for reduced motion', async ({ page }) => {
@@ -373,25 +412,27 @@ test('sizes the cockpit controls to the 44px contract', async ({ page }) => {
     await openCockpit(page);
 
     // WCAG 2.2 SC 2.5.8, floor 44px (plan §12.1). The same sweep `dashboard.spec.ts` runs.
-    // The cockpit's doors are the "Where to go" list now that the action grid is gone; each is scoped
-    // to its region because the section nav renders real `Training`, `Events` and `Race` links too.
-    const doors = page.getByRole('region', { name: 'Where to go' });
+    // Every grid entry is scoped to the Actions region: the section nav renders real `Training`,
+    // `Events` and `Race` links, so a page-scoped `/^Training/`, `/^Event/` or `/^Race/` matches a nav
+    // tab as well as the grid entry and Playwright refuses the ambiguity. Only the entries were
+    // scoped before; the rest of the grid's own links are scoped here too, which is the same fix.
+    const actions = page.getByRole('region', { name: 'Actions' });
     const sectionNav = page.getByRole('navigation', { name: 'Career sections' });
     const targets = [
-        doors.getByRole('link', { name: 'Training decision' }),
-        doors.getByRole('link', { name: 'Race decision' }),
-        doors.getByRole('link', { name: 'Skills planner' }),
-        doors.getByRole('link', { name: 'Run deck' }),
-        doors.getByRole('link', { name: 'Timeline' }),
-        doors.getByRole('link', { name: 'Career result' }),
-        doors.getByRole('link', { name: 'Run settings' }),
+        actions.getByRole('link', { name: /^Training/ }),
+        actions.getByRole('link', { name: /^Race/ }),
+        actions.getByRole('link', { name: /^Rest/ }),
+        actions.getByRole('link', { name: /^Recreation/ }),
+        actions.getByRole('link', { name: /^Scenario action/ }),
+        actions.getByRole('link', { name: /^Event/ }),
+        actions.getByRole('link', { name: /^Inheritance/ }),
         // The career bar's `Cockpit`/`Dashboard` door pair was replaced by the section nav (slice 4.1),
         // so the Cockpit entry is the nav's OWN tab now and is scoped to it, and the Dashboard entry is
         // the shell's own nav. Both are controls a Trainer uses, so both stay in the sweep; only their
         // scope changed.
         sectionNav.getByRole('link', { name: 'Cockpit', exact: true }),
         page.getByRole('link', { name: 'Dashboard' }).first(),
-        page.getByRole('link', { name: 'Delete this run' }),
+        page.getByRole('link', { name: 'Record the first turn through Training' }),
     ];
 
     for (const target of targets) {
@@ -478,12 +519,14 @@ test('records Energy through the cockpit correction and then marks one action', 
     // WCAG 2.2 SC 2.5.8 on the decision's own door, which only exists in the ranked state.
     expect(((await go.boundingBox())?.height ?? 0), 'the decision link is under 44px').toBeGreaterThanOrEqual(44);
 
-    // The ranked marker lived on the action grid's entries, which this pass removed with the HFW
-    // parity work: the auditor's ranked-state check is the accented recommendation card's own text.
-    await expect(advisorRegion.getByRole('heading', { name: 'Recommended action' })).toBeVisible();
+    // Scoped to the Actions region, not the page: `getByText` matches case-insensitively, and the
+    // ranked marker is the grid's, not the card's.
+    const actions = page.getByRole('region', { name: 'Actions' });
+    await expect(actions.getByText('RECOMMENDED')).toHaveCount(1);
+    await expect(actions.getByRole('link', { name: /^Training.*RECOMMENDED/ })).toBeVisible();
 
-    // The ranked state scans too: the accented recommendation card is the treatment the absent
-    // state does not carry.
+    // The ranked state scans too: the accented recommendation card and the RECOMMENDED marker are the
+    // two treatments the absent state does not carry.
     const ranked = await buildAxe(page).analyze();
     expect(ranked.violations, JSON.stringify(ranked.violations, null, 2)).toEqual([]);
 });
@@ -566,6 +609,41 @@ test('names the run state in the DOM, and only the one that applies', async ({ p
     await expect(page.getByText('Critical:')).toHaveCount(0);
 });
 
+test('keeps every settings disclosure closed on load for a finished career', async ({ page }) => {
+    const cockpitUrl = await completeCareer(page);
+
+    // Reload rather than read the page the status write left behind: that one was opened to change it.
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    for (const region of ['team-state']) {
+        const details = page.locator(`details[data-region="${region}"]`);
+        await expect(details, region).toHaveCount(1);
+        await expect(details, `${region} must be closed on load`).not.toHaveAttribute('open');
+    }
+});
+
+test('the scenario panels read before the advisor, above the scenario strip', async ({ page }) => {
+    await openCockpit(page);
+
+    // Tree order, not visual order: `querySelectorAll` answers in document order, which is the order a
+    // screen reader and a keyboard reach the regions. The HFW parity slice put the scenario card in the
+    // left column, so the panels and the strip come before the advisor's rail rather than between the
+    // rail and the strip: the claim this case keeps is that the panels are above the strip they belong
+    // to and that one registered renderer did not shadow another out of the tree.
+    const regions = await page.evaluate(() =>
+        Array.from(document.querySelectorAll('[data-region]')).map((el) => el.getAttribute('data-region')),
+    );
+    const advisor = regions.indexOf('advisor');
+    const panels = regions.indexOf('scenario-panels');
+    const scenario = regions.indexOf('scenario');
+
+    expect(advisor).toBeGreaterThanOrEqual(0);
+    expect(panels).toBeGreaterThanOrEqual(0);
+    expect(panels).toBeLessThan(scenario);
+    expect(scenario).toBeLessThan(advisor);
+});
+
 test('a completed URA career prints no Critical row', async ({ page }) => {
     // The seeded career, not a wizard walk: the case is about a finished career whose four mandatory
     // races are recorded, and the fixture helper runs the repo's own run seeder against the suite's
@@ -575,6 +653,21 @@ test('a completed URA career prints no Critical row', async ({ page }) => {
 
     await expect(page.getByRole('heading', { name: 'This run is complete.' })).toBeVisible();
     await expect(page.getByText('Critical:')).toHaveCount(0);
+});
+
+test('a completed URA career draws its four recorded mandatory races as a ladder', async ({ page }) => {
+    await page.goto(`/training-runs/${uraCompletedRun()}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const rows = page.locator('[data-region="scenario-panels"] [data-ladder-group="Mandatory races"] [data-ladder-row]');
+    await expect(rows).toHaveCount(4);
+
+    // `completed` is this build's state word for a race the run entered, and the ladder prints it as
+    // `Recorded`. The attribute mirrors the payload rather than inventing a second vocabulary for one
+    // fact.
+    for (const row of await rows.all()) {
+        await expect(row).toHaveAttribute('data-state', 'completed');
+    }
 });
 
 /*

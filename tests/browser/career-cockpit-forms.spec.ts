@@ -1,3 +1,4 @@
+import { openScenarioDetail } from '../utils/scenario-detail';
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
@@ -13,7 +14,7 @@ import { startCareer } from '../utils/start-career';
  * and the redirect targets are proven in a browser.
  *
  * Named `career-cockpit-forms` to distinguish it from `career-cockpit.spec.ts`, which covers the read
- * surfaces (layout, advisor, "Where to go" doors, axe).
+ * surfaces (layout, advisor, action grid, axe).
  *
  * Fixture strategy. The run is built by walking the wizard's own steps and pressing `Start Career`, as
  * `career-cockpit.spec.ts` does, with the scenario selectable so the grade-point period form
@@ -48,6 +49,11 @@ async function newCareer(page: import('@playwright/test').Page, scenarioId = 'un
 async function openCockpit(page: import('@playwright/test').Page, scenarioId = 'unity_cup'): Promise<string> {
     const url = await newCareer(page, scenarioId);
     await page.locator('#app > *').first().waitFor();
+
+    // The Unity Cup panels render inside the closed scenario-detail disclosure; the cases below
+    // assert on them, so the shared entry point opens it.
+    await openScenarioDetail(page);
+
 
     return url;
 }
@@ -126,6 +132,125 @@ test('records the trainee rarity, potential and growth rate on the settings door
     await openSettings(page);
     await expect(page.locator('#trainee_rarity')).toHaveValue('3');
     await expect(page.locator('#potential_level')).toHaveValue('2');
+});
+
+test('records the Unity Cup team state through the team editor', async ({ page }) => {
+    await openCockpit(page);
+
+    // The editor is a disclosure, so its controls have no box until it opens: the sweep runs after the
+    // click, which is the KI-92 lesson. On an Active career the wrapper is open by default
+    // (`:open="isActive"`, the merge's own design), so the click happens only when the panel is
+    // closed — an unconditional toggle would close the panel this case is trying to open.
+    const editor = page.locator('details', { has: page.getByText('Edit team state') });
+    if (!(await editor.evaluate((el) => el instanceof HTMLDetailsElement && el.open))) {
+        await editor.locator('summary').click();
+    }
+
+    await expectTapTargets(editor.locator('input, button'), 8);
+
+    await editor.locator('input[name="team_name"]').fill('Blue Bloom');
+    await editor.locator('input[name="team_motto"]').fill('Dreaming Big');
+    await editor.locator('input[name="team_league_placement"]').fill('8');
+    await editor.locator('input[name="team_preseason_wins"]').fill('4');
+    await editor.locator('input[name="unity_trainings_count"]').fill('55');
+    await editor.locator('input[name="spirit_bursts_count"]').fill('6');
+    await editor.locator('input[name="extreme_bursts_count"]').fill('5');
+
+    await editor.getByRole('button', { name: 'Save team state' }).click();
+
+    // The write redirects back to the Cockpit, where the Team panel prints the team it was told about.
+    // The editor's own inputs hold the same words, but `getByText` reads text nodes, not field values.
+    await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
+    // The Team row is the read-back. It is matched as one cell because the editor now renders at page
+    // level and its own read-out would match a bare team name twice (strict mode).
+    await expect(page.getByRole('cell', { name: /Blue Bloom/ })).toBeVisible();
+
+    // KI-97: the same write has to reach the Unity Cup panel, whose caption reads the two counters as
+    // "normal plus Extreme". The old locator was `div.min-w-36`, the header tile class; that tile is
+    // rendered by ResourceStrip, which Cockpit.vue does not reference at all (measured before and after
+    // this dispatch), so the assertion had no subject. The panel's own line is the figure's real home.
+    await expect(page.getByText(/Spirit Bursts 6 \/ 5 Extreme/)).toBeVisible();
+});
+
+test('records the per-stat team grades and reads them back on the panel', async ({ page }) => {
+    await openCockpit(page);
+
+    const grades = page.getByRole('list', { name: 'Team stat grades' });
+    const rows = grades.getByRole('listitem');
+    await expect(rows).toHaveCount(5);
+    await expect(rows.first()).toContainText('N/A');
+
+    const editor = page.locator('details', { has: page.getByText('Edit team state') });
+    if (!(await editor.evaluate((el) => el instanceof HTMLDetailsElement && el.open))) {
+        await editor.locator('summary').click();
+    }
+
+    // R10: the per-stat set stops at S; S+ is the overall team rank and has no option here.
+    await expect(editor.locator('#team_stat_grade_Speed option', { hasText: 'S+' })).toHaveCount(0);
+
+    for (const [stat, grade] of [['Speed', 'S'], ['Stamina', 'A'], ['Power', 'A'], ['Guts', 'A'], ['Wit', 'A']] as const) {
+        await editor.locator(`#team_stat_grade_${stat}`).selectOption(grade);
+    }
+
+    await editor.getByRole('button', { name: 'Save team state' }).click();
+    await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
+
+    for (const [stat, grade] of [['Speed', 'S'], ['Stamina', 'A'], ['Power', 'A'], ['Guts', 'A'], ['Wit', 'A']] as const) {
+        await expect(rows.filter({ hasText: stat }).locator('span').nth(1)).toHaveText(grade);
+    }
+});
+
+test('renders the Unity Cup scenario region without a runtime error, the bursts widget as a meter', async ({ page }) => {
+    // Regression for the cockpit-wt merge's SpiritBurstsPanel registration, removed 2026-10-16:
+    // `spirit_bursts` is a widget key, and the panel-shaped component registered against it
+    // received the widget shape and crashed every Unity Cup Cockpit render on
+    // `props.scenario.alerts`. The assertions are on the rendered page, not on the source, so
+    // re-introducing that registration — or registering any panel-shaped component against a
+    // widget key — reproduces the crash and fails here rather than passing silently.
+    const problems: string[] = [];
+    page.on('console', (message) => {
+        if (message.type() === 'error') {
+            problems.push(message.text());
+        }
+    });
+    page.on('pageerror', (error) => problems.push(error.message));
+
+    await openCockpit(page);
+
+    // The scenario strip renders, including the scenario's own ruleset date line.
+    await expect(page.locator('[data-region="scenario"]').getByText('Unity Cup')).toBeVisible();
+    await expect(page.locator('[data-region="scenario-ruleset-date"]')).toBeVisible();
+
+    // The bursts widget renders as the labelled meter, its own shape: the value is the unrecorded
+    // reading the matrix's widget carries, and the bar names it.
+    await expect(page.getByRole('img', { name: 'Spirit Bursts: not recorded' })).toBeVisible();
+
+    // And the crash the bad registration produced never reaches the console.
+    expect(
+        problems.filter((problem) => /TypeError|Cannot read properties of undefined/.test(problem)),
+        problems.join('\n'),
+    ).toEqual([]);
+});
+
+test('closing the team editor without saving records nothing', async ({ page }) => {
+    await openCockpit(page);
+
+    const editor = page.locator('details', { has: page.getByText('Edit team state') });
+    // Open only when closed: on an Active career the wrapper is open by default, and an
+    // unconditional first click would close it before the fill.
+    if (!(await editor.evaluate((el) => el instanceof HTMLDetailsElement && el.open))) {
+        await editor.locator('summary').click();
+    }
+    await editor.locator('input[name="team_name"]').fill('Blue Bloom');
+
+    // Cancel is the disclosure itself: the form submits only from its own button, so closing it
+    // abandons the edit. The reload reads the stored run, and a fresh career has no team identity
+    // to print — the same absent card `CockpitTeamPanelTest` pins on the wire.
+    await editor.locator('summary').click();
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.getByText('Blue Bloom', { exact: true })).toHaveCount(0);
 });
 
 test('links the run-scoped deck builder from the Cockpit', async ({ page }) => {

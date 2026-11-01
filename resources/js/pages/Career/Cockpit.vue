@@ -46,9 +46,12 @@ import AbsenceValue from '../../components/AbsenceValue.vue';
  * deletion in a follow-up; nothing in this tree renders it.
  */
 import CareerStatePanel from '../../components/career/CareerStatePanel.vue';
+import ActionGrid from '../../components/career/ActionGrid.vue';
 import AdvisorRail from '../../components/career/AdvisorRail.vue';
 import Section from '../../components/ui/Section.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
+import ScenarioPanel from '../../components/scenario/ScenarioPanel.vue';
+import UnityCupEditor from '../../components/career/UnityCupEditor.vue';
 import BaseInput from '@/Components/Form/BaseInput.vue';
 import BaseSelect from '@/Components/Form/BaseSelect.vue';
 import BaseRadio from '@/Components/Form/BaseRadio.vue';
@@ -352,50 +355,6 @@ const closedOutcome = computed((): string => {
  * "Run identity" write surface inside the closed "Career tools" disclosure, reached from the Actions
  * area; the page head still prints neither, which is what the deduplication rule asks for.
  */
-/**
- * The run's own identity block, as the HFW cockpit ledes carry it: the card title, the rarity and the
- * potential, one joined line. Each piece is absent until a writer records it, and `card_title` is the
- * verbatim Global client string (brackets included, e.g. `[Rosy Dreams]`), so nothing here is derived
- * or invented.
- */
-const identityLine = computed((): string | null => {
-    const parts: string[] = [];
-
-    if (props.identity.card_title !== null) {
-        parts.push(props.identity.card_title);
-    }
-
-    if (props.identity.trainee_rarity !== null) {
-        parts.push(`★${props.identity.trainee_rarity}`);
-    }
-
-    if (props.identity.potential_level !== null) {
-        parts.push(`Potential ${props.identity.potential_level}`);
-    }
-
-    return parts.length > 0 ? parts.join(' · ') : null;
-});
-
-/**
- * The energy and mood reading the HFW cockpit ledes print beside the identity (`cockpit-unity-cup.html`
- * line 59: `Energy Low band, Mood GREAT ↑ +20%`). Both are the header's own readings and each stays
- * absent rather than becoming a half answer; the mood figure is the client's published headline
- * (`config('uma.mood_effect.training')`), never a per-tier guess.
- */
-const conditionLine = computed((): string | null => {
-    const parts: string[] = [];
-
-    if (props.header.energy_text !== null) {
-        parts.push(`Energy ${props.header.energy_text}`);
-    }
-
-    if (props.header.mood !== null) {
-        parts.push(`Mood ${props.header.mood} ↑ +${props.moodEffect.training}%`);
-    }
-
-    return parts.length > 0 ? parts.join(', ') : null;
-});
-
 const lede = computed((): string => {
     const parts: string[] = [];
 
@@ -413,25 +372,6 @@ const lede = computed((): string => {
 
     if (props.header.turn > 0 && props.header.turn <= props.header.total_turns) {
         parts.push(turnPhrase.value);
-    }
-
-    if (props.run.status === 'Active') {
-        /*
-         * The HFW cockpit ledes carry the run's identity and its energy/mood reading, and do not repeat
-         * the scenario label here: the scenario is the crumb and the scenario card's pill, so a third
-         * reading of it would be a surplus. The identity and the condition follow the position line as
-         * one sentence, the way the wireframe draws them.
-         */
-        const identity = identityLine.value;
-
-        if (identity !== null) {
-            parts.push(identity);
-        }
-
-        const line = parts.join(' · ');
-        const condition = conditionLine.value;
-
-        return condition === null ? line : `${line}. ${condition}`;
     }
 
     parts.push(props.run.scenario_label);
@@ -1148,7 +1088,19 @@ const jumpToShop = (): void => {
                         </tbody>
                     </table>
 
-                    <!-- Trackblazer's `.mockbar` copy note follows. -->
+                    <!-- HFW-OVERRIDE (scenario-extension): no cockpit HFW draws the boards this
+                         scenario composes, and SCREEN_SPEC.md SCR-CAR-011 keeps them on this screen.
+                         They stay reachable and closed, so the visible page is the wireframe's while
+                         the panels it does not draw are one press away. The shell switches on the
+                         matrix's own flags and widget keys and knows no scenario name (G-33). -->
+                    <details data-region="scenario-detail" class="mt-3">
+                        <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
+                            Scenario detail
+                        </summary>
+                        <div class="mt-2">
+                            <ScenarioPanel :scenario="props.scenario as never" />
+                        </div>
+                    </details>
 
                     <!-- HFW OVERRIDE (copy, not visual) — `cockpit-trackblazer.html` prints a `.mockbar`
                          stating that its support data is illustrative. A wireframe artifact is not
@@ -1229,6 +1181,13 @@ const jumpToShop = (): void => {
             </a>
         </div>
 
+        <!-- `C6b.4`: the action grid and the Pro Shop moved OUT of the `Career tools` disclosure.
+             They sat INSIDE it, not above it, so the disclosure could not retire while they stayed.
+             No cockpit HFW draws either: `cockpit-unity-cup.html` reaches those screens through the
+             stepper and the "Where to go" card. They keep their place on the page because they are
+             the doors a turn leads into, and two cockpit specs pin them by name. -->
+        <ActionGrid v-if="isActive" class="mt-4" :actions="props.actions" />
+
         <!-- Trackblazer's Pro Shop is reachable from the Cockpit's action area (plan §9
              E4, design-2.0 §28 "The Shop should be quickly accessible from the Career
              Cockpit"). The button is rendered only when the matrix composes a shop, so
@@ -1244,9 +1203,27 @@ const jumpToShop = (): void => {
             Shop
         </button>
 
-        <!-- The Unity Cup team editor moved out with the action grid: no cockpit HFW draws a write
-             surface, and the cockpit no longer hosts the team write. -->
-
+        <!-- The team write path (Unity Cup only). It is `open` while the career is being
+             played, so the Active screen keeps the panel it has always shown, and closed
+             once the career has ended, where it is a setting rather than a decision.
+             `C6b.11`: it no longer rides the retired tools disclosure, which is gone; a
+             Unity Cup cockpit keeps this panel because no other screen hosts the write. -->
+        <details
+            v-if="composesTeamPanel && teamState !== null"
+            data-region="team-state"
+            :open="isActive"
+            class="mt-3 rounded-lg border border-rule bg-panel p-4"
+        >
+            <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
+                Edit team state
+            </summary>
+            <UnityCupEditor
+                :action="props.run.update_url"
+                :umamusume-id="props.run.umamusume_id"
+                :status="props.run.status"
+                :team="teamState"
+            />
+        </details>
 
 
 

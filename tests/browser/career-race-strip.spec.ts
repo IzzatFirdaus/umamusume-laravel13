@@ -225,10 +225,10 @@ test('holds the left column at 320px and at a 200-percent width without sideways
     await page.setViewportSize({ width: 320, height: 900 });
 
     // The spec's mobile order (design-2.0 §40): the primary decision reads above the left column, so
-    // the strip never pushes the doors below it.
+    // the strip never pushes the actions below it.
     const ahead = await page.getByRole('heading', { name: 'Still to come' }).boundingBox();
-    const doors = await page.getByRole('heading', { name: 'Where to go' }).boundingBox();
-    expect((doors?.y ?? 0), 'the doors are not above the left column on mobile').toBeLessThan(ahead?.y ?? 0);
+    const actions = await page.getByRole('heading', { name: 'Actions' }).boundingBox();
+    expect((actions?.y ?? 0), 'the actions are not above the left column on mobile').toBeLessThan(ahead?.y ?? 0);
 
     // Reduced motion is the global block's, and the probe that proves it can fail is the reason this
     // case is here rather than a computed-style read of elements that never animate.
