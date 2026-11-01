@@ -69,7 +69,7 @@ const CONFLICTS: ReadonlyArray<{ question: string; state: string }> = [
     { question: 'Is 1400 m Sprint or Mile?', state: 'Game8 says Sprint; the data export files every 1400 m course under Mile.' },
     { question: 'Can Wit training fail?', state: 'Unsettled: one guide lists a Wit failure branch, one argues the risk driver is absent.' },
     { question: 'Open League rank ceiling', state: 'Global notices exclude S and above; the JP notice excludes UC1 and above.' },
-    { question: 'Artisan Cleat Hammer price', state: 'Two published figures: 20 coins and 25 coins. The catalogue prints 25, the higher figure, so a Trainer who planned on 20 is short five.' },
+    { question: 'Artisan Cleat Hammer price', state: 'Two published figures: 20 coins and 25 coins. The catalogue prints 25, the higher figure, so a Trainer who budgeted for 20 is short five.' },
 ];
 </script>
 
