@@ -241,7 +241,7 @@ const close = async (): Promise<void> => {
                         No item on either client guarantees training success. The Artisan Cleat Hammer row
                         prints <b>25 coins</b> while a published guide states 20, and the two figures are not
                         reconciled here:
-                        <Link href="/database/sources" class="font-medium underline">
+                        <Link href="/database/sources" class="inline-flex min-h-11 items-center font-medium text-ink-strong underline">
                             the source ledger's Open conflicts row
                         </Link>
                         carries both.
