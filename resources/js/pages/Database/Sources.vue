@@ -62,8 +62,12 @@ const props = defineProps<{
  * The mood race effect used to sit in this list. It is settled: section 1.3's dated resolution
  * (`:1385`, 2026-09-27) reads the client's own Mood Effect panel against the two guide camps and
  * resolves the race-side figure in GameWith's favour, 4% and 2% rather than 10% and 5%. The mock
- * still lists it as open (`database-sources.html:118`), so the ledger prints three conflicts and the
- * wireframe's tile prints four; the reference wins and the difference is recorded on the card.
+ * still lists it as open (`database-sources.html:118`), so the ledger printed three conflicts and the
+ * wireframe's tile printed four; the reference won and the difference was recorded on the card.
+ *
+ * The list is four again as of 2026-11-02, and not the same four: the Artisan Cleat Hammer price
+ * opened a fourth row (`0174519c`), so the count now agrees with the mock's tile for a different
+ * reason than the one above. The mood race row stays settled and stays out.
  */
 const CONFLICTS: ReadonlyArray<{ question: string; state: string }> = [
     { question: 'Is 1400 m Sprint or Mile?', state: 'Game8 says Sprint; the data export files every 1400 m course under Mile.' },
