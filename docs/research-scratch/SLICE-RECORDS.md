@@ -12505,3 +12505,29 @@ in. Recorded so no later slice spends a commit discovering it.
 parameter. Not `?ids=`. No route change, no new Form Request. `/veterans/{id}` is complete
 at `e48ab5fb` and is not to be re-opened: its six residual markers are the two refused
 blocks and nothing else.
+
+### Correction to the close-out framing at `10436bf6` — atomicity, not budget
+
+The session that landed `e48ab5fb` and `10436bf6` closed by deferring Slice 1.2 and
+described the reason as "a budget call, not a blocker." The reason was right; the
+framing was wrong, and the framing is the part future sessions would copy.
+
+There is no session budget to run out. What makes deferring Slice 1.2 correct is that
+the slice is **atomic across three files** — `Veterans/Index.vue` gains the picker,
+`Veterans/Compare.vue` drops `Choose up to 6` and reads the existing `?veterans[]=`,
+and `veteran-compare.spec.ts` has seven KI-146 locators repaired plus its entry point
+moved. Landing two of the three leaves `Compare.vue` with a dead picker and the spec
+redder than KI-146 already has it. Starting a third of an atomic unit is worse than
+not starting it.
+
+**Rule for this pass:** a slice is deferred only on a stated blocker — peer-dirt on a
+target file, a missing fixture, an ADR or schema conflict, or an atomicity constraint
+that cannot be satisfied inside the work about to be done. A schedule is not a blocker.
+Any future "budget" framing for deferred work is a scope error and gets corrected the
+same way.
+
+**Next session opens with Slice 1.2 as its first action**, not "when there is room."
+The whole atomic unit lands in one commit, verified across all three files before the
+commit exists. If the session cannot land the complete unit, it opens a different slice
+rather than a partial one. Then Cockpit 2.1 through 2.4, companion-doc first, one commit
+per variant. Five slices, five commits.
