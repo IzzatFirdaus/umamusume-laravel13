@@ -4046,7 +4046,8 @@ by widening `renderedDashLines()` to decode numeric character references before 
 Neither half is fixed here.
 ## KI-144 — The `Career tools` disclosure on the cockpit still hosts v2.1.0 write surfaces that have no door of their own
 
-**State:** OPEN. Filed 2026-10-31 during the career-screens HFW parity pass, from a side-by-side of the rendered
+**State:** CLOSED 2026-11-01 by the erratum below, which names each write surface's door. It was filed
+OPEN on 2026-10-31 during the career-screens HFW parity pass, from a side-by-side of the rendered
 cockpit against `cockpit-unity-cup.html`.
 
 **Defect.** The cockpit's `▼ Career tools` disclosure (`resources/js/pages/Career/Cockpit.vue`, the `<details
@@ -4086,8 +4087,59 @@ Retire the Career tools disclosure**.
 `C6b.11`'s deletion, and its four write surfaces took the doors landed in `6b5f45da`, `60ec3143`, `bb222846` and
 `6f33ffc0`. The `Actions` grid is gone in `202e8753`. And "`Races in this run` duplicates the `RunRaceStrip` the
 cockpit's left column already renders" stopped being true in `3d8c5ee2` (C6b.5), which removed the mount and left its
-spec behind; that absence is now its own entry, KI-147. What this entry still owns is the copy the disclosure's
-retirement left unsettled on the screen spec.
+spec behind; that absence is now its own entry, KI-147. Where each surface went, since this entry's whole claim was that they had
+no door: the run identity form to `runs.settings` at `/training-runs/{run}/settings` (`6b5f45da`, C6b.1),
+the turn correction to `runs.turns.edit` at `/training-runs/{run}/turns/{turn}/edit` (`60ec3143`, C6b.2),
+run deletion to its own confirmation page at `/training-runs/{run}/delete` (`bb222846`, C6b.3), and the
+team-state write to `runs.team` at `/training-runs/{run}/team` (`6f33ffc0`). The `Actions` grid the
+disclosure duplicated is gone in `202e8753`, and the `Races in this run` section it also carried left
+earlier. Closure condition met on the four writes; the copy the retirement left unsettled on the screen
+spec is the residue, and it is a spec edit rather than a door.
+
+## KI-145 — `npm run lint:ui` reports 282 arbitrary values against the recorded 219 baseline, and the debt is peer-owned
+
+**State:** OPEN, and not the cockpit pass's to clear. Filed retrospectively 2026-11-01: the number was
+named in the bodies of `da59bdac` and `202e8753` before an entry existed to hold it.
+
+**Defect.** `node tools/ui-framework-check.mjs` fails with `arbitrary-value count 282 exceeds baseline
+219`, so `npm run lint:ui` is red on every checkout carrying the 63 findings added since the baseline was
+recorded. The gate refuses a new arbitrary value per named file, and it is right to: `AGENTS.md` §9 calls
+that list deferred debt with a named intent, not a place to add.
+
+**Why it is filed rather than fixed.** `da59bdac` states the pair and adds none - "npm run lint:ui:
+unchanged at 282 against the 219 baseline, and this diff adds no arbitrary value" - and `202e8753`
+re-measures it with `Cockpit.vue`, `ScenarioDetail.vue` and `TeamEdit.vue` carrying no finding of their
+own. Two passes have now run against a red gate without being able to attribute their own share.
+
+**Evidence.** The failing run prints `ui-framework-check: 585 finding(s)` with the `debt-increase` line
+naming 282 against 219; `202e8753`'s body records that the 63 over baseline sit in 31 other files, among
+them the peer-dirty `pages/Dashboard.vue`, `layouts/AppLayout.vue` and
+`components/support/CardPicker.vue`.
+
+**Closure.** Whoever owns those 31 files either removes the added values or enumerates each one into
+`tools/ui-lint-baseline.json` and bumps `count` in the same commit. Raising the baseline is the owner's
+call: §2 escalation 4 bars an agent from editing the bar to pass a check. What this entry does not
+establish: whether the non-arbitrary findings in the 585 gate anything independently, since the run's
+failing line is the `debt-increase` one.
+
+## KI-146 — `veteran-compare.spec.ts` addressed a card grid the library no longer renders; seven cases were stale
+
+**State:** CLOSED by `da59bdac` (2026-11-01). Filed retrospectively 2026-11-01, because that commit's
+subject and body both name KI-146 and no entry held it.
+
+**Defect.** Seven cases addressed a `listitem` and a link labelled `Compare this career`. The veterans
+library moved from cards to table rows in an earlier commit, and its row door is labelled `Compare` and
+goes to `legacy.compare`. The cases could not pass on the page as shipped.
+
+**Closure, in the repair commit's own words.** "KI-146 repaired, the seven stale cases: every one
+addressed a `listitem` and a link labelled 'Compare this career'... The entry path is now one helper,
+openComparison, that ticks the library boxes and takes the counting door. Two cases asserted controls that
+no longer exist anywhere and were retargeted rather than deleted."
+
+**What closure does not cover.** The two retargeted cases are named by role in that body, not by title,
+so a later reader wanting them goes to the diff. The comparison-door copy fix that travelled in the same
+commit is a separate concern recorded there: the door now tells the Trainer to tick careers on the
+library, because it leads to the Legacy Lab's comparison of recorded selections.
 
 ## KI-147 — `career-race-strip.spec.ts` walks a race strip the cockpit stopped rendering, and five of its six cases fail
 
@@ -4121,9 +4173,22 @@ no page, and its only mentions left are comments at `RaceCalendarNote.vue:4` and
 tests/browser/career-race-strip.spec.ts tests/browser/grand-concert-panel.spec.ts` → 5 failed, 7 passed, 9.7m, with
 `grand-concert-panel.spec.ts` 6/6.
 
-**Closure.** Decide first whether the run-scoped strip returns to the cockpit or moves to the Races screen; then
-either restore the mount or repoint the spec's entry route, and rewrite the mobile-order pair against a block the page
-actually carries. This entry does not cover `RunRaceStrip.vue`'s own retirement: if the strip is not coming back, the
-component and its Feature test are a separate deletion, and the cockpit still consumes the `raceStrip` payload for one
-figure (`Cockpit.vue:226` declares the prop, `:562`'s `raceCount` reads `run`, `:1011` prints it), so that reader
-moves before the prop can.
+**Closure.** Three dispositions, none evidenced and none chosen. The entry exists because the choice is
+open, not because one is preferred; a Career-domain slice decides.
+
+- (a) **Restore the mount.** `RunRaceStrip.vue` is intact and imported by nothing, and the cockpit still
+  receives the payload it renders (`Cockpit.vue:226` declares `raceStrip`, `:562`'s `raceCount` reads
+  `run`, `:1011` prints it), so the strip returns with an import and a mount. The follow-up brief names
+  `races`, `recorded` and `pending_turn` among that payload's keys; those three are NOT verified here,
+  because this docs pass opened no source file to check them.
+- (b) **Repoint the spec.** Keep the strip off the cockpit and move `career-race-strip.spec.ts` to
+  whatever surface now carries the race data. The candidates this pass can name are `runs.timeline` and
+  the `/scenario` page's team-race facility; neither is established as the owner, and the mobile-order
+  pair at `:227-230` gets rewritten against whichever block the page actually carries.
+- (c) **Delete the facility.** Remove `RunRaceStrip.vue`, the `raceStrip` prop and
+  `career-race-strip.spec.ts` together. This is the only option that must move a live reader first:
+  `raceCount` consumes the payload to print one figure at `:1011`, so the prop cannot go while that row
+  does.
+
+The revert in `05da0924` stands under all three: the case dies upstream of the mobile-order pair on a
+missing strip region, so any edit to those lines is unverifiable until a disposition is chosen.
