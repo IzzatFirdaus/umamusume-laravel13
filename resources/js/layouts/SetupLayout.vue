@@ -213,7 +213,7 @@ onMounted(async () => {
                     <div class="min-w-0 flex-1">
                         <h1
                             tabindex="-1"
-                            class="mt-[7px] min-w-0 text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong focus:outline-none"
+                            class="mt-[7px] min-w-0 text-3xl font-semibold leading-[1.12] tracking-[-0.01em] text-ink-strong focus:outline-none"
                         >
                             <slot name="title" />
                         </h1>

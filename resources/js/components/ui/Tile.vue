@@ -28,15 +28,15 @@ withDefaults(
 
 <template>
     <div class="tile rounded-sm border border-rule bg-raised px-2.5 py-2">
-        <div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">{{ label }}</div>
+        <div class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">{{ label }}</div>
         <div
             class="mt-0.5 font-extrabold leading-[1.3]"
-            :class="absent ? 'text-[12.5px] font-semibold text-ink-muted' : 'text-base text-ink-strong'"
+            :class="absent ? 'text-xs font-semibold text-ink-muted' : 'text-base text-ink-strong'"
             :title="hint"
             data-tile-value
         >{{ value }}<span
             v-if="suffix && !absent"
-            class="ml-1 font-mono text-[11px] font-semibold text-ink-muted"
+            class="ml-1 font-mono text-xs font-semibold text-ink-muted"
         >{{ suffix }}</span></div>
     </div>
 </template>

@@ -1,6 +1,6 @@
 {
-    "count": 219,
-    "reason": "Reset 2026-10-26 to the honest count after the HFW page rewrites landed without baseline updates. Bracketed variant prefixes (min-[Npx]:) are now exempt in the rule itself, so the 219 are real arbitrary VALUES (literal px/em/rem), not breakpoint spellings. A 220th finding fails.",
+    "count": 209,
+    "reason": "Reset 2026-10-26 to the honest count after the HFW page rewrites landed without baseline updates. Bracketed variant prefixes (min-[Npx]:) are now exempt in the rule itself, so the 219 are real arbitrary VALUES (literal px/em/rem), not breakpoint spellings. A 220th finding fails. Lowered to 209 on 2026-11-02 when the database UI/UX audit's type-scale pass replaced the arbitrary text sizes in PageHeader, SetupLayout, Pill and Tile with the ratified tiers.",
     "allowlist": [
         "resources/js/components/Form/BaseTextarea.vue|[88px]",
         "resources/js/components/career/AdvisorRail.vue|[calc(100svh-1rem)]",
