@@ -79,6 +79,9 @@ final class VeteranController extends Controller
             // exclude a trainee by name, and the Lab's own scenario facet is where that belongs.
             'find_parents_url' => route('legacy.index', $filters['tags'] === [] ? [] : ['tags' => $filters['tags']]),
             'compare_url' => route('veterans.compare'),
+            // The picker on the library now owns the selection, so the page states the cap from the
+            // same constant the request enforces rather than repeating a number.
+            'compare_max' => VeteranCompareRequest::MAX_VETERANS,
             'absences' => self::absences(),
             'searchAction' => route('veterans.index'),
         ]);
@@ -195,23 +198,12 @@ final class VeteranController extends Controller
             ]);
         }, $veterans);
 
-        // A Trainer picks from the library, not from every run: an unfiled career has no row here to name.
-        $comparable = Veteran::query()
-            ->with('trainingRun.umamusume')
-            ->get()
-            ->map(static fn (Veteran $veteran): array => [
-                'id' => $veteran->id,
-                'label' => VeteranRow::label($veteran->trainingRun),
-            ])
-            ->sortBy('label')
-            ->values()
-            ->all();
-
+        // The selection list is gone: the library owns the checkboxes now, so this page no longer needs
+        // every filed career to offer them. That removes a query that loaded every Veteran with its run
+        // and trainee on a screen that only reads the ids the URL named.
         return Inertia::render('Veterans/Compare', [
             'columns' => $columns,
             'selected' => $request->veteranIds(),
-            'max' => VeteranCompareRequest::MAX_VETERANS,
-            'comparable' => $comparable,
             // The head band's `Back to library` door (`veterans-compare.html:57`). It belongs to the page
             // whether or not a career is selected, so it is not carried inside `empty`.
             'library_url' => route('veterans.index'),
@@ -220,8 +212,12 @@ final class VeteranController extends Controller
             // the ten axes are `Umamusume`'s own columns, not a property of whichever row came first.
             'aptitude_axes' => Umamusume::APTITUDE_AXES,
             'empty' => $columns === [] ? [
-                'message' => 'Nothing is selected, so there is nothing to line up. Choose up to '
-                    .VeteranCompareRequest::MAX_VETERANS.' careers below, or open the library and use a row\'s Compare link.',
+                // Rewritten with the picker's move. The old sentence pointed at careers "below" on this
+                // screen and at a row's Compare link, and both halves became false: the selection lives on
+                // the library now, and the row's own Compare door leads to the Legacy Lab's comparison of
+                // recorded selections, which is a different question.
+                'message' => 'Nothing is selected, so there is nothing to line up. Tick up to '
+                    .VeteranCompareRequest::MAX_VETERANS.' careers on the library and open the comparison from there.',
                 'library_url' => route('veterans.index'),
             ] : null,
             'notice' => LegacyController::RECORD_ONLY_NOTICE,

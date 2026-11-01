@@ -17,14 +17,14 @@
  * invention, and the comparison's whole value is that the Trainer can read six real careers side by side.
  *
  * The selection lives in the query string, so the view is shareable and survives a reload with no client
- * state to rehydrate. The cap is enforced in the picker as a message and on the server as the rule.
+ * state to rehydrate. The cap is the server's rule alone now: `VeteranCompareRequest` refuses a
+ * seventh id, and the picker that used to warn about it here lives on the library instead.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
-import { BaseButton, BaseCheckbox } from '../../components/Form';
 import { veteranResultClause } from '../../domain/veteranNote';
-import { Head, router, usePage } from '@inertiajs/vue3';
+import { Head } from '@inertiajs/vue3';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 
 interface Aptitude {
@@ -59,8 +59,6 @@ interface Column {
 const props = defineProps<{
     columns: Column[];
     selected: number[];
-    max: number;
-    comparable: { id: number; label: string }[];
     library_url: string;
     empty: { message: string; library_url: string } | null;
     aptitude_axes: { key: string; label: string }[];
@@ -68,11 +66,6 @@ const props = defineProps<{
     absences: { label: string; reason: string }[];
 }>();
 
-const page = usePage();
-const errors = computed(() => (page.props.errors as Record<string, string | undefined> | undefined) ?? {});
-
-const picked = ref<string[]>(props.selected.map((id) => String(id)));
-const loading = ref(false);
 const hoveredColumn = ref<number | null>(null);
 
 /**
@@ -94,49 +87,15 @@ function letterFor(column: Column, key: string): string | null {
     return column.aptitudes.find((aptitude) => aptitude.key === key)?.letter ?? null;
 }
 
-function isChecked(id: number): boolean {
-    return picked.value.includes(String(id));
-}
-
-function toggle(id: number): void {
-    const value = String(id);
-
-    picked.value = isChecked(id)
-        ? picked.value.filter((selected) => selected !== value)
-        : // The cap is enforced here as a message, not as authority: a seventh tick does nothing rather than
-          // posting a selection that comes back as a field error. `VeteranCompareRequest` still decides.
-          picked.value.length >= props.max
-            ? picked.value
-            : [...picked.value, value];
-}
-
-function clearAll(): void {
-    picked.value = [];
-}
-
-function compare(): void {
-    router.get(
-        '/veterans/compare',
-        { veterans: picked.value },
-        {
-            preserveState: true,
-            preserveScroll: true,
-            onStart: () => {
-                loading.value = true;
-            },
-            onFinish: () => {
-                loading.value = false;
-            },
-        },
-    );
-}
-
 /**
- * The columns in the order the Trainer ticked them, not the order the server found them in. The first
- * column is the first selected career; an unticked career drops out and a re-ticked one appends to the end.
+ * The columns in the order the Trainer ticked them. The order arrives in the query string, which the
+ * library builds from its own checkboxes, and `VeteranCompareRequest::veteranIds()` returns the ids in
+ * the order the URL named them — so this page holds no selection state of its own. It used to carry a
+ * picker of its own, which meant choosing careers and reading the comparison shared one screen, and the
+ * screen could not be linked to without also shipping a form.
  */
 const orderedColumns = computed<Column[]>(() => {
-    const order = new Map(picked.value.map((id, index) => [id, index]));
+    const order = new Map(props.selected.map((id, index) => [String(id), index]));
 
     return [...props.columns].sort(
         (a, b) =>
@@ -425,82 +384,6 @@ watch(orderedColumns, () => {
                 </a>
             </template>
         </PageHeader>
-
-        <p v-if="loading" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
-
-        <fieldset class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <legend class="text-lg font-semibold text-ink-strong">Choose up to {{ props.max }}</legend>
-            <p id="picker-help" class="text-xs text-ink-muted">
-                Only careers already filed in the library can be compared. A run that has not been saved has
-                no row here to name.
-            </p>
-
-            <p v-if="props.comparable.length === 0" class="mt-2 text-sm text-ink" role="status">
-                The library is empty, so there is nothing to choose. File a career from its Result screen
-                first.
-            </p>
-
-            <div v-else class="mt-2">
-                <p class="text-sm text-ink" role="status" aria-live="polite">
-                    {{ picked.length }} of {{ props.max }} selected
-                </p>
-
-                <ul class="mt-2 grid gap-1 @3xl:grid-cols-2">
-                    <li v-for="option in props.comparable" :key="option.id">
-                        <!-- Boolean model mode, not the `modelValue === value` group mode: the group mode
-                             has to agree on the id's type on both sides, and a mismatch renders every
-                             picker row as already ticked, so a tick changes nothing and Compare submits
-                             the one career the deep link landed on. Binding the boolean makes the state
-                             the single source. -->
-                        <BaseCheckbox
-                            :model-value="isChecked(option.id)"
-                            :value="option.id"
-                            :id="`pick-${option.id}`"
-                            :name="`pick-${option.id}`"
-                            :label="option.label"
-                            :disabled="!isChecked(option.id) && picked.length >= props.max"
-                            @update:model-value="toggle(option.id)"
-                        />
-                    </li>
-                </ul>
-            </div>
-
-            <div class="mt-3 flex flex-wrap items-center gap-3">
-                <BaseButton
-                    type="button"
-                    variant="primary"
-                    :disabled="picked.length === 0"
-                    @click="compare"
-                >
-                    Compare
-                </BaseButton>
-                <BaseButton
-                    type="button"
-                    variant="secondary"
-                    :disabled="picked.length === 0"
-                    @click="clearAll"
-                >
-                    Clear all
-                </BaseButton>
-                <p v-if="picked.length === 0" class="text-xs text-ink-muted">
-                    Select at least one career to compare.
-                </p>
-                <p v-else-if="picked.length >= props.max" class="text-xs text-ink-muted">
-                    Up to {{ props.max }} careers fit in this view. Select fewer to see each value at a wider column.
-                </p>
-            </div>
-
-            <ul v-if="Object.keys(errors).length > 0" class="mt-2 space-y-1">
-                <li
-                    v-for="(message, field) in errors"
-                    :key="field"
-                    role="alert"
-                    class="rounded-md border border-risk bg-raised px-3 py-1 text-sm text-risk"
-                >
-                    {{ field }}: {{ message }}
-                </li>
-            </ul>
-        </fieldset>
 
         <section
             v-if="props.empty !== null"

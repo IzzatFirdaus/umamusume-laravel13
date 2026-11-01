@@ -43,29 +43,39 @@ test.afterEach(async ({ page }) => {
 // `fileCareer` lives in `tests/utils/file-career.ts` and is shared with `veterans.spec.ts`; it returns
 // the bare run URL, which each call here records so the `afterEach` above can cascade it away.
 
+/**
+ * Opens the comparison for the named careers the way a Trainer now does it: tick the rows on the
+ * library, then take the head band's door. The picker used to live on the compare page, so every case
+ * here entered through a row's "Compare this career" link and ticked the second career on the page it
+ * landed on. That page has no selection controls anymore, which is the point of the move: choosing and
+ * reading were the same screen, and the screen could not be linked to without shipping a form.
+ *
+ * The order the names are given is the order they are ticked, and the compare page reads that order
+ * back out of the query string, so a case that cares about column order gets it from here.
+ */
+async function openComparison(page: import('@playwright/test').Page, trainees: string[]): Promise<void> {
+    await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    for (const trainee of trainees) {
+        // A substring, not the whole name: the checkbox's accessible name carries the row's full label
+        // (`Agnes Digital · URA Finale · 2026-11-01`) so two careers of one trainee stay addressable.
+        await page.getByRole('checkbox', { name: trainee }).check();
+    }
+
+    await page.getByRole('link', { name: `Compare ${trainees.length} selected` }).click();
+    // The path, not the query spelling. The href is written `?veterans[]=N`, but Inertia's Link
+    // re-serialises the array as `?veterans%5B0%5D=N&veterans%5B1%5D=M`, and PHP builds the same list
+    // from either spelling. Matching the query shape is how this helper broke once already.
+    await page.waitForURL(/\/veterans\/compare\?/, WRITE);
+    await page.locator('#app > *').first().waitFor();
+}
+
 test('lines careers up with one property per row, reached from the library row', async ({ page }) => {
     createdRunUrls.push(await fileCareer(page, 'Agnes Digital', 'Speed'));
     createdRunUrls.push(await fileCareer(page, 'Eishin Flash', null));
 
-    await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-
-    // The library's own door, labelled for what it opens rather than left to a bare "Compare", and scoped to
-    // one row so the entry career is fixed rather than whatever the default order puts first.
-    await page.getByRole('listitem').filter({ hasText: 'Eishin Flash' })
-        .getByRole('link', { name: 'Compare this career' })
-        .click();
-    await page.waitForURL(/\/veterans\/compare\?veterans\[\]=\d+/, WRITE);
-
-    // The *other* career is picked from the keyboard: the entry career is already in `picked`, so ticking it
-    // again would deselect it and leave the Compare button with nothing to act on.
-    await page.getByRole('checkbox', { name: 'Agnes Digital' }).check();
-    await page.getByRole('button', { name: 'Compare' }).click();
-    // The path, not the query. The library row's door is a server-rendered href and lands as
-    // `?veterans[]=N`; this button is `router.get` with an array value, and Inertia serialises that as
-    // `?veterans%5B0%5D=N`. PHP builds the same array from either spelling, so the wire format is not
-    // the property — the two columns below are, and they only render if both picks arrived.
-    await page.waitForURL(/\/veterans\/compare\?/, WRITE);
+    await openComparison(page, ['Eishin Flash', 'Agnes Digital']);
 
     // A career's name is printed once on this page, in its `th scope="col"`, so both columns are asserted
     // through that role and the section's own count agrees with the number of careers filed.
@@ -99,21 +109,38 @@ test('says nothing is selected before anything is picked, rather than showing an
     await expect(page.getByRole('heading', { name: 'Nothing selected' })).toBeVisible();
     await expect(page.getByRole('link', { name: 'Open the library' })).toBeVisible();
 
-    // The compare button has nothing to act on, so it is inert rather than promising a blank table.
-    await expect(page.getByRole('button', { name: 'Compare' })).toBeDisabled();
+    // The empty state now names the library as the place careers are ticked. The inert Compare button
+    // this line asserted was the picker's submit control, and the picker moved: on the library the
+    // door is a link that counts the selection instead of a button that could be disabled.
+    await expect(
+        page.getByText(/Tick up to \d+ careers on the library and open the comparison from there/),
+    ).toBeVisible();
 });
 
 test('sizes the comparison controls to the 44px contract', async ({ page }) => {
     createdRunUrls.push(await fileCareer(page, 'Super Creek', 'Speed'));
 
+    // The picker's tap target is measured where the picker lives now. It is the label row that carries
+    // the input, not the native 24px box inside it: the row is `min-h-11` and clicking anywhere on it
+    // toggles the pick.
+    await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const libraryTargets = [
+        page.locator('label').filter({ has: page.getByRole('checkbox', { name: 'Super Creek' }) }),
+        page.getByRole('link', { name: 'Compare veterans' }),
+    ];
+
+    for (const target of libraryTargets) {
+        const box = await target.boundingBox();
+        expect(box?.height ?? 0, 'a library selection control is below the 44px floor').toBeGreaterThanOrEqual(44);
+    }
+
     await page.goto('/veterans/compare', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
     const targets = [
-        // The picker's tap target is the label row that carries the input, not the native 24px box inside
-        // it: the row is `min-h-11` and clicking anywhere on it toggles the pick.
-        page.locator('label').filter({ has: page.getByRole('checkbox', { name: 'Super Creek' }) }),
-        page.getByRole('button', { name: 'Compare' }),
+        page.getByRole('link', { name: 'Back to library' }),
         page.getByRole('link', { name: 'Open the library' }),
     ];
 
@@ -130,12 +157,9 @@ test('sizes the comparison controls to the 44px contract', async ({ page }) => {
 test('passes an axe scan at WCAG A and AA', async ({ page }) => {
     createdRunUrls.push(await fileCareer(page, 'Admire Vega', 'Speed'));
 
-    // Scanned with a column rendered rather than on the empty picker: the aligned table is what this screen
-    // exists to print, and a career's Japanese name only appears inside its column head.
-    await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.getByRole('link', { name: 'Compare this career' }).first().click();
-    await page.waitForURL(/\/veterans\/compare\?veterans\[\]=\d+/, WRITE);
+    // Scanned with a column rendered rather than on an empty comparison: the aligned table is what this
+    // screen exists to print, and a career's Japanese name only appears inside its column head.
+    await openComparison(page, ['Admire Vega']);
 
     const results = await buildAxe(page).analyze();
 
@@ -143,9 +167,9 @@ test('passes an axe scan at WCAG A and AA', async ({ page }) => {
 });
 
 /**
- * Files two careers, opens the library's row door on the second, ticks the first and compares, so the
- * matrix renders with two columns. Repeats the flow a Trainer takes rather than a pre-seeded query string,
- * because the door and the picker are both parts of the selection path Phase 8 touches.
+ * Files two careers and opens the comparison with the second ticked first, so the matrix renders with
+ * two columns in a known order. It repeats the flow a Trainer takes rather than pre-seeding a query
+ * string, because the checkbox and the counting door are both parts of the selection path.
  */
 async function openTwoCareerComparison(
     page: import('@playwright/test').Page,
@@ -156,17 +180,9 @@ async function openTwoCareerComparison(
     createdRunUrls.push(await fileCareer(page, first, 'Speed'));
     createdRunUrls.push(await fileCareer(page, second, secondTag));
 
-    await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.getByRole('listitem').filter({ hasText: second })
-        .getByRole('link', { name: 'Compare this career' })
-        .click();
-    await page.waitForURL(/\/veterans\/compare\?/, WRITE);
-
-    await page.getByRole('checkbox', { name: first }).check();
-    await page.getByRole('button', { name: 'Compare' }).click();
-    await page.waitForURL(/\/veterans\/compare\?/, WRITE);
-    await expect(page.getByRole('heading', { name: '2 careers side by side' })).toBeVisible(WRITE);
+    // Ticked in this order on purpose: the compare page reads column order from the query string, so
+    // `second` leads and the server's own filing order (which puts `first` ahead) must not win.
+    await openComparison(page, [second, first]);
 }
 
 test('pins the property column and the header row so a value never loses its label', async ({ page }) => {
@@ -207,27 +223,28 @@ test('pins the property column and the header row so a value never loses its lab
     expect(headerComputed.background, 'the sticky header is transparent').not.toBe('rgba(0, 0, 0, 0)');
 });
 
-test('counts the selection, clears it and says why nothing can compare', async ({ page }) => {
+test('counts the selection on the library door and clears it when the tick comes back off', async ({ page }) => {
     createdRunUrls.push(await fileCareer(page, 'Super Creek', 'Speed'));
 
-    await page.goto('/veterans/compare', { waitUntil: 'domcontentloaded' });
+    await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    const count = page.getByText(/of \d+ selected/);
-    await expect(count).toContainText('0 of');
+    // The door is the count. The picker used to carry its own "0 of 6 selected" status beside a button
+    // that disabled itself; on the library the head band's one accented control says the number
+    // instead, so there is no second readout to fall out of step with it.
+    const door = page.getByRole('link', { name: 'Compare veterans' });
+    await expect(door).toBeVisible();
 
-    // The empty picker states the reason rather than leaving a dead button to be clicked first.
-    await expect(page.getByText('Select at least one career to compare.')).toBeVisible();
-    await expect(page.getByRole('button', { name: 'Compare' })).toBeDisabled();
+    await page.getByRole('checkbox', { name: 'Select Super Creek' }).check();
+    await expect(page.getByRole('link', { name: 'Compare 1 selected' })).toBeVisible();
+    await expect(door).toHaveCount(0);
 
-    await page.getByRole('checkbox', { name: 'Super Creek' }).check();
-    await expect(count).toContainText('1 of');
-    await expect(page.getByText('Select at least one career to compare.')).toHaveCount(0);
-    await expect(page.getByRole('button', { name: 'Compare' })).toBeEnabled();
+    await page.getByRole('checkbox', { name: 'Select Super Creek' }).uncheck();
+    await expect(door).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Compare 1 selected' })).toHaveCount(0);
 
-    await page.getByRole('button', { name: 'Clear all' }).click();
-    await expect(count).toContainText('0 of');
-    await expect(page.getByRole('button', { name: 'Compare' })).toBeDisabled();
+    // "why nothing can compare" moved with the selection. An empty door still leads somewhere honest:
+    // the compare page states the reason in its own empty state, which the case above asserts.
 });
 
 test('keeps the columns in the order the Trainer ticked them', async ({ page }) => {
@@ -237,17 +254,7 @@ test('keeps the columns in the order the Trainer ticked them', async ({ page }) 
     createdRunUrls.push(await fileCareer(page, 'Agnes Digital', 'Speed'));
     createdRunUrls.push(await fileCareer(page, 'Eishin Flash', null));
 
-    await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
-    await page.getByRole('listitem').filter({ hasText: 'Agnes Digital' })
-        .getByRole('link', { name: 'Compare this career' })
-        .click();
-    await page.waitForURL(/\/veterans\/compare\?veterans\[\]=\d+/, WRITE);
-
-    await page.getByRole('checkbox', { name: 'Eishin Flash' }).check();
-    await page.getByRole('button', { name: 'Compare' }).click();
-    await page.waitForURL(/\/veterans\/compare\?/, WRITE);
-    await expect(page.getByRole('heading', { name: '2 careers side by side' })).toBeVisible(WRITE);
+    await openComparison(page, ['Agnes Digital', 'Eishin Flash']);
 
     const headings = page.getByRole('columnheader');
     await expect(headings.nth(1)).toContainText('Agnes Digital');
@@ -285,7 +292,13 @@ test('shows one career at a time under lg rather than scrolling the matrix sidew
     // The Difference column hides with the career columns it summarises (`hidden lg:table-cell`): a
     // verdict over values paged out of view would be a comparison the reader cannot check. It is in
     // the DOM, so the fold is real at every width; only its visibility follows the width.
-    await expect(page.getByRole('columnheader', { name: 'Difference' })).toHaveCount(1);
+    //
+    // Asserted with a locator, not a role: `getByRole` resolves through the accessibility tree, and a
+    // `display: none` cell is not in that tree at all, so a role query can never count the hidden
+    // header no matter what the DOM holds. The two assertions below are the two claims this line owns.
+    const differenceHeader = page.locator('thead th').filter({ hasText: 'Difference' });
+    await expect(differenceHeader).toHaveCount(1);
+    await expect(differenceHeader).not.toBeVisible();
 
     // The document itself never scrolls sideways at phone width (WCAG 1.4.10).
     const overflow = await page.evaluate(
@@ -324,7 +337,9 @@ test('pins a horizontal scrollbar that stays reachable when the matrix overflows
         createdRunUrls.push(await fileCareer(page, 'Agnes Digital', 'Speed'));
     }
 
-    await page.goto('/veterans/compare', { waitUntil: 'domcontentloaded' });
+    // Six careers of one trainee, so the boxes are addressed by position rather than by name: every
+    // row carries the same label, and a name query would match all six.
+    await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
     const picks = page.locator('input[type="checkbox"]');
@@ -332,7 +347,7 @@ test('pins a horizontal scrollbar that stays reachable when the matrix overflows
         await picks.nth(index).check();
     }
 
-    await page.getByRole('button', { name: 'Compare' }).click();
+    await page.getByRole('link', { name: 'Compare 6 selected' }).click();
     await page.waitForURL(/\/veterans\/compare\?/, WRITE);
     await expect(page.getByRole('heading', { name: '6 careers side by side' })).toBeVisible(WRITE);
 
@@ -376,16 +391,9 @@ test('gives two careers of one trainee different column headers', async ({ page 
     await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    await page.getByRole('listitem').filter({ hasText: 'URA Finale' })
-        .getByRole('link', { name: 'Compare this career' })
-        .click();
-    await page.waitForURL(/\/veterans\/compare\?veterans\[\]=\d+/, WRITE);
-
-    // The second pick is addressed by its own label, not by the trainee name: both rows carry the
-    // same name now, and a name query would be ambiguous.
-    await page.getByRole('checkbox', { name: /Unity Cup/ }).check();
-    await page.getByRole('button', { name: 'Compare' }).click();
-    await page.waitForURL(/\/veterans\/compare\?/, WRITE);
+    // Each pick is addressed by the scenario inside its own label, not by the trainee name: both rows
+    // carry the same name now, and a bare name query would be ambiguous.
+    await openComparison(page, ['URA Finale', 'Unity Cup']);
 
     await expect(page.getByRole('heading', { name: '2 careers side by side' })).toBeVisible();
 
@@ -417,23 +425,16 @@ test('renders the wireframe regions in the wireframe order at 1280', async ({ pa
     }
 
     await page.setViewportSize({ width: 1280, height: 900 });
-    await page.goto('/veterans/compare', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
+    await openComparison(page, ['Agnes Digital', 'Eishin Flash', 'Gold Ship']);
 
-    for (const trainee of ['Agnes Digital', 'Eishin Flash', 'Gold Ship']) {
-        await page.getByRole('checkbox', { name: trainee }).check();
-    }
-    await page.getByRole('button', { name: 'Compare' }).click();
-    // The router replaces the same path with a query string, so a URL wait can resolve on the page already
-    // showing. Wait for the matrix's own heading: it exists only once the careers are actually lined up.
-    await expect(page.getByRole('heading', { name: /careers side by side/ })).toBeVisible(WRITE);
-    await page.locator('#app > *').first().waitFor();
+    // Whole-page scope, and it only became possible with this slice: the picker used to sit on this
+    // page and own the first `grid`, so the comparison had to be narrowed to the comparison subtree to
+    // avoid measuring the picker's two-column checkbox grid against the wireframe's three-card band.
+    // With the selection back on the library, `main` is the honest root and the grid signature is
+    // worth asserting again.
+    const app = await capture(page, 'main', { markers: PAGE_MARKERS });
 
-    // The compared subtree is the comparison itself, not the whole `main`: this page still carries the
-    // picker the library is meant to own, and that surplus is Slice 1.2's to move. Scoping to the section
-    // keeps the grid signature measuring the wireframe's own three-card band instead of the picker's
-    // two-column checkbox grid, and `regions: 'subset'` still demands every marker the mock draws.
-    const app = await capture(page, 'section[aria-labelledby="compare-table"]', { markers: PAGE_MARKERS });
+    expect(app.regions.length, 'the comparison rendered, not its empty state').toBeGreaterThan(0);
 
     await page.goto(WIREFRAME);
     const hfw = await capture(page, '.canvas', { markers: PAGE_MARKERS });

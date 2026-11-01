@@ -61,7 +61,12 @@ it('lines up the filed careers the Trainer selected, in the order they named the
             ->where('columns.0.career.turns', 1)
             // The ten axes arrive once, not derived from whichever column came first.
             ->has('aptitude_axes', 10)
-            ->where('max', 6));
+            // Retargeted with the picker's move. `max` and `comparable` were the compare page's own
+            // selection controls: the cap it printed and the list it ticked from now live on the
+            // library, so this payload must not carry them. The seventh-career refusal below still
+            // proves the server enforces the cap regardless of what any page displays.
+            ->missing('max')
+            ->missing('comparable'));
 });
 
 it('refuses a seventh career rather than wrapping the table past its region', function (): void {
@@ -127,22 +132,20 @@ it('refuses a career id that is not in the library', function (): void {
         ->assertSessionHasErrors('veterans.0');
 });
 
-it('offers only the filed careers to the picker, ordered by name', function (): void {
+it('offers no picker list, because the library owns the selection now', function (): void {
     $listed = compareVeteran('Gold Ship', ['Scenario']);
-    $filed = compareVeteran('Icy Pearl', ['Speed']);
+    compareVeteran('Icy Pearl', ['Speed']);
     $unfiled = TrainingRun::factory()->create(['status' => RunStatus::Completed]);
 
     $this->get(route('veterans.compare', ['veterans' => [$listed->id]]))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            // Two filed careers, not three: the unfiled run is not a Veteran and cannot be compared.
-            ->has('comparable', 2)
-            // `collect()` rather than `array_column()`: Inertia hands a nested value as an array or a
-            // Collection depending on its depth, and the assertion should not depend on which.
-            ->where('comparable', fn ($comparable): bool => collect($comparable)->pluck('label')->all() === [
-                'Gold Ship · No scenario set · '.$listed->trainingRun->created_at?->format('Y-m-d'),
-                'Icy Pearl · No scenario set · '.$filed->trainingRun->created_at?->format('Y-m-d'),
-            ])
+            // The case used to assert `comparable` held exactly the filed careers in name order, which
+            // is how the page kept an unfiled run out of the tick list. The list is gone: the library
+            // table is built from `Veteran` rows, so an unfiled run has no row to tick, and the request
+            // refuses an id that is not a library row. Both halves stay enforced; neither is this
+            // payload's job any more.
+            ->missing('comparable')
             ->where('columns.0.veteran_url', route('veterans.show', $listed)));
 
     expect($unfiled->veteran)->toBeNull();

@@ -34,7 +34,7 @@ import Pagination from '../../components/ui/Pagination.vue';
 import Card from '../../components/ui/Card.vue';
 import Tile from '../../components/ui/Tile.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
-import { BaseInput, BaseSelect, BaseButton, LinkButton } from '../../components/Form';
+import { BaseInput, BaseSelect, BaseButton, BaseCheckbox, LinkButton } from '../../components/Form';
 import { carriesAncestryNote, veteranResultClause, VETERAN_ANCESTRY_NOTE } from '../../domain/veteranNote';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
@@ -87,6 +87,8 @@ const props = defineProps<{
     file_veteran_url: string;
     find_parents_url: string;
     compare_url: string;
+    /** The server's own cap, so the picker never states a limit the request does not enforce. */
+    compare_max: number;
     absences: Absence[];
     searchAction: string;
 }>();
@@ -117,6 +119,33 @@ const search = ref(props.filters.search ?? '');
 const scenario = ref(props.filters.scenario ?? '');
 const tag = ref(props.filters.tag ?? '');
 const loading = ref(false);
+
+/**
+ * The careers ticked for comparison. Selection lives here, on the library, because the library is
+ * where a Trainer sees the rows: `veterans.html` puts the checkboxes in the table and the compare
+ * page draws only the comparison. The compare surface used to carry its own picker, which meant
+ * choosing careers and reading them were the same screen and the same screen could not be linked to.
+ */
+const selected = ref<number[]>([]);
+
+const isChosen = (id: number): boolean => selected.value.includes(id);
+
+const toggleChosen = (id: number): void => {
+    selected.value = isChosen(id)
+        ? selected.value.filter((chosen): boolean => chosen !== id)
+        : [...selected.value, id];
+};
+
+/**
+ * The head band's door. With nothing ticked it is the plain compare page, which states its own empty
+ * state; with a selection it carries the ids in the parameter the page already validates, `veterans[]`
+ * (`VeteranCompareRequest::rules()`), so no new query vocabulary is invented here.
+ */
+const compareHref = computed((): string =>
+    selected.value.length === 0
+        ? props.compare_url
+        : `${props.compare_url}?${selected.value.map((id): string => `veterans[]=${id}`).join('&')}`,
+);
 
 function filteredQuery(order: 'newest' | 'oldest'): Record<string, string> {
     const query: Record<string, string> = { order };
@@ -206,9 +235,11 @@ const factorGrades: { family: string; note: string }[] = [
                 <template #actions>
                     <!-- The page's one accented control (UI-7, UX-6, DESIGN.md §2.3). The HFW's head
                          action is `btn-primary`, and the filter commit is a quiet secondary so the
-                         accent has one owner. -->
-                    <LinkButton :href="props.compare_url" variant="primary">
-                        Compare veterans
+                         accent has one owner. The label counts the ticked rows because the selection
+                         now lives on this page: `veterans.html` puts the checkboxes in the table, so
+                         the door has to say what it will carry. -->
+                    <LinkButton :href="compareHref" variant="primary">
+                        {{ selected.length > 0 ? `Compare ${selected.length} selected` : 'Compare veterans' }}
                     </LinkButton>
                 </template>
             </PageHeader>
@@ -344,6 +375,7 @@ const factorGrades: { family: string; note: string }[] = [
                 <table class="t">
                     <thead>
                         <tr>
+                            <th scope="col"><span class="sr-only">Select for comparison</span></th>
                             <th scope="col">Trainee</th>
                             <th scope="col">Scenario</th>
                             <th scope="col">Saved</th>
@@ -355,6 +387,23 @@ const factorGrades: { family: string; note: string }[] = [
                     </thead>
                     <tbody>
                         <tr v-for="veteran in veterans.data" :key="veteran.id" :data-veteran-row="veteran.id">
+                            <td>
+                                <!-- The row's own selection. `srOnlyLabel` keeps the sentence as the
+                                     control's accessible name and prints nothing, because the trainee's
+                                     name is already the cell beside it and a printed copy would read the
+                                     same name twice per row. Past the cap the box disables rather than
+                                     silently dropping the tick, which is what the compare page's picker
+                                     did before it moved here. -->
+                                <BaseCheckbox
+                                    :model-value="isChosen(veteran.id)"
+                                    :id="`compare-${veteran.id}`"
+                                    :name="`compare-${veteran.id}`"
+                                    :label="`Select ${veteran.label} for comparison`"
+                                    sr-only-label
+                                    :disabled="!isChosen(veteran.id) && selected.length >= props.compare_max"
+                                    @update:model-value="toggleChosen(veteran.id)"
+                                />
+                            </td>
                             <td>
                                 <span class="flex items-start gap-2.5">
                                     <ArtworkSlot :url="veteran.portrait_url" alt="" size="size-12" reserve data-region="slot" />
