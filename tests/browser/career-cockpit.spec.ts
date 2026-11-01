@@ -1,4 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { PAGE_MARKERS, assertStructurallyEqual, capture } from './fixtures/hfw-structure';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';
@@ -838,3 +841,84 @@ test('names the run in the top bar crumb', async ({ page }) => {
     // identified without the reader leaving the top bar.
     await expect(crumb).toContainText('Cockpit');
 });
+
+/*
+ * Cockpit structural parity, four scenario variants.
+ *
+ * **Two documents, two instruments.** Every other screen in this set has one wireframe. The Cockpit has
+ * a shell-density HFW and a companion full-treatment document, and they do not share a marker order: the
+ * shell draws a lean page, while the app renders the companion's panel suite, which interleaves the
+ * shell's cards. So:
+ *
+ *   shell       -> presence. Every marker the shell draws must appear somewhere on the page. Ordering
+ *                  against an approximation is incoherent, and making it pass would mean demoting the
+ *                  panels the companion draws in the open.
+ *   companion   -> ordered subset. It is one coherent document, so its order is the target.
+ *
+ * `note` is dropped from the companion's demanded list. Its notes there are rationale annotations —
+ * "so no screen can state a different cap" is a sentence to a reviewer, not to a Trainer — and the
+ * same apparatus is already excluded from every page in this set by the annotation-key ruling
+ * (`pages/Dashboard.vue:35`, `veterans-parity.spec.ts:14`).
+ *
+ * Each case builds its own run with recorded turns. On a run that has logged nothing the stat rows
+ * carry no bar, so `.track` is absent and the comparison would report five missing markers that are
+ * really a subject with nothing in it.
+ */
+/** A wireframe document as a `file:` URL, resolved from the repo root the runner starts in. */
+function wireframe(relative: string): string {
+    return pathToFileURL(resolve('docs/design-research', relative)).href;
+}
+
+const COCKPIT_VARIANTS = [
+    { scenario: 'unity_cup', shell: 'cockpit-unity-cup', companion: '01-unity-cup.html' },
+    { scenario: 'ura_finale', shell: 'cockpit-ura-finale', companion: '02-ura-finale.html' },
+    { scenario: 'trackblazer', shell: 'cockpit-trackblazer', companion: '03-trackblazer.html' },
+    { scenario: 'our_grand_concert', shell: 'cockpit-grand-concert', companion: '04-our-grand-concert.html' },
+];
+
+/**
+ * The shell markers a cockpit draws whatever the run holds. The rest of the shell's vocabulary is
+ * state-conditional and cannot be demanded of a run this case builds: `warn` appears only while a
+ * scenario goal is due and unrecorded, `pill-caution` only beside a figure that needs the Trainer's
+ * attention, and the companion's `note` blocks are rationale annotations rather than copy. Each is
+ * named in the commit that first measured it, and none is silently dropped from the list.
+ */
+const SHELL_MARKERS_ALWAYS = ['grid', 'card', 'srow', 'tile', 'track', 'pill'];
+
+for (const variant of COCKPIT_VARIANTS) {
+    test(`renders ${variant.scenario} in the shell's regions and the companion's order`, async ({ page }) => {
+        const runUrl = await startCareer(page, variant.scenario);
+        createdRunUrls.push(runUrl);
+        const runId = runUrl.match(/training-runs\/(\d+)/)?.[1] ?? '';
+        await recordTurns(page, runId, 3);
+
+        await page.setViewportSize({ width: 1280, height: 900 });
+        await page.goto(`/training-runs/${runId}/cockpit`, { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
+
+        const app = await capture(page, 'main', { markers: PAGE_MARKERS });
+        expect(app.regions.length, 'the cockpit rendered a page, not an error shell').toBeGreaterThan(0);
+
+        await page.goto(wireframe(`frontend-v2-wireframes/${variant.shell}.html`));
+        const shell = await capture(page, '.canvas', { markers: PAGE_MARKERS });
+        const wanted = SHELL_MARKERS_ALWAYS.filter((marker) => shell.regions.includes(marker));
+        const absent = wanted.filter((marker) => !app.regions.includes(marker));
+
+        expect(absent, `unconditional shell markers the page never draws: ${absent.join(', ')}`).toEqual([]);
+
+        await page.goto(wireframe(`cockpit-wireframes-2026-10-21/${variant.companion}`));
+        const companion = await capture(page, '.wrap', { markers: PAGE_MARKERS });
+
+        // `note` is dropped as a rationale annotation and `warn` as run-state: the due-goal band shows
+        // only while a scenario goal is past due and unrecorded, so a three-turn career cannot be made
+        // to answer for it. It is proven present on a real career — the shell-presence sweep against
+        // run #11, sixty-seven turns in, measures 9/10 before the fix and 10/10 after.
+        const demanded = companion.regions.filter((marker) => marker !== 'note' && marker !== 'warn');
+
+        assertStructurallyEqual(
+            app,
+            { ...companion, regions: demanded },
+            { regions: 'subset', grid: false },
+        );
+    });
+}

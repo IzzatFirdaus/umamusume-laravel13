@@ -183,7 +183,7 @@ const incompleteData = computed(
 
              It opens the card, where `cockpit-unity-cup.html` puts it: the fact comes before the
              thing to do about it. -->
-        <div v-if="due !== null" class="flex flex-wrap items-start gap-2">
+        <div v-if="due !== null" class="warn flex flex-wrap items-start gap-2">
             <span class="pill pill-caution shrink-0">current</span>
             <AlertRow
                 class="min-w-0 flex-1"
