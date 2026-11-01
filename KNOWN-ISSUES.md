@@ -4081,3 +4081,49 @@ sections can go as soon as the disclosure's own copy is settled. Filed rather th
 screens are outside the parity slice's scope, and the routing of four writes onto three doors is a decision, not a
 layout change. The slice spec is filed in `docs/proposals/frontend-development-update-plan.md` as **Slice 6b —
 Retire the Career tools disclosure**.
+*Erratum 2026-11-01.* Three sentences above are stale and are preserved rather than rewritten. The
+`Career tools` disclosure is gone: `grep -c "career-tools" resources/js/pages/Career/Cockpit.vue` returns 0, which is
+`C6b.11`'s deletion, and its four write surfaces took the doors landed in `6b5f45da`, `60ec3143`, `bb222846` and
+`6f33ffc0`. The `Actions` grid is gone in `202e8753`. And "`Races in this run` duplicates the `RunRaceStrip` the
+cockpit's left column already renders" stopped being true in `3d8c5ee2` (C6b.5), which removed the mount and left its
+spec behind; that absence is now its own entry, KI-147. What this entry still owns is the copy the disclosure's
+retirement left unsettled on the screen spec.
+
+## KI-147 — `career-race-strip.spec.ts` walks a race strip the cockpit stopped rendering, and five of its six cases fail
+
+**State:** OPEN. Filed 2026-11-01 from the blocking browser batch that ran the file during the v3.0.0 cockpit surgery.
+`202e8753` is where the failures were measured, not where they were caused.
+
+**Defect.** `3d8c5ee2` ("fix(cockpit): remove the Races-in-this-run section (C6b.5)") deleted the `<RunRaceStrip>`
+mount from `resources/js/pages/Career/Cockpit.vue` and left `tests/browser/career-race-strip.spec.ts` entering at
+`/training-runs/{run}/cockpit` to read the three regions that mount rendered. Five of the file's six cases fail:
+`replaces the catalogue grid with three run-scoped regions` (`region "Races in this run"`, spec line 71),
+`keeps an entered race in the run region and out of the list ahead of it` (`button "Details and actions for…"`,
+line 107), `says so when there is no turn being decided, and prints no figure it cannot source` (the
+`No race on this scenario's calendar falls at turn 2.` sentence, line 155),
+`walks the strip links from the keyboard with a visible focus ring` (300 s waiting for
+`link "Open Race Decision for turn 12"`, line 186), and `holds the left column at 320px and at a 200-percent width
+without sideways scroll` (`region "Recorded in this run"`, line 221). The sixth,
+`passes an axe scan at WCAG A and AA`, passes because it never names a strip landmark.
+
+**Why.** A removal that ships without its spec is worse than a red test, because the orphaned assertions start
+succeeding on absences. The mobile-order pair at `career-race-strip.spec.ts:227-230` measures the `Actions` heading
+that `202e8753` retired, and its `?? 0` fallback answers a missing element with a passing number. The surgery's own
+retarget of those lines was therefore reverted rather than committed unverified: an edit that cannot be measured is
+not a fix, and the case is dead upstream of it either way.
+
+**Evidence.** `git show --stat 3d8c5ee2` prints one file, `resources/js/pages/Career/Cockpit.vue`, 76 deletions, no
+test. `git show 6f33ffc0:resources/js/pages/Career/Cockpit.vue` contains no `<RunRaceStrip` and no
+`Races in this run`, and `git merge-base --is-ancestor 3d8c5ee2 6f33ffc0` succeeds, so the absence predates the
+surgery that measured it. `grep -rn "import RunRaceStrip" resources/js` returns nothing: the component is mounted by
+no page, and its only mentions left are comments at `RaceCalendarNote.vue:4` and `Cockpit.vue:225`. Measured run:
+`PLAYWRIGHT_PORT=8152 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/cockpit-v3-surgery/browser-8152.sqlite npx playwright test
+tests/browser/career-race-strip.spec.ts tests/browser/grand-concert-panel.spec.ts` → 5 failed, 7 passed, 9.7m, with
+`grand-concert-panel.spec.ts` 6/6.
+
+**Closure.** Decide first whether the run-scoped strip returns to the cockpit or moves to the Races screen; then
+either restore the mount or repoint the spec's entry route, and rewrite the mobile-order pair against a block the page
+actually carries. This entry does not cover `RunRaceStrip.vue`'s own retirement: if the strip is not coming back, the
+component and its Feature test are a separate deletion, and the cockpit still consumes the `raceStrip` payload for one
+figure (`Cockpit.vue:226` declares the prop, `:562`'s `raceCount` reads `run`, `:1011` prints it), so that reader
+moves before the prop can.
