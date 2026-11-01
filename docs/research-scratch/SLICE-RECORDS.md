@@ -12455,3 +12455,53 @@ slices that share `veteran-compare.spec.ts` and one fixture: the `/veterans/{id}
 `Veterans/Index.vue` and `Veterans/Compare.vue`, and the KI-146 repair of that spec's seven
 stale locators. Splitting them leaves the spec red across two of the three. Its brief is this
 ledger entry, which now carries all five findings and the routing rules.
+
+### Parity pass, findings 6 to 8 and one instruction correction — 2026-11-01
+
+Landed `e48ab5fb` (`/veterans/{id}` rewritten: sweep 16 to 6, hash differs, 23 browser
+and 67 Pest tests green). This is the pass's first genuine layout redesign, and it
+produced three findings that outlive the page.
+
+**Finding 6 — an HFW element the app is ADR-forbidden from computing is a refusal, not a
+gap.** The wireframe leads `veteran-detail.html` with a Family / Factor / Grade / Carries
+table. A per-factor grade is derived from the stored sparks, and `ADR-0020` §3 with
+`PRD` FR-G-4 keeps derivation out of the Veteran library: it records and searches what the
+Trainer entered. `VeteranController.php:275` already lists "The Factors view" in this page's
+own absence register with that reason, and `VeteranRow` says in its docblock that it derives
+nothing and carries counts only. So the rule is: the HFW's drawing is not a source; the ADR
+is. Any wireframe element that requires a value the app is forbidden to produce renders as an
+`HFW-OVERRIDE` with the rule cited, never as a block to be built. The same reasoning refused
+the "Used as a parent" card, which needs a reverse lookup over
+`training_runs.inheritance_parent_a_id` / `_b_id`, a controller change outside a frontend pass.
+
+**Finding 7 — a plan that names a URL parameter the app already serves under another name
+is wrong, and the codebase wins.** The instruction told the next slice to make
+`Veterans/Compare.vue` read `?ids=`. The parameter already exists and is validated as
+`veterans` by `VeteranCompareRequest.php:53`, whose docblock states "Selection is by
+`veterans` ids, not run ids". Renaming it would be a Form Request change, which the same
+instruction's own stop conditions reject as backend work. Rule: before a slice introduces or
+moves a URL parameter, read the existing Form Request or validation call. Inventing a name
+for a URL the app already serves is the same failure class as deleting a block the HFW
+draws, only pointed at additions instead of deletions.
+
+**Finding 8 — `data-region` shadows a ported class token, not the other way around.** The
+rewritten stat rows first carried `data-region="stat-row"` alongside `class="srow"`. The
+harness resolves `data-region` before class tokens, so the new marker hid the real one and
+the sweep kept reporting all five rows missing after they had been built correctly. This
+completes `79384f63`'s rule 3, which said "mark a real element"; the full standing form is:
+mark a real element using `data-region` **only when no ported class token already expresses
+that region**. Where the region is `.srow`, `.card`, `.pill`, `.tile` or `.note`, the class
+is already the marker and an added attribute makes the sweep report it absent. A wrapper is
+needed only when the target is a component with `v-if`/`v-else` roots and no ported class.
+
+**The topbar pill cannot answer a canvas marker.** `veteran-detail.html`'s `pill-positive`
+sits inside the "Used as a parent" card, not in the topbar `.who`. Because the harness
+captures the app from `main` and the wireframe from `.canvas`, a `#who` pill renders outside
+both captured subtrees and satisfies nothing, even when it is correct UI. Before adding a
+page pill to close a marker, check which subtree the wireframe's copy of that marker lives
+in. Recorded so no later slice spends a commit discovering it.
+
+**Correction carried into Slice 1.2:** `Compare.vue` reads `?veterans[]=`, the existing
+parameter. Not `?ids=`. No route change, no new Form Request. `/veterans/{id}` is complete
+at `e48ab5fb` and is not to be re-opened: its six residual markers are the two refused
+blocks and nothing else.
