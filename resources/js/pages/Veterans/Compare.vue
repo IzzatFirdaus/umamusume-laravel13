@@ -21,6 +21,7 @@
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
+import PageHeader from '../../components/ui/PageHeader.vue';
 import { BaseButton, BaseCheckbox } from '../../components/Form';
 import { veteranResultClause } from '../../domain/veteranNote';
 import { Head, router, usePage } from '@inertiajs/vue3';
@@ -40,6 +41,10 @@ interface Column {
     trainee_ja: string | null;
     scenario_label: string;
     status_label: string;
+    saved_at: string | null;
+    blue: number;
+    pink: number;
+    unique: number;
     tags: string[];
     notes: string | null;
     hasSelection: boolean;
@@ -56,6 +61,7 @@ const props = defineProps<{
     selected: number[];
     max: number;
     comparable: { id: number; label: string }[];
+    library_url: string;
     empty: { message: string; library_url: string } | null;
     aptitude_axes: { key: string; label: string }[];
     notice: string;
@@ -225,6 +231,24 @@ function verdictOf(values: (string | number | null)[]): string {
     return `differs (${distinct.size} values)`;
 }
 
+const pageTitle = computed((): string =>
+    orderedColumns.value.length > 0
+        ? [...new Set(orderedColumns.value.map((column) => column.trainee))].join(' · ')
+        : 'Compare Veterans',
+);
+
+/**
+ * The head band's sentence, with the real count: the wireframe draws three careers and prints "Three
+ * records side by side", and a page that copied that word would state a number it did not measure.
+ */
+const comparisonLede = computed((): string => {
+    const count = orderedColumns.value.length;
+
+    return count === 0
+        ? 'Choose careers to line up. Differences are marked so the eye goes to what changed, and matching rows still print.'
+        : `${count} record${count === 1 ? '' : 's'} side by side. Differences are marked so the eye goes to what changed, and matching rows still print.`;
+});
+
 const differences = computed<Difference[]>(() => {
     const columns = orderedColumns.value;
     const of = (read: (column: Column) => string | number | null): (string | number | null)[] =>
@@ -232,6 +256,19 @@ const differences = computed<Difference[]>(() => {
 
     return [
         { property: 'Scenario', verdict: verdictOf(of((column) => column.scenario_label)) },
+        // The day each career was filed, straight from the library row's own timestamp.
+        { property: 'Saved', verdict: verdictOf(of((column) => column.saved_at)) },
+        // The recorded Spark set, counted per career. These are the rows the wireframe tints: they are
+        // the comparison a Trainer actually reads. A career with no Legacy read-back answers null, not
+        // zero, because `VeteranRow::sparkCount` returns 0 for a payload that was never written and a
+        // row of zeroes would claim a Spark set the career does not have.
+        { property: 'Blue factor', verdict: verdictOf(of((column) => (column.hasSelection ? column.blue : null))) },
+        { property: 'Pink factor', verdict: verdictOf(of((column) => (column.hasSelection ? column.pink : null))) },
+        { property: 'Unique factor', verdict: verdictOf(of((column) => (column.hasSelection ? column.unique : null))) },
+        {
+            property: 'Total factor grades',
+            verdict: verdictOf(of((column) => (column.hasSelection ? column.blue + column.pink + column.unique : null))),
+        },
         { property: 'Status', verdict: verdictOf(of((column) => column.status_label)) },
         { property: 'Turns logged', verdict: verdictOf(of((column) => column.career.turns)) },
         { property: 'Energy', verdict: verdictOf(of((column) => column.career.energy)) },
@@ -367,9 +404,27 @@ watch(orderedColumns, () => {
         <Head title="Compare Veterans" />
         <!-- The wireframe titles the comparison with the selected careers, not with the screen's
              function ("Vodka · Daiwa Scarlet · Maruzensky"); the picker state keeps the function. -->
-        <template #title>
-            {{ orderedColumns.length > 0 ? [...new Set(orderedColumns.map((column) => column.trainee))].join(' · ') : 'Compare Veterans' }}
+        <template #who>
+            <!-- The `#who` slot contract (AppLayout, S8): exactly one pill, and it states the fact this
+                 page is about. The wireframe prints "3 selected" with three careers drawn; this prints the
+                 count the query actually carries, and renders nothing when the picker is empty. -->
+            <span
+                v-if="orderedColumns.length > 0"
+                class="inline-flex shrink-0 items-center rounded-pill bg-panel px-2.5 py-1 text-xs font-extrabold text-ink"
+                data-shell-selected-pill
+            >{{ orderedColumns.length }} selected</span>
         </template>
+
+        <PageHeader eyebrow="Veteran comparison" :title="pageTitle" :description="comparisonLede">
+            <template #actions>
+                <a
+                    :href="props.library_url"
+                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm font-medium text-ink transition-colors duration-150 ease-out hover:bg-sunken"
+                >
+                    Back to library
+                </a>
+            </template>
+        </PageHeader>
 
         <p v-if="loading" role="status" class="mb-4 text-sm text-ink-muted">Loading…</p>
 
@@ -499,7 +554,7 @@ watch(orderedColumns, () => {
             <!-- The wrapper is the sticky context: it carries no overflow of its own, so the mirror bar
                  below can pin against the viewport. The region keeps `overflow-x-auto` and the region
                  contract (`role`, `tabindex`, `aria-label`) exactly as it was. -->
-            <div class="comparison-wrap mt-2">
+            <div class="comparison-wrap card mt-2">
                 <div
                     ref="regionEl"
                     role="region"
@@ -508,7 +563,7 @@ watch(orderedColumns, () => {
                     class="comparison-region overflow-x-auto"
                     @scroll="syncFromRegion"
                 >
-                <table ref="tableEl" class="comparison-matrix w-full min-w-max border-collapse text-sm">
+                <table ref="tableEl" class="comparison-matrix w-full min-w-max border-collapse text-sm lg:min-w-0">
                     <caption class="pb-2 text-left text-xs text-ink-muted">
                         Recorded values only. A blank cell means the career never recorded it, and its tooltip says which.
                     </caption>
@@ -550,6 +605,84 @@ watch(orderedColumns, () => {
                             </td>
                             <td class="hidden p-2 lg:table-cell">
                                 <span :class="verdictPill(verdictBy['Scenario'])">{{ verdictBy['Scenario'] }}</span>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-rule">
+                            <th scope="row" class="comparison-row-head p-2 text-left font-medium text-ink-muted">Saved</th>
+                            <td
+                                v-for="(column, index) in orderedColumns"
+                                :key="`saved-${column.id}`"
+                                class="p-2 text-ink"
+                                :class="[careerColumnClass(index), { 'comparison-col-hover': hoveredColumn === index }]"
+                            >
+                                {{ column.saved_at }}
+                            </td>
+                            <td class="hidden p-2 lg:table-cell">
+                                <span :class="verdictPill(verdictBy['Saved'])">{{ verdictBy['Saved'] }}</span>
+                            </td>
+                        </tr>
+                        <!-- The Spark rows. `veterans-compare.html:65-66` tints exactly these two, and the
+                             tint is the wireframe's Von Restorff mark for the rows a Trainer scans first, so
+                             it rides the row rather than a cell. Unique and Total stay untinted because the
+                             mock leaves them in the plain band. -->
+                        <tr class="border-b border-rule bg-sunken">
+                            <th scope="row" class="comparison-row-head p-2 text-left font-semibold text-ink-strong">Blue factor</th>
+                            <td
+                                v-for="(column, index) in orderedColumns"
+                                :key="`blue-${column.id}`"
+                                class="p-2 text-ink"
+                                :class="[careerColumnClass(index), { 'comparison-col-hover': hoveredColumn === index }]"
+                            >
+                                <template v-if="column.hasSelection">{{ column.blue }}</template>
+                                <AbsenceValue v-else compact reason="No Legacy read-back on this career, so its Spark set was never recorded." />
+                            </td>
+                            <td class="hidden p-2 lg:table-cell">
+                                <span :class="verdictPill(verdictBy['Blue factor'])">{{ verdictBy['Blue factor'] }}</span>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-rule bg-sunken">
+                            <th scope="row" class="comparison-row-head p-2 text-left font-semibold text-ink-strong">Pink factor</th>
+                            <td
+                                v-for="(column, index) in orderedColumns"
+                                :key="`pink-${column.id}`"
+                                class="p-2 text-ink"
+                                :class="[careerColumnClass(index), { 'comparison-col-hover': hoveredColumn === index }]"
+                            >
+                                <template v-if="column.hasSelection">{{ column.pink }}</template>
+                                <AbsenceValue v-else compact reason="No Legacy read-back on this career, so its Spark set was never recorded." />
+                            </td>
+                            <td class="hidden p-2 lg:table-cell">
+                                <span :class="verdictPill(verdictBy['Pink factor'])">{{ verdictBy['Pink factor'] }}</span>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-rule">
+                            <th scope="row" class="comparison-row-head p-2 text-left font-medium text-ink-muted">Unique factor</th>
+                            <td
+                                v-for="(column, index) in orderedColumns"
+                                :key="`unique-${column.id}`"
+                                class="p-2 text-ink"
+                                :class="[careerColumnClass(index), { 'comparison-col-hover': hoveredColumn === index }]"
+                            >
+                                <template v-if="column.hasSelection">{{ column.unique }}</template>
+                                <AbsenceValue v-else compact reason="No Legacy read-back on this career, so its Spark set was never recorded." />
+                            </td>
+                            <td class="hidden p-2 lg:table-cell">
+                                <span :class="verdictPill(verdictBy['Unique factor'])">{{ verdictBy['Unique factor'] }}</span>
+                            </td>
+                        </tr>
+                        <tr class="border-b border-rule">
+                            <th scope="row" class="comparison-row-head p-2 text-left font-medium text-ink-muted">Total factor grades</th>
+                            <td
+                                v-for="(column, index) in orderedColumns"
+                                :key="`total-${column.id}`"
+                                class="p-2 text-ink"
+                                :class="[careerColumnClass(index), { 'comparison-col-hover': hoveredColumn === index }]"
+                            >
+                                <template v-if="column.hasSelection">{{ column.blue + column.pink + column.unique }}</template>
+                                <AbsenceValue v-else compact reason="No Legacy read-back on this career, so its Spark set was never recorded." />
+                            </td>
+                            <td class="hidden p-2 lg:table-cell">
+                                <span :class="verdictPill(verdictBy['Total factor grades'])">{{ verdictBy['Total factor grades'] }}</span>
                             </td>
                         </tr>
                         <tr class="border-b border-rule">
@@ -725,6 +858,15 @@ watch(orderedColumns, () => {
                 </div>
             </div>
 
+            <!-- The note below the matrix, where the wireframe puts its one prose paragraph. It states
+                 what the Spark rows cannot say, rather than copying the mock's illustrative sentence:
+                 a count is not a stat, and no column in this build records which stat a Spark rides. -->
+            <p v-if="orderedColumns.length > 0" class="note mt-3 text-sm text-ink" role="note">
+                The factor rows count the Sparks a career recorded; they do not say which stat each one
+                rides, and no column in this build stores that. Two careers can agree on every count and
+                still reinforce different stats.
+            </p>
+
             <!-- The verdict is the matrix's LAST column (`veterans-compare.html:70-84`), so the separate
                  "Where they differ" card is gone. `differences` becomes a MATRIX-ALIGNED array: a verdict
                  for a row the matrix no longer draws (`Notes`) is dropped rather than given a cell. The
@@ -747,6 +889,26 @@ watch(orderedColumns, () => {
                         <a :href="column.veteran_url" class="font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out">{{ column.label }}</a>
                         <span v-if="column.trainee_ja" lang="ja" class="text-xs text-ink-muted">{{ column.trainee_ja }}</span>
                     </h2>
+                    <dl class="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
+                        <dt class="text-ink-muted">Blue</dt>
+                        <dd class="text-right font-medium text-ink">
+                            <template v-if="column.hasSelection">{{ column.blue }}</template>
+                            <AbsenceValue v-else compact reason="No Legacy read-back on this career, so its Spark set was never recorded." />
+                        </dd>
+                        <dt class="text-ink-muted">Pink</dt>
+                        <dd class="text-right font-medium text-ink">
+                            <template v-if="column.hasSelection">{{ column.pink }}</template>
+                            <AbsenceValue v-else compact reason="No Legacy read-back on this career, so its Spark set was never recorded." />
+                        </dd>
+                        <!-- HFW-OVERRIDE (data: the Best-for value renders as a named absence; no source
+                             publishes a recommendation rule and `ADR-0020` §3 keeps pricing a parent
+                             combination out of the record screens, so the row exists and the verdict does
+                             not). -->
+                        <dt class="text-ink-muted">Best for</dt>
+                        <dd class="text-right font-medium text-ink">
+                            <AbsenceValue compact reason="Nothing decisive: no table in this build prices a parent combination, so no career is named better for a stat or an aptitude." />
+                        </dd>
+                    </dl>
                     <p v-if="veteranResultClause(column.notes) !== null" class="whitespace-pre-wrap text-ink">{{ veteranResultClause(column.notes) }}</p>
                     <p v-else class="text-xs text-ink-muted">No note recorded for this career.</p>
                 </section>

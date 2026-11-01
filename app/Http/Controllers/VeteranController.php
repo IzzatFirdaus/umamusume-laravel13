@@ -212,6 +212,9 @@ final class VeteranController extends Controller
             'selected' => $request->veteranIds(),
             'max' => VeteranCompareRequest::MAX_VETERANS,
             'comparable' => $comparable,
+            // The head band's `Back to library` door (`veterans-compare.html:57`). It belongs to the page
+            // whether or not a career is selected, so it is not carried inside `empty`.
+            'library_url' => route('veterans.index'),
             // The axis list travels once, beside the cells that read it. Deriving the rows from the first
             // column would make a career with no published letters decide the shape for every career, and
             // the ten axes are `Umamusume`'s own columns, not a property of whichever row came first.

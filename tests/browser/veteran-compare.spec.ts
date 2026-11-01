@@ -1,7 +1,14 @@
 import { test, expect } from '@playwright/test';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { PAGE_MARKERS, assertStructurallyEqual, capture } from './fixtures/hfw-structure';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { fileCareer } from '../utils/file-career';
+
+const WIREFRAME = pathToFileURL(
+    resolve('docs/design-research/frontend-v2-wireframes/veterans-compare.html'),
+).href;
 
 /*
  * Rendered-copy, keyboard and accessibility evidence for the Veteran comparison (`SCR-VET-004`, plan §8
@@ -395,4 +402,41 @@ test('gives two careers of one trainee different column headers', async ({ page 
     expect(new Set(labels).size, `column labels must differ: ${JSON.stringify(labels)}`).toBe(2);
     expect(labels.some((l) => l.includes('URA Finale'))).toBe(true);
     expect(labels.some((l) => l.includes('Unity Cup'))).toBe(true);
+});
+
+/*
+ * Structural parity against the high-fidelity wireframe, the same instrument `veterans-parity.spec.ts`
+ * runs for the library. `regions: 'subset'` asks only that every marker the wireframe draws exists on the
+ * page, in the wireframe's order; the app's extra markers (the picker, the absence register, the per-career
+ * note cards) are surplus the ruling allows rather than failures. The wireframe's `.keybox` annotation key
+ * is not in `PAGE_MARKERS`, so it is ignored rather than demanded.
+ */
+test('renders the wireframe regions in the wireframe order at 1280', async ({ page }) => {
+    for (const trainee of ['Agnes Digital', 'Eishin Flash', 'Gold Ship'] as const) {
+        createdRunUrls.push(await fileCareer(page, trainee, null));
+    }
+
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/veterans/compare', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    for (const trainee of ['Agnes Digital', 'Eishin Flash', 'Gold Ship']) {
+        await page.getByRole('checkbox', { name: trainee }).check();
+    }
+    await page.getByRole('button', { name: 'Compare' }).click();
+    // The router replaces the same path with a query string, so a URL wait can resolve on the page already
+    // showing. Wait for the matrix's own heading: it exists only once the careers are actually lined up.
+    await expect(page.getByRole('heading', { name: /careers side by side/ })).toBeVisible(WRITE);
+    await page.locator('#app > *').first().waitFor();
+
+    // The compared subtree is the comparison itself, not the whole `main`: this page still carries the
+    // picker the library is meant to own, and that surplus is Slice 1.2's to move. Scoping to the section
+    // keeps the grid signature measuring the wireframe's own three-card band instead of the picker's
+    // two-column checkbox grid, and `regions: 'subset'` still demands every marker the mock draws.
+    const app = await capture(page, 'section[aria-labelledby="compare-table"]', { markers: PAGE_MARKERS });
+
+    await page.goto(WIREFRAME);
+    const hfw = await capture(page, '.canvas', { markers: PAGE_MARKERS });
+
+    assertStructurallyEqual(app, hfw, { regions: 'subset', grid: true });
 });
