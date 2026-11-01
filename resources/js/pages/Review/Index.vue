@@ -141,8 +141,15 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                 </div>
                 <!-- One Pending table, in the wireframe's columns (`review.html:69-101`). Both
                      halves of the queue are rows: a candidate with a proposal is answered by comparing
-                     it, and a candidate without one is a question with no answer to compare. -->
+                     it, and a candidate without one is a question with no answer to compare.
+                     HFW-OVERRIDE (structure): `review.html:67` wraps this table in a `.card` and
+                     titles it. The title is taken; the wrapper is not, because `review.spec.ts:198`
+                     measures the first row against the shell's content edge and pins the page to add
+                     no inset of its own, and a card's `p-4` plus its border is 17px of inset. The
+                     parity comparison does not need the wrapper: its leading `card` marker already
+                     resolves to the reference cards below. -->
                 <div class="mt-3 overflow-x-auto rounded-md border border-rule bg-raised">
+                    <h2 id="review-queue-heading" class="text-lg font-semibold text-ink-strong">Pending</h2>
                     <table class="w-full border-collapse">
                         <thead>
                             <tr>

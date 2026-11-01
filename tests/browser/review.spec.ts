@@ -1,5 +1,12 @@
 import { test, expect } from '@playwright/test';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { PAGE_MARKERS, assertStructurallyEqual, capture } from './fixtures/hfw-structure';
 import { expectTapTargets } from '../utils/tap-targets';
+
+const WIREFRAME = pathToFileURL(
+    resolve('docs/design-research/frontend-v2-wireframes/review.html'),
+).href;
 import { buildAxe, openAllDisclosures } from '../utils/accessibility';
 import { clearPendingCandidates, seedPendingCandidates } from '../utils/review-candidates';
 
@@ -277,4 +284,72 @@ test('passes an axe scan at WCAG A and AA', async ({ page }) => {
     const results = await buildAxe(page).analyze();
 
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+/*
+ * Structural parity for SCR-REV-001 (`/review`) against `review.html`, the instrument
+ * `veterans-parity.spec.ts` runs for the library.
+ *
+ * Two wireframe markers are refused here, and both refusals are named rather than absorbed into a
+ * looser comparison mode, because `missingFrom` is a subsequence check: one unmatched marker makes
+ * every later marker report missing too, which is exactly how this page came to be scored six
+ * markers behind when it was one behind.
+ *
+ *   1. `pill-positive`, the "Exact" badge at `review.html:71`. The queue holds Fuzzy and None
+ *      candidates only (`ReviewController.php:21`, PRD US-5): Exact and Alias auto-promote and never
+ *      arrive here, so a positive pill on this screen is a row that cannot exist.
+ *   2. the queue card's `.note` at `review.html:88`. Its sentence is a research finding about
+ *      uncorroborated opponent names; the word appears nowhere in `resources/`, `app/` or `lang/`,
+ *      so shipping it would put an unsourced claim in product copy. A wireframe's prose is not the
+ *      app's copy, which is the same ruling that keeps an annotation key off every page in this set.
+ *   3. the `.card` at `review.html:67` that wraps the queue table. Its heading is taken; its wrapper
+ *      is not, for the reason recorded at the exclusion below.
+ */
+test('renders the wireframe regions in the wireframe order at 1280', async ({ page }) => {
+    // Both halves of the queue, because the wireframe draws both: a proposed candidate and a
+    // no-match row. Seeded with none of them the page renders its empty state and the comparison
+    // would pass by measuring nothing.
+    seedPendingCandidates(2, { suggested: true });
+    seedPendingCandidates(2);
+
+    await page.goto('/review', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const app = await capture(page, 'main', { markers: PAGE_MARKERS });
+
+    expect(app.regions.length, 'the queue rendered rows, not its empty state').toBeGreaterThan(0);
+    expect(app.regions, 'the queue never prints an Exact-tier pill').not.toContain('pill-positive');
+
+    await page.goto(WIREFRAME);
+    const hfw = await capture(page, '.canvas', { markers: PAGE_MARKERS });
+
+    let queueCardDropped = false;
+    let queueNoteDropped = false;
+
+    const demanded = hfw.regions.filter((marker) => {
+        if (marker === 'pill-positive') {
+            return false;
+        }
+
+        // The card that wraps the queue table. `review.spec.ts:198` measures the first row against
+        // the shell's content edge and pins the page to add no inset of its own, and a card's `p-4`
+        // plus its border is 17px of inset, so the app draws this panel edge to edge. The exclusion
+        // has to be explicit: left in, the matcher resolves it to one of the reference cards below
+        // and then reports every marker after it missing, which is how this page came to be scored
+        // six behind when it was three behind.
+        if (marker === 'card' && !queueCardDropped) {
+            queueCardDropped = true;
+
+            return false;
+        }
+
+        if (marker === 'note' && !queueNoteDropped) {
+            queueNoteDropped = true;
+
+            return false;
+        }
+
+        return true;
+    });
+
+    assertStructurallyEqual(app, { ...hfw, regions: demanded }, { regions: 'subset', grid: false });
 });
