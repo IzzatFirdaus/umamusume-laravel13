@@ -46,12 +46,9 @@ import AbsenceValue from '../../components/AbsenceValue.vue';
  * deletion in a follow-up; nothing in this tree renders it.
  */
 import CareerStatePanel from '../../components/career/CareerStatePanel.vue';
-import ActionGrid from '../../components/career/ActionGrid.vue';
 import AdvisorRail from '../../components/career/AdvisorRail.vue';
 import Section from '../../components/ui/Section.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
-import ScenarioPanel from '../../components/scenario/ScenarioPanel.vue';
-import UnityCupEditor from '../../components/career/UnityCupEditor.vue';
 import BaseInput from '@/Components/Form/BaseInput.vue';
 import BaseSelect from '@/Components/Form/BaseSelect.vue';
 import BaseRadio from '@/Components/Form/BaseRadio.vue';
@@ -215,6 +212,8 @@ const props = defineProps<{
     actions: { key: string; label: string; href: string; recommended: boolean; note: string }[];
     /** The team-setup door (`v3.0.0`), null where the scenario records no team. */
     team_url: string | null;
+    /** The scenario-panel door (`v3.0.0`), replacing the `Scenario detail` disclosure. */
+    scenario_detail_url: string;
     // The decision's own shape is declared at `components/career/NextDecision.vue`, the one place that
     // reads it, and forwarded untouched the way the scenario section is (FD-2, plan §9a). `finale` stays
     // a sibling of the contract rather than a seventh key inside it.
@@ -893,6 +892,11 @@ const jumpToShop = (): void => {
     const heading = document.getElementById('trackblazer-shop-heading');
 
     if (heading === null) {
+        // v3.0.0: the shop heading lives on the scenario page now, so this door navigates there rather
+        // than scrolling to a heading this page no longer renders. Without this the button would be a
+        // control that does nothing, which is the failure the panel move would otherwise leave behind.
+        router.visit(props.scenario_detail_url);
+
         return;
     }
 
@@ -1153,19 +1157,10 @@ const jumpToShop = (): void => {
                         </tbody>
                     </table>
 
-                    <!-- HFW-OVERRIDE (scenario-extension): no cockpit HFW draws the boards this
-                         scenario composes, and SCREEN_SPEC.md SCR-CAR-011 keeps them on this screen.
-                         They stay reachable and closed, so the visible page is the wireframe's while
-                         the panels it does not draw are one press away. The shell switches on the
-                         matrix's own flags and widget keys and knows no scenario name (G-33). -->
-                    <details data-region="scenario-detail" class="mt-3">
-                        <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
-                            Scenario detail
-                        </summary>
-                        <div class="mt-2">
-                            <ScenarioPanel :scenario="props.scenario as never" />
-                        </div>
-                    </details>
+                    <!-- The scenario's own boards moved to their own page (`v3.0.0`): the `Scenario
+                         detail` door in "Where to go" leads there, so the panels stay reachable while
+                         this screen stays the wireframe's density. The shell switches on the matrix's
+                         own flags and widget keys and knows no scenario name (G-33). -->
 
                     <!-- HFW OVERRIDE (copy, not visual) — `cockpit-trackblazer.html` prints a `.mockbar`
                          stating that its support data is illustrative. A wireframe artifact is not
@@ -1230,6 +1225,9 @@ const jumpToShop = (): void => {
                         </li>
                         <!-- The team write's door (`v3.0.0`). Hidden where the scenario records no
                              team, which is why the card reads the URL rather than a scenario name. -->
+                        <li>
+                            <LinkButton :href="props.scenario_detail_url" variant="secondary" size="sm">Scenario detail</LinkButton>
+                        </li>
                         <li v-if="props.team_url !== null">
                             <LinkButton :href="props.team_url" variant="secondary" size="sm">Team setup</LinkButton>
                         </li>
@@ -1251,12 +1249,10 @@ const jumpToShop = (): void => {
             </a>
         </div>
 
-        <!-- `C6b.4`: the action grid and the Pro Shop moved OUT of the `Career tools` disclosure.
-             They sat INSIDE it, not above it, so the disclosure could not retire while they stayed.
-             No cockpit HFW draws either: `cockpit-unity-cup.html` reaches those screens through the
-             stepper and the "Where to go" card. They keep their place on the page because they are
-             the doors a turn leads into, and two cockpit specs pin them by name. -->
-        <ActionGrid v-if="isActive" class="mt-4" :actions="props.actions" />
+        <!-- The action grid retired with v3.0.0: the stepper is its home, and the two entries the
+             stepper has no tab for (Rest, Recreation) record through the Training screen, which the
+             stepper reaches. The `Race decision` door survives in "Where to go" and still reads
+             `props.actions`. -->
 
         <!-- Trackblazer's Pro Shop is reachable from the Cockpit's action area (plan §9
              E4, design-2.0 §28 "The Shop should be quickly accessible from the Career
@@ -1273,27 +1269,8 @@ const jumpToShop = (): void => {
             Shop
         </button>
 
-        <!-- The team write path (Unity Cup only). It is `open` while the career is being
-             played, so the Active screen keeps the panel it has always shown, and closed
-             once the career has ended, where it is a setting rather than a decision.
-             `C6b.11`: it no longer rides the retired tools disclosure, which is gone; a
-             Unity Cup cockpit keeps this panel because no other screen hosts the write. -->
-        <details
-            v-if="composesTeamPanel && teamState !== null"
-            data-region="team-state"
-            :open="isActive"
-            class="mt-3 rounded-lg border border-rule bg-panel p-4"
-        >
-            <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
-                Edit team state
-            </summary>
-            <UnityCupEditor
-                :action="props.run.update_url"
-                :umamusume-id="props.run.umamusume_id"
-                :status="props.run.status"
-                :team="teamState"
-            />
-        </details>
+        <!-- The team write moved to its own page (`v3.0.0`): `Team setup` in "Where to go" leads
+             there, so the write keeps a door while this screen loses the disclosure. -->
 
 
 

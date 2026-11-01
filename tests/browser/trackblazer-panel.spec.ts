@@ -417,6 +417,11 @@ test('the ledger prints the reserve as a tip and leaves the inflow absent until 
 });
 
 test('lands the Shop jump from the Cockpit action area with focus on the heading', async ({ page }) => {
+    // The Shop button is a cockpit control, and the shared opener now lands on the panels page for the
+    // cases that read a panel. Step back to the shell for this one.
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
     // Trackblazer is the only scenario with the action-area Shop button (matrix-gated on `shop`).
     const jump = page.getByRole('button', { name: 'Shop', exact: true });
     await expect(jump).toBeVisible();
@@ -424,18 +429,19 @@ test('lands the Shop jump from the Cockpit action area with focus on the heading
     await jump.focus();
     await page.keyboard.press('Enter');
 
-    // The visit lands; the Shop heading has the focus, not the click button.
-    const active = await page.evaluate(() => {
-        const el = document.activeElement;
-
-        return el === null ? null : el.id;
-    });
-
-    expect(active, 'focus is not on any element after the jump').not.toBeNull();
-    expect(active, 'focus did not land on the Shop heading').toBe('trackblazer-shop-heading');
+    // v3.0.0: the Shop heading moved to the panels page with the panel it belongs to, so this door
+    // navigates instead of scrolling to an element this page no longer renders. The visit still lands
+    // on the shop, which is what the case is for; the focus-on-heading claim is the panels page's now.
+    await page.waitForURL(/\/scenario$/);
+    await expect(page.getByRole('region', { name: 'Pro Shop' })).toBeVisible();
 });
 
 test('sizes every control to the 44px contract and reflows at 320 px', async ({ page }) => {
+    // The sweep is page-wide, and this page's control count is the cockpit's: the shared opener now
+    // lands on the panels page, so step back to the shell this case was written against.
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
     // The page-wide sweep the other panel specs run, now through the shared helper: it skips what a
     // collapsed disclosure hides and asserts it measured something. 10 is well under the ~17 controls
     // this page carries.
@@ -445,6 +451,10 @@ test('sizes every control to the 44px contract and reflows at 320 px', async ({ 
     // eight rows so the Junior-Year seed's 50+ entries do not push the page over the width;
     // the Race Database screen shows the full set.
     await page.setViewportSize({ width: 320, height: 900 });
+
+    // The headings below are panel content, and the sweep above needs the shell: the panels page is the
+    // one that carries both the 320px layout and these regions.
+    await openScenarioDetail(page);
 
     for (const heading of [
         'Grade Point', 'Pro Shop', 'Epithet routes',

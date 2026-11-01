@@ -224,11 +224,16 @@ test('holds the left column at 320px and at a 200-percent width without sideways
 
     await page.setViewportSize({ width: 320, height: 900 });
 
-    // The spec's mobile order (design-2.0 §40): the primary decision reads above the left column, so
-    // the strip never pushes the actions below it.
-    const ahead = await page.getByRole('heading', { name: 'Still to come' }).boundingBox();
-    const actions = await page.getByRole('heading', { name: 'Actions' }).boundingBox();
-    expect((actions?.y ?? 0), 'the actions are not above the left column on mobile').toBeLessThan(ahead?.y ?? 0);
+    // The spec's mobile order (design-2.0 §40): the decision path reads above the strip's own column, so
+    // the strip never pushes it below the fold. `v3.0.0` retired the page-level action grid this pair
+    // measured, and the grid's heading is gone rather than renamed — a `?? 0` on a missing box would
+    // have turned this line into a check that cannot fail. The doors are the stepper's now, and the
+    // stepper is the first block on the page at every width (measured 2026-11-01 at 320px on a Unity Cup
+    // run: stepper y=327, the run's cards below it), which is the same claim on the surviving surface.
+    const ahead = await page.getByRole('region', { name: 'Still to come' }).boundingBox();
+    const steps = await page.getByRole('navigation', { name: 'Career' }).boundingBox();
+    expect(steps, 'the career stepper is absent, so the order cannot be measured').not.toBeNull();
+    expect((steps?.y ?? 0), 'the doors are not above the race strip on mobile').toBeLessThan(ahead?.y ?? 0);
 
     // Reduced motion is the global block's, and the probe that proves it can fail is the reason this
     // case is here rather than a computed-style read of elements that never animate.

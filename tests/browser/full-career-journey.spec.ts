@@ -129,25 +129,23 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    // Neither the label text nor the team-name field is unique here: `run-tools` nests the
-    // team-state disclosure, so a descendant match on the field finds both and the walk fails on
-    // strict mode before the assertion. Naming the panel by its own attribute is what makes the
-    // selector single.
-    const teamEditor = page.locator('details[data-region="team-state"]');
-    // The panel is `open` while the career is active — Cockpit.vue sets `:open="isActive"`, because the
-    // panel the Active screen has always shown stays shown and only closes once the career has ended.
-    // The journey used to click the summary first, which TOGGLED IT CLOSED and left the input hidden, so
-    // the fill sat at its 300s budget waiting for an element that could never become visible. Asserting
-    // the contract instead of toggling it is what makes the next line possible.
-    await expect(teamEditor).toHaveAttribute('open', '');
-    await teamEditor.locator('input[name="team_name"]').fill('Blue Bloom');
-    await teamEditor.locator('input[name="spirit_bursts_count"]').fill('6');
-    await teamEditor.getByRole('button', { name: 'Save team state' }).click();
+    // v3.0.0: the team write lives on its own page, reached by the `Team setup` door. The disclosure
+    // this walk used to drive is gone, so it takes the page directly; the field names are still the
+    // editor's own, because the page mounts `UnityCupEditor` unchanged.
+    await page.goto(`${runUrl}/team`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await page.locator('input[name="team_name"]').fill('Blue Bloom');
+    await page.locator('input[name="spirit_bursts_count"]').fill('6');
+    await page.getByRole('button', { name: 'Save team state' }).click();
+    // `runs.update` redirects `back()`, so the flash lands on the page the form was submitted from.
     await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
-    // The saved name now appears twice on the cockpit: the Scenario card's own table prints it as
-    // the `Team` row's cell (Cockpit.vue:1024-1040, outside any disclosure and always visible), and
-    // UnityCupPanel repeats it inside the closed `scenario-detail` disclosure as a hidden `<dd>`. A
-    // bare getByText resolves to two elements, so the walk names the visible cell it means.
+
+    // The Cockpit's Scenario card prints the saved name as the `Team` row's cell. The second copy this
+    // walk used to disambiguate lived in `UnityCupPanel`, which now renders on `/scenario`, so the
+    // cockpit carries one cell under that name.
+    await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
     await expect(page.getByRole('cell', { name: 'Blue Bloom' })).toBeVisible();
 
     // Reload: the identity and the team state are read back from storage, not from the form.

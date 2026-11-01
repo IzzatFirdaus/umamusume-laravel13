@@ -156,6 +156,13 @@ Route::get('/training-runs/{run}/settings', [CockpitController::class, 'settings
  */
 Route::get('/training-runs/{run}/team', [CockpitController::class, 'teamEdit'])->name('runs.team');
 /*
+ * The scenario's own board suite, on a page of its own (`v3.0.0`). The cockpit's `Scenario detail`
+ * disclosure retires and the door of the same name in `Where to go` leads here, so the panels — and
+ * the ADR-0026 career-goals surface among them — stay reachable.
+ */
+Route::get('/training-runs/{run}/scenario', [CockpitController::class, 'scenarioDetail'])
+    ->name('runs.scenario-detail');
+/*
  * The Race Decision (SCREEN-011, `SCR-CAR-013`, plan §8 D10). A read screen over the run's own
  * calendar; its one write is the existing `runs.races.store` below, so no second race-write route
  * exists. It descends from the run's URL the way the Cockpit does.

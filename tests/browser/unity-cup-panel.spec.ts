@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
+import { backToCockpit, openScenarioDetail } from '../utils/scenario-detail';
 import { expectTapTargets } from '../utils/tap-targets';
 
 /*
@@ -41,15 +42,9 @@ async function openUnityCupCockpit(page: import('@playwright/test').Page): Promi
     await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    // The scenario panels render inside a closed `scenario-detail` disclosure: no cockpit HFW draws
-    // them, so the visible page is the wireframe's. A case that reads a panel opens it first.
-    const detail = page.locator('details[data-region="scenario-detail"]');
-    if ((await detail.count()) > 0) {
-        const open = await detail.first().evaluate((el) => (el as HTMLDetailsElement).open);
-        if (!open) {
-            await detail.first().locator('summary').first().click();
-        }
-    }
+    // v3.0.0: the panels moved out of the cockpit's `Scenario detail` disclosure and onto their own
+    // page, reached by the door of the same name. This spec follows them there.
+    await openScenarioDetail(page);
 }
 
 test('renders the configured burst bands, their payout timing and the Extreme caveat', async ({ page }) => {
@@ -157,12 +152,12 @@ test('reaches the panel by keyboard without adding a control or trapping focus',
     // the guard measures what a stop can *do*, not how many there are. Measured this pass: the region's
     // only links are `TeamRankLadderPanel`'s "Record this race" rows, every one of them navigating to the
     // run's own races screen; its only other focusable node is `ProvenanceMark`'s `role="img"` mark, which
-    // opens a tooltip and acts on nothing; and its only panel disclosure is `AbsenceValue`'s. The shell's
-    // own `scenario-detail` wrapper hosts the panel, so it is not a control the panel added.
+    // opens a tooltip and acts on nothing; and its only disclosure is `AbsenceValue`'s. The cockpit's
+    // own wrapper is gone with v3.0.0, so there is no longer a shell disclosure to exclude.
     await expect(section.locator('input, select, textarea, button')).toHaveCount(0);
     await expect(section.locator('[tabindex]:not([role="img"])')).toHaveCount(0);
     await expect(
-        section.locator('details:not([data-region="scenario-detail"]):not(:has(> summary:has-text("N/A")))'),
+        section.locator('details:not(:has(> summary:has-text("N/A")))'),
     ).toHaveCount(0);
 
     const links = section.locator('a');
@@ -287,15 +282,15 @@ test('draws the five team race categories as a table with the published ask and 
     await expect(board.getByRole('cell', { name: 'N/A' })).toHaveCount(5);
     await expect(board.getByText(/No column records who this run fields/i)).toBeVisible();
 
-    // The ruling, measured, as amended 2026-10-25 (owner ruling R3): the region adds no form control, its
-    // only panel disclosures are `AbsenceValue`'s (the shell's `scenario-detail` wrapper hosts the panel and
-    // is not one), and its only other focusable node is `ProvenanceMark`'s `role="img"` mark. The board
+    // The ruling, measured, as amended 2026-10-25 (owner ruling R3) and re-measured for `v3.0.0`: the
+    // region adds no form control, its only panel disclosures are `AbsenceValue`'s, and its only other
+    // focusable node is `ProvenanceMark`'s `role="img"` mark. The board
     // itself adds neither, which is the claim this case owns.
     const region = page.getByRole('region', { name: 'Scenario' });
     await expect(region.locator('input, select, textarea, button')).toHaveCount(0);
     await expect(region.locator('[tabindex]:not([role="img"])')).toHaveCount(0);
     await expect(
-        region.locator('details:not([data-region="scenario-detail"]):not(:has(> summary:has-text("N/A")))'),
+        region.locator('details:not(:has(> summary:has-text("N/A")))'),
     ).toHaveCount(0);
     await expect(board.locator('a, button, input, select, textarea, details, [tabindex]')).toHaveCount(0);
 });
@@ -430,6 +425,10 @@ test('heads both scenario blocks with the documented capsule and keeps the regio
 
 test('shows no dual-value readout while the rail has nothing to rank', async ({ page }) => {
     await openUnityCupCockpit(page);
+
+    // The Advisor is a cockpit region, not a panel one, and the helper now lands on the panels page
+    // because that is where every other case in this file reads. Step back to the shell for this one.
+    await backToCockpit(page);
 
     // A fresh run records no Energy and no target, so the rail refuses and the readout that hangs off a
     // ranked action is absent rather than empty. The ranked case is `career-cockpit.spec.ts`'s subject;

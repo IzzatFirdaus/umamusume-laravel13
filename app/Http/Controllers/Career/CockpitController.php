@@ -200,6 +200,37 @@ class CockpitController extends Controller
         ]);
     }
 
+    /**
+     * The scenario's own board suite, on a page of its own (`v3.0.0`). The cockpit's `Scenario detail`
+     * disclosure retires and the door of the same name in "Where to go" leads here, so the panels stay
+     * reachable — including `CareerGoalsPanel`, the ADR-0026 trainee-goals surface whose only host is
+     * this suite.
+     *
+     * On this controller for the reason `teamEdit()` is: `scenarioSectionContext()` is private here and
+     * folds four sections together, so a separate controller would duplicate the assembly or force a
+     * refactor outside this pass.
+     */
+    public function scenarioDetail(TrainingRun $run): Response
+    {
+        $run->loadMissing(['umamusume', 'turnEntries', 'turnEvents']);
+
+        $latest = $run->turnEntries->sortByDesc('turn')->first();
+        $advice = app(TrainerAdvisor::class)->advise($latest, $run->buildTarget(), $run);
+        $team = $this->team->teamSection($run);
+
+        return Inertia::render('Career/ScenarioDetail', [
+            'run' => $this->runSection($run),
+            'scenario' => $this->scenario->scenarioSection(
+                $run,
+                $team,
+                $latest,
+                $advice,
+                $this->scenarioSectionContext($run, $latest, $advice),
+            ),
+            'backUrl' => route('runs.cockpit', $run),
+        ]);
+    }
+
     public function show(TrainingRun $run): Response
     {
         // The run with its trainee, its turns, and its race log with the slots and the turn link each
@@ -270,6 +301,9 @@ class CockpitController extends Controller
             // release, and this is the door that keeps the write reachable. Null where the scenario
             // records no team, so the card gates on the URL's presence rather than on a scenario name.
             'team_url' => $run->composesPanel('team_rank_ladder') ? route('runs.team', $run) : null,
+            // The scenario-panel door (`v3.0.0`): the `Scenario detail` disclosure retires and this is
+            // where it went, so the boards it held stay one press away instead of disappearing.
+            'scenario_detail_url' => route('runs.scenario-detail', $run),
             'scenario' => $this->scenario->scenarioSection($run, $team, $latest, $advice, $this->scenarioSectionContext($run, $latest, $advice)),
             // F2, plan §9.6 ruling 2: arbitrary-turn correction. The selected turn defaults to the
             // latest, but `?edit_turn=<id>` names any logged turn; the form posts to the existing

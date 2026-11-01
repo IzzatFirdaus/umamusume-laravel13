@@ -1,4 +1,4 @@
-import { openScenarioDetail } from '../utils/scenario-detail';
+import { backToCockpit, openScenarioDetail, openTeamEdit } from '../utils/scenario-detail';
 import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
@@ -14,7 +14,7 @@ import { startCareer } from '../utils/start-career';
  * and the redirect targets are proven in a browser.
  *
  * Named `career-cockpit-forms` to distinguish it from `career-cockpit.spec.ts`, which covers the read
- * surfaces (layout, advisor, action grid, axe).
+ * surfaces (layout, advisor, the doors, axe).
  *
  * Fixture strategy. The run is built by walking the wizard's own steps and pressing `Start Career`, as
  * `career-cockpit.spec.ts` does, with the scenario selectable so the grade-point period form
@@ -50,11 +50,9 @@ async function openCockpit(page: import('@playwright/test').Page, scenarioId = '
     const url = await newCareer(page, scenarioId);
     await page.locator('#app > *').first().waitFor();
 
-    // The Unity Cup panels render inside the closed scenario-detail disclosure; the cases below
-    // assert on them, so the shared entry point opens it.
-    await openScenarioDetail(page);
-
-
+    // v3.0.0: this stays on the Cockpit. The panels moved to their own page, and the case that reads
+    // one calls `openScenarioDetail` for itself — a shared opener that navigated away would put every
+    // shell case (`openSettings`, the 44px sweeps, the keyboard walk) on the wrong page.
     return url;
 }
 
@@ -141,10 +139,13 @@ test('records the Unity Cup team state through the team editor', async ({ page }
     // click, which is the KI-92 lesson. On an Active career the wrapper is open by default
     // (`:open="isActive"`, the merge's own design), so the click happens only when the panel is
     // closed — an unconditional toggle would close the panel this case is trying to open.
-    const editor = page.locator('details', { has: page.getByText('Edit team state') });
-    if (!(await editor.evaluate((el) => el instanceof HTMLDetailsElement && el.open))) {
-        await editor.locator('summary').click();
-    }
+    // v3.0.0: the team write is a page of its own, reached by the `Team setup` door. The disclosure
+    // this case opened is gone, and with it the open-state dance KI-92 needed: a page has no
+    // collapsed state to step around.
+    await openTeamEdit(page);
+    await page.locator('#app > *').first().waitFor();
+
+    const editor = page.locator('main');
 
     await expectTapTargets(editor.locator('input, button'), 8);
 
@@ -163,27 +164,40 @@ test('records the Unity Cup team state through the team editor', async ({ page }
     await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
     // The Team row is the read-back. It is matched as one cell because the editor now renders at page
     // level and its own read-out would match a bare team name twice (strict mode).
+    // The Team row is the read-back and it lives on the Cockpit: `runs.update` redirects `back()`, so
+    // the flash above landed on the team page and the row has to be read on the shell.
+    await backToCockpit(page);
     await expect(page.getByRole('cell', { name: /Blue Bloom/ })).toBeVisible();
 
     // KI-97: the same write has to reach the Unity Cup panel, whose caption reads the two counters as
     // "normal plus Extreme". The old locator was `div.min-w-36`, the header tile class; that tile is
     // rendered by ResourceStrip, which Cockpit.vue does not reference at all (measured before and after
     // this dispatch), so the assertion had no subject. The panel's own line is the figure's real home.
+    // The panel is a page of its own in v3.0.0, so the read-back is read there.
+    await openScenarioDetail(page);
     await expect(page.getByText(/Spirit Bursts 6 \/ 5 Extreme/)).toBeVisible();
 });
 
 test('records the per-stat team grades and reads them back on the panel', async ({ page }) => {
     await openCockpit(page);
 
+    // v3.0.0: the panel that prints the grades and the page that edits them are two pages now, so
+    // this reads the empty state on the panels page, edits on the team page, then reads the recorded
+    // grades back on the panel.
+    await openScenarioDetail(page);
     const grades = page.getByRole('list', { name: 'Team stat grades' });
     const rows = grades.getByRole('listitem');
     await expect(rows).toHaveCount(5);
     await expect(rows.first()).toContainText('N/A');
 
-    const editor = page.locator('details', { has: page.getByText('Edit team state') });
-    if (!(await editor.evaluate((el) => el instanceof HTMLDetailsElement && el.open))) {
-        await editor.locator('summary').click();
-    }
+    await backToCockpit(page);
+    // v3.0.0: the team write is a page of its own, reached by the `Team setup` door. The disclosure
+    // this case opened is gone, and with it the open-state dance KI-92 needed: a page has no
+    // collapsed state to step around.
+    await openTeamEdit(page);
+    await page.locator('#app > *').first().waitFor();
+
+    const editor = page.locator('main');
 
     // R10: the per-stat set stops at S; S+ is the overall team rank and has no option here.
     await expect(editor.locator('#team_stat_grade_Speed option', { hasText: 'S+' })).toHaveCount(0);
@@ -194,6 +208,9 @@ test('records the per-stat team grades and reads them back on the panel', async 
 
     await editor.getByRole('button', { name: 'Save team state' }).click();
     await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
+
+    // The recorded grades are read back on the panel, which is where they render.
+    await openScenarioDetail(page);
 
     for (const [stat, grade] of [['Speed', 'S'], ['Stamina', 'A'], ['Power', 'A'], ['Guts', 'A'], ['Wit', 'A']] as const) {
         await expect(rows.filter({ hasText: stat }).locator('span').nth(1)).toHaveText(grade);
@@ -216,8 +233,9 @@ test('renders the Unity Cup scenario region without a runtime error, the bursts 
     page.on('pageerror', (error) => problems.push(error.message));
 
     await openCockpit(page);
-
-    // The scenario strip renders, including the scenario's own ruleset date line.
+    // The region and the meter asserted below are the panel's own (`ScenarioPanel.vue:227` carries
+    // `data-region="scenario"`), and the panel moved to its own page in v3.0.0.
+    await openScenarioDetail(page);
     await expect(page.locator('[data-region="scenario"]').getByText('Unity Cup')).toBeVisible();
     await expect(page.locator('[data-region="scenario-ruleset-date"]')).toBeVisible();
 
@@ -235,18 +253,22 @@ test('renders the Unity Cup scenario region without a runtime error, the bursts 
 test('closing the team editor without saving records nothing', async ({ page }) => {
     await openCockpit(page);
 
-    const editor = page.locator('details', { has: page.getByText('Edit team state') });
-    // Open only when closed: on an Active career the wrapper is open by default, and an
-    // unconditional first click would close it before the fill.
-    if (!(await editor.evaluate((el) => el instanceof HTMLDetailsElement && el.open))) {
-        await editor.locator('summary').click();
-    }
+    // v3.0.0: the team write is a page of its own, reached by the `Team setup` door. The disclosure
+    // this case opened is gone, and with it the open-state dance KI-92 needed: a page has no
+    // collapsed state to step around.
+    await openTeamEdit(page);
+    await page.locator('#app > *').first().waitFor();
+
+    const editor = page.locator('main');
     await editor.locator('input[name="team_name"]').fill('Blue Bloom');
 
     // Cancel is the disclosure itself: the form submits only from its own button, so closing it
     // abandons the edit. The reload reads the stored run, and a fresh career has no team identity
     // to print — the same absent card `CockpitTeamPanelTest` pins on the wire.
-    await editor.locator('summary').click();
+    // Abandoning is leaving the page: the disclosure this used to close is gone, so the unsaved value is
+    // dropped by navigating away, and the reload reads storage rather than the form.
+    await page.getByRole('link', { name: 'Back to Cockpit' }).click();
+    await page.waitForURL(/\/cockpit$/);
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 

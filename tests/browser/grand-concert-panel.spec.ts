@@ -45,7 +45,7 @@ test('states the scenario and its partial documentation in the strip', async ({ 
 
     await openScenarioDetail(page);
     const section = page.getByRole('region', { name: 'Scenario' });
-    // The name prints twice once the scenario-detail disclosure is open: the card's accent pill and
+    // The name prints twice once the panels are on screen: the card's accent pill and
     // the panel's own heading. The card's copy is first in document order.
     await expect(section.getByText('Our Grand Concert', { exact: true }).first()).toBeVisible();
     await expect(section.getByText('Partially documented', { exact: true }).first()).toBeVisible();
