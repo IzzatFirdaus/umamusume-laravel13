@@ -43,9 +43,11 @@ test('/database/sources — the source URL link hit area meets the 44px house ba
     await page.goto('/database/sources', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    // The page's own source URL, inside the Fetched section. `a.underline` alone would match the
-    // shell's nav link first, which is already 44px; the URL is the link whose text IS the address.
-    const link = page.locator('section[aria-labelledby="fetched-heading"] a.underline').first();
+    // The ledger is one table now, not two sections, so `section[aria-labelledby="fetched-heading"]`
+    // matched nothing and `boundingBox()` waited out the whole test timeout. The fetched row's own
+    // publisher link is the element this bar has always measured.
+    const ledger = page.getByRole('table', { name: /Every source this tool reads/ });
+    const link = ledger.locator('tr').filter({ hasText: 'Fetched' }).first().getByRole('link', { name: 'Open source' });
     const box = await link.boundingBox();
 
     expect(box?.height ?? 0, `the source URL link is ${box?.height ?? 0}px tall, under the 44px bar`).toBeGreaterThanOrEqual(44);
@@ -55,10 +57,10 @@ test('/database/sources — the transcribed publisher link hit area meets the 44
     await page.goto('/database/sources', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    // The Transcribed section's own link. It is the same 19px shape as the raw URL, and the 8.4
-    // measurement counted it in the same group: nine `a.underline` instances, two of them in this
-    // page's markup.
-    const link = page.locator('section[aria-labelledby="transcribed-heading"] a.underline').first();
+    // Same single ledger: the transcribed row's publisher link, which is the sibling of the fetched one
+    // above and shares its `inline-flex min-h-11` shape.
+    const ledger = page.getByRole('table', { name: /Every source this tool reads/ });
+    const link = ledger.locator('tr').filter({ hasText: 'Transcribed' }).first().getByRole('link', { name: 'Open source' });
     const box = await link.boundingBox();
 
     expect(box?.height ?? 0, `the transcribed publisher link is ${box?.height ?? 0}px tall, under the 44px bar`).toBeGreaterThanOrEqual(44);
