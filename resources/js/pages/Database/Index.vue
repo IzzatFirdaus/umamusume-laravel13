@@ -17,7 +17,7 @@ import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import { Head, Link } from '@inertiajs/vue3';
 
 const props = defineProps<{
-    areas: { label: string; url: string; source: string; count: number | null; tag: string | null; description: string }[];
+    areas: { label: string; url: string; source: string; count: number | null; recorded: number | null; tag: string | null; description: string }[];
     matrix: { state: string; verified_at: string | null; source: string };
 }>();
 
@@ -77,7 +77,8 @@ const isLedger = (label: string): boolean => label === 'Data sources';
                         <span class="flex items-baseline justify-between gap-3">
                             <b class="text-base font-bold text-ink-strong">{{ area.label }}</b>
                             <span v-if="area.count !== null" class="font-mono text-sm font-bold tabular-nums text-ink-strong">
-                                {{ group(area.count) }}
+                                {{ group(area.count) }}<template v-if="typeof area.recorded === 'number' && area.recorded !== area.count">
+                                    of {{ group(area.recorded) }}</template>
                             </span>
                             <span
                                 v-else

@@ -34,12 +34,19 @@ it('sends a live count for every area that has a table, and null where the rows 
             ->has('areas', 9)
             ->where('areas.0.label', 'Trainees')
             ->where('areas.0.count', 3)
+            ->where('areas.0.recorded', 3)
             ->where('areas.1.label', 'Support Cards')
             ->where('areas.1.count', 2)
+            ->where('areas.1.recorded', 2)
             ->where('areas.2.label', 'Skills')
-            ->where('areas.2.count', 4)
+            // The factory's skills carry no client name, so the Skills door scopes them out and the hub
+            // prints the door's 0 rather than the table's 4. That is the whole point of the pair (F-03):
+            // a hub figure the door contradicts is the bug this pins shut.
+            ->where('areas.2.count', 0)
+            ->where('areas.2.recorded', 4)
             ->where('areas.3.label', 'Races')
             ->where('areas.3.count', 1)
+            ->where('areas.3.recorded', 1)
             // The scenario matrix reads its count off `config/scenarios.php`, not off a table.
             ->where('areas.5.label', 'Scenarios')
             ->where('areas.5.count', count((array) config('scenarios.scenarios', [])))

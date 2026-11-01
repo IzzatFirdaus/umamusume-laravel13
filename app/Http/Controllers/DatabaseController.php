@@ -44,16 +44,22 @@ class DatabaseController extends Controller
      */
     public function index(): Response
     {
-        // One grouped query for the four live counts (slice 9.1). Four separate `count()` calls are
-        // four round trips for four integers, and the hub is the screen every other area is reached
-        // from, so it is the one page where that shape is worth fixing. `UNION ALL` keeps the areas as
-        // rows of one result set; the alternative — one query per area — is what this replaces.
+        // One grouped query for the four live areas, each with two figures: the rows the table holds and
+        // the rows the area's own door leads with. The hub used to print the raw count, which disagreed
+        // with the door a Trainer clicks through to (F-03): the Skills tile said 1,910 while the Skills
+        // door said 623, because the door scopes to the rows released on Global and carrying a client
+        // name, and the hub named no scope at all. The scoped figure is the tile's number, so the door
+        // and its door always agree; the raw figure rides beside it, in the door's own "N of M" grammar.
+        //
+        // The three scoped arms repeat each door's own default predicate (`CatalogController::indexProps`
+        // for trainees, `SupportCardController::databaseIndex` for supports, `Skill::scopeAvailableOnGlobal`
+        // for skills). Races has no scope, so both its figures are the same number and the tile prints one.
         $live = collect(DB::select(
-            "select 'trainees' as area, count(*) as total from umamusume where external_ref is not null "
-            ."union all select 'supports', count(*) from support_cards "
-            ."union all select 'skills', count(*) from skills "
-            ."union all select 'races', count(*) from race_catalog_slots"
-        ))->pluck('total', 'area');
+            "select 'trainees' as area, count(*) as total, sum(case when release_status = 'GlobalReleased' then 1 else 0 end) as scoped from umamusume "
+            ."union all select 'supports', count(*), sum(case when release_status = 'Global' then 1 else 0 end) from support_cards "
+            ."union all select 'skills', count(*), sum(case when release_status = 'GlobalReleased' and name_is_client = 1 then 1 else 0 end) from skills "
+            ."union all select 'races', count(*), count(*) from race_catalog_slots"
+        ))->keyBy('area');
 
         // Each area's `source` states, in one of the three arms the hub's own subtitle names, where
         // the data behind the door came from: the fetch engine's catalog tables, `config/scenarios.php`
@@ -61,16 +67,17 @@ class DatabaseController extends Controller
         // `config/reference.php`. The hub adds no new fact — it moves the provenance each view already
         // states onto the row that leads to it (frontend-fidelity Slice 3.2).
         //
-        // `count` is the live row count for the four fetched areas and the scenario matrix; it is null
-        // where the area's rows are transcribed into config, and those tiles print the `tag` word the
-        // HFW prints instead. A count that no table can corroborate would be a typed capture value.
+        // `count` is the number the area's door leads with and `recorded` the rows the table holds; the
+        // tile prints the second only where the two differ. It is null where the area's rows are
+        // transcribed into config, and those tiles print the `tag` word the HFW prints instead. A count
+        // that no table can corroborate would be a typed capture value.
         return Inertia::render('Database/Index', [
             'areas' => [
-                ['label' => 'Trainees', 'url' => route('database.trainees'), 'source' => 'Fetched', 'count' => (int) ($live['trainees'] ?? 0), 'tag' => null, 'description' => 'Aptitudes, costumes, base stats and growth rows.'],
-                ['label' => 'Support Cards', 'url' => route('database.supports'), 'source' => 'Fetched', 'count' => (int) ($live['supports'] ?? 0), 'tag' => null, 'description' => 'Seven types, effect ladders, limit-break stages.'],
-                ['label' => 'Skills', 'url' => route('database.skills'), 'source' => 'Fetched', 'count' => (int) ($live['skills'] ?? 0), 'tag' => null, 'description' => 'Engine conditions, base costs, hint ladders.'],
-                ['label' => 'Races', 'url' => route('database.races'), 'source' => 'Fetched', 'count' => (int) ($live['races'] ?? 0), 'tag' => null, 'description' => 'Grade, surface, distance band, fan thresholds.'],
-                ['label' => 'Events', 'url' => route('database.events'), 'source' => 'Transcribed', 'count' => null, 'tag' => 'Reference', 'description' => 'Support-card and trainee event chains.'],
+                ['label' => 'Trainees', 'url' => route('database.trainees'), 'source' => 'Fetched', 'count' => (int) ($live['trainees']->scoped ?? 0), 'recorded' => (int) ($live['trainees']->total ?? 0), 'tag' => null, 'description' => 'Aptitudes, costumes, base stats and growth rows.'],
+                ['label' => 'Support Cards', 'url' => route('database.supports'), 'source' => 'Fetched', 'count' => (int) ($live['supports']->scoped ?? 0), 'recorded' => (int) ($live['supports']->total ?? 0), 'tag' => null, 'description' => 'Seven types, effect ladders, limit-break stages.'],
+                ['label' => 'Skills', 'url' => route('database.skills'), 'source' => 'Fetched', 'count' => (int) ($live['skills']->scoped ?? 0), 'recorded' => (int) ($live['skills']->total ?? 0), 'tag' => null, 'description' => 'Engine conditions, base costs, hint ladders.'],
+                ['label' => 'Races', 'url' => route('database.races'), 'source' => 'Fetched', 'count' => (int) ($live['races']->scoped ?? 0), 'recorded' => (int) ($live['races']->total ?? 0), 'tag' => null, 'description' => 'Grade, surface, distance band, fan thresholds.'],
+                ['label' => 'Events', 'url' => route('database.events'), 'source' => 'Transcribed', 'count' => null, 'tag' => 'Reference', 'description' => 'Recurring live-event types and their cadence.'],
                 ['label' => 'Scenarios', 'url' => route('database.scenarios'), 'source' => 'Config', 'count' => count((array) config('scenarios.scenarios', [])), 'tag' => null, 'description' => 'Caps, panels, live-on-Global dates, rulesets.'],
                 ['label' => 'Shop Items', 'url' => route('database.shop-items'), 'source' => 'Transcribed', 'count' => null, 'tag' => 'Trackblazer', 'description' => 'Costs, effects and one publisher\'s ratings.'],
                 ['label' => 'Sparks', 'url' => route('database.sparks'), 'source' => 'Transcribed', 'count' => null, 'tag' => 'Inheritance', 'description' => 'Blue, pink and white factor families and their grades.'],
@@ -417,7 +424,15 @@ class DatabaseController extends Controller
      */
     public function sources(): Response
     {
-        $lastFetched = DB::table('data_sources')->max('fetched_at');
+        // Each source's own newest recorded fetch, keyed by the config key the provenance rows are written
+        // under. This used to take `max(fetched_at)` over the whole table and stamp every row with that one
+        // figure, so on a database where only one source has ever been fetched every other row claimed that
+        // source's date (F-04). A source with no row says so in words, which the view already renders: "no
+        // fetch recorded" and "fetched long ago" are different facts.
+        $fetchedAt = DB::table('data_sources')
+            ->selectRaw('source_key, max(fetched_at) as fetched_at')
+            ->groupBy('source_key')
+            ->pluck('fetched_at', 'source_key');
 
         $fetched = [];
 
@@ -426,12 +441,15 @@ class DatabaseController extends Controller
                 continue;
             }
 
+            $at = $fetchedAt[$key] ?? null;
+
             $fetched[] = [
                 'name' => (string) $key,
                 'url' => (string) $source['url'],
-                'fetched_at' => $lastFetched === null ? null : (string) $lastFetched,
-                'note' => 'Fetched by the ingest pipeline from the publisher\'s own document. The newest '
-                    .'recorded fetch across every dataset is the date beside this row.',
+                'fetched_at' => $at === null ? null : (string) $at,
+                'note' => 'Fetched by the ingest pipeline from the publisher\'s own document. The date '
+                    .'beside this row is this source\'s own newest recorded fetch, not the newest fetch '
+                    .'across every dataset.',
             ];
         }
 
