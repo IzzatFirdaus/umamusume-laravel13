@@ -12531,3 +12531,83 @@ The whole atomic unit lands in one commit, verified across all three files befor
 commit exists. If the session cannot land the complete unit, it opens a different slice
 rather than a partial one. Then Cockpit 2.1 through 2.4, companion-doc first, one commit
 per variant. Five slices, five commits.
+## Cockpit v3.0.0 surgery - 2026-11-01 (`6f33ffc0..05da0924`)
+
+**Commits.** `6f33ffc0` the team-state door, `202e8753` the surgery, `05da0924` the attribution
+correction plus KI-147 and the KI-144 erratum. Three commits, no documentation commit among them; the
+record is here.
+
+**What the surgery changed.** The `Actions` grid left `resources/js/pages/Career/Cockpit.vue`: the
+career stepper (`CareerLayout.vue:131`, nine steps) is the home of every destination the grid printed,
+and Rest and Recreation record through the Training screen the stepper reaches. The `Scenario detail`
+disclosure left, replaced by a door and the page `/training-runs/{run}/scenario`
+(`runs.scenario-detail`, `Career/ScenarioDetail.vue`). The `Edit team state` disclosure left, replaced
+by a door and `/training-runs/{run}/team` (`runs.team`, `Career/TeamEdit.vue`, landed in `6f33ffc0`).
+
+**Provenance of the three blocks.** `b7922db0` deleted all three and `f7d99280` reverted it, because the
+deletion removed the only entry point each block provided. This pass deleted them only after both doors
+were landed and walked: the ordering is the whole difference between this pass and the overcorrection.
+
+**Door count, measured on the served app at 320px.** Unity Cup 9 doors (Training decision, Race
+decision, Skills planner, Run deck, Timeline, Career result, Run settings, Scenario detail, Team setup);
+the other three scenarios 8, because a scenario that records no team gets no team door. `6f33ffc0`
+recorded 7 to 8 for the team door alone; `202e8753` recorded the step to 9. The gate is
+`composesPanel('team_rank_ladder')` and a nullable `team_url` prop, never a scenario name.
+
+**The panel suite was preserved, not pruned.** `ScenarioPanel` moved behind a door rather than being
+deleted. `CareerGoalsPanel` - the ADR-0026 trainee-goals surface - has no host other than that suite, so
+deleting the disclosure with no replacement would have retired a shipped surface by accident. The owner's
+plan-mode ruling was "move it behind its own door", and `scenario-v3-1280.png` in the surgery's shot
+directory shows the goals board and the mandatory-race ladder rendering on the new page.
+
+**Seven corrections to the brief, each verified against the tree before it was acted on.**
+
+1. `$run->team_state` does not exist. Team data is `scenario.team`, built by
+   `TeamPanelBuilder::teamSection($run)`, the same call `CockpitController::show()` makes; the brief's
+   accessor would have returned null on every request.
+2. There is no Ziggy in this project, so `route('runs.team', id)` inside a `.vue` throws. URLs arrive as
+   controller props (`team_url`, `scenario_detail_url`, and the `run.*_url` set that predates this pass).
+3. `scenario_label` is not a column. `$run->only('scenario_label')` returns nothing; the label is derived
+   by `ScenarioSectionBuilder` from `config/scenarios.php`.
+4. The editor's real field set is seven scalars plus one select per stat - `team_name`, `team_motto`,
+   `team_league_placement`, `team_preseason_wins`, `unity_trainings_count`, `spirit_bursts_count`,
+   `extreme_bursts_count` (`UnityCupEditor.vue:104-178`). The brief invented `strategy` and omitted
+   `extreme_bursts_count`.
+5. The brief's verification grep `grep 'data-region="actions"'` returns 0 before any change, because
+   `ActionGrid.vue:45-46` renders its own heading and the region attribute is not what the block carries.
+   A check that cannot fail is not evidence; the pass substituted mount-and-import greps plus the door
+   count.
+6. Pint and PHPStan are PHP-only tools and cannot lint a `.vue` file, so they were dropped from the
+   frontend verification list; `npm run typecheck` and `npm run build` carry that side.
+7. The plan's door counts were 7/8; measured they are 9/8 after both doors, and the pass states the
+   measured pair.
+
+**Failure split, stated per file rather than as one number.** `career-cockpit.spec.ts` 22 passed / 7
+failed, all seven pre-existing with `file:line` proof against HEAD's bytes (`career-closed-heading`,
+`[data-field="turn"]`, the `Run summary` region, `Open the Career Result`, the fan-ladder and mood-effect
+sentences). `career-race-strip.spec.ts` 1 passed / 5 failed, all five from `RunRaceStrip` not being
+mounted - `3d8c5ee2` removed it on 2026-11-01, one file and 76 deletions with no test in the package, and
+`6f33ffc0` is its descendant. Filed as KI-147 with three disposition options and no chosen one.
+`CockpitController.php:623` was line 589 at `6f33ffc0`; the surgery's 34 insertions shifted it, and
+`UiHygieneTest`'s finding is pre-existing at both numbers.
+
+**Stage discipline.** Three peer hunks rode in files this pass also edited: `CockpitController.php`'s
+`preFinalSection()` stamina-floor min-max band, and in `Cockpit.vue` the `teamRank` rewrite plus a mockbar
+copy line. All three stayed out. The commits were built from spliced blobs on a private index
+(`git hash-object -w` + `GIT_INDEX_FILE` + `read-tree HEAD` + `commit-tree` + three-argument
+`update-ref`), each splice asserting its needle matched exactly once and that the landed blob kept this
+pass's lines and carried none of the peer regions. `KNOWN-ISSUES.md` and `SCREEN_SPEC.md` were staged the
+same way for the same reason, and the same edits were applied to the working copy so a peer's next
+pathspec commit cannot delete them.
+
+**Gates, all run as blocking subagents, none backgrounded, none in flight at commit time.** build green
+with `ScenarioDetail-W2jcy6M2.js` emitted; `npm run typecheck` clean after one TS2322 in the new
+`treeOrder` helper was fixed; `pint --test` passed on the three PHP paths; `--filter=ScenarioDetail` 3
+passed (42 assertions); `--filter=TeamEdit` 3 passed (31 assertions); `--filter=Cockpit` 128 passed / 3
+failed (all three pre-existing); the eight-spec browser batch 76 passed / 16 failed; the retarget batch
+21 passed / 8 failed; the re-check 22 passed / 7 failed; the last two specs 7 passed / 5 failed; the full
+Pest suite 2095 passed / 21 failed (635.42s, every failure attributed pre-existing or peer by a
+clean-vs-HEAD check); PHPStan 11 errors, none in a touched path; `lint:ui` at 282 against the recorded
+219 baseline with zero findings in the three cockpit files; `composer lore` 534 hits / 75 exempt lines and
+`lore-code` 303 hits, with the slice's own four files producing none.
+
