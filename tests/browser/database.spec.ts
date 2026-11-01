@@ -343,7 +343,7 @@ test('the race database renders whichever state the catalogue is in', async ({ p
     // is. The line it replaced said "410 of 410 slots" above a table holding 25 rows, which read as
     // the whole set rather than one page of it.
     await expect(page.locator('nav[aria-label="Pagination"] [role="status"]')).toContainText(
-        /Showing \d+ to \d+ of \d+ slots/,
+        /Showing \d+–\d+ of \d+ slots/,
     );
 
     // Rows carry stored values, and every unstored one is the house absence disclosure rather than a
@@ -370,7 +370,7 @@ test('the race database pager names the range it shows and moves a page', async 
     }
 
     const status = page.locator('nav[aria-label="Pagination"] [role="status"]');
-    await expect(status).toContainText(/Showing \d+ to \d+ of \d+ slots/);
+    await expect(status).toContainText(/Showing \d+–\d+ of \d+ slots/);
 
     // The canonical pager is a button pair, not a set of links, so the PAGE owns the request. That is
     // the behaviour that changed: the pager this replaced was Inertia links, and this one is not.
@@ -414,7 +414,7 @@ test('the race catalogue mounts the wireframe table when rows exist', async ({ p
         await expect(table.locator('summary', { hasText: 'N/A' })).toHaveCount(5);
 
         await expect(page.locator('nav[aria-label="Pagination"] [role="status"]')).toContainText(
-            'Showing 1 to 3 of 3 slots',
+            'Showing 1–3 of 3 slots',
         );
     } finally {
         removeRaceSlots(seeded);
