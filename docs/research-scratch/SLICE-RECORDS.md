@@ -12354,3 +12354,49 @@ Edit-team-state are drawn in the companion, not the shell, so they stay: that de
 `b7922db0`'s whole failure. `Run settings` and `Delete this run` stay as
 `HFW-OVERRIDE (structure: … required by app; shell HFW does not draw a door for it)`.
 Advisor provenance is required by H-1 and GP-2 and is not surplus.
+
+### Parity pass, /review and /support-cards closed — 2026-11-01
+
+**Landed.** `2c5f0970` (review: the queue's own heading, three wireframe refusals named
+rather than silently mismatched) and `734189f0` (support-cards: filter row, five fields,
+per-row slot, per-row and per-card type chips). Both carry the two required facts in the
+commit body. `/review`'s hashes differ, so real work landed; `/support-cards`' hash
+identically at `917a62e984abc46b40f0…`, so it is a marker-only closure under the rule
+`207c1495` set.
+
+**Two method findings, load-bearing for every remaining page.**
+
+**1. The sweep count is a smoke test, not an enumeration.** `missingFrom` is a subsequence
+check, so one unmatched wireframe marker cascades every later marker into the missing list.
+`/review` reported 6 and had 0 missing blocks (one heading to add, three named refusals).
+`/support-cards` reported 27 and had 0 missing blocks. The sweep's job is to say "look at
+this page"; the enumeration is the code read, done first, every time. A page's real delta
+list never comes from the count.
+
+**2. A parity case on an unpopulated page passes by measuring nothing.**
+`assertStructurallyEqual(..., { regions: 'subset' })` against an empty `capture(main)` list
+is satisfied by zero markers. `/review`'s first case passed with an empty queue because the
+empty state renders nothing to compare. Every parity case must assert
+`regions.length > 0` before comparing, and must seed or request enough rows that the
+comparison has a subject. `/support-cards` asks for `?pageSize=20` for the same reason: the
+controller ships five rows by deliberate choice, the wireframe draws seven, and comparing
+row for row reports four markers missing and cascades the rest.
+
+**Shared components stay out of this pass, on evidence.** The cheapest form of the
+`/support-cards` fix was tried first: `data-region="field"` as a fallthrough attribute on
+`<BaseInput>` and `<BaseSelect>`. It never reached the DOM, because both components switch
+root elements with `v-if`/`v-else` and Vue drops fallthrough attributes on a multi-root
+component; the sweep then showed `filters` present and all five `field` markers absent.
+Real page-local wrappers are what the comparison needs, and a marker on a shared component
+would say only "a field exists somewhere" where the check asks "is this field here, in this
+order". Blast radius of `734189f0` is one page file.
+
+**KI-142 is wider than its entry says.** The en-dash pager wording now fails a second
+page's case (`support-cards.spec.ts:212`, after `skills.spec.ts:153`). The defect is in the
+shared pager, so every page that asserts its own range wording carries the same red case.
+Worth adding to the pending KI-142 text when `KNOWN-ISSUES.md` frees up.
+
+**Remaining, in order.** `/veterans/{id}` (real: a `<dl>` grid against card-with-`srow`
+markup, a layout redesign, one complete slice), the picker move across
+`Veterans/Index.vue` + `Veterans/Compare.vue` as one atomic change, then the four Cockpit
+variants, each read-gated and page-local. Nine subjects were ten; two closed today.
