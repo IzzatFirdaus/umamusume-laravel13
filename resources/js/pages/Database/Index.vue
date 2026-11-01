@@ -85,6 +85,7 @@ const isLedger = (label: string): boolean => label === 'Data sources';
                                 :class="isLedger(area.label) ? 'pill-positive' : 'pill-outline'"
                             >{{ area.tag }}</span>
                         </span>
+                        <span class="mt-1 text-xs font-semibold text-ink-muted">{{ area.source }}</span>
                         <span :id="`database-area-${index}`" class="mt-1.5 text-xs text-ink-muted">{{ area.description }}</span>
                     </Link>
                 </li>

@@ -24,7 +24,7 @@ import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
 import DatabaseNav from '../../components/database/DatabaseNav.vue';
 import DataTable, { type DataTableColumn } from '../../components/ui/DataTable.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 interface Cap {
@@ -190,8 +190,12 @@ const panelState = (scenario: Scenario, label: string): boolean =>
                         The bold figure in each row is that scenario's outlier, and the outlier is its
                         mechanical identity. Base is {{ props.baseCap }} for every stat; the hard ceiling
                         is 2000. Bold marks the outlier, not the maximum. Verified
-                        {{ props.verifiedAt }} against the GameTora scenarios.json export and the Global
-                        prose sources the config header names. A verification date records when the
+                        {{ props.verifiedAt }} against the GameTora scenarios.json export and
+                        <Link
+                            href="/database/sources"
+                            class="text-ink-strong underline hover:text-ink-muted"
+                        >the Global prose sources</Link>
+                        the config header names. A verification date records when the
                         matrix was checked, not when it was fetched, and nothing on this page was
                         fetched today.
                     </span>
