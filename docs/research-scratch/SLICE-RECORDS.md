@@ -12310,3 +12310,47 @@ at 1280x2000, the fixture builder and capture harness, and `README.md` with the 
 run ids. Fixtures: 7 veterans, 67 candidates, 559 support cards, 1,910 skills; runs #8 ura
 Active, #11 unity_cup, #12 trackblazer and #13 our_grand_concert, the last two created
 through `/training-runs/create` because no seeder carries those scenarios.
+
+### Parity pass, resolutions on the four open items — 2026-11-01 (owner ruling)
+
+Owner rulings taken after the `12662049` entry. They lock the four items that entry
+raised, and they set the enumeration that governs the remaining ten subjects.
+
+**1. `Best for` — the row renders, the value stays refused.** Corrects the peer-ledger
+entry above it ("Wireframe 'Best for' mini-table refused (§1.5.4 / PRD G-4)"): §1.5.4 is
+about ancestor slots, so the citation was imprecise, and G-4 forbids the recommendation,
+not the row. The HFW draws the row and visual parity requires it, so `7be35b69`'s shape is
+correct: row present, value an `AbsenceValue`. The prior entry's "refused" phrasing is
+superseded as to the row; it stands as to the value. The peer entry itself is not edited.
+
+**2. `lint:ui` at 282 against the recorded 219.** Owed a register entry; the text is in
+this commit's body under `KNOWN-ISSUES row pending:` because `KNOWN-ISSUES.md` carries a
+peer's uncommitted KI-141 and KI-143 and `git commit <path>` would land them with mine.
+KI-145 and KI-146 are free: `git show HEAD:KNOWN-ISSUES.md` ends at KI-144, and no KI above
+144 appears in any tracked markdown on this tree.
+
+**3. `veteran-compare.spec.ts` seven failures.** Pre-existing, owed by the library's
+cards-to-table migration, not by a visual slice. Also pending in the register, same reason.
+
+**4. `verdictOf` answers `same` on an all-absent row.** Recorded, not fixed. The behavior is
+shared with the Legacy read-back row, and changing the branch moves copy on screens this
+pass does not own. The proper fix is a per-caller override.
+
+**Enumeration, now standing for every remaining subject.** Before editing a page: run the
+`assertStructurallyEqual` sweep for its exact missing markers, read the controller payload
+to confirm each marker has a source or is a visible absence, then screenshot to confirm the
+delta is genuinely missing rather than clipped. If any of the three fails, stop and report.
+One 9-second sweep replaced eleven image pairs and is the reason the scope below is known.
+
+**Scope, corrected.** Sixteen subjects, ten remaining. `/veterans` and `/legacy` already
+match; six pages landed in `baf7019e..c40b1a86`; four index pages plus four Cockpit variants
+remain, in cost order `/skills` (4 markers), `/review` (6), `/support-cards` (27),
+`/veterans/{id}` (16, a card-grammar rewrite), then the picker move, then Cockpit.
+
+**Cockpit ground rules, recorded before that block opens.** Shell HFW plus companion doc
+plus app is three images per variant, and where the two documents disagree the companion
+wins because it carries the full treatment. The ActionGrid, Shop button, team roster and
+Edit-team-state are drawn in the companion, not the shell, so they stay: that deletion was
+`b7922db0`'s whole failure. `Run settings` and `Delete this run` stay as
+`HFW-OVERRIDE (structure: … required by app; shell HFW does not draw a door for it)`.
+Advisor provenance is required by H-1 and GP-2 and is not surplus.
