@@ -157,6 +157,10 @@ class DatabaseController extends Controller
         return Inertia::render('Database/Races', [
             'slots' => $slots,
             'totalCount' => RaceCatalogSlot::query()->count(),
+            // The payout card's provenance. Its figures are transcribed, not read from a table, so the
+            // card carries the same reference metadata the other transcribed views carry (F-06).
+            'source' => (array) config('reference.race_payouts.source', []),
+            'recheck' => (array) config('reference.race_payouts.recheck', []),
             // Echoed so a picker paints the facet the Trainer chose, which is the same contract the
             // support-card catalog states: a select that reads "Any" after a filter has been applied
             // tells the Trainer their narrowing was lost.

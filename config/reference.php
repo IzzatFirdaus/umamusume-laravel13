@@ -345,4 +345,25 @@ return [
         'roll_odds_note' => 'The star count is rolled from the run\'s results, never chosen. Crossing 1100 buys a roughly one-in-ten roll at three stars, not a three-star Spark, and below 600 the three-star branch is 0% rather than unlikely.',
     ],
 
+    /*
+    | The Races view's payout card: the per-grade post-race figures, §1.2. The reference guide records
+    | reading them on 2026-10-15 from one publisher's Race Bonus page (its own last-updated stamp is
+    | 2026-06-26), and records the limit in the same breath: the figures are a publisher's arithmetic,
+    | not a decoded client value, so a tracker prints the payout rather than recomputing it.
+    |
+    | The distance bands are deliberately not in this dataset. They are read off the fetched export
+    | (`race_catalog_slots.distance_band` and the course metres beside it), so their provenance is the
+    | race-catalog fetch row in the ledger, not a transcription.
+    */
+    'race_payouts' => [
+        'source' => [
+            'section' => 'Race payouts by grade',
+            'anchor' => '2026-10-15',
+        ],
+        'recheck' => [
+            'text' => 'Re-read the publisher\'s Race Bonus page and compare its 0% base row and its 34% breakpoint against the package the client prints after a first-place finish.',
+            'url' => 'https://game8.co/games/Umamusume-Pretty-Derby/archives/572831',
+        ],
+    ],
+
 ];

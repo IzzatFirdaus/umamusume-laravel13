@@ -166,10 +166,12 @@ test('the Data sources page lists every dataset and names no repository path', a
     await expect(page.getByRole('heading', { name: 'Sources', level: 2 })).toBeVisible();
     const ledger = page.getByRole('table', { name: /Every source this tool reads/ });
     await expect(ledger).toBeVisible();
-    await expect(ledger.getByRole('row')).toHaveCount(13);
-    await expect(ledger.getByRole('link', { name: 'Open source' })).toHaveCount(12);
+    // One header row over nine fetched datasets and four transcribed ones (the Races payout card joined
+    // the list with `config/reference.php`'s `race_payouts` entry), and one publisher link per dataset.
+    await expect(ledger.getByRole('row')).toHaveCount(14);
+    await expect(ledger.getByRole('link', { name: 'Open source' })).toHaveCount(13);
     await expect(ledger.getByText('Fetched', { exact: true })).toHaveCount(9);
-    await expect(ledger.getByText('Transcribed', { exact: true })).toHaveCount(3);
+    await expect(ledger.getByText('Transcribed', { exact: true })).toHaveCount(4);
     await expect(page.locator('body')).not.toContainText('https://');
 
     // The wireframe's two closing sections: a live disagreement is printed as one, and the page says

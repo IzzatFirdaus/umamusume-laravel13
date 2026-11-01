@@ -12,8 +12,9 @@ use Inertia\Testing\AssertableInertia as Assert;
  *
  * Three areas are the ported catalog surfaces: Trainees, Support Cards and Skills render the same
  * shared list components the originals use. Two are DB- and config-derived: Races from RaceCatalogSlot,
- * Scenarios from config/scenarios.php. Three are transcribed from `docs/UMAMUSUME_REFERENCE.md` into
- * `config/reference.php`: Events, Shop Items and Sparks. All read-only; no redirects, no forms.
+ * Scenarios from config/scenarios.php. Four are transcribed from `docs/UMAMUSUME_REFERENCE.md` into
+ * `config/reference.php`: Events, Shop Items, Sparks, and the Races view's payout card, whose figures are
+ * transcribed even though the table beside it is fetched. All read-only; no redirects, no forms.
  *
  * Slice 3.1: Config → badge index validation. Every `state` value in config/reference.php must be one
  * of the four ProvenanceBadge states: confirmed, calculated, estimated, unknown.
@@ -291,6 +292,9 @@ it('renders the Data sources page with one row per dataset', function (): void {
 
                 expect($names)->toContain('Recurring event types');
                 expect($names)->toContain('Spark categories');
+                // The races payout card names the dataset its figures came from, so the ledger has to
+                // list that dataset or the card points at a row that does not exist.
+                expect($names)->toContain('Race payouts by grade');
                 expect(collect($names)->every(fn (string $n): bool => ! str_contains($n, '§')))->toBeTrue();
 
                 return true;
@@ -298,7 +302,7 @@ it('renders the Data sources page with one row per dataset', function (): void {
 });
 
 it('keeps the guide path off every reference view it used to ship on', function (): void {
-    foreach (['/database/events', '/database/shop-items', '/database/sparks'] as $url) {
+    foreach (['/database/events', '/database/shop-items', '/database/sparks', '/database/races'] as $url) {
         $this->get($url)
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page->missing('source.doc'));

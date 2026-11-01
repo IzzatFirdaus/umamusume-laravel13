@@ -25,6 +25,7 @@ import BaseButton from '../../components/Form/BaseButton.vue';
 import BaseInput from '../../components/Form/BaseInput.vue';
 import BaseSelect from '../../components/Form/BaseSelect.vue';
 import DatabaseNav from '../../components/database/DatabaseNav.vue';
+import SourceNote from '../../components/database/SourceNote.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
 import Pagination from '../../components/ui/Pagination.vue';
 import AppLayout from '../../layouts/AppLayout.vue';
@@ -55,6 +56,9 @@ interface Paginator<T> {
 const props = defineProps<{
     slots: Paginator<Slot>;
     totalCount: number;
+    /** Which transcribed dataset the payout card's figures came from, and when the guide was read. */
+    source: { section: string; anchor: string };
+    recheck: { text: string; url: string };
     /** The facets the request carried, echoed so each picker paints what the Trainer chose. */
     filters: {
         q: string | null;
@@ -406,6 +410,14 @@ function goToPage(page: number): void {
                         and third are not published.
                     </span>
                 </p>
+                <!-- The figures above are not read from a table: they are transcribed, so the card says
+                     which dataset they came from and when the guide was read, the same row every other
+                     transcribed reference view carries. -->
+                <SourceNote
+                    :section="props.source.section"
+                    :anchor="props.source.anchor"
+                    :recheck="props.recheck"
+                />
             </section>
         </div>
     </AppLayout>
