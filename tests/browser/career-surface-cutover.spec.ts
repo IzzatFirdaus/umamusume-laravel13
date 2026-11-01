@@ -102,12 +102,13 @@ test('Dashboard Resume and Careers selection converge on the same Cockpit surfac
 test('the Cockpit keeps its own 2.0 decision links after the cutover', async ({ page }) => {
     await openCareersAndSelectRun(page);
 
-    // Only the links that exist today (SCREEN-009's action grid). The cutover must not have
-    // broken the 2.0 navigation that was already there.
-    await expect(page.getByRole('link', { name: /^Training/ })).toBeVisible();
-    await expect(page.getByRole('link', { name: /^Race/ })).toBeVisible();
-    await expect(page.getByRole('link', { name: /^Event/ })).toBeVisible();
-    await expect(page.getByRole('link', { name: /^Inheritance/ })).toBeVisible();
+    // The cockpit's decision doors are the "Where to go" list now that the action grid is gone (HFW
+    // parity pass). Scoped to that region because the career section nav renders its own `Training`,
+    // `Races` and `Events` tabs, which a page-scoped `/^Training/` would collide with.
+    const doors = page.getByRole('region', { name: 'Where to go' });
+    await expect(doors.getByRole('link', { name: 'Training decision' })).toBeVisible();
+    await expect(doors.getByRole('link', { name: 'Race decision' })).toBeVisible();
+    await expect(doors.getByRole('link', { name: 'Career result' })).toBeVisible();
 });
 
 test('the Cockpit carries the door to the Career Result', async ({ page }) => {

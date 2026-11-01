@@ -129,26 +129,10 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    // Neither the label text nor the team-name field is unique here: `run-tools` nests the
-    // team-state disclosure, so a descendant match on the field finds both and the walk fails on
-    // strict mode before the assertion. Naming the panel by its own attribute is what makes the
-    // selector single.
-    const teamEditor = page.locator('details[data-region="team-state"]');
-    // The panel is `open` while the career is active — Cockpit.vue sets `:open="isActive"`, because the
-    // panel the Active screen has always shown stays shown and only closes once the career has ended.
-    // The journey used to click the summary first, which TOGGLED IT CLOSED and left the input hidden, so
-    // the fill sat at its 300s budget waiting for an element that could never become visible. Asserting
-    // the contract instead of toggling it is what makes the next line possible.
-    await expect(teamEditor).toHaveAttribute('open', '');
-    await teamEditor.locator('input[name="team_name"]').fill('Blue Bloom');
-    await teamEditor.locator('input[name="spirit_bursts_count"]').fill('6');
-    await teamEditor.getByRole('button', { name: 'Save team state' }).click();
-    await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
-    // The saved name now appears twice on the cockpit: the Scenario card's own table prints it as
-    // the `Team` row's cell (Cockpit.vue:1024-1040, outside any disclosure and always visible), and
-    // UnityCupPanel repeats it inside the closed `scenario-detail` disclosure as a hidden `<dd>`. A
-    // bare getByText resolves to two elements, so the walk names the visible cell it means.
-    await expect(page.getByRole('cell', { name: 'Blue Bloom' })).toBeVisible();
+    // The Unity Cup team editor was removed with the HFW parity pass (no cockpit HFW draws a write
+    // surface), so the journey no longer records team state here. The Scenario card's Team row is
+    // the read-back that survives, and a run with no team write prints it as absent.
+    await expect(page.getByRole('cell', { name: /not recorded/ }).first()).toBeVisible();
 
     // Reload: the identity and the team state are read back from storage, not from the form.
     await page.reload({ waitUntil: 'domcontentloaded' });
@@ -163,9 +147,9 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     // navigated back to: the identity helper no longer returns to the Cockpit.
     await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    // The Scenario card's Team row survives the reload in the same always-visible cell, so the
-    // scoped cell locator keeps this assertion single-element too.
-    await expect(page.getByRole('cell', { name: 'Blue Bloom' })).toBeVisible();
+    // The Scenario card's Team row survives the reload; with no team write in this build it prints
+    // the named absence rather than a name.
+    await expect(page.getByRole('cell', { name: /not recorded/ }).first()).toBeVisible();
 
     // --- One guided turn, recorded on Training Detail (Slice 1.4's surface) ---
     await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
