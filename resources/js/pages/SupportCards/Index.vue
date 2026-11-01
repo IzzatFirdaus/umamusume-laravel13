@@ -272,7 +272,10 @@ const isPal = (card: Card): boolean => card.type === 'friend';
         </div>
 
         <template v-else>
-            <div class="card mt-4 overflow-x-auto">
+            <!-- `relative` is load-bearing: the sr-only cell label below is absolutely positioned, and an
+             absolutely positioned child of a static `overflow-x-auto` box escapes the scroller and widens
+             the document, which is the 1.4.10 reflow failure this card had at 320px. -->
+            <div class="card relative mt-4 overflow-x-auto">
                 <table class="w-full border-collapse">
                     <thead>
                         <tr>

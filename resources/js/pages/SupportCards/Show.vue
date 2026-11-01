@@ -322,7 +322,7 @@ const statedAt = (stage: EffectStage): string => {
                     </p>
                     <div class="mt-2 flex flex-wrap items-center gap-2 text-sm">
                         <span class="flex gap-1" aria-hidden="true">
-                            <span v-for="slot in BREAKS" :key="slot" class="font-mono text-ink-faint">◇</span>
+                            <span v-for="slot in BREAKS" :key="slot" class="font-mono text-ink-muted">◇</span>
                         </span>
                         <span class="font-semibold text-ink-strong">breaks not recorded</span>
                         <span class="ml-auto font-mono text-xs text-ink-muted">cap {{ props.levelCap }}</span>
