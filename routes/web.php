@@ -150,6 +150,12 @@ Route::get('/training-runs/{run}/cockpit', [CockpitController::class, 'show'])->
  */
 Route::get('/training-runs/{run}/settings', [CockpitController::class, 'settings'])->name('runs.settings');
 /*
+ * The team write, on a page of its own (`v3.0.0`). The cockpit's inline `Edit team state` disclosure
+ * retires, and the `Team setup` door in `Where to go` leads here instead, so the surface is reachable
+ * before the block is deleted rather than after.
+ */
+Route::get('/training-runs/{run}/team', [CockpitController::class, 'teamEdit'])->name('runs.team');
+/*
  * The Race Decision (SCREEN-011, `SCR-CAR-013`, plan §8 D10). A read screen over the run's own
  * calendar; its one write is the existing `runs.races.store` below, so no second race-write route
  * exists. It descends from the run's URL the way the Cockpit does.

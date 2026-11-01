@@ -213,6 +213,8 @@ const props = defineProps<{
     /** A-0.11: the client's Mood Effect headline (great tier: +20% training, +4% running). */
     moodEffect: { training: number; running: number };
     actions: { key: string; label: string; href: string; recommended: boolean; note: string }[];
+    /** The team-setup door (`v3.0.0`), null where the scenario records no team. */
+    team_url: string | null;
     // The decision's own shape is declared at `components/career/NextDecision.vue`, the one place that
     // reads it, and forwarded untouched the way the scenario section is (FD-2, plan §9a). `finale` stays
     // a sibling of the contract rather than a seventh key inside it.
@@ -1225,6 +1227,11 @@ const jumpToShop = (): void => {
                              row disappears with the disclosure when `C6b.11` lands the retirement. -->
                         <li>
                             <LinkButton :href="props.run.settings_url" variant="secondary" size="sm">Run settings</LinkButton>
+                        </li>
+                        <!-- The team write's door (`v3.0.0`). Hidden where the scenario records no
+                             team, which is why the card reads the URL rather than a scenario name. -->
+                        <li v-if="props.team_url !== null">
+                            <LinkButton :href="props.team_url" variant="secondary" size="sm">Team setup</LinkButton>
                         </li>
                     </ul>
                 </section>

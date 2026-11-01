@@ -24,6 +24,7 @@ use App\Services\CareerCalendar;
 use App\Services\FanLadder;
 use App\Services\Scenario\FinaleReader;
 use App\Services\ScenarioCaps;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -170,6 +171,35 @@ class CockpitController extends Controller
         ]);
     }
 
+    /**
+     * The Unity Cup team write, on a page of its own (`v3.0.0`). The cockpit's inline `Edit team state`
+     * disclosure retires with this release, and this is the door that replaced it, so the write surface
+     * survives the deletion instead of disappearing with it.
+     *
+     * It lives on this controller rather than a `TeamEditController` of its own because `runSection()` is
+     * private and about fifty lines: a separate controller would either duplicate it or force a
+     * visibility refactor outside this pass. Same reasoning that keeps `scenarioDetail()` here.
+     */
+    public function teamEdit(TrainingRun $run): Response|RedirectResponse
+    {
+        // The gate is the scenario's own flag, not a name comparison: the block this page replaces was
+        // gated on the same capability (`composesTeamPanel`), and `config/scenarios.php` is the only
+        // place a scenario name belongs (§7).
+        if (! $run->composesPanel('team_rank_ladder')) {
+            return redirect()
+                ->route('runs.cockpit', $run)
+                ->with('status', 'Team state is only available for a scenario that records a team.');
+        }
+
+        $run->loadMissing('umamusume');
+
+        return Inertia::render('Career/TeamEdit', [
+            'run' => $this->runSection($run),
+            'team' => $this->team->teamSection($run),
+            'backUrl' => route('runs.cockpit', $run),
+        ]);
+    }
+
     public function show(TrainingRun $run): Response
     {
         // The run with its trainee, its turns, and its race log with the slots and the turn link each
@@ -236,6 +266,10 @@ class CockpitController extends Controller
             // draws the card from one flag and never from a scenario name (D-240, G-33).
             'performance' => $this->performanceSection($run),
             'raceStrip' => $this->raceStrip->raceStripSection($run, $this->obligationSlots($run)),
+            // The team-setup door (`v3.0.0`): the inline `Edit team state` disclosure retires this
+            // release, and this is the door that keeps the write reachable. Null where the scenario
+            // records no team, so the card gates on the URL's presence rather than on a scenario name.
+            'team_url' => $run->composesPanel('team_rank_ladder') ? route('runs.team', $run) : null,
             'scenario' => $this->scenario->scenarioSection($run, $team, $latest, $advice, $this->scenarioSectionContext($run, $latest, $advice)),
             // F2, plan §9.6 ruling 2: arbitrary-turn correction. The selected turn defaults to the
             // latest, but `?edit_turn=<id>` names any logged turn; the form posts to the existing
