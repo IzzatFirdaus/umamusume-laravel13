@@ -179,6 +179,28 @@ where its keybox requires one-pick radios.
   component, but the sentence suggested for it names a verification date this release did not perform,
   so it is not printed.
 
+**Cockpit v3.0.0 surgery (`6f33ffc0..05da0924`, 2026-11-01).** Three blocks the v2.1.0 cockpit carried
+retired, and the two doors that replace them landed first: `b7922db0` had deleted the same three and
+`f7d99280` reverted it, because the deletion removed the only entry point each one provided.
+
+- **`Actions` grid retired** - the career stepper carries every destination the grid printed, and Rest
+  and Recreation record through the Training screen the stepper reaches (`runs.training?choice=…`).
+- **`Scenario detail` disclosure retired** - the panel suite is reachable at
+  `/training-runs/{run}/scenario` (`runs.scenario-detail`), which preserves `CareerGoalsPanel`, the
+  ADR-0026 trainee-goals surface that has no other host.
+- **`Edit team state` inline block retired** - the editor is reachable at `/training-runs/{run}/team`
+  (`runs.team`) for the scenarios whose matrix records a team, and every other scenario is redirected to
+  the cockpit with the reason in the flash.
+- **`Where to go` now carries 9 doors for Unity Cup and 8 for the other three**, measured on the served
+  app at 320px. The gate is `composesPanel('team_rank_ladder')` and a nullable `team_url` prop, so the
+  card names no scenario (§7).
+- **`RunRaceStrip` is not on the Cockpit** - removed earlier by `3d8c5ee2` (C6b.5), which left its spec
+  behind. Tracked as KI-147 with three disposition options and none chosen; `202e8753` measured the
+  failures and `05da0924` attributed them.
+- **Peer-hunk discipline** - three uncommitted peer hunks in `Cockpit.vue` and `CockpitController.php`
+  stayed out of the surgery commits, which were built from spliced blobs on a private index. The
+  register and this file's neighbours were staged the same way.
+
 ## [2.1.1] - 2026-10-24
 
 A PATCH release from the Group A + Group B audit pass. Read-only panels and copy on existing screens,
