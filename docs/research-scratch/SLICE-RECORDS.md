@@ -12207,3 +12207,106 @@ N of 9 entries complete: Cockpit, TrainingDetail, RaceDecision, SkillsPlanner, E
 
 N of 1 entries complete: Legacy/Builder, Legacy/Compare, Veterans/Compare, Review/Detail (fixed); SupportCards/Show, Skills/Show (verified only).
 
+
+### HFW visual parity pass, Phase 0 and Veterans/Compare — 2026-11-01
+
+**Scope correction, measured before any edit.** The dispatch brief names nineteen
+subjects (fifteen pages plus four Cockpit variants) and calls five families plus the
+Cockpit unlanded. Both figures are wrong on this tree.
+
+- Sixteen subjects, not nineteen: the five families list twelve pages (3+3+2+2+2).
+- `baf7019e..c40b1a86` is an ancestor of `b7922db0`, so the Legacy six-screen entry
+  directly above is landed work, not a pending worktree. It already fixed
+  `Legacy/Builder.vue`, `Legacy/Compare.vue`, `Veterans/Compare.vue` (cards onto card
+  grammar), `Review/Detail.vue`, and verified `/support-cards/{id}` and `/skills/{id}`
+  with no edits. `Legacy/Compare.vue:364` carries the `t min-w-[40rem]` table that entry
+  claims, re-measured with `rg` after a shell grep reported zero (the hook rewrote the
+  bracket pattern; a quoted-pattern shell grep is not an instrument in this worktree).
+- Remaining to verify or fix: `/veterans`, `/veteran-detail`, `/legacy`, `/review`,
+  `/support-cards`, `/skills` (six index or detail surfaces) and the four Cockpit
+  variants. Eleven, not eleven-pages-plus-four.
+
+**Owner rulings taken this pass, both 2026-11-01, both in the user's own words:**
+
+1. Build inline in the shared master tree, waiving the AGENTS.md §9 no-build-while-a-peer
+   works rule for this pass. Every `app/` screenshot therefore carries the peer's
+   uncommitted `AppLayout.vue` (+194), `Preflight.vue` (+40) and `CardPicker.vue` (+4),
+   recorded in `.scratch-uma/hfw-parity-2026-11-01/README.md`.
+2. Evidence under `.scratch-uma/hfw-parity-2026-11-01/`, not `.scratch-parity/` (the brief
+   asserted the latter is gitignored; `git check-ignore` says it is not).
+3. No root `TASKS.md`: the root set is closed, so the session record lands here.
+
+**Method correction, the one that matters for the remaining eleven.** The brief's
+screenshot loop says commit only when the two images are indistinguishable, and Slice 1.1
+step 5 says "trim rows to the six the HFW draws". That is `b7922db0`'s error repeated:
+deleting app blocks because a shell wireframe does not draw them. The repository already
+owns the right instrument and the right rule:
+
+- `tests/browser/fixtures/hfw-structure.ts` compares ordered markers, and
+  `assertStructurallyEqual(app, hfw, { regions: 'subset', grid: true })` means "every
+  marker the wireframe draws exists, in order". Surplus is allowed by definition.
+  `veterans-parity.spec.ts:17-19` states this in its own header.
+- Annotation keys are document apparatus, not product UI: `pages/Dashboard.vue:35` and
+  `veterans-parity.spec.ts:14` both already rule this. The brief lists them as missing
+  blocks on three pages; none are shipped.
+- SCREEN_SPEC:2966 defines `/veterans/compare` as careers "aligned property by property,
+  recorded values only", and `veteran-compare.spec.ts:73` pins four rows the trim would
+  delete. The owner chose to keep every recorded row and keep the absence register.
+
+So the pass proceeds as structure parity plus the visible head, pill, row and card deltas,
+never as deletion.
+
+**Landed here.**
+
+- `f7d99280` revert of `b7922db0`: 12 files, 1,854 insertions. Four panel specs and
+  `tests/utils/scenario-detail.ts` restored; the scenario-detail, ActionGrid and
+  team-state regions confirmed at `Cockpit.vue:1159`, `:1252`, `:1276`.
+- `e2f25a55` the lede half only, re-applied: identity and energy/mood through
+  `identityLine` and `conditionLine`, with the scenario label dropped from the Active
+  branch because the crumb and the pill already name it.
+- `033794d7` the restored specs made green: `unity-cup-panel.spec.ts` never opened the
+  `scenario-detail` disclosure, which is the single cause of all eleven of its failures
+  (`ura-panel.spec.ts:103-109` already had the opener); two control guards counted the
+  shell's own wrapper as a panel control, now excluded by `data-region` with the ruling
+  otherwise intact; `career-cockpit.spec.ts:305` guarded a `find()` result against `null`
+  when `find()` returns `undefined`. All three reproduce at `13f80d14`, the state the
+  revert restores, so none is a regression from this pass.
+- `7be35b69` Veterans/Compare structure parity: head band through the shared PageHeader,
+  the `#who` pill, Saved row, the four Spark rows the payload already carried and the page
+  never printed, the two tinted factor rows, the note below the matrix, Blue/Pink/Best-for
+  rows on the per-career cards, and the matrix inside a card at `lg:min-w-0` so the
+  Difference column the page already builds is visible at 1280 instead of off the edge.
+
+**Conflict flagged, not resolved silently.** `7be35b69` renders a `Best for` row as a named
+absence. The Legacy six-screen entry above records "Wireframe 'Best for' mini-table refused
+(§1.5.4 / PRD G-4)". The dispatch brief names it a "render, don't delete" case and the owner
+reaffirmed structure parity on 2026-11-01, so the row renders and the verdict does not. If
+the earlier refusal governs, the row is the thing to delete, and this line is the record.
+
+**Findings for the register (KNOWN-ISSUES.md is peer-dirty, so they are recorded here first).**
+
+1. `veteran-compare.spec.ts` fails seven of its eleven cases before this pass touches it.
+   Each times out on `getByRole('listitem')...getByRole('link', { name: 'Compare this
+   career' })`; the library now renders `<tr data-veteran-row>` rows whose door is labelled
+   `Compare` (`Index.vue:390`, the shape `veterans.spec.ts:265` documents). Retargeting
+   seven cases is test repair owed by the library's cards-to-table move, not by a visual slice.
+2. `npm run lint:ui` is red at 282 arbitrary values against the recorded baseline of 219
+   (AGENTS.md §9). Zero findings sit in the files `7be35b69` touched; `Dashboard.vue` alone
+   carries 68. The 2026-10-27 figure in the baseline note is now stale.
+3. `verdictOf` returns `same` when every cell on a row is absent (`Compare.vue:190`), so a
+   factor row over three unrecorded careers prints `same`. Pre-existing and shared with the
+   Legacy read-back row; changing the branch moves copy on screens this pass does not own.
+
+**Verification run.** Four panel specs 48 passed 0 failed across two runs (37 of 48 in the
+four-file run, the remaining 11 in the single-file re-run after the opener landed);
+`unity-cup-panel` alone 15 passed; the new compare parity case 1 passed in 5.6s; `npm run
+typecheck` no errors; `pint --test` on `VeteranController.php` passed; `composer lore-code`
+302 hits, 13 from lines added here, all on the word "factor", ruled as the established
+display noun the library's own "Factor grades" card already prints. `veteran-compare` full
+file: 5 passed, 7 failed, the seven classified above as pre-existing.
+
+**Evidence.** `.scratch-uma/hfw-parity-2026-11-01/` holds 16 HFW and 16 app baseline PNGs
+at 1280x2000, the fixture builder and capture harness, and `README.md` with the routes and
+run ids. Fixtures: 7 veterans, 67 candidates, 559 support cards, 1,910 skills; runs #8 ura
+Active, #11 unity_cup, #12 trackblazer and #13 our_grand_concert, the last two created
+through `/training-runs/create` because no seeder carries those scenarios.
