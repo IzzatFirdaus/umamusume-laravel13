@@ -1,5 +1,12 @@
 import { test, expect } from '@playwright/test';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { PAGE_MARKERS, assertStructurallyEqual, capture } from './fixtures/hfw-structure';
 import { buildAxe, openAllDisclosures } from '../utils/accessibility';
+
+const WIREFRAME = pathToFileURL(
+    resolve('docs/design-research/frontend-v2-wireframes/skills.html'),
+).href;
 
 // Rendered-copy evidence for the ported Skills screens (SCR-SKL-001/002, ADR-0020 §1). The
 // server-side tests (SkillSearchScreenTest, SkillDetailTest) assert the resolved props; these
@@ -408,4 +415,36 @@ test('returns to the filtered list with its query intact', async ({ page }) => {
     await expect(page).toHaveURL(/\/skills\?.*search=lookatcurren.*unique=1/);
     await expect(page.getByLabel('Search')).toHaveValue('lookatcurren');
     await expect(page.getByLabel('Unique')).toHaveValue('1');
+});
+
+/*
+ * Structural parity for SCR-SKL-001 (`/skills`) against `skills.html`, the same instrument
+ * `veterans-parity.spec.ts` runs for the library: ordered markers resolved from `data-region`
+ * first and the ported class tokens second, so the comparison survives a font metric or a
+ * padding change and a missing block does not.
+ *
+ * The wireframe's filter row carries four `.field` labels; this catalogue carries three. The
+ * fourth is the Distance facet, refused at `SkillCatalog.vue:12`: distance exists only inside
+ * the condition tokens, so a picker over it would be a control the server cannot answer, and the
+ * page footer states the absence. That refusal is asserted as a count of its own rather than
+ * folded into a weakened comparison mode, so the day a distance column lands, the fourth field is
+ * the failure that says so.
+ */
+test('renders the wireframe regions in the wireframe order at 1280', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/skills', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const app = await capture(page, 'main', { markers: PAGE_MARKERS });
+
+    expect(app.regions.filter((marker) => marker === 'field'), 'search, type and unique').toHaveLength(3);
+
+    await page.goto(WIREFRAME);
+    const hfw = await capture(page, '.canvas', { markers: PAGE_MARKERS });
+
+    assertStructurallyEqual(
+        app,
+        { ...hfw, regions: hfw.regions.filter((marker) => marker !== 'field') },
+        { regions: 'subset', grid: false },
+    );
 });

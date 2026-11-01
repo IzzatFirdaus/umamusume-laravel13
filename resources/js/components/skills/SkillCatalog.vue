@@ -144,12 +144,13 @@ const engineCondition = (skill: Skill): string =>
         <h2 v-if="props.heading" class="text-lg font-semibold text-ink-strong">{{ props.heading }}</h2>
 
         <form
+            data-region="filters"
             class="flex flex-wrap items-end gap-3"
             :class="props.heading ? 'mt-3' : ''"
             :aria-busy="loading ? 'true' : null"
             @submit.prevent="applyFilters"
         >
-            <label class="flex min-w-0 flex-1 basis-64 flex-col gap-1 text-xs font-semibold text-ink-muted">
+            <label data-region="field" class="flex min-w-0 flex-1 basis-64 flex-col gap-1 text-xs font-semibold text-ink-muted">
                 Search
                 <BaseInput
                     id="skill-search"
@@ -160,7 +161,7 @@ const engineCondition = (skill: Skill): string =>
                     :error="errors.search"
                 />
             </label>
-            <label class="flex flex-col gap-1 text-xs font-semibold text-ink-muted">
+            <label data-region="field" class="flex flex-col gap-1 text-xs font-semibold text-ink-muted">
                 Unique
                 <BaseSelect
                     id="skill-unique"
@@ -171,7 +172,7 @@ const engineCondition = (skill: Skill): string =>
                     @update:model-value="unique = facet($event)"
                 />
             </label>
-            <label class="flex flex-col gap-1 text-xs font-semibold text-ink-muted">
+            <label data-region="field" class="flex flex-col gap-1 text-xs font-semibold text-ink-muted">
                 Type
                 <BaseSelect
                     id="skill-type"
