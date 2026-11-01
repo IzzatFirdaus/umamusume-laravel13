@@ -1,5 +1,12 @@
 import { test, expect } from '@playwright/test';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+import { PAGE_MARKERS, assertStructurallyEqual, capture } from './fixtures/hfw-structure';
 import { buildAxe, openAllDisclosures } from '../utils/accessibility';
+
+const WIREFRAME = pathToFileURL(
+    resolve('docs/design-research/frontend-v2-wireframes/support-cards.html'),
+).href;
 
 // Rendered-copy evidence for the ported support-card screens (SCR-SUP-001/002, ADR-0020 §1). The
 // server-side tests (SupportCardPageTest) assert the resolved props; these assert what the browser
@@ -406,4 +413,32 @@ test('the support-card detail passes an axe scan at WCAG A and AA', async ({ pag
     await openAllDisclosures(page);
     const results = await buildAxe(page).analyze();
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+
+/*
+ * Structural parity for SCR-SUP-001 (`/support-cards`) against `support-cards.html`, the instrument
+ * `veterans-parity.spec.ts` runs for the library.
+ *
+ * It asks for a longer page than the default on purpose. `SupportCardController::index()` renders five
+ * rows, a deliberate choice documented at its own call site, while the wireframe draws seven. Compared
+ * row for row the page would report four markers missing and the sweep's subsequence check would then
+ * cascade every later marker with them, which is a page-length artifact rather than a missing block.
+ * `?pageSize=20` is the URL the controller already honours, so the comparison measures the structure
+ * instead of the row count.
+ */
+test('renders the wireframe regions in the wireframe order at 1280', async ({ page }) => {
+    await page.setViewportSize({ width: 1280, height: 900 });
+    await page.goto('/support-cards?pageSize=20', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const app = await capture(page, 'main', { markers: PAGE_MARKERS });
+
+    // A parity case on an unpopulated page passes by measuring nothing, so the list is proved
+    // non-empty before anything is compared.
+    expect(app.regions.length, 'the catalogue rendered rows').toBeGreaterThan(0);
+
+    await page.goto(WIREFRAME);
+    const hfw = await capture(page, '.canvas', { markers: PAGE_MARKERS });
+
+    assertStructurallyEqual(app, hfw, { regions: 'subset', grid: false });
 });

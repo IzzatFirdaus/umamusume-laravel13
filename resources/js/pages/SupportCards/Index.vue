@@ -175,62 +175,73 @@ const isPal = (card: Card): boolean => card.type === 'friend';
              The Type/Rarity pair was reversed until R6 while this comment claimed the wireframe's
              order — corrected in both places together. -->
         <form
+            data-region="filters"
             class="flex flex-wrap items-end gap-3"
             :aria-busy="loading ? 'true' : null"
             @submit.prevent="applyFilters"
         >
-            <BaseInput
-                id="support-card-q"
-                v-model="q"
-                name="q"
-                type="search"
-                label="Search"
-                placeholder="Card name"
-                :error="errors.q"
-            />
+            <div data-region="field">
+                <BaseInput
+                    id="support-card-q"
+                    v-model="q"
+                    name="q"
+                    type="search"
+                    label="Search"
+                    placeholder="Card name"
+                    :error="errors.q"
+                />
+            </div>
             <!-- Type BEFORE Rarity, which is the wireframe's order (`support-cards.html:73-77`:
                  Search, Type, Rarity, Server, Clear). The page shipped them the other way round while
                  its own comment claimed it was "in the wireframe's order" — the comment was the
                  defect, so the order is corrected here and the comment with it. -->
-            <BaseSelect
-                id="support-card-type"
-                v-model="type"
-                name="type"
-                label="Type"
-                :options="[{ value: '', label: 'All' }, ...Object.entries(props.typeWords).map(([value, word]) => ({ value, label: word }))]"
-                placeholder="All"
-                :error="errors.type"
-            />
-            <BaseSelect
-                id="support-card-rarity"
-                v-model="rarity"
-                name="rarity"
-                label="Rarity"
-                :options="[{ value: '', label: 'All' }, ...Object.entries(props.rarityWords).map(([value, word]) => ({ value, label: word }))]"
-                placeholder="All"
-                :error="errors.rarity"
-            />
+            <div data-region="field">
+                <BaseSelect
+                    id="support-card-type"
+                    v-model="type"
+                    name="type"
+                    label="Type"
+                    :options="[{ value: '', label: 'All' }, ...Object.entries(props.typeWords).map(([value, word]) => ({ value, label: word }))]"
+                    placeholder="All"
+                    :error="errors.type"
+                />
+            </div>
+            <div data-region="field">
+                <BaseSelect
+                    id="support-card-rarity"
+                    v-model="rarity"
+                    name="rarity"
+                    label="Rarity"
+                    :options="[{ value: '', label: 'All' }, ...Object.entries(props.rarityWords).map(([value, word]) => ({ value, label: word }))]"
+                    placeholder="All"
+                    :error="errors.rarity"
+                />
+            </div>
             <!-- The wireframe's Server facet: Global or JP, Global selected, no all-servers option.
                  The table then does not repeat availability on every row, because the list is
                  already one server's. -->
-            <BaseSelect
-                id="support-card-server"
-                v-model="server"
-                name="server"
-                label="Server"
-                :options="props.servers.map((option) => ({ value: option, label: option }))"
-                placeholder="Global"
-                :error="errors.server"
-            />
-            <BaseSelect
-                id="support-card-sort"
-                v-model="sort"
-                name="sort"
-                label="Sort by"
-                :options="[{ value: '', label: 'Name' }, ...Object.entries(props.sorts).map(([value, label]) => ({ value, label }))]"
-                placeholder="Name"
-                :error="errors.sort"
-            />
+            <div data-region="field">
+                <BaseSelect
+                    id="support-card-server"
+                    v-model="server"
+                    name="server"
+                    label="Server"
+                    :options="props.servers.map((option) => ({ value: option, label: option }))"
+                    placeholder="Global"
+                    :error="errors.server"
+                />
+            </div>
+            <div data-region="field">
+                <BaseSelect
+                    id="support-card-sort"
+                    v-model="sort"
+                    name="sort"
+                    label="Sort by"
+                    :options="[{ value: '', label: 'Name' }, ...Object.entries(props.sorts).map(([value, label]) => ({ value, label }))]"
+                    placeholder="Name"
+                    :error="errors.sort"
+                />
+            </div>
             <BaseButton type="submit" variant="primary" size="md" :loading="loading">
                 Filter
             </BaseButton>
@@ -277,7 +288,7 @@ const isPal = (card: Card): boolean => card.type === 'friend';
                     <!-- The row id is the spec's and the pager's anchor: the table body is the list. -->
                     <tbody id="support-card-results">
                         <tr v-for="card in props.cards.data" :key="card.id" class="last:border-b-0">
-                            <td :class="td">
+                            <td :class="td" data-region="slot">
                                 <span class="flex items-center gap-2">
                                     <!-- The one clickable frame of the ported pages: it leads to the same
                                          place the name beside it does, and its accessible name is the row's
@@ -300,7 +311,7 @@ const isPal = (card: Card): boolean => card.type === 'friend';
                                     </span>
                                 </span>
                             </td>
-                            <td :class="td">
+                            <td :class="td" data-region="type-chip">
                                 <SupportTypeMark :type="card.type" :label="card.type_label" />
                             </td>
                             <td :class="td">
@@ -372,7 +383,7 @@ const isPal = (card: Card): boolean => card.type === 'friend';
                         </thead>
                         <tbody>
                             <tr v-for="row in props.typeCounts" :key="row.type">
-                                <td :class="td">
+                                <td :class="td" data-region="type-chip">
                                     <SupportTypeMark :type="row.type" :label="row.label" />
                                 </td>
                                 <td :class="tdNum">{{ row.r }} / {{ row.sr }} / {{ row.ssr }}</td>
