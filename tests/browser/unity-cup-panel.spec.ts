@@ -40,6 +40,16 @@ async function openUnityCupCockpit(page: import('@playwright/test').Page): Promi
 
     await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
+
+    // The scenario panels render inside a closed `scenario-detail` disclosure: no cockpit HFW draws
+    // them, so the visible page is the wireframe's. A case that reads a panel opens it first.
+    const detail = page.locator('details[data-region="scenario-detail"]');
+    if ((await detail.count()) > 0) {
+        const open = await detail.first().evaluate((el) => (el as HTMLDetailsElement).open);
+        if (!open) {
+            await detail.first().locator('summary').first().click();
+        }
+    }
 }
 
 test('renders the configured burst bands, their payout timing and the Extreme caveat', async ({ page }) => {
@@ -147,10 +157,13 @@ test('reaches the panel by keyboard without adding a control or trapping focus',
     // the guard measures what a stop can *do*, not how many there are. Measured this pass: the region's
     // only links are `TeamRankLadderPanel`'s "Record this race" rows, every one of them navigating to the
     // run's own races screen; its only other focusable node is `ProvenanceMark`'s `role="img"` mark, which
-    // opens a tooltip and acts on nothing; and its only disclosure is `AbsenceValue`'s.
+    // opens a tooltip and acts on nothing; and its only panel disclosure is `AbsenceValue`'s. The shell's
+    // own `scenario-detail` wrapper hosts the panel, so it is not a control the panel added.
     await expect(section.locator('input, select, textarea, button')).toHaveCount(0);
     await expect(section.locator('[tabindex]:not([role="img"])')).toHaveCount(0);
-    await expect(section.locator('details:not(:has(> summary:has-text("N/A")))')).toHaveCount(0);
+    await expect(
+        section.locator('details:not([data-region="scenario-detail"]):not(:has(> summary:has-text("N/A")))'),
+    ).toHaveCount(0);
 
     const links = section.locator('a');
     const linkCount = await links.count();
@@ -275,12 +288,15 @@ test('draws the five team race categories as a table with the published ask and 
     await expect(board.getByText(/No column records who this run fields/i)).toBeVisible();
 
     // The ruling, measured, as amended 2026-10-25 (owner ruling R3): the region adds no form control, its
-    // only disclosures are `AbsenceValue`'s, and its only other focusable node is `ProvenanceMark`'s
-    // `role="img"` mark. The board itself adds neither, which is the claim this case owns.
+    // only panel disclosures are `AbsenceValue`'s (the shell's `scenario-detail` wrapper hosts the panel and
+    // is not one), and its only other focusable node is `ProvenanceMark`'s `role="img"` mark. The board
+    // itself adds neither, which is the claim this case owns.
     const region = page.getByRole('region', { name: 'Scenario' });
     await expect(region.locator('input, select, textarea, button')).toHaveCount(0);
     await expect(region.locator('[tabindex]:not([role="img"])')).toHaveCount(0);
-    await expect(region.locator('details:not(:has(> summary:has-text("N/A")))')).toHaveCount(0);
+    await expect(
+        region.locator('details:not([data-region="scenario-detail"]):not(:has(> summary:has-text("N/A")))'),
+    ).toHaveCount(0);
     await expect(board.locator('a, button, input, select, textarea, details, [tabindex]')).toHaveCount(0);
 });
 

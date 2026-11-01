@@ -302,7 +302,7 @@ test('puts the obligations table below the recommendation, as the wireframe draw
 
         return {
             afterRecommendation: follows(recommendation),
-            afterPriority: priority === null ? null : follows(priority),
+            afterPriority: priority === undefined ? null : follows(priority),
         };
     });
 
