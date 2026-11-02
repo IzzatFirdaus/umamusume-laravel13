@@ -64,6 +64,23 @@ test.describe('Snapshot entry', () => {
         await expect(page.getByRole('heading', { name: 'Scenario', level: 2 })).toBeVisible();
     });
 
+    test('offers Review only after a snapshot has been entered', async ({ page }) => {
+        // AUD-20261102-007 F-01: the Review step is a read-back, so it is not a door until a draft
+        // exists. A first visit states the remedy rather than leading to an empty read-back.
+        await hydrate(page, '/career/snapshot');
+
+        const steps = page.getByRole('navigation', { name: 'Snapshot steps' });
+        await expect(steps.getByRole('link', { name: 'Review' })).toHaveCount(0);
+        await expect(steps.getByRole('button', { name: 'Review' })).toBeDisabled();
+        await expect(page.getByText('Enter at least one record to continue.')).toBeVisible();
+
+        // A filled setup parks the draft for review, and the same step becomes a link.
+        await fillSetupAndReview(page);
+        await hydrate(page, '/career/snapshot');
+        await expect(steps.getByRole('link', { name: 'Review' })).toBeVisible();
+        await expect(page.getByText('Enter at least one record to continue.')).toHaveCount(0);
+    });
+
     test('passes the axe A + AA scan', async ({ page }) => {
         await hydrate(page, '/career/snapshot');
         const results = await buildAxe(page).analyze();

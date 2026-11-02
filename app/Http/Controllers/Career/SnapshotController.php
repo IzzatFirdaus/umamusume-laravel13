@@ -50,9 +50,16 @@ class SnapshotController extends Controller
         'skill_points' => 'Skill Points',
     ];
 
-    public function entry(): Response
+    public function entry(Request $request): Response
     {
-        return Inertia::render('Career/Snapshot/Entry');
+        $draft = $request->session()->get('career.snapshot.draft');
+
+        return Inertia::render('Career/Snapshot/Entry', [
+            // The stepper's Review door is gated on a parked draft: Review reads back what Setup
+            // parked, so an Entry visit before any record has nothing to read back
+            // (AUD-20261102-007 F-01).
+            'hasDraft' => is_array($draft) && $draft !== [],
+        ]);
     }
 
     public function setup(Request $request): Response

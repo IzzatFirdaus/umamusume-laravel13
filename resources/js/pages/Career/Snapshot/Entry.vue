@@ -8,6 +8,10 @@ import { Head } from '@inertiajs/vue3';
  * them down a wizard whose first step assumes turn 1. The setup form is the next screen and does the
  * work; this one only says what the door is for.
  */
+const props = defineProps<{
+    /** Whether a snapshot has been parked for review; the Review step is a read-back, not an entry. */
+    hasDraft: boolean;
+}>();
 </script>
 
 <template>
@@ -15,12 +19,28 @@ import { Head } from '@inertiajs/vue3';
         <Head title="Start from existing snapshot" />
         <template #title>Start from existing snapshot</template>
 
-        <!-- The HFW's snapshot stepper: Entry is live, Setup and Review are the links forward. -->
+        <!-- The HFW's snapshot stepper: Entry is live, Setup is the link forward. Review is a
+             read-back of a parked draft, so it is not offered as a door until one exists
+             (AUD-20261102-007 F-01). -->
         <nav aria-label="Snapshot steps" class="flex flex-wrap items-center gap-2 text-sm">
             <span aria-current="step" class="inline-flex min-h-11 items-center rounded-full border-2 border-pick-line bg-green-tint px-3 font-bold text-ink-strong">Entry</span>
             <a href="/career/snapshot/setup" class="inline-flex min-h-11 items-center rounded-full border border-rule px-3 font-medium text-ink hover:bg-raised">Setup</a>
-            <a href="/career/snapshot/review" class="inline-flex min-h-11 items-center rounded-full border border-rule px-3 font-medium text-ink hover:bg-raised">Review</a>
+            <a
+                v-if="props.hasDraft"
+                href="/career/snapshot/review"
+                class="inline-flex min-h-11 items-center rounded-full border border-rule px-3 font-medium text-ink hover:bg-raised"
+            >Review</a>
+            <button
+                v-else
+                type="button"
+                disabled
+                aria-describedby="snapshot-review-hint"
+                class="inline-flex min-h-11 cursor-not-allowed items-center rounded-full border border-dashed border-rule px-3 font-medium text-ink-muted"
+            >Review</button>
         </nav>
+        <p v-if="!props.hasDraft" id="snapshot-review-hint" class="mt-2 text-xs text-ink-muted">
+            Enter at least one record to continue.
+        </p>
 
         <section aria-labelledby="snapshot-entry-heading" class="card mt-3.5 max-w-3xl">
             <h2 id="snapshot-entry-heading" class="text-lg font-semibold text-ink-strong">
