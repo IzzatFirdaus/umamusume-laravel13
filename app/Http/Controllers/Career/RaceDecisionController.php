@@ -203,6 +203,8 @@ class RaceDecisionController extends Controller
             // Whether the row's own columns describe the race at all, so the shared card can fold a
             // placeholder to one line rather than ten refusals (R2-12, `RaceFacts::describesRace()`).
             'detail_recorded' => RaceFacts::describesRace($slot),
+            'track_name' => $slot->track_name,
+            'entries' => $slot->entries,
             // What the Trainer has already recorded for this slot, or null when they have not
             // reached it. The status is the enum's own value; the word is the enum's, not a label
             // this screen invents.

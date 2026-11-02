@@ -40,6 +40,11 @@ final class RaceFacts
                 $slot->distance_band === null ? null : 'Band names are the export\'s own. The corpus disagrees with itself at the 1400 m line (Game8 calls it Sprint, the export calls it Mile), so the band is printed as the export states it and no band is derived from a metre count.',
             ),
             self::fact('surface', 'Surface', $slot->surface, 'This catalogue row carries no surface.'),
+            self::fact('track', 'Track', $slot->track_name, 'No track name recorded for this slot.'),
+            self::fact('entries', 'Entries', $slot->entries === null ? null : (string) $slot->entries, 'No entry count recorded for this slot.'),
+            self::fact('direction', 'Direction', $slot->direction_label ?? ($slot->direction === null ? null : (string) $slot->direction), 'No direction recorded for this slot.', $slot->direction_label !== null ? 'Decoded label is best-guess (unverified).' : null),
+            self::fact('course', 'Course', $slot->course_label ?? ($slot->course === null ? null : (string) $slot->course), 'No course recorded for this slot.', $slot->course_label !== null ? 'Decoded label is best-guess (unverified).' : null),
+            self::fact('season', 'Season', $slot->season_label ?? ($slot->season === null ? null : (string) $slot->season), 'No season recorded for this slot.', $slot->season_label !== null ? 'Decoded label is best-guess (unverified).' : null),
             self::fact(
                 'running_style',
                 'Running style',
@@ -54,7 +59,7 @@ final class RaceFacts
                     .($slot->fans_gain_curve === null ? ' (none on this row)' : " ({$slot->fans_gain_curve})")
                     .', and no per-placement payout is stored against it.',
             ),
-            self::fact('reward', 'Reward', null, 'No column holds a race reward, and no source in this repository states one per race.'),
+            self::fact('reward', 'Reward', $slot->reward_summary, 'No reward data recorded for this slot.'),
             self::fact('skill_points', 'Skill Points', null, 'No column holds a skill-point payout. The Trainer records what the client paid with the turn, on Training.'),
             self::fact('scenario_reward', 'Scenario reward', null, 'No column holds a scenario reward, and the scenario panels that would state one are not built.'),
             self::fact(
@@ -84,6 +89,7 @@ final class RaceFacts
         return $slot->distance !== null
             || $slot->distance_band !== null
             || $slot->surface !== null
+            || $slot->track_name !== null
             || $slot->hasFanGate()
             || $slot->fanPayout() !== null;
     }

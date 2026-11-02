@@ -18,7 +18,7 @@
  * line, because the calendar holds 410 rows under 304 titles and a row without its position is
  * indistinguishable from its sibling.
  */
-import { Head, router } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import { ref } from 'vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import BaseButton from '../../components/Form/BaseButton.vue';
@@ -273,7 +273,7 @@ function goToPage(page: number): void {
                         <tbody>
                             <tr v-for="slot in props.slots.data" :key="slot.id">
                                 <th scope="row" class="font-semibold text-ink-strong">
-                                    <b>{{ slot.title }}</b>
+                                    <Link :href="`/database/races/${slot.id}`" class="text-ink-strong underline">{{ slot.title }}</Link>
                                     <span
                                         v-if="slotLine(slot) !== ''"
                                         class="block text-xs font-normal text-ink-muted"

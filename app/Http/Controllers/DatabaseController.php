@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Models\RaceCatalogSlot;
 use App\Models\Umamusume;
 use App\Services\PageSize;
+use App\Services\RaceFacts;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -485,6 +486,19 @@ class DatabaseController extends Controller
             // (`database-sources.html:74`), and it is the same recorded value the Scenarios page
             // prints, read from the one place it is written so two screens cannot disagree.
             'matrixVerifiedAt' => (string) config('scenarios.verified_at'),
+        ]);
+    }
+
+    /**
+     * One race slot's own page: the full catalogue row plus its decoded facts.
+     */
+    public function raceDetail(int $id): Response
+    {
+        $slot = RaceCatalogSlot::findOrFail($id);
+
+        return Inertia::render('Database/RaceDetail', [
+            'slot' => $slot,
+            'facts' => RaceFacts::forSlot($slot),
         ]);
     }
 

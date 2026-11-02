@@ -100,10 +100,10 @@ it('prints the payout on the Fan gain row when the row carries one, and names th
             // Fan gain is comparison row 5 and the facts list's own sixth entry.
             ->where('groups.optional.races.0.comparison.5.value', '1st: 6,700 / 2nd: 2,680 / 3rd: 1,340')
             ->where('groups.optional.races.0.comparison.5.title', null)
-            ->where('groups.optional.races.0.facts.5.key', 'fan_gain')
-            ->where('groups.optional.races.0.facts.5.value', '1st: 6,700 / 2nd: 2,680 / 3rd: 1,340')
+            ->where('groups.optional.races.0.facts.10.key', 'fan_gain')
+            ->where('groups.optional.races.0.facts.10.value', '1st: 6,700 / 2nd: 2,680 / 3rd: 1,340')
             // Absent, with the reason, rather than a zero that would read as "pays nothing".
             ->where('groups.upcoming.races.0.comparison.5.value', null)
             ->where('groups.upcoming.races.0.comparison.5.title', fn (string $title): bool => str_contains($title, 'Payout not recorded'))
-            ->where('groups.upcoming.races.0.facts.5.value', null));
+            ->where('groups.upcoming.races.0.facts.10.value', null));
 });
