@@ -1017,7 +1017,9 @@ table.t tr.is-current td {
    the wireframe's `.rule-soft`, as in the section title block it ports. */
 .card > h2 {
     margin:0;
-    font-size:15px;
+    /* 16px: the base tier (DESIGN.md §2.2), not the wireframe's 15px. A utility class cannot
+       override this rule (0,1,1 beats 0,1,0), so the tier is set here. (AUD-20261101-001 F-01) */
+    font-size:16px;
     font-weight:800;
     color:var(--color-ink-strong);
     padding-bottom:9px;
@@ -1736,7 +1738,8 @@ table.t tr.is-current td {
 /* .empty h2: ported from shell.css; resolves to house tokens. */
 .empty h2 {
     margin:0 0 6px;
-    font-size:15px;
+    /* 16px, the base tier — same reason as `.card > h2` above. (AUD-20261101-001 F-01) */
+    font-size:16px;
     font-weight:800;
     color:var(--color-ink-strong);
 }

@@ -3,7 +3,7 @@ import AppLayout from '../layouts/AppLayout.vue';
 import PageHeader from '../components/ui/PageHeader.vue';
 import { LinkButton } from '../components/Form';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, onMounted, onUnmounted, ref } from 'vue';
 import { useVisitState } from '../composables/useVisitState';
 import { useLayout } from '../composables/useLayout';
 import ArtworkSlot from '../components/ArtworkSlot.vue';
@@ -145,7 +145,24 @@ const group = (n: number): string => n.toLocaleString('en-US');
 const totalTurns = computed<number>(() => props.activeCareer?.total_turns ?? 0);
 
 // The 50-minute countdown for an Independent Training session (§1.1.7), computed from the stored
-// completion instant so it is correct on load without a poll. `mm:ss`, clamped at zero.
+// completion instant and advanced once per second so the value actually moves. `mm:ss`, clamped at
+// zero. Cleared on unmount to avoid leaks; guarded by onMounted so it never runs during SSR.
+const now = ref<number>(Date.now());
+let indepTimer: ReturnType<typeof setInterval> | null = null;
+
+onMounted(() => {
+    indepTimer = setInterval(() => {
+        now.value = Date.now();
+    }, 1000);
+});
+
+onUnmounted(() => {
+    if (indepTimer !== null) {
+        clearInterval(indepTimer);
+        indepTimer = null;
+    }
+});
+
 const indepRemaining = computed<string | null>(() => {
     const completes = props.activeCareer?.indep?.completes_at;
 
@@ -153,7 +170,7 @@ const indepRemaining = computed<string | null>(() => {
         return null;
     }
 
-    const seconds = Math.max(0, Math.floor((new Date(completes).getTime() - Date.now()) / 1000));
+    const seconds = Math.max(0, Math.floor((new Date(completes).getTime() - now.value) / 1000));
     const mm = Math.floor(seconds / 60);
     const ss = seconds % 60;
 
@@ -173,14 +190,7 @@ const lede = computed<string>(
         `${props.globalScenarioCount} permanent Global scenario${props.globalScenarioCount === 1 ? '' : 's'}.`,
 );
 
-// The Japanese name and the calendar position, on the one line the wireframe gives them
-// (index.html:80-82: `ライスシャワー · Junior Year · Early January`).
-const careerMeta = computed<string[]>(() => {
-    if (props.activeCareer === null) return [];
-    return [props.activeCareer.trainee_ja, props.activeCareer.position_label].filter(
-        (part): part is string => part !== null && part !== '',
-    );
-});
+
 
 /*
  * The note under the tiles (index.html:102-107). One paragraph, in the wireframe's order:
@@ -215,8 +225,8 @@ const careerNote = computed<string | null>(() => {
 
     const numbers =
         cockpit === null
-            ? `The strip here counts ${recorded} recorded turn${recorded === 1 ? '' : 's'}, and this run's cockpit has no imported position to report.`
-            : `This run's cockpit reports turn ${cockpit} from its imported position; the strip here counts ${recorded} recorded turn${recorded === 1 ? '' : 's'}.`;
+            ? `recorded turns: ${recorded}; imported position: none.`
+            : `recorded turns: ${recorded}; imported position: ${cockpit}.`;
 
     return `${absence}A turn is counted from the turns recorded, not from the position the run was imported at. ${numbers} Both are labelled, and the disagreement is a known defect, not a rendering choice.`;
 });
@@ -243,7 +253,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
             </PageHeader>
         </template>
 
-        <p v-if="visiting" role="status" class="mb-3 text-sm text-ink-muted">Loading...</p>
+        <p v-if="visiting" role="status" class="mb-3 text-sm text-ink-muted">Loading the page you chose…</p>
 
         <p
             v-if="visitFailed"
@@ -251,10 +261,11 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
             class="mb-3 rounded-sm border border-risk bg-raised px-3 py-2 text-sm text-ink"
         >
             That page could not be loaded. Try again, or open it from the navigation.
+            <button type="button" class="ml-2 underline" @click="router.reload()">Try again</button>
         </p>
 
         <div v-if="allCardsHidden" role="region" aria-labelledby="dashboard-empty-heading" class="card">
-            <h2 id="dashboard-empty-heading">No cards are shown on the Trainer Desk.</h2>
+            <h2 id="dashboard-empty-heading" class="text-base">No cards are shown on the Trainer Desk.</h2>
             <p class="text-sm text-ink-muted">
                 <span class="font-semibold text-ink">Settings &gt; General &gt; Show on Dashboard</span>
                 names the toggles.
@@ -272,7 +283,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                     class="card"
                     data-card="active_career"
                 >
-                    <h2 id="pickup-heading">Pick up where you left off</h2>
+                    <h2 id="pickup-heading" class="text-base">Pick up where you left off</h2>
 
                     <!-- One row: the frame, the name block, and the one filled action on the page
                          (index.html:74-85, `display:flex; align-items:center; gap:16px`). The button
@@ -287,12 +298,14 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                         />
                         <div class="min-w-0 flex-[1_1_250px]">
                             <p class="flex flex-wrap items-center gap-2">
-                                <span class="text-[19px] font-extrabold leading-tight text-ink-strong">{{ props.activeCareer.trainee }}</span>
+                                <span class="text-lg font-extrabold leading-tight text-ink-strong">{{ props.activeCareer.trainee }}</span>
                                 <Pill tone="accent">{{ props.activeCareer.scenario_label }}</Pill>
                             </p>
-                            <p class="mt-[3px] text-[12.5px] text-ink-muted">
-                                <template v-if="careerMeta.length">
-                                    {{ careerMeta.join(' · ') }}
+                            <p class="mt-[3px] text-xs text-ink-muted">
+                                <template v-if="props.activeCareer.trainee_ja || props.activeCareer.position_label">
+                                    <span v-if="props.activeCareer.trainee_ja" lang="ja">{{ props.activeCareer.trainee_ja }}</span>
+                                    <template v-if="props.activeCareer.trainee_ja && props.activeCareer.position_label"> · </template>
+                                    <span v-if="props.activeCareer.position_label">{{ props.activeCareer.position_label }}</span>
                                 </template>
                                 <AbsenceValue
                                     v-else
@@ -333,6 +346,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                             label="Turn"
                             :value="group(props.activeCareer.turn)"
                             :suffix="'of ' + totalTurns"
+                            :hint="props.activeCareer.cockpit_turn !== null && props.activeCareer.cockpit_turn !== props.activeCareer.turn ? `Imported position: ${props.activeCareer.cockpit_turn}` : undefined"
                             data-tile="turn"
                         />
                         <Tile
@@ -371,12 +385,13 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                     class="card"
                     data-card="active_career"
                 >
-                    <h2 id="pickup-empty-heading">Pick up where you left off</h2>
+                    <h2 id="pickup-empty-heading" class="text-base">Pick up where you left off</h2>
                     <p class="text-sm font-semibold text-ink-strong">Not recorded: no career is running.</p>
-                    <p class="mt-1 text-[12.5px] text-ink-muted">
+                    <p class="mt-1 text-xs text-ink-muted">
                         Start a career to track turns, Energy and race record in one place, or import one
                         you have already started in the client.
                     </p>
+                    <p class="mt-1 text-xs text-ink-muted">A running career shows the trainee, the turn, Energy, Mood and Skill Points.</p>
                     <div class="mt-3 flex flex-wrap items-center gap-3">
                         <!-- Nothing to resume is the one state where the head's outline is not enough:
                              there is no resume card to carry the accent, so "Start a career" takes it. -->
@@ -391,26 +406,27 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                 <!-- The wireframe's three stacked tiles (index.html:110-130): `.k` key, a 14px value,
                      a muted subline, and one underlined door each. -->
                 <section
-                    v-show="!isCardHidden('roster') && !isCardHidden('data_status')"
+                    v-show="!isCardHidden('roster') || !isCardHidden('data_status')"
                     role="region"
                     aria-labelledby="needs-you-heading"
                     class="card"
                     data-card="needs_you"
                 >
-                    <h2 id="needs-you-heading">Needs you</h2>
+                    <h2 id="needs-you-heading" class="text-base">Needs you</h2>
                     <div class="flex flex-col gap-[9px]">
                         <!-- The risk edge reads the `stale` flag, not the word (index.html:113). -->
                         <div
+                            v-show="!isCardHidden('data_status')"
                             class="flex items-center justify-between gap-3 rounded-sm border border-rule bg-raised px-2.5 py-2"
                             :class="props.needsYou.dataStatus.stale ? 'border-l-[3px] border-l-risk' : ''"
                             data-needs-you="data_status"
                         >
                             <div class="min-w-0">
-                                <div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Data status</div>
-                                <div class="text-[14px] font-extrabold leading-[1.3] text-ink-strong">
+                                <div class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Data status</div>
+                                <div class="text-sm font-extrabold leading-[1.3] text-ink-strong">
                                     {{ props.needsYou.dataStatus.label }} &middot; {{ props.needsYou.dataStatus.state }}
                                 </div>
-                                <p class="text-[11.5px] text-ink-muted">
+                                <p class="text-xs text-ink-muted">
                                     <template v-if="props.needsYou.dataStatus.verified_at">
                                         Verified {{ props.needsYou.dataStatus.verified_at }} &middot; {{ props.needsYou.dataStatus.source }}
                                     </template>
@@ -423,7 +439,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                             </div>
                             <Link
                                 href="/database/sources"
-                                class="inline-flex min-h-11 shrink-0 items-center text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
+                                class="inline-flex min-h-11 shrink-0 items-center text-xs text-ink-strong underline underline-offset-2 hover:decoration-2"
                             >Source ledger</Link>
                         </div>
 
@@ -432,24 +448,25 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                             data-needs-you="veterans"
                         >
                             <div class="min-w-0">
-                                <div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Veterans</div>
-                                <div class="text-[14px] font-extrabold leading-[1.3] text-ink-strong">
+                                <div class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Veterans</div>
+                                <div class="text-sm font-extrabold leading-[1.3] text-ink-strong">
                                     {{ group(props.needsYou.veteranCount) }} banked
                                 </div>
                             </div>
                             <Link
                                 :href="props.recentVeterans.library_url"
-                                class="inline-flex min-h-11 shrink-0 items-center text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
+                                class="inline-flex min-h-11 shrink-0 items-center text-xs text-ink-strong underline underline-offset-2 hover:decoration-2"
                             >Open the library</Link>
                         </div>
 
                         <div
+                            v-show="!isCardHidden('roster')"
                             class="flex items-center justify-between gap-3 rounded-sm border border-rule bg-raised px-2.5 py-2"
                             data-needs-you="review"
                         >
                             <div class="min-w-0">
-                                <div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Review queue</div>
-                                <div class="text-[14px] font-extrabold leading-[1.3] text-ink-strong">
+                                <div class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Review queue</div>
+                                <div class="text-sm font-extrabold leading-[1.3] text-ink-strong">
                                     <template v-if="props.needsYou.reviewPending > 0">
                                         {{ group(props.needsYou.reviewPending) }} pending {{ props.needsYou.reviewPending === 1 ? 'match' : 'matches' }}
                                     </template>
@@ -461,7 +478,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                             </div>
                             <Link
                                 href="/review"
-                                class="inline-flex min-h-11 shrink-0 items-center text-[12px] text-ink-strong underline underline-offset-2 hover:decoration-2"
+                                class="inline-flex min-h-11 shrink-0 items-center text-xs text-ink-strong underline underline-offset-2 hover:decoration-2"
                             >Open review</Link>
                         </div>
                     </div>
@@ -473,38 +490,39 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                  because it is the figure the resume card above features. -->
             <div class="grid gap-3.5 g-4" data-dashboard-row="kpi">
                 <section class="card" aria-labelledby="kpi-careers-heading" data-card="kpi_careers">
-                    <h2 id="kpi-careers-heading" class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Careers running</h2>
-                    <p class="text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.careersRunning) }}</p>
-                    <p class="text-[11.5px] text-ink-muted">
-                        <span v-if="props.activeCareer">{{ props.activeCareer.trainee }} &middot; {{ props.activeCareer.scenario_label }}</span>
+                    <h2 id="kpi-careers-heading" class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Careers running</h2>
+                    <p class="text-kpi font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.careersRunning) }}</p>
+                    <p class="text-xs text-ink-muted">
+                        <span v-if="props.activeCareerCount > 1">{{ props.activeCareerCount }} live careers</span>
+                        <span v-else-if="props.activeCareer">{{ props.activeCareer.trainee }} &middot; {{ props.activeCareer.scenario_label }}</span>
                         <span v-else>No career is running.</span>
                     </p>
                 </section>
 
                 <section class="card" aria-labelledby="kpi-trainees-heading" data-card="kpi_trainees">
-                    <h2 id="kpi-trainees-heading" class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Trainees catalogued</h2>
+                    <h2 id="kpi-trainees-heading" class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Trainees catalogued</h2>
                     <!-- The catalogue figure, not the app counter: the wireframe's 71 is what the
                          sourced dataset publishes, and the plan's §7.2 ruling prints it with the
                          catalogue's own door beside it. The door sits on the number's empty right
                          side instead of under it, so the card reads figure-first. -->
                     <div class="flex items-center justify-between gap-3">
-                        <p class="font-mono text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.catalogueTrainees) }}</p>
-                        <Link href="/catalog" class="inline-flex min-h-11 shrink-0 items-center underline underline-offset-2 hover:decoration-2">Browse catalog</Link>
+                        <p class="font-mono text-kpi font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.catalogueTrainees) }}</p>
+                        <Link href="/umamusume" class="inline-flex min-h-11 shrink-0 items-center underline underline-offset-2 hover:decoration-2">Browse catalog</Link>
                     </div>
                 </section>
 
                 <section class="card" aria-labelledby="kpi-skills-heading" data-card="kpi_skills">
-                    <h2 id="kpi-skills-heading" class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Skills</h2>
+                    <h2 id="kpi-skills-heading" class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Skills</h2>
                     <div class="flex items-center justify-between gap-3">
-                        <p class="font-mono text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.skills) }}</p>
+                        <p class="font-mono text-kpi font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.skills) }}</p>
                         <Link href="/skills" class="inline-flex min-h-11 shrink-0 items-center underline underline-offset-2 hover:decoration-2">Skill search</Link>
                     </div>
                 </section>
 
                 <section class="card" aria-labelledby="kpi-support-heading" data-card="kpi_support">
-                    <h2 id="kpi-support-heading" class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Support cards</h2>
+                    <h2 id="kpi-support-heading" class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Support cards</h2>
                     <div class="flex items-center justify-between gap-3">
-                        <p class="font-mono text-[26px] font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.supportCards) }}</p>
+                        <p class="font-mono text-kpi font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.supportCards) }}</p>
                         <Link href="/support-cards" class="inline-flex min-h-11 shrink-0 items-center underline underline-offset-2 hover:decoration-2">Browse cards</Link>
                     </div>
                 </section>
@@ -519,16 +537,19 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                     class="card"
                     data-card="recent_veterans"
                 >
-                    <h2 id="recent-veterans-heading">Recent veterans</h2>
+                    <h2 id="recent-veterans-heading" class="text-base">Recent veterans</h2>
 
+                    <p v-if="props.recentVeterans.rows.length === 0" class="text-sm text-ink-muted">
+                        No veterans banked yet. Finish a run, set it to Completed, and save it from the Legacy Lab.
+                    </p>
                     <div v-if="props.recentVeterans.rows.length" class="overflow-x-auto">
-                        <table class="w-full border-collapse text-[12.5px]">
+                        <table class="w-full border-collapse text-xs">
                             <thead>
                                 <tr>
-                                    <th class="border-b border-rule-soft px-[9px] py-[7px] text-left text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Trainee</th>
-                                    <th class="border-b border-rule-soft px-[9px] py-[7px] text-left text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Scenario</th>
-                                    <th class="border-b border-rule-soft px-[9px] py-[7px] text-left text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Saved</th>
-                                    <th class="border-b border-rule-soft px-[9px] py-[7px] text-right text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted"><span class="sr-only">Open the veteran</span></th>
+                                    <th class="border-b border-rule-soft px-[9px] py-[7px] text-left text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Trainee</th>
+                                    <th class="border-b border-rule-soft px-[9px] py-[7px] text-left text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Scenario</th>
+                                    <th class="border-b border-rule-soft px-[9px] py-[7px] text-left text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Saved</th>
+                                    <th class="border-b border-rule-soft px-[9px] py-[7px] text-right text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted"><span class="sr-only">Open the veteran</span></th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -539,7 +560,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                                             <ArtworkSlot :url="veteran.artworkURL" alt="" size="size-10" reserve />
                                             <span class="min-w-0">
                                                 <b class="font-extrabold text-ink-strong">{{ veteran.trainee }}</b>
-                                                <span v-if="veteran.trainee_ja" class="ml-1 text-ink-muted">{{ veteran.trainee_ja }}</span>
+                                                <span v-if="veteran.trainee_ja" class="ml-1 text-ink-muted" lang="ja">{{ veteran.trainee_ja }}</span>
                                             </span>
                                         </span>
                                     </td>
@@ -561,7 +582,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                          rest. The count on the left is the payload's own total, so it cannot drift
                          from the library it links to. -->
                     <div class="mt-3 flex flex-wrap items-center justify-between gap-2">
-                        <span class="text-[12px] text-ink-muted">
+                        <span class="text-xs text-ink-muted">
                             {{ group(props.recentVeterans.total) }} veteran{{ props.recentVeterans.total === 1 ? '' : 's' }}
                             &middot; {{ veteransShown }} shown
                         </span>
@@ -576,7 +597,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                     class="card"
                     data-card="quick_actions"
                 >
-                    <h2 id="quick-actions-heading">Quick actions</h2>
+                    <h2 id="quick-actions-heading" class="text-base">Quick actions</h2>
                     <!-- Four outline buttons, full width, label centred (index.html:178-183). The
                          wireframe draws no marks here; the rail already carries one per destination,
                          and a second icon set on one card would be a second vocabulary for the same
@@ -589,12 +610,11 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                         </ul>
                     </nav>
                     <details class="mt-3">
-                        <summary class="cursor-pointer list-none text-[12.5px] font-semibold text-ink-strong">
+                        <summary class="cursor-pointer list-none text-xs font-semibold text-ink-strong">
                             Why four destinations
                         </summary>
-                        <p class="mt-1.5 text-[12.5px] text-ink-muted">
-                            The running app's sidebar carries ten flat items; this dashboard is the same
-                            set, grouped, with one primary action.
+                        <p class="mt-1.5 text-xs text-ink-muted">
+                            Quick actions group the destinations the sidebar lists, with one primary action per card.
                         </p>
                     </details>
                 </section>
