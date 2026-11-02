@@ -24,7 +24,9 @@ final class GametoraCharacterCardParser implements CharacterCardSourceParser
      *                          rarity: int, global_release_date: string, is_debut_form: bool,
      *                          skills_innate: list<int>, skills_unique: list<int>,
      *                          skills_awakening: list<int>, skills_event: list<int>,
-     *                          skills_evo: list<array{new: int, old: int}>}>
+     *                          skills_evo: list<array{new: int, old: int}>,
+     *                          base_stats: array<string, int>|null,
+     *                          growth_rates: array<string, int>|null}>
      */
     public function parse(string $body): array
     {
@@ -52,16 +54,19 @@ final class GametoraCharacterCardParser implements CharacterCardSourceParser
             }
 
             $globalRelease = GametoraCharacterParser::dateOrNull($card['release_en'] ?? null);
+            $isJapanOnly = $globalRelease === null || $globalRelease === GametoraCharacterParser::UNKNOWN_DATE;
             $cardId = $card['card_id'] ?? null;
             $charId = $card['char_id'] ?? null;
             // The Global client string is `title_en_gl`; `title` is the Japanese-side
             // string and they genuinely differ ("Run! Fun! Watergun!" ships as
             // "[RUN! RUIN! LAUNCHER!]"). No fallback chain between them: reading the
             // wrong one is a silent data error, and a chain hides that it happened.
-            $title = $card['title_en_gl'] ?? null;
-
-            if ($globalRelease === null || $globalRelease === GametoraCharacterParser::UNKNOWN_DATE) {
-                continue;
+            // For Japan-only cards `title_en_gl` is absent, so the Japanese `title`
+            // is the only name the card has.
+            if ($isJapanOnly) {
+                $title = $card['title'] ?? null;
+            } else {
+                $title = $card['title_en_gl'] ?? null;
             }
 
             if (! is_numeric($cardId) || ! is_numeric($charId)) {
@@ -98,6 +103,8 @@ final class GametoraCharacterCardParser implements CharacterCardSourceParser
                 'skills_awakening' => $this->intList($card['skills_awakening'] ?? null),
                 'skills_event' => $this->intList($card['skills_event'] ?? null),
                 'skills_evo' => $this->evoPairs($card['skills_evo'] ?? null),
+                'base_stats' => $this->keyedStats($card['base_stats'] ?? null),
+                'growth_rates' => $this->keyedStats($card['stat_bonus'] ?? null),
             ];
         }
 
@@ -186,5 +193,35 @@ final class GametoraCharacterCardParser implements CharacterCardSourceParser
         }
 
         return $ids;
+    }
+
+    /**
+     * Convert a positional 5-int list to a keyed object, or null when malformed.
+     *
+     * The source publishes stats in canonical order [Speed, Stamina, Power, Guts, Wit].
+     * Storage uses keyed objects so rendering is order-independent of config('scenarios.stat_order').
+     *
+     * @return array<string, int>|null
+     */
+    private function keyedStats(mixed $value): ?array
+    {
+        if (! is_array($value) || count($value) !== 5) {
+            return null;
+        }
+
+        $keys = ['Speed', 'Stamina', 'Power', 'Guts', 'Wit'];
+        $result = [];
+
+        foreach ($keys as $index => $key) {
+            $item = $value[$index] ?? null;
+
+            if (! is_int($item) && ! (is_string($item) && ctype_digit($item))) {
+                return null;
+            }
+
+            $result[$key] = (int) $item;
+        }
+
+        return $result;
     }
 }

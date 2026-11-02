@@ -101,6 +101,8 @@ final class StoreCharacterCards
                     'skills_awakening' => $record['skills_awakening'],
                     'skills_event' => $record['skills_event'],
                     'skills_evo' => $record['skills_evo'],
+                    'base_stats' => $record['base_stats'] ?? null,
+                    'growth_rates' => $record['growth_rates'] ?? null,
                     ...$this->provenance($url, $snapshotPath, $timezone),
                 ];
 

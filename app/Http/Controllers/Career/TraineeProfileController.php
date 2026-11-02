@@ -126,8 +126,10 @@ class TraineeProfileController extends Controller
                     'rarity_stars' => $card->rarity->stars(),
                     'rarity_word' => $card->rarity->word(),
                     'is_debut_form' => $card->is_debut_form,
-                    'global_release_date' => $card->global_release_date->toDateString(),
-                    'global_release_date_display' => $card->global_release_date->format('M j, Y'),
+                    'global_release_date' => $card->global_release_date?->toDateString(),
+                    'global_release_date_display' => $card->global_release_date?->format('M j, Y'),
+                    'base_stats' => $card->base_stats,
+                    'growth_rates' => $card->growth_rates,
                     'artworkURL' => $mirror->url('card_portrait', (int) $card->card_id),
                     'skillLists' => array_map(function (array $list) use ($resolved): array {
                         $skills = collect($list['ids'])
@@ -183,11 +185,11 @@ class TraineeProfileController extends Controller
             'absences' => [
                 'growth' => [
                     'value' => null,
-                    'absence' => 'No growth figure is stored for any costume form, so no percentage is known for any axis. The client prints the row as five cells and a real zero as +0%; here each cell states N/A so an absent figure is never read as a zero.',
+                    'absence' => 'No growth figure is recorded for this form, so no percentage is known for any axis. The client prints the row as five cells and a real zero as +0%; here each cell states N/A so an absent figure is never read as a zero.',
                 ],
                 'baseStats' => [
                     'value' => null,
-                    'absence' => "No base-stat figure is stored, so none of the five is known before a run exists. The export's five base values sum to 450 for a three-star card, 425 for two stars and 400 for one; those are starting totals, not a ceiling.",
+                    'absence' => "No base-stat figure is recorded for this form, so none of the five is known before a run exists. The export's five base values sum to 450 for a three-star card, 425 for two stars and 400 for one; those are starting totals, not a ceiling.",
                 ],
             ],
         ]);

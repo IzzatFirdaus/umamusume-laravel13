@@ -95,6 +95,8 @@ it('ships exactly the columns the card-layer docs list', function (): void {
         'skills_awakening',
         'skills_event',
         'skills_evo',
+        'base_stats',
+        'growth_rates',
     ]);
 });
 
@@ -160,11 +162,9 @@ it('reads the three card flags as booleans, not as whatever the driver stored', 
         ->and($fetched->is_debut_form)->toBeFalse();
 });
 
-it('refuses a card with no source and no Global date, which are the two rules that make a row a card', function (): void {
-    foreach (['source_url' => null, 'global_release_date' => null] as $column => $value) {
-        expect(fn () => CharacterCard::factory()->create([$column => $value]))
-            ->toThrow(QueryException::class, $column);
-    }
+it('refuses a card with no source, which is the one rule that makes a row a card', function (): void {
+    expect(fn () => CharacterCard::factory()->create(['source_url' => null]))
+        ->toThrow(QueryException::class, 'source_url');
 });
 
 it('orders rarity by the glyph run, since hue cannot rank three near-identical fills', function (): void {

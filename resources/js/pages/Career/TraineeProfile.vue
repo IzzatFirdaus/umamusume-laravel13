@@ -332,11 +332,11 @@ function remainingLetters(group: AptitudeGroup): string {
                     <div class="tiles mt-2" data-field="growth">
                         <div v-for="axis in statAxes" :key="axis" class="tile">
                             <p class="k">{{ axis }}</p>
-                            <p class="v na">N/A</p>
+                            <p class="v" :class="growthRates && growthRates[axis] != null ? '' : 'na'">{{ growthRates && growthRates[axis] != null ? `${growthRates[axis]}%` : 'N/A' }}</p>
                         </div>
                     </div>
 
-                    <p class="note mt-2">
+                    <p v-if="!growthRates" class="note mt-2">
                         <span class="g" aria-hidden="true">○</span>
                         <span class="flex-1">{{ props.absences.growth.absence }}</span>
                     </p>
@@ -378,12 +378,12 @@ function remainingLetters(group: AptitudeGroup): string {
                     <div class="mt-2" data-field="base-stats">
                         <div v-for="axis in statAxes" :key="axis" class="srow">
                             <span class="k">{{ axis }}</span>
-                            <span class="v">N/A</span>
+                            <span class="v">{{ baseStats && baseStats[axis] != null ? baseStats[axis] : 'N/A' }}</span>
                             <div class="track" aria-hidden="true"></div>
                         </div>
                     </div>
 
-                    <p class="note mt-2">
+                    <p v-if="!baseStats" class="note mt-2">
                         <span class="g" aria-hidden="true">○</span>
                         <span class="flex-1">{{ props.absences.baseStats.absence }}</span>
                     </p>

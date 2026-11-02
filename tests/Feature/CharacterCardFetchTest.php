@@ -209,7 +209,7 @@ it('skips every card whose trainee is not in the catalog', function (): void {
     );
 
     // The roster has not cleared the review queue for any of them yet.
-    expect($counts)->toMatchArray(['created' => 0, 'updated' => 0, 'skipped' => 7])
+    expect($counts)->toMatchArray(['created' => 0, 'updated' => 0, 'skipped' => 11])
         ->and(CharacterCard::query()->count())->toBe(0);
 });
 
@@ -294,9 +294,9 @@ it('routes the card source past the match stage and into the card table', functi
         null,
     );
 
-    // Measured, not copied from the plan: the parser emits 7 records for this
-    // fixture, 3 of them Special Week's, so 3 created and 4 skipped.
-    expect($counts)->toMatchArray(['created' => 3, 'updated' => 0, 'skipped' => 4, 'review' => 0])
+    // Measured, not copied from the plan: the parser emits 11 records for this
+    // fixture (7 Global + 4 JP-only), 3 of them Special Week's, so 3 created and 8 skipped.
+    expect($counts)->toMatchArray(['created' => 3, 'updated' => 0, 'skipped' => 8, 'review' => 0])
         // Without the branch this body reaches the match loop, which reads a `name`
         // key card records never carry. Nothing here is ambiguous, so nothing may be
         // filed for a Trainer to adjudicate.
@@ -329,7 +329,7 @@ it('leaves catalog:version alone when no card lands', function (): void {
 
 it('is declared as a fetch source with the card-grain parser', function (): void {
     expect(config('uma.sources.gametora-character-cards'))->toMatchArray([
-        'url' => 'https://gametora.com/data/umamusume/character-cards.e9e9ee6d.json',
+        'url' => 'https://gametora.com/data/umamusume/character-cards.897e63ea.json',
         'delay_ms' => 1000,
         'timeout_s' => 15,
         'timezone' => 'Asia/Tokyo',

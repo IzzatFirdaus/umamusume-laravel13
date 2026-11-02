@@ -24,7 +24,7 @@ use Illuminate\Support\Carbon;
  * @property int $umamusume_id
  * @property string $title verbatim [Global] client string, brackets included
  * @property CardRarity $rarity
- * @property Carbon $global_release_date
+ * @property Carbon|null $global_release_date
  * @property bool $is_debut_form
  * @property bool $unconfirmed not confirmed by two sources; hidden by default
  * @property string $source_url
@@ -38,10 +38,12 @@ use Illuminate\Support\Carbon;
  * @property list<int>|null $skills_event the ids her events grant
  * @property list<array{new: int, old: int}>|null $skills_evo the evolved/base id pairs the source
  *                                                            publishes, `new` replacing `old`
+ * @property array<string, int>|null $base_stats the source's five base values keyed by stat name
+ * @property array<string, int>|null $growth_rates the source's five growth percentages keyed by stat name
  * @property-read Umamusume $umamusume
  */
 #[Table('character_cards')]
-#[Fillable(['card_id', 'umamusume_id', 'title', 'rarity', 'global_release_date', 'is_debut_form', 'unconfirmed', 'source_url', 'snapshot_path', 'fetched_at', 'source_timezone', 'is_manual', 'skills_innate', 'skills_unique', 'skills_awakening', 'skills_event', 'skills_evo'])]
+#[Fillable(['card_id', 'umamusume_id', 'title', 'rarity', 'base_stats', 'growth_rates', 'global_release_date', 'is_debut_form', 'unconfirmed', 'source_url', 'snapshot_path', 'fetched_at', 'source_timezone', 'is_manual', 'skills_innate', 'skills_unique', 'skills_awakening', 'skills_event', 'skills_evo'])]
 class CharacterCard extends Model
 {
     /** @use HasFactory<CharacterCardFactory> */
@@ -59,6 +61,8 @@ class CharacterCard extends Model
     {
         return [
             'rarity' => CardRarity::class,
+            'base_stats' => 'array',
+            'growth_rates' => 'array',
             'global_release_date' => 'date',
             'fetched_at' => 'datetime',
             'is_debut_form' => 'boolean',

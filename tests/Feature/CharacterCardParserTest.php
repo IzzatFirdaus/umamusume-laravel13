@@ -18,20 +18,16 @@ function globalCardBody(): string
     return file_get_contents(base_path('tests/Fixtures/gametora-character-cards.global.sample.json')) ?: '';
 }
 
-it('emits one record per Global card and drops every JP-only one', function (): void {
+it('emits one record per card, Global and Japan-only', function (): void {
     $cardIds = array_column(globalCardRecords(), 'card_id');
 
-    // Eleven rows in, seven with a Global date. The brief said eight; its own
-    // parenthetical names four [JP-Only] forms — Gold Ship's La Mode 564, Tokai
-    // Teio's Dream Butterfly and both Fenomeno forms — and 11 - 4 is 7. That matches
-    // the errata this plan was written from: Special Week has three Global forms and
-    // Gold Ship two (docs/requests/2026-09-29-catalog-roster-and-trainee-selector.md
-    // E-2, E-3), so the fixture carries 3 + 2 + 2.
-    expect($cardIds)->toHaveCount(7)
-        ->and($cardIds)->not->toContain(100703)
-        ->and($cardIds)->not->toContain(100303)
-        ->and($cardIds)->not->toContain(112701)
-        ->and($cardIds)->not->toContain(112702);
+    // Eleven rows in, all parsed: seven Global + four JP-only. JP-only cards carry
+    // the Japanese-side title instead of the Global client string.
+    expect($cardIds)->toHaveCount(11)
+        ->and($cardIds)->toContain(100703)
+        ->and($cardIds)->toContain(100303)
+        ->and($cardIds)->toContain(112701)
+        ->and($cardIds)->toContain(112702);
 });
 
 it('keeps the [Global] client title verbatim, brackets and all', function (): void {
@@ -67,7 +63,7 @@ it('links each card to its trainee by the ref the character parser writes', func
     $records = globalCardRecords();
 
     expect($records[0]['char_external_ref'])->toBe('gametora:char:1001')
-        ->and(array_unique(array_column($records, 'char_external_ref')))->toHaveCount(3);
+        ->and(array_unique(array_column($records, 'char_external_ref')))->toHaveCount(4);
 });
 
 it('derives the debut through the same code path as the character catalog', function (): void {
@@ -97,7 +93,7 @@ it('derives the debut through the same code path as the character catalog', func
             'gametora:char:1007',
             'gametora:char:1127',
         ])
-        ->and(array_column(globalCardRecords(), 'char_external_ref'))->not->toContain('gametora:char:1127');
+        ->and(array_column(globalCardRecords(), 'char_external_ref'))->toContain('gametora:char:1127');
 });
 
 it('returns nothing for a body that is not a JSON array', function (): void {
@@ -105,7 +101,7 @@ it('returns nothing for a body that is not a JSON array', function (): void {
         ->and((new GametoraCharacterCardParser)->parse('{"object":true}'))->toBe([]);
 });
 
-it('skips a row with no usable card id, no client title, or no real Global date', function (): void {
+it('skips a row with no usable card id, no client title, or no title at all', function (): void {
     $body = json_encode([
         ['card_id' => null, 'char_id' => 1001, 'title_en_gl' => '[No Id]', 'rarity' => 3, 'release_en' => '2025-06-26'],
         ['card_id' => 100102, 'char_id' => 1001, 'title_en_gl' => null, 'rarity' => 3, 'release_en' => '2025-10-14'],
