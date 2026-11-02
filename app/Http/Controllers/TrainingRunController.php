@@ -203,7 +203,10 @@ class TrainingRunController extends Controller
                     // Brackets stripped so `RUN` can prefix-match `[RUN! RUIN! LAUNCHER!]`,
                     // whose verbatim string starts with `[`. The label renders `title`.
                     'titleKey' => preg_replace('/^\[|\]$/', '', $c->title) ?? $c->title,
-                    'releaseDate' => $c->global_release_date->toDateString(),
+                    // Nullable since `2026_11_02_112258_make_global_release_date_nullable_on_character_cards`:
+                    // a card the source has not dated is a real state, and an empty string sorts ahead of
+                    // every dated card in the combobox's `localeCompare` order without claiming a date.
+                    'releaseDate' => $c->global_release_date?->toDateString() ?? '',
                     'debut' => $c->is_debut_form,
                 ])->all(),
             ])->all();
