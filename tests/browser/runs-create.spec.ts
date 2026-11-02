@@ -16,7 +16,11 @@ test('heads the page once with the HFW copy, one filled action, and the actions 
     // One h1, and it is the HFW's own line rather than an invented title.
     await expect(page.getByRole('heading', { level: 1 })).toHaveCount(1);
     await expect(page.getByRole('heading', { level: 1 })).toHaveText('Create a career');
-    await expect(page.getByText('New career', { exact: true }).first()).toBeVisible();
+    // One name for the page: the breadcrumb leaf and the browser title carry the same words as the
+    // h1. The rail's own "New Career" destination is a different string and is not this page's name.
+    // (AUD-20261102-017 F-01)
+    await expect(page.getByRole('banner').getByText('Create a career', { exact: true })).toBeVisible();
+    await expect(page).toHaveTitle(/Create a career/);
 
     // Region order: the card's heading is above the trainee field, and the actions sit after it.
     const heading = page.getByRole('heading', { name: 'Career', level: 2 });

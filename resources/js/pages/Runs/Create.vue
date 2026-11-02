@@ -98,11 +98,11 @@ function submit(): void {
 </script>
 
 <template>
-    <AppLayout :breadcrumb="[{ label: 'Careers', href: '/training-runs' }, { label: 'New career' }]">
-        <Head title="New career" />
+    <AppLayout :breadcrumb="[{ label: 'Careers', href: '/training-runs' }, { label: 'Create a career' }]">
+        <Head title="Create a career" />
         <template #head>
             <PageHeader
-                eyebrow="New career"
+                eyebrow="Careers"
                 title="Create a career"
                 description="Trainee and status are required. Scenario, inheritance parents, the Grade Point period, the shop countdown and notes are optional and can be recorded later on the run page."
             >
