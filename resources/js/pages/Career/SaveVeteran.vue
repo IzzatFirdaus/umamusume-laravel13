@@ -192,7 +192,7 @@ function save(): void {
             class="mt-4 rounded-md border border-rule bg-panel p-4"
         >
             <h2 id="blocked-heading" class="text-lg font-semibold text-ink-strong">Nothing to file yet</h2>
-            <p role="alert" class="mt-2 text-sm text-ink">{{ props.blocked }}</p>
+            <p role="status" class="mt-2 text-sm text-ink">{{ props.blocked }}</p>
             <p class="mt-3 flex flex-wrap gap-3 text-sm">
                 <Link href="/training-runs" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-sunken transition-colors duration-150 ease-out">Open the run list</Link>
                 <a :href="props.run_url" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-ink hover:bg-sunken transition-colors duration-150 ease-out">This career's record</a>

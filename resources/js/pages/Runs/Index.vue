@@ -298,6 +298,7 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
                     </LinkButton>
                     <span
                         v-else
+                        aria-disabled="true"
                         class="inline-flex min-h-9 items-center rounded-md border border-rule px-3 text-ink-muted"
                     >Previous</span>
                     <LinkButton v-if="nextLink?.url" :href="nextLink.url" variant="secondary" size="sm">
@@ -305,6 +306,7 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
                     </LinkButton>
                     <span
                         v-else
+                        aria-disabled="true"
                         class="inline-flex min-h-9 items-center rounded-md border border-rule px-3 text-ink-muted"
                     >Next</span>
                 </span>
