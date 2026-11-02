@@ -3,6 +3,11 @@ interface Props {
     label: string;
     variant?: 'info' | 'success' | 'warning' | 'neutral' | 'positive' | 'caution';
     size?: 'sm' | 'md';
+    /**
+     * The stored state value (e.g. `active`), rendered as `data-status` so the pill's meaning is
+     * machine-readable and never carried by colour alone (AUD-20261102-006 F-01).
+     */
+    status?: string;
 }
 
 const props = defineProps<Props>();
@@ -26,6 +31,7 @@ const sizeClasses = {
     <span
         class="pill"
         :class="[variantClasses[props.variant ?? 'neutral'], sizeClasses[props.size ?? 'md']]"
+        :data-status="props.status"
     >
         {{ props.label }}
     </span>

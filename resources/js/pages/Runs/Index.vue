@@ -273,7 +273,12 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
                             </span>
                         </td>
                         <td class="px-3 py-3">
-                            <StatusPill :label="run.status_label" :variant="statusVariant(run.status_label)" size="sm" />
+                            <StatusPill
+                                :label="run.status_label"
+                                :status="run.status"
+                                :variant="statusVariant(run.status_label)"
+                                size="sm"
+                            />
                         </td>
                         <td class="px-4 py-3 text-right">
                             <!-- Annotation 5: no destructive action in the row. Delete stays on the
