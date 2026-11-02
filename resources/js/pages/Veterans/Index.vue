@@ -352,6 +352,10 @@ const factorGrades: { family: string; note: string }[] = [
         >
             <p>The library holds no Veterans yet.</p>
             <p class="mt-1">{{ props.filingNotice }}</p>
+            <p class="mt-1">
+                A filed career shows its trainee, scenario, the sparks the pair carried and the run it
+                came from.
+            </p>
             <a
                 :href="props.file_veteran_url"
                 class="mt-3 inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 font-semibold text-on-primary-action"

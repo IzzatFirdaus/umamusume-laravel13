@@ -284,6 +284,7 @@ const aptitudePill = (race: Race): string => {
                             <td class="py-2 pr-3" :title="race.aptitude.label">
                                 {{ race.surface ?? 'Surface not recorded' }} · {{ race.distance_band ?? 'band not recorded' }}
                                 <span class="pill pill-neutral ml-1 align-[1px]">{{ aptitudePill(race) }}</span>
+                                <span class="sr-only">, the race's aptitude letter for this distance and surface</span>
                             </td>
                             <td class="py-2 pr-3 text-right font-mono">{{ race.fans_needed ?? '-' }}</td>
                             <td class="py-2 pr-3 text-right font-mono">{{ race.payout ? '+' + race.payout.sp : '-' }}</td>
@@ -294,13 +295,18 @@ const aptitudePill = (race: Race): string => {
                                     class="btn btn-primary btn-sm min-h-11"
                                     @click.stop="enterFormFor(race)"
                                 >{{ enterForm.processing ? 'Entering…' : 'Enter' }}</button>
-                                <button
-                                    v-else
-                                    type="button"
-                                    class="btn btn-sm min-h-11"
-                                    disabled
-                                    :title="race.blocked_reason"
-                                >{{ race.maiden_gated ? 'Maiden lock not cleared' : 'Blocked' }}</button>
+                                <template v-else>
+                                    <button
+                                        type="button"
+                                        class="btn btn-sm min-h-11"
+                                        disabled
+                                        :title="race.blocked_reason"
+                                    >{{ race.maiden_gated ? 'Maiden lock not cleared' : 'Blocked' }}</button>
+                                    <!-- The reason was title-only: a Trainer on a touch device, or reading
+                                         with a screen reader, never saw why the door is shut.
+                                         (AUD-20261102-002 F-03) -->
+                                    <span class="mt-1 block text-xs text-ink-muted">{{ race.blocked_reason }}</span>
+                                </template>
                             </td>
                         </tr>
                     </tbody>

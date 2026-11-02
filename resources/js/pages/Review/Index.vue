@@ -190,7 +190,7 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                                             :source-key="candidate.source_key"
                                         />
                                     </template>
-                                    <span v-else class="pill pill-caution">No match</span>
+                                    <span v-else class="pill pill-neutral">No match</span>
                                 </td>
                                 <td :class="[tdNum, 'text-right']">
                                     <!-- `ProvenanceBadge` is the single owner of the state word
