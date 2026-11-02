@@ -38,7 +38,9 @@ export class SnapshotSetupPage {
         await this.page.waitForURL(/\/career\/snapshot\/review/, WRITE);
         await this.page.locator('#app > *').first().waitFor();
 
-        // Confirm on the review screen.
+        // Confirm on the review screen. The commit is final, so the screen refuses until the
+        // no-undo acknowledgement is ticked (AUD-20261102-009 F-01).
+        await this.page.getByLabel('I understand this snapshot cannot be undone.').check();
         await this.page.getByRole('button', { name: 'Record snapshot' }).click();
         await this.page.waitForURL(/\/training-runs\/\d+\/cockpit$/, WRITE);
 

@@ -58,7 +58,15 @@ watch(() => form.hasErrors, (hasErrors) => {
     }
 });
 
+const acknowledged = ref(false);
+
 const submit = (): void => {
+    // The commit is final: no undo follows it, so the acknowledgement is part of the gate
+    // (AUD-20261102-009 F-01).
+    if (!acknowledged.value || !props.has_draft) {
+        return;
+    }
+
     form.post(props.action);
 };
 
@@ -140,10 +148,23 @@ const treatment = (state: string): string => {
             </ul>
         </div>
 
+        <!-- The commit has no undo, so it asks for an explicit acknowledgement first; until then the
+             button refuses (AUD-20261102-009 F-01, the ConfirmDelete pattern). -->
+        <label class="mt-6 flex max-w-3xl items-start gap-2 text-sm">
+            <input
+                id="snapshot-acknowledged"
+                v-model="acknowledged"
+                type="checkbox"
+                class="mt-0.5"
+                required
+            />
+            <span>I understand this snapshot cannot be undone.</span>
+        </label>
+
         <div class="mt-6 flex flex-wrap items-center gap-3">
             <button
                 type="button"
-                :disabled="form.processing || !props.has_draft"
+                :disabled="form.processing || !props.has_draft || !acknowledged"
                 class="inline-flex min-h-11 items-center rounded-md bg-primary-action px-4 text-sm font-bold text-on-primary-action disabled:opacity-60"
                 @click="submit"
             >

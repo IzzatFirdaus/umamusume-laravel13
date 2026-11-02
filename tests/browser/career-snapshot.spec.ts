@@ -218,6 +218,18 @@ test.describe('Snapshot review', () => {
         await expect(page.getByText('No runs yet')).toBeVisible();
     });
 
+    test('refuses the commit until the no-undo acknowledgement is ticked', async ({ page }) => {
+        // AUD-20261102-009 F-01: the commit is final, so the read-back alone is not the gate; the
+        // Trainer must state that they understand it cannot be undone.
+        await fillSetupAndReview(page);
+
+        const commit = page.getByRole('button', { name: 'Record snapshot' });
+        await expect(commit).toBeDisabled();
+
+        await page.getByLabel('I understand this snapshot cannot be undone.').check();
+        await expect(commit).toBeEnabled();
+    });
+
     test('passes the axe A + AA scan', async ({ page }) => {
         await fillSetupAndReview(page);
         const results = await buildAxe(page).analyze();
