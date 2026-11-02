@@ -14,6 +14,7 @@ use App\Actions\StoreSupportEffects;
 use App\Actions\StoreTraineeGoals;
 use App\Enums\CandidateStatus;
 use App\Enums\MatchTier;
+use App\Enums\ReleaseStatus;
 use App\Models\MatchCandidate;
 use App\Services\DataPipeline\Contracts\CharacterCardSourceParser;
 use App\Services\DataPipeline\Contracts\ProfileSourceParser;
@@ -24,6 +25,7 @@ use App\Services\DataPipeline\Contracts\SupportCardSourceParser;
 use App\Services\DataPipeline\Contracts\SupportEffectSourceParser;
 use App\Services\DataPipeline\Contracts\TraineeGoalSourceParser;
 use Illuminate\Support\Facades\Cache;
+use RuntimeException;
 
 /**
  * Parse -> normalize -> match -> promote|review stage runner (PRD FR-B-2).
@@ -253,7 +255,8 @@ final class PipelineRunner
         $counts = ['updated' => 0, 'created' => 0, 'skipped' => 0, 'review' => 0];
 
         foreach ($parser->parse($body) as $record) {
-            $match = $this->matcher->match($record['name']);
+            $match = $this->matcher->match($this->recordName($record, $sourceKey));
+            $recordReleaseStatus = ReleaseStatus::tryFrom((string) ($record['release_status'] ?? ''));
 
             if ($match['tier'] === MatchTier::Exact || $match['tier'] === MatchTier::Alias) {
                 $result = $this->promote->handle(
@@ -277,7 +280,32 @@ final class PipelineRunner
                 continue;
             }
 
-            $matchKey = $this->matcher->matchKey($record['name']);
+            // Japan-only trainees are promoted directly rather than queued for
+            // review, so they land in the database and are visible on the catalog
+            // and Database surfaces while staying out of career setups.
+            if ($recordReleaseStatus === ReleaseStatus::JapanOnly) {
+                $result = $this->promote->handle(
+                    record: $record,
+                    existing: null,
+                    sourceKey: $sourceKey,
+                    url: $sourceConfig['url'],
+                    snapshotPath: $snapshotPath,
+                    confidence: null,
+                    sourceTimezone: $sourceConfig['timezone'] ?? null,
+                );
+
+                if ($result['skipped']) {
+                    $counts['skipped']++;
+                } elseif ($result['created']) {
+                    $counts['created']++;
+                } else {
+                    $counts['updated']++;
+                }
+
+                continue;
+            }
+
+            $matchKey = $this->matcher->matchKey($this->recordName($record, $sourceKey));
 
             $candidate = MatchCandidate::updateOrCreate(
                 [
@@ -286,7 +314,7 @@ final class PipelineRunner
                     'proposed_match_key' => $matchKey,
                 ],
                 [
-                    'proposed_name' => $record['name'],
+                    'proposed_name' => $this->recordName($record, $sourceKey),
                     'proposed_name_ja' => $record['name_ja'] ?? null,
                     'suggested_umamusume_id' => $match['umamusume']?->id,
                     'match_tier' => $match['tier']->value,
@@ -308,5 +336,30 @@ final class PipelineRunner
         }
 
         return $counts;
+    }
+
+    /**
+     * The record's display name, whichever key the source's parser writes it under.
+     *
+     * The trainee-shaped parsers write `name`. The race parsers added for the enrichment work write
+     * `name_en` / `name_ja`, because a race has an English and a Japanese name and no single `name` —
+     * and the shared loop below reads a name for every source it routes. Reading the key leniently
+     * keeps one entity's shape from crashing the pipeline for another, and the throw names the source
+     * and the record so a shape nobody anticipated is traceable rather than a bare undefined-key
+     * warning. When the race source gets its own writer this helper can go.
+     *
+     * @param  array<string, mixed>  $record
+     */
+    private function recordName(array $record, string $sourceKey): string
+    {
+        foreach (['name', 'name_en', 'title'] as $key) {
+            if (isset($record[$key]) && is_string($record[$key]) && $record[$key] !== '') {
+                return $record[$key];
+            }
+        }
+
+        throw new RuntimeException(
+            "{$sourceKey}: record [{$record['id']}] has none of name, name_en or title."
+        );
     }
 }
