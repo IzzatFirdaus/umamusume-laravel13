@@ -199,9 +199,9 @@ test('the quick actions are four outline destinations and a note', async ({ page
     // prose appears on click, so the card reads destinations-first.
     const why = quick.locator('details').filter({ hasText: 'Why four destinations' });
     await expect(why.getByText('Why four destinations')).toBeVisible();
-    await expect(why.getByText(/The running app's sidebar carries ten flat items/)).toBeHidden();
+    await expect(why.getByText(/Quick actions group the destinations the sidebar lists/)).toBeHidden();
     await why.locator('summary').click();
-    await expect(why.getByText(/The running app's sidebar carries ten flat items/)).toBeVisible();
+    await expect(why.getByText(/Quick actions group the destinations the sidebar lists/)).toBeVisible();
 });
 
 test('with no active career the resume card names the absence and keeps its actions', async ({ page }) => {
@@ -237,7 +237,7 @@ test('an active career draws the resume card the wireframe draws', async ({ page
 
     // index.html:102-107: the labelled defect, naming both numbers.
     await expect(card.getByText(/A turn is counted from the turns recorded/)).toBeVisible();
-    await expect(card.getByText(/cockpit reports turn \d+/)).toBeVisible();
+    await expect(card.getByText(/imported position: \d+/)).toBeVisible();
 
     // index.html:84: "Open cockpit" is the card's filled action, and the page's only one.
     await expect(card.getByRole('link', { name: 'Open cockpit' })).toBeVisible();
