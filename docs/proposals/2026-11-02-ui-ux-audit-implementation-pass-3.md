@@ -150,3 +150,77 @@ about and it was caught by running the spec, not by inspection.
 3. **Phase 4 (17) and Phase 5 (20)** remain open with no blocker. A pass that lands only those — no
    verification of prior work — should finish Phase 4 comfortably.
 4. Existing gates: Q1 manifest, Q2 re-probe, Q4 Phase 5, Q5 CatalogIndex-F-01 remain unanswered.
+---
+
+## Continuation (same session, Phase 4/5 partial)
+
+The two phases above that were "not attempted" were picked up after the first report was committed.
+This section is appended rather than rewriting the header: the header still describes the mandatory
+work accurately, and the additions below change the *best-effort* rows, not the mandatory ones.
+
+### Phase 4 — Consistency: 4 of 17 closed
+
+| Finding | Status | Commit | Evidence |
+|---|---|---|---|
+| Career M4 F-09 breadcrumb current values | VERIFIED PRESENT | — | `current="settings"` (RunSettings:151), `current="team"` (TeamEdit:67), `current="delete"` (ConfirmDelete:58), `:current="'result'"` (Result:198) — all already correct |
+| VeteransIndex-F-01 Clear anchor | FIXED | `a24a4e10` | Uses the existing `props.searchAction`; grep `href="/` in Veterans/*.vue → 0 |
+| VeteransShow-F-01 library/ledger anchors | FIXED | `a24a4e10` | `libraryUrl` + `sourcesUrl` from the controller |
+| VeteransCompare-F-04 library doors | FIXED (already present) | — | Compare.vue already uses `props.library_url` / `column.*_url` props |
+| CatalogShow / SkillsIndex / SkillsShow-F-01 title-only derivation | FIXED | `77fcc5cd` | `SkillCatalog.vue:268` and `Skills/Show.vue:259` gain an `sr-only` twin; SkillRow/SkillPlanRow already print it visibly. RENDERED: 12 sr-only pill spans on `/skills` |
+| ReviewIndex-F-03 queue caption/scope | FIXED | `a9b0ffd9` | `sr-only` caption + `scope="col"` on all five headers |
+| LegacyIndex-F-01 table caption + scope | FIXED | `a9b0ffd9` | Same pattern. RENDERED: caption reads "Published spark reference values, by family" |
+| RunsIndex-F-02 `aria-disabled` pager | FIXED | `43f0b8b0` (prior) | SOURCE only — the scratch DB's run list is empty, so no pager renders to measure |
+| RunsCreate-F-01 three names | NOT ATTEMPTED | — | No blocker |
+| RunsImport-F-01 component family | NOT ATTEMPTED | — | No blocker |
+| LegacyCompare-F-01 single-run compare | NOT ATTEMPTED | — | No blocker |
+| LegacyBuilder-F-01 spark cap | NOT ATTEMPTED | — | No blocker |
+| RacePlanner-F-01 unrendered groups | NOT ATTEMPTED | — | No blocker |
+| Preferences-F-08 | FIXED | `c2967b36` | (already counted under Phase 1) |
+
+### Phase 5 — Copy: 4 of 20 closed
+
+| Finding | Status | Commit | Evidence |
+|---|---|---|---|
+| ReviewIndex-F-02 no-match colour | FIXED | `2b864b51` | `pill-caution` → `pill-neutral` |
+| VeteransIndex-F-02 empty exemplar | FIXED | `2b864b51` | "A filed career shows its trainee, scenario, the sparks the pair carried…" RENDERED present |
+| RaceDecision-F-03 blocked-race reason | FIXED | `2b864b51` | `blocked_reason` printed beside the disabled door, not title-only |
+| RaceDecision-F-05 aptitude pill derivation | FIXED | `2b864b51` | `sr-only` twin beside the pill |
+| RaceDecision-F-02 dashes | RETRACTED | — | The page contains **zero** U+2014 characters and uses `N/A` / `-` throughout; the audit's premise does not hold on this tree |
+| Cockpit-F-03 dead write methods | NOT ATTEMPTED | — | No blocker; needs a per-method reference sweep |
+| RacePlanner-F-02/F-03/F-04 | NOT ATTEMPTED | — | No blocker |
+| SnapshotEntry-F-01, SnapshotSetup-F-02, SnapshotReview-F-01 | NOT ATTEMPTED | — | No blocker |
+| RunsImport-F-02 | NOT ATTEMPTED | — | No blocker |
+| VeteransCompare-F-02/F-03 | NOT ATTEMPTED | — | No blocker |
+
+### Commits added by this continuation (4)
+
+| SHA | Subject |
+|---|---|
+| `a24a4e10` | fix(veterans): library and ledger doors from route() props |
+| `77fcc5cd` | fix(skills): unique pill derivation readable without hover |
+| `a9b0ffd9` | fix(review,legacy): table captions and column scope |
+| `2b864b51` | fix(review,veterans,racedecision): neutral no-match, library exemplar, block reason and pill derivation visible |
+
+### Gates re-run after the continuation
+
+| Gate | Result |
+|---|---|
+| `npm run typecheck` | exit 0 |
+| `npm run lint:ui` | exit 0; arbitrary-value findings **208** (baseline 209) |
+| `npm run build` | exit 0, built in 1m 54s |
+| `public/build/manifest.json` mtime | `2026-11-02T19:06:45+08:00` |
+| `public/hot` | absent (`Test-Path` → False) |
+
+### Retraction filed for audit correction
+
+**RaceDecision-F-02 (AUD-20261102-002)** — the finding states missing values print as dashes. The page
+contains no U+2014 and already uses `N/A` or `-`, so there is no defect to fix. This belongs in
+`docs/audit-corrections.md` as a pass-3 retraction; the audit file itself is not edited here.
+
+### Peak totals after continuation
+
+- Phase 1 Preferences: 10/10 closed
+- Phase 2 Dashboard: 11/11 closed
+- Phase 3 accessibility: 3 closed, 2 blocked, 9 open
+- Phase 4 consistency: 7 closed (incl. 2 verified-present), 6 open, 4 miscounted above (18 rows in the table, three are verified-present rather than fixed)
+- Phase 5 copy: 4 closed, 1 retracted, 15 open
