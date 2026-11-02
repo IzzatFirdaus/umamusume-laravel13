@@ -157,7 +157,18 @@ const tagErrors = computed<string[]>(() => {
 
 const saving = reactive({ busy: false });
 
+/*
+ * An existing record is rewritten in place: the same row, the same library position, and the previous
+ * tags and note are gone rather than versioned. A first save has nothing to lose, so the gate is only
+ * armed when `props.saved` names a record already filed (AUD-20261102-007 F-02).
+ */
+const overwriteAcknowledged = ref(props.saved === null);
+
 function save(): void {
+    if (!overwriteAcknowledged.value) {
+        return;
+    }
+
     saving.busy = true;
 
     form.post(props.save_url, {
@@ -407,10 +418,25 @@ function save(): void {
                     <BaseButton
                         type="submit"
                         variant="primary"
-                        :disabled="form.processing || saving.busy"
+                        :disabled="form.processing || saving.busy || !overwriteAcknowledged"
                     >
                         {{ form.processing ? 'Saving…' : (props.saved === null ? 'Save Veteran' : 'Update Veteran') }}
                     </BaseButton>
+
+                    <!-- The overwrite gate. It appears only when a record is already filed, because a
+                         first save has nothing to replace. (AUD-20261102-007 F-02) -->
+                    <label v-if="props.saved !== null" class="flex items-start gap-2 text-sm">
+                        <input
+                            id="overwrite-acknowledged"
+                            v-model="overwriteAcknowledged"
+                            type="checkbox"
+                            class="mt-0.5"
+                        />
+                        <span>
+                            This replaces the Veteran already filed for this career: its tags and note are
+                            rewritten, and the previous text is not kept.
+                        </span>
+                    </label>
                     <Link :href="props.result_url" class="inline-flex min-h-11 items-center text-sm text-ink underline">Back to the result</Link>
                     <Link :href="props.library_url" class="inline-flex min-h-11 items-center text-sm text-ink underline">Open the library</Link>
                 </div>
