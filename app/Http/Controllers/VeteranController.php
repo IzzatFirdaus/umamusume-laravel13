@@ -134,6 +134,10 @@ final class VeteranController extends Controller
                 'b' => $run->inheritanceParentB?->name,
             ],
             'runUrl' => route('runs.cockpit', $run),
+            // The two doors the detail page carries, supplied server-side so the page spells no URL.
+            // (AUD-20261102-028 F-01)
+            'libraryUrl' => route('veterans.index'),
+            'sourcesUrl' => route('database.sources'),
             'traineeUrl' => route('catalog.show', $run->umamusume->slug),
             // The frame of the form this career was trained in — the run's own chosen costume, falling back
             // to the trainee's debut when the run recorded none — and no frame at all when the mirror holds

@@ -49,6 +49,10 @@ const props = defineProps<{
     counts: { skills: number; races: number };
     parents: { a: string | null; b: string | null };
     runUrl: string;
+    /** `route('veterans.index')`, the back door. */
+    libraryUrl: string;
+    /** `route('database.sources')`, the ledger the filing timestamp came from. */
+    sourcesUrl: string;
     traineeUrl: string;
     artworkURL: string | null;
     notice: string;
@@ -89,7 +93,7 @@ const noStatsRecorded = computed((): boolean =>
 
         <PageHeader eyebrow="Veteran" :title="props.veteran.trainee" :title-ja="props.veteran.trainee_ja ?? undefined" :description="lede">
             <template #actions>
-                <a href="/veterans" :class="doorClass">Back to library</a>
+                <a :href="props.libraryUrl" :class="doorClass">Back to library</a>
                 <a :href="props.runUrl" :class="`${doorClass} bg-primary-action font-semibold text-on-primary-action`">
                     Open the Cockpit
                 </a>
@@ -286,7 +290,7 @@ const noStatsRecorded = computed((): boolean =>
                             </dd>
                         </div>
                     </dl>
-                    <a href="/database/sources" :class="doorClass" class="mt-3">Source ledger</a>
+                    <a :href="props.sourcesUrl" :class="doorClass" class="mt-3">Source ledger</a>
                 </section>
 
                 <section aria-labelledby="veteran-absences" class="card mt-4">

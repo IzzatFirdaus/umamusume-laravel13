@@ -316,7 +316,7 @@ const factorGrades: { family: string; note: string }[] = [
                 </div>
                 <BaseButton type="submit" variant="secondary">Filter</BaseButton>
                 <a
-                    href="/veterans"
+                    :href="props.searchAction"
                     class="inline-flex min-h-11 items-center px-2 text-sm text-ink-muted hover:underline transition-colors duration-150 ease-out"
                 >Clear</a>
             </div>
