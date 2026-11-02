@@ -225,19 +225,29 @@ const barItems = items.filter((item) => item.inBar);
 const moreItems = items.filter((item) => !item.inBar);
 
 /*
- * The collapsible rail. Collapsed means marks instead of words, and expanded means words only: the owner
- * asked for the marks to appear at one width, not beside the labels at both, so a mark never competes
- * with the word it stands for.
+ * The collapsible rail, rebuilt to the HFW's rail block (docs/design-research/frontend-v2-wireframes/
+ * assets/shell.css:146-311). Collapsed means marks instead of words, and expanded means words only:
+ * the owner asked for the marks to appear at one width, not beside the labels at both, so a mark
+ * never competes with the word it stands for.
+ *
+ * The rail is sticky from `md` up: `h-screen` gives it a definite viewport height, `self-start` stops
+ * the flex row stretching it, and the nav scrolls inside the column while the foot stays pinned. The
+ * HFW reaches the same shape through a grid column (`--rail-w`) and a 180ms `grid-template-columns`
+ * transition; this shell is a flex row, so the collapse animates the child's width instead. The end
+ * state is the measured HFW geometry at both widths. HFW-OVERRIDE (motion): width, not grid columns.
  *
  * Collapsing is still safe only because the word never leaves the DOM: the label moves to `sr-only`
- * rather than being removed, so every destination keeps its accessible name and gains a `title` carrying
- * it (design-2.0 §42, "text alternatives for icons"), and the active destination keeps
- * `aria-current="page"` plus a left rule on top of its fill because state may never ride on colour alone.
+ * rather than being removed, so every destination keeps its accessible name and gains a `title`
+ * carrying it (design-2.0 §42, "text alternatives for icons"), and the active destination keeps
+ * `aria-current="page"` plus the HFW's 3px inset left rule on top of its fill because state may never
+ * ride on colour alone. The group headings stay in the tree as `sr-only` when the rail collapses,
+ * where the HFW uses `display:none`; visually identical, and a screen reader keeps the group names
+ * (HFW-OVERRIDE (a11y)).
  *
  * The control that collapses it lives in the rail head beside the brand (HFW index.html annotation
- * 10): the control belongs to the pane it resizes, and plan 1.2's placement in the 48px bar made a
- * global row own a local width. It is hidden below `md`, where the column is hidden too.
- * The collapsed column keeps a short `TD` mark so the rail does not float without a top edge.
+ * 10): the control belongs to the pane it resizes. Collapsed, the head stacks the 22px `TD` tile
+ * above the toggle, so both fit the 56px column; the wordmark moves to `sr-only` and the toggle's
+ * chevron turns to point the way the rail will move.
  *
  * The choice lives in `localStorage`, not in a Preference row. `App\Models\Preference::KEYS` is exactly
  * `theme` and `failure_estimate` because PRD US-11 authorises those two and no more, so a third stored
@@ -269,20 +279,43 @@ function toggleRail(): void {
 }
 
 // One brand accent on the surface: the header blue carries the active nav item, so the rail reads
-// as the same family as the chrome above it instead of adding a second hue beside it.
-const linkClass =
-    'flex min-h-11 items-center rounded-md px-3 text-sm font-medium text-ink hover:bg-raised hover:text-ink-strong';
+// as the same family as the chrome above it instead of adding a second hue beside it. The mobile
+// bar keeps this fill; the rail's current row uses the HFW's chrome tint plus an inset rule.
 const activeClass = 'bg-brand-chrome/10 font-semibold text-brand-chrome';
-// The sidebar's active rule sits on the left edge of the row at every rail width, so the current
-// destination is marked by a shape as well as by a fill and a word colour (WCAG 1.4.1). Stock
-// utilities only: `border-l-4` is the nearest step on the default ramp to the 3px the plan names,
-// and a `[3px]` arbitrary value would trip the arbitrary-value lint that plan slice 1.12 installs.
-// The mobile bar keeps a left rule out: a thick bar inside a 64px-wide bottom slot reads as
-// misalignment rather than as state, and the bar carries `aria-current` and a raised fill instead.
-const activeRailRule = 'border-l-4 border-l-brand-chrome pl-2';
-const activeRailRuleCollapsed = 'border-l-4 border-l-brand-chrome';
-const disabledClass =
-    'flex min-h-11 cursor-not-allowed items-center rounded-md px-3 text-sm font-medium text-ink-muted';
+
+/*
+ * The rail's geometry copies the HFW's rail block (docs/design-research/frontend-v2-wireframes/
+ * assets/shell.css:146-311), measured in Chromium at 1280x800: a 236px sticky column collapsing to
+ * 56px, a 64px head (84px collapsed), a 22px TD tile, 13.5px rows with 11px inline padding and
+ * 1px/4px margins, 10px group headings inset 31px, a 6px dot spacer, a 3px x 28px current rule at
+ * the rail edge, and a 44px foot at 13px/15px. The house scale rounds those (13.5 to 14, 10 to 12,
+ * 31 to 32), so the exact values live here with the HFW as their source rather than as static
+ * arbitrary classes in the template. HFW-OVERRIDE (a11y): the group headings move to `sr-only`
+ * rather than leaving the tree, so a collapsed rail keeps its group names.
+ */
+const railHeadClass = 'flex items-center gap-2 px-2.5 pb-2 pt-3';
+const railHeadCollapsedClass = 'flex flex-col items-center gap-0.5 px-0 pb-1.5 pt-2.5';
+const railBrandClass = 'flex min-w-0 flex-1 items-center gap-[9px]';
+const railBrandCollapsedClass = 'flex flex-none items-center justify-center';
+const railMarkClass =
+    'grid size-5.5 shrink-0 place-items-center rounded-sm bg-brand-chrome text-[11px] font-black text-on-brand-chrome';
+const railWordClass = 'overflow-hidden whitespace-nowrap text-xs font-black leading-normal tracking-widest text-ink-strong';
+const railGroupClass =
+    'px-[31px] pb-[5px] pt-3 text-[10px] font-extrabold uppercase tracking-[0.13em] text-ink-muted';
+const railItemClass =
+    'relative mx-1 my-px flex min-h-11 items-center gap-2.5 rounded-sm px-[11px] text-[13.5px]';
+const railItemCollapsedClass =
+    'relative mx-1 my-px flex min-h-11 items-center justify-center gap-2.5 rounded-sm px-0 text-[13.5px]';
+const railItemIdleClass = 'font-medium text-ink hover:bg-sunken';
+const railItemCurrentClass = 'bg-brand-chrome/10 font-extrabold text-ink-strong';
+const railItemDisabledClass = 'cursor-not-allowed font-medium text-ink-muted';
+const railDotClass = 'size-1.5 flex-none rounded-full';
+const railCurrentRuleClass = 'absolute -left-1 inset-y-2 w-[3px] rounded-r-[3px] bg-brand-chrome';
+const railGlyphClass = 'size-4.5';
+const railFootClass =
+    'mt-auto flex min-h-11 items-center border-t border-rule-soft text-xs leading-normal text-ink-muted underline';
+const railFootWideClass = 'px-[15px] py-[13px]';
+const railFootCollapsedClass = 'justify-center px-0 py-[13px]';
 const mobileClass =
     'flex min-h-11 shrink-0 items-center whitespace-nowrap px-3 text-xs font-medium text-ink';
 const mobileDisabledClass =
@@ -321,76 +354,109 @@ const moreIsCurrent = computed(() =>
 
         <aside
             :class="[
-                'hidden shrink-0 flex-col border-r border-rule-soft bg-raised transition-[width] md:flex motion-reduce:transition-none',
+                'hidden shrink-0 flex-col border-r border-rule-soft bg-panel transition-[width] duration-[180ms] ease-out md:sticky md:top-0 md:flex md:h-screen md:self-start motion-reduce:transition-none',
                 railCollapsed ? 'w-14' : 'w-[236px]',
             ]"
         >
             <!-- The rail head carries the brand and the control that resizes this pane, because the
-                 control belongs to the thing it resizes (HFW index.html annotation 10; the earlier
-                 placement in the 48px bar made a global row own a local width). Collapsed, the
-                 wordmark shortens to the `TD` mark and the toggle keeps its icon; the accessible
-                 name stays the action either way (WCAG 2.5.3). -->
-            <div class="flex items-center gap-2 border-b border-rule-soft px-2 py-2">
-                <span
-                    class="flex min-w-0 items-center gap-2 px-1 text-xs font-bold tracking-wide text-ink-strong"
-                >
-                    <span aria-hidden="true">TD</span>
-                    <span :class="railCollapsed ? 'sr-only' : ''">TRAINER DESK</span>
+                 control belongs to the thing it resizes (HFW index.html annotation 10). Expanded,
+                 the 22px TD tile and the word share one row and the 44px chevron toggle sits at the
+                 far end; collapsed, the head stacks the tile above the toggle so both fit 56px, and
+                 the word moves to `sr-only` (WCAG 2.5.3 and 1.3.1). -->
+            <div :class="railCollapsed ? railHeadCollapsedClass : railHeadClass">
+                <span :class="railCollapsed ? railBrandCollapsedClass : railBrandClass">
+                    <span aria-hidden="true" :class="railMarkClass" data-rail-mark>TD</span>
+                    <span :class="[railWordClass, railCollapsed ? 'sr-only' : '']">TRAINER DESK</span>
                 </span>
                 <button
                     type="button"
-                    class="ml-auto inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-md px-2 text-xs font-medium text-ink hover:bg-raised hover:text-ink-strong transition-colors duration-150 ease-out"
+                    class="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-sm text-ink-muted hover:bg-sunken hover:text-ink-strong"
                     :aria-expanded="!railCollapsed"
                     aria-controls="primary-nav-rail"
-                    :title="railCollapsed ? 'Expand navigation' : undefined"
+                    :aria-label="railCollapsed ? 'Expand navigation' : 'Collapse navigation'"
+                    :title="railCollapsed ? 'Expand navigation' : 'Collapse navigation'"
                     @click="toggleRail"
                 >
                     <span class="sr-only">{{ railCollapsed ? 'Expand navigation' : 'Collapse navigation' }}</span>
-                    <span aria-hidden="true">{{ railCollapsed ? '›' : '‹' }}</span>
+                    <NavGlyph
+                        name="chevron"
+                        :class="[
+                            railGlyphClass,
+                            'transition-transform',
+                            'stroke-[1.8]',
+                            railCollapsed ? '' : 'rotate-180',
+                            'motion-reduce:transition-none',
+                        ]"
+                    />
                 </button>
             </div>
-            <nav id="primary-nav-rail" aria-label="Global navigation" class="flex-1 overflow-y-auto p-2">
-                <div v-for="group in groups" :key="group.label" class="mb-2">
-                    <p
-                        :class="[
-                            'px-3 pb-1 pt-2 text-[11px] font-bold uppercase tracking-wider text-ink-muted',
-                            railCollapsed ? 'sr-only' : '',
-                        ]"
-                    >{{ group.label }}</p>
-                    <ul class="space-y-1">
+            <nav id="primary-nav-rail" aria-label="Global navigation" class="flex-1 overflow-y-auto">
+                <div v-for="group in groups" :key="group.label">
+                    <p :class="railCollapsed ? 'sr-only' : railGroupClass">{{ group.label }}</p>
+                    <ul>
                         <li v-for="item in group.items" :key="item.label">
                             <Link
                                 v-if="item.spa"
                                 :href="item.to as string"
                                 :class="[
-                                    linkClass,
-                                    railCollapsed ? 'justify-center px-0' : '',
-                                    isCurrent(item.to as string) ? activeClass : '',
-                                    isCurrent(item.to as string) && railCollapsed ? activeRailRuleCollapsed : '',
-                                    isCurrent(item.to as string) && !railCollapsed ? activeRailRule : '',
+                                    railCollapsed ? railItemCollapsedClass : railItemClass,
+                                    isCurrent(item.to as string) ? railItemCurrentClass : railItemIdleClass,
                                 ]"
                                 :aria-current="isCurrent(item.to as string) ? 'page' : undefined"
-                                :title="railCollapsed ? item.label : undefined"
+                                :title="item.label"
                                 :prefetch="item.prefetches ? 'hover' : false"
                             >
-                                <NavGlyph v-if="railCollapsed" :name="item.icon" />
+                                <span
+                                    v-if="!railCollapsed"
+                                    aria-hidden="true"
+                                    data-rail-dot
+                                    :class="[railDotClass, isCurrent(item.to as string) ? 'bg-brand-chrome' : 'bg-ink-faint']"
+                                />
+                                <NavGlyph v-if="railCollapsed" :name="item.icon" class="size-4.5" />
                                 <span :class="railCollapsed ? 'sr-only' : ''">{{ item.label }}</span>
+                                <span
+                                    v-if="isCurrent(item.to as string)"
+                                    aria-hidden="true"
+                                    data-rail-current
+                                    :class="railCurrentRuleClass"
+                                />
                             </Link>
                             <a
                                 v-else-if="item.to"
                                 :href="item.to"
-                                :class="[linkClass, railCollapsed ? 'justify-center px-0' : '']"
-                                :title="railCollapsed ? item.label : undefined"
+                                :class="[
+                                    railCollapsed ? railItemCollapsedClass : railItemClass,
+                                    isCurrent(item.to) ? railItemCurrentClass : railItemIdleClass,
+                                ]"
+                                :title="item.label"
                             >
-                                <NavGlyph v-if="railCollapsed" :name="item.icon" />
+                                <span
+                                    v-if="!railCollapsed"
+                                    aria-hidden="true"
+                                    data-rail-dot
+                                    :class="[railDotClass, isCurrent(item.to) ? 'bg-brand-chrome' : 'bg-ink-faint']"
+                                />
+                                <NavGlyph v-if="railCollapsed" :name="item.icon" class="size-4.5" />
                                 <span :class="railCollapsed ? 'sr-only' : ''">{{ item.label }}</span>
+                                <span
+                                    v-if="isCurrent(item.to)"
+                                    aria-hidden="true"
+                                    data-rail-current
+                                    :class="railCurrentRuleClass"
+                                />
                             </a>
                             <span
                                 v-else
-                                :class="[disabledClass, railCollapsed ? 'justify-center px-0' : '']"
+                                :class="[railCollapsed ? railItemCollapsedClass : railItemClass, railItemDisabledClass]"
                                 title="Coming with Trainer Desk 2.0"
                             >
-                                <NavGlyph v-if="railCollapsed" :name="item.icon" />
+                                <span
+                                    v-if="!railCollapsed"
+                                    aria-hidden="true"
+                                    data-rail-dot
+                                    :class="[railDotClass, 'bg-ink-faint']"
+                                />
+                                <NavGlyph v-if="railCollapsed" :name="item.icon" class="size-4.5" />
                                 <span :class="railCollapsed ? 'sr-only' : ''">{{ item.label }}</span>
                                 <span v-if="!railCollapsed" class="ml-2 text-xs">not built</span>
                             </span>
@@ -398,13 +464,13 @@ const moreIsCurrent = computed(() =>
                     </ul>
                 </div>
             </nav>
-            <div class="border-t border-rule-soft px-2 py-3 text-xs text-ink-muted">
-                <Link
-                    href="/database/sources"
-                    class="inline-flex min-h-11 items-center underline"
-                    :class="railCollapsed ? 'sr-only' : ''"
-                >Data sources</Link>
-            </div>
+            <Link
+                href="/database/sources"
+                title="Data sources"
+                :class="[railFootClass, railCollapsed ? railFootCollapsedClass : railFootWideClass]"
+            >
+                <span :class="railCollapsed ? 'sr-only' : ''">Data sources</span>
+            </Link>
         </aside>
 
 <!-- The HFW's `.main` column: bar, page head, canvas. Three bands, each capped at the shell
