@@ -212,7 +212,31 @@ const errorOf = (key: string): string | undefined => form.errors[key];
 
 const controlId = (key: string): string => `field-${key.replace(/\./g, '_')}`;
 const errorId = (key: string): string => `error-${key.replace(/\./g, '_')}`;
-const describedBy = (key: string): string | undefined => (errorOf(key) === undefined ? undefined : errorId(key));
+const describedBy = (key: string): string | undefined => {
+    if (errorOf(key) === undefined) return undefined;
+    if (key.startsWith('settings.stat_target_defaults.') && key !== 'settings.stat_target_defaults') {
+        return `error-${key.replace(/\./g, '_')}`;
+    }
+    if (key === 'settings.default_scenario') {
+        return `${controlId(key)}-error`;
+    }
+    return `error-block-${key}`;
+};
+
+const firstControlId = (key: string): string | null => {
+    if (key === 'theme') return 'field-theme_light';
+    if (key === 'settings.dashboard_layout') return 'field-settings_dashboard_layout_standard';
+    if (key === 'settings.dashboard_hidden_cards') return 'dashboard_card_active_career';
+    return null;
+};
+
+const blockErrorKeys = computed<string[]>(() =>
+    visibleErrors.value.filter((key) => {
+        if (key.startsWith('settings.stat_target_defaults.') && key !== 'settings.stat_target_defaults') return false;
+        if (key === 'settings.default_scenario') return false;
+        return true;
+    }),
+);
 
 // The keys that can carry a refusal, in the order they render. Each element exists only while it has
 // a message, and `aria-describedby` is set under the same condition, so the reference is never
@@ -267,12 +291,13 @@ function submit(): void {
         onError: () => {
             const firstKey = Object.keys(form.errors)[0];
 
-            // The control has to be in the DOM before it can take focus, and every control's id is
-            // `controlId(its error key)`, the idiom `BuildTarget.vue:140` already uses. A whole-blob
-            // refusal (`settings`, `preferences`) names no control, so nothing is focused and the
-            // message block below the cards is the answer.
             void nextTick(() => {
-                document.getElementById(controlId(firstKey))?.focus();
+                const cid = firstControlId(firstKey);
+                if (cid !== null) {
+                    document.getElementById(cid)?.focus();
+                } else {
+                    document.getElementById(`error-block-${firstKey}`)?.focus();
+                }
             });
         },
     });
@@ -284,7 +309,7 @@ function runBackup(): void {
 </script>
 
 <template>
-    <AppLayout :breadcrumb="[{ label: 'Settings' }]">
+    <AppLayout :breadcrumb="[{ label: 'Preferences' }]">
         <Head title="Preferences" />
 
         <!-- preferences.html:54-67: the page head carries the state line and the one save verb,
@@ -342,6 +367,8 @@ function runBackup(): void {
                         />
                     </div>
 
+                    <p class="mt-1 text-xs text-ink-muted">Wide is held behind DL.14 in this build and is unavailable until that ships.</p>
+
                     <Note class="mt-2.5">
                         The widths are the ratified ones: 768 / 1152 / 1536. Below 1280px the wide shell
                         collapses to the standard breakpoints, so choosing Wide on a laptop changes
@@ -396,8 +423,9 @@ function runBackup(): void {
                     <div class="flex flex-col gap-2">
                         <a :href="props.exportUrl" :class="buttonClasses('secondary')">Export everything as JSON</a>
                         <BaseButton type="button" variant="secondary" :disabled="backupForm.processing" @click="runBackup">
-                            {{ backupForm.processing ? 'Backing up' : 'Download a backup' }}
+                            {{ backupForm.processing ? 'Backing up' : 'Write a backup' }}
                         </BaseButton>
+                        <p role="status" class="sr-only">{{ backupForm.processing ? 'Backing up…' : '' }}</p>
                     </div>
                     <p class="mt-2.5 text-xs text-ink-muted">
                         Export is a file download. A backup is a complete copy you can restore from.
@@ -438,7 +466,7 @@ function runBackup(): void {
                     </div>
 
                     <Note class="mt-2.5">
-                        This is the app&rsquo;s only theme control &mdash; a four-option choice, not a
+                        This is the app&rsquo;s only theme control, a four-option choice, not a
                         two-way switch. The options are shown as radios so they read side by side.
                         There is no per-page switching anywhere else in the product.
                     </Note>
@@ -513,19 +541,22 @@ function runBackup(): void {
                     <p class="mt-2.5 text-xs text-ink-muted">Hidden cards are excluded, not collapsed.</p>
 
                     <div class="mt-2.5 flex flex-wrap items-center gap-3">
-                        <BaseButton type="button" variant="secondary" @click="armReset">
+                        <BaseButton type="button" variant="secondary" :aria-label="resetArmed ? 'Reset? Press again within five seconds to confirm reset.' : 'Reset layout to defaults'" @click="armReset">
                             {{ resetArmed ? 'Reset?' : 'Reset layout to defaults' }}
                         </BaseButton>
-                        <p v-if="resetStatus" role="status" class="sr-only">{{ resetStatus }}</p>
+                        <p role="status" class="sr-only">{{ resetStatus }}</p>
                     </div>
                 </section>
             </div>
 
             <p
-                v-for="key in visibleErrors"
+                v-for="key in blockErrorKeys"
                 :key="key"
                 :id="`error-block-${key}`"
                 class="text-risk"
+                role="alert"
+                aria-live="assertive"
+                tabindex="-1"
             >
                 {{ errorOf(key) }}
             </p>
