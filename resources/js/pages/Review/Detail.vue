@@ -19,7 +19,7 @@ import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import StatusPill from '../../components/StatusPill.vue';
 import SuggestionHint from '../../components/review/SuggestionHint.vue';
 import { LinkButton } from '../../components/Form';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
 interface Candidate {
@@ -32,6 +32,7 @@ interface Candidate {
     created_at: string;
     suggestion: string | null;
     suggested_umamusume_id: number | null;
+    status: string;
 }
 
 const props = defineProps<{
@@ -48,6 +49,10 @@ const props = defineProps<{
  * Typed narrowly to the one method the page uses.
  */
 const candidateForm = ref<{ chooseRecord: (id: number) => void } | null>(null);
+
+const reopen = (): void => {
+    router.post(`/review/${props.candidate.id}/reopen`);
+};
 
 
 interface BestMatch {
@@ -366,6 +371,7 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                 />
 
                 <CandidateForm
+                    v-if="props.candidate.status === 'Pending'"
                     ref="candidateForm"
                     :candidate="props.candidate"
                     :alias-languages="props.aliasLanguages"
@@ -373,6 +379,20 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                     :default-expanded="true"
                     variant="savebar"
                 />
+
+                <div v-else class="mt-4">
+                    <p class="text-sm text-ink-muted">
+                        This candidate has been resolved ({{ props.candidate.status }}). You can return it to
+                        Pending if the verdict was mistaken.
+                    </p>
+                    <button
+                        type="button"
+                        class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:bg-panel"
+                        @click="reopen"
+                    >
+                        Return to Pending
+                    </button>
+                </div>
             </section>
 
         </div>

@@ -248,6 +248,7 @@ Route::get('/review', [ReviewController::class, 'index'])->name('review.index');
 // reader might expect; the two differ by method, and either order binds the same `{candidate}`.
 Route::get('/review/{candidate}', [ReviewController::class, 'show'])->name('review.detail');
 Route::post('/review/{candidate}', [ReviewController::class, 'resolve'])->name('review.resolve');
+Route::post('/review/{candidate}/reopen', [ReviewController::class, 'reopen'])->name('review.reopen');
 
 /*
  * The Legacy Lab (SCREEN-006; PRD FR-G, ADR-0020 §3, under ADR-0010). Record-only: these routes read

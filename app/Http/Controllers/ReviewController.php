@@ -69,6 +69,11 @@ class ReviewController extends Controller
                 ->where('status', '!=', CandidateStatus::Pending->value)
                 ->whereDate('updated_at', today())
                 ->count(),
+            // Total resolved (all-time), so the progress bar reflects actual work done, not pending rows
+            // on other pages (AUD-20261102-021 F-01).
+            'resolvedCount' => MatchCandidate::query()
+                ->where('status', '!=', CandidateStatus::Pending->value)
+                ->count(),
         ]);
     }
 
@@ -106,6 +111,7 @@ class ReviewController extends Controller
                 'created_at' => $candidate->created_by_fetch_at->toDateString(),
                 'suggestion' => $suggested?->name,
                 'suggested_umamusume_id' => $candidate->suggested_umamusume_id,
+                'status' => $candidate->status->value,
             ],
             /*
              * The record the engine proposed, in the shape the "Best match" card prints. The stored
@@ -182,9 +188,15 @@ class ReviewController extends Controller
     }
 
     /**
-     * Applies the Trainer's verdict (see the ResolveMatchCandidate action for
-     * what each status does) and returns to the queue.
+     * Returns a resolved candidate to Pending (reversal for ReviewDetail-F-01, SHR-6/H3).
      */
+    public function reopen(MatchCandidate $candidate): RedirectResponse
+    {
+        $candidate->status = CandidateStatus::Pending;
+        $candidate->save();
+
+        return redirect()->route('review.index')->with('status', 'Candidate returned to Pending.');
+    }
     public function resolve(ResolveMatchCandidateRequest $request, MatchCandidate $candidate, ResolveMatchCandidate $action): RedirectResponse
     {
         $action->handle($candidate, $request->verdict());

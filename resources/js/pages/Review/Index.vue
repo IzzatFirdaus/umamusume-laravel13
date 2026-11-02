@@ -33,6 +33,8 @@ const props = defineProps<{
     neverFetched: boolean;
     /** Candidates whose verdict landed today (`status` left `Pending`, counted on `updated_at`). */
     resolvedToday: number;
+    /** Total candidates resolved (all-time, non-Pending). */
+    resolvedCount: number;
 }>();
 
 /**
@@ -58,8 +60,9 @@ function goToPage(page: number): void {
  * runs downward as verdicts land rather than upward. Reported as resolved-of-total so the bar fills
  * as the Trainer works, which is the reading a progress bar invites.
  */
-const resolvedCount = computed<number>(() => Math.max(0, props.candidates.total - props.candidates.data.length));
-const progressPercent = computed<number>(() => (props.candidates.total === 0 ? 0 : Math.round((resolvedCount.value / props.candidates.total) * 100)));
+const resolvedCount = computed<number>(() => props.resolvedCount);
+const totalCount = computed<number>(() => props.resolvedCount + props.candidates.total);
+const progressPercent = computed<number>(() => (totalCount.value === 0 ? 0 : Math.round((resolvedCount.value / totalCount.value) * 100)));
 
 const th = 'border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong';
 const thNum = 'border-b border-rule px-2 py-2 text-right text-xs font-semibold text-ink-strong';
@@ -127,7 +130,7 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                         aria-label="Review progress"
                         :aria-valuenow="resolvedCount"
                         aria-valuemin="0"
-                        :aria-valuemax="candidates.total"
+                        :aria-valuemax="totalCount"
                     >
                         <div
                             class="h-full rounded-full bg-brand-chrome transition-[width] duration-150 ease-out motion-reduce:transition-none"
@@ -135,7 +138,7 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                         />
                     </div>
                     <p class="shrink-0 text-xs text-ink-muted">
-                        {{ resolvedCount }} of {{ candidates.total }} resolved
+                        {{ resolvedCount }} of {{ totalCount }} resolved
                         <span v-if="props.resolvedToday > 0"> · {{ props.resolvedToday }} today</span>
                     </p>
                 </div>
