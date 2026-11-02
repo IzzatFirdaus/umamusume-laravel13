@@ -74,10 +74,12 @@ interface FormEntry {
     rarity_stars: string;
     rarity_word: string;
     is_debut_form: boolean;
-    global_release_date: string;
-    global_release_date_display: string;
+    global_release_date: string | null;
+    global_release_date_display: string | null;
     artworkURL: string | null;
     skillLists: SkillList[];
+    base_stats: Record<string, number> | null;
+    growth_rates: Record<string, number> | null;
 }
 
 interface Trainee {
@@ -201,6 +203,16 @@ interface AptitudeGroup {
     header: string;
     entries: { label: string; key: string; letter: string }[];
 }
+
+/*
+ * The base-stat and growth blocks sit once on the page, so they read the debut form — the form the
+ * wireframe marks as current — falling back to the first form when no debut form is confirmed.
+ */
+const primaryForm = computed<FormEntry | null>(() => props.forms.find((f) => f.is_debut_form) ?? props.forms[0] ?? null);
+
+const baseStats = computed<Record<string, number> | null>(() => primaryForm.value?.base_stats ?? null);
+
+const growthRates = computed<Record<string, number> | null>(() => primaryForm.value?.growth_rates ?? null);
 
 const aptitudeGroups = computed<AptitudeGroup[] | null>(() => {
     const letters = props.trainee.aptitudes;
