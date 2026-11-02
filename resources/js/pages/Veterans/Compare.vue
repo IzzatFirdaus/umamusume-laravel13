@@ -263,8 +263,13 @@ const verdictBy = computed<Record<string, string>>(() =>
     Object.fromEntries(differences.value.map((row) => [row.property, row.verdict])),
 );
 
+/*
+ * `same` and `single column` are neutral states, not differences: one says the careers agree, the other
+ * says there was nothing to compare against. Both wore the caution tint, which read as "a difference was
+ * found" for a row that carries no difference at all. (AUD-20261102-027 F-03)
+ */
 const verdictPill = (verdict: string): string =>
-    verdict === 'same' ? 'pill pill-neutral' : 'pill pill-caution';
+    verdict === 'same' || verdict === 'single column' ? 'pill pill-neutral' : 'pill pill-caution';
 
 /** Keep the pager on a career that still exists after a tick or untick changes the column set. */
 watch(orderedColumns, (columns) => {
