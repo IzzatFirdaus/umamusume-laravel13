@@ -4251,3 +4251,275 @@ matrix cells in `Veterans/Compare.vue` rely on exactly that and still work.
 
 **Where it bit.** `Review/Index.vue` carried a bare `sticky bottom-0` pager; removed in pass 5
 (AUD-20261102-021 F-04).
+## KI-141 — the Build target step carries two `title`-only reasons the wizard parity gate bans
+
+**State:** OPEN. Filed 2026-10-31 while running the trainee-profile browser gate (`5cb6eeb9`) in the frozen worktree
+`D:\Projects\td-5cb6eeb9`. The gate ran the six wizard specs; this is its only failure and it is not this slice's.
+
+**Defect.** `resources/js/pages/Career/BuildTarget.vue:503` and `:511` put the reason for an unrecorded target total
+into `title=` on non-interactive elements — the `<span>` beside the total, and the `N/A` cell itself.
+`tests/browser/wizard-parity.spec.ts:104` counts `title=` on every non-interactive element of every wizard step and
+requires zero, because a tooltip is reachable with a mouse and by nothing else.
+
+**Why.** `868c173c` ("fix(career): N/A + title on unrecorded target figures (F-1)") wrote the pair while `title` was
+still the documented channel. `DESIGN.md` §5's 2026-10-17 amendment retired it ("the reason now renders through
+`AbsenceValue`'s disclosure or as visible prose beside the marker"), and the parity sweep has not run over the target
+step since, so the regression stayed invisible across two slices.
+
+**Evidence.** The six-spec run's tail: `1 failed [chromium] › tests\browser\wizard-parity.spec.ts:85:9 › setup wizard
+sweep › target: no artifact vocabulary, no dark variants, no horizontal overflow — Error: title= on non-interactive
+elements, Expected: 0, Received: 2`, with `70 passed (3.7m)`. Attribution is not `5cb6eeb9`:
+`git merge-base --is-ancestor 868c173c 5cb6eeb9^` returns true, and the two lines are untouched by this slice's diff.
+The failing case's own DOM snapshot is at `test-results/wizard-parity-setup-wizard-f15ed-…-chromium/error-context.md`.
+
+**Closure.** Move both reasons to the shipped pattern — a visible sentence beside the marker, or an `AbsenceValue`
+disclosure, the way `TraineeProfile.vue` states its growth and base-stat absences — then re-run
+`npx playwright test tests/browser/wizard-parity.spec.ts`. Not fixed here: the target step is outside the
+trainee-profile slice's file set, and the dispatch that produced this finding bars editing it in this pass.
+
+## KI-142 — the pager renders two range wordings, and the dash form slips past the copy gate that bans it
+
+**State:** OPEN. Filed 2026-10-31 while classifying the three Races browser failures during the Database and
+Help HFW parity pass. This slice did not cause it and did not fix it: the component and the four other specs
+named below are outside its file set.
+
+**Defect.** `resources/js/components/ui/Pagination.vue:62` prints the range with an en dash — the page reads
+`Showing 1–25 of 410 slots` — while five browser assertions across three specs pin the word form:
+`tests/browser/database.spec.ts:346`, `:373` and `:417` (the race database), `tests/browser/skills.spec.ts:146`
+and `tests/browser/support-cards.spec.ts:205`. The single assertion that pins the dash is
+`tests/browser/data-table.spec.ts:166`. Both wordings cannot ship, so the component now satisfies one spec and
+fails five. The dash is also the glyph the copy rule forbids in shipped text (D-79, enforced by
+`RenderedCopyHygieneTest`), and it reaches a Trainer because the source spells it as the character reference
+`&#8211;`: the gate's sweep matches the literal characters `\x{2013}` and `\x{2014}` on a source line, so an
+entity-written dash is invisible to it. That is the second half of this entry — a copy ban with a hole in the
+instrument that polices it.
+
+**Why.** `78b0f4e4` ("feat(veterans): bring the library to HFW parity") changed the line from
+`Showing {{ from }} to {{ to }} of {{ total }} {{ noun }}` to the `&#8211;` form and recorded the reason as
+"byte-identical (range wording restored to the en dash the data-table spec pins)". True of
+`data-table.spec.ts:166`, and the same commit did not re-baseline the five assertions that pin the word. The
+parity pass then read the three Races failures as a peer's uncommitted edit, which they are not: the wording
+is committed.
+
+**Evidence.** Two reproducible commands, both on a session-private harness
+(`PLAYWRIGHT_PORT=<port> PLAYWRIGHT_SCRATCH_DB=.scratch-uma/<session>/browser-<port>.sqlite`).
+`npx playwright test tests/browser/skills.spec.ts tests/browser/support-cards.spec.ts tests/browser/data-table.spec.ts`
+→ `2 failed, 41 passed`, the two failures being `skills.spec.ts:139` and `support-cards.spec.ts:198`, both
+"states the page it is showing", and `data-table.spec.ts:166` green in the same run.
+`npx playwright test tests/browser/database.spec.ts --grep "race"` → the three Races cases fail with
+`Received string: " Showing 1–25 of 410 slots Page 1 of 17"` against `/Showing \d+ to \d+ of \d+ slots/`.
+Attribution: `git show 78b0f4e4 -- resources/js/components/ui/Pagination.vue` carries the `-`/`+` pair, the
+removed line reading `Showing {{ from }} to {{ to }} of {{ total }} {{ noun }}` and the added line the
+`&#8211;` form, and none of the seven parity commits touches `Pagination.vue`.
+
+**Closure.** Choose one wording and re-baseline the other side. The dash is the form the copy rule forbids, so
+the expected resolution is the word form in the component plus `data-table.spec.ts:166` re-pinned to it, after
+which the three Races cases, the skills case and the support-cards case go green together. The gate half closes
+by widening `renderedDashLines()` to decode numeric character references before matching, or by failing on the
+`&#8211;`/`&#8212;` spellings directly — a source-level reading of the rule is what let the entity through.
+Neither half is fixed here.
+
+## KI-143 — `review-detail.spec.ts` describes a queue that renders `CandidateForm variant="row"`, and no caller exists
+
+**State:** OPEN. Filed 2026-10-31 during the six-screen HFW parity pass, from a read of the spec's own header.
+
+**Defect.** `tests/browser/review-detail.spec.ts:15-18` states that the row shape "still ships, on the QUEUE,
+where `CandidateForm` renders `variant="row"`; those cases moved to `review.spec.ts` (see the block at its
+foot)". `resources/js/pages/Review/Index.vue:3` names `CandidateForm` only in a comment ("FQ-10: `CandidateForm`
+renders on `Review/Detail.vue`; the queue links to it instead"), and `Review/Detail.vue:311` is the component's
+only rendered call site, with `variant="savebar"`. Nothing renders the row variant.
+
+**Why.** The sentence was written when the queue drew the form per row. `FQ-10` moved the verdict form to the
+detail page and the comment was never re-baselined. The pass that then declared the prop
+(`CandidateForm.vue:21-30`) made the variant resolve instead of warning, which removes the last symptom without
+creating a caller, so nothing surfaces the discrepancy.
+
+**Evidence.** `CandidateForm` appears in four places under `resources/js`, three of them prose; the one element
+is `Review/Detail.vue:311`. No `variant="row"` string exists anywhere in `resources/js`. The `:15-18` claim is
+therefore the only assertion in the tree that the row shape ships anywhere.
+
+**Closure.** Say which is true. Either correct the spec header to state that the row variant is unrendered (and
+say where the row-shape cases actually live, if they survived the move), or retire the variant and its two
+branches if `FQ-10` meant the queue shape is gone for good — then re-run
+`npx playwright test tests/browser/review-detail.spec.ts`. Filed rather than fixed here: the sentence describes
+another page's behaviour, and choosing between "keep a dead variant" and "delete it" is a decision rather than a
+typo fix. The `variant` prop added by this pass does not create a caller and does not settle the question.
+
+## KI-144 — The `Career tools` disclosure on the cockpit still hosts v2.1.0 write surfaces that have no door of their own
+
+**State:** CLOSED 2026-11-01 by the erratum below, which names each write surface's door. It was filed
+OPEN on 2026-10-31 during the career-screens HFW parity pass, from a side-by-side of the rendered
+cockpit against `cockpit-unity-cup.html`.
+
+**Defect.** The cockpit's `▼ Career tools` disclosure (`resources/js/pages/Career/Cockpit.vue`, the `<details
+data-region="career-tools">` block) carries four write surfaces that belong on screens of their own: the run
+identity form (rarity, potential level, aptitudes, growth rate, stat targets, skill points, notes), the turn
+correction form (the five stats, SP, energy, fans, mood, outcome, origin note), a delete-turn action and a
+delete-run action. Two of its other sections are redundant with regions that already exist above it: the `Actions`
+grid duplicates the action grid the page already renders, and `Races in this run` duplicates the `RunRaceStrip` the
+cockpit's left column already renders. The wireframe's cockpit ends at "Where to go"; nothing of this kind is drawn
+below it.
+
+**Why.** The disclosure is the interim home for the writes that `Runs/Show.vue` owned when that screen was retired
+in F2 (2026-10-09): its forms had to go somewhere, and the cockpit was the somewhere. v3.x's separation — the
+cockpit is a read of the run plus one action, and write surfaces live on the desks that own them — arrived
+afterwards, and the retirement was never scheduled. Nothing in the plan's slice list carries it, so the disclosure
+reads as a design decision to a later session rather than as an unfiled debt.
+
+**Evidence.** `cockpit-unity-cup.html` has no region below "Where to go". The disclosure's own markup carries the
+four forms; `Cockpit.vue` renders both the action grid and the race strip outside it as well. Two
+`career-cockpit.spec.ts` cases that reach into it fail in this tree for the same reason and were proven
+pre-existing against `HEAD` before this entry was filed: `names every absent value and refuses to rank until Energy
+is entered` (the `Actions` heading the disclosure replaced is not a heading any more) and `records Energy through
+the cockpit correction and then marks one action` (the correction form's disclosure is closed on load, so the click
+times out).
+
+**Closure.** Build the door for each write surface first, verify each by walking it, and only then delete one
+section of the disclosure at a time — deleting the disclosure before the writes have homes makes the writes
+unreachable, which is a data-loss bug rather than a fix. The doors are: `GET/POST /training-runs/{run}/settings`
+(run identity), `GET/POST /training-runs/{run}/turns/{turn}/edit` (turn correction) and `DELETE
+/training-runs/{run}` (run deletion, on its own confirmation page). The redundant `Actions` and `Races in this run`
+sections can go as soon as the disclosure's own copy is settled. Filed rather than fixed here: the three new
+screens are outside the parity slice's scope, and the routing of four writes onto three doors is a decision, not a
+layout change. The slice spec is filed in `docs/proposals/frontend-development-update-plan.md` as **Slice 6b —
+Retire the Career tools disclosure**.
+*Erratum 2026-11-01.* Three sentences above are stale and are preserved rather than rewritten. The
+`Career tools` disclosure is gone: `grep -c "career-tools" resources/js/pages/Career/Cockpit.vue` returns 0, which is
+`C6b.11`'s deletion, and its four write surfaces took the doors landed in `6b5f45da`, `60ec3143`, `bb222846` and
+`6f33ffc0`. The `Actions` grid is gone in `202e8753`. And "`Races in this run` duplicates the `RunRaceStrip` the
+cockpit's left column already renders" stopped being true in `3d8c5ee2` (C6b.5), which removed the mount and left its
+spec behind; that absence is now its own entry, KI-147. Where each surface went, since this entry's whole claim was that they had
+no door: the run identity form to `runs.settings` at `/training-runs/{run}/settings` (`6b5f45da`, C6b.1),
+the turn correction to `runs.turns.edit` at `/training-runs/{run}/turns/{turn}/edit` (`60ec3143`, C6b.2),
+run deletion to its own confirmation page at `/training-runs/{run}/delete` (`bb222846`, C6b.3), and the
+team-state write to `runs.team` at `/training-runs/{run}/team` (`6f33ffc0`). The `Actions` grid the
+disclosure duplicated is gone in `202e8753`, and the `Races in this run` section it also carried left
+earlier. Closure condition met on the four writes; the copy the retirement left unsettled on the screen
+spec is the residue, and it is a spec edit rather than a door.
+
+## KI-145 — `npm run lint:ui` reports 282 arbitrary values against the recorded 219 baseline, and the debt is peer-owned
+
+**State:** OPEN, and not the cockpit pass's to clear. Filed retrospectively 2026-11-01: the number was
+named in the bodies of `da59bdac` and `202e8753` before an entry existed to hold it.
+
+**Defect.** `node tools/ui-framework-check.mjs` fails with `arbitrary-value count 282 exceeds baseline
+219`, so `npm run lint:ui` is red on every checkout carrying the 63 findings added since the baseline was
+recorded. The gate refuses a new arbitrary value per named file, and it is right to: `AGENTS.md` §9 calls
+that list deferred debt with a named intent, not a place to add.
+
+**Why it is filed rather than fixed.** `da59bdac` states the pair and adds none - "npm run lint:ui:
+unchanged at 282 against the 219 baseline, and this diff adds no arbitrary value" - and `202e8753`
+re-measures it with `Cockpit.vue`, `ScenarioDetail.vue` and `TeamEdit.vue` carrying no finding of their
+own. Two passes have now run against a red gate without being able to attribute their own share.
+
+**Evidence.** The failing run prints `ui-framework-check: 585 finding(s)` with the `debt-increase` line
+naming 282 against 219; `202e8753`'s body records that the 63 over baseline sit in 31 other files, among
+them the peer-dirty `pages/Dashboard.vue`, `layouts/AppLayout.vue` and
+`components/support/CardPicker.vue`.
+
+**Closure.** Whoever owns those 31 files either removes the added values or enumerates each one into
+`tools/ui-lint-baseline.json` and bumps `count` in the same commit. Raising the baseline is the owner's
+call: §2 escalation 4 bars an agent from editing the bar to pass a check. What this entry does not
+establish: whether the non-arbitrary findings in the 585 gate anything independently, since the run's
+failing line is the `debt-increase` one.
+
+## KI-146 — `veteran-compare.spec.ts` addressed a card grid the library no longer renders; seven cases were stale
+
+**State:** CLOSED by `da59bdac` (2026-11-01). Filed retrospectively 2026-11-01, because that commit's
+subject and body both name KI-146 and no entry held it.
+
+**Defect.** Seven cases addressed a `listitem` and a link labelled `Compare this career`. The veterans
+library moved from cards to table rows in an earlier commit, and its row door is labelled `Compare` and
+goes to `legacy.compare`. The cases could not pass on the page as shipped.
+
+**Closure, in the repair commit's own words.** "KI-146 repaired, the seven stale cases: every one
+addressed a `listitem` and a link labelled 'Compare this career'... The entry path is now one helper,
+openComparison, that ticks the library boxes and takes the counting door. Two cases asserted controls that
+no longer exist anywhere and were retargeted rather than deleted."
+
+**What closure does not cover.** The two retargeted cases are named by role in that body, not by title,
+so a later reader wanting them goes to the diff. The comparison-door copy fix that travelled in the same
+commit is a separate concern recorded there: the door now tells the Trainer to tick careers on the
+library, because it leads to the Legacy Lab's comparison of recorded selections.
+
+## KI-147 — `career-race-strip.spec.ts` walks a race strip the cockpit stopped rendering, and five of its six cases fail
+
+**State:** OPEN. Filed 2026-11-01 from the blocking browser batch that ran the file during the v3.0.0 cockpit surgery.
+`202e8753` is where the failures were measured, not where they were caused.
+
+**Defect.** `3d8c5ee2` ("fix(cockpit): remove the Races-in-this-run section (C6b.5)") deleted the `<RunRaceStrip>`
+mount from `resources/js/pages/Career/Cockpit.vue` and left `tests/browser/career-race-strip.spec.ts` entering at
+`/training-runs/{run}/cockpit` to read the three regions that mount rendered. Five of the file's six cases fail:
+`replaces the catalogue grid with three run-scoped regions` (`region "Races in this run"`, spec line 71),
+`keeps an entered race in the run region and out of the list ahead of it` (`button "Details and actions for…"`,
+line 107), `says so when there is no turn being decided, and prints no figure it cannot source` (the
+`No race on this scenario's calendar falls at turn 2.` sentence, line 155),
+`walks the strip links from the keyboard with a visible focus ring` (300 s waiting for
+`link "Open Race Decision for turn 12"`, line 186), and `holds the left column at 320px and at a 200-percent width
+without sideways scroll` (`region "Recorded in this run"`, line 221). The sixth,
+`passes an axe scan at WCAG A and AA`, passes because it never names a strip landmark.
+
+**Why.** A removal that ships without its spec is worse than a red test, because the orphaned assertions start
+succeeding on absences. The mobile-order pair at `career-race-strip.spec.ts:227-230` measures the `Actions` heading
+that `202e8753` retired, and its `?? 0` fallback answers a missing element with a passing number. The surgery's own
+retarget of those lines was therefore reverted rather than committed unverified: an edit that cannot be measured is
+not a fix, and the case is dead upstream of it either way.
+
+**Evidence.** `git show --stat 3d8c5ee2` prints one file, `resources/js/pages/Career/Cockpit.vue`, 76 deletions, no
+test. `git show 6f33ffc0:resources/js/pages/Career/Cockpit.vue` contains no `<RunRaceStrip` and no
+`Races in this run`, and `git merge-base --is-ancestor 3d8c5ee2 6f33ffc0` succeeds, so the absence predates the
+surgery that measured it. `grep -rn "import RunRaceStrip" resources/js` returns nothing: the component is mounted by
+no page, and its only mentions left are comments at `RaceCalendarNote.vue:4` and `Cockpit.vue:225`. Measured run:
+`PLAYWRIGHT_PORT=8152 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/cockpit-v3-surgery/browser-8152.sqlite npx playwright test
+tests/browser/career-race-strip.spec.ts tests/browser/grand-concert-panel.spec.ts` → 5 failed, 7 passed, 9.7m, with
+`grand-concert-panel.spec.ts` 6/6.
+
+**Closure.** Three dispositions, none evidenced and none chosen. The entry exists because the choice is
+open, not because one is preferred; a Career-domain slice decides.
+
+- (a) **Restore the mount.** `RunRaceStrip.vue` is intact and imported by nothing, and the cockpit still
+  receives the payload it renders (`Cockpit.vue:226` declares `raceStrip`, `:562`'s `raceCount` reads
+  `run`, `:1011` prints it), so the strip returns with an import and a mount. The follow-up brief names
+  `races`, `recorded` and `pending_turn` among that payload's keys; those three are NOT verified here,
+  because this docs pass opened no source file to check them.
+- (b) **Repoint the spec.** Keep the strip off the cockpit and move `career-race-strip.spec.ts` to
+  whatever surface now carries the race data. The candidates this pass can name are `runs.timeline` and
+  the `/scenario` page's team-race facility; neither is established as the owner, and the mobile-order
+  pair at `:227-230` gets rewritten against whichever block the page actually carries.
+- (c) **Delete the facility.** Remove `RunRaceStrip.vue`, the `raceStrip` prop and
+  `career-race-strip.spec.ts` together. This is the only option that must move a live reader first:
+  `raceCount` consumes the payload to print one figure at `:1011`, so the prop cannot go while that row
+  does.
+
+The revert in `05da0924` stands under all three: the case dies upstream of the mobile-order pair on a
+missing strip region, so any edit to those lines is unverifiable until a disposition is chosen.
+
+## KI-148 — Four Form Counted rows leaked into the dev DB (data-hygiene, purged)
+
+**State:** RESOLVED (purged) 2026-11-02. Four rows (Form Counted 1..4, ids 68-71, external_ref null,
+no pipeline source) leaked into the dev database from a test run and rendered at
+/database/trainees?search=Form%20Counted with live detail URLs. The screens did not distinguish them
+from real trainees.
+
+**Why not a code defect.** The read path is correct: CatalogRosterTreeTest.php:219 intentionally creates
+trainees without external_ref via factory and asserts they render. A read-path filter on
+external_ref IS NOT NULL would break that test and any legitimate trainee-creation flow. The audit's
+proposed remedy (F-08) was therefore wrong; the correct remedy is data-hygiene (purge the rows), which
+was applied in this pass (4 deleted, 0 remaining).
+
+**Closure.** Purged via direct delete on the dev DB. No code change. Read path unchanged. Entry recorded
+for durability so a future reader understands why the read-path filter cannot be used.
+
+
+ 
+ # #   K I - 1 4 9      C a t a l o g   S h o w   d o e s   n o t   r e n d e r   ` c h a r a c t e r _ c a r d s . b a s e _ s t a t s `   /   ` . g r o w t h _ r a t e s `   e v e n   w h e n   p o p u l a t e d  
+  
+ * * S t a t e : * *   O P E N   2 0 2 6 - 1 1 - 0 2 .   ` c h a r a c t e r _ c a r d s `   n o w   s t o r e s   ` b a s e _ s t a t s `   a n d   ` g r o w t h _ r a t e s `   ( A D R - 0 0 3 0 ,   m i g r a t i o n   ` 2 0 2 6 _ 1 1 _ 0 2 _ 1 4 1 6 3 9 ` ) ,   p o p u l a t e d   b y   t h e   r e p a r s e .   T h e   t r a i n e e   p r o f i l e   ( ` / c a r e e r / s e t u p / t r a i n e e / { i d } ` )   r e n d e r s   t h e m .   T h e   c a t a l o g   d e t a i l   p a g e   ( ` / u m a m u s u m e / { s l u g } ` )   s t i l l   p r i n t s   N o t  
+ 
+## KI-149 — Catalog Show does not render character_cards.base_stats / .growth_rates even when populated
+
+**State:** OPEN 2026-11-02. `character_cards` now stores `base_stats` and `growth_rates` (ADR-0030, migration `2026_11_02_141639`), populated by the reparse. The trainee profile (`/career/setup/trainee/{id}`) renders them. The catalog detail page (`/umamusume/{slug}`) still prints "Not recorded" for both, because `CatalogController` and `Catalog/Show.vue` were not updated in that slice.
+
+**Why not fixed here.** Out of scope of the trainee-profile slice; a separate plan should align the catalog detail surface. The audit observation that "catalogue stores no base value or growth row" (Database pass-2) becomes stale after ADR-0030 and should be corrected in `docs/audit-corrections.md` or the audit report when the follow-up lands.
+
+**Closure.** Update `CatalogController` and `Catalog/Show.vue` to read `base_stats`/`growth_rates` and render them, mirroring the trainee profile conditional rendering.
