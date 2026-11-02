@@ -4228,3 +4228,26 @@ Builder, Review, Preferences, Help, Skills.
 **Why it is filed rather than fixed.** A 1px step on a heading is unlikely to reflow anything, but
 "unlikely" is not measured. Sampling those screens at 320/768/1280 for row wrapping and card heights
 is its own task.
+
+## KI-150 — Page-level `position: sticky` is unavailable under the shell's container context
+
+**State:** OPEN (architectural constraint, documented).
+
+**What.** `AppLayout.vue:616` puts `@container` on the canvas, which is `container-type: inline-size`
+and is load-bearing for the responsive grid system every page uses. Containment ends `position: sticky`
+for descendants: a `sticky` element inside it never paints pinned, because its scrollport is the
+container rather than the viewport.
+
+**What this changes.** No page may rely on a page-level sticky bar pinned to the viewport. `sticky`
+inside a page's own `overflow-*` scrollport is unaffected — that element is its own scrollport, and the
+matrix cells in `Veterans/Compare.vue` rely on exactly that and still work.
+
+**Options, none taken yet.**
+- Relocate the container context off `main` — every `.g-*` page depends on it, so this is a shell
+  refactor with the widest blast radius in the app.
+- Switch the grid from container queries to `@media` — a larger refactor of the grid CSS.
+- Keep no page-level sticky. This is the current choice: the dead declarations are removed and the
+  constraint stated where they were.
+
+**Where it bit.** `Review/Index.vue` carried a bare `sticky bottom-0` pager; removed in pass 5
+(AUD-20261102-021 F-04).
