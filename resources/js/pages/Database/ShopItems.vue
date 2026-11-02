@@ -239,8 +239,8 @@ const close = async (): Promise<void> => {
                         "Race-triggered items last 3 turns" is recorded as <b>unconfirmed</b>. No source in the
                         repository states a duration for that class, so the catalogue does not print one.
                         No item on either client guarantees training success. The Artisan Cleat Hammer row
-                        prints <b>25 coins</b> while a published guide states 20, and the two figures are not
-                        reconciled here:
+                        prints <b>25 coins</b> while the guide's 2026-10-15 note records <b>20 coins</b> as
+                        the figure a second source corroborates, and the two are not reconciled here:
                         <Link href="/database/sources" class="inline-flex min-h-11 items-center font-medium text-ink-strong underline">
                             the source ledger's Open conflicts row
                         </Link>
