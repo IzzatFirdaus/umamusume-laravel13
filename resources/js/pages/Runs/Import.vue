@@ -716,10 +716,9 @@ const breadcrumb = computed(() =>
                             @update:model-value="(v: string | number) => (form.csv = String(v))"
                         />
 
-                        <!-- The request's own HEADERS joined for reading, while the paste field's placeholder carries
-                             the same list joined for pasting. Restored: `63d1cdd2` dropped this line as a stale change
-                             while `run-import.spec.ts:53` kept asserting it, which left the tree red. -->
-                        <p v-if="mode === 'paste'" class="mt-1 font-mono text-xs text-ink-muted">{{ headers.join(', ') }}</p>
+                        <!-- No paragraph restating the header list under the field. The placeholder already carries it in the
+                             form the Trainer pastes against, and a second copy in the same visual channel is
+                             noise rather than a second aid. (AUD-20261102-018 F-02) -->
 
                         <div v-if="mode === 'upload'" class="mt-4">
                             <BaseInput

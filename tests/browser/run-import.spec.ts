@@ -49,11 +49,11 @@ test('states the column list the export writes, so the paste target is checkable
     await expect(page.getByRole('heading', { name: 'Bring in a historical career', level: 1 })).toBeVisible();
     await expect(page.getByText(/nothing is created until you confirm/)).toBeVisible();
 
-    // The hint is the request's own HEADERS joined for reading, and the placeholder the same list joined
-    // for pasting, so a Trainer comparing a sheet sees the exact order the parser refuses anything else
-    // against.
-    await expect(page.getByText(HEADERS.split(',').join(', '))).toBeVisible();
+    // The header list is rendered once, in the placeholder — the form the Trainer pastes against. The
+    // sentence below it that read the same list back in spaces was removed as a duplicate in one visual
+    // channel (AUD-20261102-018 F-02), so the assertion is that the list appears exactly once here.
     await expect(page.locator('textarea[name="csv"]')).toHaveAttribute('placeholder', HEADERS);
+    await expect(page.getByText(HEADERS.split(',').join(', '))).toHaveCount(0);
 });
 
 test('sizes the import form controls to the 44px contract', async ({ page }) => {
