@@ -154,13 +154,14 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                 <div class="mt-3 overflow-x-auto rounded-md border border-rule bg-raised">
                     <h2 id="review-queue-heading" class="text-lg font-semibold text-ink-strong">Pending</h2>
                     <table class="w-full border-collapse">
+                        <caption class="sr-only">Pending match candidates, with the question each answers and the best match found</caption>
                         <thead>
                             <tr>
-                                <th :class="th">Candidate</th>
-                                <th :class="th">Question</th>
-                                <th :class="th">Best match</th>
-                                <th :class="thNum">Confidence</th>
-                                <th :class="thNum"><span class="sr-only">Review</span></th>
+                                <th scope="col" :class="th">Candidate</th>
+                                <th scope="col" :class="th">Question</th>
+                                <th scope="col" :class="th">Best match</th>
+                                <th scope="col" :class="thNum">Confidence</th>
+                                <th scope="col" :class="thNum"><span class="sr-only">Review</span></th>
                             </tr>
                         </thead>
                         <tbody id="review-results">

@@ -72,13 +72,14 @@ const tdNum = 'border-b border-rule px-2 py-3 text-right align-top font-mono tex
 
                 <div v-else class="mt-3 overflow-x-auto">
                     <table class="w-full border-collapse">
+                        <caption class="sr-only">Recorded inheritance pairs, with each parent and the blue sparks the pair carries</caption>
                         <thead>
                             <tr>
-                                <th :class="th">Legacy</th>
-                                <th :class="th">Parent A</th>
-                                <th :class="th">Parent B</th>
-                                <th :class="thNum">Blue sparks</th>
-                                <th :class="thNum"><span class="sr-only">Open the pair</span></th>
+                                <th scope="col" :class="th">Legacy</th>
+                                <th scope="col" :class="th">Parent A</th>
+                                <th scope="col" :class="th">Parent B</th>
+                                <th scope="col" :class="thNum">Blue sparks</th>
+                                <th scope="col" :class="thNum"><span class="sr-only">Open the pair</span></th>
                             </tr>
                         </thead>
                         <tbody>
