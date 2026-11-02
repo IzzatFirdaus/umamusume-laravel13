@@ -100,7 +100,7 @@ defineExpose({ open, openAt });
 <template>
     <dialog
         ref="dialog"
-        class="w-full max-w-2xl rounded-[var(--radius-lg)] border border-[var(--color-rule)] bg-[var(--color-panel)] p-4 text-[var(--color-ink)] backdrop:bg-black/40"
+        class="m-auto w-full max-w-2xl rounded-[var(--radius-lg)] border border-[var(--color-rule)] bg-[var(--color-panel)] p-4 text-[var(--color-ink)] backdrop:bg-black/40"
         :aria-label="`Choose a card for ${slotLabel}`"
         @close="closed"
     >
@@ -140,7 +140,7 @@ defineExpose({ open, openAt });
                 :key="option.id"
                 class="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-rule)] p-2"
             >
-                <ArtworkSlot :url="option.artworkURL" alt="" size="size-10" reserve />
+                <ArtworkSlot :url="option.artworkURL" alt="" size="size-12" reserve />
                 <div class="min-w-0 flex-1">
                     <p class="truncate text-sm font-semibold text-[var(--color-ink-strong)]">{{ option.name }}</p>
                     <p v-if="option.name_ja" lang="ja" class="truncate text-xs text-[var(--color-ink-muted)]">{{ option.name_ja }}</p>

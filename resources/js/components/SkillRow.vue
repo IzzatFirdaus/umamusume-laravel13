@@ -19,7 +19,7 @@ defineProps<{
         </span>
 
         <span class="ml-auto font-mono text-xs tabular-nums text-ink-muted">
-            <span v-if="skill.sp_cost === null">N/A SP <span class="font-sans">· no cost published</span></span>
+            <span v-if="skill.sp_cost === null">{{ skill.is_unique ? 'Unique' : 'N/A SP · no cost published' }}</span>
             <template v-else>{{ skill.sp_cost }} SP</template>
         </span>
     </li>
