@@ -39,6 +39,33 @@ async function createRun(page: Page): Promise<string> {
     return runUrl;
 }
 
+test('announces the turn on arrival and focuses a refused correction', async ({ page }) => {
+    const runUrl = await createRun(page);
+    const runId = runUrl.split('/').pop() as string;
+
+    await recordTurns(page, runId, 1);
+
+    await page.goto(`${runUrl}/timeline`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await page.getByRole('link', { name: 'Edit turn 1' }).first().click();
+    await page.waitForURL(/\/training-runs\/\d+\/turns\/\d+\/edit$/, WRITE);
+
+    const response = await page.reload({ waitUntil: 'domcontentloaded' });
+    expect(response?.status()).toBe(200);
+
+    // AUD-20261102-009 F-01: arriving on the page announces whose turn this is, before any write.
+    await expect(page.getByRole('status').filter({ hasText: /Correcting turn 1 of/ })).toBeAttached();
+
+    // AUD-20261102-009 F-02: a refused correction moves focus to its own alert, so a keyboard
+    // Trainer meets the reason rather than being left at the button.
+    await page.locator('#speed').fill('');
+    await page.getByRole('button', { name: 'Save correction' }).click();
+
+    const alert = page.getByRole('alert').filter({ hasText: 'The correction was not saved.' });
+    await expect(alert).toBeVisible();
+    await expect(alert).toBeFocused();
+});
+
 test('corrects a turn from the Timeline row and saves it on the door', async ({ page }) => {
     const runUrl = await createRun(page);
     const runId = runUrl.split('/').pop() as string;
