@@ -97,6 +97,12 @@ class DeckSelectController extends Controller
             'scenarioPending' => SetupDraft::read()['scenario'] === null,
             // The one write this step makes, stated as a URL the page never has to resolve.
             'action' => route('career.deck.store'),
+            // The two doors this step offers, supplied server-side so the page never spells a
+            // setup URL. (AUD-20261102-005 F-06)
+            'preflightUrl' => route('career.preflight'),
+            'legacyUrl' => route('career.legacy'),
+            // The page's own address, for the GET filter that retargets the picker.
+            'selfUrl' => route('career.deck'),
         ]);
     }
 
@@ -173,6 +179,10 @@ class DeckSelectController extends Controller
                 ->map(static fn (SupportCard $card): array => [
                     'id' => $card->id,
                     'name' => $card->displayName(),
+                    // The row prints a thumbnail beside the name. `ArtworkMirror::url()` answers null
+                    // when the mirror holds no file for this id, which is its normal partial answer
+                    // (`ADR-0021` Decision 5) and leaves `ArtworkSlot` rendering the text-only row.
+                    'artworkURL' => app(ArtworkMirror::class)->url('support_thumb', (int) $card->support_id),
                     'label' => $card->displayName().' · '.$card->rarityWord().' '.$card->typeLabel(),
                     'type' => $card->type,
                     'type_label' => $card->typeLabel(),

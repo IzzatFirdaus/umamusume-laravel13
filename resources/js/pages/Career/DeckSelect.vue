@@ -104,6 +104,12 @@ const props = defineProps<{
     scenarioLabel: string | null;
     scenarioPending: boolean;
     action: string;
+    /** `route('career.preflight')`, the forward door. */
+    preflightUrl: string;
+    /** `route('career.legacy')`, the back door. */
+    legacyUrl: string;
+    /** `route('career.deck')`, this page's own address for the GET filter. */
+    selfUrl: string;
 }>();
 
 /**
@@ -211,7 +217,7 @@ function errorLabel(field: string): string {
  */
 function filter(retarget = false): void {
     router.get(
-        '/career/setup/deck',
+        props.selfUrl,
         {
             type: type.value || undefined,
             q: search.value || undefined,
@@ -256,7 +262,7 @@ function saveAndContinue(): void {
     form.put(props.action, {
         preserveScroll: true,
         onSuccess: () => {
-            router.get('/career/setup/preflight');
+            router.get(props.preflightUrl);
         },
     });
 }
@@ -315,16 +321,33 @@ function clearSlot(position: number): void {
  * Retarget the picker. The query has to say the same slot the picker aims at: a Trainer who copies the
  * address bar between a Replace and the next equip was copying the slot the last server round trip wrote,
  * one behind the screen (R3-03). One navigation serves both, so the focus move the filter does is shared.
+ *
+ * **A search belongs to the slot it was made for.** Both the dialog and the URL carry the last filter in
+ * `props.picker`, so aiming at a second slot used to reopen it pre-filled with the first slot's query and
+ * filter the second slot's list by it, which read as though the new slot had been searched already. The
+ * retarget clears both halves: the dialog's inputs and the refs `filter()` navigates with. Equipping one
+ * card is a unit of work that ends when the dialog closes (Shneiderman rule 4, "design dialogs to yield
+ * closure"), so the next slot starts from an empty box. A Replace on the *same* slot keeps the filter,
+ * because there the Trainer is refining a search they just made.
  */
 function replace(position: number, opener: Event): void {
+    const retargeted = position !== props.picker.fillingSlot;
+
     filling.value = position;
     form.deck_slot = position;
+
+    if (retargeted) {
+        type.value = '';
+        search.value = '';
+    }
 
     // Open first, in the click's own tick. Opening after the retarget visit was measured not to work:
     // the visit remounts this component, the dialog ref resets, and `showModal()` ran on a detached
     // element (`open: false` in the DOM dump). The dialog owns the focus return, which is why the
     // opener element is handed over rather than a ref.
-    picker.value?.open(opener, { type: props.picker.type, query: props.picker.query });
+    picker.value?.open(opener, retargeted
+        ? { type: '', query: '' }
+        : { type: props.picker.type, query: props.picker.query });
 
     // Then retarget, keeping the component alive so the dialog above survives the round trip.
     filter(true);
@@ -356,7 +379,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
         -->
         <template #actions>
             <Link
-                href="/career/setup/legacy"
+                :href="props.legacyUrl"
                 class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:bg-panel"
             >
                 Back

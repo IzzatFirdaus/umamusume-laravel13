@@ -64,6 +64,7 @@ class ScenarioSelectController extends Controller
             // The step's write URL, supplied server-side the way CareerLayout.vue:11 and
             // UnityCupEditor.vue:20 already receive URLs. No Ziggy dependency is introduced.
             'action' => route('career.scenario.store'),
+            'traineeUrl' => route('career.trainee'),
         ]);
     }
 

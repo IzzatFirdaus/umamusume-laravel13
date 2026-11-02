@@ -78,6 +78,8 @@ const props = defineProps<{
     verified_at: string;
     /** `route('career.scenario.store')`, supplied by the server so the page never hard-codes the URL. */
     action: string;
+    /** `route('career.trainee')`, the next step, supplied server-side for the same reason. */
+    traineeUrl: string;
 }>();
 
 const choosing = ref<string | null>(null);
@@ -139,7 +141,7 @@ function continueStep(): void {
         return;
     }
 
-    router.visit('/career/setup/trainee');
+    router.visit(props.traineeUrl);
 }
 
 </script>
