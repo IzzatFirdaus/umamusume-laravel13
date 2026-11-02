@@ -10,7 +10,7 @@
  * columns — so the door adds a page and no write path. Validation feedback therefore lands where
  * it always did: `form.errors` from that request.
  */
-import { computed, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { Head, useForm } from '@inertiajs/vue3';
 
 import CareerLayout from '../../layouts/CareerLayout.vue';
@@ -55,6 +55,8 @@ const str = (value: number | string | null): string => (value === null ? '' : St
 
 /** What this page is for, in one line, under the one `h1`. */
 const lede = computed(() => `${props.run.trainee}'s recorded reading for turn ${props.turn.turn}.`);
+
+const alertRef = ref<HTMLElement | null>(null);
 
 const form = useForm({
     turn: String(props.turn.turn),
@@ -107,7 +109,15 @@ const submit = (): void => {
             mood: data.mood === '' ? null : data.mood,
             condition: data.condition === '' ? null : data.condition,
         }))
-        .put(props.update_url);
+        .put(props.update_url, {
+            // A refusal is a state change the Trainer did not ask for and must be told about. The
+            // alert is `role="alert"`, but a live region that is inserted does not move the caret —
+            // keyboard and screen-reader users were left at the submit button with no way to reach
+            // the list. Focus lands on the alert instead (AUD-20261102-009 F-02).
+            onError: () => {
+                nextTick(() => alertRef.value?.focus());
+            },
+        });
 };
 </script>
 
@@ -123,6 +133,10 @@ const submit = (): void => {
         current="cockpit"
     >
         <Head :title="`Turn ${props.turn.turn}: ${props.run.trainee}`" />
+
+        <!-- Page-load status (AUD-20261102-009 F-01): the screen's only previous announcement was the
+             post-save "Saved.", so arriving on the page said nothing about whose turn this is. -->
+        <p role="status" class="sr-only">Correcting turn {{ props.turn.turn }} of {{ props.run.trainee }}'s career.</p>
 
         <template #head>
             <PageHeader eyebrow="Correct turn" :title="`Turn ${props.turn.turn}`" :description="lede">
@@ -145,6 +159,7 @@ const submit = (): void => {
 
             <div
                 v-if="form.hasErrors"
+                ref="alertRef"
                 role="alert"
                 tabindex="-1"
                 class="mt-3 rounded-md border border-risk bg-raised p-3 text-sm text-risk"
