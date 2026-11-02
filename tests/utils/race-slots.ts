@@ -92,3 +92,84 @@ export function removeRaceSlots(seeded: SeededRaceSlot[]): void {
         db.close();
     }
 }
+
+/**
+ * The three enriched column sets the detail spec needs, written onto the catalogue's own seeded
+ * rows by `external_ref` rather than invented as extra rows.
+ *
+ * The calendar is seeded; enrichment is not (it arrives through `uma:enrich-races`, which is not
+ * part of `migrate --seed`). This helper reproduces the published shape for one populated row, one
+ * partial row and one unenriched special race, and `clearRaceEnrichment()` puts the columns back so
+ * a neighbouring case still sees the unenriched state.
+ */
+export interface EnrichedRaceIds {
+    populated: number;
+    partial: number;
+    empty: number;
+}
+
+export function seedRaceEnrichment(): EnrichedRaceIds {
+    const db = new DatabaseSync(resolvedScratchDatabase());
+
+    try {
+        const idFor = (externalRef: string): number => {
+            const row = db
+                .prepare('SELECT id FROM race_catalog_slots WHERE external_ref = ? LIMIT 1')
+                .get(externalRef) as { id?: number } | undefined;
+
+            if (row?.id === undefined) {
+                throw new Error(`race fixture ${externalRef} is not in the scratch catalogue`);
+            }
+
+            return Number(row.id);
+        };
+
+        const populated = idFor('102201');
+        const partial = idFor('406801');
+        const empty = idFor('debut');
+
+        db.prepare(
+            `UPDATE race_catalog_slots
+                SET track_name = ?, entries = ?, direction = ?, direction_label = ?,
+                    course = ?, course_label = ?, season = ?, season_label = ?,
+                    factor_effect_1 = ?, factor_effect_2 = ?, reward_summary = ?
+              WHERE id = ?`,
+        ).run(
+            'Hanshin', 18, 1, 'Right-Handed', 3, null, 4, 'Winter (early)', 'speed', 'guts',
+            JSON.stringify([
+                { item: 4, num_min: 1, num_max: 1, chance: '1.000' },
+                { item: 43, num_min: 5, num_max: 5, chance: '0.050' },
+            ]),
+            populated,
+        );
+
+        db.prepare(
+            `UPDATE race_catalog_slots
+                SET track_name = ?, entries = ?, direction = ?, direction_label = ?,
+                    course = ?, course_label = ?, season = ?, season_label = ?,
+                    factor_effect_1 = NULL, factor_effect_2 = NULL, reward_summary = NULL
+              WHERE id = ?`,
+        ).run('Chukyo', 16, 2, 'Left-Handed', 1, 'Inner', 3, 'Early Autumn', partial);
+
+        return { populated, partial, empty };
+    } finally {
+        db.close();
+    }
+}
+
+/** Restores the three rows to the unenriched state this suite's other race cases expect. */
+export function clearRaceEnrichment(ids: EnrichedRaceIds): void {
+    const db = new DatabaseSync(resolvedScratchDatabase());
+
+    try {
+        db.prepare(
+            `UPDATE race_catalog_slots
+                SET track_name = NULL, entries = NULL, direction = NULL, direction_label = NULL,
+                    course = NULL, course_label = NULL, season = NULL, season_label = NULL,
+                    factor_effect_1 = NULL, factor_effect_2 = NULL, reward_summary = NULL
+              WHERE id IN (?, ?)`,
+        ).run(ids.populated, ids.partial);
+    } finally {
+        db.close();
+    }
+}
