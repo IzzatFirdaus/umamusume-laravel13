@@ -1,9 +1,8 @@
 <script setup lang="ts">
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
-import AppLayout from '../../layouts/AppLayout.vue';
+import CareerLayout from '../../layouts/CareerLayout.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
-import CareerSectionNav from '../../components/career/CareerSectionNav.vue';
 import DeckAnalysis from '../../components/support/DeckAnalysis.vue';
 import SupportSlot from '../../components/support/SupportSlot.vue';
 import SupportTypeMark from '../../components/support/SupportTypeMark.vue';
@@ -277,19 +276,17 @@ function save(): void {
 </script>
 
 <template>
-    <AppLayout>
+    <CareerLayout
+        :trainee="props.run.name ?? ''"
+        :trainee-ja="null"
+        :scenario-label="props.run.scenario_label ?? 'No scenario chosen'"
+        :status-label="props.run.status_label"
+        :status="props.run.status_label.toLowerCase()"
+        :run-url="props.run.run_url"
+        current="deck"
+    >
         <Head title="This run's six slots" />
         <template #title>This run's six slots</template>
-
-        <CareerSectionNav
-            :trainee="run.name ?? ''"
-            :scenario-label="run.scenario_label ?? 'No scenario chosen'"
-            :status-label="run.status_label"
-            :status="run.status_label.toLowerCase()"
-            :run-url="run.run_url"
-            current="deck"
-            class="mt-3"
-        />
 
         <div class="mt-1 flex flex-wrap items-start justify-between gap-3">
             <p class="max-w-3xl text-sm text-ink">
@@ -341,6 +338,7 @@ function save(): void {
                     </button>
                 </div>
                 <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving the deck…</p>
+        <p v-if="form.recentlySuccessful" role="status" class="text-sm text-ink-muted">Saved.</p>
                 <p class="mt-1 text-xs text-ink-muted">
                     Saving replaces the whole deck: slots left empty are cleared.
                 </p>
@@ -501,5 +499,5 @@ function save(): void {
         />
             </div>
         </details>
-    </AppLayout>
+    </CareerLayout>
 </template>

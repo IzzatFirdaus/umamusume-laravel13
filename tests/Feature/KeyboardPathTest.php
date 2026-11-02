@@ -95,7 +95,7 @@ it('collapses the rail to marks without removing any destination name', function
     // reason the rail is allowed to be icon-only: a mark that replaces the name would leave ten
     // anonymous links, and §42 asks for text alternatives to icons rather than icons instead of them.
     expect($layout)->toContain("railCollapsed ? 'sr-only' : ''")
-        ->and($layout)->toContain(':title="railCollapsed ? item.label : undefined"');
+        ->and($layout)->toContain(':title="item.label"');
 
     // The marks belong to the collapsed rail alone (owner instruction, 2026-10-06): the full-width
     // sidebar is text, and a drawing beside the word it stands for is noise. Three destination renders
@@ -103,7 +103,7 @@ it('collapses the rail to marks without removing any destination name', function
     // that drops its `v-if` fails here rather than shipping a mixed rail. The toggle's own chevron is
     // unguarded by design and is not a destination mark.
     expect(substr_count($layout, ':name="item.icon"'))->toBe(3)
-        ->and(substr_count($layout, '<NavGlyph v-if="railCollapsed" :name="item.icon" />'))->toBe(3);
+        ->and(substr_count($layout, '<NavGlyph v-if="railCollapsed" :name="item.icon" class="size-4.5" />'))->toBe(3);
 
     // Both widths exist, and the width change is a motion that reduced-motion turns off.
     // The wide rail is the wireframe's measured 236px column, not Tailwind's 256px `w-64`; the
@@ -113,6 +113,17 @@ it('collapses the rail to marks without removing any destination name', function
         ->and($layout)->toContain("'w-[236px]'")
         ->and($layout)->toContain('transition-[width]')
         ->and($layout)->toContain('motion-reduce:transition-none');
+
+    // The HFW's sticky full-height rail: `h-screen` gives it a definite height, `self-start` stops
+    // the flex row stretching it, and the nav scrolls inside it. The data attributes are the hooks
+    // the browser specs measure.
+    expect($layout)->toContain('md:sticky')
+        ->and($layout)->toContain('md:top-0')
+        ->and($layout)->toContain('md:h-screen')
+        ->and($layout)->toContain('md:self-start')
+        ->and($layout)->toContain('bg-panel')
+        ->and($layout)->toContain('data-rail-current')
+        ->and($layout)->toContain('data-rail-dot');
 
     // The choice is remembered in the browser, not in a preference row: a third stored key would widen
     // PRD US-11's two authorised keys. Asserted on the write and the absence of a server route name,

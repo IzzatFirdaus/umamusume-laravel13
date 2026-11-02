@@ -176,11 +176,11 @@ test.describe('Legacy Lab builder', () => {
             await expect(page.getByText(label, { exact: true }).first()).toBeVisible();
         }
 
-        // A node with nothing chosen says so, and never as a dash (AGENTS.md §5). The absence is
-        // carried on the element's `title` rather than as visible text.
-        const notChosen = page.getByTitle('No Umamusume chosen for this node yet.').first();
-        await expect(notChosen).toBeVisible();
-        await expect(notChosen).toHaveAttribute('title', /No Umamusume chosen for this node yet\./);
+        // A node with nothing chosen says so, and never as a dash (AGENTS.md §5). The word is
+        // visible prose, not a `title`: DESIGN.md §5's 2026-10-17 amendment bans a `title`-only
+        // absence, and `6cde0da8` deleted these titles from AncestryNode.vue - this assertion
+        // pinned the superseded idiom and has failed for every run that reached it since.
+        await expect(page.getByText('Not chosen', { exact: true }).first()).toBeVisible();
 
         // The Spark chance is absent with the reason attached. The brief asks for `~10% ★★★`; the
         // odds exist in the corpus only as a wiki pair flagged stale (§1.5.3) and nothing in this
@@ -189,7 +189,7 @@ test.describe('Legacy Lab builder', () => {
         // summary. The chance cell is a COMPARE-page subject (Legacy/Compare.vue:421) and the
         // star-roll sentence survives only as a docblock comment (AncestryNode.vue:20), so both
         // assertions pinned subjects this page never rendered. The absence itself stays proven by
-        // the per-node title above.
+        // the visible "Not chosen" word above.
 
         // Assignment is a labelled `<select>`, so it is in the tab order, arrow-keyable and named
         // for a screen reader with no custom key handling. WCAG 2.2 SC 2.5.7 forbids a drag-only

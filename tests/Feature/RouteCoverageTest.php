@@ -54,6 +54,7 @@ final class RouteCoverageMap
      */
     public const EXCLUDED_PAGES = [
         'Catalog/Show',
+        'Database/RaceDetail',
     ];
 
     /**

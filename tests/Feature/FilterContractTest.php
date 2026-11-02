@@ -139,3 +139,30 @@ it('keeps the catalog and skills page sizes on the same rule they already used',
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page->where('skills.per_page', 2));
 });
+
+/*
+ * The roster's own default is six, and only its default (owner ask, 2026-10-30). ADR-0018's rule is
+ * that a page size is honoured and clamped 1..100, never refused, and that the floor and ceiling are
+ * the same on every surface; a surface may pass its own default, which is what `PageSize::clamp()`'s
+ * second argument exists for. So the untouched page is six rows and `?pageSize=` still wins in both
+ * directions — the case below would fail if a later session turned this into a `min(6, …)` cap, which
+ * would silently break the contract on a pasted or restored URL.
+ */
+it('shows six roster rows a page by default and still honours a larger ask', function (): void {
+    Umamusume::factory()->count(9)->create(['release_status' => ReleaseStatus::GlobalReleased]);
+
+    $this->get('/umamusume')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('umamusumes.data', 6)
+            ->where('umamusumes.per_page', 6)
+            // The count line still states the whole scope, not the page: six of nine.
+            ->where('totalCount', 9));
+
+    // The ceiling is ADR-0018's, untouched by the default above.
+    $this->get('/umamusume?pageSize=100')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('umamusumes.data', 9)
+            ->where('umamusumes.per_page', 100));
+});

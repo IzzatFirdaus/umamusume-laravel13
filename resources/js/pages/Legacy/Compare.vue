@@ -342,18 +342,6 @@ const verdictPill = (verdict: string): string =>
             be a comparison, and one column is the builder's own page.
         </p>
 
-        <!-- One column is not a comparison: every verdict row would read "same" because there is only
-             one value to compare against itself, and caution-coloured "same" pills say a difference was
-             looked for and not found. The honest state is the same one the empty screen states.
-             (AUD-20261102-024 F-01) -->
-        <p
-            v-else-if="columns.length === 1"
-            class="mt-8 rounded-md border border-dashed border-rule bg-panel p-6 text-sm text-ink-muted"
-        >
-            One run is selected. A comparison needs two columns, so pick a second run above to see the
-            difference row.
-        </p>
-
         <template v-else>
             <p
                 v-if="allColumnsIdentical"
