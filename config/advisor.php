@@ -32,7 +32,7 @@ return [
         'rest_recovery' => [
             'value' => 30,
             'source' => 'GameWith, 2026-09-25',
-            'verified_at' => '2026-09-25',
+            'verified_at' => '2026-11-02',
             'confidence' => 'current',
         ],
 
@@ -47,14 +47,14 @@ return [
         'wit_cost' => [
             'value' => 0,
             'source' => 'Game8, 2026-09-10',
-            'verified_at' => '2026-09-10',
+            'verified_at' => '2026-11-02',
             'confidence' => 'current',
         ],
 
         'advisory_threshold' => [
             'value' => 50,
             'source' => 'qualitative only',
-            'verified_at' => '2026-09-25',
+            'verified_at' => '2026-11-02',
             'confidence' => 'current',
         ],
     ],

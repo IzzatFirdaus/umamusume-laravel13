@@ -951,8 +951,11 @@ Game8 scenario pages, with the source noted per claim.
 * **Fan and skill-point gates.** Senior-year Valentine 60,000 / 40,000, Fan Fest 70,000 / 60,000
   requiring a 3-bar friendship with Director Akikawa, Holiday Season 120,000 / 80,000, all from
   `docs/scenarios/01`.
-* **Beginner targets.** Speed around 800 or an A rank to win the URA finale; stamina by distance
-  400 Sprint, 500 Mile, 600 Medium, 700 Long.
+* **Beginner targets.** Speed around 800 or an A rank to win the URA finale; stamina by distance,
+  per `docs/scenarios/01`'s "Stamina Requirements" table: Sprint ~350–450 (D–C rank), Mile ~450–550
+  (C to C+), Medium ~600–700 (B), Long ~700–800 (B+). *Corrected 2026-11-01: this line read "400
+  Sprint, 500 Mile, 600 Medium, 700 Long", which collapsed each band to its minimum and lost the
+  range the guide actually states.*
 
 #### 2.2.2 Unity Cup `[Global]`
 

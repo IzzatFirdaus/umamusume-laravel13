@@ -5,6 +5,10 @@ use App\Services\DataPipeline\Parsers\GametoraCharacterCardParser;
 use App\Services\DataPipeline\Parsers\GametoraCharacterParser;
 use App\Services\DataPipeline\Parsers\GametoraCharacterProfileParser;
 use App\Services\DataPipeline\Parsers\GametoraRaceCatalogParser;
+use App\Services\DataPipeline\Parsers\GametoraRaceFansParser;
+use App\Services\DataPipeline\Parsers\GametoraRaceParser;
+use App\Services\DataPipeline\Parsers\GametoraRaceRewardParser;
+use App\Services\DataPipeline\Parsers\GametoraRacetrackParser;
 use App\Services\DataPipeline\Parsers\GametoraSkillsParser;
 use App\Services\DataPipeline\Parsers\GametoraSupportCardParser;
 use App\Services\DataPipeline\Parsers\GametoraSupportEffectParser;
@@ -70,12 +74,12 @@ return [
          * as silently old data.
          */
         'gametora-characters' => [
-            'url' => 'https://gametora.com/data/umamusume/character-cards.e9e9ee6d.json',
+            'url' => 'https://gametora.com/data/umamusume/character-cards.897e63ea.json',
             'parser' => GametoraCharacterParser::class,
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
-            'seed_file' => 'gametora-characters.e9e9ee6d.json',
+            'seed_file' => 'gametora-characters.897e63ea.json',
         ],
 
         /*
@@ -106,14 +110,14 @@ return [
          * notes in this file claim.
          */
         'gametora-character-cards' => [
-            'url' => 'https://gametora.com/data/umamusume/character-cards.e9e9ee6d.json',
+            'url' => 'https://gametora.com/data/umamusume/character-cards.897e63ea.json',
             'parser' => GametoraCharacterCardParser::class,
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
             // Same body as `gametora-characters` above, read at the other grain — hence the
             // same committed file rather than a second copy of it.
-            'seed_file' => 'gametora-characters.e9e9ee6d.json',
+            'seed_file' => 'gametora-characters.897e63ea.json',
         ],
 
         /*
@@ -404,6 +408,62 @@ return [
          * obligation; the race names a Trainer reads come from `race_catalog_slots.title`, which is
          * already the Global-vetted client string, and not from this file. True as of 2026-10-13.
          */
+        'gametora-racetracks' => [
+            'url' => 'https://gametora.com/data/umamusume/racetracks_extended.effe0119.json',
+            'manifest' => [
+                'url' => 'https://gametora.com/data/manifests/umamusume.json',
+                'base' => 'https://gametora.com/data/umamusume/',
+                'key' => 'racetracks_extended',
+            ],
+            'parser' => GametoraRacetrackParser::class,
+            'delay_ms' => 1000,
+            'timeout_s' => 15,
+            'timezone' => 'Asia/Tokyo',
+            'seed_file' => 'racetracks_extended.json',
+        ],
+
+        'gametora-race-fans' => [
+            'url' => 'https://gametora.com/data/umamusume/race-fans.82ab7152.json',
+            'manifest' => [
+                'url' => 'https://gametora.com/data/manifests/umamusume.json',
+                'base' => 'https://gametora.com/data/umamusume/',
+                'key' => 'race-fans',
+            ],
+            'parser' => GametoraRaceFansParser::class,
+            'delay_ms' => 1000,
+            'timeout_s' => 15,
+            'timezone' => 'Asia/Tokyo',
+            'seed_file' => 'race-fans.json',
+        ],
+
+        'gametora-races' => [
+            'url' => 'https://gametora.com/data/umamusume/races.51478888.json',
+            'manifest' => [
+                'url' => 'https://gametora.com/data/manifests/umamusume.json',
+                'base' => 'https://gametora.com/data/umamusume/',
+                'key' => 'races',
+            ],
+            'parser' => GametoraRaceParser::class,
+            'delay_ms' => 1000,
+            'timeout_s' => 15,
+            'timezone' => 'Asia/Tokyo',
+            'seed_file' => 'races.json',
+        ],
+
+        'gametora-race-rewards' => [
+            'url' => 'https://gametora.com/data/umamusume/race-rewards.d95f3aa1.json',
+            'manifest' => [
+                'url' => 'https://gametora.com/data/manifests/umamusume.json',
+                'base' => 'https://gametora.com/data/umamusume/',
+                'key' => 'race-rewards',
+            ],
+            'parser' => GametoraRaceRewardParser::class,
+            'delay_ms' => 1000,
+            'timeout_s' => 15,
+            'timezone' => 'Asia/Tokyo',
+            'seed_file' => 'race-rewards.json',
+        ],
+
         'gametora-ura-objectives' => [
             'url' => 'https://gametora.com/data/umamusume/ura-objectives.ead4bbfe.json',
             'manifest' => [
@@ -466,7 +526,7 @@ return [
          * date: the skill detail's provenance row prints it, and the ladder's docblock reads it here
          * instead of repeating it.
          */
-        'hint_discount_measured_at' => '2026-10-03',
+        'hint_discount_measured_at' => '2026-11-02',
     ],
 
     /*
@@ -542,7 +602,7 @@ return [
      */
     'race_payouts' => [
         'source' => 'Game8.co "Race Bonus Explained", 2026-06-26, [Global]; transcribed in UMAMUSUME_REFERENCE.md (2026-10-15 payout table)',
-        'verified_at' => '2026-10-15',
+        'verified_at' => '2026-11-02',
         'families' => [
             'standard' => [
                 'g1' => ['stat' => 10, 'sp' => 45],

@@ -38,7 +38,7 @@ return [
     | It is a verification date, not an "updated" one: nothing here was fetched
     | on it.
     */
-    'verified_at' => '2026-09-27',
+    'verified_at' => '2026-11-02',
 
     /*
     | The source the matrix's numbers were read against, and whether that source is marked stale.
@@ -285,7 +285,16 @@ return [
             */
             'finale_targets' => [
                 'speed_to_win' => ['approx' => 800, 'phrasing' => 'around 800 Speed, or an A rank'],
-                'stamina_by_distance' => ['Sprint' => 400, 'Mile' => 500, 'Medium' => 600, 'Long' => 700],
+                // Ranges, as the source states them: `docs/scenarios/01-ura-finale.md`'s "Stamina
+                // Requirements" table prints 350–450 Sprint, 450–550 Mile, 600–700 Medium and 700–800
+                // Long. The earlier single figures here (400/500/600/700) were those bands' minima, and
+                // printing a point where the guide draws a band told a Trainer the floor was exact.
+                'stamina_by_distance' => [
+                    'Sprint' => ['min' => 350, 'max' => 450],
+                    'Mile' => ['min' => 450, 'max' => 550],
+                    'Medium' => ['min' => 600, 'max' => 700],
+                    'Long' => ['min' => 700, 'max' => 800],
+                ],
             ],
 
             /*

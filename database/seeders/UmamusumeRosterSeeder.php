@@ -133,7 +133,6 @@ class UmamusumeRosterSeeder extends Seeder
      */
     private function inScope(array $record): bool
     {
-        return ReleaseStatus::tryFrom((string) ($record['release_status'] ?? ''))
-            !== ReleaseStatus::JapanOnly;
+        return ReleaseStatus::tryFrom((string) ($record['release_status'] ?? '')) !== null;
     }
 }
