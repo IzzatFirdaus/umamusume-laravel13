@@ -92,7 +92,13 @@ class CatalogController extends Controller
         $status = $request->validated('status');
         $search = $request->query('search');
         $page = max(1, (int) $request->query('page', '1'));
-        $pageSize = PageSize::clamp($request->query('pageSize'));
+        // Six rows a page, down from the shared default of 25 (owner ask, 2026-10-30): the roster is a
+        // browse surface, and six cards is one screen of the grid rather than two and a half. This is a
+        // per-surface DEFAULT, not a second constant — `PageSize`'s docblock already admits exactly this
+        // shape (`SupportCardController` passes its own), and the floor and ceiling stay ADR-0018's 1..100,
+        // so `?pageSize=` is still honoured in both directions and only the untouched page changed size.
+        // The pager carries the rest, and its links keep the query string, so paging stays at six.
+        $pageSize = PageSize::clamp($request->query('pageSize'), 6);
 
         /** @var ReleaseStatus|null $statusEnum */
         $statusEnum = $status !== null && $status !== CatalogSearchRequest::ALL ? ReleaseStatus::tryFrom((string) $status) : null;
@@ -194,8 +200,8 @@ class CatalogController extends Controller
                         'rarity_stars' => $card->rarity->stars(),
                         'is_debut_form' => $card->is_debut_form,
                         'unconfirmed' => $card->unconfirmed,
-                        'global_release_date' => $card->global_release_date->toDateString(),
-                        'global_release_date_display' => $card->global_release_date->format('M j, Y'),
+                        'global_release_date' => $card->global_release_date?->toDateString(),
+                        'global_release_date_display' => $card->global_release_date?->format('M j, Y'),
                         'artworkURL' => $mirror->url('card_portrait', (int) $card->card_id),
                     ])->all(),
                 ];
@@ -405,8 +411,8 @@ class CatalogController extends Controller
                 'rarity_stars' => $card->rarity->stars(),
                 'is_debut_form' => $card->is_debut_form,
                 'unconfirmed' => $card->unconfirmed,
-                'global_release_date' => $card->global_release_date->toDateString(),
-                'global_release_date_display' => $card->global_release_date->format('M j, Y'),
+                'global_release_date' => $card->global_release_date?->toDateString(),
+                'global_release_date_display' => $card->global_release_date?->format('M j, Y'),
                 'snapshot_path' => $card->snapshot_path,
                 'source_url' => $card->source_url,
                 'fetched_at_display' => $card->fetched_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
