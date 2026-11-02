@@ -371,6 +371,7 @@ class CockpitController extends Controller
             // and grade-point period all POST through `runs.update`, the same route and validator the
             // 2.0.0 record screen used. The cockpit is the door, so the 2.0 edit URLs ride here.
             'run_url' => route('runs.cockpit', $run),
+            'skills_url' => route('runs.skills.planner', $run),
             // The run-identity door (`C6b.1`): the same four forms the cockpit drew, on a page of
             // their own, so the `Career tools` disclosure can retire. It reads; the writes stay on
             // `update_url` below.
@@ -1206,7 +1207,10 @@ class CockpitController extends Controller
             ],
             'stamina_floors' => [
                 'rows' => array_map(
-                    static fn (string $distance, string $floor): array => ['distance' => $distance, 'floor' => number_format((int) $floor)],
+                    static fn (string $distance, array $floor): array => [
+                        'distance' => $distance,
+                        'floor' => number_format((int) $floor['min']).'–'.number_format((int) $floor['max']),
+                    ],
                     array_keys((array) $targets['stamina_by_distance']),
                     array_values((array) $targets['stamina_by_distance']),
                 ),

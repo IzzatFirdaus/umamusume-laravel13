@@ -145,7 +145,7 @@ interface Performance {
 }
 
 const props = defineProps<{
-    run: { id: number; trainee: string; trainee_ja: string | null; umamusume_id: number; scenario: string | null; status: string; status_label: string; scenario_label: string; run_url: string; index_url: string; timeline_url: string; result_url: string; training_url: string; deck_url: string; status_labels: Record<string, string>; scenarios: Record<string, string>; update_url: string; destroy_url: string; export_csv_url: string; export_json_url: string; current_objective_index: number | null };
+    run: { id: number; trainee: string; trainee_ja: string | null; umamusume_id: number; scenario: string | null; status: string; status_label: string; scenario_label: string; run_url: string; skills_url: string; index_url: string; timeline_url: string; result_url: string; training_url: string; deck_url: string; status_labels: Record<string, string>; scenarios: Record<string, string>; update_url: string; destroy_url: string; export_csv_url: string; export_json_url: string; current_objective_index: number | null };
     header: Header;
     /**
      * Where the career stands, as `CareerPosition::toArray()` carries it. The header's Year, Month and
@@ -519,10 +519,14 @@ const teamBursts = computed((): string => {
     return total >= 10 && total <= 12 ? `${total} (inside 10-12)` : String(total);
 });
 
-const teamRank = computed((): string => 'not recorded');
-
-/** The Skills planner's URL, derived the way `CareerSectionNav` derives its steps. */
-const skillsUrl = computed((): string => `${props.run.run_url.replace(/\/cockpit$/, '')}/skills`);
+const teamRank = computed((): string => {
+    // Recorded TeamRankPayload via header.values.team_rank (CockpitController::headerSection, :509).
+    const rank = props.header.values['team_rank'];
+    if (typeof rank !== 'string' || rank.trim() === '') {
+        return 'not recorded';
+    }
+    return rank;
+});
 
 /**
  * "Where to go": the screens a career's turn leads into, from the doors this page already carries.
@@ -537,7 +541,7 @@ const whereToGo = computed((): { label: string; href: string }[] => {
         links.push({ label: 'Race decision', href: race.href });
     }
 
-    links.push({ label: 'Skills planner', href: skillsUrl.value });
+    links.push({ label: 'Skills planner', href: props.run.skills_url });
     links.push({ label: 'Run deck', href: props.run.deck_url });
     links.push({ label: 'Timeline', href: props.run.timeline_url });
     links.push({ label: 'Career result', href: props.run.result_url });
@@ -1032,8 +1036,8 @@ const jumpToShop = (): void => {
         <div class="info mt-4" role="note">
             <span aria-hidden="true">i</span>
             <span>
-                This cockpit is a shell-density view. The full twelve-change treatment with token
-                mapping lives in the companion research document.
+                This screen shows the run's position and decision. Full scenario boards are on
+                Scenario detail.
             </span>
         </div>
 
