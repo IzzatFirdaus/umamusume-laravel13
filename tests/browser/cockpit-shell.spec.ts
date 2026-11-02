@@ -189,7 +189,7 @@ test('prints the shell-density info banner above the body grid', async ({ page }
     const banner = page.locator('main .info[role="note"]');
     await expect(banner).toHaveCount(1);
     await expect(banner).toBeVisible();
-    await expect(banner).toContainText('shell-density view');
+    await expect(banner).toContainText('Full scenario boards are on Scenario detail');
 
     // It reads before the body's first region, so the note is not discovered mid-page.
     expect(await top(banner)).toBeLessThan(await top(stats(page)));

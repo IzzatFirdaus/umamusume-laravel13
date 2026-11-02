@@ -189,6 +189,51 @@ test('keeps the picker open across a filter', async ({ page }) => {
     await expect(page).toHaveURL(/q=Teio/);
 });
 
+test('a new slot opens the picker with no search left over from the slot before it', async ({ page }) => {
+    await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
+
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+
+    // Narrow the list the way a Trainer hunting one card does: a type and a name, both submitted.
+    await dialog.locator('select[name="type"]').selectOption('speed');
+    await dialog.getByLabel('Name contains').fill('Teio');
+    await dialog.getByRole('button', { name: 'Filter' }).click();
+    await expect(page).toHaveURL(/q=Teio/);
+
+    await dialog.getByRole('button', { name: 'Equip', exact: true }).first().click();
+    await expect(page.getByText('Deck saved.')).toBeVisible();
+
+    // Equipping one card is a unit of work and it ended when the dialog closed, so slot two is a fresh
+    // one: the box opens on the whole catalogue and the address drops the search that belonged to slot
+    // one. The URL is the sync point as well as the assertion - the retarget is a `router.get`.
+    await page.getByRole('button', { name: 'Choose a card for Slot 2' }).click();
+    await expect(page).toHaveURL(/deck_slot=2/);
+
+    await expect(dialog.getByLabel('Name contains')).toHaveValue('');
+    await expect(dialog.locator('select[name="type"]')).toHaveValue('');
+    await expect(page).not.toHaveURL(/q=Teio/);
+    await expect(page).not.toHaveURL(/type=speed/);
+});
+
+test('a second look at the slot already aimed at keeps the search being refined', async ({ page }) => {
+    await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
+
+    const dialog = page.getByRole('dialog');
+    await dialog.getByLabel('Name contains').fill('Teio');
+    await dialog.getByRole('button', { name: 'Filter' }).click();
+    await expect(page).toHaveURL(/q=Teio/);
+
+    // Escape loses a filter string, not an entry (`CardPicker.vue` states why it carries no close-guard).
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+
+    // The same slot, so this is the Trainer resuming the search they just made rather than starting the
+    // next unit of work. Without this case the reset above can be "simplified" into always-clearing.
+    await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
+    await expect(dialog.getByLabel('Name contains')).toHaveValue('Teio');
+});
+
 test('finds a card by its printed name and epithet', async ({ page }) => {
     await page.getByRole('button', { name: /Choose a card for/i }).first().click();
 

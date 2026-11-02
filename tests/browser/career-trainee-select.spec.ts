@@ -524,11 +524,11 @@ test.describe('Trainee Selection and Profile', () => {
         // states the absence rather than a number.
         await expect(page.getByRole('heading', { name: 'Unique skill' })).toBeVisible();
         await expect(page.getByText('Shooting Star of Dioskouroi')).toBeVisible();
-        await expect(page.getByText('N/A SP')).toBeVisible();
+        await expect(page.getByText('Unique')).toBeVisible();
 
         // The two rows the wireframe keeps for figures this catalogue does not hold.
-        await expect(page.getByText(/No growth figure is stored/)).toBeVisible();
-        await expect(page.getByText(/No base-stat figure is stored/)).toBeVisible();
+        await expect(page.getByText(/No growth figure is recorded/)).toBeVisible();
+        await expect(page.getByText(/No base-stat figure is recorded/)).toBeVisible();
 
         // The Build analysis section is GONE (slice 3.4); its durable sentence survives as prose.
         await expect(page.getByRole('heading', { name: 'Build analysis' })).toHaveCount(0);

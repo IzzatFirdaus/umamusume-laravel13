@@ -432,7 +432,7 @@ test('the scenario matrix prints config/scenarios.php, verification date and all
     await expect(page.getByRole('heading', { name: 'Scenario matrix', level: 1 })).toBeVisible();
 
     // The config's own date, named as a verification date rather than an update (config/scenarios.php:41-42).
-    await expect(page.getByText(/Verified 2026-09-27 against/)).toBeVisible();
+    await expect(page.getByText(/Verified 2026-11-02 against/)).toBeVisible();
 
     for (const label of ['URA Finale', 'Unity Cup', 'Trackblazer', 'Our Grand Concert']) {
         await expect(page.getByRole('heading', { name: label, level: 3 })).toBeVisible();

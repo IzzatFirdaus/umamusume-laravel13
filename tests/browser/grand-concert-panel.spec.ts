@@ -76,7 +76,7 @@ test('draws the five published caps as a table of base, bonus and cap', async ({
     await expect(speed.getByRole('cell').nth(2)).toHaveText('1600');
 
     // The date is the matrix's verification date, not a fetch date.
-    await expect(section.getByText(/Verified 2026-09-27/)).toBeVisible();
+    await expect(section.getByText(/Verified 2026-11-02/)).toBeVisible();
 });
 
 test('names the caps verified and says why the panel is undrawn in a visible line', async ({ page }) => {

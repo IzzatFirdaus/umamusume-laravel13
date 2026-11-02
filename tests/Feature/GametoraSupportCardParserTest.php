@@ -189,7 +189,7 @@ it('keeps the 23 cards whose char_id is a staff id the trainable catalogue does 
     // names nobody in the trainable catalogue. Tazuna Hayakawa's Pal cards and the two group cards are
     // also the rows the Scenario Link badge is derived from.
     $roster = json_decode(
-        (string) file_get_contents(base_path('database/seeders/data/gametora-characters.e9e9ee6d.json')),
+        (string) file_get_contents(base_path('database/seeders/data/gametora-characters.897e63ea.json')),
         true,
         512,
         JSON_THROW_ON_ERROR

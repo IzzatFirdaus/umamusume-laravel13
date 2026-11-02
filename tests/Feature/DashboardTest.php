@@ -66,7 +66,7 @@ it('renders the dashboard with no active career, an empty Veteran list and the d
             ->where('dataStatus.label', 'Global data')
             ->where('dataStatus.state', 'Current')
             ->where('dataStatus.verified_at', config('scenarios.verified_at'))
-            ->where('dataStatus.verified_at', '2026-09-27')
+            ->where('dataStatus.verified_at', '2026-11-02')
             ->has('counts.trainees')
             ->has('counts.skills')
             ->has('counts.supportCards'));

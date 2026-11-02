@@ -11,8 +11,8 @@ import { test, expect } from '@playwright/test';
  *   2. It carries the section crumb on the left and the two utilities on the right: the live-career
  *      pill (`1 active career` / `N active careers`) and the `? Help` link.
  *   3. The wireframe's `+ Static wireframe` chip is a document artifact and does not ship.
- *   4. The rail is the wireframe's 236px column, the product name lives in its head, and the current
- *      destination carries `aria-current="page"` plus a left rule.
+ *   4. The rail is the wireframe's 236px sticky column, the product name lives in its head, and the
+ *      current destination carries `aria-current="page"` plus the wireframe's 3px inset left rule.
  *   5. One `h1`, inside the banner band under the bar.
  */
 
@@ -67,15 +67,47 @@ test('the rail is the wireframe 236px column and marks the current destination',
     const box = await rail.boundingBox();
     expect(box).not.toBeNull();
     expect(Math.round(box!.width)).toBe(236);
+    expect(await rail.evaluate((el) => getComputedStyle(el).position)).toBe('sticky');
 
     const primary = page.getByRole('navigation', { name: 'Global navigation' });
     const current = primary.locator('[aria-current="page"]');
     await expect(current).toHaveCount(1);
     await expect(current).toHaveText('Dashboard');
 
-    // The left rule is a shape as well as a fill, so state never rides on colour alone (WCAG 1.4.1).
-    const rule = await current.evaluate((el) => getComputedStyle(el).borderLeftWidth);
-    expect(rule).toBe('4px');
+    // The current row carries the HFW's 3px inset rule, a shape as well as a fill, so state never
+    // rides on colour alone (WCAG 1.4.1). It is a child span, not a border, so the label does not
+    // shift when the rule appears.
+    const rule = current.locator('[data-rail-current]');
+    await expect(rule).toHaveCount(1);
+    expect(await rule.evaluate((el) => getComputedStyle(el).width)).toBe('3px');
+    expect(await rule.evaluate((el) => getComputedStyle(el).height)).toBe('28px');
+    expect(await rule.evaluate((el) => getComputedStyle(el).top)).toBe('8px');
+    expect(await rule.evaluate((el) => getComputedStyle(el).backgroundColor)).toBe(BLUE);
+    expect(await current.evaluate((el) => getComputedStyle(el).borderLeftWidth)).toBe('0px');
+});
+
+test('the rail stays pinned while the page scrolls', async ({ page }) => {
+    // The library is taller than this viewport, which is the condition the rail has to survive.
+    await page.setViewportSize({ width: 1280, height: 600 });
+    await page.goto('/support-cards', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    expect(await page.evaluate(() => document.documentElement.scrollHeight)).toBeGreaterThan(600);
+
+    const rail = page.locator('aside').first();
+    const topbar = page.locator(BAR);
+    const railBefore = await rail.boundingBox();
+    const barBefore = await topbar.boundingBox();
+
+    await page.evaluate(() => window.scrollTo(0, 400));
+    await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(300);
+
+    const railAfter = await rail.boundingBox();
+    const barAfter = await topbar.boundingBox();
+
+    // The rail holds the viewport while the page moves under it; the top bar scrolls away.
+    expect(Math.abs((railAfter?.y ?? -1) - (railBefore?.y ?? 0))).toBeLessThanOrEqual(1);
+    expect(Math.round(railAfter?.height ?? 0)).toBe(600);
+    expect(barAfter?.y ?? 0).toBeLessThan((barBefore?.y ?? 0) - 300);
 });
 
 test('the mobile bar offers the wireframe four slots plus More', async ({ page }) => {

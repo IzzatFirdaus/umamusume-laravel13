@@ -161,7 +161,7 @@ it('renders the Scenarios matrix with the config values and PARTIALLY DOCUMENTED
             ->has('baseCap')
             ->where('baseCap', 1200)
             ->has('verifiedAt')
-            ->where('verifiedAt', '2026-09-27')
+            ->where('verifiedAt', '2026-11-02')
             ->has('scenarios', 4)
             ->where('scenarios.ura_finale.label', 'URA Finale')
             ->where('scenarios.unity_cup.label', 'Unity Cup')

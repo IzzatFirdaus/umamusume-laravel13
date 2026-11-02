@@ -56,6 +56,6 @@ test('the hub still carries the nine-tile grid, the strip and the verification d
     ).toHaveCount(9);
     await expect(page.getByRole('navigation', { name: 'Reference data areas' })).toBeVisible();
     // A verification date, never "updated today".
-    await expect(page.getByText(/verified 2026-09-27/i).first()).toBeVisible();
+    await expect(page.getByText(/verified 2026-11-02/i).first()).toBeVisible();
     await expect(page.getByText(/updated today/i)).toHaveCount(0);
 });
