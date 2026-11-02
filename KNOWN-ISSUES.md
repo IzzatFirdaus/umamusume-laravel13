@@ -4192,3 +4192,19 @@ open, not because one is preferred; a Career-domain slice decides.
 
 The revert in `05da0924` stands under all three: the case dies upstream of the mobile-order pair on a
 missing strip region, so any edit to those lines is unverifiable until a disposition is chosen.
+
+## KI-148 — Four Form Counted rows leaked into the dev DB (data-hygiene, purged)
+
+**State:** RESOLVED (purged) 2026-11-02. Four rows (Form Counted 1..4, ids 68-71, external_ref null,
+no pipeline source) leaked into the dev database from a test run and rendered at
+/database/trainees?search=Form%20Counted with live detail URLs. The screens did not distinguish them
+from real trainees.
+
+**Why not a code defect.** The read path is correct: CatalogRosterTreeTest.php:219 intentionally creates
+trainees without external_ref via factory and asserts they render. A read-path filter on
+external_ref IS NOT NULL would break that test and any legitimate trainee-creation flow. The audit's
+proposed remedy (F-08) was therefore wrong; the correct remedy is data-hygiene (purge the rows), which
+was applied in this pass (4 deleted, 0 remaining).
+
+**Closure.** Purged via direct delete on the dev DB. No code change. Read path unchanged. Entry recorded
+for durability so a future reader understands why the read-path filter cannot be used.
