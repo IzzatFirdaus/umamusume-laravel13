@@ -265,7 +265,7 @@ const engineCondition = (skill: Skill): string =>
                                             v-if="skill.is_unique"
                                             class="pill pill-neutral"
                                             title="Marked from the source's skill class code, not from a card's own skill list."
-                                        >✦ Unique</span>
+                                        >✦ Unique<span class="sr-only">, from the source's skill class code, not a rarity word</span></span>
                                     </span>
                                     <!-- 18 of the 623 Global rows store the same string in both name columns,
                                          so the second line only appears when it carries something new. -->

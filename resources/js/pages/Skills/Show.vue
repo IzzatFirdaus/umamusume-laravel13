@@ -257,7 +257,7 @@ const effectLine = (effect: Effect): string => `type ${effect.type}: ${effect.va
                                         v-if="props.skill.is_unique"
                                         class="pill pill-neutral"
                                         title="Marked from the source's skill class code, not from a card's own skill list."
-                                    >✦ Unique</span>
+                                    >✦ Unique<span class="sr-only">, from the source's skill class code, not a rarity word</span></span>
                                     <template v-else>No</template>
                                 </td>
                             </tr>
