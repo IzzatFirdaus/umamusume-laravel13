@@ -282,3 +282,34 @@ test('leaves the Identity section text-only when the mirror holds no file', asyn
     await expect(page.getByRole('heading', { name: 'Profile' })).toBeVisible();
     await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 });
+
+// The trainee profile plan's follow-up: the catalogue stores the source's base stats and growth
+// row per card (`character_cards.base_stats` / `.growth_rates`, ADR-0030), so the detail page must
+// print them rather than stating a character-wide absence. The seeded Special Week debut form is
+// 83/88/98/90/91 with growth 0/20/0/0/10%.
+test('renders the recorded base stats and growth for the active form', async ({ page }) => {
+    await page.goto('/umamusume/special-week');
+    await page.locator('#app > *').first().waitFor();
+
+    const block = page.locator('.card').filter({ has: page.getByRole('heading', { name: 'Base stats and growth' }) });
+    const rows = block.locator('tbody tr');
+    await expect(rows).toHaveCount(5);
+
+    // Each row prints a real figure in both columns, never the absence token.
+    for (const row of await rows.all()) {
+        const cells = row.locator('td');
+        await expect(cells.nth(1)).toHaveText(/^\d+$/);
+        await expect(cells.nth(2)).toHaveText(/^\d+%$/);
+    }
+
+    await expect(rows.first()).toContainText('Speed');
+    await expect(rows.first()).toContainText('83');
+    await expect(rows.nth(1)).toContainText('Stamina');
+    await expect(rows.nth(1)).toContainText('20%');
+
+    // With a row recorded, neither absence note prints. A zero growth rate is a real figure and
+    // still prints `0%` rather than falling back to the absence.
+    await expect(block.getByText('No base-stat figure is recorded for this form.')).toHaveCount(0);
+    await expect(block.getByText('No growth figure is recorded for this form.')).toHaveCount(0);
+    await expect(rows.nth(2)).toContainText('0%');
+});

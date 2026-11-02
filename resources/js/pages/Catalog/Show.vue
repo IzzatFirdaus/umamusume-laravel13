@@ -7,10 +7,9 @@
  * beyond the HFW (her goals, her runs, the form's skill lists) follow the same two-column block as
  * full-width cards, so nothing the previous screen answered was dropped to make the new order fit.
  *
- * Two figures the HFW prints are not stored in this catalogue, and the page states that instead of
- * inventing them: the five base stat values (and with them the ★4 and ★5 totals) and the growth row.
- * `character_cards` holds a title, a rarity and a release date; a growth row lives on the run that
- * reads it off the card. A zero is a recorded figure, so no `+0%` prints where nothing was fetched.
+ * The five base values and the growth row are recorded per card (`character_cards.base_stats` /
+ * `growth_rates`, ADR-0030), keyed by stat name so the order comes from the payload. A card whose
+ * source never published them states the absence; a zero the source did publish is a real zero.
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
@@ -41,6 +40,10 @@ interface Card {
     snapshot_path: string | null;
     source_url: string;
     fetched_at_display: string | null;
+    /** The source's five base values keyed by stat name, or null when it published none. */
+    base_stats: Record<string, number> | null;
+    /** The source's five growth percentages keyed by stat name, or null when it published none. */
+    growth_rates: Record<string, number> | null;
 }
 
 interface Skill {
@@ -130,6 +133,8 @@ const props = defineProps<{
     traineeGoals: TraineeGoals;
     provenance: Source[];
     showUnconfirmed: boolean;
+    /** The five stats in display order, supplied by the server so the page names none of them. */
+    stat_order: string[];
     /** The carry endpoint: writes this trainee into the setup draft and opens the wizard. */
     carry_url: string;
 }>();
@@ -137,6 +142,17 @@ const props = defineProps<{
 const activeCard = computed<Card | null>(
     () => props.cards.find((card) => card.id === props.activeCardId) ?? props.cards[0] ?? null,
 );
+
+/*
+ * The base/growth blocks read the active form, the same one the Identity slot and the skill lists
+ * above already read. A null row is the source's own silence, never a zero.
+ */
+const baseStats = computed<Record<string, number> | null>(() => activeCard.value?.base_stats ?? null);
+
+const growthRates = computed<Record<string, number> | null>(() => activeCard.value?.growth_rates ?? null);
+
+/** Payload order, with the client's own list as a fallback for an older payload shape. */
+const statOrder = computed<string[]>(() => (props.stat_order.length > 0 ? props.stat_order : STATS));
 
 const uniqueSkills = computed<SkillList>(() => props.skillLists[0]);
 
@@ -154,9 +170,8 @@ function formHref(id: number): string {
     return `/umamusume/${props.trainee.slug}?${params.toString()}`;
 }
 
-// The five stats the client trains, in the client's own order (`UMAMUSUME_REFERENCE.md` §1.3.1). A
-// row stays on screen for each even though this catalogue stores no value, because a missing row
-// reads as a missing column while "Not recorded" reads as the state it is.
+// The five stats the client trains, in the client's own order (`UMAMUSUME_REFERENCE.md` §1.3.1).
+// The page prints them from `stat_order`; this list is the fallback when a payload carries none.
 const STATS = ['Speed', 'Stamina', 'Power', 'Guts', 'Wit'];
 
 const th = 'border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong';
@@ -202,7 +217,8 @@ const cardH2 = 'text-base font-bold text-ink-strong';
 
         <div class="grid gap-4 g-side">
             <div>
-                <!-- Base values and growth: the region stays, the values state their absence. -->
+                <!-- Base values and growth: the source's own figures when it published them, and the absence
+                     stated when it did not. -->
                 <div class="card">
                     <h2>Base stats and growth</h2>
                     <p class="sub">A card's five base values, and what each stat's growth row adds to it.</p>
@@ -215,20 +231,26 @@ const cardH2 = 'text-base font-bold text-ink-strong';
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for="stat in STATS" :key="stat">
+                            <tr v-for="stat in statOrder" :key="stat">
                                 <td :class="td">{{ stat }}</td>
-                                <td :class="tdNum">Not recorded</td>
-                                <td :class="tdNum">Not recorded</td>
+                                <td :class="tdNum">{{ baseStats !== null && baseStats[stat] != null ? baseStats[stat] : 'Not recorded' }}</td>
+                                <td :class="tdNum">{{ growthRates !== null && growthRates[stat] != null ? `${growthRates[stat]}%` : 'Not recorded' }}</td>
                             </tr>
                         </tbody>
                     </table>
-                    <p class="note mt-3">
+                    <p v-if="baseStats === null" class="note mt-3">
+                        <span class="g" aria-hidden="true">○</span>
+                        <span>No base-stat figure is recorded for this form.</span>
+                    </p>
+                    <p v-if="growthRates === null" class="note mt-1">
+                        <span class="g" aria-hidden="true">○</span>
+                        <span>No growth figure is recorded for this form.</span>
+                    </p>
+                    <p v-if="baseStats === null && growthRates === null" class="note mt-1">
                         <span class="g" aria-hidden="true">○</span>
                         <span>
-                            This catalogue stores no base value and no growth row for a form, so the cells
-                            above state the absence rather than a zero. The growth row is entered on a run,
-                            where a Trainer reads it off the card; the ★4 and ★5 totals are functions of
-                            these same five values and cannot print without them.
+                            A cell that cannot be read states the absence rather than a zero. The ★4 and ★5
+                            totals are functions of these same five values and cannot print without them.
                         </span>
                     </p>
                 </div>
@@ -400,7 +422,14 @@ const cardH2 = 'text-base font-bold text-ink-strong';
                                         </span>
                                     </td>
                                     <td :class="td">{{ card.rarity_stars }} {{ card.rarity_label }}</td>
-                                    <td :class="tdNum">Not recorded</td>
+                                    <td :class="tdNum">
+                                        <template v-if="card.growth_rates !== null">
+                                            <span v-for="stat in statOrder" :key="stat" class="block text-xs">
+                                                {{ stat }} {{ card.growth_rates[stat] != null ? `${card.growth_rates[stat]}%` : 'Not recorded' }}
+                                            </span>
+                                        </template>
+                                        <span v-else>Not recorded</span>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
@@ -418,8 +447,8 @@ const cardH2 = 'text-base font-bold text-ink-strong';
                             <span class="g" aria-hidden="true">○</span>
                             <span>
                                 The growth row varies by costume, so a character-wide value cannot exist.
-                                This catalogue stores neither the row nor the per-form split, so each cell
-                                above states the absence.
+                                Each form's recorded row is printed beside it, and a form whose row was
+                                never recorded says so.
                             </span>
                         </p>
                     </template>
@@ -443,8 +472,9 @@ const cardH2 = 'text-base font-bold text-ink-strong';
                     <p class="note mt-3">
                         <span class="g" aria-hidden="true">○</span>
                         <span>
-                            The rule is the export's, and it holds for every card. The five values it
-                            distributes are not stored in this catalogue, so the split cannot print here.
+                            The rule is the export's, and it holds for every card. The base row above is
+                            the card's own; the ★4/★5 per-stat distribution is profile-driven and not
+                            stored, so the split cannot print here.
                         </span>
                     </p>
                 </div>

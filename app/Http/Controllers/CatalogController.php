@@ -410,9 +410,16 @@ class CatalogController extends Controller
                 'snapshot_path' => $card->snapshot_path,
                 'source_url' => $card->source_url,
                 'fetched_at_display' => $card->fetched_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
+                // The per-card figures the source publishes (ADR-0030). Null is the source's own
+                // silence, so the page states the absence rather than rendering a zero.
+                'base_stats' => $card->base_stats,
+                'growth_rates' => $card->growth_rates,
             ])->values()->all(),
             'activeCardId' => $activeCard?->id,
             'hiddenFormCount' => $showUnconfirmed ? 0 : $umamusume->cards()->where('unconfirmed', true)->count(),
+            // The display order of the five stats. The page prints the base/growth rows from this
+            // list rather than a second copy, so a `stat_order` change moves both surfaces together.
+            'stat_order' => array_values((array) config('scenarios.stat_order')),
             'runs' => $runs->map(static fn (TrainingRun $run): array => [
                 'id' => $run->id,
                 'status_label' => $run->status->label(),
