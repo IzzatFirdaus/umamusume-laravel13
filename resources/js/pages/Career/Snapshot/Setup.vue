@@ -2,7 +2,7 @@
 import AppLayout from '../../../layouts/AppLayout.vue';
 import PageHeader from '../../../components/ui/PageHeader.vue';
 import { BaseButton, BaseCheckbox, BaseInput, BaseSelect, BaseTextarea } from '../../../components/Form';
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { computed, reactive } from 'vue';
 
 /*
@@ -117,6 +117,25 @@ const submit = (): void => {
     form.transform((data) => ({ ...data, field_states: fieldStates.value }))
         .get(props.review, { preserveScroll: true });
 };
+
+/*
+ * Every position refusal, not just the first truthy one: a submit that leaves year, month and half
+ * all unanswered must name all three, or the or-chain hides two of the three failures
+ * (AUD-20261102-008 F-02).
+ *
+ * The refusal arrives as a redirect back to this screen, which remounts the page and leaves the
+ * local `useForm` bag empty; the shared page props are where the server's bag lands, so both are
+ * read. Without this the block rendered nothing at all after a refused submit.
+ */
+const page = usePage();
+
+const positionErrors = computed<string[]>(() => {
+    const shared = (page.props.errors ?? {}) as Record<string, string>;
+
+    return [shared.career_year ?? form.errors.career_year, shared.career_month ?? form.errors.career_month, shared.career_phase ?? form.errors.career_phase].filter(
+        (message): message is string => typeof message === 'string' && message !== '',
+    );
+});
 </script>
 
 <template>
@@ -212,9 +231,9 @@ const submit = (): void => {
                       :error="form.errors.career_phase"
                     />
                 </div>
-                <span v-if="form.errors.career_year || form.errors.career_month || form.errors.career_phase" class="mt-2 block text-xs text-risk">
-                    {{ form.errors.career_year || form.errors.career_month || form.errors.career_phase }}
-                </span>
+                <ul v-if="positionErrors.length > 0" class="mt-2 space-y-1 text-xs text-risk">
+                    <li v-for="(message, index) in positionErrors" :key="index">{{ message }}</li>
+                </ul>
             </section>
 
             <section aria-labelledby="snapshot-state-heading" class="card">

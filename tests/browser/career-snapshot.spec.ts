@@ -148,6 +148,21 @@ test.describe('Snapshot setup', () => {
         await expect(speedFlag).toHaveAttribute('aria-describedby', 'snapshot-speed');
     });
 
+    test('shows every concurrent position error, not just the first', async ({ page }) => {
+        // AUD-20261102-008 F-02: the block used to print only the first truthy error in an or chain,
+        // hiding the other two when year, month and half were all refused together.
+        await hydrate(page, '/career/snapshot/setup');
+
+        // The controls carry the browser's `required`; the server refuses independently, and the
+        // block must name every refused position field. Turn native validation off to reach it.
+        await page.locator('#snapshot-form').evaluate((form) => form.setAttribute('novalidate', ''));
+
+        await page.locator('[data-region="hrow-actions"]').getByRole('button', { name: 'Review snapshot' }).click();
+
+        const positionErrors = page.locator('section[aria-labelledby="snapshot-position-heading"] ul.text-risk li');
+        await expect(positionErrors).toHaveCount(3);
+    });
+
     test('passes the axe A + AA scan', async ({ page }) => {
         await hydrate(page, '/career/snapshot/setup');
         const results = await buildAxe(page).analyze();
