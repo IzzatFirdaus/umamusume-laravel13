@@ -166,11 +166,13 @@ test('the Data sources page lists every dataset and names no repository path', a
     await expect(page.getByRole('heading', { name: 'Sources', level: 2 })).toBeVisible();
     const ledger = page.getByRole('table', { name: /Every source this tool reads/ });
     await expect(ledger).toBeVisible();
-    // One header row over nine fetched datasets and four transcribed ones (the Races payout card joined
-    // the list with `config/reference.php`'s `race_payouts` entry), and one publisher link per dataset.
-    await expect(ledger.getByRole('row')).toHaveCount(14);
-    await expect(ledger.getByRole('link', { name: 'Open source' })).toHaveCount(13);
-    await expect(ledger.getByText('Fetched', { exact: true })).toHaveCount(9);
+    // One header row over thirteen fetched datasets and four transcribed ones. The four race
+    // enrichment sources (racetracks, race fans, races, race rewards) joined the fetched set with
+    // the 2026-11-02 enrichment landing; the Races payout card joined the transcribed set with
+    // `config/reference.php`'s `race_payouts` entry. One publisher link per dataset.
+    await expect(ledger.getByRole('row')).toHaveCount(18);
+    await expect(ledger.getByRole('link', { name: 'Open source' })).toHaveCount(17);
+    await expect(ledger.getByText('Fetched', { exact: true })).toHaveCount(13);
     await expect(ledger.getByText('Transcribed', { exact: true })).toHaveCount(4);
     await expect(page.locator('body')).not.toContainText('https://');
 
