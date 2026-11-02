@@ -277,13 +277,14 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                 </section>
             </div>
 
-            <!-- The pager is pinned to the bottom of the viewport while the queue scrolls under it:
-                 on a twenty-five card page the next page was a scroll away from the card being
-                 worked on. `main` carries `@container`, which makes `position: sticky` a no-op for a
-                 descendant (containment.spec.ts pins that), so the pin uses the fixed-position
-                 footer idiom `StickyFooter.vue` ships rather than a bare `sticky` utility. -->
+            <!-- The pager travels with the queue. It used to carry a bare `sticky bottom-0`, which is
+                 a no-op here: `main` sets `container-type: inline-size` for the responsive grid
+                 (AppLayout.vue:616) and containment ends `position: sticky` for every descendant. The
+                 declaration promised a pin the browser never painted, so it is gone rather than left
+                 as a false expectation. Filed as KI-150.
+                 (AUD-20261102-021 F-04) -->
             <div
-                class="sticky bottom-0 z-10 -mx-4 mt-6 border-t border-rule bg-panel px-4 py-3 md:-mx-8 md:px-8"
+                class="z-10 -mx-4 mt-6 border-t border-rule bg-panel px-4 py-3 md:-mx-8 md:px-8"
                 data-testid="review-pager"
             >
                 <Pagination
