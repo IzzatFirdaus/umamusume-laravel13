@@ -69,7 +69,7 @@ interface Group {
 }
 
 const props = defineProps<{
-    run: { id: number; trainee: string; trainee_ja: string | null; scenario_label: string; status_label: string; run_url: string };
+    run: { id: number; trainee: string; trainee_ja: string | null; scenario_label: string; status_label: string; run_url: string; races_url: string };
     nextTurn: { year_label: string; turn: number } | null;
     groups: { mandatory: Group; upcoming: Group; optional: Group; rival: Group } | null;
     comparison: { rows: { key: string; label: string }[] };
@@ -166,7 +166,7 @@ const disciplineLabel = (race: Race): string => {
 
 const aptitudePill = (race: Race): string => race.aptitude.distance ?? race.aptitude.surface ?? 'N/A';
 
-const racesUrl = computed(() => props.run.run_url.replace(/\/cockpit$/, '/races'));
+const racesUrl = computed(() => props.run.races_url);
 
 </script>
 

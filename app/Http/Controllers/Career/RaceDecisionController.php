@@ -103,6 +103,9 @@ class RaceDecisionController extends Controller
                 : 'No scenario set',
             'status_label' => $run->status->label(),
             'run_url' => route('runs.cockpit', $run),
+            // The "Train instead" door, supplied rather than string-replaced on `run_url`
+            // (AUD-20261102-002 F-04).
+            'training_url' => route('runs.training', $run),
         ];
     }
 

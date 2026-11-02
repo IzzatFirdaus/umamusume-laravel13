@@ -58,7 +58,7 @@ interface Race {
 }
 
 const props = defineProps<{
-    run: { id: number; trainee: string; trainee_ja: string | null; scenario_label: string; status_label: string; run_url: string };
+    run: { id: number; trainee: string; trainee_ja: string | null; scenario_label: string; status_label: string; run_url: string; training_url: string };
     nextTurn: { year_label: string; turn: number; position_label: string } | null;
     races: Race[];
     deadlines: { id: number; title: string; year_label: string; turn: number | null; state: string; is_next: boolean; reached: boolean }[];
@@ -154,7 +154,7 @@ const selectRace = (id: number): void => {
     selectedId.value = id;
 };
 
-const trainingUrl = computed(() => props.run.run_url.replace(/\/cockpit$/, '/training'));
+const trainingUrl = computed(() => props.run.training_url);
 
 const undoableTurn = computed(() => Math.max(1, (props.nextTurn?.turn ?? 1) - 1));
 

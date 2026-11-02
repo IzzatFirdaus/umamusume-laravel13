@@ -156,6 +156,9 @@ class RacePlannerController extends Controller
                 : 'No scenario set',
             'status_label' => $run->status->label(),
             'run_url' => route('runs.cockpit', $run),
+            // "This turn's race" — the decision screen — supplied rather than string-replaced on
+            // `run_url` (AUD-20261102-002 F-04).
+            'races_url' => route('runs.races.decision', $run),
         ];
     }
 
