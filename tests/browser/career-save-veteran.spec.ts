@@ -155,11 +155,39 @@ test('refuses a career that has not finished, with the door rather than a dead f
     await openSaveVeteran(page, 'Mejiro McQueen', false);
 
     await expect(page.getByRole('heading', { name: 'Nothing to file yet' })).toBeVisible();
-    await expect(page.getByRole('alert')).toContainText('Active');
+
+    // SaveVeteran-F-01: a non-error precondition is a status, not an alert; the refusal names the
+    // status the run actually holds.
+    const blocked = page.locator('section[aria-labelledby="blocked-heading"]');
+    await expect(blocked.getByRole('status')).toContainText('Active');
 
     // No form, so no save button that could only fail.
     await expect(page.getByRole('button', { name: 'Save Veteran' })).toHaveCount(0);
     await expect(page.getByRole('link', { name: 'Open the run list' })).toBeVisible();
+});
+
+test('gates an overwrite behind the acknowledgement and leaves a first save ungated', async ({ page }) => {
+    const runUrl = await openSaveVeteran(page, 'Gold Ship');
+
+    // SaveVeteran-F-02: a first save has nothing to replace, so the button is live and no gate is
+    // drawn.
+    await expect(page.locator('#overwrite-acknowledged')).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Save Veteran' })).toBeEnabled();
+
+    await page.getByRole('button', { name: 'Save Veteran' }).click();
+    await page.waitForURL(/\/veterans\/\d+$/, WRITE);
+
+    // A record now exists, so the same screen offers Update Veteran and refuses the write until the
+    // replacement is acknowledged.
+    await page.goto(`${runUrl}/veteran`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const update = page.getByRole('button', { name: 'Update Veteran' });
+    await expect(page.locator('#overwrite-acknowledged')).toBeVisible();
+    await expect(update).toBeDisabled();
+
+    await page.locator('#overwrite-acknowledged').check();
+    await expect(update).toBeEnabled();
 });
 
 test('sizes the save screen controls to the 44px contract', async ({ page }) => {
