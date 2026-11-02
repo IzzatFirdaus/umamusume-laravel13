@@ -174,6 +174,8 @@ class TraineeProfileController extends Controller
             // supplied server-side the way CareerLayout.vue:11 and UnityCupEditor.vue:20 already receive
             // URLs. No Ziggy dependency is introduced.
             'action' => route('career.trainee.store'),
+            // The five stat axes, in config order, so the page never hard-codes a stat list.
+            'statOrder' => array_values((array) config('scenarios.stat_order')),
             // Two named absences, one reason each. The catalogue stores neither figure: the Growth Rate
             // row is `stat_bonus`, absent from every table this tool owns, and the base five are the
             // export's starting allocation, which the catalogue also does not carry. A reason per block

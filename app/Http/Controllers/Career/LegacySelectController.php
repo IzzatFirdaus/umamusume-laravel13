@@ -200,6 +200,8 @@ class LegacySelectController extends Controller
             // The step's write URL, supplied server-side the way CareerLayout.vue:11 and
             // UnityCupEditor.vue:20 already receive URLs. No Ziggy dependency is introduced.
             'action' => route('career.legacy.store'),
+            'backUrl' => route('career.target'),
+            'forwardUrl' => route('career.deck'),
         ]);
     }
 
@@ -241,6 +243,12 @@ class LegacySelectController extends Controller
             'legacy_selection' => $request->payload(),
             'legacy_parents' => $request->parentIds(),
         ]);
+
+        if ($request->input('next') === 'deck') {
+            return redirect()
+                ->route('career.deck')
+                ->with('status', 'Legacy recorded.');
+        }
 
         return redirect()
             ->route('career.legacy')

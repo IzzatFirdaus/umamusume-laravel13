@@ -53,6 +53,8 @@ interface Scenario {
     key: string;
     label: string;
     focus: string | null;
+    /** Why no focus sentence exists, when the scenario's own record says why (URA Finale's). */
+    focus_reason: string | null;
     /**
      * The scenario's own rules, read from `config/scenarios.php` by
      * `PreflightController::scenarioSection()`. These are what the wireframe's "What this scenario
@@ -70,7 +72,9 @@ interface Scenario {
             dirt: number | null;
             effect: string | null;
         }[];
-        stamina_by_distance: Record<string, number | null>;
+        stamina_by_distance: Record<string, { min: number; max: number } | null>;
+        /** The source's own hedge for the speed target, e.g. "around 800 Speed, or an A rank". */
+        speed_phrasing: string | null;
     };
 }
 
@@ -229,14 +233,21 @@ const finaleTargetLine = computed((): string | null => {
         return null;
     }
 
+    const speed = scenario.asks.speed_phrasing ?? null;
     const distance = props.contract.build.target?.distance ?? null;
     const stamina = distance === null ? null : (scenario.asks.stamina_by_distance[distance] ?? null);
-
-    if (stamina === null) {
+    if (speed === null && stamina === null) {
         return null;
     }
 
-    return `Stamina by distance: ${distance} ${stamina}.`;
+    // The speed half is the scenario's own figure and prints even before the target step, so the
+    // row never reads N/A while the scenario states a target. The stamina half joins when the
+    // target's distance band names one.
+    if (stamina === null) {
+        return `Speed to win: ${speed}.`;
+    }
+
+    return `Speed to win: ${speed}. Stamina by distance: ${distance} ${stamina.min}–${stamina.max}.`;
 });
 
 const legacySummary = computed((): string => {
@@ -323,6 +334,8 @@ const attention = computed((): string => {
 /** What `StartCareerRequest` refuses without, and nothing else: a scenario and a trainee. */
 const canStart = computed((): boolean => props.contract.build.scenario !== null && props.contract.build.trainee !== null);
 
+const acknowledged = ref(false);
+
 const startBlocker = computed((): string | null => {
     const absent: string[] = [];
 
@@ -346,7 +359,7 @@ const startBlocker = computed((): string | null => {
 });
 
 const start = (): void => {
-    if (form.processing) {
+    if (form.processing || !acknowledged.value) {
         return;
     }
 
@@ -443,7 +456,7 @@ const CAREER_TURNS = 72;
             <button
                 type="button"
                 class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 text-sm font-semibold text-on-primary-action hover:bg-primary-action/90 disabled:opacity-60"
-                :disabled="!canStart || form.processing"
+                :disabled="!canStart || form.processing || !acknowledged"
                 @click="start"
             >
                 {{ form.processing ? 'Starting…' : 'Create the run' }}
@@ -623,7 +636,11 @@ const CAREER_TURNS = 72;
                                 <th scope="row" class="py-1.5 pr-2 font-normal text-ink-muted">Focus</th>
                                 <td class="py-1.5 text-ink">
                                     <template v-if="props.contract.build.scenario?.focus">{{ props.contract.build.scenario.focus }}</template>
-                                    <AbsenceValue v-else compact reason="The scenario record carries no focus sentence." />
+                                    <AbsenceValue
+                                        v-else
+                                        compact
+                                        :reason="props.contract.build.scenario?.focus_reason ?? 'The scenario record carries no focus sentence.'"
+                                    />
                                 </td>
                             </tr>
                             <tr class="border-b border-rule">
@@ -692,11 +709,19 @@ const CAREER_TURNS = 72;
                             <tr class="border-b border-rule">
                                 <th scope="row" class="py-1.5 pr-2 font-normal text-ink-muted">Happy Meek</th>
                                 <td class="py-1.5 text-ink">
-                                    <!-- A standing rule of the client rather than a scenario row: it can
-                                         appear on any stat-training turn. No configuration key scopes it
-                                         per scenario, so it prints as the rule it is. -->
-                                    Can appear on any stat-training turn. Win pays 30 SP and +1 cap tier;
-                                    lose pays 15 SP.
+                                    <!-- The duel is URA Finale's own system (`UMAMUSUME_REFERENCE.md` §2.2.1,
+                                         GameTora/Game8/umamusu.wiki; the config keeps `duel` only under
+                                         `ura_finale`), so it prints only for that scenario and states the
+                                         absence elsewhere rather than a rule that does not apply. -->
+                                    <template v-if="props.contract.build.scenario?.key === 'ura_finale'">
+                                        Can appear on any stat-training turn. Win pays 30 SP and +1 cap tier;
+                                        lose pays 15 SP.
+                                    </template>
+                                    <AbsenceValue
+                                        v-else
+                                        compact
+                                        reason="This scenario's record has no duel system."
+                                    />
                                 </td>
                             </tr>
                             <tr>
@@ -747,6 +772,20 @@ const CAREER_TURNS = 72;
                         actually logged.
                     </p>
                     <p v-if="startBlocker !== null" class="mt-2 text-sm text-ink">{{ startBlocker }}</p>
+
+                    <label class="mt-3 flex items-start gap-2 text-sm">
+                        <input
+                            v-model="acknowledged"
+                            type="checkbox"
+                            id="confirmed"
+                            class="mt-0.5"
+                        />
+                        <span>I understand this creates an Active run that cannot be un-created; retirement is the only exit.</span>
+                    </label>
+
+                    <p v-if="!acknowledged" role="status" class="mt-2 text-sm text-ink-muted">
+                        Acknowledge the above to enable "Create the run".
+                    </p>
 
                     <!-- The mode switch and the policy radios are cut (Phase E2): `career-preflight.html:176-186`
                          draws the Commit card and nothing else. The write and its back door live in the head

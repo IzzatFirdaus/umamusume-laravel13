@@ -162,10 +162,12 @@ function continueStep(): void {
                 type="button"
                 variant="primary"
                 :disabled="props.selected === null || form.processing"
+                :aria-describedby="props.selected === null ? 'scenario-continue-hint' : undefined"
                 @click="continueStep"
             >
                 Continue to trainee
             </BaseButton>
+            <span id="scenario-continue-hint" class="text-xs text-ink-muted">Choose a scenario to continue.</span>
         </template>
 
         <p
@@ -187,7 +189,8 @@ function continueStep(): void {
             class="mt-8 rounded-lg border border-dashed border-rule bg-raised p-4 text-sm text-ink-muted"
         >
             No scenario is composed. The scenario settings hold none, so there is nothing to choose
-            and no career can be started until one is added.
+            and no career can be started until one is added. URA Finale is the baseline — a first run
+            is usually built on it.
         </p>
 
         <!--

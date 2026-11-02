@@ -105,6 +105,8 @@ const props = defineProps<{
     notice: string;
     /** `route('career.legacy.store')`, supplied by the server so the page never hard-codes the URL. */
     action: string;
+    /** Server-supplied back door, so the page never hard-codes a setup URL. */
+    backUrl: string;
 }>();
 
 /**
@@ -139,6 +141,7 @@ const pickValue = (index: number): string =>
     manual.value[index] ? '__manual__' : (form.legacies[index]?.legacy_id ?? '');
 
 const form = useForm({
+    next: null as string | null,
     affinity: props.affinity ?? '',
     legacies: (props.payload?.legacies ?? []).map((legacy, index) => ({
         legacy_id: String(props.parents[index] ?? ''),
@@ -190,6 +193,7 @@ while (form.legacies.length < 2) {
 const saving = (): void => {
     form.transform((data) => ({
         ...data,
+        next: data.next ?? null,
         // An empty grade is "not recorded", and the payload's own reader accepts null and nothing else
         // (`LegacySelectionPayload::affinity()`), so the blank field is sent as the absence rather than as
         // the empty string the select carries.
@@ -327,17 +331,19 @@ const pickOptions = (): { value: string; label: string }[] => [
         -->
         <template #actions>
             <a
-                href="/career/setup/target"
+                :href="props.backUrl"
                 class="inline-flex min-h-11 items-center justify-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:bg-panel"
             >
                 Back
             </a>
-            <a
-                href="/career/setup/deck"
-                class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 text-sm font-semibold text-on-primary-action hover:bg-primary-action/90"
+            <button
+                type="button"
+                class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 text-sm font-semibold text-on-primary-action hover:bg-primary-action/90 disabled:opacity-60"
+                :disabled="form.processing"
+                @click="form.next = 'deck'; saving()"
             >
                 Continue to deck
-            </a>
+            </button>
         </template>
 
         <p

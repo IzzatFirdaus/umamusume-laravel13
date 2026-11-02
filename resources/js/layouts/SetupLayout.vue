@@ -278,6 +278,15 @@ onMounted(async () => {
                         <span data-region="hrow-position" class="text-xs text-ink-muted">Step {{ props.step }} of {{ steps.length }}</span>
                         <slot name="actions" />
                     </div>
+
+                    <!-- Single-session draft scope (F-02, AUD-20261102-005). Static copy, no controller
+                         change: one draft per session; another tab replaces it (last write wins); an
+                         expired session restarts the wizard. Stated here so a Trainer learns the scope
+                         before data loss can occur. -->
+                    <p class="text-xs text-ink-muted">
+                        One draft per session. Opening this wizard in another tab replaces this one
+                        (last write wins); an expired session restarts the wizard.
+                    </p>
                 </div>
             </div>
             <div class="mt-4 border-t border-rule-soft" aria-hidden="true" data-region="hr" />

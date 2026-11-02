@@ -101,6 +101,7 @@ class BuildTargetController extends Controller
             // is now the step before this one. The roster is the fallback for a draft with no trainee,
             // so a direct visit still has a way back.
             'backUrl' => $this->backUrl(),
+            'forwardUrl' => route('preferences.edit'),
             // The step's write URL, supplied server-side the way CareerLayout.vue:11 and
             // UnityCupEditor.vue:20 already receive URLs. No Ziggy dependency is introduced.
             'action' => route('career.target.store'),

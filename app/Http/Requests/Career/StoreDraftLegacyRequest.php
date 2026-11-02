@@ -30,6 +30,19 @@ use App\Http\Requests\StoreLegacySelectionRequest;
  */
 class StoreDraftLegacyRequest extends StoreLegacySelectionRequest
 {
+    /**
+     * @return array<string, array<int, string>>
+     */
+    public function rules(): array
+    {
+        return array_merge(parent::rules(), [
+            /*
+             * The Legacy step's own primary advances the wizard, so it asks for the next step by name.
+             * The allowlist is one value on purpose: the deck door. No other destination is offered.
+             */
+            'next' => ['nullable', 'in:deck'],
+        ]);
+    }
     public function authorize(): bool
     {
         return true; // local-only tool, and no run exists at this step yet (ARCHITECTURE §8)

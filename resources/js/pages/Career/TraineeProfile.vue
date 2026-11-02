@@ -110,6 +110,7 @@ const props = defineProps<{
     rosterUrl: string;
     /** `route('career.trainee.store')`, supplied by the server so the page never hard-codes the URL. */
     action: string;
+    statOrder: string[];
 }>();
 
 const isSelected = computed(() => props.selected === props.trainee.id);
@@ -149,7 +150,7 @@ function choose(): void {
  * five-cell growth row and a real zero as `+0%` (`UMAMUSUME_REFERENCE.md` §1.3.5), but this tool holds
  * no figure for either, so each cell keeps its place and states `N/A` under one reason per block.
  */
-const statAxes = ['Speed', 'Stamina', 'Power', 'Guts', 'Wit'] as const;
+const statAxes = computed(() => props.statOrder);
 
 /*
  * The aptitudes as `career-profile.html` draws them: three columns (surface, distance, running style),

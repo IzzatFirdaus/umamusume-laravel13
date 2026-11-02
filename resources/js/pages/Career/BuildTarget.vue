@@ -86,13 +86,14 @@ const props = defineProps<{
     scenarioPending: boolean;
     /** The step before this one: the stored trainee's profile, or the roster before a pick. */
     backUrl: string;
+    forwardUrl: string;
     /** `route('career.target.store')`, supplied by the server so the page never hard-codes the URL. */
     action: string;
     /**
      * The scenario stanza's own stamina floors, from `config/scenarios.php` via the controller. Read
      * rather than restated, so a published figure has one home.
      */
-    finaleTargets: { staminaByDistance: Record<string, number> };
+    finaleTargets: { staminaByDistance: Record<string, { min: number; max: number }> };
 }>();
 
 /**
@@ -580,7 +581,7 @@ function applyDefaults(): void {
             <section data-region="card" class="card" aria-labelledby="distance-floor">
                 <h2 id="distance-floor">Stamina floor</h2>
 
-                <p class="sub">What the advisor checks before recommending a Medium or Long race.</p>
+                <p class="sub">The stamina a finale-ready trainee needs in each distance band.</p>
 
                 <table v-if="Object.keys(props.finaleTargets.staminaByDistance).length > 0" class="mt-2 w-full text-sm">
                     <thead>
@@ -592,7 +593,7 @@ function applyDefaults(): void {
                     <tbody>
                         <tr v-for="(floor, band) in props.finaleTargets.staminaByDistance" :key="band" class="border-b border-rule">
                             <td class="py-2 pr-3 text-ink">{{ band }}</td>
-                            <td class="font-mono text-ink tabular-nums">{{ floor }}</td>
+                            <td class="font-mono text-ink tabular-nums">{{ floor.min }}–{{ floor.max }}</td>
                         </tr>
                     </tbody>
                 </table>
@@ -619,7 +620,7 @@ function applyDefaults(): void {
                     <BaseButton type="button" variant="secondary" :disabled="props.statDefaults === null" @click="applyDefaults">
                         Use saved defaults
                     </BaseButton>
-                    <Link href="/settings" class="inline-flex min-h-11 items-center text-sm text-ink underline">
+                    <Link :href="props.forwardUrl" class="inline-flex min-h-11 items-center text-sm text-ink underline">
                         Set defaults in Settings
                     </Link>
                 </div>
