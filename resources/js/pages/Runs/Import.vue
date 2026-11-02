@@ -2,8 +2,6 @@
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
 import Card from '../../components/ui/Card.vue';
-import UiSelect from '../../components/ui/Select.vue';
-import UiTextarea from '../../components/ui/Textarea.vue';
 import { BaseInput, BaseSelect, BaseTextarea, BaseButton, LinkButton } from '../../components/Form';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
 import { computed, ref, watch } from 'vue';
@@ -476,12 +474,12 @@ const breadcrumb = computed(() =>
                                     Trainee
                                     <span class="tag" :class="fieldState('umamusume_id').found ? '' : 'you'">{{ fieldState('umamusume_id').found ? 'found' : 'missing' }}</span>
                                 </label>
-                                <UiSelect
+                                <BaseSelect
                                     id="preview-umamusume_id"
                                     name="umamusume_id"
                                     :model-value="runEdits.umamusume_id"
                                     :options="importTraineeOptions"
-                                    :described-by="fieldState('umamusume_id').found ? undefined : 'preview-umamusume_id-missing'"
+                                    :aria-describedby="fieldState('umamusume_id').found ? undefined : 'preview-umamusume_id-missing'"
                                     @update:model-value="(v: string | number | null) => (runEdits.umamusume_id = String(v ?? ''))"
                                 />
                                 <p v-if="!fieldState('umamusume_id').found" id="preview-umamusume_id-missing" class="mt-1 text-xs text-risk">
@@ -494,12 +492,12 @@ const breadcrumb = computed(() =>
                                     Scenario
                                     <span class="tag" :class="fieldState('scenario').found ? '' : 'you'">{{ fieldState('scenario').found ? 'found' : 'missing' }}</span>
                                 </label>
-                                <UiSelect
+                                <BaseSelect
                                     id="preview-scenario"
                                     name="scenario"
                                     :model-value="runEdits.scenario"
                                     :options="importScenarioOptions"
-                                    :described-by="fieldState('scenario').found ? undefined : 'preview-scenario-missing'"
+                                    :aria-describedby="fieldState('scenario').found ? undefined : 'preview-scenario-missing'"
                                     @update:model-value="(v: string | number | null) => (runEdits.scenario = String(v ?? ''))"
                                 />
                                 <p v-if="!fieldState('scenario').found" id="preview-scenario-missing" class="mt-1 text-xs text-ink-muted">
@@ -512,12 +510,12 @@ const breadcrumb = computed(() =>
                                     Status
                                     <span class="tag" :class="fieldState('status').found ? '' : 'you'">{{ fieldState('status').found ? 'found' : 'missing' }}</span>
                                 </label>
-                                <UiSelect
+                                <BaseSelect
                                     id="preview-status"
                                     name="status"
                                     :model-value="runEdits.status"
                                     :options="importStatusOptions"
-                                    :described-by="fieldState('status').found ? undefined : 'preview-status-missing'"
+                                    :aria-describedby="fieldState('status').found ? undefined : 'preview-status-missing'"
                                     @update:model-value="(v: string | number | null) => (runEdits.status = String(v ?? ''))"
                                 />
                                 <p v-if="!fieldState('status').found" id="preview-status-missing" class="mt-1 text-xs text-risk">
@@ -530,12 +528,12 @@ const breadcrumb = computed(() =>
                                     Notes
                                     <span class="tag" :class="fieldState('notes').found ? '' : 'you'">{{ fieldState('notes').found ? 'found' : 'missing' }}</span>
                                 </label>
-                                <UiTextarea
+                                <BaseTextarea
                                     id="preview-notes"
                                     name="notes"
                                     :rows="2"
                                     :model-value="runEdits.notes"
-                                    :described-by="fieldState('notes').found ? undefined : 'preview-notes-missing'"
+                                    :aria-describedby="fieldState('notes').found ? undefined : 'preview-notes-missing'"
                                     @update:model-value="(v: string) => (runEdits.notes = v)"
                                 />
                                 <p v-if="!fieldState('notes').found" id="preview-notes-missing" class="mt-1 text-xs text-ink-muted">
