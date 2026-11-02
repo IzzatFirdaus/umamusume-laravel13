@@ -20,6 +20,7 @@
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
 import Note from '../../components/ui/Note.vue';
+import AbsenceValue from '../../components/AbsenceValue.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
@@ -286,8 +287,24 @@ const aptitudePill = (race: Race): string => {
                                 <span class="pill pill-neutral ml-1 align-[1px]">{{ aptitudePill(race) }}</span>
                                 <span class="sr-only">, the race's aptitude letter for this distance and surface</span>
                             </td>
-                            <td class="py-2 pr-3 text-right font-mono">{{ race.fans_needed ?? '-' }}</td>
-                            <td class="py-2 pr-3 text-right font-mono">{{ race.payout ? '+' + race.payout.sp : '-' }}</td>
+                            <td class="py-2 pr-3 text-right font-mono">
+                                <template v-if="race.fans_needed !== null">{{ race.fans_needed }}</template>
+                                <AbsenceValue
+                                    v-else
+                                    class="font-mono"
+                                    compact
+                                    reason="No fan requirement is published for this race"
+                                />
+                            </td>
+                            <td class="py-2 pr-3 text-right font-mono">
+                                <template v-if="race.payout !== null">+{{ race.payout.sp }}</template>
+                                <AbsenceValue
+                                    v-else
+                                    class="font-mono"
+                                    compact
+                                    reason="No Skill Point payout is published for this race"
+                                />
+                            </td>
                             <td class="py-2 text-right">
                                 <button
                                     v-if="race.blocked_reason === null"
@@ -337,12 +354,28 @@ const aptitudePill = (race: Race): string => {
                         <tbody>
                             <tr class="is-current">
                                 <td><b>1st</b></td>
-                                <td class="text-right font-mono"><b>{{ selected.payout ? selected.payout.sp : '-' }}</b></td>
-                                <td class="text-right font-mono">{{ selected.payout ? '+' + selected.payout.stat : '-' }}</td>
+                                <td class="text-right font-mono">
+                                    <template v-if="selected.payout !== null"><b>{{ selected.payout.sp }}</b></template>
+                                    <AbsenceValue v-else class="font-mono" compact reason="No Skill Point payout is published for this race" />
+                                </td>
+                                <td class="text-right font-mono">
+                                    <template v-if="selected.payout !== null">+{{ selected.payout.stat }}</template>
+                                    <AbsenceValue v-else class="font-mono" compact reason="No stat gain is published for this race" />
+                                </td>
                                 <td class="text-right font-mono">scales</td>
                             </tr>
-                            <tr><td>2nd</td><td class="text-right font-mono">-</td><td class="text-right font-mono">-</td><td class="text-right font-mono">scales</td></tr>
-                            <tr><td>3rd</td><td class="text-right font-mono">-</td><td class="text-right font-mono">-</td><td class="text-right font-mono">scales</td></tr>
+                            <tr>
+                                <td>2nd</td>
+                                <td class="text-right font-mono"><AbsenceValue class="font-mono" compact reason="Only the winner's payout is published" /></td>
+                                <td class="text-right font-mono"><AbsenceValue class="font-mono" compact reason="Only the winner's payout is published" /></td>
+                                <td class="text-right font-mono">scales</td>
+                            </tr>
+                            <tr>
+                                <td>3rd</td>
+                                <td class="text-right font-mono"><AbsenceValue class="font-mono" compact reason="Only the winner's payout is published" /></td>
+                                <td class="text-right font-mono"><AbsenceValue class="font-mono" compact reason="Only the winner's payout is published" /></td>
+                                <td class="text-right font-mono">scales</td>
+                            </tr>
                         </tbody>
                     </table>
 
