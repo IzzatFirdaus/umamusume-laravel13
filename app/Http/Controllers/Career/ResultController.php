@@ -159,12 +159,17 @@ class ResultController extends Controller
             ];
         }
 
-        $guide = (int) $guides[$distance];
-        $side = $stamina < $guide ? 'below' : 'above';
+        $guide = (array) $guides[$distance];
+        $low = (int) ($guide['min'] ?? 0);
+        $high = (int) ($guide['max'] ?? 0);
+        $band = $low.'–'.$high;
+        // Against the band's low end: "below the band" is the claim the figure supports, and a reading
+        // inside the band is not below the recommendation the guide made.
+        $side = $stamina < $low ? 'below' : 'above';
 
         return [
-            'text' => "Won the finale with {$stamina} Stamina, {$side} the {$guide} the published guide names "
-                ."for {$distance} courses. That figure is a recommendation, not a gate: the game did not "
+            'text' => "Won the finale with {$stamina} Stamina, {$side} the {$band} band the published guide names "
+                ."for {$distance} courses. That band is a recommendation, not a gate: the game did not "
                 .'enforce it, and this screen will not imply that it did.',
             'source' => 'docs/UMAMUSUME_REFERENCE.md §2.2.1',
         ];

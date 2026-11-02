@@ -330,16 +330,16 @@ const coverageConstants = computed(() =>
             <h2 id="skills-budget-heading" class="sr-only">Skill Point budget</h2>
             <div class="flex flex-wrap items-center gap-4">
                 <div class="min-w-[180px] flex-1">
-                    <div class="text-[10px] font-extrabold uppercase tracking-[0.07em] text-ink-muted">Skill Points</div>
-                    <div class="font-mono text-[26px] font-extrabold leading-tight text-ink-strong">{{ props.coverage.sp ?? 'N/A' }}</div>
+                    <div class="text-xs font-extrabold uppercase tracking-[0.07em] text-ink-muted">Skill Points</div>
+                    <div class="font-mono text-kpi font-extrabold leading-tight text-ink-strong">{{ props.coverage.sp ?? 'N/A' }}</div>
                 </div>
                 <div class="min-w-[180px] flex-1">
-                    <div class="text-[10px] font-extrabold uppercase tracking-[0.07em] text-ink-muted">Planned spend</div>
-                    <div class="font-mono text-[26px] font-extrabold leading-tight text-ink-strong">{{ plannedSpend }}</div>
+                    <div class="text-xs font-extrabold uppercase tracking-[0.07em] text-ink-muted">Planned spend</div>
+                    <div class="font-mono text-kpi font-extrabold leading-tight text-ink-strong">{{ plannedSpend }}</div>
                 </div>
                 <div class="min-w-[180px] flex-1">
-                    <div class="text-[10px] font-extrabold uppercase tracking-[0.07em] text-ink-muted">Remaining</div>
-                    <div class="font-mono text-[26px] font-extrabold leading-tight" :class="remaining === null || remaining < 0 ? 'text-risk' : 'text-green-deep'">{{ remaining ?? 'N/A' }}</div>
+                    <div class="text-xs font-extrabold uppercase tracking-[0.07em] text-ink-muted">Remaining</div>
+                    <div class="font-mono text-kpi font-extrabold leading-tight" :class="remaining === null || remaining < 0 ? 'text-risk' : 'text-green-deep'">{{ remaining ?? 'N/A' }}</div>
                 </div>
                 <button type="button" class="btn btn-primary min-h-11" :disabled="!canCommit || pickerForm.processing" @click="commitPlan">
                     {{ pickerForm.processing ? 'Learning…' : 'Learn planned skills' }}
@@ -353,15 +353,15 @@ const coverageConstants = computed(() =>
 
         <div class="mt-3.5 flex flex-wrap items-end gap-2.5">
             <label class="flex min-w-[220px] flex-1 flex-col gap-1">
-                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Search</span>
+                <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Search</span>
                 <input v-model="search" type="search" name="skill_search" placeholder="Skill name" class="min-h-11 rounded-md border border-rule bg-raised px-3 text-sm" @input="page = 1">
             </label>
             <label class="flex flex-col gap-1">
-                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Type</span>
+                <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Type</span>
                 <BaseSelect disabled :options="[{ value: '', label: 'Any' }]" model-value="" title="No column carries a skill type, so this filter cannot act." />
             </label>
             <label class="flex flex-col gap-1">
-                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Hints</span>
+                <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Hints</span>
                 <BaseSelect disabled :options="[{ value: '', label: 'Any' }]" model-value="" title="Hint levels are not recorded per skill, so this filter cannot act." />
             </label>
             <button type="button" class="btn btn-quiet min-h-11" @click="search = ''; page = 1">Clear</button>

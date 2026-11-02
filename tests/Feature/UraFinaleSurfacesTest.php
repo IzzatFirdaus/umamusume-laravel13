@@ -260,10 +260,10 @@ it('opens the pre-final review only inside the window the advisor already owns',
         ->and($preFinal['speed_target']['phrasing'])->toBe('around 800 Speed, or an A rank')
         ->and($preFinal['speed_target']['short_by'])->toBeNull()
         ->and($preFinal['stamina_floors']['rows'])->toBe([
-            ['distance' => 'Sprint', 'floor' => '400'],
-            ['distance' => 'Mile', 'floor' => '500'],
-            ['distance' => 'Medium', 'floor' => '600'],
-            ['distance' => 'Long', 'floor' => '700'],
+            ['distance' => 'Sprint', 'floor' => '350–450'],
+            ['distance' => 'Mile', 'floor' => '450–550'],
+            ['distance' => 'Medium', 'floor' => '600–700'],
+            ['distance' => 'Long', 'floor' => '700–800'],
         ])
         // Which floor applies is the finale distance, and nothing in this tool computes it. The row
         // is a pure absence, so it carries no badge key at all (owner ruling 2a).

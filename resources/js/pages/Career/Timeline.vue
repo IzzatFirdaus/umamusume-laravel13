@@ -164,22 +164,22 @@ const finaleText = computed(() => {
         </p>
 
         <div class="grid gap-3 g-4">
-            <div class="card"><div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Turns recorded</div><div class="font-mono text-[22px] font-extrabold text-ink-strong">{{ recordedTurns }}</div></div>
-            <div class="card"><div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Races entered</div><div class="font-mono text-[22px] font-extrabold text-ink-strong">{{ raceCount }}</div></div>
-            <div class="card"><div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Events</div><div class="font-mono text-[22px] font-extrabold text-ink-strong">{{ eventCount }}</div></div>
-            <div class="card"><div class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Finale</div><div class="text-base font-extrabold text-ink-strong">{{ finaleText }}</div></div>
+            <div class="card"><div class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Turns recorded</div><div class="font-mono text-kpi font-extrabold text-ink-strong">{{ recordedTurns }}</div></div>
+            <div class="card"><div class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Races entered</div><div class="font-mono text-kpi font-extrabold text-ink-strong">{{ raceCount }}</div></div>
+            <div class="card"><div class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Events</div><div class="font-mono text-kpi font-extrabold text-ink-strong">{{ eventCount }}</div></div>
+            <div class="card"><div class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Finale</div><div class="text-sm font-extrabold text-ink-strong">{{ finaleText }}</div></div>
         </div>
 
         <div class="mt-3.5 flex flex-wrap items-end gap-2.5">
             <label class="flex flex-col gap-1">
-                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Kind</span>
+                <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Kind</span>
                 <select v-model="kindFilter" name="kind" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm" @change="page = 1">
                     <option value="">All entries</option>
                     <option v-for="kind in kindOptions" :key="kind" :value="kind">{{ kind }}</option>
                 </select>
             </label>
             <label class="flex flex-col gap-1">
-                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Year</span>
+                <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Year</span>
                 <select v-model="yearFilter" name="year" class="min-h-11 rounded-md border border-rule bg-raised px-2 text-sm" @change="page = 1">
                     <option value="">All years</option>
                     <option v-for="year in yearOptions" :key="year" :value="year">{{ year }}</option>

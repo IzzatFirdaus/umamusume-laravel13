@@ -55,7 +55,7 @@ const submit = (): void => {
         :status="props.run.status"
         :position="null"
         :run-url="props.run.run_url"
-        current="cockpit"
+        current="delete"
     >
         <Head :title="`Delete this career: ${props.run.trainee}`" />
 
@@ -80,7 +80,10 @@ const submit = (): void => {
             <ul class="mt-3 list-disc pl-5 text-sm">
                 <li><b>{{ props.counts.turns }}</b> recorded {{ props.counts.turns === 1 ? 'turn' : 'turns' }}</li>
                 <li><b>{{ props.counts.races }}</b> {{ props.counts.races === 1 ? 'race' : 'races' }}</li>
-                <li>Its build target, its skill plan and its inheritance selection</li>
+                <li>Turn events</li>
+                <li>Skills</li>
+                <li>Deck slots</li>
+                <li>The linked Veteran (if any)</li>
             </ul>
 
             <form class="mt-4 flex flex-col gap-3" @submit.prevent="submit">

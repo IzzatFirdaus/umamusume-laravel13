@@ -248,9 +248,18 @@ class PreflightController extends Controller
                         'effect' => isset($gate['effect']) ? (string) $gate['effect'] : null,
                     ], $config['fan_gates']))
                     : [],
+                // A band, not a point: the source states 600–700 for Medium, so the surface prints the
+                // range it was given rather than collapsing it to a minimum that reads as exact.
                 'stamina_by_distance' => isset($config['finale_targets']['stamina_by_distance'])
                     && is_array($config['finale_targets']['stamina_by_distance'])
-                    ? array_map(static fn ($floor): ?int => is_numeric($floor) ? (int) $floor : null, $config['finale_targets']['stamina_by_distance'])
+                    ? array_map(
+                        static fn ($floor): ?array => is_array($floor)
+                            && is_numeric($floor['min'] ?? null)
+                            && is_numeric($floor['max'] ?? null)
+                            ? ['min' => (int) $floor['min'], 'max' => (int) $floor['max']]
+                            : null,
+                        $config['finale_targets']['stamina_by_distance'],
+                    )
                     : [],
                 // The speed half of the finale target, in the source's own hedge ("around 800 Speed,
                 // or an A rank") rather than a rounded number.

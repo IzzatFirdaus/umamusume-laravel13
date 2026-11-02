@@ -129,7 +129,8 @@ it('composes every entered step into one contract', function (): void {
             ->where('contract.build.scenario.asks.fan_gates.0.label', "Valentine's Day")
             ->where('contract.build.scenario.asks.fan_gates.0.turf', 60000)
             ->where('contract.build.scenario.asks.fan_gates.0.dirt', 40000)
-            ->where('contract.build.scenario.asks.stamina_by_distance.Medium', 600)
+            ->where('contract.build.scenario.asks.stamina_by_distance.Medium.min', 600)
+            ->where('contract.build.scenario.asks.stamina_by_distance.Medium.max', 700)
             // The speed half travels in the source's own hedge, so the finale row can print it even
             // before the target step names a distance band.
             ->where('contract.build.scenario.asks.speed_phrasing', 'around 800 Speed, or an A rank')

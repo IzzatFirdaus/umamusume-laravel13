@@ -51,7 +51,7 @@ const props = defineProps<{
 const capColumn = (stat: string): string => `cap_${stat.toLowerCase()}`;
 
 /** What this page is for, in one line, under the one `h1`. */
-const lede = computed(() => `The identity fields the Cockpit used to hold. Everything here writes through ${props.run.run_url}.`);
+const lede = computed(() => `The identity fields the Cockpit used to hold. Everything here writes through ${props.run.update_url}.`);
 
 /*
  * Every form carries the whole key set `runs.update` demands, because `umamusume_id` and `status`
@@ -148,7 +148,7 @@ const saveIdentity = (): void => {
         :status="props.run.status"
         :position="null"
         :run-url="props.run.run_url"
-        current="cockpit"
+        current="settings"
     >
         <Head :title="`Run settings: ${props.run.trainee}`" />
 
@@ -187,6 +187,7 @@ const saveIdentity = (): void => {
                             {{ statusForm.processing ? 'Saving…' : 'Change status' }}
                         </button>
                         <p v-if="statusForm.recentlySuccessful" role="status" class="mt-1 text-xs text-ink-muted">Saved.</p>
+                        <p v-if="Object.keys(statusForm.errors).length" role="alert" class="mt-1 text-xs text-risk">{{ Object.values(statusForm.errors).join(' ') }}</p>
                     </form>
                 </li>
 
@@ -207,6 +208,7 @@ const saveIdentity = (): void => {
                             {{ scenarioForm.processing ? 'Saving…' : 'Change scenario' }}
                         </button>
                         <p v-if="scenarioForm.recentlySuccessful" role="status" class="mt-1 text-xs text-ink-muted">Saved.</p>
+                        <p v-if="Object.keys(scenarioForm.errors).length" role="alert" class="mt-1 text-xs text-risk">{{ Object.values(scenarioForm.errors).join(' ') }}</p>
                     </form>
                 </li>
 
@@ -227,6 +229,7 @@ const saveIdentity = (): void => {
                             {{ periodForm.processing ? 'Saving…' : 'Report period' }}
                         </button>
                         <p v-if="periodForm.recentlySuccessful" role="status" class="mt-1 text-xs text-ink-muted">Saved.</p>
+                        <p v-if="Object.keys(periodForm.errors).length" role="alert" class="mt-1 text-xs text-risk">{{ Object.values(periodForm.errors).join(' ') }}</p>
                     </form>
                 </li>
 
@@ -312,6 +315,7 @@ const saveIdentity = (): void => {
                             {{ identityForm.processing ? 'Saving…' : 'Save identity' }}
                         </button>
                         <p v-if="identityForm.recentlySuccessful" class="mt-1 text-xs text-ink-muted">Saved.</p>
+                        <p v-if="Object.keys(identityForm.errors).length" role="alert" class="mt-1 text-xs text-risk">{{ Object.values(identityForm.errors).join(' ') }}</p>
                     </form>
                 </li>
             </ul>

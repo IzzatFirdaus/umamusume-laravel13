@@ -563,22 +563,22 @@ const energyBandNote = computed(() =>
                                 >
                                 <span class="min-w-0 flex-1 basis-[190px]">
                                     <span class="font-extrabold text-ink-strong">
-                                        <span class="mr-1.5 inline-flex min-w-[18px] justify-center rounded border border-rule px-1 font-mono text-[11px]">{{ discipline.shortcut }}</span>
+                                        <span class="mr-1.5 inline-flex min-w-[18px] justify-center rounded border border-rule px-1 font-mono text-xs">{{ discipline.shortcut }}</span>
                                         {{ discipline.key }}
-                                        <span v-if="discipline.key === 'Wit'" class="ml-1 rounded bg-brand-accent-soft px-1.5 py-0.5 text-[10.5px] font-bold text-brand-accent-ink">no Energy</span>
-                                        <span v-if="discipline.recommended" class="ml-1 rounded bg-status-positive px-1.5 py-0.5 text-[10.5px] font-bold text-status-positive-ink">Recommended</span>
+                                        <span v-if="discipline.key === 'Wit'" class="ml-1 rounded bg-brand-accent-soft px-1.5 py-0.5 text-xs font-bold text-brand-accent-ink">no Energy</span>
+                                        <span v-if="discipline.recommended" class="ml-1 rounded bg-status-positive px-1.5 py-0.5 text-xs font-bold text-status-positive-ink">Recommended</span>
                                     </span>
-                                    <span class="block text-[11.5px] text-ink-muted">
+                                    <span class="block text-xs text-ink-muted">
                                         {{ discipline.feeder }} · Lv {{ discipline.level ?? 'not recorded' }} base ·
                                         failure rate not published
                                     </span>
                                 </span>
-                                <span class="text-right font-mono text-[12.5px] text-ink-strong">
+                                <span class="text-right font-mono text-sm text-ink-strong">
                                     <template v-if="discipline.gains !== null">{{ discipline.gains }}</template>
                                     <span v-else class="font-semibold text-ink-muted">{{ discipline.gainsAbsence }}</span>
                                 </span>
                                 <span
-                                    class="text-right font-mono text-[12.5px] font-extrabold"
+                                    class="text-right font-mono text-sm font-extrabold"
                                     :class="discipline.energy !== null && discipline.energy > 0 ? 'text-[var(--up)]' : 'text-[var(--down)]'"
                                 >{{ signedEnergy(discipline.energy) }}</span>
                             </label>
@@ -615,9 +615,9 @@ const energyBandNote = computed(() =>
                                 <span>
                                     <span class="block font-extrabold text-ink-strong">
                                         {{ action.label }}
-                                        <span v-if="action.recommended" class="ml-1 rounded bg-status-positive px-1.5 py-0.5 text-[10.5px] font-bold text-status-positive-ink">Recommended</span>
+                                        <span v-if="action.recommended" class="ml-1 rounded bg-status-positive px-1.5 py-0.5 text-xs font-bold text-status-positive-ink">Recommended</span>
                                     </span>
-                                    <span class="block text-[11.5px] text-ink-muted">{{ action.note }}</span>
+                                    <span class="block text-xs text-ink-muted">{{ action.note }}</span>
                                 </span>
                             </label>
                         </div>
@@ -627,7 +627,7 @@ const energyBandNote = computed(() =>
                 <div class="flex flex-col gap-4">
                     <section class="card" aria-labelledby="why-rest-heading">
                         <h2 id="why-rest-heading">Why {{ props.advisor.action ?? 'this action' }}</h2>
-                        <ul class="list-disc pl-[18px] text-[12.5px] leading-[1.6] text-ink">
+                        <ul class="list-disc pl-[18px] text-sm leading-[1.6] text-ink">
                             <li v-if="props.advisor.reason !== null">{{ props.advisor.reason }}</li>
                             <li v-if="bandWord !== null">This turn is {{ bandWord }}; the line it is measured against is the sourced 50.</li>
                             <li>
@@ -651,11 +651,11 @@ const energyBandNote = computed(() =>
                         <p class="sub">Written only after the turn is committed.</p>
                         <div class="grid gap-2.5 g-2">
                             <label class="flex flex-col gap-1">
-                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Energy after</span>
+                                <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Energy after</span>
                                 <BaseInput id="turn-energy" v-model="form.energy" type="number" name="energy" min="0" max="100" placeholder="-" :error="errorOf('energy')" />
                             </label>
                             <label class="flex flex-col gap-1">
-                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Mood after</span>
+                                <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Mood after</span>
                                 <BaseSelect
                                     id="turn-mood"
                                     v-model="form.mood"
@@ -665,11 +665,11 @@ const energyBandNote = computed(() =>
                                 />
                             </label>
                             <label class="flex flex-col gap-1">
-                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Fans</span>
+                                <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Fans</span>
                                 <BaseInput id="turn-fans" v-model="form.fans" type="number" name="fans" min="0" :placeholder="placeholder('fans')" :error="errorOf('fans')" />
                             </label>
                             <label class="flex flex-col gap-1">
-                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Skill points</span>
+                                <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Skill points</span>
                                 <BaseInput id="turn-sp" v-model="form.sp" type="number" name="sp" min="0" :placeholder="placeholder('sp')" :error="errorOf('sp')" />
                             </label>
                         </div>

@@ -126,7 +126,7 @@ it('states the fields the corpus holds and names the reason for each one it does
     $this->get(route('runs.races.decision', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('races.0.facts', 10)
+            ->has('races.0.facts', 15)
             // Present, straight off the catalogue row.
             ->where('races.0.facts.0.key', 'grade')
             ->where('races.0.facts.0.value', 'OP')
@@ -140,20 +140,20 @@ it('states the fields the corpus holds and names the reason for each one it does
             ->where('races.0.facts.3.key', 'surface')
             ->where('races.0.facts.3.value', 'Turf')
             // Absent, each with the reason it is absent rather than a default or a dash.
-            ->where('races.0.facts.4.key', 'running_style')
-            ->where('races.0.facts.4.value', null)
-            ->where('races.0.facts.4.title', fn (string $title): bool => str_contains($title, 'aptitude'))
-            ->where('races.0.facts.5.key', 'fan_gain')
-            ->where('races.0.facts.5.value', null)
-            ->where('races.0.facts.5.title', fn (string $title): bool => str_contains($title, 'payout curve'))
-            ->where('races.0.facts.6.key', 'reward')
-            ->where('races.0.facts.6.value', null)
-            ->where('races.0.facts.7.key', 'skill_points')
-            ->where('races.0.facts.7.value', null)
-            ->where('races.0.facts.8.key', 'scenario_reward')
-            ->where('races.0.facts.8.value', null)
-            ->where('races.0.facts.9.key', 'win_probability')
-            ->where('races.0.facts.9.value', null));
+            ->where('races.0.facts.9.key', 'running_style')
+            ->where('races.0.facts.9.value', null)
+            ->where('races.0.facts.9.title', fn (string $title): bool => str_contains($title, 'aptitude'))
+            ->where('races.0.facts.10.key', 'fan_gain')
+            ->where('races.0.facts.10.value', null)
+            ->where('races.0.facts.10.title', fn (string $title): bool => str_contains($title, 'payout curve'))
+            ->where('races.0.facts.11.key', 'reward')
+            ->where('races.0.facts.11.value', null)
+            ->where('races.0.facts.12.key', 'skill_points')
+            ->where('races.0.facts.12.value', null)
+            ->where('races.0.facts.13.key', 'scenario_reward')
+            ->where('races.0.facts.13.value', null)
+            ->where('races.0.facts.14.key', 'win_probability')
+            ->where('races.0.facts.14.value', null));
 });
 
 it('gates a standard race on the run-level maiden lock and clears it on a debut win', function (): void {

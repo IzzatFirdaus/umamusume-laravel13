@@ -20,6 +20,7 @@ import PageHeader from '../../components/ui/PageHeader.vue';
 import UnityCupEditor from '../../components/career/UnityCupEditor.vue';
 import { LinkButton } from '../../components/Form';
 import { Head } from '@inertiajs/vue3';
+import { useVisitState } from '../../composables/useVisitState';
 
 const props = defineProps<{
     run: {
@@ -48,6 +49,8 @@ const props = defineProps<{
     backUrl: string;
 }>();
 
+const { visiting, visitFailed } = useVisitState();
+
 const lede = `Recorded team state for ${props.run.scenario_label}. `
     + 'Every field stays blank until you state it, and a blank field posts nothing rather than a zero.';
 </script>
@@ -61,7 +64,7 @@ const lede = `Recorded team state for ${props.run.scenario_label}. `
         :status="props.run.status"
         :position="null"
         :run-url="props.run.run_url"
-        current="cockpit"
+        current="team"
     >
         <Head :title="`Team setup: ${props.run.trainee}`" />
 
@@ -72,6 +75,11 @@ const lede = `Recorded team state for ${props.run.scenario_label}. `
                 </template>
             </PageHeader>
         </template>
+
+        <p v-if="visiting" role="status" class="mb-3 text-sm text-ink-muted">Loading…</p>
+        <p v-if="visitFailed" role="alert" class="mb-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
+            That screen did not load. Nothing was saved; try again.
+        </p>
 
         <section aria-labelledby="team-edit-heading" class="card mt-4">
             <h2 id="team-edit-heading" class="text-lg font-semibold text-ink-strong">Team</h2>

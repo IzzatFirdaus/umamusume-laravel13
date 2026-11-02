@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Career;
 
+use App\Enums\ReleaseStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Career\StoreTraineeRequest;
 use App\Http\Requests\Career\TraineeSearchRequest;
@@ -78,6 +79,7 @@ class TraineeSelectController extends Controller
         // sentinel `StoreTraineeGoals` already reads; a trainee without one came from no document, so
         // offering her here would start a career on a row the engine never wrote.
         $query = Umamusume::query()
+            ->where('release_status', ReleaseStatus::GlobalReleased->value)
             ->whereNotNull('external_ref')
             ->where('external_ref', '!=', '')
             ->with(['cards' => $this->cardScope()]);
@@ -456,6 +458,7 @@ class TraineeSelectController extends Controller
     {
         return static function (Relation $cards): void {
             $cards->where('unconfirmed', false)
+                ->whereNotNull('global_release_date')
                 ->orderBy('is_debut_form', 'desc')
                 ->orderBy('global_release_date')
                 ->orderBy('card_id');

@@ -195,6 +195,7 @@ const bankable = [
         :status-label="props.run.status_label"
         :status="props.run.status"
         :run-url="props.run.run_url"
+        :current="'result'"
     >
         <Head :title="`Career result: ${props.run.trainee}`" />
         <template #title>{{ props.run.trainee }} · {{ props.run.scenario_label }}</template>

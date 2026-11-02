@@ -394,7 +394,7 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                         <tr v-for="row in props.caps" :key="row.stat" :class="row.source === 'entered' ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft">
                             <td class="py-2 pr-3"><b>{{ row.stat }}</b> cap <span class="text-xs text-ink-muted">({{ row.source }})</span></td>
                             <td class="py-2 pr-3 text-right font-mono">{{ row.value ?? 'N/A' }}</td>
-                            <td class="py-2 pr-3 text-right font-mono text-ink-muted" title="This tool computes no inheritance change; the cap beside it is the stored figure.">N/A</td>
+                            <td class="py-2 pr-3 text-right font-mono text-ink-muted" title="This tool computes no inheritance change; the cap beside it is the stored figure.">N/A <span class="text-xs">· this tool computes no inheritance change</span></td>
                             <td class="py-2 text-right font-mono">{{ row.value ?? 'N/A' }}</td>
                         </tr>
                     </tbody>

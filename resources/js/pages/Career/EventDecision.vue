@@ -216,13 +216,13 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
 
                     <div class="mt-2 rounded-md border border-rule-soft bg-raised p-4">
                         <div class="flex flex-wrap items-baseline gap-2.5">
-                            <span class="text-[15px] font-extrabold text-ink-strong">
+                            <span class="text-lg font-extrabold text-ink-strong">
                                 {{ form.source_name === '' ? 'Name the event as the client shows it' : form.source_name }}
                             </span>
                             <span class="pill pill-neutral">{{ form.event_type === '' ? 'Source not set' : form.event_type }}</span>
                             <span v-if="form.support_card_name !== ''" class="pill pill-neutral">{{ form.support_card_name }}</span>
                         </div>
-                        <p class="mt-2.5 text-[13px] leading-[1.6] text-ink">
+                        <p class="mt-2.5 text-sm leading-[1.6] text-ink">
                             Event text is the client's own copy. This tool does not transcribe or paraphrase it; the
                             fields below record the words the client shows, so the screen never invents event copy.
                         </p>
@@ -232,7 +232,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                         </Note>
                     </div>
 
-                    <p class="mt-3 text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Options</p>
+                    <p class="mt-3 text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Options</p>
 
                     <div class="mt-1 flex flex-col gap-2.5">
                         <label
@@ -249,8 +249,8 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                                 @change="selectChoice(index, choice.label)"
                             >
                             <span class="min-w-0 flex-1">
-                                <span class="block text-[13.5px] font-bold text-ink-strong">{{ choice.label }}</span>
-                                <span class="mt-0.5 block text-[11.5px] text-ink-muted">
+                                <span class="block text-sm font-bold text-ink-strong">{{ choice.label }}</span>
+                                <span class="mt-0.5 block text-xs text-ink-muted">
                                     Selecting shown; outcome not predicted.
                                     <span v-if="choice.outcome_recorded && choice.outcome !== null"> Recorded outcome: {{ choice.outcome }}.</span>
                                 </span>
@@ -258,9 +258,9 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                         </label>
 
                         <label class="flex flex-col gap-1 rounded-md border border-rule-soft bg-raised px-3 py-[11px]">
-                            <span class="text-[13.5px] font-bold text-ink-strong">The option's own words</span>
+                            <span class="text-sm font-bold text-ink-strong">The option's own words</span>
                             <BaseInput v-model="form.choice_label" name="choice_label" maxlength="200" placeholder="Type the option the client showed" :error="form.errors.choice_label" />
-                            <span class="text-[11.5px] text-ink-muted">Selecting shown; outcome not predicted.</span>
+                            <span class="text-xs text-ink-muted">Selecting shown; outcome not predicted.</span>
                         </label>
                     </div>
 
@@ -306,19 +306,19 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                         <p class="sub">After the client resolves the event, record what it did.</p>
                         <div class="grid gap-2.5 g-2">
                             <div class="flex flex-col gap-1">
-                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Energy</span>
+                                <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Energy</span>
                                 <span data-outcome="not-recorded" class="rounded-md border border-dashed border-rule bg-raised px-2 py-2 text-sm text-ink-muted">Not recorded</span>
                             </div>
                             <div class="flex flex-col gap-1">
-                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Mood</span>
+                                <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Mood</span>
                                 <span data-outcome="not-recorded" class="rounded-md border border-dashed border-rule bg-raised px-2 py-2 text-sm text-ink-muted">Not recorded</span>
                             </div>
                             <div class="flex flex-col gap-1">
-                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Skill points</span>
+                                <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Skill points</span>
                                 <span data-outcome="not-recorded" class="rounded-md border border-dashed border-rule bg-raised px-2 py-2 text-sm text-ink-muted">Not recorded</span>
                             </div>
                             <div class="flex flex-col gap-1">
-                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Stat changed</span>
+                                <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Stat changed</span>
                                 <span data-outcome="not-recorded" class="rounded-md border border-dashed border-rule bg-raised px-2 py-2 text-sm text-ink-muted">Not recorded</span>
                             </div>
                         </div>
@@ -329,11 +329,11 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                         </p>
                         <div class="mt-3 grid gap-2.5 g-2">
                             <label class="flex flex-col gap-1">
-                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Bond change</span>
+                                <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Bond change</span>
                                 <BaseInput v-model="form.bond_delta" type="number" name="bond_delta" placeholder="Optional" :error="form.errors.bond_delta" />
                             </label>
                             <label class="flex flex-col gap-1">
-                                <span class="text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Note</span>
+                                <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Note</span>
                                 <BaseInput v-model="form.origin_note" name="origin_note" maxlength="1000" placeholder="Optional" :error="form.errors.origin_note" />
                             </label>
                         </div>
