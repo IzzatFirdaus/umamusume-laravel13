@@ -285,7 +285,6 @@ const racesUrl = computed(() => props.run.races_url);
                 <p v-if="group.truncated !== null" class="mt-1.5 text-xs text-ink-muted">{{ group.truncated }}</p>
             </section>
         </template>
-        </template>
 
         <p v-else-if="props.empty !== null" class="card mt-3.5 text-sm text-ink">{{ props.empty }}</p>
 
