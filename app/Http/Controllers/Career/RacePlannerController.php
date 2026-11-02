@@ -320,6 +320,8 @@ class RacePlannerController extends Controller
             // Whether the row's own columns describe the race at all, which is what lets the card fold
             // a placeholder to one line instead of ten refusals (R2-12, `RaceFacts::describesRace()`).
             'detail_recorded' => RaceFacts::describesRace($slot),
+            'track_name' => $slot->track_name,
+            'entries' => $slot->entries,
             'status' => $entry?->status->value,
             'placement' => $entry?->placementOrdinal(),
             'fans_gain' => $entry?->fans_gain,
@@ -599,7 +601,10 @@ class RacePlannerController extends Controller
         // obligation sits on has been reached and the run has recorded nothing against it.
         $alert = $pending->isAtOrBeforeTurn($next)
             ? [
-                'text' => "Critical: {$pending->title} is due and not recorded",
+                // No "Critical:" prefix. Race Decision's deadline rows state the obligation in the same
+                // register and do not shout it, and the risk edge beside this sentence already carries
+                // the urgency (AUD-20261102-003 F-04).
+                'text' => "{$pending->title} is due and not recorded",
                 'detail' => $row['turn'] === null
                     ? "{$row['year_label']}, the post-December block."
                     : "{$row['year_label']} year, turn {$row['turn']}.",

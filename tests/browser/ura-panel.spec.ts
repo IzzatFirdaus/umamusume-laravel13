@@ -183,7 +183,7 @@ test('renders each Happy Meek field as an unrecorded reading with its own reason
 test('raises the Critical alert as rendered copy when the debut turn has arrived', async ({ page }) => {
     const region = await openUraCockpit(page, DEBUT_TURN - 1);
 
-    await expect(region.getByText('Critical: Junior Make Debut is due and not recorded')).toBeVisible();
+    await expect(region.getByText('Junior Make Debut is due and not recorded')).toBeVisible();
     await expect(region.getByRole('region', { name: 'Mandatory races' }).getByText('Due now')).toBeVisible();
 
     // The alert is a note, not only a colour: the level word is in the rendered text.
@@ -201,7 +201,7 @@ test('marks the debut missed once its turn has passed with no race recorded', as
     // twice rather than counted once across the region.
     await expect(region.getByRole('region', { name: 'Trainee goals' }).getByText('Missed')).toBeVisible();
     await expect(region.getByRole('region', { name: 'Mandatory races' }).getByText('Missed')).toBeVisible();
-    await expect(region.getByText('Critical: Junior Make Debut is due and not recorded')).toBeVisible();
+    await expect(region.getByText('Junior Make Debut is due and not recorded')).toBeVisible();
 });
 
 test('gives the finale block an N/A deadline instead of an invented turn', async ({ page }) => {

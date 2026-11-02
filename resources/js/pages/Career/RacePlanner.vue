@@ -233,19 +233,30 @@ const racesUrl = computed(() => props.run.races_url);
         </div>
 
         <template v-if="props.groups !== null">
-            <section class="card mt-3.5" aria-labelledby="mandatory-heading">
-                <h2 id="mandatory-heading">Mandatory</h2>
-                <p class="sub">Races the scenario requires. A missed obligation is the one thing this calendar raises.</p>
-                <p v-if="props.groups.mandatory.races.length === 0" class="text-sm text-ink">{{ props.groups.mandatory.empty }}</p>
+            <!-- One loop over the controller's own groups. The page rendered `mandatory` and `upcoming`
+                 only, so `optional` and `rival` were computed and transmitted and never displayed
+                 (AUD-20261102-003 F-01); `orderedGroups` existed for exactly this loop and nothing used it
+                 (F-03). Each group carries its own key, label, definition and empty sentence, so the loop
+                 states structure and the controller owns the words. -->
+            <section
+                v-for="group in orderedGroups"
+                :key="group.key"
+                class="card mt-3.5"
+                :aria-labelledby="`${group.key}-heading`"
+            >
+                <h2 :id="`${group.key}-heading`">{{ group.label }}</h2>
+                <p class="sub">{{ group.definition }}</p>
+                <p v-if="group.races.length === 0" class="text-sm text-ink">{{ group.empty }}</p>
                 <table v-else class="t mt-2 w-full border-collapse text-sm">
+                    <caption class="sr-only">{{ group.label }}: {{ group.definition }}</caption>
                     <thead>
                         <tr>
-                            <th class="text-left">Race</th><th class="text-left">Grade</th><th class="text-left">Surface · distance</th>
-                            <th class="text-right">Turn</th><th class="text-right">Fans needed</th><th class="text-right"></th>
+                            <th scope="col" class="text-left">Race</th><th scope="col" class="text-left">Grade</th><th scope="col" class="text-left">Surface · distance</th>
+                            <th scope="col" class="text-right">Turn</th><th scope="col" class="text-right">Fans needed</th><th scope="col" class="text-right"><span class="sr-only">Compare</span></th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="race in props.groups.mandatory.races" :key="race.id" :class="selected.includes(race.id) ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft">
+                        <tr v-for="race in group.races" :key="race.id" :class="selected.includes(race.id) ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft">
                             <td class="py-2 pr-3">
                                 <b>{{ race.title }}</b>
                                 <span class="block text-xs text-ink-muted">{{ comparisonValue(race, 'distance') ?? 'Distance not recorded' }}</span>
@@ -254,52 +265,26 @@ const racesUrl = computed(() => props.run.races_url);
                             <td class="py-2 pr-3" :title="race.aptitude.label">
                                 {{ disciplineLabel(race) }}
                                 <span class="pill pill-neutral ml-1 align-[1px]">{{ aptitudePill(race) }}</span>
+                                <span class="sr-only">, the race's aptitude letter for this distance and surface</span>
                             </td>
                             <td class="py-2 pr-3 text-right font-mono">{{ race.turn ?? 'N/A' }}</td>
                             <td class="py-2 pr-3 text-right font-mono">{{ race.fans_needed ?? 'N/A' }}</td>
                             <td class="py-2 text-right">
-                                <button type="button" class="btn btn-sm min-h-11" @click="toggle(race.id)">Compare</button>
+                                <button
+                                    type="button"
+                                    class="btn btn-sm min-h-11"
+                                    :disabled="!selected.includes(race.id) && selected.length >= LIMIT"
+                                    :aria-describedby="!selected.includes(race.id) && selected.length >= LIMIT ? 'compare-limit-hint' : undefined"
+                                    @click="toggle(race.id)"
+                                >Compare</button>
                                 <span v-if="race.blocked_reason !== null" class="ml-1 block text-[10.5px] text-ink-muted" :title="race.blocked_reason">{{ race.maiden_gated ? 'Maiden lock not cleared' : 'Blocked' }}</span>
                             </td>
                         </tr>
                     </tbody>
                 </table>
-                <p v-if="props.groups.mandatory.truncated !== null" class="mt-1.5 text-xs text-ink-muted">{{ props.groups.mandatory.truncated }}</p>
+                <p v-if="group.truncated !== null" class="mt-1.5 text-xs text-ink-muted">{{ group.truncated }}</p>
             </section>
-
-            <section class="card mt-3.5" aria-labelledby="upcoming-heading">
-                <h2 id="upcoming-heading">Upcoming</h2>
-                <p class="sub">Optional races before the next obligation, filtered to this trainee's aptitude.</p>
-                <p v-if="props.groups.upcoming.races.length === 0" class="text-sm text-ink">{{ props.groups.upcoming.empty }}</p>
-                <table v-else class="t mt-2 w-full border-collapse text-sm">
-                    <thead>
-                        <tr>
-                            <th class="text-left">Race</th><th class="text-left">Grade</th><th class="text-left">Surface · distance</th>
-                            <th class="text-right">Turn</th><th class="text-right">Fans needed</th><th class="text-right"></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="race in props.groups.upcoming.races" :key="race.id" :class="selected.includes(race.id) ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft">
-                            <td class="py-2 pr-3">
-                                <b>{{ race.title }}</b>
-                                <span class="block text-xs text-ink-muted">{{ comparisonValue(race, 'distance') ?? 'Distance not recorded' }}</span>
-                            </td>
-                            <td class="py-2 pr-3">{{ race.tier ?? 'N/A' }}</td>
-                            <td class="py-2 pr-3" :title="race.aptitude.label">
-                                {{ disciplineLabel(race) }}
-                                <span class="pill" :class="race.aptitude.distance === 'G' || race.aptitude.surface === 'G' ? 'pill-neutral' : 'pill-positive'">{{ aptitudePill(race) }}</span>
-                            </td>
-                            <td class="py-2 pr-3 text-right font-mono">{{ race.turn ?? 'N/A' }}</td>
-                            <td class="py-2 pr-3 text-right font-mono">{{ race.fans_needed ?? 'N/A' }}</td>
-                            <td class="py-2 text-right">
-                                <button type="button" class="btn btn-sm min-h-11" @click="toggle(race.id)">Compare</button>
-                                <span v-if="race.blocked_reason !== null" class="ml-1 block text-[10.5px] text-ink-muted" :title="race.blocked_reason">{{ race.maiden_gated ? 'Maiden lock not cleared' : 'Blocked' }}</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <p v-if="props.groups.upcoming.truncated !== null" class="mt-1.5 text-xs text-ink-muted">{{ props.groups.upcoming.truncated }}</p>
-            </section>
+        </template>
         </template>
 
         <p v-else-if="props.empty !== null" class="card mt-3.5 text-sm text-ink">{{ props.empty }}</p>
@@ -314,6 +299,13 @@ const racesUrl = computed(() => props.run.races_url);
                     <p class="mt-1 text-sm text-ink-muted">
                         Choose at least two races above. The comparison shows recorded and sourced values
                         only; a cell with no source behind it reads N/A, and its title says why.
+                    </p>
+                    <!-- The cap was silent: a fifth Compare press was dropped by `.slice(0, LIMIT)` with
+                         no feedback, and the prompt named only the minimum
+                         (AUD-20261102-003 F-02). -->
+                    <p id="compare-limit-hint" class="mt-2 text-xs text-ink-muted">
+                        Up to {{ LIMIT }} races can be lined up at once. Choosing a fifth replaces nothing:
+                        clear one with its Compare control first.
                     </p>
                 </div>
             </template>

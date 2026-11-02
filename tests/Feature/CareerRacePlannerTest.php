@@ -261,7 +261,7 @@ it('states the next mandatory race and its turn, and raises the Level 1 alert on
             ->where('deadline.next.turn', 11)
             ->where('deadline.next.state', 'Not recorded yet')
             // Turn 11 of Junior has been reached from turn 13, so this is the Level 1 item.
-            ->where('deadline.alert.text', 'Critical: Junior Make Debut is due and not recorded')
+            ->where('deadline.alert.text', 'Junior Make Debut is due and not recorded')
             ->where('deadline.alert.detail', fn (string $detail): bool => str_contains($detail, '11')));
 
     // Clearing it moves both the marker and the alert to the next obligation, whose turn has not
