@@ -442,7 +442,7 @@ const moreIsCurrent = computed(() =>
                                     <Link
                                         v-if="part.href"
                                         :href="part.href"
-                                        class="underline underline-offset-2 hover:decoration-2"
+                                        class="min-h-11 inline-flex items-center underline underline-offset-2 hover:decoration-2"
                                     >{{ part.label }}</Link>
                                     <b v-else>{{ part.label }}</b>
                                 </template>
@@ -508,7 +508,7 @@ const moreIsCurrent = computed(() =>
                     >
                         <slot name="eyebrow" />
                     </p>
-                    <h1 class="min-w-0 text-[28px] font-extrabold leading-[1.12] tracking-[-0.01em] text-ink-strong focus:outline-none">
+                    <h1 class="min-w-0 text-3xl font-semibold leading-[1.12] tracking-[-0.01em] text-ink-strong focus:outline-none">
                         <slot name="title" />
                     </h1>
                     <!-- The HFW's `.lede`: the one sentence under the name, at a readable measure.
