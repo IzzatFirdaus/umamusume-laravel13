@@ -143,6 +143,11 @@ export async function startCareer(
     // The completable-start case: the button is enabled once a scenario and a trainee are in. Its label
     // is the wireframe's own (`career-preflight.html:64`, "Create the run"); the Phase E2 cut removed
     // the Independent-Training branch that used to swap the text.
+    //
+    // Since AUD-20261102-005 F-01 the button is additionally gated on the finality acknowledgment, so
+    // the helper ticks it first: a disabled control fails `click()` on actionability and the walk would
+    // hang rather than start a run.
+    await page.locator('#confirmed').check();
     await page.getByRole('button', { name: 'Create the run' }).click();
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
 
