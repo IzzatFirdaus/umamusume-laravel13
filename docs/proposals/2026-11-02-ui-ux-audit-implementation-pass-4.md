@@ -2,10 +2,17 @@
 
 Dated 2026-11-02.
 
-**Pass 4 — Phase 3 tail closed (2 fixed, 1 blocker re-confirmed, 1 named); Phase 4 reached its two
-fixable rows; Phase 5 reached its four fixable rows. RaceDecision-F-02's pass-3 retraction is
-**withdrawn** and the defect fixed. Items still open are named in §3 with their blocker; none is
-categorised as "not attempted" without one.**
+**Pass 4 — Phase 3 tail closed; Phase 4 reached 4 of its 6 rows; Phase 5 reached 1 of its 8 rows.
+RaceDecision-F-02's pass-3 retraction is **withdrawn** and the defect fixed. Three findings are
+blocked (the shell `@container` decision, the missing spark-ceiling figure, the component-family
+decision); the remaining unstarted rows are **not blocked — they were not reached**, and are
+executable in the next pass. §9 corrects this report after review.**
+
+> **Header corrected 2026-11-02 after review.** The first draft claimed "none is categorised as
+> 'not attempted' without one [a blocker]". That was false for five rows: SnapshotEntry-F-01,
+> SnapshotSetup-F-02, SnapshotReview-F-01, VeteransCompare-F-02/F-03 and Cockpit-F-03 were not
+> attempted and have no environmental blocker — they are scope, not environment. The corrected
+> header above says so.
 
 ## 1. Step 0 — RaceDecision-F-02 retraction: WITHDRAWN (Path B)
 
@@ -169,3 +176,86 @@ dereferences `character_cards.global_release_date` without a null guard. The col
 
 Prior-pass commits (`c2967b36`, `5d3bda00`, `a24a4e10`, `77fcc5cd`, `a9b0ffd9`, `2b864b51`,
 `c6e55619`, `00e3cf15`, `9d753b7a`, `b95dc5cc`) are not counted here.
+## 9. Corrections after review
+
+Dated 2026-11-02. Six blocking items, five notes.
+
+### B-6 / B-3 — `TrainingRunController.php:206` fixed, and it unblocks the spec
+
+The report called it "worth its own fix commit". It was a live 500 on any catalogue holding an
+undated card, it blocked `runs-create.spec.ts`, and the column became nullable in
+`2026_11_02_112258_make_global_release_date_nullable_on_character_cards` without the controller
+following. **Fixed in `7cf84750`** — `$c->global_release_date?->toDateString() ?? ''`. Verification:
+RENDERED — `GET /training-runs/create` returned **500** before and **200** after.
+
+**B-3 resolved as (b):** RunsCreate-F-01 is `FIXED (source)` with SOURCE evidence — the breadcrumb
+leaf, `<Head>` title and h1 all read "Create a career" at `Runs/Create.vue:101-106`, and
+`runs-create.spec.ts:21` asserts the crumb leaf. Its Playwright run is owed and **could not be
+completed this pass**: the suite's `global_setup.ts` runs `php artisan migrate --seed`, and the seed
+now throws `RuntimeException: gametora-races: Undefined array key "name"` at
+`SourceDocumentSeeder.php:124`. That failure comes from the peer's in-flight pipeline work
+(`config/uma.php` re-pointed at new untracked `GametoraRaceParser`/`GametoraRaceFansParser`/
+`GametoraRaceRewardParser`, plus modified `PipelineRunner.php` and seeders), not from this pass.
+**Blocker named: peer pipeline work in the working tree; the suite cannot seed until it settles.**
+
+### B-1 — header corrected
+
+See the note at the top. Five rows are unstarted with no environmental blocker.
+
+### B-2 — specs run, and what exists per changed screen
+
+| Screen changed | Spec that covers it | Ran this pass? |
+|---|---|---|
+| `RaceDecision.vue` (F-02, F-04) | `race-decision.spec.ts` — **does not exist** | — |
+| `TurnEdit.vue` (F-01, F-02) | `turn-edit.spec.ts` — **does not exist** | — |
+| `SaveVeteran.vue` (F-02) | no `save-veteran` spec — **does not exist** | — |
+| `Legacy/Compare.vue` (F-01) | `legacy.spec.ts` — **exists** | **No** — blocked by the seeding failure above |
+| `Runs/Create.vue` (F-01) | `runs-create.spec.ts` — exists | **No** — blocked by the seeding failure |
+| `Runs/Import.vue` (F-02) | `run-import.spec.ts` — exists | Yes: 10 passed, 1 failed (`:123`, pre-existing) |
+| `Career/*` doors (F-04) | `career-preflight.spec.ts` — exists | Not run — blocked by the seeding failure |
+
+So: **two of the seven changed screens have a spec, and one of those two ran.** The other five
+findings are SOURCE-verified with **no browser spec existing for the screen**. That is the honest
+state; creating those three specs is pass-5 scope.
+
+### B-4 — behavioral findings verified by SOURCE only
+
+- **SaveVeteran-F-02**: the flow is "click Save → acknowledge → save proceeds". SOURCE shows the ref,
+  the gate in `save()`, the `:disabled` binding and the checkbox. A RENDERED check would be: load a
+  career with a filed veteran, assert the submit is disabled and no POST leaves until the box is
+  ticked. **Not attempted; no spec exists.**
+- **TurnEdit-F-01/F-02**: SOURCE shows the `role="status"` line and the `onError` focus. A RENDERED
+  check would be: `document.activeElement.id` is the alert after a refused submit.
+  **Not attempted; no spec exists.**
+
+### B-5 — `app.css` residual filed
+
+Filed as **KI-149** in `KNOWN-ISSUES.md` rather than left in this report: thirteen screens render
+`.card > h2` and are unmeasured for the 15→16px step.
+
+### N-1 — LegacyBuilder-F-01: the finding's premise is unverified
+
+The audit filed F-01 on the premise that a per-parent spark-count ceiling exists. Nothing in the tree
+defines one (`MAX_SPARK_STARS = 3` is a star ceiling). Either the reference names a count and the
+finding is real pending that figure, or the finding is false and belongs in
+`docs/audit-corrections.md`. **Not resolved here** — reading `docs/UMAMUSUME_REFERENCE.md` for the
+figure is what settles it.
+
+### N-2 — RunsImport-F-01: recommendation stated
+
+**Recommend `Form/*` as canonical.** It is the family the majority of the app uses (Runs, Career
+setup, Legacy, Preferences); `ui/*` is the Dashboard-era set. Migration would move `Runs/Import.vue`
+to `BaseInput`/`BaseSelect`/`BaseTextarea` with their `ariaDescribedby` contract, which rewrites every
+field on the page and needs its own Playwright pass. Owner confirms the direction.
+
+### N-3 / N-4 — notes
+
+- No browser spec exists for SaveVeteran or TurnEdit; SOURCE is the record until they are written.
+- **No Dashboard change this pass**, so `dashboard.spec.ts` was not re-run; the pass-3 result (11
+  passed) stands.
+
+### N-5 — `[data-shell-crumb]` tests the same thing
+
+`AppLayout.vue:503` puts `data-shell-crumb` on the breadcrumb `<nav>`; its leaf is the `{{ part.label }}`
+`<b>` the finding names. The assertion scopes to that nav and reads the leaf text, which is the same
+target the old bare-text assertion addressed — narrower, not weaker.

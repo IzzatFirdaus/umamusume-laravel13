@@ -4208,3 +4208,23 @@ was applied in this pass (4 deleted, 0 remaining).
 
 **Closure.** Purged via direct delete on the dev DB. No code change. Read path unchanged. Entry recorded
 for durability so a future reader understands why the read-path filter cannot be used.
+
+
+## KI-149 — `.card > h2` type step went 15 to 16px globally, and thirteen screens are unmeasured for it
+
+**State:** OPEN (residual, not a defect in itself).
+
+**What changed.** The type-scale finding (AUD-20261101-001 F-01) was fixed by raising `.card > h2` and
+`.empty h2` from 15px to 16px in `resources/css/app.css`, because a utility class cannot beat the rule
+specificities (0,1,1 vs 0,1,0). That is a global step, not a Dashboard-only one.
+
+**What was measured.** Dashboard (`<main>` font sizes 12/14/16/28 after the change) and Career
+Preflight. Legacy was eyeballed in the same pass but not measured.
+
+**What was not.** Any other page whose `.card` has a direct `h2` child: every Database area page,
+Career Cockpit / Result / DeckSelect, Veterans Index / Show / Compare, Legacy Index / Compare /
+Builder, Review, Preferences, Help, Skills.
+
+**Why it is filed rather than fixed.** A 1px step on a heading is unlikely to reflow anything, but
+"unlikely" is not measured. Sampling those screens at 320/768/1280 for row wrapping and card heights
+is its own task.
