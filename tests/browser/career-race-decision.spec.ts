@@ -126,6 +126,32 @@ test('selecting a row moves the detail card and the savebar status', async ({ pa
     await expect(page.locator('.savebar')).toContainText(`${title} selected`);
 });
 
+test('loads with 200 and focuses the manual-race refusal', async ({ page }) => {
+    const runUrl = await openDecision(page);
+
+    // The route answers 200 as its own page, not as a redirect to the cockpit.
+    const response = await page.goto(`${runUrl}/races`, { waitUntil: 'domcontentloaded' });
+    expect(response?.status()).toBe(200);
+    await page.locator('#app > *').first().waitFor();
+
+    // RaceDecision-F-04 keeps the free-race door available on the page; it is a disclosure rather
+    // than a second screen (the wireframe draws only calendar races).
+    await page.getByText('Race not on the calendar').click();
+
+    const manual = page
+        .locator('details')
+        .filter({ has: page.locator('summary', { hasText: 'Race not on the calendar' }) })
+        .locator('form');
+    // The controls carry native `required`; the server refuses independently, and its refusal is
+    // what the alert must announce.
+    await manual.evaluate((form) => form.setAttribute('novalidate', ''));
+    await manual.getByRole('button', { name: 'Record race' }).click();
+
+    const alert = page.locator('details form p[role="alert"][tabindex="-1"]');
+    await expect(alert).toBeVisible();
+    await expect(alert).toBeFocused();
+});
+
 test('Train instead escapes to the training screen', async ({ page }) => {
     const runUrl = await openDecision(page);
 
