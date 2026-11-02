@@ -207,6 +207,11 @@ const form = useForm({
         rank_letter: parent.rank_letter ?? '',
         is_guest: parent.is_guest,
         pick: parent.pick ?? null,
+        // The grandparent names, seeded from the graph like the wizard step seeds them. This array is
+        // load-bearing: `AncestorEditor` binds `legacy.ancestors[ancestorIndex]` (an index into it, so
+        // an absent array is a render-time throw that empties the whole editor subtree), and the server
+        // requires `legacies.*.ancestors` to be present, so omitting it would refuse every save.
+        ancestors: parent.ancestors.map((ancestor) => ancestor.name ?? ''),
         ancestors_rank_letters: parent.ancestors.map((ancestor) => ancestor.rank_letter ?? ''),
         ancestors_rank: parent.ancestors.map((ancestor) =>
             ancestor.rank === null || ancestor.rank === undefined ? '' : String(ancestor.rank),
@@ -483,24 +488,24 @@ const hasAnyNode = computed(() =>
                     <p class="mt-1 text-sm font-semibold text-ink-strong">{{ trainee.name }}</p>
                 </li>
 
-                <li
-                    v-for="(parent, index) in graph.parents"
-                    :key="parent.slot"
-                    class="ml-3 border-l-2 border-rule pl-3"
-                >
+                <li class="ml-3 border-l-2 border-rule pl-3">
                     <!--
                         The node and its two ancestors are one item, so the list a screen reader walks
                         is the diagram: the parent, then her own two. `AncestryNode` renders the parent
                         row; the two ancestors follow it as their own list at the same nesting depth,
                         which is why this is one `<li>` and not two siblings.
                     -->
-                    <!-- The wireframe's two-parent split (`legacy-builder.html:70`): `g-2` puts the two
-                         parents side by side from the container's 585px and stacks them below it, so the
-                         pair can be read across rather than down. The list stays a list — every id the
-                         ancestor editors bind (`rank-${slot}`, `ancestor-${slot}-${n}`) travels with the
-                         data, not with this container. -->
+                    <!-- The wireframe's two-parent split (`legacy-builder.html:70`): both parents are
+                         children of one `g-2` grid, so the pair reads across from the container's 585px
+                         and stacks below it, and `[data-layout='compact']` keeps them stacked at every
+                         width. The list stays a list — every id the ancestor editors bind
+                         (`rank-${slot}`, `ancestor-${slot}-${n}`) travels with the data, not with this
+                         container. -->
                     <ul class="grid gap-4 g-2">
-                        <li>
+                        <li
+                            v-for="(parent, index) in graph.parents"
+                            :key="parent.slot"
+                        >
                             <AncestryNode
                                 :label="parent.label"
                                 :name="assignedName(parent.slot) ?? parent.name"
