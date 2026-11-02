@@ -335,6 +335,7 @@ Route::get('/database/trainees', [CatalogController::class, 'databaseIndex'])->n
 Route::get('/database/supports', [SupportCardController::class, 'databaseIndex'])->name('database.supports');
 Route::get('/database/skills', [SkillController::class, 'databaseIndex'])->name('database.skills');
 Route::get('/database/races', [DatabaseController::class, 'races'])->name('database.races');
+Route::get('/database/races/{id}', [DatabaseController::class, 'raceDetail'])->name('database.races.show');
 Route::get('/database/scenarios', [DatabaseController::class, 'scenarios'])->name('database.scenarios');
 // The three reference views (`SCR-SYS-008` to `010`): config-derived tables transcribed from
 // `docs/UMAMUSUME_REFERENCE.md`, completing the eight areas SCREEN-023 lists.
