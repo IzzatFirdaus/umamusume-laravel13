@@ -1,0 +1,25 @@
+#!/bin/sh
+# Pre-commit pathspec enforcement (CQ-10).
+# Compares staged files against the declared COMMIT_PATHS env var.
+# If any staged file is outside COMMIT_PATHS, the commit is refused.
+# When COMMIT_PATHS is unset, the hook is a no-op.
+if [ -z "$COMMIT_PATHS" ]; then
+    exit 0
+fi
+offending=""
+for f in $(git diff --cached --name-only); do
+    allowed=0
+    for p in $COMMIT_PATHS; do
+        case "$f" in
+            "$p"|"$p"/*) allowed=1; break ;;
+        esac
+    done
+    if [ "$allowed" -eq 0 ]; then
+        offending="$offending $f"
+    fi
+done
+if [ -n "$offending" ]; then
+    echo "pre-commit: staged files outside COMMIT_PATHS ($COMMIT_PATHS):$offending"
+    exit 1
+fi
+exit 0
