@@ -341,6 +341,9 @@ test('Reset layout to defaults is a two-click confirm that commits', async ({ pa
     // carries the same sentence, but a label is read only when focus is on the control; the live
     // region is what tells a Trainer who activated the button by name that its state changed.
     await expect(page.getByRole('status').filter({ hasText: 'Reset armed.' })).toBeVisible();
+    // The focused button also carries the sentence, for a Trainer who navigates by control rather
+    // than by live region.
+    await expect(page.getByRole('button', { name: 'Reset?' })).toHaveAttribute('aria-label', /five seconds/);
 
     await page.getByRole('button', { name: 'Reset?' }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Preferences saved.' })).toBeVisible();
