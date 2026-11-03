@@ -40,3 +40,19 @@ Dispatch expected 9; actual 10. The extra is `2b61a1da` (landed after the dispat
 ## Phase 0 outcome
 
 Ground truth recorded. Proceed to Phase 1 residuals.
+
+
+## Rev-3 pre-flight note (2026-11-03)
+
+### Push state
+- origin/master = ae97da9e (docs(agents): correct ui-lint debt count)
+- 6 commits on origin: 847b3fe7 .. ae97da9e
+- 2 local-only: 83770ded (deferred items), 0e7bc8ee (peer revert coordination)
+- origin is not ahead of HEAD (0 commits); no unauthorized push detected beyond the 6 already reported.
+- Authorization status: the 6 commits that reached origin are assumed owner-authorized (recorded here per rev-3 O-1); the 2 local commits remain owner-gated.
+
+### Peer series integrity
+- 6f3d5a81 (refusal focus fixes) IS an ancestor of origin/master -> OK
+- e4786df4 (legacy compare fix) IS an ancestor of origin/master -> OK
+- 9a61197f (peer tests) is local-only, NOT on origin -> origin/master fresh clone is not red.
+- Conclusion: origin/master carries the required fixes; peer test commit stays local until the series pushes together.
