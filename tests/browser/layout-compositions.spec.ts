@@ -115,10 +115,11 @@ test.describe('HFW layouts', () => {
     });
 
     test('no mode scrolls the document at 320, 390 or 768', async ({ page }) => {
-        // `/support-cards` is excluded: its wide table overflows the document at 320px with or without
-        // the area strip (measured with the strip removed), which is a pre-existing defect outside this
-        // layout change. `/skills` was excluded for the same reason until 2026-10-30, when its table
-        // moved inside a labelled scroll region and the exclusion was lifted.
+        // `/support-cards` was excluded here because its wide table overflowed the document at 320px
+        // with or without the area strip. The roster card took a scroll wrapper in `174938b4` and the
+        // two summary cards below it take one now, so the exclusion is lifted the same way `/skills`
+        // was on 2026-10-30: a fixed page goes back under the check rather than being remembered by
+        // the defect that excuse was written for.
         const paths = [
             '/',
             '/career/setup/scenario',
@@ -130,6 +131,7 @@ test.describe('HFW layouts', () => {
             '/skills/370',
             '/legacy/compare',
             '/veterans/compare',
+            '/support-cards',
         ];
 
         for (const mode of ['compact', 'standard', 'wide'] as const) {

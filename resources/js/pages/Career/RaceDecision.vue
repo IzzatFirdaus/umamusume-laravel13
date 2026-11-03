@@ -118,6 +118,12 @@ watch(
     },
 );
 
+// The calendar branch answers the same way. Its Enter button and its alert are both above the fold,
+// but a refusal that leaves focus on the button tells a screen-reader user nothing moved and shows
+// them no reason; the sentence at the foot of the page announces, which is not the same as focus
+// (AUD-20261102-002 F-01).
+const enterAlertRef = ref<HTMLElement | null>(null);
+
 // Post only what the manual branch renders, the way only rendered inputs submitted: the manual path
 // prohibits `scenario_slot_id` and the Form Request refuses circles without a team-race slot.
 manualForm.transform((data) => ({
@@ -159,6 +165,23 @@ const trainingUrl = computed(() => props.run.training_url);
 const undoableTurn = computed(() => Math.max(1, (props.nextTurn?.turn ?? 1) - 1));
 
 const enterForm = useForm({ turn_entry_id: '' });
+
+// Registered after `enterForm` exists. `watch` evaluates its source getter on registration, so a
+// watcher placed above this line throws `ReferenceError: Cannot access 'enterForm' before
+// initialization` inside that getter; Vue catches it, logs "Unhandled error during execution of
+// watcher getter", and the watcher simply never fires - the fix would sit in the file doing nothing
+// while the page still renders.
+watch(
+    () => enterForm.hasErrors,
+    async (hasErrors: boolean) => {
+        if (!hasErrors) {
+            return;
+        }
+
+        await nextTick();
+        enterAlertRef.value?.focus();
+    },
+);
 
 const enterRace = (): void => {
     if (selected.value === null) {
@@ -421,7 +444,13 @@ const aptitudePill = (race: Race): string => {
                     </Note>
                 </section>
 
-                <p v-if="enterForm.hasErrors" role="alert" class="rounded-md border border-risk bg-raised p-2 text-sm text-risk">
+                <p
+                    v-if="enterForm.hasErrors"
+                    ref="enterAlertRef"
+                    role="alert"
+                    tabindex="-1"
+                    class="rounded-md border border-risk bg-raised p-2 text-sm text-risk"
+                >
                     <span v-for="(message, key) in enterForm.errors" :key="key" class="block">{{ message }}</span>
                 </p>
 

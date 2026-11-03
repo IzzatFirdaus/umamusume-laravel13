@@ -374,7 +374,7 @@ const isPal = (card: Card): boolean => card.type === 'friend';
             </div>
 
             <div class="mt-4 grid gap-4 g-2">
-                <div class="card">
+                <div class="card overflow-x-auto">
                     <h2>The seven types</h2>
                     <table class="w-full border-collapse">
                         <thead>
@@ -403,7 +403,7 @@ const isPal = (card: Card): boolean => card.type === 'friend';
                     </p>
                 </div>
 
-                <div class="card">
+                <div class="card overflow-x-auto">
                     <h2>Effects that decide a deck slot</h2>
                     <table class="w-full border-collapse">
                         <tbody>

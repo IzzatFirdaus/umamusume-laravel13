@@ -221,6 +221,12 @@ test('refuses a stat target above the engine ceiling and ties the message to its
     // The refusal is referenced by the input that caused it (SCREEN_SPEC.md SCR-SYS-002).
     await expect(speed).toHaveAttribute('aria-invalid', 'true');
 
+    // And focus lands on that input (WCAG 2.4.3). This is the key family `c2967b36` dropped from
+    // `firstControlId()`, so it is the family a re-regression would silently take focus away from
+    // again: the refusal renders on the control, and the `error-block-<key>` fallback has no element
+    // here to focus. (AUD-20261102-003 F-03)
+    await expect(speed).toBeFocused();
+
     // Read describedby only after the refusal has landed: before the response the input still
     // advertises its hint id, so a read taken straight after the click captures the wrong token.
     const describedBy = await speed.getAttribute('aria-describedby');
@@ -303,6 +309,11 @@ test('Reset layout to defaults is a two-click confirm that commits', async ({ pa
     const reset = page.getByRole('button', { name: 'Reset layout to defaults' });
     await reset.click();
     await expect(page.getByRole('button', { name: 'Reset?' })).toBeVisible();
+
+    // The arm is announced, not only re-labelled (AUD-20261102-003 F-06). The button's `aria-label`
+    // carries the same sentence, but a label is read only when focus is on the control; the live
+    // region is what tells a Trainer who activated the button by name that its state changed.
+    await expect(page.getByRole('status').filter({ hasText: 'Reset armed.' })).toBeVisible();
 
     await page.getByRole('button', { name: 'Reset?' }).click();
     await expect(page.getByRole('status').filter({ hasText: 'Preferences saved.' })).toBeVisible();

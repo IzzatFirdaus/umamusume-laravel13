@@ -175,9 +175,14 @@ function armReset(): void {
     }
 
     resetArmed.value = true;
+    // The arm is a state change the page announces, not only a label the focused button happens to
+    // carry: a Trainer who activated it without focus still on the button hears nothing at all
+    // (AUD-20261102-003 F-06).
+    resetStatus.value = 'Reset armed. Press again within five seconds to confirm.';
     resetTimer = setTimeout(() => {
         resetArmed.value = false;
         resetTimer = null;
+        resetStatus.value = 'Reset not confirmed; nothing changed.';
     }, 5000);
 }
 
@@ -227,6 +232,13 @@ const firstControlId = (key: string): string | null => {
     if (key === 'theme') return 'field-theme_light';
     if (key === 'settings.dashboard_layout') return 'field-settings_dashboard_layout_standard';
     if (key === 'settings.dashboard_hidden_cards') return 'dashboard_card_active_career';
+    // The stat-target rows and the default-scenario select answer for themselves: they are excluded
+    // from `blockErrorKeys` below, so the `error-block-<key>` fallback has no element to focus and
+    // focus would land nowhere. `c2967b36` retired the generic `controlId()` lookup and dropped these
+    // two families with it (AUD-20261102-003 F-03).
+    if (key.startsWith('settings.stat_target_defaults.')) return controlId(key);
+    if (key === 'settings.default_scenario') return controlId(key);
+
     return null;
 };
 
