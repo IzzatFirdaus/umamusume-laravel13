@@ -176,6 +176,12 @@ Two failures happened on the way and are part of the record:
    `/tmp/...` path into `DB_DATABASE`; PHP on Windows cannot open it. Re-running against the same
    clone with the `cygpath -m` Windows path succeeded (output above). This is a harness
    bug in the script, not a repository defect.
+3. **The PASS is not out-of-the-box, and does not close KI-102.** `.env.example` still defaults to
+   MySQL (`DB_CONNECTION=mysql`, `DB_HOST=mysql`, `DB_DATABASE=laravel`, lines 25–28). The literal
+   next-clone move — `cp .env.example .env && php artisan migrate` — still dies at
+   `getaddrinfo`. The run above supplied `DB_CONNECTION=sqlite` and an absolute `DB_DATABASE` by
+   hand; `032b0c02` fixed only the unquoted `APP_NAME`. The revised plan's **Slice E** is
+   therefore still required, and KI-102 remains open.
 
 The full PHP suite was not run inside the clone; a representative parser pair was, to prove the
 test harness boots against the seeded scratch-of-clone database.
@@ -209,22 +215,39 @@ own files are all committed; the tree holds no uncommitted work of mine.
 
 ## §6 — Owner actions
 
-- **Push:** after this report's commit, `git rev-list --count origin/master..HEAD` is `2`
-  (`032b0c02` and the report commit). They are local and need a push if the owner wants
-  `origin/master` to move. Nothing else is unpushed.
+- **Push:** three commits are local and unpushed once this correction lands — `032b0c02`
+  (env quoting), `c1e97c2c` (this report), and the correction commit that adds this section.
+  `git rev-list --count origin/master..HEAD` will read `3`. They need a push before
+  `origin/master` moves.
 - **Peer coordination:** none required — no file was withheld.
 - **Fresh-clone test failures:** none in the executed set. The full PHP/browser suites were not
   run inside the clone.
 
 ## §7 — The claim about the sequence
 
-Prior reports claiming `88043b3b` and the six others did **not** match the `git status` that was
-quoted in the critique — but they match the repository now: all 37 cited SHAs exist on `master`
-and `origin/master`, the tree is clean, and the three migrations are tracked.
+The 37 SHAs are accurate: all exist on `master` and `origin/master`, the tree was clean at the
+start of this pass, and the three migrations are tracked. **The prior reports' commit
+attributions were accurate; the `git status` they were judged against was the pre-commit
+snapshot.**
 
-**The sequence's work is durable in git as of `78755486` (origin/master), and a fresh clone of
-`032b0c02` reproduces the schema and builds.** The prior reports' commit attributions were
-accurate; the `git status` they were judged against was the pre-commit snapshot. This pass adds
-no feature code: it proves the state, fixes the one reproducibility defect the proof exposed
-(`032b0c02`), and records the reconciliation above. The only uncommitted lines in the tree are a
-peer's concurrent doc rename, identified in §5.
+That is the whole claim. It does **not** validate the reports' readings of those commits:
+
+- pass-5 §2.3 mis-stated `a76a95a1`'s scope — the commit touched one file,
+  `Veterans/Compare.vue`; `Legacy/Compare.vue:278-279` still routes `single column` to
+  `pill-caution`;
+- `AGENTS.md` §9's "219 as measured 2026-10-27" is contradicted by
+  `ui-lint-baseline.json`'s 209.
+
+Both remain flagged for the owner under the revised plan's §Deviations item 6.
+
+**The sequence's work is durable in git as of `78755486` (origin/master). A clone of `032b0c02`
+migrates, seeds and builds — after the harness supplies SQLite settings (§4, item 3). It is not a
+zero-edit first-clone yet.**
+
+## §8 — What this pass does not close
+
+1. **Slice E / KI-102** — `.env.example` still defaults to MySQL; the literal
+   `cp .env.example .env && php artisan migrate` still fails. See §4, item 3.
+2. **Slice D** — the `Legacy/Compare.vue:278-279` pill mapping is unchanged; `a76a95a1` touched
+   `Veterans/Compare.vue` only.
+3. **Push** — the commits above are local; `origin/master` does not have them yet.
