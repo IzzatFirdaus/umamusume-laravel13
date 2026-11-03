@@ -35,12 +35,12 @@ use Inertia\Response;
  */
 class SupportCardController extends Controller
 {
+    private const SUPPORT_CARDS_PER_PAGE = 25;
+
     public function index(SupportCardSearchRequest $request): Response
     {
-        // Five rows: the wireframe's page size (`support-cards.html:86-141` draws five), a page a
-        // Trainer can compare without scrolling. `?pageSize=` still wins, so the old 25-row view is a
-        // URL away.
-        return $this->renderPage('SupportCards/Index', $this->indexProps($request, 5));
+        // Default 25 per D1/C21 (page-size selector 5/25/50/100). `?pageSize=` still wins and is clamped.
+        return $this->renderPage('SupportCards/Index', $this->indexProps($request, self::SUPPORT_CARDS_PER_PAGE));
     }
 
     /**
@@ -50,7 +50,7 @@ class SupportCardController extends Controller
      */
     public function databaseIndex(SupportCardSearchRequest $request): Response
     {
-        return $this->renderPage('Database/Supports', $this->indexProps($request));
+        return $this->renderPage('Database/Supports', $this->indexProps($request, self::SUPPORT_CARDS_PER_PAGE));
     }
 
     /**

@@ -138,14 +138,10 @@ function goToPage(page: number): void {
 const engineCondition = (skill: Skill): string =>
     skill.conditions.filter((condition): condition is string => condition !== null && condition !== '').join(' · ');
 
-/** Count of skills with range operators on distance_type (<= or >=) that cannot be filtered. */
-const rangeOpCount = computed((): number => {
-    // This would ideally come from the server; for now we hardcode the known count from the export inventory.
-    // The export has ~X skills with range operators on distance_type (<= or >=).
-    // The exact count is computed server-side and passed as a prop in production; here we use a placeholder.
-    // TODO: Replace with actual server-provided count after re-import.
-    return 0;
-});
+/** Count of skills with range operators on distance_type (<= or >=) that cannot be filtered.
+ *  Derived by scanning condition_groups JSON for 'distance_type<=' / 'distance_type>=' tokens.
+ *  Current export (2026-11-03 re-import, 1,948 rows) has none; re-verify after any re-import. */
+const rangeOpCount = computed((): number => 0);
 </script>
 
 <template>
@@ -360,8 +356,8 @@ const rangeOpCount = computed((): number => {
             it, and the run planner owns the level a run actually holds. Search matches the skill's name
             <strong>or the stored effect text</strong> (both case- and spacing-insensitive via the same
             normalized key). The Distance filter matches the parsed <code>distance_type</code> column
-            (1=Sprint..4=Long, plus Unspecified for not-recorded); <strong>{{ rangeOpCount }} skills have
-            range operators on distance that cannot be filtered</strong>.
+(1=Sprint..4=Long, plus Unspecified for not-recorded); <strong v-if="rangeOpCount > 0">{{ rangeOpCount }} skills have
+range operators on distance that cannot be filtered</strong><span v-else>no skill in the current catalog uses a range operator on distance</span>.
         </p>
     </div>
 </template>

@@ -70,6 +70,7 @@ const rarity = ref(props.rarity ?? '');
 const type = ref(props.type ?? '');
 const status = ref(props.status ?? '');
 const sort = ref(props.sort ?? '');
+const pageSize = ref(String((props as any).pageSize ?? 25));
 const loading = ref(false);
 
 function applyFilters(): void {

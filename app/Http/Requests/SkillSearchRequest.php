@@ -25,7 +25,10 @@ use Illuminate\Validation\Rule;
  * something. `rarity` is deliberately absent: it is the export's class code with no client label
  * (`ADR-0011` §3), so a control over it would ask a Trainer to choose between numbers they cannot read.
  *
- * `distance` accepts 1..4 (Sprint/Mile/Medium/Long per config) plus Unspecified for null distance_type.
+ * `distance` accepts 1..4 (Sprint/Mile/Medium/Long per config) plus 0 for Unspecified (null distance_type).
+ * SHR-1 exception: the Type facet uses the string token 'Unspecified' (never-zero identity), but distance is
+ * an integer domain where 0 is a natural sentinel for "not recorded" and is not a stored value; aligning to a
+ * string token would cascade through the controller, the Vue select and the tests for no behavioral gain.
  */
 class SkillSearchRequest extends FormRequest
 {

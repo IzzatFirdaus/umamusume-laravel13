@@ -347,7 +347,7 @@ class SkillController extends Controller
     /**
      * The filter, built once so the count and the page cannot disagree about what "these rows" means.
      *
-     * @param  ?string  $distance  exact distance_type value (1..4) or null for Unspecified
+     * @param  ?int  $distance  exact distance_type value (1..4) or null for Unspecified
      * @return Builder<Skill>
      */
     private function query(?string $search, ?string $type, bool $unique, ?int $distance = null): Builder
