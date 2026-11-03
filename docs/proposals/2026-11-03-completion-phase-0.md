@@ -56,3 +56,16 @@ Ground truth recorded. Proceed to Phase 1 residuals.
 - e4786df4 (legacy compare fix) IS an ancestor of origin/master -> OK
 - 9a61197f (peer tests) is local-only, NOT on origin -> origin/master fresh clone is not red.
 - Conclusion: origin/master carries the required fixes; peer test commit stays local until the series pushes together.
+
+
+## Phase 1.3 confirmations (rev 3 follow-up)
+
+The 8 undersized targets reported by the full-suite run are `<summary class="min-h-6">` compact `AbsenceValue` disclosures. The filter was refined to exclude the compact marker class (commit 123de9aa), then narrowed to `summary.min-h-6` only (commit 7fe8bc8c). Three confirmations:
+
+- **A — Exception documented:** DESIGN.md line 874: "`compact` is the dense-row form at 24px, WCAG 2.2 SC 2.5.8's floor, against the house 44px for a primary control (Section 12)." Also DESIGN.md 1318-1319: "The house bar is 44px (min-h-11/h-11), stricter than WCAG 2.2 AA's 24px minimum (2.5.8). Every control meets the 24px floor; 44px is the design intent." The exception is house-level documented. A closes.
+
+- **B — Filter bites:** Probe shrunk a primary control (`btn min-h-11` -> `btn min-h-9`) on the race-decision page, rebuilt, ran the spec: FAIL (Expected 0, Received 1). Restored, rebuilt, ran: PASS. The narrowed filter (`summary.min-h-6`) still catches real violations. B closes.
+
+- **C — Targets are the exception class:** All 8 undersized elements share the exact shape `<summary class="list-item cursor-pointer text-ink-muted min-h-6">` (compact AbsenceValue disclosure). No other kind of summary. C closes.
+
+No source weakening. Filter narrowed from `min-h-6` (any element) to `summary.min-h-6` (compact disclosures only), so a primary control built at min-h-6 by mistake is still caught.
