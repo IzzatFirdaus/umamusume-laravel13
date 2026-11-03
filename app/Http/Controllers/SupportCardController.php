@@ -120,44 +120,29 @@ class SupportCardController extends Controller
             }
         }
 
-        $cards = $this->ordered($this->filtered($q, $rarity, $type, $status, $server), $sort)
-            ->paginate($pageSize)
-            ->withQueryString()
-            ->through(function (SupportCard $card) use ($dictionary): array {
-                $effects = SupportCardEffects::atCap($card, $dictionary);
+        // Derived sorts (friendship_bonus, initial_friendship_gauge) require in-memory sort
+        // because they depend on computed effect values from the dictionary.
+        // Database-level sorts (name, type, rarity, released) use the query builder.
+        $derivedSorts = ['friendship_bonus', 'initial_friendship_gauge'];
 
-                return [
-                    'id' => $card->id,
-                    'name' => $card->displayName(),
-                    // The name and the epithet are two source fields, and the row prints them as the two
-                    // lines the card face carries. `name` above stays the joined label the row link and
-                    // the accessible-name contract are built on.
-                    'char_name' => $card->char_name ?? $card->name_ja ?? 'Card '.$card->support_id,
-                    'title' => $card->title_en,
-                    'url' => route('support-cards.show', $card),
-                    // The row's thumbnail slot (`ADR-0021` read half, `design-2.0` §45a "Support-card
-                    // index, card row"). `support_id` is the publisher's number and the only key the
-                    // mirror's storage path answers to; the `url` above is built from the local primary
-                    // key, because `show()` binds on that. The two must not be interchanged: a swapped
-                    // `support-id` finds no file and the slot silently disappears, which reads as "the
-                    // pictures never arrived" rather than as a bug. A null is the mirror's normal
-                    // partial answer and the page renders no frame for it (`DESIGN.md` §4.7).
-                    'artworkURL' => app(ArtworkMirror::class)->url('support_thumb', (int) $card->support_id),
-                    'rarity_label' => $card->rarity->label(),
-                    'rarity_stars' => $card->rarity->stars(),
-                    'rarity_word' => $card->rarityWord(),
-                    // The export's key beside its client word, because the type mark draws a different
-                    // glyph per key and the word alone cannot select it (`SupportTypeMark.vue`).
-                    'type' => $card->type,
-                    'type_label' => $card->typeLabel(),
-                    'release_status' => $card->release_status,
-                    'effects' => $effects,
-                    // The friendship bonus is the one effect the index compares on, so it gets its own
-                    // cell instead of being read out of the chip run (`support-cards.html` annotation 2:
-                    // a Pal card's absence is the deciding fact for that type, not a missing chip).
-                    'friendship' => $this->friendshipBonus($effects),
-                ];
-            });
+        if (in_array($sort, $derivedSorts, true)) {
+            $cards = $this->paginateWithDerivedSort(
+                $this->filtered($q, $rarity, $type, $status, $server),
+                $sort,
+                $dictionary,
+                $pageSize,
+                $request
+            );
+        } else {
+            $cards = $this->ordered($this->filtered($q, $rarity, $type, $status, $server), $sort)
+                ->paginate($pageSize)
+                ->withQueryString()
+                ->through(function (SupportCard $card) use ($dictionary): array {
+                    $effects = SupportCardEffects::atCap($card, $dictionary);
+
+                    return $this->mapCardForIndex($card, $effects);
+                });
+        }
 
         return [
             'cards' => $cards,
@@ -197,7 +182,7 @@ class SupportCardController extends Controller
         ];
     }
 
-    /**
+/**
      * The export's own id for Friendship Bonus, the effect the deck-slot comparison turns on.
      *
      * An id and not a label: `support_effects` is the join target for `support_cards.effects`, so the
@@ -206,6 +191,122 @@ class SupportCardController extends Controller
      * "Friendship Bonus" on every committed body, and a test pins that pairing.
      */
     private const FRIENDSHIP_EFFECT_ID = 1;
+
+    /**
+     * Map a support card to its index representation.
+     *
+     * @param  list<array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>  $effects
+     * @return array<string, mixed>
+     */
+    private function mapCardForIndex(SupportCard $card, array $effects): array
+    {
+        return [
+            'id' => $card->id,
+            'name' => $card->displayName(),
+            'char_name' => $card->char_name ?? $card->name_ja ?? 'Card '.$card->support_id,
+            'title' => $card->title_en,
+            'url' => route('support-cards.show', $card),
+            'artworkURL' => app(ArtworkMirror::class)->url('support_thumb', (int) $card->support_id),
+            'rarity_label' => $card->rarity->label(),
+            'rarity_stars' => $card->rarity->stars(),
+            'rarity_word' => $card->rarityWord(),
+            'type' => $card->type,
+            'type_label' => $card->typeLabel(),
+            'release_status' => $card->release_status,
+            'effects' => $effects,
+            'friendship' => $this->friendshipBonus($effects),
+        ];
+    }
+
+    /**
+     * Paginate with a derived sort (friendship_bonus, initial_friendship_gauge).
+     *
+     * Fetches all matching cards, computes the sort value for each, sorts in PHP with N/A-last
+     * (null/absent sorts last, never treated as 0), then paginates manually.
+     * Ties break by name (char_name, title_en) for deterministic order.
+     *
+     * @param  Builder<SupportCard>  $query
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     */
+    private function paginateWithDerivedSort(Builder $query, string $sort, array $dictionary, int $perPage, SupportCardSearchRequest $request): \Illuminate\Contracts\Pagination\LengthAwarePaginator
+    {
+        // Get all matching cards (the catalog is small enough for this)
+        $cards = $query->get();
+
+        // Effect IDs: 1 = Friendship Bonus, 14 = Initial Friendship Gauge
+        $targetEffectId = $sort === 'friendship_bonus' ? 1 : 14;
+
+        // Compute sort value for each card
+        $cardsWithSort = $cards->map(function (SupportCard $card) use ($dictionary, $targetEffectId): array {
+            $effects = SupportCardEffects::atCap($card, $dictionary);
+            $sortValue = null;
+
+            foreach ($effects as $effect) {
+                if ($effect['effect_id'] === $targetEffectId) {
+                    $sortValue = $effect['value']; // raw numeric value for sorting
+                    break;
+                }
+            }
+
+            return [
+                'card' => $card,
+                'effects' => $effects,
+                'sortValue' => $sortValue,
+                'name' => $card->displayName(),
+                'char_name' => $card->char_name ?? '',
+                'title_en' => $card->title_en ?? '',
+            ];
+        });
+
+        // Sort: N/A (null) last, then by value descending, then by name
+        $cardsWithSort = $cardsWithSort->sort(function (array $a, array $b): int {
+            // N/A last
+            if ($a['sortValue'] === null && $b['sortValue'] !== null) {
+                return 1;
+            }
+            if ($a['sortValue'] !== null && $b['sortValue'] === null) {
+                return -1;
+            }
+            if ($a['sortValue'] === null && $b['sortValue'] === null) {
+                // Both N/A: tie-break by name
+                $nameCmp = strcmp($a['char_name'], $b['char_name']);
+                if ($nameCmp !== 0) {
+                    return $nameCmp;
+                }
+                return strcmp($a['title_en'], $b['title_en']);
+            }
+
+            // Both have values: sort descending (higher is better)
+            $valCmp = $b['sortValue'] <=> $a['sortValue'];
+            if ($valCmp !== 0) {
+                return $valCmp;
+            }
+
+            // Tie-break by name
+            $nameCmp = strcmp($a['char_name'], $b['char_name']);
+            if ($nameCmp !== 0) {
+                return $nameCmp;
+            }
+            return strcmp($a['title_en'], $b['title_en']);
+        });
+
+        // Manual pagination
+        $page = $request->query('page', 1);
+        $total = $cardsWithSort->count();
+        $offset = ($page - 1) * $perPage;
+        $pageItems = $cardsWithSort->slice($offset, $perPage)->values();
+
+        return new \Illuminate\Pagination\LengthAwarePaginator(
+            $pageItems->map(function (array $item): array {
+                return $this->mapCardForIndex($item['card'], $item['effects']);
+            })->all(),
+            $total,
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+    }
 
     /**
      * The friendship bonus at cap, or null when the card's effects do not state one.
@@ -497,8 +598,12 @@ class SupportCardController extends Controller
             SupportCardSearchRequest::SORTS,
             array_map(
                 static fn (string $sort): string => match ($sort) {
+                    'name' => 'Name',
+                    'type' => 'Type',
                     'rarity' => 'Rarity',
                     'released' => 'Release date',
+                    'friendship_bonus' => 'Friendship bonus',
+                    'initial_friendship_gauge' => 'Initial friendship gauge',
                 },
                 SupportCardSearchRequest::SORTS
             )
@@ -553,12 +658,17 @@ class SupportCardController extends Controller
      * card Global has not received sorts last rather than appearing brand new — SQLite ranks NULL below
      * every value, and descending puts the nulls at the end.
      *
+     * Derived sorts (friendship_bonus, initial_friendship_gauge) are handled in indexProps via in-memory
+     * sort because they depend on computed effect values. N/A (null/absent) sorts last; ties break by name.
+     *
      * @param  Builder<SupportCard>  $query
      * @return Builder<SupportCard>
      */
     private function ordered(Builder $query, ?string $sort): Builder
     {
         return (match ($sort) {
+            'name' => $query,
+            'type' => $query->orderBy('type'),
             'rarity' => $query->orderBy('rarity'),
             'released' => $query->orderByDesc('release_global'),
             default => $query,

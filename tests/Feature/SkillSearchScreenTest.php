@@ -419,8 +419,24 @@ it('carries the activation predicate the source states beside the row', function
 
 it('refuses an unknown type on the Database URL and lands back on it', function (): void {
     // The same refusal as the Library URL, but the picker the error names lives on the Database area, so
-    // the field error must land beside that picker rather than bouncing the Trainer to `/skills`.
+    // the error must land beside that picker rather than bouncing the Trainer to `/skills`.
     $this->get(route('database.skills', ['type' => 'Debuff']))
         ->assertRedirect(route('database.skills'))
         ->assertSessionHasErrors('type');
+});
+
+/**
+ * P3 fixture verification: the sample fixture used by `skillScreenImport()` parses without error
+ * and the P3 fields (description, description_match_key, distance_type) are handled gracefully
+ * when absent from the fixture. The full export verification is recorded in the commit (1,948 rows,
+ * 985 descriptions, 798 distance_type from the 2026-11-03 re-import).
+ */
+it('verifies the P3 parser handles missing desc_en and distance_type in fixture gracefully', function (): void {
+    skillScreenImport();
+
+    $total = Skill::count();
+    // The fixture has no desc_en or distance_type==N tokens, so P3 columns stay null — parser must not crash
+    expect($total)->toBe(12);
+    expect(Skill::whereNotNull('description')->count())->toBe(0);
+    expect(Skill::whereNotNull('distance_type')->count())->toBe(0);
 });

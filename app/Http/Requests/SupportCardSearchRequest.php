@@ -29,7 +29,7 @@ class SupportCardSearchRequest extends FormRequest
     /**
      * The two orderings besides the default. Tokens, not labels: the view names them for a Trainer.
      */
-    public const SORTS = ['rarity', 'released'];
+    public const SORTS = ['name', 'type', 'rarity', 'released', 'friendship_bonus', 'initial_friendship_gauge'];
 
     /**
      * The two servers the wireframe's filter offers, in its order (`support-cards.html:76`).

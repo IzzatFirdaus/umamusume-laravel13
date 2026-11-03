@@ -109,6 +109,9 @@ class SkillController extends Controller
                 ),
             ]);
 
+        // P3: count skills with range operators on distance_type (<= or >=) for the footer note
+        $rangeOpCount = $this->rangeOperatorCount();
+
         return [
             'skills' => $skills,
             'search' => $search,
@@ -120,7 +123,31 @@ class SkillController extends Controller
             'totalCount' => $this->availableCount(),
             'askedFor' => $this->describeAsk($search, $type, $request->boolean('unique')),
             'distance' => $distance,
+            'rangeOpCount' => $rangeOpCount,
         ];
+    }
+
+    /**
+     * Count of skills whose condition tokens contain range operators on distance_type (<= or >=).
+     * Computed from the stored condition_groups JSON at query time.
+     */
+    private function rangeOperatorCount(): int
+    {
+        $count = 0;
+        $skills = Skill::query()->availableOnGlobal()->get(['condition_groups']);
+        foreach ($skills as $skill) {
+            foreach ($skill->condition_groups ?? [] as $group) {
+                $condition = $group['condition'] ?? '';
+                $precondition = $group['precondition'] ?? '';
+                if (str_contains($condition, 'distance_type<=') || str_contains($condition, 'distance_type>=')
+                    || str_contains($precondition, 'distance_type<=') || str_contains($precondition, 'distance_type>=')
+                ) {
+                    $count++;
+                    break 2;
+                }
+            }
+        }
+        return $count;
     }
 
     /**

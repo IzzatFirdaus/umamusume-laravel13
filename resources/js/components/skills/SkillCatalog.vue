@@ -56,14 +56,10 @@ const props = defineProps<{
     unique: boolean;
     totalCount: number;
     askedFor: string;
-    /**
-     * The h2 the Database host passes ("Skill catalog"). The `/skills` host omits it: its own h1 already
-     * names the search, and a second heading would say the same thing twice.
-     */
-    heading?: string | null;
-    /** Where the filter form, the Clear link and the pager write back to. Required: a caller that omits
-     *  it would silently filter from the Database URL back to `/skills`, so each page states its address. */
     filterPath: string;
+    heading?: string | null;
+    /** Count of skills with range operators on distance_type (<= or >=) that cannot be filtered. */
+    rangeOpCount: number;
 }>();
 
 const page = usePage();
@@ -137,11 +133,6 @@ function goToPage(page: number): void {
 
 const engineCondition = (skill: Skill): string =>
     skill.conditions.filter((condition): condition is string => condition !== null && condition !== '').join(' · ');
-
-/** Count of skills with range operators on distance_type (<= or >=) that cannot be filtered.
- *  Derived by scanning condition_groups JSON for 'distance_type<=' / 'distance_type>=' tokens.
- *  Current export (2026-11-03 re-import, 1,948 rows) has none; re-verify after any re-import. */
-const rangeOpCount = computed((): number => 0);
 </script>
 
 <template>

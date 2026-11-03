@@ -359,6 +359,74 @@ it('orders by rarity and by release date when asked, and by name when not', func
         ->assertInertia(fn (Assert $page) => $page
             ->where('cards.data.0.name', 'Amber [Tracen Academy]')
             ->where('cards.data.1.name', 'Beryl [Tracen Academy]'));
+
+    // Explicit name sort (same as default but explicit)
+    test()->get('/support-cards?sort=name')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.name', 'Amber [Tracen Academy]')
+            ->where('cards.data.1.name', 'Beryl [Tracen Academy]'));
+});
+
+it('orders by type when asked', function (): void {
+    SupportCard::factory()->wit()->create(['char_name' => 'C Wit']);
+    SupportCard::factory()->speed()->create(['char_name' => 'A Speed']);
+    SupportCard::factory()->guts()->create(['char_name' => 'B Guts']);
+
+    // Types are stored as keys (speed, stamina, power, guts, intelligence, friend, group)
+    // and sorted alphabetically by the key: friend, group, guts, intelligence, power, speed, stamina
+    test()->get('/support-cards?sort=type')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.name', 'B Guts [Tracen Academy]')
+            ->where('cards.data.1.name', 'C Wit [Tracen Academy]')
+            ->where('cards.data.2.name', 'A Speed [Tracen Academy]'));
+});
+
+it('orders by friendship bonus at cap with N/A last', function (): void {
+    // Card with friendship bonus
+    effectRow(1, 'Friendship Bonus');
+    SupportCard::factory()->create(['char_name' => 'Has Bonus', 'effects' => [[1, 5, 10, 15, 20, 25, 30, 35, -1, -1, -1, -1]]]);
+
+    // Card without friendship bonus (explicitly no effects)
+    SupportCard::factory()->create(['char_name' => 'No Bonus', 'effects' => []]);
+
+    // Card with friendship bonus at higher value
+    SupportCard::factory()->create(['char_name' => 'High Bonus', 'effects' => [[1, 10, 15, 20, 25, 30, 35, 40, -1, -1, -1, -1]]]);
+
+    // Card with no effects at all (another N/A)
+    SupportCard::factory()->create(['char_name' => 'No Effects', 'effects' => []]);
+
+    // Default: highest friendship bonus first, N/A last
+    test()->get('/support-cards?sort=friendship_bonus')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.name', 'High Bonus [Tracen Academy]')
+            ->where('cards.data.1.name', 'Has Bonus [Tracen Academy]')
+            // N/A cards (no friendship bonus) should be last
+            ->where('cards.data.2.friendship', null)
+            ->where('cards.data.3.friendship', null));
+});
+
+it('orders by initial friendship gauge at cap with N/A last', function (): void {
+    // Card with initial friendship gauge (effect 14)
+    effectRow(14, 'Initial Friendship Gauge');
+    SupportCard::factory()->create(['char_name' => 'Has Gauge', 'effects' => [[14, 5, 10, 15, -1, -1, -1, -1, -1, -1, -1, -1]]]);
+
+    // Card without initial friendship gauge
+    SupportCard::factory()->create(['char_name' => 'No Gauge', 'effects' => [[1, 5, 10, 15, -1, -1, -1, -1, -1, -1, -1, -1]]]);
+
+    // Card with higher initial friendship gauge
+    SupportCard::factory()->create(['char_name' => 'High Gauge', 'effects' => [[14, 10, 15, 20, -1, -1, -1, -1, -1, -1, -1, -1]]]);
+
+    // Default: highest gauge first, N/A last
+    test()->get('/support-cards?sort=initial_friendship_gauge')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.name', 'High Gauge [Tracen Academy]')
+            ->where('cards.data.1.name', 'Has Gauge [Tracen Academy]')
+            // N/A card should be last
+            ->where('cards.data.2.effects.0.effect_id', 1));
 });
 
 it('names the fetch that fills an empty catalog', function (): void {
