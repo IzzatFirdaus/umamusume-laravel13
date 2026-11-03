@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Career;
 
 use App\Enums\BuildPurpose;
-use App\Enums\ReleaseStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Career\StoreDraftBuildTargetRequest;
 use App\Models\Advisor\BuildTargetPayload;

@@ -595,9 +595,9 @@ final class SkillsPlannerController extends Controller
         $name = $skill === null ? ($priorityName ?? '') : $skill->name;
 
         $note = $this->prerequisiteNote($name);
-        if (!$inPool && $skill !== null) {
+        if (! $inPool && $skill !== null) {
             $poolNote = "This run's selected form does not publish this skill; it is recordable as a target but not in the learnable pool.";
-            $note = $note !== null ? $note . ' ' . $poolNote : $poolNote;
+            $note = $note !== null ? $note.' '.$poolNote : $poolNote;
         }
 
         return [

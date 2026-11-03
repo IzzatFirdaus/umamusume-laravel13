@@ -373,14 +373,13 @@ it('orders by type when asked', function (): void {
     SupportCard::factory()->speed()->create(['char_name' => 'A Speed']);
     SupportCard::factory()->guts()->create(['char_name' => 'B Guts']);
 
-    // Types are stored as keys (speed, stamina, power, guts, intelligence, friend, group)
-    // and sorted alphabetically by the key: friend, group, guts, intelligence, power, speed, stamina
+    // Legend order for type sort (C25): Speed, Stamina, Power, Guts, Wit, Pal, Group
     test()->get('/support-cards?sort=type')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('cards.data.0.name', 'B Guts [Tracen Academy]')
-            ->where('cards.data.1.name', 'C Wit [Tracen Academy]')
-            ->where('cards.data.2.name', 'A Speed [Tracen Academy]'));
+            ->where('cards.data.0.name', 'A Speed [Tracen Academy]')
+            ->where('cards.data.1.name', 'B Guts [Tracen Academy]')
+            ->where('cards.data.2.name', 'C Wit [Tracen Academy]'));
 });
 
 it('orders by friendship bonus at cap with N/A last', function (): void {
@@ -429,13 +428,97 @@ it('orders by initial friendship gauge at cap with N/A last', function (): void 
             ->where('cards.data.2.effects.0.effect_id', 1));
 });
 
-it('names the fetch that fills an empty catalog', function (): void {
-    // The page renders the fetch-and-reparse copy; here the contract is the state that selects it.
-    test()->get('/support-cards')
+it('preserves derived sort across pages (friendship_bonus)', function (): void {
+    effectRow(1, 'Friendship Bonus');
+    // Create 11 cards: 5 with varying friendship bonus, 6 without (N/A)
+    // With pageSize=5 (narrowed from 2), this spans 3 pages: 5, 5, 1
+    SupportCard::factory()->create(['char_name' => 'Low Bonus', 'effects' => [[1, 5, 10, 15, -1, -1, -1, -1, -1, -1, -1, -1]]]);
+    SupportCard::factory()->create(['char_name' => 'Mid Bonus', 'effects' => [[1, 10, 15, 20, -1, -1, -1, -1, -1, -1, -1, -1]]]);
+    SupportCard::factory()->create(['char_name' => 'High Bonus', 'effects' => [[1, 15, 20, 25, -1, -1, -1, -1, -1, -1, -1, -1]]]);
+    SupportCard::factory()->create(['char_name' => 'Mid2 Bonus', 'effects' => [[1, 12, 18, 22, -1, -1, -1, -1, -1, -1, -1, -1]]]);
+    SupportCard::factory()->create(['char_name' => 'Mid3 Bonus', 'effects' => [[1, 8, 12, 18, -1, -1, -1, -1, -1, -1, -1, -1]]]);
+    SupportCard::factory()->create(['char_name' => 'No Bonus A', 'effects' => []]);
+    SupportCard::factory()->create(['char_name' => 'No Bonus B', 'effects' => []]);
+    SupportCard::factory()->create(['char_name' => 'No Bonus C', 'effects' => []]);
+    SupportCard::factory()->create(['char_name' => 'No Bonus D', 'effects' => []]);
+    SupportCard::factory()->create(['char_name' => 'No Bonus E', 'effects' => []]);
+    SupportCard::factory()->create(['char_name' => 'No Bonus F', 'effects' => []]);
+
+    // Page 1: High Bonus, Mid2 Bonus, Mid Bonus, Mid3 Bonus, Low Bonus
+    test()->get('/support-cards?sort=friendship_bonus&pageSize=5')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('cards.data', 0)
-            ->where('totalCount', 0));
+            ->where('cards.data.0.name', 'High Bonus [Tracen Academy]')
+            ->where('cards.data.1.name', 'Mid2 Bonus [Tracen Academy]')
+            ->where('cards.data.2.name', 'Mid Bonus [Tracen Academy]')
+            ->where('cards.data.3.name', 'Mid3 Bonus [Tracen Academy]')
+            ->where('cards.data.4.name', 'Low Bonus [Tracen Academy]')
+            ->where('cards.current_page', 1)
+            ->where('cards.last_page', 3));
+
+    // Page 2: No Bonus A, No Bonus B, No Bonus C, No Bonus D, No Bonus E (all N/A, tie-break by name)
+    test()->get('/support-cards?sort=friendship_bonus&pageSize=5&page=2')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.name', 'No Bonus A [Tracen Academy]')
+            ->where('cards.data.1.name', 'No Bonus B [Tracen Academy]')
+            ->where('cards.data.2.name', 'No Bonus C [Tracen Academy]')
+            ->where('cards.data.3.name', 'No Bonus D [Tracen Academy]')
+            ->where('cards.data.4.name', 'No Bonus E [Tracen Academy]')
+            ->where('cards.current_page', 2));
+
+    // Page 3: No Bonus F (last N/A)
+    test()->get('/support-cards?sort=friendship_bonus&pageSize=5&page=3')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.name', 'No Bonus F [Tracen Academy]')
+            ->where('cards.current_page', 3));
+});
+
+it('preserves derived sort across pages (initial_friendship_gauge)', function (): void {
+    effectRow(14, 'Initial Friendship Gauge');
+    // Create 11 cards: 5 with varying gauge, 6 without (N/A)
+    SupportCard::factory()->create(['char_name' => 'Low Gauge', 'effects' => [[14, 5, 10, 15, -1, -1, -1, -1, -1, -1, -1, -1]]]);
+    SupportCard::factory()->create(['char_name' => 'Mid Gauge', 'effects' => [[14, 10, 15, 20, -1, -1, -1, -1, -1, -1, -1, -1]]]);
+    SupportCard::factory()->create(['char_name' => 'High Gauge', 'effects' => [[14, 15, 20, 25, -1, -1, -1, -1, -1, -1, -1, -1]]]);
+    SupportCard::factory()->create(['char_name' => 'Mid2 Gauge', 'effects' => [[14, 12, 18, 22, -1, -1, -1, -1, -1, -1, -1, -1]]]);
+    SupportCard::factory()->create(['char_name' => 'Mid3 Gauge', 'effects' => [[14, 8, 12, 18, -1, -1, -1, -1, -1, -1, -1, -1]]]);
+    SupportCard::factory()->create(['char_name' => 'No Gauge A', 'effects' => []]);
+    SupportCard::factory()->create(['char_name' => 'No Gauge B', 'effects' => []]);
+    SupportCard::factory()->create(['char_name' => 'No Gauge C', 'effects' => []]);
+    SupportCard::factory()->create(['char_name' => 'No Gauge D', 'effects' => []]);
+    SupportCard::factory()->create(['char_name' => 'No Gauge E', 'effects' => []]);
+    SupportCard::factory()->create(['char_name' => 'No Gauge F', 'effects' => []]);
+
+    // Page 1: High Gauge, Mid2 Gauge, Mid Gauge, Mid3 Gauge, Low Gauge
+    test()->get('/support-cards?sort=initial_friendship_gauge&pageSize=5')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.name', 'High Gauge [Tracen Academy]')
+            ->where('cards.data.1.name', 'Mid2 Gauge [Tracen Academy]')
+            ->where('cards.data.2.name', 'Mid Gauge [Tracen Academy]')
+            ->where('cards.data.3.name', 'Mid3 Gauge [Tracen Academy]')
+            ->where('cards.data.4.name', 'Low Gauge [Tracen Academy]')
+            ->where('cards.current_page', 1)
+            ->where('cards.last_page', 3));
+
+    // Page 2: No Gauge A through No Gauge E (all N/A, tie-break by name)
+    test()->get('/support-cards?sort=initial_friendship_gauge&pageSize=5&page=2')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.name', 'No Gauge A [Tracen Academy]')
+            ->where('cards.data.1.name', 'No Gauge B [Tracen Academy]')
+            ->where('cards.data.2.name', 'No Gauge C [Tracen Academy]')
+            ->where('cards.data.3.name', 'No Gauge D [Tracen Academy]')
+            ->where('cards.data.4.name', 'No Gauge E [Tracen Academy]')
+            ->where('cards.current_page', 2));
+
+    // Page 3: No Gauge F
+    test()->get('/support-cards?sort=initial_friendship_gauge&pageSize=5&page=3')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('cards.data.0.name', 'No Gauge F [Tracen Academy]')
+            ->where('cards.current_page', 3));
 });
 
 it('names the ask when a filter matches nothing', function (): void {

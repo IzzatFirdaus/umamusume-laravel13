@@ -654,7 +654,7 @@ class SupportCardController extends Controller
             ->count();
     }
 
-    /**
+/**
      * The chosen ordering, with the label a Trainer reads as the tiebreaker in every case.
      *
      * A tiebreaker is not cosmetic: two cards of the same rarity have no defined order without one, and
@@ -667,14 +667,37 @@ class SupportCardController extends Controller
      * Derived sorts (friendship_bonus, initial_friendship_gauge) are handled in indexProps via in-memory
      * sort because they depend on computed effect values. N/A (null/absent) sorts last; ties break by name.
      *
+     * Type sort uses the legend order (Speed, Stamina, Power, Guts, Wit, Pal, Group) per C25;
+     * fallback to word-alphabetical if a type is not in the mapping.
+     *
      * @param  Builder<SupportCard>  $query
      * @return Builder<SupportCard>
      */
     private function ordered(Builder $query, ?string $sort): Builder
     {
+        // Legend order for type sort (C25): Speed, Stamina, Power, Guts, Wit, Pal, Group
+        $typeOrder = [
+            'speed' => 0,
+            'stamina' => 1,
+            'power' => 2,
+            'guts' => 3,
+            'intelligence' => 4,
+            'friend' => 5,
+            'group' => 6,
+        ];
+
         return (match ($sort) {
             'name' => $query,
-            'type' => $query->orderBy('type'),
+            'type' => $query->orderByRaw(
+                'CASE ' .
+                implode(' ', array_map(
+                    static fn (string $t, int $o): string => "WHEN type = ? THEN $o",
+                    array_keys($typeOrder),
+                    array_values($typeOrder)
+                )) .
+                ' ELSE 99 END',
+                array_keys($typeOrder)
+            ),
             'rarity' => $query->orderBy('rarity'),
             'released' => $query->orderByDesc('release_global'),
             default => $query,

@@ -147,6 +147,7 @@ class SkillController extends Controller
                 }
             }
         }
+
         return $count;
     }
 
