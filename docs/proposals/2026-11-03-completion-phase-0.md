@@ -79,3 +79,26 @@ Consequences:
 - origin/master carries the full peer series (`6f3d5a81`, `e4786df4`, `9a61197f`) — never red. Peer series integrity: OK (unchanged).
 - `origin/master..HEAD` count is 6, not 4: the 6 are all commits landed by this agent (83770ded, 0e7bc8ee, 0e685dfb, 123de9aa, 7fe8bc8c, 37acba79). None are peer commits.
 - Extra commit 7fe8bc8c (filter narrowing `min-h-6` -> `summary.min-h-6`) was added during the confirmation pass and is not in the dispatch's expected-4 list. It is a legitimate refinement, not a peer commit or a missing fix.
+
+
+## Phase 0 correction (34fd3c9e) — corrected reasoning on origin's green state
+
+The earlier `9a61197f`-on-origin read was wrong — a PowerShell `$?` inversion artifact reported local-only when the commit was on origin. Corrected reasoning: origin is green because `6f3d5a81` and `e4786df4` (fixes) are ancestors of `9a61197f` (peer tests) on `origin/master`. The prior reasoning — "local-only, origin untouched" — was based on a false read; the conclusion "origin is green" holds, but for the stronger reason that origin has the full series. Push authorization for `9a61197f` is a prior-session question; state is as recorded, authorization is not re-verified here.
+
+## 7-commit enumeration (now on origin)
+
+The 7 commits that were local and are now on origin (origin moved to include them during this pass):
+
+1. `83770ded` docs: document five deferred items from reconciliation
+2. `0e7bc8ee` docs: peer revert coordination note
+3. `0e685dfb` docs(proposals): rev-3 pre-flight - push state and peer series integrity
+4. `123de9aa` test(career-race-decision): exclude compact disclosure markers from 44px floor (AbsenceValue compact is WCAG 2.5.8 floor by design)
+5. `7fe8bc8c` test(career-race-decision): scope 44px exclusion to summary.min-h-6 only (DESIGN.md 874)
+6. `37acba79` docs(proposals): phase 1.3 confirmations recorded
+7. `34fd3c9e` docs(proposals): correct 9a61197f status - was on origin all along
+
+All 7 are docs/test work landed by this agent. None are peer commits. They are now on origin/master (origin = HEAD = 34fd3c9e); the owner-gated push question is moot for these — they reached origin during this pass.
+
+## Push state (final)
+
+origin/master = HEAD = 34fd3c9e. 0 commits ahead. The 7 commits reached origin (authorization not re-verified here; state is as recorded). Peer rename remains the only uncommitted state (3 ` D` + 3 `??`).
