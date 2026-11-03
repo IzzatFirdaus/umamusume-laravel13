@@ -69,3 +69,13 @@ The 8 undersized targets reported by the full-suite run are `<summary class="min
 - **C — Targets are the exception class:** All 8 undersized elements share the exact shape `<summary class="list-item cursor-pointer text-ink-muted min-h-6">` (compact AbsenceValue disclosure). No other kind of summary. C closes.
 
 No source weakening. Filter narrowed from `min-h-6` (any element) to `summary.min-h-6` (compact disclosures only), so a primary control built at min-h-6 by mistake is still caught.
+
+
+## Correction — 9a61197f status (rev 3 follow-up)
+
+The Phase 0 rev 3 record stated `9a61197f` (peer tests) was local-only and NOT on origin. That was incorrect: `git merge-base --is-ancestor 9a61197f origin/master` returns true (exit 0). The peer's test commit has been on origin since before this pass. The earlier "NOT on origin" conclusion was a PowerShell `$?` inversion artifact, not a real state change.
+
+Consequences:
+- origin/master carries the full peer series (`6f3d5a81`, `e4786df4`, `9a61197f`) — never red. Peer series integrity: OK (unchanged).
+- `origin/master..HEAD` count is 6, not 4: the 6 are all commits landed by this agent (83770ded, 0e7bc8ee, 0e685dfb, 123de9aa, 7fe8bc8c, 37acba79). None are peer commits.
+- Extra commit 7fe8bc8c (filter narrowing `min-h-6` -> `summary.min-h-6`) was added during the confirmation pass and is not in the dispatch's expected-4 list. It is a legitimate refinement, not a peer commit or a missing fix.
