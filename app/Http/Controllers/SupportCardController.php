@@ -98,7 +98,8 @@ class SupportCardController extends Controller
         // Option-set narrowing (C22) — support-cards surface only: narrow the clamped value
         // to the selector's option set {5, 25, 50, 100}. Garbage (non-numeric, parses to ≤ 0)
         // → default 25; everything that parses to ≥ 1 → clamp (1–100) then nearest option.
-        // Tie-break: 1–4 → 5, 15 → 25 (pinned in tests), 30 → 25, 99 → 100. PageSize service untouched.
+        // Tie-break: equidistant options pick the one closer to the default (25).
+        // 15 → 25 (equidistant from 5/25; 25 closer to default), 75 → 50 (equidistant from 50/100; 50 closer to default).
         $options = [5, 25, 50, 100];
         if (! in_array($pageSize, $options, true)) {
             $raw = $request->query('pageSize');
@@ -106,15 +107,20 @@ class SupportCardController extends Controller
             if (! is_numeric($raw) || $parsed <= 0) {
                 $pageSize = 25;
             } else {
-                // Nearest option, tie-break toward the larger option (15 → 25, 30 → 25)
+                // Nearest option; tie-break toward the option closer to the default (25).
                 $target = $pageSize;
                 $pageSize = $options[0];
                 $minDiff = abs($options[0] - $target);
                 foreach ($options as $option) {
                     $diff = abs($option - $target);
-                    if ($diff < $minDiff || ($diff === $minDiff && $option > $pageSize)) {
+                    if ($diff < $minDiff) {
                         $minDiff = $diff;
                         $pageSize = $option;
+                    } elseif ($diff === $minDiff) {
+                        // Tie-break: pick the option closer to the default (25)
+                        if (abs($option - 25) < abs($pageSize - 25)) {
+                            $pageSize = $option;
+                        }
                     }
                 }
             }

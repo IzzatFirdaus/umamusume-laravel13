@@ -333,6 +333,8 @@ function addPickedSkill(): void {
     });
 }
 
+const addingRecommendation = ref(false);
+
 function addRecommendation(): void {
     const recommendedIds = props.recommended.rows.map((r) => r.id);
     const newIds = recommendedIds.filter((id) => !planned.value.includes(id));
@@ -341,8 +343,12 @@ function addRecommendation(): void {
         return;
     }
 
+    // Double-click trap: set loading state to prevent rapid re-entry
+    addingRecommendation.value = true;
+
     // Use the same commit path as "Learn planned skills" — append to planned array
     planned.value = [...planned.value, ...newIds];
+    addingRecommendation.value = false;
 }
 
 // ADR-0001 §2 wants the constants behind a number visible wherever the number appears, so the two
@@ -618,6 +624,9 @@ const coverageConstants = computed(() =>
                                     v-if="props.purchasable.shortfall !== null && props.purchasable.shortfall > 0"
                                 >, a shortfall of <span class="font-mono tabular-nums">{{ props.purchasable.shortfall }}</span> SP</template></template>.
                             </p>
+                            <p class="mt-1 text-xs text-ink-muted">
+                                This list reads the full catalogue, not this run's pool.
+                            </p>
                             <!-- A capped scroll region is keyboard-reachable or it is not reachable (WCAG 2.1.1 and
                                  axe's `scrollable-region-focusable`): `tabindex` puts the list itself in the tab
                                  order and the name says what scrolling it reveals. -->
@@ -661,6 +670,9 @@ const coverageConstants = computed(() =>
                                         </template>
                                     </template>.
                                 </p>
+                                <p class="mt-1 text-xs text-ink-muted">
+                                    (a) The rule is this tool's own heuristic, not a client mechanic. (b) The fill reuses the cheapest-first ordering. (c) The pool is the run's form's skill list — the trainee profile's "Skills on this form" (unique + innate + awakening, plus acquired event skills). (d) When the budget outlasts the pool, the residual is printed.
+                                </p>
                                 <ol tabindex="0" aria-label="Recommended skills for this run" class="mt-2 max-h-72 space-y-1 overflow-y-auto text-sm">
                                     <li v-for="skill in props.recommended.rows" :key="skill.id" class="flex items-baseline justify-between gap-3">
                                         <span class="text-ink">{{ skill.name }}</span>
@@ -670,10 +682,10 @@ const coverageConstants = computed(() =>
                                 <button
                                     type="button"
                                     class="btn btn-primary min-h-11 mt-2"
-                                    :disabled="planned.some(p => props.recommended.rows.some(r => r.id === p))"
+                                    :disabled="planned.some(p => props.recommended.rows.some(r => r.id === p)) || addingRecommendation"
                                     @click="addRecommendation"
                                 >
-                                    Add recommendation to plan
+                                    {{ addingRecommendation ? 'Adding…' : 'Add recommendation to plan' }}
                                 </button>
                             </div>
                             <p v-else class="mt-1 text-sm text-ink-muted">
