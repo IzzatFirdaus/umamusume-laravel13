@@ -11,7 +11,7 @@ Date: 2026-11-03 (final closure pass)
 - Scenario-driven component props (resolved label from server, no hardcoded scenario names)
 
 ### v3.0.0 — page-structure rewrite
-- 28-page divergence audit program (passes 1–5 + follow-ups) closed
+- 28-page divergence audit program (passes 1–5 + follow-ups) closed — re-audit 2026-11-03: 0 divergent, 11 near (HFW-OVERRIDE candidates), 15 matching. No page-level repair needed.
 - ~50 UI/UX audit findings resolved across 6 passes
 - Audit program Slices A, B, C, D, E, G landed (snapshot review payload, runs status pill, legacy compare, refusal focus, SQLite default)
 - Phase 1.3: 8 compact AbsenceValue disclosures documented as WCAG 2.5.8 exception (DESIGN.md:874)
@@ -30,7 +30,7 @@ Date: 2026-11-03 (final closure pass)
 - build: 0 errors
 
 ### Documentation
-- 8 owner decision documents produced (Q1/Q2/Q4/Q5/Q6, design rulings, blocked scenarios, full project state)
+- 4 documents covering 10 owner decisions produced (Q1/Q2/Q4/Q5/Q6, design rulings, blocked scenarios, full project state)
 - TASKS.md §1133–1189 reconciliation evidence (re-audit 2026-11-03: 0 divergent, 11 near, 15 matching)
 - Push-state records corrected (9a61197f on origin all along; `$?` inversion artifact diagnosed)
 
@@ -84,6 +84,7 @@ All pending decisions in one place:
 - Phase 3 doc reconciliation (TASKS.md, 15 references, HFW-OVERRIDE comments) defers until rename lands
 - Peer's `9a61197f` is on origin; required fixes (`6f3d5a81`, `e4786df4`) are ancestors — origin is green
 - `.scratch-uma/*.staged-peer-revert.vue` (2 files) preserved from prior pass; peer should be told
+- **Peer rename landed criterion:** `git log --oneline -1 -- docs/proposals/audit-corrections.md` shows a commit AND `git status --short docs/` returns empty. Until both are true, Phase 3 doc reconciliation (TASKS.md, 15 references, HFW-OVERRIDE comments) defers.
 
 ## 5. Test suite state
 
