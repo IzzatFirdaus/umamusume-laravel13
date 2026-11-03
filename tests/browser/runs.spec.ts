@@ -51,9 +51,9 @@ test('renders the run list, and says what happens next when it is empty', async 
     const runLinks = await page.locator('a[href^="/training-runs/"]').evaluateAll((nodes) =>
         nodes
             .map((n) => (n as HTMLAnchorElement).getAttribute('href') ?? '')
-            .filter((h) => /^\\/training-runs\\/\\d+$/.test(h)),
+            .filter((h) => /^\/training-runs\/\d+$/.test(h)),
     );
-    const runIds = [...new Set(runLinks.map((h) => h.match(/\\/(\\d+)$/)?.[1]).filter(Boolean))] as string[];
+    const runIds = [...new Set(runLinks.map((h) => h.match(/\/(\d+)$/)?.[1]).filter(Boolean))] as string[];
     for (const id of runIds) {
         const cookie = (await page.context().cookies()).find((c) => c.name === 'XSRF-TOKEN');
         await page.request.delete(`/training-runs/${id}`, {
