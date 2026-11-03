@@ -42,6 +42,7 @@ const props = defineProps<{
     type: string | null;
     status: string | null;
     sort: string | null;
+    pageSize?: number | string | null;
     rarityWords: Record<string, string>;
     typeWords: Record<string, string>;
     availabilities: string[];
@@ -64,6 +65,7 @@ const props = defineProps<{
             :type="props.type"
             :status="props.status"
             :sort="props.sort"
+            :page-size="props.pageSize"
             :rarity-words="props.rarityWords"
             :type-words="props.typeWords"
             :availabilities="props.availabilities"

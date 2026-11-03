@@ -132,8 +132,9 @@ class BuildTargetController extends Controller
      */
     private function pickerSkills(): array
     {
+        $target = SetupDraft::buildTarget();
         $existingNames = array_values(array_filter(
-            (array) (SetupDraft::buildTarget()?->skill_priorities ?? []),
+            (array) ($target['skill_priorities'] ?? []),
             static fn (mixed $name): bool => is_string($name) && $name !== '',
         ));
 

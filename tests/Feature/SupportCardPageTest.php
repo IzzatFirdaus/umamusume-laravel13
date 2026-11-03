@@ -139,33 +139,101 @@ it('names an effect the dictionary has no row for instead of inventing a label',
             ->where('cards.data.0.effects.0.display', '5'));
 });
 
-it('paginates at five cards, keeps twenty-five a URL away, and carries the filter through the link', function (): void {
+it('paginates at twenty-five cards by default, supports pageSize selector, and carries the filter through the link', function (): void {
     foreach (range(1, 26) as $index) {
         SupportCard::factory()->create(['char_name' => sprintf('Trainee %02d', $index)]);
     }
 
-    // Five rows is the wireframe's page size (`support-cards.html:86-141`).
+    // Twenty-five rows by default (D1/C21).
     test()->get('/support-cards')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('cards.data', 5)
+            ->has('cards.data', 25)
             ->where('cards.data.0.name', 'Trainee 01 [Tracen Academy]')
-            ->where('cards.data.4.name', 'Trainee 05 [Tracen Academy]')
+            ->where('cards.data.24.name', 'Trainee 25 [Tracen Academy]')
             ->where('cards.total', 26)
             ->where('totalCount', 26));
 
-    // The clamp still honours an explicit size, so the old 25-row view survives as a URL.
+    // The clamp still honours an explicit size, so the old 5-row view survives as a URL.
+    test()->get('/support-cards?pageSize=5')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 5)
+            ->where('cards.data.0.name', 'Trainee 01 [Tracen Academy]'));
+
+    // Selector values pass through/clamp as before.
+    test()->get('/support-cards?pageSize=50')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 26));
+
+    test()->get('/support-cards?pageSize=1000')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 26));
+
+    test()->get('/support-cards?pageSize=abc')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 25));
+
+    // Option-set narrowing (C22, v9): in-range non-options resolve to nearest option,
+    // tie-break toward smaller option. Garbage/parsed-to-≤0 → 25.
+    // With 26 fixtures: effective 25 → 25 on page 1; effective 5 → 5 on page 1; effective 50/100 → 26 (all).
+    test()->get('/support-cards?pageSize=0')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 25));
+    test()->get('/support-cards?pageSize=-5')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 25));
+    test()->get('/support-cards?pageSize=1')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 5));
+    test()->get('/support-cards?pageSize=4')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 5));
+    test()->get('/support-cards?pageSize=5')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 5));
+    test()->get('/support-cards?pageSize=15')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 25));
     test()->get('/support-cards?pageSize=25')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('cards.data', 25)
-            ->where('cards.data.24.name', 'Trainee 25 [Tracen Academy]'));
+            ->has('cards.data', 25));
+    test()->get('/support-cards?pageSize=30')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 25));
+    test()->get('/support-cards?pageSize=50')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 26));
+    test()->get('/support-cards?pageSize=99')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 26));
+    test()->get('/support-cards?pageSize=100')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 26));
+    test()->get('/support-cards?pageSize=1000')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 26));
 
     test()->get('/support-cards?page=2&rarity=1')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('cards.data', 5)
-            ->where('cards.data.0.name', 'Trainee 06 [Tracen Academy]'));
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', 'Trainee 26 [Tracen Academy]'));
 });
 
 it('searches the three stored name fields, escapes LIKE metacharacters, and names the ask', function (): void {

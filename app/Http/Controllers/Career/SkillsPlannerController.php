@@ -33,7 +33,7 @@ final class SkillsPlannerController extends Controller
 
     public function show(TrainingRun $run): Response
     {
-        $run->load(['umamusume', 'turnEntries', 'skills']);
+        $run->load(['umamusume', 'turnEntries', 'skills', 'characterCard']);
 
         $target = $run->buildTarget();
         $catalog = $this->catalogFor($run);
@@ -165,6 +165,9 @@ final class SkillsPlannerController extends Controller
             ];
         }
 
+        // Get pool skill IDs for this run
+        $poolSkillIds = $this->poolSkillIds($run);
+
         // Step 1: Build a map of required skills with their hint-adjusted costs
         $requiredCosts = [];
         $requiredIds = [];
@@ -189,7 +192,7 @@ final class SkillsPlannerController extends Controller
         $priorityTotal = array_sum($requiredCosts);
         $remainingSp = $sp - $priorityTotal;
 
-        // Step 3: Fill with cheapest remaining skills (base cost, no hint recorded yet)
+        // Step 3: Fill with cheapest remaining skills from the pool
         $acquiredIds = $run->skills
             ->filter(static fn (Skill $skill): bool => $skill->pivot->status === SkillAcquisition::Acquired->value)
             ->pluck('id')
@@ -197,6 +200,7 @@ final class SkillsPlannerController extends Controller
 
         $fillCandidates = Skill::query()
             ->availableOnGlobal()
+            ->whereIn('export_id', $poolSkillIds)
             ->whereNotIn('id', array_merge($acquiredIds, $requiredIds))
             ->whereNotNull('sp_cost')
             ->orderBy('sp_cost')
@@ -245,6 +249,37 @@ final class SkillsPlannerController extends Controller
             'sp' => $sp,
             'shortfall' => $allShortfall,
         ];
+    }
+
+    /**
+     * The skill IDs that form this run's learnable pool: the selected form's unique, innate,
+     * and awakening skills (pre-event pool), plus any event skills the run has recorded as acquired.
+     * This is the game's rule — the skill menu never offers anything else.
+     *
+     * @return list<int>
+     */
+    private function poolSkillIds(TrainingRun $run): array
+    {
+        $card = $run->characterCard;
+        if ($card === null) {
+            return [];
+        }
+
+        // Pre-event pool: unique + innate + awakening (the union of what the form can ever spend SP on)
+        $preEvent = array_merge(
+            $card->skills_unique ?? [],
+            $card->skills_innate ?? [],
+            $card->skills_awakening ?? [],
+        );
+
+        // Add event skills that the run has recorded as acquired
+        $acquiredEventIds = $run->skills
+            ->filter(static fn (Skill $skill): bool => $skill->pivot->status === SkillAcquisition::Acquired->value)
+            ->filter(static fn (Skill $skill): bool => in_array($skill->export_id, $card->skills_event ?? [], true))
+            ->pluck('export_id')
+            ->all();
+
+        return array_values(array_unique(array_merge($preEvent, $acquiredEventIds)));
     }
 
     /**
@@ -390,10 +425,15 @@ final class SkillsPlannerController extends Controller
         /** @var array<int, int> $levels */
         $levels = $run->skillLevels->pluck('current_level', 'skill_id')->all();
 
+        // Pool skills for this run (game's rule: form's unique+innate+awakening + acquired event skills)
+        $poolSkillExportIds = $this->poolSkillIds($run);
+
         $available = [];
         $learned = [];
 
         foreach ($run->skills as $skill) {
+            $inPool = in_array($skill->export_id, $poolSkillExportIds, true);
+
             if ($skill->pivot->status === SkillAcquisition::Acquired->value) {
                 $learned[] = $this->skillRow($skill, $target, [
                     'status' => SkillAcquisition::Acquired->value,
@@ -402,7 +442,7 @@ final class SkillsPlannerController extends Controller
                     'current_level' => $levels[$skill->id] ?? null,
                     // Per-run hint level for pricing; null = not recorded (full base cost)
                     'hint_level' => $skill->pivot->hint_level ?? null,
-                ]);
+                ], inPool: $inPool);
             }
 
             if ($skill->pivot->status === SkillAcquisition::Suggested->value
@@ -412,7 +452,7 @@ final class SkillsPlannerController extends Controller
                     'turn' => $skill->pivot->turn_acquired,
                     'current_level' => $levels[$skill->id] ?? null,
                     'hint_level' => $skill->pivot->hint_level ?? null,
-                ]);
+                ], inPool: $inPool);
             }
         }
 
@@ -467,6 +507,9 @@ final class SkillsPlannerController extends Controller
         $rows = [];
         $seen = [];
 
+        // Pool skills for this run (game's rule: form's unique+innate+awakening + acquired event skills)
+        $poolSkillExportIds = $this->poolSkillIds($run);
+
         foreach ($this->priorityNames($run) as $name) {
             if (array_key_exists($name, $seen)) {
                 continue;
@@ -493,7 +536,10 @@ final class SkillsPlannerController extends Controller
                 ];
             }
 
-            $rows[] = $this->skillRow($catalog->get($name), $target, $recorded, $name);
+            $skill = $catalog->get($name);
+            $inPool = $skill !== null && in_array($skill->export_id, $poolSkillExportIds, true);
+
+            $rows[] = $this->skillRow($skill, $target, $recorded, $name, $inPool);
         }
 
         return $rows;
@@ -544,6 +590,7 @@ final class SkillsPlannerController extends Controller
         ?BuildTargetPayload $target,
         ?array $recorded = null,
         ?string $priorityName = null,
+        bool $inPool = false,
     ): array {
         $name = $skill === null ? ($priorityName ?? '') : $skill->name;
 
@@ -557,6 +604,7 @@ final class SkillsPlannerController extends Controller
             'conditions' => $this->conditionsLine($skill),
             'fit' => $this->fitCells($skill, $target),
             'note' => $this->prerequisiteNote($name),
+            'in_pool' => $inPool,
         ];
     }
 

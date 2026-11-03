@@ -52,6 +52,7 @@ const props = defineProps<{
     type: string | null;
     status: string | null;
     sort: string | null;
+    pageSize?: number | string | null;
     rarityWords: Record<string, string>;
     typeWords: Record<string, string>;
     availabilities: string[];
@@ -81,6 +82,8 @@ function applyFilters(): void {
             type: type.value || undefined,
             status: status.value || undefined,
             sort: sort.value || undefined,
+            pageSize: pageSize.value || undefined,
+            page: undefined,
         },
         {
             preserveState: true,
@@ -108,6 +111,7 @@ function goToPage(page: number): void {
             type: type.value || undefined,
             status: status.value || undefined,
             sort: sort.value || undefined,
+            pageSize: pageSize.value || undefined,
             page,
         },
         {
@@ -167,6 +171,14 @@ function goToPage(page: number): void {
                 :options="[{ value: '', label: 'Name' }, ...Object.entries(sorts).map(([value, label]) => ({ value, label }))]"
                 placeholder="Name"
                 :error="errors.sort"
+            />
+            <BaseSelect
+                v-model="pageSize"
+                id="support-card-page-size"
+                name="pageSize"
+                label="Per page"
+                :options="[{ value: '5', label: '5' }, { value: '25', label: '25' }, { value: '50', label: '50' }, { value: '100', label: '100' }]"
+                :error="(errors as any).pageSize"
             />
             <BaseButton type="submit" variant="primary" size="md" :loading="loading">
                 Filter

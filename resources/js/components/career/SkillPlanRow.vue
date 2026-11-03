@@ -10,6 +10,8 @@
  * itself lives in the page that owns the list order.
  *
  * P2: hint level dropdown emits `hint` event with the selected level (1-5, or null to clear).
+ * Offered only for skills in the run's pool (game's rule: form's unique+innate+awakening + acquired event).
+ * No-cost pool skills keep the selector with the "no published cost" caption; no "hints do not apply" copy.
  */
 import { computed, nextTick, ref } from 'vue';
 
@@ -31,6 +33,7 @@ const props = defineProps<{
         conditions: string | null;
         fit: FitCell[];
         note: string | null;
+        in_pool: boolean;
     };
     position: number;
     count: number;
@@ -120,9 +123,11 @@ async function move(delta: number): Promise<void> {
             <span>of 6</span>
         </label>
 
-        <!-- P2: Hint level selector — available for any skill on the run. NULL = not recorded (N/A, full price). -->
+        <!-- P2: Hint level selector — offered only for skills in the run's pool (game's rule).
+             No-cost pool skills keep the selector with the "no published cost" caption;
+             no "hints do not apply" copy. Skills outside the pool show no selector. -->
         <label
-            v-if="props.row.recorded !== null"
+            v-if="props.row.recorded !== null && props.row.in_pool"
             class="mt-1 flex items-center gap-2 text-xs text-ink-muted"
         >
             <span>Hint level</span>
@@ -140,6 +145,18 @@ async function move(delta: number): Promise<void> {
                 <option value="5">Lvl Max (40% off)</option>
             </select>
         </label>
+        <p
+            v-else-if="props.row.recorded !== null && props.row.in_pool && props.row.sp_cost === null"
+            class="mt-1 text-xs text-ink-muted"
+        >
+            Hint level: N/A <span class="text-ink-muted">· no published cost</span>
+        </p>
+        <p
+            v-else-if="props.row.recorded !== null && !props.row.in_pool"
+            class="mt-1 text-xs text-ink-muted"
+        >
+            Hint level: N/A <span class="text-ink-muted">· not in this run's form</span>
+        </p>
 
         <!-- The conditions are engine expressions a Trainer reads only when asking what gates a skill,
              so they sit behind a disclosure rather than in every row's scan line (plan 4.5). The
