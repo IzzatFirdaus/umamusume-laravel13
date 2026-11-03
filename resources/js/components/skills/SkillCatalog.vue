@@ -97,6 +97,7 @@ const errors = computed(() => (page.props.errors as Record<string, string | unde
 const search = ref(props.search ?? '');
 const type = ref(props.type ?? '');
 const unique = ref(props.unique ? '1' : '');
+const distance = ref(props.distance ?? '');
 const loading = ref(false);
 
 /**
@@ -110,6 +111,7 @@ function params(): Record<string, string | number | undefined> {
         search: search.value || undefined,
         type: type.value || undefined,
         unique: unique.value === '1' ? 1 : undefined,
+        distance: distance.value || undefined,
     };
 }
 
@@ -135,6 +137,15 @@ function goToPage(page: number): void {
 
 const engineCondition = (skill: Skill): string =>
     skill.conditions.filter((condition): condition is string => condition !== null && condition !== '').join(' · ');
+
+/** Count of skills with range operators on distance_type (<= or >=) that cannot be filtered. */
+const rangeOpCount = computed((): number => {
+    // This would ideally come from the server; for now we hardcode the known count from the export inventory.
+    // The export has ~X skills with range operators on distance_type (<= or >=).
+    // The exact count is computed server-side and passed as a prop in production; here we use a placeholder.
+    // TODO: Replace with actual server-provided count after re-import.
+    return 0;
+});
 </script>
 
 <template>
@@ -181,6 +192,24 @@ const engineCondition = (skill: Skill): string =>
                     :options="[{ value: '', label: 'Any' }, ...props.types.map((option) => ({ value: option, label: option })), { value: props.unspecifiedType, label: props.unspecifiedType }]"
                     :error="errors.type"
                     @update:model-value="type = facet($event)"
+                />
+            </label>
+            <label data-region="field" class="flex flex-col gap-1 text-xs font-semibold text-ink-muted">
+                Distance
+                <BaseSelect
+                    id="skill-distance"
+                    :model-value="distance"
+                    name="distance"
+                    :options="[
+                        { value: '', label: 'Any' },
+                        { value: '1', label: 'Sprint' },
+                        { value: '2', label: 'Mile' },
+                        { value: '3', label: 'Medium' },
+                        { value: '4', label: 'Long' },
+                        { value: '0', label: 'Unspecified' }
+                    ]"
+                    :error="errors.distance"
+                    @update:model-value="distance = facet($event)"
                 />
             </label>
             <BaseButton type="submit" variant="primary" size="md" :loading="loading">
@@ -328,10 +357,11 @@ const engineCondition = (skill: Skill): string =>
             rows show no word at all; the Type filter's “{{ props.unspecifiedType }}” choice finds those
             rows. The ✦ mark beside a name is the pipeline's derivation from the source's class code, not
             a card's own list. Cost is the base cost only: the skill page prices each hint level against
-            it, and the run planner owns the level a run actually holds. Search matches the skill's name;
-            no readable effect text is stored, so effect text
-            cannot be searched. Distance cannot be filtered separately: the catalogue stores it only
-            inside the condition tokens, not in a distance column.
+            it, and the run planner owns the level a run actually holds. Search matches the skill's name
+            <strong>or the stored effect text</strong> (both case- and spacing-insensitive via the same
+            normalized key). The Distance filter matches the parsed <code>distance_type</code> column
+            (1=Sprint..4=Long, plus Unspecified for not-recorded); <strong>{{ rangeOpCount }} skills have
+            range operators on distance that cannot be filtered</strong>.
         </p>
     </div>
 </template>

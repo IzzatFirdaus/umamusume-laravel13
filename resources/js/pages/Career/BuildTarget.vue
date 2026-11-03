@@ -32,6 +32,7 @@ import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import SubCell from '../../components/SubCell.vue';
 import { BaseSelect, BaseInput, BaseButton } from '../../components/Form';
+import SearchableSkillPicker from '../../components/Form/SearchableSkillPicker.vue';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref } from 'vue';
 
@@ -261,6 +262,12 @@ function applyDefaults(): void {
             form.targets[stat] = value;
         }
     });
+}
+
+function onSkillPrioritySelect(payload: { id: number; name: string }): void {
+    if (!form.skill_priorities.includes(payload.name)) {
+        form.skill_priorities.push(payload.name);
+    }
 }
 
 </script>
@@ -544,15 +551,21 @@ function applyDefaults(): void {
                   are looked up by band name and a fifth band renders with its name and no sentence
                   rather than with an invented one.
                 -->
-                <fieldset class="mt-2">
+                <fieldset
+                    id="distance-group"
+                    class="mt-2"
+                    :aria-describedby="describedBy('distance')"
+                    :aria-invalid="errorOf('distance') !== undefined"
+                >
                     <legend class="sr-only">Distance</legend>
                     <div class="flex flex-col gap-1.5">
                         <label
-                            v-for="band in props.distanceBands"
+                            v-for="(band, bandIndex) in props.distanceBands"
                             :key="band"
                             class="flex items-center gap-2 text-sm text-ink"
                         >
                             <input
+                                :id="bandIndex === 0 ? 'distance' : `distance-${bandIndex}`"
                                 v-model="form.distance"
                                 type="radio"
                                 name="distance"
@@ -565,16 +578,61 @@ function applyDefaults(): void {
                     </div>
                 </fieldset>
 
-                <p v-if="errorOf('distance')" role="alert" class="mt-2 text-sm text-risk">{{ errorOf('distance') }}</p>
+                <p v-if="errorOf('distance')" :id="errorId('distance')" role="alert" class="mt-2 text-sm text-risk">{{ errorOf('distance') }}</p>
 
-                <p class="note mt-2" data-field="distance-conflict">
+<p class="note mt-2" data-field="distance-conflict">
                     <b>Band edges are Game8's. 1400 m is an open conflict:</b>
-                    Game8 places it in {{ props.distanceBands[0] }}, the data export files every 1400 m
+                    Game8 places it in {{ props.distanceBands[0] }, the data export files every 1400 m
                     course under distance code 2, which reads as {{ props.distanceBands[1] }}, and the
                     client's own skills tagged for that band gate on <code>distance_type == 2</code>. This tool
                     states the disagreement rather than picking a side, so a 1400 m race can be typed
                     either way as long as the skill gate it is planned against uses the same reading.
                 </p>
+            </section>
+
+            <!-- Skill priorities: the build target's optional priority list.
+                 The Skills Planner reads these names and lists them in the Required group. -->
+            <section data-region="card" class="card" aria-labelledby="skill-priorities-heading">
+                <h2 id="skill-priorities-heading" class="flex items-center gap-2">
+                    Skill priorities
+                    <span class="text-xs text-ink-muted font-normal">(optional)</span>
+                </h2>
+                <p class="sub mt-1">
+                    The Skills Planner lists these skills in the Required group and sums their cost
+                    against the run's recorded SP. Empty means the planner will show no Required skills.
+                </p>
+
+                <div class="mt-3">
+                    <SearchableSkillPicker
+                        :options="props.picker_skills.map(s => ({ id: s.id, name: s.name, type: '' }))"
+                        label="Skill priorities"
+                        placeholder="Search and add skills…"
+                        hint="Pick skills by name; type to filter. Chosen skills are added to the list below."
+                        @select="onSkillPrioritySelect"
+                    />
+                </div>
+
+                <div v-if="form.skill_priorities.length > 0" class="mt-3 flex flex-wrap gap-2">
+                    <span class="text-xs font-semibold text-ink-muted">Chosen:</span>
+                    <span
+                        v-for="(name, idx) in form.skill_priorities"
+                        :key="`${idx}-${name}`"
+                        class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-raised text-sm text-ink"
+                    >
+                        {{ name }}
+                        <button
+                            type="button"
+                            class="text-ink-muted hover:text-risk"
+                            @click="form.skill_priorities.splice(idx, 1)"
+                            aria-label="Remove {{ name }}"
+                        >
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </span>
+                </div>
+                <p v-else class="mt-2 text-xs text-ink-muted">No skill priorities chosen yet.</p>
             </section>
 
             <!-- The stamina floor per band, read from the scenario's own stanza rather than restated. -->

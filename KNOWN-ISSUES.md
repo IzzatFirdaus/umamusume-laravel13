@@ -4520,7 +4520,7 @@ for durability so a future reader understands why the read-path filter cannot be
 
 **State:** OPEN 2026-11-02. `character_cards` now stores `base_stats` and `growth_rates` (ADR-0030, migration `2026_11_02_141639`), populated by the reparse. The trainee profile (`/career/setup/trainee/{id}`) renders them. The catalog detail page (`/umamusume/{slug}`) still prints "Not recorded" for both, because `CatalogController` and `Catalog/Show.vue` were not updated in that slice.
 
-**Why not fixed here.** Out of scope of the trainee-profile slice; a separate plan should align the catalog detail surface. The audit observation that "catalogue stores no base value or growth row" (Database pass-2) becomes stale after ADR-0030 and should be corrected in `docs/audit-corrections.md` or the audit report when the follow-up lands.
+**Why not fixed here.** Out of scope of the trainee-profile slice; a separate plan should align the catalog detail surface. The audit observation that "catalogue stores no base value or growth row" (Database pass-2) becomes stale after ADR-0030 and should be corrected in `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## audit-corrections.md` (formerly `docs/audit-corrections.md`), or the audit report when the follow-up lands.
 
 **Closure.** Update `CatalogController` and `Catalog/Show.vue` to read `base_stats`/`growth_rates` and render them, mirroring the trainee profile conditional rendering.
 

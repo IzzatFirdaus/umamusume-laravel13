@@ -319,7 +319,7 @@ class TrainingRun extends Model
     public function skills(): BelongsToMany
     {
         return $this->belongsToMany(Skill::class, 'run_skills')
-            ->withPivot(['status', 'turn_acquired'])
+            ->withPivot(['status', 'turn_acquired', 'hint_level'])
             ->using(RunSkill::class);
     }
 
@@ -371,12 +371,45 @@ class TrainingRun extends Model
         return $this->independentTrainingRun?->isInProgress() ?? false;
     }
 
-    public function setSkillStatus(Skill $skill, SkillAcquisition $status, ?int $turnAcquired = null): void
+    public function setSkillStatus(Skill $skill, SkillAcquisition $status, ?int $turnAcquired = null, ?int $hintLevel = null): void
     {
         $this->skills()->syncWithoutDetaching([
             $skill->id => [
                 'status' => $status->value,
                 'turn_acquired' => $turnAcquired,
+                'hint_level' => $hintLevel,
+            ],
+        ]);
+    }
+
+    /**
+     * Record a hint level for a skill without changing its acquisition status.
+     *
+     * If the skill is not yet on the run, creates a row with status Suggested and the given hint level.
+     * A hint is never stored orphaned — it always lives on a run_skills row.
+     */
+    public function setSkillHintLevel(Skill $skill, ?int $level): void
+    {
+        if ($level === null) {
+            return;
+        }
+
+        $existing = $this->skills()->where('skills.id', $skill->id)->first();
+
+        if ($existing === null) {
+            $this->skills()->attach($skill->id, [
+                'status' => SkillAcquisition::Suggested->value,
+                'hint_level' => $level,
+            ]);
+
+            return;
+        }
+
+        $this->skills()->syncWithoutDetaching([
+            $skill->id => [
+                'status' => $existing->pivot->status,
+                'turn_acquired' => $existing->pivot->turn_acquired,
+                'hint_level' => $level,
             ],
         ]);
     }

@@ -8,6 +8,8 @@
  *
  * The move buttons are the only edit; when `movable` is false they do not render, and the reorder
  * itself lives in the page that owns the list order.
+ *
+ * P2: hint level dropdown emits `hint` event with the selected level (1-5, or null to clear).
  */
 import { computed, nextTick, ref } from 'vue';
 
@@ -25,7 +27,7 @@ const props = defineProps<{
         name_ja: string | null;
         is_unique: boolean;
         sp_cost: number | null;
-        recorded: { status: string; turn: number | null; current_level: number | null } | null;
+        recorded: { status: string; turn: number | null; current_level: number | null; hint_level: number | null } | null;
         conditions: string | null;
         fit: FitCell[];
         note: string | null;
@@ -35,10 +37,15 @@ const props = defineProps<{
     movable: boolean;
 }>();
 
-const emit = defineEmits<{ move: [delta: number]; level: [value: string] }>();
+const emit = defineEmits<{ move: [delta: number]; level: [value: string]; hint: [value: number | null] }>();
 
 function onLevel(event: Event): void {
     emit('level', (event.target as HTMLInputElement).value);
+}
+
+function onHint(event: Event): void {
+    const value = (event.target as HTMLSelectElement).value;
+    emit('hint', value === '' ? null : Number(value));
 }
 
 const FIT_WORDS: Record<FitCell['state'], string> = {
@@ -94,8 +101,8 @@ async function move(delta: number): Promise<void> {
             <template v-if="props.row.recorded.turn !== null"> on turn {{ props.row.recorded.turn }}</template>
         </p>
 
-        <!-- ADR-0029 D4: the level an acquired skill reached in this run, 1..6. Hint levels are a
-             support-card fact and are not this row's. -->
+<!-- ADR-0029 D4: the level an acquired skill reached in this run, 1..6. Hint levels are a
+         support-card fact and are not this row's. -->
         <label
             v-if="props.row.recorded !== null && props.row.recorded.status === 'Acquired'"
             class="mt-1 flex items-center gap-2 text-xs text-ink-muted"
@@ -111,6 +118,27 @@ async function move(delta: number): Promise<void> {
                 @change="onLevel"
             />
             <span>of 6</span>
+        </label>
+
+        <!-- P2: Hint level selector — available for any skill on the run. NULL = not recorded (N/A, full price). -->
+        <label
+            v-if="props.row.recorded !== null"
+            class="mt-1 flex items-center gap-2 text-xs text-ink-muted"
+        >
+            <span>Hint level</span>
+            <select
+                class="min-h-11 w-28 rounded-md border border-rule bg-raised px-2 text-sm text-ink"
+                :value="props.row.recorded.hint_level ?? ''"
+                :aria-label="`Hint level for ${props.row.name}`"
+                @change="onHint"
+            >
+                <option value="">Not recorded</option>
+                <option value="1">Lvl 1 (10% off)</option>
+                <option value="2">Lvl 2 (20% off)</option>
+                <option value="3">Lvl 3 (30% off)</option>
+                <option value="4">Lvl 4 (35% off)</option>
+                <option value="5">Lvl Max (40% off)</option>
+            </select>
         </label>
 
         <!-- The conditions are engine expressions a Trainer reads only when asking what gates a skill,

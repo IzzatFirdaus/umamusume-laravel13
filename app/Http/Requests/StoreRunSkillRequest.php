@@ -70,6 +70,9 @@ class StoreRunSkillRequest extends FormRequest
             ],
             'skills.*.status' => ['required', Rule::enum(SkillAcquisition::class)],
             'skills.*.turn_acquired' => ['nullable', 'integer', 'min:1'],
+            // The hint level a run holds for this skill, 1–5 (Lv Max). NULL = not recorded, so the
+            // planner prices at full base cost. Validated against the ladder in config('uma.skills.hint_discount').
+            'skills.*.hint_level' => ['nullable', 'integer', 'between:1,5'],
             // ADR-0029 D4: the level a skill reached in the run, 1..6. Hint levels are not this
             // table's fact (they are a support-card mechanic) and are not accepted here.
             'skills.*.current_level' => ['nullable', 'integer', 'between:1,6'],
@@ -95,7 +98,7 @@ class StoreRunSkillRequest extends FormRequest
     }
 
     /**
-     * @param  array{status: string, turn_acquired?: int|null}  $entry
+     * @param  array{status: string, turn_acquired?: int|null, hint_level?: int|null}  $entry
      */
     public function acquisitionFor(array $entry): SkillAcquisition
     {

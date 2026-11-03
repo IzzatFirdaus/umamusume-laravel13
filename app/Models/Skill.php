@@ -46,6 +46,9 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $fetched_at
  * @property string|null $source_timezone
  * @property bool $is_manual
+ * @property string|null $description The export's `desc_en` field, or null when absent.
+ * @property string|null $description_match_key Normalized key for case/spacing-insensitive description search.
+ * @property int|null $distance_type Parsed from `distance_type==N` in condition tokens (1=Sprint..4=Long).
  * @property-read RunSkill $pivot Present only when loaded through the run_skills relation.
  */
 #[Fillable([
@@ -65,6 +68,9 @@ use Illuminate\Support\Carbon;
     'fetched_at',
     'source_timezone',
     'is_manual',
+    'description',
+    'description_match_key',
+    'distance_type',
 ])]
 class Skill extends Model
 {
@@ -118,6 +124,9 @@ class Skill extends Model
             'name_is_client' => 'boolean',
             'is_manual' => 'boolean',
             'fetched_at' => 'datetime',
+            'description' => 'string',
+            'description_match_key' => 'string',
+            'distance_type' => 'integer',
         ];
     }
 }

@@ -93,7 +93,8 @@ test.describe('Setup step 4 — Legacy', () => {
         await expect(page.getByText('Chosen', { exact: true })).toHaveCount(0);
 
         // The mechanism table: the five kinds the payload and the Spark editor already offer, each with
-        // the figure the corpus gives it. `scr-car-008-legacy-source-accuracy-2026-10-30.md` records why
+        // the figure the corpus gives it. `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section
+        // `## scr-car-008-legacy-source-accuracy-2026-10-30.md`, records why
         // this list is five and not the wireframe's three, and why the sixth row the page used to print
         // ('Unique-skill factor') is gone: inheriting a unique skill IS the Green Spark, so the two rows
         // stated one mechanism twice.

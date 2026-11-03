@@ -197,6 +197,7 @@ class CockpitController extends Controller
             'run' => $this->runSection($run),
             'team' => $this->team->teamSection($run),
             'backUrl' => route('runs.cockpit', $run),
+            'scenarioDetailUrl' => route('runs.scenario-detail', $run),
         ]);
     }
 

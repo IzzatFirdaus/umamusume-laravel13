@@ -24,7 +24,7 @@ defineProps<{
         <CapsuleHeader title="Team Race" class="mb-3" />
 
         <p class="text-sm text-ink">
-            <span class="font-bold text-ink-strong">Aim for at least {{ guidance }} circles</span>
+            <span class="font-bold text-ink-strong">Aim for at least {{ guidance }} circles </span>
             <span class="text-ink-muted">as a margin, not a win condition. A loss lowers the league
                 rank, and after the 2026-07-01 rework a loss can be retried with an Alarm Clock.</span>
         </p>

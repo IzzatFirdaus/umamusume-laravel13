@@ -571,6 +571,135 @@ for a line that quotes a dead path as history.
 above. All ten are tracked, so each is recoverable at the commit the delete lands on; `CHANGELOG.md`'s
 2026-10-19 rows about the `SKILL.md` → `SKILL_REGISTRY.md` rename are dated history and were left alone. <!-- census: quoted-original -->
 
+### Round 22 (2026-11-03, owner-ordered) — 46 documents into the masters that own their subject
+
+The owner named ten `docs/proposals/2026-11-0*` files and every file in `docs/audits/` except the
+eight Rice Shower / Unity Cup documents, ordered them consolidated into this directory and the
+originals deleted from their locations. Nine of the ten proposals are dated pass reports and
+pre-flight state records, so they land in `SLICE-RECORDS.md`; the tenth,
+`2026-11-03-git-reconciliation.md`, is a git-state record like the slice records but reconciles
+prior audit reports' commit claims, so it travels with the audits master. The 35 remaining
+`docs/audits/` files (32 `AUD-*` screen/flow audits and 3 `scr-car-*` records) land in
+`AUDIT-AND-VERIFICATION.md`. 46 files, all tracked and clean at HEAD at delete time, so each is
+recoverable from the commit that deleted it.
+
+| Absorbed file                                              | Lines | New home                                        | Why there                                                        |
+| ---------------------------------------------------------- | ----- | ----------------------------------------------- | ---------------------------------------------------------------- |
+| `docs/proposals/2026-11-02-followup-closeout.md`            | 144   | `SLICE-RECORDS.md`, section `## 2026-11-02-followup-closeout.md` | A dispatch closeout record                            |
+| `docs/proposals/2026-11-02-legacy-builder-pass.md`          | 51    | `SLICE-RECORDS.md`, section `## 2026-11-02-legacy-builder-pass.md` | A pass report                                         |
+| `docs/proposals/2026-11-02-ui-ux-audit-implementation-pass-1.md` | 71 | `SLICE-RECORDS.md`, section `## 2026-11-02-ui-ux-audit-implementation-pass-1.md` | Pass reports 1-5 of one plan       |
+| `docs/proposals/2026-11-02-ui-ux-audit-implementation-pass-2.md` | 117 | `SLICE-RECORDS.md`, section `## 2026-11-02-ui-ux-audit-implementation-pass-2.md` |                              |
+| `docs/proposals/2026-11-02-ui-ux-audit-implementation-pass-3.md` | 225 | `SLICE-RECORDS.md`, section `## 2026-11-02-ui-ux-audit-implementation-pass-3.md` |                              |
+| `docs/proposals/2026-11-02-ui-ux-audit-implementation-pass-4.md` | 260 | `SLICE-RECORDS.md`, section `## 2026-11-02-ui-ux-audit-implementation-pass-4.md` |                              |
+| `docs/proposals/2026-11-02-ui-ux-audit-implementation-pass-5.md` | 140 | `SLICE-RECORDS.md`, section `## 2026-11-02-ui-ux-audit-implementation-pass-5.md` |                              |
+| `docs/proposals/2026-11-03-completion-phase-0.md`           | 109   | `SLICE-RECORDS.md`, section `## 2026-11-03-completion-phase-0.md` | A completion pre-flight state record                         |
+| `docs/proposals/2026-11-03-deferred-items.md`               | 28    | `SLICE-RECORDS.md`, section `## 2026-11-03-deferred-items.md` | The reconciliation's deferred-items record                       |
+| `docs/proposals/2026-11-03-git-reconciliation.md`           | 264   | `AUDIT-AND-VERIFICATION.md`, section `## 2026-11-03-git-reconciliation.md` | Reconciles audit reports' commit claims |
+| `docs/audits/AUD-20261102-016..029` (12 files)              | 1,290 | `AUDIT-AND-VERIFICATION.md`, one `## <name>` section each | Screen/flow audit reports, the class this master holds         |
+| `docs/audits/AUD-career-*` (9 files), `AUD-catalog-*` (2), `AUD-dashboard-2026-11-01.md`, `AUD-database-2026-11-01.md`, `AUD-help-2026-11-02.md`, `AUD-preferences-2026-11-01.md`, `AUD-skills-*` (2), `AUD-support-cards-*` (2) | 23 files | `AUDIT-AND-VERIFICATION.md`, one `## <name>` section each | The same class |
+| `docs/audits/scr-car-008-legacy-screen-audit-2026-10-30.md` | 163   | `AUDIT-AND-VERIFICATION.md`, section `## scr-car-008-legacy-screen-audit-2026-10-30.md` | The SCR-CAR-008 audit              |
+| `docs/audits/scr-car-008-legacy-source-accuracy-2026-10-30.md` | 71 | `AUDIT-AND-VERIFICATION.md`, section `## scr-car-008-legacy-source-accuracy-2026-10-30.md` | Its source-accuracy companion     |
+| `docs/audits/scr-car-009-deck-screen-audit-2026-10-30.md`   | 107   | `AUDIT-AND-VERIFICATION.md`, section `## scr-car-009-deck-screen-audit-2026-10-30.md` | The SCR-CAR-009 audit              |
+
+Per-file line counts above are total lines (`Get-Content … .Count`); the slice-record table
+individualises the ten proposals. The eight exclusions named by the owner
+(`rice-shower-unity-cup-ux-walk.md`, `-2`, `-3`, `-4`, `-resolutions`,
+`-round2/3/4-reconciliation.md`) stay at their own paths, as do every other `docs/proposals/`
+file outside the ten, `docs/proposals/2026-11-02-ui-ux-audit-implementation.md` (the plan the
+pass reports execute, not in the owner's list), `docs/proposals/2026-11-03-slices-a-g-report.md`
+and `docs/reports/`.
+
+Verification, per the discipline's line-by-line rule, ran twice: once against the built fragments
+before the splice and again against the appended regions after it, comparing every non-blank
+source line against its appended region in order with one-level heading demotion
+(4,297/4,297 non-blank lines, 0 missing in each of the 46). `SLICE-RECORDS.md` took 82,374 added
+bytes and **zero** deleted lines, with its 6,571 NUL bytes asserted unchanged before and after;
+`AUDIT-AND-VERIFICATION.md` took 549,900 added bytes and zero deleted lines, with zero NUL bytes
+before and after. A peer reset of the shared working tree wiped the first splice between its
+verification and the delete step (the masters reverted to their HEAD sizes while the working tree
+still carried everything else); the splice was re-run from the retained fragments and re-verified
+before anything was deleted.
+
+**Source encodings, stated because two masters already carry non-UTF-8 bytes.** All ten proposal
+sources are valid UTF-8, LF-only, and were embedded byte for byte. Of the 36 audit sources, 8
+carry a UTF-8 byte-order mark (`AUD-20261102-021..025`, `AUD-career-surfaces-2026-11-01.md`,
+`AUD-dashboard-2026-11-01.md`, `AUD-preferences-2026-11-01.md`), stripped because a BOM inside a
+section is an invisible mid-file character; and 18 are cp1252 (the veterans, career, catalog,
+help, skills and support-card audits), where 137 bytes in the undefined-UTF-8 range 0x97 decode
+under cp1252 to the em dash their own UTF-8 text already uses. Each source was decoded under the
+encoding its own bytes prove. No source carried an undefined cp1252 byte (0x80, 0x81, 0x8d), so
+nothing was lossy.
+
+**Two approved departures from verbatim**, both mechanical and recorded per file in the
+appended region itself: the one-level heading demotion the discipline allows (each source's `#`
+title re-titled under its `## <name>` anchor as `###`, prose lines untouched), and a two-line
+fold provenance note at the head of each section, quoted as a blockquote so the demotion pass
+cannot mistake it for body content. Blank-line spacing inside bodies is preserved as counted
+blank lines, not byte positions.
+
+**References.** Live citations were repointed before the delete:
+`docs/reports/2026-11-02-legacy-builder-completion-report.md` (the two `### Added` rows naming
+`AUD-20261102-029-legacy-builder-2026-11-02.md` and `2026-11-02-legacy-builder-pass.md`) and
+`tests/browser/career-legacy-deck-steps.spec.ts` (the mechanism-table docblock naming
+`scr-car-008-legacy-source-accuracy-2026-10-30.md`), each repointed at the master and its section
+anchor. The census run after the round reports every remaining reference to the 46 deleted paths,
+each marked `<!-- census: quoted-original -->` where it quotes a dead path as history: the
+cross-reference tables inside the embedded audit bodies, which quote each other's former sibling
+paths as written (the tolerated historical class from Round 18), and the dated per-commit table
+rows in `2026-11-03-git-reconciliation.md` itself, which record where a file sat on the day its
+SHA was proved.
+
+**Disposition of the originals.** Deleted from the working tree in this round, after the
+verification above. All 46 are tracked, so each is recoverable at the commit the delete lands on.
+
+### Round 23 (2026-11-03, owner-ordered) — nine `docs/proposals/` files into the masters that own their subject
+
+The owner ordered nine files of the 2026-11-02/03 audit-and-closure thread consolidated into this
+directory and the originals deleted. None had been embedded by an earlier round. They routed on
+class: the plan of record with the plans, the three option-and-recommendation packages with the
+rulings-owed briefs, the two dated state records with the slice records, and the three audit
+corrections with the audits. All nine were embedded fresh.
+
+| Absorbed file                                          | Lines | New home                                                              | Why there                                                                    |
+| ------------------------------------------------------ | ----- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| `docs/proposals/2026-11-02-ui-ux-audit-implementation.md` | 422 | `PROCESS-PLANS.md`, section `## 2026-11-02-ui-ux-audit-implementation.md` | The plan of record the five pass reports execute                              |
+| `docs/proposals/2026-11-03-owner-decisions.md`          | 91    | `PLANS-AND-BRIEFS.md`, section `## 2026-11-03-owner-decisions.md`      | A queue of Q1..Q6, each with options and a recommendation awaiting the owner  |
+| `docs/proposals/2026-11-03-design-rulings-pending.md`   | 48    | `PLANS-AND-BRIEFS.md`, section `## 2026-11-03-design-rulings-pending.md` | The Dashboard type-scale and 14 section-measure rulings, the same class      |
+| `docs/proposals/2026-11-03-blocked-scenarios.md`        | 47    | `PLANS-AND-BRIEFS.md`, section `## 2026-11-03-blocked-scenarios.md`    | Phase 4.1 and 4.2 evidence gaps, each with options and a recommendation       |
+| `docs/proposals/2026-11-03-full-project-state.md`       | 119   | `SLICE-RECORDS.md`, section `## 2026-11-03-full-project-state.md`      | A dated state record measured against the tree                                |
+| `docs/proposals/2026-11-03-slices-a-g-report.md`        | 35    | `SLICE-RECORDS.md`, section `## 2026-11-03-slices-a-g-report.md`       | A pass report: slice-by-slice outcome, suite state and its attributions       |
+| `docs/proposals/audit-corrections.md`                   | 127   | `AUDIT-AND-VERIFICATION.md`, section `## audit-corrections.md`         | Corrections to the database audit's findings and dispositions                 |
+| `docs/proposals/audit-fix-pass-addendum.md`             | 122   | `AUDIT-AND-VERIFICATION.md`, section `## audit-fix-pass-addendum.md`   | The fix-pass record corrections and dispositions                              |
+| `docs/proposals/pass2-closeout-notes.md`                | 8     | `AUDIT-AND-VERIFICATION.md`, section `## pass2-closeout-notes.md`      | The pass-2 close-out notes, whose items belong to the audit records          |
+
+Verification, per the discipline's line-by-line rule, ran before the delete: every non-blank source
+line was found in its section, in order, with one-level heading demotion and a fold note at each head
+(761/761 non-blank lines across the nine; 0 missing in each). Every source was valid UTF-8 with LF
+endings, so no encoding repair was needed. `SLICE-RECORDS.md`'s 6,571 NUL bytes were asserted
+unchanged before and after.
+
+**One documented exception to one-level demotion.** `pass2-closeout-notes.md` carries no `#` title:
+its first heading is already `### Pass 2 close-out notes (2026-11-02)`, so the section keeps that line
+as its `###` title and demotes the remaining headings by two, which leaves `###` under `##` with no
+`####` levels added. The body text is untouched.
+
+**Recoverability, stated per source because it differs.** Six are tracked and clean at HEAD and are
+recoverable at the commit that deletes them. Three are **not** tracked at all:
+`audit-corrections.md`, `audit-fix-pass-addendum.md` and `pass2-closeout-notes.md` had been moved
+into `docs/proposals/` as untracked copies of root files that a peer had deleted, so their deletion
+here leaves the master section as the only copy, the Round 13 E2 precedent. `docs/audit-corrections.md`
+and `docs/audit-fix-pass-addendum.md` no longer exist anywhere in the tree; the sections are now the
+record.
+
+**References.** The census was run after the round and every remaining reference to a deleted path is
+marked or ruled: the embedded bodies' own cross-references (`docs/audit-corrections.md` appears inside
+`audit-fix-pass-addendum.md` and `pass2-closeout-notes.md`, and both are now sections of the same
+master), the dated commit tables that name a file as it sat on the day of a measurement, and the
+plan-of-record pointer inside `2026-11-02-ui-ux-audit-implementation.md` naming its own former path.
+
+on; `CHANGELOG.md`'s
+2026-10-19 rows about the `SKILL.md` → `SKILL_REGISTRY.md` rename are dated history and were left alone. <!-- census: quoted-original -->
+
 ### Deliberate exceptions, outside the masters
 
 Three entries stay outside `docs/research-scratch/` on purpose. They are listed here so a future pass

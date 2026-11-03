@@ -405,6 +405,9 @@ const pickOptions = (): { value: string; label: string }[] => [
                         <span v-if="card.scenario">{{ card.scenario }}</span>
                         <template v-if="card.stars !== null"> · {{ '★'.repeat(card.stars) }}</template>
                         <template v-if="card.savedAt !== null"> · saved {{ card.savedAt }}</template>
+                        <template v-if="form.legacies[index].rank_letter !== '' || form.legacies[index].rank !== ''">
+                            · rank {{ form.legacies[index].rank_letter }}<template v-if="form.legacies[index].rank !== ''"> ({{ form.legacies[index].rank }}★)</template>
+                        </template>
                     </div>
                     <div class="mt-2 flex flex-wrap gap-1.5">
                         <span
@@ -433,10 +436,11 @@ const pickOptions = (): { value: string; label: string }[] => [
                         :error="errorFor(index)"
                         @update:model-value="assignParent(index, String($event))"
                     />
-                    <div v-if="manual[index]" class="mt-2">
-                        <label class="block text-xs font-medium text-ink" :for="`legacy-name-${index}`">
-                            Parent name
-                        </label>
+                    <div v-if="manual[index] || card !== null" class="mt-2">
+                        <div v-if="manual[index]">
+                            <label class="block text-xs font-medium text-ink" :for="`legacy-name-${index}`">
+                                Parent name
+                            </label>
                         <BaseInput
                             :id="`legacy-name-${index}`"
                             v-model="form.legacies[index].name"
@@ -456,6 +460,7 @@ const pickOptions = (): { value: string; label: string }[] => [
                             the catalogue of trainees this tool knows, offered as a spelling aid; a name
                             not in it is still storable, because a friend's finished run is never a local row.
                         </p>
+                        </div>
 
                         <!-- The parent's own record, the same three facts the payload stores for a
                              library pick. Entered here, read by the projected-start table in realtime. -->
@@ -486,6 +491,16 @@ const pickOptions = (): { value: string; label: string }[] => [
                                 />
                             </div>
                         </div>
+
+                        <label class="mt-2 flex items-center gap-2 text-xs text-ink">
+                            <input
+                                type="checkbox"
+                                v-model="form.legacies[index].is_guest"
+                                :name="`legacies.${index}.is_guest`"
+                                class="min-h-6 min-w-6"
+                            />
+                            Guest / rented parent (not a local run)
+                        </label>
 
                         <!-- The parent's own Sparks: kind, category, target, stars. The same boundary the
                              server validates - a Stat category whose target is not a stat is refused

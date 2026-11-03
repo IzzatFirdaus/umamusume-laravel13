@@ -282,7 +282,7 @@ const aptitudePill = (race: Race): string => {
                         <tr>
                             <th scope="col" class="text-left">Race</th>
                             <th scope="col" class="text-left">Grade</th>
-                            <th scope="col" class="text-left">Surface · distance</th>
+                            <th scope="col" class="text-left">Surface · distance · aptitude</th>
                             <th scope="col" class="text-right">Fans needed</th>
                             <th scope="col" class="text-right">Skill Pt</th>
                             <th scope="col" class="text-right"></th>
@@ -458,7 +458,7 @@ const aptitudePill = (race: Race): string => {
                     <span class="dirty" role="status">
                         {{ selected !== null ? selected.title + ' selected' : 'No race chosen' }}
                     </span>
-                    <button type="button" class="btn btn-quiet min-h-11" title="The build has no undo; this screen proposes one.">Undo turn {{ undoableTurn }}</button>
+                    <button type="button" class="btn btn-quiet min-h-11" disabled title="Undo is not available in this build; this screen proposes one.">Undo turn {{ undoableTurn }}</button>
                     <a :href="trainingUrl" class="btn min-h-11 inline-flex items-center">Train instead</a>
                     <button
                         type="button"

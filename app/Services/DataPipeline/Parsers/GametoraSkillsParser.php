@@ -6,6 +6,7 @@ namespace App\Services\DataPipeline\Parsers;
 
 use App\Enums\ReleaseStatus;
 use App\Services\DataPipeline\Contracts\SkillSourceParser;
+use App\Services\DataPipeline\NameNormalizer;
 use JsonException;
 
 /**
@@ -152,7 +153,7 @@ final class GametoraSkillsParser implements SkillSourceParser
      *                        fetch must not throw over it
      * @return array{export_id: int, name: string, name_ja: string|null, name_is_client: bool,
      *               release_status: string, rarity: int|null, is_unique: bool, sp_cost: int|null, type: string|null,
-     *               condition_groups: list<array<string, mixed>>}|null
+     *               condition_groups: list<array<string, mixed>>, description: string|null, description_match_key: string|null, distance_type: int|null}|null
      */
     private function row(mixed $skill): ?array
     {
@@ -174,6 +175,15 @@ final class GametoraSkillsParser implements SkillSourceParser
 
         $rarity = isset($skill['rarity']) && is_int($skill['rarity']) ? $skill['rarity'] : null;
 
+        // P3: extract description (desc_en) and normalize it for search
+        $description = $this->textOrNull($skill['desc_en'] ?? null);
+        $descriptionMatchKey = $description !== null
+            ? (new NameNormalizer)->normalize($description)
+            : null;
+
+        // P3: parse distance_type from condition tokens (exact equality only)
+        $distanceType = $this->parseDistanceType($skill['condition_groups'] ?? null);
+
         return [
             'export_id' => $skill['id'],
             'name' => $name,
@@ -190,6 +200,10 @@ final class GametoraSkillsParser implements SkillSourceParser
             'sp_cost' => isset($skill['cost']) && is_int($skill['cost']) ? $skill['cost'] : null,
             'type' => $this->category($skill['condition_groups'] ?? null),
             'condition_groups' => $this->conditionGroups($skill['condition_groups'] ?? null),
+            // P3: description and distance parsing
+            'description' => $description,
+            'description_match_key' => $descriptionMatchKey,
+            'distance_type' => $distanceType,
         ];
     }
 
@@ -314,5 +328,37 @@ final class GametoraSkillsParser implements SkillSourceParser
         $value = trim($value);
 
         return $value === '' ? null : $value;
+    }
+
+    /**
+     * Parse distance_type from exact equality tokens in condition groups.
+     * Only `distance_type==N` (N=1..4) sets the column; range operators (<=, >=) leave it NULL.
+     * Returns the first exact match found, or null if none.
+     */
+    private function parseDistanceType(mixed $groups): ?int
+    {
+        if (! is_array($groups)) {
+            return null;
+        }
+
+        foreach ($groups as $group) {
+            if (! is_array($group)) {
+                continue;
+            }
+
+            foreach ([$group['condition'] ?? null, $group['precondition'] ?? null] as $predicate) {
+                if (! is_string($predicate)) {
+                    continue;
+                }
+
+                foreach (preg_split('/[@&]/', $predicate) ?: [] as $atom) {
+                    if (preg_match('/^distance_type==([1-4])$/', trim($atom), $m) === 1) {
+                        return (int) $m[1];
+                    }
+                }
+            }
+        }
+
+        return null;
     }
 }

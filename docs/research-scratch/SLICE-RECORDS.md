@@ -53,6 +53,23 @@ verbatim: the source's own cross-references inside the embedded body are repoint
 section anchor. The other seven files of this round landed in `PROCESS-PLANS.md` (one),
 `PLANS-AND-BRIEFS.md` (three) and `AUDIT-AND-VERIFICATION.md` (two), with one refreshed in place in
 `DESIGN-CORPUS.md`; the routing table for all eight is in `docs/research-scratch/INDEX.md` §Round 18.
+**Round 22 (2026-11-03, consolidation):** the owner ordered ten `docs/proposals/2026-11-0*` files and
+every `docs/audits/` file except the eight Rice Shower / Unity Cup documents consolidated into
+`docs/research-scratch/` and the originals deleted. Nine of the ten proposals landed here as their own
+sections, each a dated pass report or pre-flight state record: `2026-11-02-followup-closeout.md` (144
+lines), `2026-11-02-legacy-builder-pass.md` (51), the five `2026-11-02-ui-ux-audit-implementation-pass-N.md`
+reports (71, 117, 225, 260 and 140), `2026-11-03-completion-phase-0.md` (109) and
+`2026-11-03-deferred-items.md` (28). The tenth, `2026-11-03-git-reconciliation.md` (264), landed in
+`AUDIT-AND-VERIFICATION.md` with the 35 audit reports of the same round. Each section was verified
+line-by-line against its source before the delete and again against the appended region after it (4,297
+of 4,297 non-blank lines across all 46 sources, in order, with one-level heading demotion and a fold note
+added at each head; 0 missing). The originals were then deleted from `docs/proposals/`; these sections
+are now the only working-tree copies and the citation targets, recoverable from the commit that deleted
+them. This file's 6,571 NUL bytes were asserted unchanged before and after, and the bytes were appended
+with a raw read/write so no decode round-trip touched them. The routing table for all 46 is in
+`docs/research-scratch/INDEX.md` §Round 22.
+
+---
 
 ---
 
@@ -12611,3 +12628,1449 @@ clean-vs-HEAD check); PHPStan 11 errors, none in a touched path; `lint:ui` at 28
 219 baseline with zero findings in the three cockpit files; `composer lore` 534 hits / 75 exempt lines and
 `lore-code` 303 hits, with the slice's own four files producing none.
 
+## Round 22 — the 2026-11-02/03 pass reports and state records (2026-11-03, owner-ordered)
+
+The owner ordered ten `docs/proposals/2026-11-0*` files and every `docs/audits/` file except the
+eight Rice Shower / Unity Cup documents consolidated into this directory and the originals
+deleted. The ten proposal files are dated pass reports and pre-flight state records, so they land
+here; the 35 audit reports land in `AUDIT-AND-VERIFICATION.md`, and the one proposal that is a
+git-state record rather than a pass report (`2026-11-03-git-reconciliation.md`) travels with them.
+The per-file measurement table, the encoding repairs and the citation repoints are recorded in
+`INDEX.md` §"Round 22", and this round appends to the end of this file so the append-only
+execution ledger above it is untouched.
+
+**Source encodings, stated because this master is not clean UTF-8.** All ten proposal sources are
+valid UTF-8 with LF endings and are embedded byte for byte. The audit sources are not: eight carry
+a UTF-8 byte-order mark, which was stripped because a BOM inside a section is an invisible
+character in the middle of a file; and eighteen are cp1252, where 137 bytes in the undefined-UTF-8
+range 0x97 decode under cp1252 to the em dash their surrounding text already uses where it is
+UTF-8. Each was decoded under the encoding its own bytes prove, so a tree that already carries
+double-encoded dashes in places now carries the correct character in the new sections.
+
+## 2026-11-02-followup-closeout.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/proposals/2026-11-02-followup-closeout.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Follow-up closeout — Catalog Show fix and addendum Phases B–E
+
+
+**Date:** 2026-11-03 (Asia/Kuala_Lumpur)
+**Status:** Catalog Show landed with rendered evidence; addendum B–E landed or verified item by
+item. Three closure items (the trainee-profile plan file, the Catalog Show KI, and the
+`session_cost` comment) are recorded here rather than as separate edits, each with its reason in
+"Deviations". No code work remains open from this dispatch; the owner-gated items are unchanged.
+
+### 1. Catalog Show fix
+
+`88043b3b` — *fix(catalog): render base stats and growth rates on trainee detail*.
+
+- `CatalogController::show()` now sends `character_cards.base_stats` / `.growth_rates` per card
+  plus `scenarios.stat_order`; `Catalog/Show.vue` reads the active form, prints the five base
+  values and growth percentages, hides both absence notes when a row exists, and prints each
+  costume form's recorded growth row instead of the retired "stores neither" claim.
+- Rendered evidence: `/umamusume/vodka` shows **96/61/105/75/88** base stats and
+  **10/0/20/0/0%** growth, 0 "Not recorded" in the base block, both absence notes gone, the
+  Costumes growth column populated for both forms. (Vodka's own values; the dispatch's sample
+  `90/89/83/92/96` is Tokai Teio's debut form.)
+- JP-only null card: `/umamusume/mejiro-ryan` (card 66, `base_stats` null) renders
+  "No base-stat figure is recorded for this form." and "No growth figure is recorded for this
+  form.", no console error.
+- 320px: `document.documentElement.scrollWidth` 305 (no overflow).
+- `catalog-detail.spec.ts` gains a rounded-figures case that passes; the file's untouched
+  single-form case fails pre-existing (the enriched scratch DB now holds more than one form for
+  `silence-suzuka`).
+
+### 2. Plan closure and the Catalog Show KI
+
+**Trainee-profile plan.** The path named by the dispatch,
+`docs/proposals/2026-11-02-trainee-profile-data-fix.md`, does not exist in this tree (listed
+`docs/proposals/`, searched all `docs/**/*.md`). No file was created to hold a closure: the
+dispatch limits documentation to closures, and inventing the plan in order to close it would be a
+new artifact. The closure is therefore recorded here:
+
+- Phase 1 wizard fix: `cf088ccb`.
+- Phase 2 migration `2026_11_02_141639` is applied (migrate:status `[24] Ran`, reparse
+  `266 updated, 0 created, 4 skipped`); the parser/model/store/controller changes are present in
+  the shared working tree but have no commit of their own (the owning session has not committed
+  them), so there is no hash to cite for that half.
+- ADR-0030 is present; `tests/browser/trainee-profile.spec.ts` passes 3/3.
+- Deferred Catalogue follow-up: `88043b3b` (this pass).
+
+**Catalog Show KI.** HEAD's `KI-149` is the `.card > h2` type-step issue. The Catalog Show
+entry — which reuses the number — lives inside the peer's uncommitted 273-line addition to
+`KNOWN-ISSUES.md` (the file also carries a corrupted UTF-16 fragment in that block). Editing it in
+place would require committing the peer's block, and no hunk of it applies against HEAD, so the
+state was not flipped. Resolution for the record: the Catalog Show divergence is **RESOLVED by
+`88043b3b`**; the peer should flip that entry when their block lands and renumber it (next free
+number is KI-151).
+
+### 3. Addendum B–E status
+
+| Item | Status | Evidence |
+|---|---|---|
+| B.1 RaceDetail M2 audit | **FIXED** — `45ebbc37` | findings below |
+| B.2 race-detail browser spec | **FIXED** — `64446e10` | 4/4 pass |
+| B.3 null-column absence notes | **VERIFIED** (page already used `AbsenceValue`; covered in `45ebbc37`) | ids 3/1 render 29 absence notes, 0 dash cells |
+| B.4 rewards display | **FIXED** — `45ebbc37`, option (b) | "Item id" + visible disclosure; no item dictionary exists, so no name invented |
+| B.5 8 skipped races | **VERIFIED expected** — `6cbc52e4` | ids 1, 2, 405–410: all have null `track_id`/`race_id`/`fans_gain_curve` (debut, maiden, URA Finals); no join defect |
+| C.1 Races.vue re-audit | **VERIFIED** (no commit) | F-01 5 sizes; F-03 410 = 410; F-06 payout SourceNote; F-11 44px; F-13 305@320 |
+| D.1 missing gates | **RUN**; 4 new PHPStan errors fixed in `1c15a29a` | below |
+| E.1 Rejected-candidate spot-check | **VERIFIED** (no revert) | 5/5 sampled propose names now in `umamusume` (JapanOnly promotions); 68 rejected: 66 null proposals, 2 valid ids, 0 missing trainees |
+| E.2 `session_cost` citation | **ALREADY SATISFIED** (no edit) | `config/advisor.php:23-25` documents 2023-02-25 as the source's publication date and marks it stale; the requested "last verified" line would contradict that |
+
+#### RaceDetail audit findings
+
+- **RD-01 rewards (NRM-1, sev 2, FIXED):** the table printed the raw item id with no disclosure.
+  Now the column is "Item id" and the card states the catalogue records no name for them; the
+  chance column prints percentages (100%/5%/1%) instead of raw fractions.
+- **RD-02 raw reward JSON (H8, sev 2, FIXED):** the decoded facts table printed
+  `reward_summary` as JSON. The page filters that row; the Rewards card is the only reward
+  surface. (`RaceFacts` is peer-owned; the residual "Reward"/"Course" facts there are deferred.)
+- **RD-03 machine codes (NRM-1, sev 1, FIXED):** direction/season printed code+label; course
+  printed a bare code when its label was null. Labels print alone; a missing label prints
+  "Code N" visibly as a code.
+- **RD-04 factor-effect casing (H4, sev 1, FIXED):** "speed, guts" now reads "Speed, Guts"; an
+  unrecognised source value is left verbatim.
+- **RD-05 provenance (GP-2, sev 1, FIXED):** the page names the four enrichment datasets and
+  links `/database/sources`; the door carries the 44px target.
+- **RD-06 dead null-slot branch (hygiene, sev 0, FIXED):** the route `findOrFail()`s, so the
+  "No race selected" branch was unreachable; removed.
+- **RD-07 type scale / targets / contrast / reflow (VERIFIED):** `.card > h2` 16px; no in-main
+  control under 44px except the documented 24px `AbsenceValue` markers; contrast light
+  21 / 13.93 / 6.21 / 21, dark 14.35 / 13.99 / 4.83 / 12.63; scrollWidth 305/375/753/1265 at
+  320/390/768/1280; focus ring 3px solid.
+
+### 4. Gates
+
+- `npm run typecheck` → exit 0.
+- `npm run lint:ui` → exit 0; 207 finding lines (tool summary 509 across categories), equal to
+  pass 5's 207 and below the 209 baseline.
+- `npm run build` → exit 0 (manifest rebuilt); `public/hot` absent.
+- `vendor/bin/pint --test` on every PHP file touched this pass → passed; `php -l` clean.
+- `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` → 15 errors, **11 after
+  `1c15a29a`**; the remaining 11 are pre-existing and outside the enrichment files
+  (InheritanceEventController, PreflightController ×2, ScenarioSelectController,
+  DashboardController, LegacyController ×2, TrainingRunController, IndependentTraining ×3).
+  The four enrichment-parser contract errors are fixed by giving them their own
+  `RaceEnrichmentSourceParser` contract.
+- Parser feature tests: `GametoraRace{Fans,Parser,Reward,Racetrack}ParserTest` → 8 passed
+  (29 assertions).
+- `trainee-profile.spec.ts` + `career-snapshot.spec.ts` → 17 passed (3 + 14).
+- `race-detail.spec.ts` → 4 passed.
+- Full `npm run test:browser` → **NOT RUN TO COMPLETION.** The suite is 109 spec files at
+  `workers: 1`; the run started 01:09 and had reached `career-cockpit.spec.ts` (alphabetical)
+  at 01:31 when it was stopped, so a complete pass would run well over an hour. It is recorded as
+  not passed, not as green.
+- Targeted regression set instead — the specs this pass's source changes touch:
+  `catalog.spec.ts`, `catalog-to-wizard.spec.ts`, `database.spec.ts`, `database-subpages.spec.ts`
+  → **47 passed, 2 failed**. One failure was a real race-enrichment regression (the source
+  ledger still expected 14 rows after four enrichment sources were added); fixed by `d6c5cd3d`
+  and its case re-run green. The other (`catalog-to-wizard.spec.ts`) expects a `New career`
+  button on the catalog page that an earlier pass renamed; it is pre-existing spec drift and was
+  not changed here.
+
+### 5. Remaining owner-gated items
+
+Unchanged: proposal §7 Q2 (re-probe), Q4 (Phase 5 owner findings), Q5 (CatalogIndex schema
+change). No new owner decision is needed for this dispatch.
+
+### 6. Deviations and corrections
+
+- **Dispatch paths:** the snapshot pages live under `Career/Snapshot/`, and the race routes are
+  `/training-runs/{run}/races`, `/turns/{turn}/edit`, `/veteran`, `/database/races/{id}`. The
+  synthetic URLs in the prior dispatch were not used.
+- **"Create three specs":** all three files already existed; they were extended. `race-detail`
+  was genuinely new.
+- **KI and plan:** see §2. The plan file is absent; the Catalog KI is peer-uncommitted with a
+  numbering collision, so neither got the prescribed commit. The resolution is recorded here.
+- **`session_cost`:** already documented; the requested comment would have mis-stated the date's
+  meaning.
+- **RunsImport F-01:** fully closed — 0 form-field `ui/*` imports remain (only `PageHeader` and
+  `Card` chrome).
+- **Cockpit F-03:** removed identifiers grep to 0; the file's 7 pre-existing spec failures remain
+  (proved at HEAD in the prior pass).
+- **Landing untracked session files:** `RaceDetail.vue`, `EnrichRaces.php` and the four
+  enrichment parsers were untracked from the enrichment session; they were landed here with the
+  audit/citation/contract changes, each commit body saying so.
+- **Full browser suite:** started and stopped as §4 records; the full-suite gate is therefore
+  **not run**, and only the affected subset plus the named specs carry browser evidence.
+- **`catalog-to-wizard.spec.ts`:** fails on a renamed catalog action (pre-existing); not fixed
+  here because it is outside this pass's source changes and the dispatch's trap list owns its own
+  set of pre-existing failures.
+
+## 2026-11-02-legacy-builder-pass.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/proposals/2026-11-02-legacy-builder-pass.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Pass report — Legacy builder: commit layout fix, triage regression, complete M2 screen audit
+
+
+Date: 2026-11-02
+Session: resume Legacy builder side-by-side + stalled audit
+
+### Pre-audit triage (§0)
+
+#### 0.1 — Layout change committed
+- **Status:** Committed
+- **SHA:** `a1bfac85` fix(legacy): parents side by side in standard and wide layouts (SCR-CAR-006)
+- **Files:** `resources/js/pages/Legacy/Builder.vue` (+16/-11; also included load-bearing `ancestors` array seeding for `AncestorEditor`)
+- **Verification:** Verified via Playwright (prior session) — Standard and Wide → 2 grid tracks; Compact → 1 track stacked.
+
+#### 0.2 — Scratch verification spec removed
+- **Status:** Deleted
+- **File:** `tests/browser/_verify_legacy_grid.spec.ts` (untracked, removed)
+
+#### 0.3 — Regression gate triage
+- **`legacy.spec.ts`:** 9/9 passed (session-private, port 8150)
+- **`accessibility.spec.ts`:** 4 passed, 2 failed
+  - `the visit progress indicator carries valid progressbar semantics mid-visit (KI-63)` — pre-existing/known issue pattern
+  - `no list-role container holds non-list children on the dashboard or the two wizard steps` — pre-existing, different components (dashboard/wizard), not related to Builder.vue
+- **Classification:** PRE-EXISTING/UNRELATED — no regressions introduced by the layout change. Legacy Lab specs all green.
+
+### Audit
+- **Report:** `docs/audits/AUD-20261102-029-legacy-builder-2026-11-02.md` (M2 screen audit)
+- **Findings count by severity:** Severity 0: 6 findings (all observations, no defects). No severity ≥1 findings.
+- **Coverage:** Builder states inspected via code + shipped regression specs; layout behavior confirmed correct.
+
+### Findings resolution
+| ID | Rule | Outcome | Notes |
+| --- | --- | --- | --- |
+| F-01 | GT-1, UI-6 | NOT-A-DEFECT | Group `<li>` + `ul.g-2` correctly groups parents; connector on group. |
+| F-02 | UI-6, GT-5 | NOT-A-DEFECT | Compact override stacks parents correctly. |
+| F-03 | UX-1, WCAG 2.5.8 | NOT-A-DEFECT | Parent selects meet 44px house rule (verified by spec). |
+| F-04 | NRM-1, H1 | NOT-A-DEFECT | Error/refusal flow exercised by spec. |
+| F-05 | SHR-8, GP-1 | NOT-A-DEFECT | `ancestors` array seeded load-bearing for editor. |
+| F-06 | IA-5 | NOT-A-DEFECT | Empty states and absence copy present. |
+
+### Verification
+- `npm run typecheck` — clean
+- `npm run lint:ui` — pre-existing violations in other files (Preferences/Edit.vue, Veterans/Index.vue etc., not in diff scope)
+- `npm run build` — succeeded
+
+### Deviations from dispatch
+- Audit measurement spec (`_audit_legacy_builder.spec.ts`) was interrupted mid-run; full rendered JSON outputs not captured. Report uses PARTIAL rendered evidence with source inspection + shipped regression specs as primary evidence (acceptable per audit guidelines when browser measurement incomplete).
+- Accessibility suite shows 2 pre-existing failures unrelated to layout change (classified as pre-existing per dispatch guidance).
+
+### Commits
+- `a1bfac85` fix(legacy): parents side by side in standard and wide layouts (SCR-CAR-006)
+- `5827a7be` docs(audits): M2 screen audit of /legacy/{id} (AUD-20261102-029)
+
+## 2026-11-02-ui-ux-audit-implementation-pass-1.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/proposals/2026-11-02-ui-ux-audit-implementation-pass-1.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### UI/UX Audit Implementation — Pass 1 Report
+
+
+Dated 2026-11-02. Executes `docs/proposals/2026-11-02-ui-ux-audit-implementation.md`.
+
+### 1. Pre-flight results
+
+#### Gate 1 — Owner questions (defaults used)
+- Q1 (Manifest): not created (deferred, per default).
+- Q2 (RENDERED_EVIDENCE re-probe): not re-probed; treated as OBSERVED_SOURCE only.
+- Q3 (Reference data absorption): already absorbed in proposal §2.3.
+- Q4 (Phase 5 deferrals): not executed.
+- Q5 (CatalogIndex F-01): not implemented (schema change needs owner approval).
+- Q6 (Fixtures): assumed yes; Playwright used against session-private scratch DB.
+
+#### Gate 2 — Environment probe
+- Server: HTTP/1.1 200 on http://127.0.0.1:8000/
+- node_modules: present (typecheck exit 0)
+- Chromium: available (Playwright launches, RENDERED_EVIDENCE = TRUE)
+- public/hot: absent (built artifact served)
+- npm run build: exit 0
+
+#### Gate 3 — Working tree state
+Peer edits present in: PreflightController.php, CareerPreflightTest.php, KNOWN-ISSUES.md, SCREEN_SPEC.md, and others. All commits used explicit pathspec; peer hunks excluded.
+
+### 2. Per-phase outcomes
+
+#### Phase 1 — Blocking (severity 3 + verification of landed work)
+- **1.1 Database pass 2 verification**: 11 commits (7e9df158..ba335bb4) verified present. F-01..F-12 (excl. retracted F-08) confirmed. Build clean.
+- **1.2 Career setup F-01 commit behavior**: verified — checkbox gates button (Playwright); PUT fires on acknowledged click; no double-submit (form.processing guard).
+- **1.3 ReviewIndex-F-01**: FIXED. `resolvedCount` now counts all non-Pending candidates; progress bar denominator is resolved+pending. Commit 696d12de.
+- **1.4 ReviewDetail-F-01**: FIXED. Reopen endpoint + "Return to Pending" button for resolved candidates. Commit 696d12de.
+
+#### Phase 2-4 — Not executed this pass
+The dispatch's Phase 2-4 findings (~40 findings) were not implemented due to scope and time constraints. They remain OPEN. Specific blockers named per finding in the proposal §3.
+
+#### Phase 5 — Not executed (owner sign-off required)
+
+### 3. Findings not implemented
+All Phase 2-4 findings remain OPEN. Named blockers:
+- Phase 2 (accessibility): requires individual source fixes per audit recommendation; not started.
+- Phase 3 (consistency): requires grep-based + source fixes; not started.
+- Phase 4 (copy): requires copy-tracking test updates; not started.
+- CatalogIndex F-01: gated on owner decision (schema change).
+- Phase 5: gated on owner sign-off.
+
+### 4. Gates not passed
+- Phase 5 (owner sign-off required)
+- CatalogIndex F-01 (owner decision required)
+- Full browser suite (deferred, ~2h runtime)
+
+### 5. Build verification evidence
+- npm run build: exit 0
+- public/build/manifest.json: current against source
+- public/hot: absent (built artifact served)
+- Playwright: F-01 checkbox gating verified against built bundle
+
+### 6. Peer-edit coordination
+Peer changes in PreflightController.php, CareerPreflightTest.php, KNOWN-ISSUES.md, SCREEN_SPEC.md left unstaged. All commits used explicit pathspec. No peer hunks swept.
+
+### 7. Deviations from this dispatch
+- Phase 2-4 not executed (scope exceeded single-session capacity). Named as BLOCKED with specific blockers.
+- ReviewDetail-F-01 implemented as re-open (option a) rather than pre-commit confirmation (option b), per audit recommendation.
+
+### 8. Owner actions required
+1. Phase 5 deferrals — owner sign-off needed to proceed
+2. CatalogIndex F-01 — schema change decision (option a vs b)
+3. Full browser suite — longer session window needed
+4. RENDERED_EVIDENCE re-probe — owner authorization for 30 reports
+
+### Commits this pass
+- 696d12de: fix(review): progress bar uses actual resolved count (F-01); add reopen path (F-01)
+
+## 2026-11-02-ui-ux-audit-implementation-pass-2.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/proposals/2026-11-02-ui-ux-audit-implementation-pass-2.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### UI/UX Audit Implementation — Pass 2 Report
+
+
+Dated 2026-11-02. Executes `docs/proposals/2026-11-02-ui-ux-audit-implementation.md` (pass 2).
+
+### Pre-flight results
+
+- Server: HTTP/1.1 200 on http://127.0.0.1:8000/
+- node_modules: present (typecheck exit 0)
+- Chromium: available (Playwright 1.63.0, RENDERED_EVIDENCE = TRUE)
+- public/hot: absent (built artifact served)
+- npm run build: exit 0
+- Peer edits: PreflightController.php, CareerPreflightTest.php, KNOWN-ISSUES.md, SCREEN_SPEC.md, and 20+ other files (peer working tree). All commits used explicit pathspec.
+
+### Part A — Pass-1 verification gaps
+
+#### A.1 — Database seven-URL sweep
+Playwright against built artifact. Results:
+- /database: hub tiles show Fetched/Transcribed/Config provenance ✓; Recurring live-event types tile ✓
+- /database/trainees, /database/supports, /database/skills: h1 30px/600 ✓
+- /database/races, /database/sparks: breadcrumb ≥44px ✓
+- /database/sources: per-source dates ("No fetch recorded" for artwork) ✓; Artisan Cleat Hammer fourth conflict ✓
+- /database/scenarios: link to /database/sources ✓
+- F-13 reflow: scrollWidth 320 at 320×640 viewport ✓ (already resolved, 174938b4 still in place)
+
+#### A.2 — Career setup F-01 commit behavior
+Playwright walkthrough to /career/setup/preflight with valid draft:
+1. Checkbox unchecked → button disabled ✓
+2. Checkbox checked → button enabled ✓
+3. Acknowledged click → PUT fires, redirects to /runs/{id}/cockpit, run count delta = 1 ✓
+4. Double-click → still one run created ✓
+
+#### A.3 — Per-finding blocker table
+See §3 below.
+
+#### A.4 — Pass-1 header correction
+Pass-1 report's header ("Implementation complete") misrepresented its body ("Phase 2-4 not executed"). This pass's header (below) is honest. Pass-1 report remains unchanged on disk; this note is the correction.
+
+#### A.5 — ReviewDetail-F-01 feature test
+Source-fixed only. No feature test added this pass. The reopen endpoint and button are present but not end-to-end tested.
+
+#### A.6 — ReviewIndex/Detail Playwright evidence
+ReviewIndex: source-verified (resolvedCount computed uses props.resolvedCount, total = resolved+pending). Not behaviorally verified with mixed pending/resolved rows.
+ReviewDetail: source-verified (reopen button renders for resolved candidates). Not behaviorally verified.
+
+### Part B — Phase 2 execution
+
+#### B.3 — Cockpit F-01: string-built URL
+FIXED (commit b9055ce0). `skillsUrl` computed replaced with `props.run.skills_url` from controller. Verification: SOURCE (grep confirms no `run_url` string replacement remains for skills URL).
+
+#### Other Phase 2 findings
+Not implemented. Reasons:
+- Preferences F-01/F-02/F-03/F-06: peer has uncommitted changes to Edit.vue (55 insertions). Deferred to peer commit to avoid conflict.
+- Database F-13: already resolved (verified, scrollWidth 320).
+- RunsIndex F-01, SaveVeteran F-01/F-02, SnapshotSetup F-01, TurnEdit F-01/F-02, VeteransCompare F-01, ReviewIndex F-04: not started (scope exceeded session capacity).
+
+### Part C — Phase 3/4
+Not started. Phase 2 not fully closed (13 of 14 findings remain open).
+
+### Per-finding blocker table (A.3)
+
+| Finding | Audit | Phase | Status | Blocker |
+|---------|-------|-------|--------|---------|
+| ReviewIndex-F-01 | AUD-20261102-021 | 1 | FIXED (696d12de) | — |
+| ReviewDetail-F-01 | AUD-20261102-022 | 1 | FIXED (696d12de) | — |
+| Cockpit-F-01 | AUD-20261102-001 | 2 | FIXED (b9055ce0) | — |
+| Database-F-13 | AUD-20261102-004 | 2 | FIXED (174938b4, verified) | — |
+| Preferences-F-01 | AUD-20261101-003 | 2 | BLOCKED | Peer Edit.vue uncommitted |
+| Preferences-F-02 | AUD-20261101-003 | 2 | BLOCKED | Peer Edit.vue uncommitted |
+| Preferences-F-03 | AUD-20261101-003 | 2 | BLOCKED | Peer Edit.vue uncommitted |
+| Preferences-F-06 | AUD-20261101-003 | 2 | BLOCKED | Peer Edit.vue uncommitted |
+| RunsIndex-F-01 | AUD-20261102-006 | 2 | NOT ATTEMPTED | No environmental or owner blocker; executable next pass |
+| SaveVeteran-F-01 | AUD-20261102-007 | 2 | NOT ATTEMPTED | No environmental or owner blocker; executable next pass |
+| SaveVeteran-F-02 | AUD-20261102-007 | 2 | NOT ATTEMPTED | No environmental or owner blocker; executable next pass |
+| SnapshotSetup-F-01 | AUD-20261102-008 | 2 | NOT ATTEMPTED | No environmental or owner blocker; executable next pass |
+| TurnEdit-F-01 | AUD-20261102-009 | 2 | NOT ATTEMPTED | No environmental or owner blocker; executable next pass |
+| TurnEdit-F-02 | AUD-20261102-009 | 2 | NOT ATTEMPTED | No environmental or owner blocker; executable next pass |
+| VeteransCompare-F-01 | AUD-20261102-011 | 2 | NOT ATTEMPTED | No environmental or owner blocker; executable next pass |
+| ReviewIndex-F-04 | AUD-20261102-021 | 2 | NOT ATTEMPTED | No environmental or owner blocker; executable next pass |
+| Phase 3-4 findings | Various | 3-4 | NOT ATTEMPTED | Phase 2 not fully closed |
+| Phase 5 findings | Various | 5 | DEFERRED | Owner gate Q4 |
+| CatalogIndex-F-01 | AUD-20261102-010 | 3 | DEFERRED | Owner gate Q5 (schema change) |
+
+### Part D — Pass report
+
+#### Prior-pass corrections
+Pass-1 report's header ("Implementation complete") misrepresented its body ("Phase 2-4 not executed"). Pass-2 header (below) is honest. Pass-1 report remains on disk unchanged.
+
+#### Per-phase outcomes
+- Phase 1: 2 severity-3 findings fixed (ReviewIndex-F-01, ReviewDetail-F-01)
+- Phase 2: 2 findings fixed (Cockpit-F-01, Database-F-13 already resolved); 4 blocked (peer Edit.vue); 9 not attempted
+- Phase 3-4: not started
+- Phase 5: not executed (owner gate)
+
+#### Verification evidence
+- ReviewIndex-F-01: SOURCE — resolvedCount computed uses props.resolvedCount; total = resolved+pending
+- ReviewDetail-F-01: SOURCE — reopen endpoint + button present; not end-to-end tested
+- Cockpit-F-01: SOURCE — grep confirms no run_url string replacement; skills_url prop from controller
+- Database-F-13: RENDERED — scrollWidth 320 at 320×640 viewport
+
+#### Peer-edit coordination
+Peer changes in 20+ files (Cockpit.vue, Preferences/Edit.vue, etc.) left unstaged. All commits used explicit pathspec. No peer hunks swept.
+
+#### Owner actions required
+1. Phase 5 deferrals — owner sign-off needed
+2. CatalogIndex F-01 — schema change decision
+3. Full browser suite — longer session window
+4. RENDERED_EVIDENCE re-probe — owner authorization for 30 reports
+5. Preferences F-01/F-02/F-03/F-06 — peer Edit.vue commit needed before these can land
+
+### Commits this pass
+- b9055ce0: fix(cockpit): skills URL from route() not string replacement (AUD-20261102-022 F-01)
+- a85ff5fa: docs(proposals): pass-1 report for UI/UX audit implementation (prior pass)
+
+### Gates
+- npm run typecheck: exit 0
+- npm run build: exit 0
+- npm run lint:ui: not run this pass
+
+## 2026-11-02-ui-ux-audit-implementation-pass-3.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/proposals/2026-11-02-ui-ux-audit-implementation-pass-3.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### UI/UX Audit Implementation — Pass 3 Report
+
+
+Dated 2026-11-02.
+
+**Status: Preferences (10/10) and Dashboard (11/11) complete with verification; Phase 3 accessibility partial (3 of 14 closed, 2 blocked, 9 not attempted — no environmental blocker). Phase 4 consistency and Phase 5 copy not attempted this pass.**
+
+This header describes the body. It does not say "complete".
+
+### Step 0 — Peer `Edit.vue` decision
+
+**Path taken: B (commit the in-flight work with attribution).**
+
+`git diff HEAD resources/js/pages/Preferences/Edit.vue` showed 7 hunks at exactly the lines the
+Preferences findings target, and inspection showed the hunks *already implement* F-01, F-02, F-03,
+F-06, F-08 plus F-04, F-05, F-07, F-09, F-10. The work was complete but uncommitted, so Path A
+(partial staging) had nothing left to add and Path C (defer) would have discarded a finished cluster.
+
+Committed as `c2967b36` with attribution in the body. Peer review welcome.
+
+### Per-finding outcomes
+
+#### Phase 1 — Preferences (10 findings) — ALL FIXED, commit `c2967b36`
+
+| Finding | Status | Evidence |
+|---|---|---|
+| F-01 error block live region | FIXED | `role="alert" aria-live="assertive" tabindex="-1"` on `error-block-*` (Edit.vue:552-559) |
+| F-02 describedby ids | FIXED | `describedBy` returns `error-block-${key}` / component ids (Edit.vue:212-224) |
+| F-03 focus map | FIXED | `firstControlId` + `document.getElementById(...)?.focus()` (Edit.vue:226-232, 299) |
+| F-04 backup label | FIXED | "Write a backup" (Edit.vue:426) |
+| F-05 wide-disabled reason | FIXED | DL.14 note (Edit.vue:370) |
+| F-06 reset arm announcement | FIXED | `aria-label` swaps to "…within five seconds…" (Edit.vue:544) |
+| F-07 breadcrumb | FIXED | `breadcrumb="[{ label: 'Preferences' }]"` (Edit.vue:312) |
+| F-08 refusals render once | FIXED | `blockErrorKeys` excludes inline keys (Edit.vue:234-242) |
+| F-09 em dash | FIXED | Theme Note reads "a four-option choice, not a two-way switch" — no `—` |
+| F-10 backup running | FIXED | `<p role="status" class="sr-only">{{ backupForm.processing ? 'Backing up…' : '' }}</p>` (Edit.vue:427) |
+
+Verification method: SOURCE for all ten (grep + line citation). Not behaviourally exercised this pass.
+
+#### Phase 2 — Dashboard (11 findings) — ALL FIXED, commits `5d3bda00`, `9d753b7a`
+
+| Finding | Status | Evidence |
+|---|---|---|
+| F-01 type scale | FIXED | RENDERED — `<main>` computed font sizes = `12/14/16/28` (4 tiers). Root cause was `.card > h2 {font-size:15px}` (specificity 0,1,1 beating any utility); raised to 16px in `app.css`, comment names the finding. |
+| F-02 `lang="ja"` | FIXED | RENDERED — zero Japanese text nodes under `<main>` without a `lang="ja"` ancestor |
+| F-03 live countdown | FIXED | SOURCE — `now` ref + `setInterval(1000)` in `onMounted`, cleared `onUnmounted`; `indepRemaining` reads `now.value` |
+| F-04 turn labels | FIXED | SOURCE — "recorded turns: N; imported position: M" (Dashboard.vue:228-229) |
+| F-05 empty-career exemplar | FIXED | RENDERED — sentence present in built bundle |
+| F-06 empty veterans | FIXED | RENDERED — "No veterans banked yet…" present |
+| F-07 KPI live count | FIXED | SOURCE — `v-if="activeCareerCount > 1"` branch prints "N live careers" (Dashboard.vue:494) |
+| F-08 developer note | FIXED | RENDERED — "Quick actions group the destinations the sidebar lists" present |
+| F-09 decoupled column | FIXED | SOURCE — column `v-show` uses `\|\|`; per-card gates on `data_status` and `roster` |
+| F-11 loading names destination | FIXED | SOURCE — "Loading the page you chose…" (Dashboard.vue:256) |
+| F-12 retry control | FIXED | SOURCE — `Try again` button calling `router.reload()` (Dashboard.vue:264) |
+
+Behavioural evidence: `tests/browser/dashboard.spec.ts` **11 passed**. Copy-tracking update in `9d753b7a`
+(the two regexes that pinned the old developer sentence now pin the new Trainer sentence, same specificity).
+
+#### Phase 3 — Accessibility remaining (14 findings) — 3 FIXED, 2 BLOCKED, 9 NOT ATTEMPTED
+
+| Finding | Status | Evidence / blocker |
+|---|---|---|
+| RaceDecision-F-01 alert focus | FIXED (already present) | SOURCE — `alertRef` + `.focus()` (RaceDecision.vue:106, 116), `tabindex="-1"` (443) |
+| RunsIndex-F-01 status pill colour coupling | FIXED `b95dc5cc` | SOURCE — `StatusPill` gains `status` prop → `:data-status`; Runs/Index passes `run.status` |
+| SaveVeteran-F-01 precondition role | FIXED (earlier pass) | SOURCE — `role="status"` at SaveVeteran.vue:195 |
+| CareerSetup-F-06 residual literals | FIXED `c6e55619` | SOURCE — grep `/career/setup/` across `resources/js/pages/Career/*.vue` → **no hits** |
+| CareerSetup-F-04/F-05/F-07 | VERIFIED PRESENT | SOURCE — exemplar line, `next=deck` save-then-navigate, `statAxes = computed(() => props.statOrder)` all in place |
+| SaveVeteran-F-02 overwrite confirmation | NOT ATTEMPTED | No environmental blocker; needs a confirmation/undo affordance designed against `ConfirmDelete.vue`'s pattern |
+| SnapshotSetup-F-01 GET payload in URL | BLOCKED | Real defect: `SnapshotController::reviewPayload()` reads `$request->query()` (lines 118-131). Fixing it means the setup screen POSTs and the review reads session only — a route + controller contract change with its own regression pass, not a source tweak. |
+| TurnEdit-F-01/F-02 status + refusal focus | NOT ATTEMPTED | No environmental blocker; `resources/js/pages/Career/TurnEdit.vue` carries no `role=` at all, so both need adding |
+| VeteransCompare-F-01 sticky no-op | NOT ATTEMPTED | Source has `position: sticky` on 3 cell classes with a documented wrapper-as-sticky-context; whether it survives the `@container` ancestor is unverified either way |
+| ReviewIndex-F-04 pager pinning | BLOCKED | `main` carries `@container` (Review/Index.vue:281), which makes `position: sticky` a no-op — the page's own comment says so. Fixing it needs a shell-level change (`AppLayout`'s container context), outside this page's file. |
+| Phase 3 findings with no slice in this dispatch | NOT ATTEMPTED | No environmental blocker; executable in a later pass |
+
+#### Phase 4 — Consistency (17 findings) — NOT ATTEMPTED
+
+No environmental blocker. Not reached: the mandatory Dashboard and Phase 3 work consumed the pass.
+
+#### Phase 5 — Copy (20 findings) — NOT ATTEMPTED
+
+No environmental blocker. Not reached.
+
+#### Owner-gated (not attempted, correctly)
+
+- Proposal Phase 5 (~15 findings) — Q4 owner sign-off
+- CatalogIndex-F-01 — Q5 schema change
+- Cockpit-F-02, SnapshotSetup-F-03 — proposal §5 severity-0 deferral
+
+### Gates
+
+| Gate | Result |
+|---|---|
+| `npm run typecheck` | exit 0 |
+| `npm run lint:ui` | exit 0; arbitrary-value findings **208** (baseline 209 — one below, not above) |
+| `npm run build` | exit 0, built in 58.83s |
+| `public/build/manifest.json` mtime | `2026-11-02T18:16:47+08:00` |
+| `public/hot` | absent (`Test-Path` → False) — the verifications ran against the built artifact |
+| `tests/browser/dashboard.spec.ts` | 11 passed |
+| `tests/browser/career-preflight.spec.ts` | 8 passed |
+
+### Commits made this pass (5)
+
+| SHA | Subject |
+|---|---|
+| `c2967b36` | fix(preferences): live regions, describedby ids, refusal focus, copy (AUD-20261101-003 F-01..F-10) |
+| `5d3bda00` | fix(dashboard): type scale to four tiers, decoupled Needs-you column (AUD-20261101-001 F-01..F-12) |
+| `b95dc5cc` | fix(runs): status pill carries data-status so state is not colour-only (AUD-20261102-006 F-01) |
+| `9d753b7a` | test(dashboard): pin the new quick-actions copy (AUD-20261101-001 F-08) |
+| `c6e55619` | fix(career-setup): remaining setup URLs from route() props (AUD-20261102-005 F-06) |
+| `00e3cf15` | test(utils): tick the finality acknowledgment before starting a run (AUD-20261102-005 F-01) |
+
+(Six rows; `00e3cf15` is the sixth.) Prior-pass commits (`696d12de`, `b9055ce0`, `43f0b8b0`,
+`c60af3a1`, `7e9df158..ba335bb4`) are **not** counted here.
+
+### Regression found and fixed
+
+`tests/utils/start-career.ts` clicked "Create the run" without ticking F-01's acknowledgment, so
+Playwright waited on a disabled control and the wizard walk hung — `dashboard.spec.ts` failed 1/11.
+Fixed in `00e3cf15`; the suite then passed 11/11. This is the class of regression the dispatch warned
+about and it was caught by running the spec, not by inspection.
+
+### Peer-edit coordination
+
+- `resources/js/pages/Preferences/Edit.vue` — Path B, committed whole with attribution (`c2967b36`)
+- `tests/browser/dashboard.spec.ts` — peer-touched; the two hunks are exactly the copy-tracking update
+  F-08 requires, committed explicitly (`9d753b7a`)
+- Left untouched and unstaged: `KNOWN-ISSUES.md`, `SCREEN_SPEC.md`, `PreflightController.php`,
+  `ResultController.php`, `CatalogController.php`, `config/*.php`, `tests/Feature/DashboardTest.php`,
+  the untracked `docs/audits/AUD-dashboard-2026-11-01.md` / `AUD-preferences-2026-11-01.md`
+- Every commit used an explicit pathspec; no `git add -A`
+
+### Deviations from the dispatch
+
+1. **Phase 3 order.** Slice 3.8 (Career setup residuals) was folded into `c6e55619` rather than left as a
+   verification-only note, because `DeckSelect.vue` still carried three literal `/career/setup/` URLs
+   that F-06's acceptance (grep → 0 hits) would have failed on.
+2. **`app.css` touched.** Dashboard F-01's root cause is a legacy `.card > h2 {font-size:15px}` rule, not
+   a Tailwind utility; a utility class cannot override it (0,1,1 vs 0,1,0). The fix changes the rule and
+   says so in a comment. This affects every `.card > h2` in the app, not only the Dashboard — that is the
+   point of a token fix, but it is broader than the finding's page scope and is flagged here.
+3. **`start-career.ts` touched.** Not in the dispatch's file list, but the F-01 gate made the shared
+   helper hang. The alternative was leaving a failing suite.
+
+### Owner actions required
+
+1. **SnapshotSetup-F-01** needs a route + controller contract decision (POST the review payload, read
+   session only). It is a real defect, not a source tweak.
+2. **ReviewIndex-F-04** needs a shell decision: `AppLayout`'s `main` carries `@container`, which disables
+   `position: sticky` for every page-level sticky footer. One shell change fixes the pager and the wizard
+   bars together.
+3. **Phase 4 (17) and Phase 5 (20)** remain open with no blocker. A pass that lands only those — no
+   verification of prior work — should finish Phase 4 comfortably.
+4. Existing gates: Q1 manifest, Q2 re-probe, Q4 Phase 5, Q5 CatalogIndex-F-01 remain unanswered.
+---
+
+### Continuation (same session, Phase 4/5 partial)
+
+The two phases above that were "not attempted" were picked up after the first report was committed.
+This section is appended rather than rewriting the header: the header still describes the mandatory
+work accurately, and the additions below change the *best-effort* rows, not the mandatory ones.
+
+#### Phase 4 — Consistency: 4 of 17 closed
+
+| Finding | Status | Commit | Evidence |
+|---|---|---|---|
+| Career M4 F-09 breadcrumb current values | VERIFIED PRESENT | — | `current="settings"` (RunSettings:151), `current="team"` (TeamEdit:67), `current="delete"` (ConfirmDelete:58), `:current="'result'"` (Result:198) — all already correct |
+| VeteransIndex-F-01 Clear anchor | FIXED | `a24a4e10` | Uses the existing `props.searchAction`; grep `href="/` in Veterans/*.vue → 0 |
+| VeteransShow-F-01 library/ledger anchors | FIXED | `a24a4e10` | `libraryUrl` + `sourcesUrl` from the controller |
+| VeteransCompare-F-04 library doors | FIXED (already present) | — | Compare.vue already uses `props.library_url` / `column.*_url` props |
+| CatalogShow / SkillsIndex / SkillsShow-F-01 title-only derivation | FIXED | `77fcc5cd` | `SkillCatalog.vue:268` and `Skills/Show.vue:259` gain an `sr-only` twin; SkillRow/SkillPlanRow already print it visibly. RENDERED: 12 sr-only pill spans on `/skills` |
+| ReviewIndex-F-03 queue caption/scope | FIXED | `a9b0ffd9` | `sr-only` caption + `scope="col"` on all five headers |
+| LegacyIndex-F-01 table caption + scope | FIXED | `a9b0ffd9` | Same pattern. RENDERED: caption reads "Published spark reference values, by family" |
+| RunsIndex-F-02 `aria-disabled` pager | FIXED | `43f0b8b0` (prior) | SOURCE only — the scratch DB's run list is empty, so no pager renders to measure |
+| RunsCreate-F-01 three names | NOT ATTEMPTED | — | No blocker |
+| RunsImport-F-01 component family | NOT ATTEMPTED | — | No blocker |
+| LegacyCompare-F-01 single-run compare | NOT ATTEMPTED | — | No blocker |
+| LegacyBuilder-F-01 spark cap | NOT ATTEMPTED | — | No blocker |
+| RacePlanner-F-01 unrendered groups | NOT ATTEMPTED | — | No blocker |
+| Preferences-F-08 | FIXED | `c2967b36` | (already counted under Phase 1) |
+
+#### Phase 5 — Copy: 4 of 20 closed
+
+| Finding | Status | Commit | Evidence |
+|---|---|---|---|
+| ReviewIndex-F-02 no-match colour | FIXED | `2b864b51` | `pill-caution` → `pill-neutral` |
+| VeteransIndex-F-02 empty exemplar | FIXED | `2b864b51` | "A filed career shows its trainee, scenario, the sparks the pair carried…" RENDERED present |
+| RaceDecision-F-03 blocked-race reason | FIXED | `2b864b51` | `blocked_reason` printed beside the disabled door, not title-only |
+| RaceDecision-F-05 aptitude pill derivation | FIXED | `2b864b51` | `sr-only` twin beside the pill |
+| RaceDecision-F-02 dashes | RETRACTED | — | The page contains **zero** U+2014 characters and uses `N/A` / `-` throughout; the audit's premise does not hold on this tree |
+| Cockpit-F-03 dead write methods | NOT ATTEMPTED | — | No blocker; needs a per-method reference sweep |
+| RacePlanner-F-02/F-03/F-04 | NOT ATTEMPTED | — | No blocker |
+| SnapshotEntry-F-01, SnapshotSetup-F-02, SnapshotReview-F-01 | NOT ATTEMPTED | — | No blocker |
+| RunsImport-F-02 | NOT ATTEMPTED | — | No blocker |
+| VeteransCompare-F-02/F-03 | NOT ATTEMPTED | — | No blocker |
+
+#### Commits added by this continuation (4)
+
+| SHA | Subject |
+|---|---|
+| `a24a4e10` | fix(veterans): library and ledger doors from route() props |
+| `77fcc5cd` | fix(skills): unique pill derivation readable without hover |
+| `a9b0ffd9` | fix(review,legacy): table captions and column scope |
+| `2b864b51` | fix(review,veterans,racedecision): neutral no-match, library exemplar, block reason and pill derivation visible |
+
+#### Gates re-run after the continuation
+
+| Gate | Result |
+|---|---|
+| `npm run typecheck` | exit 0 |
+| `npm run lint:ui` | exit 0; arbitrary-value findings **208** (baseline 209) |
+| `npm run build` | exit 0, built in 1m 54s |
+| `public/build/manifest.json` mtime | `2026-11-02T19:06:45+08:00` |
+| `public/hot` | absent (`Test-Path` → False) |
+
+#### Retraction filed for audit correction
+
+**RaceDecision-F-02 (AUD-20261102-002)** — the finding states missing values print as dashes. The page
+contains no U+2014 and already uses `N/A` or `-`, so there is no defect to fix. This belongs in
+`docs/audit-corrections.md` as a pass-3 retraction; the audit file itself is not edited here.
+
+#### Peak totals after continuation
+
+- Phase 1 Preferences: 10/10 closed
+- Phase 2 Dashboard: 11/11 closed
+- Phase 3 accessibility: 3 closed, 2 blocked, 9 open
+- Phase 4 consistency: 7 closed (incl. 2 verified-present), 6 open, 4 miscounted above (18 rows in the table, three are verified-present rather than fixed)
+- Phase 5 copy: 4 closed, 1 retracted, 15 open
+
+## 2026-11-02-ui-ux-audit-implementation-pass-4.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/proposals/2026-11-02-ui-ux-audit-implementation-pass-4.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### UI/UX Audit Implementation — Pass 4 Report
+
+
+Dated 2026-11-02.
+
+**Pass 4 — Phase 3 tail closed; Phase 4 reached 4 of its 6 rows; Phase 5 reached 1 of its 8 rows.
+RaceDecision-F-02's pass-3 retraction is **withdrawn** and the defect fixed. Three findings are
+blocked (the shell `@container` decision, the missing spark-ceiling figure, the component-family
+decision); the remaining unstarted rows are **not blocked — they were not reached**, and are
+executable in the next pass. §9 corrects this report after review.**
+
+> **Header corrected 2026-11-02 after review.** The first draft claimed "none is categorised as
+> 'not attempted' without one [a blocker]". That was false for five rows: SnapshotEntry-F-01,
+> SnapshotSetup-F-02, SnapshotReview-F-01, VeteransCompare-F-02/F-03 and Cockpit-F-03 were not
+> attempted and have no environmental blocker — they are scope, not environment. The corrected
+> header above says so.
+
+### 1. Step 0 — RaceDecision-F-02 retraction: WITHDRAWN (Path B)
+
+Pass 3 retracted F-02 because the page contained zero U+2014. The finding says *dashes*, not *em
+dashes*, so a hyphen counts. Re-read of every absence site in `RaceDecision.vue`:
+
+| Line | Value | Rendered when absent | Verdict |
+|---|---|---|---|
+| 283 | `race.tier` | `N/A` (word) | fine |
+| 285 | surface / distance band | `Surface not recorded` / `band not recorded` (words) | fine |
+| 289 | `race.fans_needed` | `'-'` (U+002D) | **defect** |
+| 290 | `race.payout.sp` | `'-'` (U+002D) | **defect** |
+| 321-324 | selected tier / distance / SP | `N/A` (words) | fine |
+| 357-358 | 1st-place SP and stat payout | `'-'` (U+002D) | **defect** |
+| 360-361 | 2nd and 3rd place rows | literal `-` (U+002D) | **defect** |
+| 383 | an absent field | `not recorded` (word) | fine |
+
+Eight absence sites: four used words, **four used a hyphen**. The retraction was wrong.
+
+**Fixed in `1af9eb53`.** All four now render `AbsenceValue` with a stated reason. Verification:
+SOURCE — `Select-String` for `'-'` in the page returns no hits; the en-dash count is 0.
+
+**No `docs/audit-corrections.md` entry is filed**: the audit was right about F-02, so the correction
+record would have to carry a *retraction of the retraction*, and this report is that record.
+
+### 2. Prior-pass corrections (pass 3)
+
+**2.1 — Phase 3 header did not reconcile with its table.** Pass 3's Phase 3 header read "3 of 14
+closed, 2 blocked, 9 not attempted"; its table listed 4 FIXED + 3 VERIFIED PRESENT + 2 BLOCKED + 4
+NOT ATTEMPTED + 1 unnamed row = 14. Correct reading: **7 closed (4 fixed + 3 verified present), 2
+blocked, 5 not attempted**. The "3" meant "newly fixed by this pass only."
+
+**2.2 — Phase 4/5 header vs continuation.** The header said Phase 4 and Phase 5 were "not attempted
+this pass"; the continuation section recorded 7 Phase 4 findings and 4 Phase 5 findings closed after
+the header was written. **End-of-pass-3 state: Phase 4 7/17, Phase 5 4/20.**
+
+**2.3 — Dashboard's single commit.** F-01..F-12 landed in one commit (`5d3bda00`) under the
+dispatch's "slices touching the same file may be combined" exception. Intentional, not an oversight.
+
+**2.4 — `app.css` verification scope.** The `.card > h2 {font-size:15px}` → `16px` change affects
+every `.card > h2`. Pass 3 verified Dashboard, Career Preflight and Legacy. **Residual risk,
+enumerated:** any page rendering a `.card` whose direct child is an `h2`. A grep of the two layout
+directories puts the surface list at Dashboard, Career (Preflight, Cockpit, Result, DeckSelect),
+Database (all area pages), Veterans (Index, Show, Compare), Legacy (Index, Compare, Builder), Review,
+Preferences, Help and Skills. Only Dashboard and Career Preflight are spec-covered for type; the rest
+are **unmeasured for the 15→16px step**. This is named here rather than fixed, because a type-scale
+change on thirteen more screens is its own finding, not a verification gap.
+
+### 3. Per-finding outcomes
+
+#### 3.1 Phase 3 tail
+
+| Finding | Audit | Status | Evidence |
+|---|---|---|---|
+| TurnEdit-F-01 page-load status | AUD-20261102-006 | **FIXED** `a7d5cefb` | SOURCE — `role="status"` line at TurnEdit.vue:136 names the turn and trainee |
+| TurnEdit-F-02 refusal focus | AUD-20261102-006 | **FIXED** `a7d5cefb` | SOURCE — `alertRef` + `onError` `nextTick` focus; the alert already carried `role="alert" tabindex="-1"` and was never focused |
+| SaveVeteran-F-02 overwrite confirmation | AUD-20261102-020 | **FIXED** `354779c9` | SOURCE — `overwriteAcknowledged` ref gates both `save()` and the submit's `:disabled`; the checkbox renders only when `props.saved !== null` |
+| VeteransCompare-F-01 sticky no-op | AUD-20261102-027 | **BLOCKED** | `AppLayout.vue:616` carries `@container` on `main` (`container-type: inline-size`), which makes `position: sticky` a no-op for every descendant. Fixing it is the shell decision that also unblocks ReviewIndex-F-04 (pass 3 §Owner actions #2). Not attempted here by design. |
+| The unnamed 14th Phase 3 row | — | **NAMED** | It is **Database-F-13** (`AUD-20261102-004`), which pass 3 closed and verified under Phase 2 (`scrollWidth` 320 at 320×640) but omitted from the Phase 3 table. No work outstanding. |
+
+#### 3.2 Phase 4 consistency
+
+| Finding | Audit | Status | Evidence |
+|---|---|---|---|
+| RaceDecision-F-04 navigation doors | AUD-20261102-002 | **FIXED** `3a9d4c76` | SOURCE — `training_url` from `route('runs.training')`; the `/cockpit` string replacement is gone. `route:list` confirms the name. |
+| RunsCreate-F-01 page named three ways | AUD-20261102-017 | **FIXED** `4657be9e` + `baf0146f` | SOURCE — breadcrumb leaf, `<Head>` title and h1 all read "Create a career"; the spec asserts the crumb leaf |
+| LegacyCompare-F-01 single-run compare | AUD-20261102-024 | **FIXED** `4657be9e` | SOURCE — `v-else-if="columns.length === 1"` states that a comparison needs two, instead of a verdict table of "same" |
+| RunsImport-F-02 redundant header list | AUD-20261102-018 | **FIXED** `5414af81` | SOURCE — the paragraph is gone, the placeholder keeps the list; the spec now asserts one rendering |
+| LegacyBuilder-F-01 spark cap | AUD-20261102-025 | **BLOCKED** | No spark-count cap exists anywhere in the tree: `LegacySelectionPayload` defines `MAX_SPARK_STARS = 3` (a star ceiling, not a count) and no `MAX_SPARKS`. Enforcing a number would invent a rule the project's bar forbids. Needs the reference figure before it can land. |
+| RacePlanner-F-01 unrendered groups | AUD-20261102-003 | **NOT ATTEMPTED — needs a reading of the audit** | The finding says "unrendered groups" without naming which; the page renders one results table and its doors. Not guessed at. |
+| RunsImport-F-01 component family | AUD-20261102-018 | **BLOCKED** | The two families differ in contract, not just in import path: `ui/TextInput` takes `:described-by` / `:invalid` slot-fed props from `ui/FormField`, while `Form/BaseInput` takes `ariaDescribedby`. Migrating either page rewrites every field and needs its own Playwright pass. |
+| CatalogIndex-F-01 | AUD-20261102-010 | **BLOCKED — owner gate Q5** | Schema change. |
+| Preferences-F-08, ReviewIndex-F-03, LegacyIndex-F-01, VeteransIndex-F-01, VeteransShow-F-01, VeteransCompare-F-04, CatalogShow/013/012-F-01, Career M4 F-09 | various | **CLOSED in pass 3** | Not re-listed as this pass's work. |
+
+#### 3.3 Phase 5 copy
+
+| Finding | Audit | Status | Evidence |
+|---|---|---|---|
+| RaceDecision-F-02 dashes for missing values | AUD-20261102-002 | **FIXED** `1af9eb53` (retraction withdrawn) | §1 above |
+| ReviewIndex-F-02 no-match colour | AUD-20261102-021 | **CLOSED in pass 3** `2b864b51` | — |
+| VeteransIndex-F-02 empty exemplar | AUD-20261102-026 | **CLOSED in pass 3** `2b864b51` | — |
+| RaceDecision-F-03, F-05 | AUD-20261102-002 | **CLOSED in pass 3** `2b864b51` | — |
+| RacePlanner-F-02/F-03/F-04 | AUD-20261102-003 | **NOT ATTEMPTED** | F-03 (dead computed) is checkable by grep; F-02 needs the config ceiling, F-04 needs the audit's exact wording. Deferred whole rather than half-landed. |
+| SnapshotEntry-F-01, SnapshotSetup-F-02, SnapshotReview-F-01 | AUD-20261102-007/-008/-009 | **NOT ATTEMPTED** | Each is a small, separate interaction change on the snapshot trio; none landed this pass. |
+| Cockpit-F-03 dead write methods | AUD-20261102-001 | **NOT ATTEMPTED** | Needs a per-method reference sweep on a 1000-line component; not attempted rather than guessed. |
+| VeteransCompare-F-02/F-03 | AUD-20261102-027 | **NOT ATTEMPTED** | Below-`lg` verdict placement and the pill colour; neither attempted. |
+| Phase-5 owner-gated (~15) | — | **NOT IN SCOPE — owner gate Q4** | — |
+
+**Honest count:** this pass fixed 7 findings and named/closed 1, across 7 commits. It did **not**
+close Phase 4 (6 rows still open: 2 blocked, 4 not attempted) and did **not** close Phase 5 (7 rows
+open, all not attempted). The remaining unblocked rows are named above so the next pass can pick them
+up without re-deriving them.
+
+### 4. Gates
+
+| Gate | Result |
+|---|---|
+| `npm run typecheck` | exit 0 |
+| `npm run lint:ui` | exit 0; **208** arbitrary-value findings (baseline 209) |
+| `npm run build` | exit 0; manifest mtime `2026-11-02T20:13:19+08:00` |
+| `public/hot` | **absent** (`Test-Path` → False) — every verification above ran against the built artifact |
+
+#### Specs run
+
+| Spec | Result | Classification |
+|---|---|---|
+| `run-import.spec.ts` | 10 passed, 1 failed (`:123` "refuses a file the app never wrote") | **PRE-EXISTING** — reproduced with this pass's changes reverted at `4657be9e` (baseline run, same failure). The assertion looks for a server validation sentence that does not paint. |
+| `runs-create.spec.ts` | 1 failed (`:12`) | **PRE-EXISTING, DATA-DEPENDENT** — the failure is at `#app > *` never becoming visible. `GET /training-runs/create` returns **500**: `TrainingRunController.php:206` calls `toDateString()` on a null `global_release_date`. `git status` shows that controller unmodified, so the defect predates this pass; it is reachable because the dev DB holds a card with a null release date. |
+| `dashboard.spec.ts` | 11 passed (pass 3) | not re-run this pass |
+
+**Newly discovered, NOT fixed (out of scope, filed here only):** `TrainingRunController.php:206`
+dereferences `character_cards.global_release_date` without a null guard. The column is nullable.
+
+### 5. Peer coordination
+
+- Every commit used an explicit pathspec; no `git add -A`.
+- `tests/browser/runs-create.spec.ts` and `tests/browser/run-import.spec.ts` are the only test files
+  touched, each a copy-tracking update for the copy this pass changed.
+- Left untouched and unstaged: `KNOWN-ISSUES.md`, `SCREEN_SPEC.md`, the Career controller set, the
+  `docs/audits/*` set including the untracked `AUD-20261102-017-runs-create-2026-11-02.md`, and
+  `config/*.php`.
+
+### 6. Deviations
+
+1. **Audit-ID drift corrected mid-pass.** Pass 3's commits cite wrong IDs for four findings:
+   SaveVeteran is `AUD-20261102-020` (pass 3 wrote `-007`), TurnEdit is `-006` (pass 3 wrote `-009`),
+   RunsIndex is `-016` (pass 3 wrote `-006`), RunsImport is `-018` (pass 3 wrote none). The proposal's
+   §3 table is the authority. Pass 4's commits use the correct IDs; pass 3's are not rewritten.
+2. **`tests/browser/runs-create.spec.ts` changed twice** — first with a `banner`-scoped assertion that
+   hung (the crumb is not inside `role="banner"`), then corrected to `[data-shell-crumb]`. Both are in
+   history; `baf0146f` is the working version.
+3. **A baseline verification run was made** for the `run-import` failure by checking out `4657be9e`
+   for the two files, rebuilding, running the one test, then restoring `5414af81` and rebuilding. The
+   classification in §4 rests on that run, not on inference.
+
+### 7. Owner actions required
+
+1. **Shell `@container` decision** — unblocks both VeteransCompare-F-01 and ReviewIndex-F-04. Options:
+   move the container context off `main`, or accept that page-level sticky is unavailable and remove
+   the declarations with a comment saying why.
+2. **LegacyBuilder-F-01** needs the published spark-count ceiling per parent before any enforcement
+   can be written.
+3. **RunsImport-F-01** needs a decision on which component family is canonical (`Form/*` is used by
+   most of the app; `ui/*` by Dashboard-era pages), because the migration rewrites every field on the
+   page it touches.
+4. **`TrainingRunController.php:206`** is a live 500 on any catalogue with a null `global_release_date`.
+   Worth its own fix commit.
+5. Unchanged gates: Q1 manifest, Q2 re-probe, Q4 Phase 5, Q5 CatalogIndex-F-01.
+
+### 8. Commits made this pass (7)
+
+| SHA | Subject |
+|---|---|
+| `1af9eb53` | fix(racedecision): absent values use words not dashes (AUD-20261102-002 F-02) |
+| `a7d5cefb` | fix(turnedit): page-load status, refusal focus (AUD-20261102-006 F-01, F-02) |
+| `354779c9` | fix(saveveteran): confirm overwrite of existing veteran (AUD-20261102-020 F-02) |
+| `3a9d4c76` | fix(career): race doors from route() not string replacement (AUD-20261102-002 F-04) |
+| `4657be9e` | fix(legacy,runs): single-run compare states its own absence, one page name (AUD-20261102-024 F-01, AUD-20261102-017 F-01) |
+| `5414af81` | fix(runsimport): drop the duplicated header list (AUD-20261102-018 F-02) |
+| `baf0146f` | test(runs-create): pin the breadcrumb leaf to the page's own name (AUD-20261102-017 F-01) |
+
+Prior-pass commits (`c2967b36`, `5d3bda00`, `a24a4e10`, `77fcc5cd`, `a9b0ffd9`, `2b864b51`,
+`c6e55619`, `00e3cf15`, `9d753b7a`, `b95dc5cc`) are not counted here.
+### 9. Corrections after review
+
+Dated 2026-11-02. Six blocking items, five notes.
+
+#### B-6 / B-3 — `TrainingRunController.php:206` fixed, and it unblocks the spec
+
+The report called it "worth its own fix commit". It was a live 500 on any catalogue holding an
+undated card, it blocked `runs-create.spec.ts`, and the column became nullable in
+`2026_11_02_112258_make_global_release_date_nullable_on_character_cards` without the controller
+following. **Fixed in `7cf84750`** — `$c->global_release_date?->toDateString() ?? ''`. Verification:
+RENDERED — `GET /training-runs/create` returned **500** before and **200** after.
+
+**B-3 resolved as (b):** RunsCreate-F-01 is `FIXED (source)` with SOURCE evidence — the breadcrumb
+leaf, `<Head>` title and h1 all read "Create a career" at `Runs/Create.vue:101-106`, and
+`runs-create.spec.ts:21` asserts the crumb leaf. Its Playwright run is owed and **could not be
+completed this pass**: the suite's `global_setup.ts` runs `php artisan migrate --seed`, and the seed
+now throws `RuntimeException: gametora-races: Undefined array key "name"` at
+`SourceDocumentSeeder.php:124`. That failure comes from the peer's in-flight pipeline work
+(`config/uma.php` re-pointed at new untracked `GametoraRaceParser`/`GametoraRaceFansParser`/
+`GametoraRaceRewardParser`, plus modified `PipelineRunner.php` and seeders), not from this pass.
+**Blocker named: peer pipeline work in the working tree; the suite cannot seed until it settles.**
+
+#### B-1 — header corrected
+
+See the note at the top. Five rows are unstarted with no environmental blocker.
+
+#### B-2 — specs run, and what exists per changed screen
+
+| Screen changed | Spec that covers it | Ran this pass? |
+|---|---|---|
+| `RaceDecision.vue` (F-02, F-04) | `race-decision.spec.ts` — **does not exist** | — |
+| `TurnEdit.vue` (F-01, F-02) | `turn-edit.spec.ts` — **does not exist** | — |
+| `SaveVeteran.vue` (F-02) | no `save-veteran` spec — **does not exist** | — |
+| `Legacy/Compare.vue` (F-01) | `legacy.spec.ts` — **exists** | **No** — blocked by the seeding failure above |
+| `Runs/Create.vue` (F-01) | `runs-create.spec.ts` — exists | **No** — blocked by the seeding failure |
+| `Runs/Import.vue` (F-02) | `run-import.spec.ts` — exists | Yes: 10 passed, 1 failed (`:123`, pre-existing) |
+| `Career/*` doors (F-04) | `career-preflight.spec.ts` — exists | Not run — blocked by the seeding failure |
+
+So: **two of the seven changed screens have a spec, and one of those two ran.** The other five
+findings are SOURCE-verified with **no browser spec existing for the screen**. That is the honest
+state; creating those three specs is pass-5 scope.
+
+#### B-4 — behavioral findings verified by SOURCE only
+
+- **SaveVeteran-F-02**: the flow is "click Save → acknowledge → save proceeds". SOURCE shows the ref,
+  the gate in `save()`, the `:disabled` binding and the checkbox. A RENDERED check would be: load a
+  career with a filed veteran, assert the submit is disabled and no POST leaves until the box is
+  ticked. **Not attempted; no spec exists.**
+- **TurnEdit-F-01/F-02**: SOURCE shows the `role="status"` line and the `onError` focus. A RENDERED
+  check would be: `document.activeElement.id` is the alert after a refused submit.
+  **Not attempted; no spec exists.**
+
+#### B-5 — `app.css` residual filed
+
+Filed as **KI-149** in `KNOWN-ISSUES.md` rather than left in this report: thirteen screens render
+`.card > h2` and are unmeasured for the 15→16px step.
+
+#### N-1 — LegacyBuilder-F-01: the finding's premise is unverified
+
+The audit filed F-01 on the premise that a per-parent spark-count ceiling exists. Nothing in the tree
+defines one (`MAX_SPARK_STARS = 3` is a star ceiling). Either the reference names a count and the
+finding is real pending that figure, or the finding is false and belongs in
+`docs/audit-corrections.md`. **Not resolved here** — reading `docs/UMAMUSUME_REFERENCE.md` for the
+figure is what settles it.
+
+#### N-2 — RunsImport-F-01: recommendation stated
+
+**Recommend `Form/*` as canonical.** It is the family the majority of the app uses (Runs, Career
+setup, Legacy, Preferences); `ui/*` is the Dashboard-era set. Migration would move `Runs/Import.vue`
+to `BaseInput`/`BaseSelect`/`BaseTextarea` with their `ariaDescribedby` contract, which rewrites every
+field on the page and needs its own Playwright pass. Owner confirms the direction.
+
+#### N-3 / N-4 — notes
+
+- No browser spec exists for SaveVeteran or TurnEdit; SOURCE is the record until they are written.
+- **No Dashboard change this pass**, so `dashboard.spec.ts` was not re-run; the pass-3 result (11
+  passed) stands.
+
+#### N-5 — `[data-shell-crumb]` tests the same thing
+
+`AppLayout.vue:503` puts `data-shell-crumb` on the breadcrumb `<nav>`; its leaf is the `{{ part.label }}`
+`<b>` the finding names. The assertion scopes to that nav and reads the leaf text, which is the same
+target the old bare-text assertion addressed — narrower, not weaker.
+
+## 2026-11-02-ui-ux-audit-implementation-pass-5.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/proposals/2026-11-02-ui-ux-audit-implementation-pass-5.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### UI/UX Audit Implementation — Pass 5 Report
+
+
+Dated 2026-11-02.
+
+**Pass 5 — Decisions A and B applied; Phase 4 tail closed (2 fixed, 2 retracted with evidence); Phase 5
+reached 2 of its 7 rows. `npm run build` passes on this pass's own changes; it fails in the working tree
+on a peer's in-flight syntax error in `TraineeProfile.vue`, which is not this pass's file and was not
+edited. Steps 6.1 and 6.2 were not attempted.**
+
+### 1. Owner decisions applied
+
+**Decision A — seeder/parser coordination.** Applied, though not in the file the dispatch named. The
+undefined-key failure was not in `SourceDocumentSeeder` (it only throws a collected message); the read
+that failed is `PipelineRunner`'s `$record['name']`, which the shared trainee loop performs for every
+source. The peer's race parsers emit `name_en`/`name_ja` and no `name`. `PipelineRunner::recordName()`
+now reads `name`, `name_en` or `title` in that order and throws naming the source and record id when
+none is present. Committed `335881fd`; `phpstan` and `pint` pass on the file.
+**Effect: the seeding failure is gone and `runs-create.spec.ts` passes (1 passed).**
+
+**Decision B — shell `@container` vs page-level sticky.** Applied for the genuine instance and
+**partially retracted for the instance the audit mis-attributed**:
+- `Review/Index.vue` carried a bare `sticky bottom-0` pager — a real page-level case. Declaration
+  removed, reason stated where it was. `b0f5a1ef`.
+- `Veterans/Compare.vue`'s three `position: sticky` cells sit inside `.comparison-region`, an
+  `overflow-x-auto` element that is **its own scrollport**. Sticky there resolves against that
+  scrollport, not the viewport, so `main`'s containment does not reach them. **Removing them would be a
+  regression**, so they stay and the finding is retracted. `2187e057`.
+- **KI-150** filed (`d7869fff`) for the constraint itself.
+
+**Decision C — race enrichment scope.** Recorded as guidance only; no code change, and the plan's own
+implementer applies it. The two unresolved enrichment blockers (`factor_effect_1/2` mapping; reward
+items rendering as ids) are unchanged and remain theirs.
+
+### 2. Per-finding outcomes
+
+#### 2.1 Phase 4 tail
+
+| Finding | Audit | Status | Evidence |
+|---|---|---|---|
+| RacePlanner-F-01 unrendered groups | AUD-20261102-003 | **FIXED** `627a7248` | SOURCE — template now loops `orderedGroups`, so `optional` and `rival` render |
+| RacePlanner-F-03 dead computed | AUD-20261102-003 | **FIXED** `627a7248` | SOURCE — `orderedGroups` is the loop's source; the dead computed became the renderer |
+| RunsImport-F-01 component family | AUD-20261102-018 | **BLOCKED** | Family migration rewrites every field's prop contract; recommendation recorded (`Form/*` canonical) and it needs its own pass |
+| LegacyBuilder-F-01 spark cap | AUD-20261102-025 | **RETRACTED** `2187e057` | Finding presupposes a ceiling no source states; `MAX_SPARK_STARS` is a star ceiling |
+| VeteransCompare-F-01 sticky | AUD-20261102-027 | **RETRACTED** `2187e057` | Cells stick inside their own scrollport; page-level containment does not apply |
+| ReviewIndex-F-04 pager pinning | AUD-20261102-021 | **FIXED** `b0f5a1ef` | SOURCE — no `sticky` remains in `Review/Index.vue` but the explanation |
+
+#### 2.2 Phase 5
+
+| Finding | Audit | Status | Evidence |
+|---|---|---|---|
+| RacePlanner-F-02 cap uncommunicated | AUD-20261102-003 | **FIXED** `627a7248` | SOURCE — `#compare-limit-hint` names the cap of four; a fifth Compare is disabled with `aria-describedby` |
+| RacePlanner-F-04 deadline prefix | AUD-20261102-003 | **FIXED** `627a7248` | SOURCE — controller no longer prefixes the alert; three copy pins updated |
+| VeteransCompare-F-03 neutral pill | AUD-20261102-027 | **FIXED** `a76a95a1` | SOURCE — `same` and `single column` map to `pill-neutral` |
+| VeteransCompare-F-02 verdict below `lg` | AUD-20261102-027 | **NOT ATTEMPTED** | No environmental blocker; the below-`lg` placement needs a layout decision the audit does not make |
+| SnapshotEntry-F-01, SnapshotSetup-F-02, SnapshotReview-F-01 | AUD-20261102-007/-008/-009 | **NOT ATTEMPTED** | No environmental blocker; not reached |
+| Cockpit-F-03 dead write methods | AUD-20261102-001 | **NOT ATTEMPTED** | No environmental blocker; the per-method sweep was not run |
+
+#### 2.3 Reverted during the pass
+
+`4657be9e`'s single-column guard in `Legacy/Compare.vue` **broke two `legacy.spec.ts` cases**: the
+builder→compare flow legitimately compares one run, and the guard removed the region the specs read.
+The guard is reverted; F-01's real defect (caution-tinted neutral verdicts) is fixed by F-03's mapping.
+This is a self-caught regression, found by running the spec rather than by inspection.
+
+### 3. Gates
+
+| Gate | Result |
+|---|---|
+| `npm run typecheck` | exit 0 |
+| `npm run lint:ui` | exit 0; **207** arbitrary-value findings (baseline 209 — down 1) |
+| `npm run build` | exit 0 **on this pass's changes** (manifest mtime `2026-11-02T22:34:56+08:00`); **fails in the working tree** on a peer syntax error, see §5 |
+| `public/hot` | absent (`Test-Path` → False) |
+
+#### Specs run
+
+| Spec | Result | Classification |
+|---|---|---|
+| `runs-create.spec.ts` | **1 passed** | Decision A unblocked it; closes pass 4's B-3 |
+| `career-preflight.spec.ts` | passed (in the combined run: 15 of 17 across both files) | — |
+| `legacy.spec.ts` | **2 failed** at `:232` and `:373` | **REGRESSION FROM THIS PASS, now reverted** — both failures read the compare region my single-column guard removed; the guard is gone and the tree rebuilt |
+| `run-import.spec.ts` | not re-run | its known pre-existing `:123` failure is unchanged by this pass |
+| `dashboard.spec.ts` | not re-run | no Dashboard change this pass; pass-3 result stands |
+
+### 4. Peer coordination
+
+- `app/Services/DataPipeline/PipelineRunner.php` — peer-modified (27 added lines, Japan-only promotion).
+  The name helper was added on top and committed whole only after `git diff` confirmed the peer's hunks
+  are additive and untouched; `pint` moved one of my `use` lines, not theirs.
+- `KNOWN-ISSUES.md` — carries the peer's KI-141..KI-148 uncommitted. My KI-149 and KI-150 were staged
+  onto `HEAD`, committed, and the peer's block restored unstaged. Current working tree: peer's eight
+  entries unstaged, both of mine committed.
+- **Not modified:** `config/uma.php`, the three untracked `GametoraRace*Parser.php` files,
+  `TraineeProfile.vue`, `SCREEN_SPEC.md`.
+
+### 5. Blocking item found, not fixed
+
+`resources/js/pages/Career/TraineeProfile.vue` **does not compile in the working tree**: the peer's
+uncommitted edit removed the `const aptitudeGroups = computed<AptitudeGroup[] | null>(() => {` opening
+line and left its body orphaned at what is now line 212-216. `npm run build` fails at
+`TraineeProfile.vue:215:8` with a babel parse error.
+**Evidence it is not this pass's:** `git status` shows the file ` M`; it was last committed by
+`c60af3a1` (pass 3). Stashing that one file and rebuilding gives `✓ built in 1m 7s`, which is how this
+pass's own build gate was verified. The stash was restored afterwards; `stash@{1}` holds a duplicate
+of the same peer state and was left in place rather than dropped.
+
+### 6. Deviations
+
+1. **Decision A landed in `PipelineRunner`, not `SourceDocumentSeeder`** — the dispatch's premise about
+   the failing read was wrong; the seeder only assembles the failure message.
+2. **Decision B applied asymmetrically** — the review pager's declaration was removed; the veterans
+   cells were kept and the finding retracted, because the mechanism differs.
+3. **`LegacyCompare-F-01`'s fix was reverted** after two spec failures proved the remedy wrong for the
+   app's single-run flow.
+4. **A duplicate `</template>` shipped in `627a7248`** and broke the SFC build; caught by the gate and
+   fixed in `b4458c09`.
+
+### 7. Owner actions required
+
+1. **Peer's `TraineeProfile.vue` syntax error** blocks a clean tree-wide build; it is theirs to fix.
+2. **RunsImport-F-01** needs the component-family direction confirmed (`Form/*` recommended).
+3. **VeteransCompare-F-02** needs a below-`lg` placement decision.
+4. Unchanged gates: Q2 re-probe, Q4 Phase 5 owner findings (~15), Q5 CatalogIndex-F-01.
+
+### 8. Commits made this pass (8)
+
+| SHA | Subject |
+|---|---|
+| `335881fd` | fix(pipeline): read a record's name leniently so one source's shape cannot crash another |
+| `627a7248` | fix(raceplanner): render every group, name the cap, drop the dead computed and the Critical prefix (AUD-20261102-003 F-01..F-04) |
+| `b0f5a1ef` | fix(review): remove the dead sticky declaration on the pager (AUD-20261102-021 F-04) |
+| `d7869fff` | docs(known-issues): KI-150 page-level sticky unavailable under the shell container context |
+| `a76a95a1` | fix(veterans): neutral verdicts use the neutral pill (AUD-20261102-027 F-03) |
+| `2187e057` | docs(audit-corrections): retract LegacyBuilder-F-01 and VeteransCompare-F-01 with evidence |
+| `b4458c09` | fix(raceplanner): remove the duplicate closing template tag the group loop left |
+
+Prior-pass commits are not counted here.
+
+---
+
+**Erratum — 2026-11-03.** §2.3 stated F-01's real defect was fixed by F-03's mapping. Verified 2026-11-03: git show --stat a76a95a1 touched only Veterans/Compare.vue. Legacy Compare.vue:278-279 was never updated. F-01's fix landed in e4786df4.
+
+## 2026-11-03-completion-phase-0.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/proposals/2026-11-03-completion-phase-0.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Completion pre-flight state (rev 2)
+
+
+Date: 2026-11-03
+Session: completion pass (rev 2)
+
+### Ground truth at pre-flight
+
+- HEAD SHA: `2b61a1da1c0398c642d25e95309acdb4991a2959`
+- `origin/master` SHA: `2b61a1da1c0398c642d25e95309acdb4991a2959`
+- Local-ahead count: `0` (dispatch expected 9; **drift** — the series is already pushed to origin/master; `78755486` is an ancestor of HEAD)
+- Tag state: `3.0.0*` absent (matches expectation)
+- Peer rename state: uncommitted — 3 deleted `docs/*.md` and 3 untracked `docs/proposals/*.md` (the `docs/` → `docs/proposals/` rename is still in flight; Slice 2.1 stays deferred/coordinate)
+- `.scratch-uma/*.staged-peer-revert.vue`: 2 files present at `.scratch-uma/remaining-code-2026-11-03/` (`Edit.staged-peer-revert.vue`, `RaceDecision.staged-peer-revert.vue`); untracked, not staged. Peer should be told their pre-revert state was preserved.
+- Playwright: 1.63.0
+- `npm run typecheck`: clean (`tsc --noEmit`, exit 0)
+- Working tree dirty: `KNOWN-ISSUES.md` (M), peer rename (D/??)
+
+### Commits in the local series (10 since `78755486`)
+
+1. `032b0c02` fix(env): quote APP_NAME so a fresh clone's .env parses
+2. `c1e97c2c` docs(proposals): git reconciliation — prove the SHAs and the fresh clone
+3. `82551fdf` docs(proposals): bound the reconciliation — Slices D/E and two readings stay open
+4. `4f5b9d3d` fix(snapshot): carry the review payload in the request body, not the URL
+5. `cbaed673` fix(runs): derive the status pill colour from the stored state
+6. `e4786df4` fix(legacy): a single column is not a difference, so no verdict wears the caution tint
+7. `6f3d5a81` fix(race-decision,preferences,support-cards): refusal focus on the calendar branch, the armed reset announcement, and the two summary tables
+8. `c91458f4` fix(env): default a fresh clone to SQLite so migrate --seed runs
+9. `9a61197f` test(preferences,racedecision): pin the two refusal-focus families
+10. `2b61a1da` test(preferences): assert the armed reset's label as well as its live region
+
+Dispatch expected 9; actual 10. The extra is `2b61a1da` (landed after the dispatch's commit list was written). All pushed to origin/master.
+
+### Drift from dispatch expectations
+
+- Local-ahead count 0 vs expected 9: the series is pushed; no owner-gated push remains for these. Push statement in Slice 10.3 needs rewording (series already on origin).
+- `KNOWN-ISSUES.md` has uncommitted edits (peer or in-flight).
+- Peer rename uncommitted (Slice 2.1 coordination still needed).
+- Slice 1.3 (44px count) not yet identified — requires a browser run; deferred to a later session.
+
+### Phase 0 outcome
+
+Ground truth recorded. Proceed to Phase 1 residuals.
+
+
+### Rev-3 pre-flight note (2026-11-03)
+
+#### Push state
+- origin/master = ae97da9e (docs(agents): correct ui-lint debt count)
+- 6 commits on origin: 847b3fe7 .. ae97da9e
+- 2 local-only: 83770ded (deferred items), 0e7bc8ee (peer revert coordination)
+- origin is not ahead of HEAD (0 commits); no unauthorized push detected beyond the 6 already reported.
+- Authorization status: the 6 commits that reached origin are assumed owner-authorized (recorded here per rev-3 O-1); the 2 local commits remain owner-gated.
+
+#### Peer series integrity
+- 6f3d5a81 (refusal focus fixes) IS an ancestor of origin/master -> OK
+- e4786df4 (legacy compare fix) IS an ancestor of origin/master -> OK
+- 9a61197f (peer tests) is local-only, NOT on origin -> origin/master fresh clone is not red.
+- Conclusion: origin/master carries the required fixes; peer test commit stays local until the series pushes together.
+
+
+### Phase 1.3 confirmations (rev 3 follow-up)
+
+The 8 undersized targets reported by the full-suite run are `<summary class="min-h-6">` compact `AbsenceValue` disclosures. The filter was refined to exclude the compact marker class (commit 123de9aa), then narrowed to `summary.min-h-6` only (commit 7fe8bc8c). Three confirmations:
+
+- **A — Exception documented:** DESIGN.md line 874: "`compact` is the dense-row form at 24px, WCAG 2.2 SC 2.5.8's floor, against the house 44px for a primary control (Section 12)." Also DESIGN.md 1318-1319: "The house bar is 44px (min-h-11/h-11), stricter than WCAG 2.2 AA's 24px minimum (2.5.8). Every control meets the 24px floor; 44px is the design intent." The exception is house-level documented. A closes.
+
+- **B — Filter bites:** Probe shrunk a primary control (`btn min-h-11` -> `btn min-h-9`) on the race-decision page, rebuilt, ran the spec: FAIL (Expected 0, Received 1). Restored, rebuilt, ran: PASS. The narrowed filter (`summary.min-h-6`) still catches real violations. B closes.
+
+- **C — Targets are the exception class:** All 8 undersized elements share the exact shape `<summary class="list-item cursor-pointer text-ink-muted min-h-6">` (compact AbsenceValue disclosure). No other kind of summary. C closes.
+
+No source weakening. Filter narrowed from `min-h-6` (any element) to `summary.min-h-6` (compact disclosures only), so a primary control built at min-h-6 by mistake is still caught.
+
+
+### Correction — 9a61197f status (rev 3 follow-up)
+
+The Phase 0 rev 3 record stated `9a61197f` (peer tests) was local-only and NOT on origin. That was incorrect: `git merge-base --is-ancestor 9a61197f origin/master` returns true (exit 0). The peer's test commit has been on origin since before this pass. The earlier "NOT on origin" conclusion was a PowerShell `$?` inversion artifact, not a real state change.
+
+Consequences:
+- origin/master carries the full peer series (`6f3d5a81`, `e4786df4`, `9a61197f`) — never red. Peer series integrity: OK (unchanged).
+- `origin/master..HEAD` count is 6, not 4: the 6 are all commits landed by this agent (83770ded, 0e7bc8ee, 0e685dfb, 123de9aa, 7fe8bc8c, 37acba79). None are peer commits.
+- Extra commit 7fe8bc8c (filter narrowing `min-h-6` -> `summary.min-h-6`) was added during the confirmation pass and is not in the dispatch's expected-4 list. It is a legitimate refinement, not a peer commit or a missing fix.
+
+
+### Phase 0 correction (34fd3c9e) — corrected reasoning on origin's green state
+
+The earlier `9a61197f`-on-origin read was wrong — a PowerShell `$?` inversion artifact reported local-only when the commit was on origin. Corrected reasoning: origin is green because `6f3d5a81` and `e4786df4` (fixes) are ancestors of `9a61197f` (peer tests) on `origin/master`. The prior reasoning — "local-only, origin untouched" — was based on a false read; the conclusion "origin is green" holds, but for the stronger reason that origin has the full series. Push authorization for `9a61197f` is a prior-session question; state is as recorded, authorization is not re-verified here.
+
+### 7-commit enumeration (now on origin)
+
+The 7 commits that were local and are now on origin (origin moved to include them during this pass):
+
+1. `83770ded` docs: document five deferred items from reconciliation
+2. `0e7bc8ee` docs: peer revert coordination note
+3. `0e685dfb` docs(proposals): rev-3 pre-flight - push state and peer series integrity
+4. `123de9aa` test(career-race-decision): exclude compact disclosure markers from 44px floor (AbsenceValue compact is WCAG 2.5.8 floor by design)
+5. `7fe8bc8c` test(career-race-decision): scope 44px exclusion to summary.min-h-6 only (DESIGN.md 874)
+6. `37acba79` docs(proposals): phase 1.3 confirmations recorded
+7. `34fd3c9e` docs(proposals): correct 9a61197f status - was on origin all along
+
+All 7 are docs/test work landed by this agent. None are peer commits. They are now on origin/master (origin = HEAD = 34fd3c9e); the owner-gated push question is moot for these — they reached origin during this pass.
+
+### Push state (final)
+
+origin/master = HEAD = 34fd3c9e. 0 commits ahead. The 7 commits reached origin (authorization not re-verified here; state is as recorded). Peer rename remains the only uncommitted state (3 ` D` + 3 `??`).
+
+
+### Push state change (2026-11-03)
+
+Origin advanced from `ae97da9e` -> `34fd3c9e` between sessions; 6 local commits reached origin. Authorization source: unverified (state moved without explanation in the record; either owner-acknowledged or peer-session push). `1ad81811` remains local, awaiting the next authorized push.
+
+## 2026-11-03-deferred-items.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/proposals/2026-11-03-deferred-items.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Deferred items (§1.5 reconciliation)
+
+
+Date: 2026-11-03 (completion pass rev 2)
+
+### Five deferred items
+
+The reconciliation pass (2026-11-03) left five items un-landed. Three are blocked on the peer
+session's in-flight work; two are deferred pending owner input.
+
+| Item | State | Cause | Unblocker |
+| --- | --- | --- | --- |
+| A | Blocked | peer-session conflict (concurrent dispatch; uncommitted `docs/` → `docs/proposals/` rename) | peer push lands; the whole series moves together |
+| B | Deferred | not reached in this pass | owner ruling |
+| C | Deferred | not reached in this pass | owner ruling |
+| D | Blocked | peer-session conflict | peer push lands; the whole series moves together |
+| E | Blocked | peer-session conflict | peer push lands; the whole series moves together |
+
+### Cause
+
+A concurrent session was executing the same dispatch and had the `docs/` → `docs/proposals/` rename
+uncommitted (3 deleted + 3 untracked). Landing A, D or E here would have collided with that
+in-flight work, so they were held back rather than risk a partial merge.
+
+### What unblocks each
+
+- **A, D, E:** the peer push must land first, including `9a61197f` (which is not self-contained —
+  it depends on `6f3d5a81` and `e4786df4`), so the series moves as a unit.
+- **B, C:** an owner ruling on the deferred scope; documented here rather than silently dropped.
+**Round 23 (2026-11-03, consolidation):** the owner ordered nine `docs/proposals/` files of the
+2026-11-02/03 audit-and-closure thread consolidated into `docs/research-scratch/` and the originals
+deleted. Two landed here as dated state records: `2026-11-03-full-project-state.md` (119 lines, the
+project state after the 3.0.0 verification, with its decision queue and peer-coordination notes) and
+`2026-11-03-slices-a-g-report.md` (35, the slice-by-slice outcome with the suite state and its
+attributions). Each section was re-verified line-by-line before the delete (761 of 761 non-blank lines
+across all nine sources of the round, in order, one-level heading demotion; 0 missing). The other
+seven went to `PROCESS-PLANS.md` (one), `PLANS-AND-BRIEFS.md` (three) and `AUDIT-AND-VERIFICATION.md`
+(three); routing in `docs/research-scratch/INDEX.md` section `### Round 23`. This file's 6,571 NUL
+bytes were asserted unchanged before and after, and the bytes were appended with a raw read/write.
+
+---
+## Round 23 — the 2026-11-03 closure state and Slices A-G report (2026-11-03, owner-ordered)
+
+Second half of the same owner-ordered pass. Two dated state records land here: the full project
+state after the 3.0.0 verification, and the Slices A-G pass report. The other seven files of the
+round went to `PROCESS-PLANS.md` (one), `PLANS-AND-BRIEFS.md` (three) and
+`AUDIT-AND-VERIFICATION.md` (three). Routing table: `INDEX.md` section `### Round 23`.
+
+## 2026-11-03-full-project-state.md
+
+> Folded into this master in consolidation Round 23 (owner-ordered, 2026-11-03) from
+> docs/proposals/2026-11-03-full-project-state.md. The source's own `#` title follows verbatim as `###`, and its headings keep one
+> level of demotion; the body is otherwise untouched. The source file was deleted from its
+> original location after this section was verified present and byte-identical; it remains
+> recoverable from the commit that deleted it.
+
+### Full project state after 3.0.0 verification
+
+
+Date: 2026-11-03 (final closure pass)
+
+### 1. What shipped
+
+#### v2.1.0 — tokens and primitives
+- Tailwind CSS v4 design token system (`bg-page`, `text-ink`, `border-rule`, etc.)
+- Vue 3 component library (100 SFCs under `resources/js/components/`)
+- Inertia + Vue 3 web surface (59 page files under `resources/js/pages/`)
+- Scenario-driven component props (resolved label from server, no hardcoded scenario names)
+
+#### v3.0.0 — page-structure rewrite
+- 28-page divergence audit program (passes 1–5 + follow-ups) closed — re-audit 2026-11-03: 0 divergent, 11 near (HFW-OVERRIDE candidates), 15 matching. No page-level repair needed.
+- ~50 UI/UX audit findings resolved across 6 passes
+- Audit program Slices A, B, C, D, E, G landed (snapshot review payload, runs status pill, legacy compare, refusal focus, SQLite default)
+- Phase 1.3: 8 compact AbsenceValue disclosures documented as WCAG 2.5.8 exception (DESIGN.md:874)
+- Phase 1.2: runs.spec.ts:41 order dependency fixed (state reset at test start)
+- Phase 1.4: Laravel Boost hook removed from composer.json
+- Phase 1.6: pre-commit pathspec enforcement hook
+- Phase 3: 5 bare `<a href>` anchors converted to Inertia Links
+- 59 `Link`/`LinkButton` literal-href sites remain (client-side navigation already works; conversion to `route()` props is a pattern preference, owner-gated)
+
+#### Test suite
+- 2089+ tests passing at last full run (2026-11-03)
+- 4 classified pre-existing failures: `career-cockpit` (7 cases), `run-import:123` (KI-95), `catalog-to-wizard`, `catalog-detail` single-form
+- lint:ui: 207 arbitrary values (≤209 gate)
+- PHPStan: 11 pre-existing issues, unchanged
+- typecheck: 0 errors
+- build: 0 errors
+
+#### Documentation
+- 4 documents covering 10 owner decisions produced (Q1/Q2/Q4/Q5/Q6, design rulings, blocked scenarios, full project state)
+- TASKS.md §1133–1189 reconciliation evidence (re-audit 2026-11-03: 0 divergent, 11 near, 15 matching)
+- Push-state records corrected (9a61197f on origin all along; `$?` inversion artifact diagnosed)
+
+### 2. What remains
+
+#### Blocked on evidence (not this dispatch's scope)
+- Phase 4.1: Unity Training evaluator — "Not implemented. The absence is the finding." No spec exists
+- Phase 4.2: Grand Concert S8–S18 — `BLOCKED BY EVIDENCE` (Lessons, Songs, Live Bonus, Promo Concert gaps)
+
+#### Owner-gated (decisions pending)
+- Q1: Manifest authorization
+- Q2: RENDERED_EVIDENCE re-probe (recommend: ~15 behavioral findings only)
+- Q4: Phase 5 owner-gated findings (~15, triage per-finding)
+- Q5: CatalogIndex-F-01 schema change (recommend: document limitation)
+- Q6: Behavioral verification fixtures (recommend: authorize)
+- Dashboard type-scale (KI-151): five live sizes, three tiers ratified
+- 14 section-measure rulings (CQ-07): per-page keep/widen/exception
+- Tag authorization: `3.0.0` tag creation
+- Push authorization: 7+ local commits
+- 59 `Link` conversion: pattern preference (functional goal already met)
+
+#### Peer-blocked (documentation reconciliation)
+- TASKS.md §1133–1189 reconciliation (blocked on peer's `docs/` rename)
+- 15 orphaned reference repoints (blocked on peer rename)
+- HFW-OVERRIDE comments for 11 near pages (blocked on peer rename)
+
+#### Peer in-flight
+- Peer's `docs/` → `docs/proposals/` rename (large; many files moved)
+- Peer's `9a61197f` commit (on origin; tests require `6f3d5a81` and `e4786df4` as ancestors — verified)
+
+### 3. Owner decision queue
+
+All pending decisions in one place:
+
+| # | Decision | Options | Recommendation | Status |
+|---|---|---|---|---|
+| Q1 | Manifest authorization | (a) authorize, (b) defer, (c) reject | (a) | pending |
+| Q2 | RENDERED_EVIDENCE re-probe | (a) all 30, (b) accept current, (c) ~15 behavioral only | (c) | pending |
+| Q4 | Phase 5 owner-gated findings | (a) all ~15, (b) defer, (c) triage per-finding | (c) | pending |
+| Q5 | CatalogIndex-F-01 schema | (a) schema change, (b) document, (c) leave open | (b) | pending |
+| Q6 | Behavioral verification fixtures | (a) authorize, (b) defer, (c) provide data | (a) | pending |
+| D1 | Dashboard type-scale | (a) cross-cutting pass, (b) merge tier, (c) accept 5-tier | (a) when session allows | pending |
+| D2 | 14 section-measure rulings | (a) keep, (b) widen, (c) exception per page | per-page | pending (14) |
+| D3 | Tag 3.0.0 | (a) cut on HEAD, (b) blocked, (c) defer | (a) if suite clean | pending |
+| D4 | Push authorization | (a) push all, (b) hold | (a) when ready | pending |
+| D5 | 59 Link conversion | (a) convert, (b) leave as-is | (b) functional goal met | pending |
+
+### 4. Peer coordination
+
+- Peer rename is in-flight (large: many `docs/` files moved to `docs/proposals/` and `docs/audits/`)
+- Phase 3 doc reconciliation (TASKS.md, 15 references, HFW-OVERRIDE comments) defers until rename lands
+- Peer's `9a61197f` is on origin; required fixes (`6f3d5a81`, `e4786df4`) are ancestors — origin is green
+- `.scratch-uma/*.staged-peer-revert.vue` (2 files) preserved from prior pass; peer should be told
+- **Peer rename landed criterion:** `git log --oneline -1 -- docs/proposals/audit-corrections.md` shows a commit AND `git status --short docs/` returns empty. Until both are true, Phase 3 doc reconciliation (TASKS.md, 15 references, HFW-OVERRIDE comments) defers.
+
+### 5. Test suite state
+
+- Last full run: 2089+ passed (2026-11-03)
+- 4 classified pre-existing failures (career-cockpit 7, run-import:123/KI-95, catalog-to-wizard, catalog-detail single-form)
+- lint:ui: 207 arbitrary values (≤209 gate)
+- PHPStan: 11 pre-existing
+- typecheck: 0
+- build: 0
+
+### 6. Tag state
+
+`3.0.0` tag: **not created**. Decision pending Phase 1 baseline verification.
+
+Decision criteria:
+- If suite failures = pre-existing only → tag (a)
+- If new regressions found and fixed → tag (a) after fix
+- If new regressions remain → tag blocked (b) with reason
+
+### 7. Next session's recommended starting point
+
+**Phase 6 baseline run** (1.4 h) against current HEAD. This is the single most consequential remaining measurement — it determines whether v3.0.0 releases or is documented as blocked.
+
+After the baseline run:
+- If clean (pre-existing only): tag decision → (a) cut 3.0.0
+- If regressions found: fix them, then tag
+
+After tagging:
+- Owner rulings arrive (or not) — the project is at a stable, documented state
+- If rulings arrive: execute Phase 5 owner-gated findings
+- If no rulings: the project is complete at the current scope; owner decides what to prioritize next
+
+## 2026-11-03-slices-a-g-report.md
+
+> Folded into this master in consolidation Round 23 (owner-ordered, 2026-11-03) from
+> docs/proposals/2026-11-03-slices-a-g-report.md. The source's own `#` title follows verbatim as `###`, and its headings keep one
+> level of demotion; the body is otherwise untouched. The source file was deleted from its
+> original location after this section was verified present and byte-identical; it remains
+> recoverable from the commit that deleted it.
+
+### Slices A–G pass report
+
+
+Date: 2026-11-03 (filed in completion pass rev 2)
+
+### 1. Slice-by-slice outcome
+
+| Slice | Commit | Verification |
+| --- | --- | --- |
+| A | `4f5b9d3d` | SOURCE — snapshot review payload in request body |
+| B | `cbaed673` | SOURCE — runs status pill colour from stored state |
+| C | `e4786df4` | SOURCE — legacy single column not a difference |
+| D | `6f3d5a81` | RENDERED — refusal focus on calendar branch, armed reset announcement, two summary tables |
+| E | `c91458f4` | SOURCE — fresh clone defaults to SQLite |
+| G | (included in series) | both-direction guard proofs `4f5b9d3d`, `cbaed673`, `e4786df4`, `6f3d5a81`, `c91458f4` |
+
+### 2. Full-suite state
+
+684 passed / 73 failed / 2 skipped in 1.4 h. Seven failures attributed (see §3 of completion report); 66 pending classification → Phase 3 Slice 3.1.
+
+### 3. Fresh-clone result
+
+At `c91458f4`: 2089 passed, `.env` unedited. KI-102 cleared.
+
+### 4. Peer-revert incident
+
+`9a61197f` landed peer tests requiring fixes from `6f3d5a81` and `e4786df4`. Preserved staged state: `.scratch-uma/remaining-code-2026-11-03/*.staged-peer-revert.vue` (2 files, untracked). 22 passed after restore.
+
+### 5. TDZ self-catch
+
+`probe-watch-tdz.mjs` found a silent-no-op watcher whose getter referenced a `const` declared later in the script; watcher moved. Any new watcher with the same shape has the same failure mode (trap 12).
+
+### 6. Peer commit dependency
+
+`9a61197f` is not self-contained — running it on `9a61197f` alone without the fixes fails its two new focus tests. The push must move the whole series together.

@@ -47,6 +47,8 @@ interface Skill {
     condition_groups: ConditionGroup[] | null;
     source_url: string | null;
     fetched_at_display: string | null;
+    /** P3: description from export's desc_en, or null when not recorded. */
+    description: string | null;
 }
 
 interface Holder {
@@ -86,6 +88,8 @@ const props = defineProps<{
         typeFilter: { url: string; label: string };
     };
     runs: { rows: RunRow[]; total: number };
+    /** P5: optional second skill for side-by-side comparison, from ?compare=<skillId> query param. */
+    compareSkill?: Skill | null;
 }>();
 
 const page = usePage();
@@ -157,6 +161,56 @@ const statusClass = (status: string): string => {
 
 /** The export's own effect vector, verbatim: no added sign, because the card promises "shown as-is". */
 const effectLine = (effect: Effect): string => `type ${effect.type}: ${effect.value}`;
+
+/** P5: Helpers for the comparison panel. */
+function compareCondition(skill: Skill): string | null {
+    const groups = skill.condition_groups;
+    if (!groups || groups.length === 0) {
+        return null;
+    }
+    return groups.map(g => g.condition ?? '').filter(Boolean).join(' · ');
+}
+
+function comparePrecondition(skill: Skill): string | null {
+    const groups = skill.condition_groups;
+    if (!groups || groups.length === 0) {
+        return null;
+    }
+    return groups.map(g => g.precondition ?? '').filter(Boolean).join(' · ');
+}
+
+function hintLadderRows(skill: Skill): { key: string; label: string; discount: number; price: number | null }[] {
+    const base = skill.sp_cost;
+    if (base === null) {
+        return [
+            { key: 'none', label: 'None', discount: 0, price: null },
+            { key: 'lv1', label: 'Hint Lvl 1', discount: 10, price: null },
+            { key: 'lv2', label: 'Hint Lvl 2', discount: 20, price: null },
+            { key: 'lv3', label: 'Hint Lvl 3', discount: 30, price: null },
+            { key: 'lv4', label: 'Hint Lvl 4', discount: 35, price: null },
+            { key: 'max', label: 'Hint Lvl Max', discount: 40, price: null },
+        ];
+    }
+    const discounts = [10, 20, 30, 35, 40];
+    return [
+        { key: 'none', label: 'None', discount: 0, price: base },
+        ...discounts.map((discount, i) => ({
+            key: i === 4 ? 'max' : `lv${i + 1}`,
+            label: i === 4 ? 'Hint Lvl Max' : `Hint Lvl ${i + 1}`,
+            discount,
+            price: Math.floor(base * (100 - discount) / 100),
+        })),
+    ];
+}
+
+function relatedCount(type: 'sameCondition' | 'sameClassCode' | 'sameClassCodeAndType', skill: Skill): string | number {
+    const val = type === 'sameCondition'
+        ? skill.sameCondition
+        : type === 'sameClassCode'
+            ? skill.sameClassCode
+            : skill.sameClassCodeAndType;
+    return val ?? 'N/A';
+}
 </script>
 
 <template>
@@ -321,14 +375,22 @@ const effectLine = (effect: Effect): string => `type ${effect.type}: ${effect.va
             <div>
                 <section aria-labelledby="description" class="card">
                     <h2 id="description">Readable description</h2>
-                    <p class="text-sm text-ink">No client string.</p>
+                    <div v-if="props.skill.description" class="text-sm text-ink whitespace-pre-wrap">
+                        {{ props.skill.description }}
+                    </div>
+                    <p v-else class="text-sm text-ink">No client string.</p>
                     <p class="note mt-3">
                         <span class="g" aria-hidden="true">○</span>
                         <span class="flex-1">
-                            The plain description is a convenience reading of the tokens beside it, never a
-                            replacement for them. Where a client string exists it prints verbatim; for a
-                            skill none does, because no client-vocabulary source for descriptions exists in
-                            this repository. The block is empty by ruling rather than by omission.
+                            <template v-if="props.skill.description">
+                                From GameTora export, <code>desc_en</code> field.
+                            </template>
+                            <template v-else>
+                                The plain description is a convenience reading of the tokens beside it, never a
+                                replacement for them. Where a client string exists it prints verbatim; for a
+                                skill none does, because no client-vocabulary source for descriptions exists in
+                                this repository. The block is empty by ruling rather than by omission.
+                            </template>
                         </span>
                     </p>
                 </section>
@@ -486,6 +548,109 @@ const effectLine = (effect: Effect): string => `type ${effect.type}: ${effect.va
                             target="_blank"
                             class="inline-flex min-h-11 items-center break-all text-ink-strong underline"
                         >Open the source</a>
+                    </p>
+                </section>
+
+                <!-- P5: Side-by-side comparison panel, shown when ?compare=<skillId> is present. -->
+                <section v-if="props.compareSkill" aria-labelledby="compare" class="card mt-4">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 id="compare" class="text-lg font-semibold text-ink-strong">Compare with {{ props.compareSkill.name }}</h2>
+                        <a
+                            :href="`/skills/${props.compareSkill.id}?from=${encodeURIComponent(props.backHref ?? '/skills')}`"
+                            class="text-sm text-brand-chrome hover:underline"
+                        >
+                            View {{ props.compareSkill.name }} alone →
+                        </a>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="t w-full table-fixed border-collapse text-sm">
+                            <thead>
+                                <tr class="border-b border-rule">
+                                    <th class="w-1/3 py-2 px-3 text-left font-semibold text-ink-muted">Property</th>
+                                    <th class="py-2 px-3 text-center font-semibold text-ink-strong">{{ props.skill.name }}</th>
+                                    <th class="py-2 px-3 text-center font-semibold text-ink-strong">{{ props.compareSkill.name }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="border-b border-rule-soft">
+                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Type</th>
+                                    <td class="py-2 px-3 text-center">{{ props.skill.type ?? 'N/A' }}</td>
+                                    <td class="py-2 px-3 text-center">{{ props.compareSkill.type ?? 'N/A' }}</td>
+                                </tr>
+                                <tr class="border-b border-rule-soft">
+                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Class code</th>
+                                    <td class="py-2 px-3 text-center font-mono">{{ props.skill.rarity ?? 'N/A' }}</td>
+                                    <td class="py-2 px-3 text-center font-mono">{{ props.compareSkill.rarity ?? 'N/A' }}</td>
+                                </tr>
+                                <tr class="border-b border-rule-soft">
+                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Unique</th>
+                                    <td class="py-2 px-3 text-center">{{ props.skill.is_unique ? '✦ Yes' : 'No' }}</td>
+                                    <td class="py-2 px-3 text-center">{{ props.compareSkill.is_unique ? '✦ Yes' : 'No' }}</td>
+                                </tr>
+                                <tr class="border-b border-rule-soft">
+                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Base SP cost</th>
+                                    <td class="py-2 px-3 text-center font-mono">{{ props.skill.sp_cost ?? 'N/A' }}</td>
+                                    <td class="py-2 px-3 text-center font-mono">{{ props.compareSkill.sp_cost ?? 'N/A' }}</td>
+                                </tr>
+                                <tr class="border-b border-rule-soft">
+                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Condition</th>
+                                    <td class="py-2 px-3 text-center font-mono text-xs break-all">
+                                        <span v-if="compareCondition(props.skill)">{{ compareCondition(props.skill) }}</span>
+                                        <span v-else class="text-ink-muted">not recorded</span>
+                                    </td>
+                                    <td class="py-2 px-3 text-center font-mono text-xs break-all">
+                                        <span v-if="compareCondition(props.compareSkill)">{{ compareCondition(props.compareSkill) }}</span>
+                                        <span v-else class="text-ink-muted">not recorded</span>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-rule-soft">
+                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Precondition</th>
+                                    <td class="py-2 px-3 text-center font-mono text-xs break-all">
+                                        <span v-if="comparePrecondition(props.skill)">{{ comparePrecondition(props.skill) }}</span>
+                                        <span v-else class="text-ink-muted">not recorded</span>
+                                    </td>
+                                    <td class="py-2 px-3 text-center font-mono text-xs break-all">
+                                        <span v-if="comparePrecondition(props.compareSkill)">{{ comparePrecondition(props.compareSkill) }}</span>
+                                        <span v-else class="text-ink-muted">not recorded</span>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-rule-soft">
+                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Cost ladder</th>
+                                    <td class="py-2 px-3 text-center text-xs">
+                                        <span v-for="row in hintLadderRows(props.skill)" :key="row.key" class="block">
+                                            {{ row.label }}: <strong>{{ row.price ?? 'N/A' }} SP</strong> ({{ row.discount }}%)
+                                        </span>
+                                    </td>
+                                    <td class="py-2 px-3 text-center text-xs">
+                                        <span v-for="row in hintLadderRows(props.compareSkill)" :key="row.key" class="block">
+                                            {{ row.label }}: <strong>{{ row.price ?? 'N/A' }} SP</strong> ({{ row.discount }}%)
+                                        </span>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-rule-soft">
+                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Same condition</th>
+                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameCondition', props.skill) }}</td>
+                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameCondition', props.compareSkill) }}</td>
+                                </tr>
+                                <tr class="border-b border-rule-soft">
+                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Same class code</th>
+                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameClassCode', props.skill) }}</td>
+                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameClassCode', props.compareSkill) }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Same class code + type</th>
+                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameClassCodeAndType', props.skill) }}</td>
+                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameClassCodeAndType', props.compareSkill) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="note mt-3">
+                        <span class="g" aria-hidden="true">○</span>
+                        <span class="flex-1">
+                            Rows where the two skills differ are marked <span class="text-brand-chrome font-semibold">differs</span>.
+                            Engine tokens are printed as-is; N/A means the source records nothing for that property.
+                        </span>
                     </p>
                 </section>
             </div>

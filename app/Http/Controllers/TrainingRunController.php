@@ -1165,7 +1165,7 @@ class TrainingRunController extends Controller
     }
 
     /**
-     * Upsert the given skill statuses on the run; skills not listed keep their
+     * Upsert the given skill statuses and hint levels on the run; skills not listed keep their
      * current status (syncWithoutDetaching, TrainingRun::setSkillStatus).
      *
      * Returns to the Skills Planner rather than the Cockpit. The planner has been this endpoint's
@@ -1186,7 +1186,8 @@ class TrainingRunController extends Controller
                 // the boundary the write crosses.
                 $turn = $entry['turn_acquired'] ?? null;
                 $status = $request->acquisitionFor($entry);
-                $run->setSkillStatus($skill, $status, $turn === null ? null : (int) $turn);
+                $hintLevel = $entry['hint_level'] ?? null;
+                $run->setSkillStatus($skill, $status, $turn === null ? null : (int) $turn, $hintLevel === null ? null : (int) $hintLevel);
 
                 // ADR-0029 D4: the level lives in `skill_levels`, the acquisition status and turn stay
                 // on the pivot. A skill that is not Acquired has no reached level, so its row goes.

@@ -14310,3 +14310,5079 @@ PRD §6 stories, not a re-registration.
   (`46151c93`); the object was intact and was re-applied.
 - `3e81adf6` — Commit 4, URA retirement (ruling A).
 - Commits 5 and 6 follow this document's move to `docs/audits/`.
+**Round 22 (2026-11-03, consolidation).** The owner ordered ten `docs/proposals/2026-11-0*` files and
+every `docs/audits/` file except the eight Rice Shower / Unity Cup documents consolidated into
+`docs/research-scratch/` and the originals deleted. Thirty-six landed here: 35 audit reports
+(32 `AUD-*` screen/flow audits and the three `scr-car-*` records) and one proposal,
+`2026-11-03-git-reconciliation.md` (264 lines), a git-state record whose subject is the audit
+reports' own commit claims. Each is its own `## <file name>` section in the appended
+`## Consolidated 2026-11-03 (Round 22)` region at the end of this file, each with a fold note and
+the source's own title as `###`. Verification ran before the delete and again after: 4,297 of
+4,297 non-blank lines across all 46 sources of the round found in order, 0 missing. The originals
+were then deleted; recoverable from the commit that deleted them. This master carries no NUL byte,
+before or after. Eight sources carried a UTF-8 BOM (stripped) and eighteen were cp1252 with 137
+bytes of `0x97` (decoded to the em dash); the byte-level detail is in the region's own preamble and
+in `docs/research-scratch/INDEX.md` §Round 22.
+
+---
+## Consolidated 2026-11-03 (Round 22)
+
+The owner ordered the 2026-11-01/02 screen and flow audit set, the three SCR-CAR audits and the
+2026-11-03 git reconciliation record consolidated into this master and the originals deleted from
+`docs/audits/` and `docs/proposals/`. Thirty-five audit reports and one proposal travel here; the
+other nine proposals of the round are pass reports and state records and land in
+`SLICE-RECORDS.md`. The eight Rice Shower / Unity Cup documents in `docs/audits/` were named as
+exclusions and are untouched. The per-file measurement table, the encoding repairs and the
+citation repoints are recorded in `INDEX.md` §"Round 22".
+
+Eight of the audit sources carried a UTF-8 byte-order mark, stripped here because a BOM inside a
+section is an invisible character in the middle of a file; eighteen were cp1252, where 137 bytes
+in the undefined-UTF-8 range 0x97 decode under cp1252 to the em dash their surrounding text
+already uses where it is UTF-8. Each source was decoded under the encoding its own bytes prove.
+This master carries no NUL byte before or after the round.
+
+## 2026-11-03-git-reconciliation.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/proposals/2026-11-03-git-reconciliation.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Git reconciliation — 2026-11-03
+
+
+**Purpose.** This pass did one thing: force the prior reports' commit claims and the repository's
+actual git state to agree. Every SHA is pasted with its `git cat-file` result. Every "committed"
+claim below is followed by the `git log` line that proves it. The fresh-clone proof is pasted in §4.
+
+**Path taken: A (the SHAs exist).** All 37 cited SHAs are `EXISTS`, and every one is contained in
+`master` **and** `origin/master`; `git rev-list --count origin/master..HEAD` is `0` at pass start.
+The `git status` that showed 60+ modified files and "up to date with origin/master" was the state
+**before** the commits landed. The commits then landed, and the tree is now clean.
+
+### §1 — Reconciliation table
+
+All rows: `git cat-file -e <sha>^{commit}` → **EXISTS**; `git branch -a --contains` →
+
+`* master` and `remotes/origin/master`. No row is `MISSING`.
+
+| SHA | Claimed in | cat-file | Subject (git log -1) | Date |
+|---|---|---|---|---|
+| 88043b3b | this pass's final report; `2026-11-02-followup-closeout.md` | EXISTS | fix(catalog): render base stats and growth rates on trainee detail | 2026-11-03 |
+| 45ebbc37 | same | EXISTS | fix(database): harden race detail values, rewards and absence notes | 2026-11-03 |
+| 64446e10 | same | EXISTS | test(database): race-detail spec for populated, partial, empty states | 2026-11-03 |
+| 6cbc52e4 | same | EXISTS | chore(pipeline): cite why 8 races lack enrichment | 2026-11-03 |
+| 1c15a29a | same | EXISTS | fix(pipeline): give race enrichment parsers their own contract | 2026-11-03 |
+| d6c5cd3d | same | EXISTS | test(database): update source ledger counts for the enrichment sources | 2026-11-03 |
+| cfbdad26 | same | EXISTS | docs(proposals): follow-up closeout for catalog fix and addendum phases | 2026-11-03 |
+| cf088ccb | `2026-11-02-followup-closeout.md` (plan closure) | EXISTS | fix(career-trainee-profile): restore aptitudeGroups and stats computeds | 2026-11-02 |
+| 335881fd | `2026-11-02-ui-ux-audit-implementation-pass-5.md` | EXISTS | fix(pipeline): read a record's name leniently so one source's shape cannot crash another | 2026-11-02 |
+| 627a7248 | pass-5 | EXISTS | fix(raceplanner): render every group, name the cap, drop the dead computed and the Critical prefix | 2026-11-02 |
+| b0f5a1ef | pass-5; `audit-corrections.md` | EXISTS | fix(review): remove the dead sticky declaration on the pager | 2026-11-02 |
+| d7869fff | pass-5 | EXISTS | docs(known-issues): KI-150 page-level sticky unavailable under the shell container context | 2026-11-02 |
+| a76a95a1 | pass-5 | EXISTS | fix(veterans): neutral verdicts use the neutral pill | 2026-11-02 |
+| 2187e057 | pass-5 | EXISTS | docs(audit-corrections): retract LegacyBuilder-F-01 and VeteransCompare-F-01 | 2026-11-02 |
+| b4458c09 | pass-5 | EXISTS | fix(raceplanner): remove the duplicate closing template tag the group loop left | 2026-11-02 |
+| 1af9eb53 | pass-4 | EXISTS | fix(racedecision): absent values use words not dashes | 2026-11-02 |
+| a7d5cefb | pass-4 | EXISTS | fix(turnedit): page-load status, refusal focus | 2026-11-02 |
+| 354779c9 | pass-4 | EXISTS | fix(saveveteran): confirm overwrite of existing veteran | 2026-11-02 |
+| 3a9d4c76 | pass-4 | EXISTS | fix(career): race doors from route() not string replacement | 2026-11-02 |
+| 4657be9e | pass-4; pass-5 | EXISTS | fix(legacy,runs): single-run compare states its own absence, one page name | 2026-11-02 |
+| 5414af81 | pass-4 | EXISTS | fix(runsimport): drop the duplicated header list | 2026-11-02 |
+| baf0146f | pass-4 | EXISTS | test(runs-create): pin the breadcrumb leaf to the page's own name | 2026-11-02 |
+| 696d12de | pass-1; pass-2; pass-3 | EXISTS | fix(review): progress bar uses actual resolved count; add reopen path | 2026-11-02 |
+| b9055ce0 | pass-2; pass-3 | EXISTS | fix(cockpit): skills URL from route() not string replacement | 2026-11-02 |
+| 43f0b8b0 | pass-3 | EXISTS | fix(saveveteran,runs): precondition role, pager aria-disabled | 2026-11-02 |
+| c60af3a1 | pass-3; pass-5; implementation index | EXISTS | feat(career-setup): resolve 7 findings | 2026-11-02 |
+| c2967b36 | pass-3; pass-4 | EXISTS | fix(preferences): live regions, describedby ids, refusal focus, copy | 2026-11-02 |
+| 5d3bda00 | pass-3; pass-4 | EXISTS | fix(dashboard): type scale to four tiers, decoupled Needs-you column | 2026-11-02 |
+| 9d753b7a | pass-3; pass-4 | EXISTS | test(dashboard): pin the new quick-actions copy | 2026-11-02 |
+| b95dc5cc | pass-3; pass-4 | EXISTS | fix(runs): status pill carries data-status so state is not colour-only | 2026-11-02 |
+| c6e55619 | pass-3; pass-4 | EXISTS | fix(career-setup): remaining setup URLs from route() props | 2026-11-02 |
+| 00e3cf15 | pass-3; pass-4 | EXISTS | test(utils): tick the finality acknowledgment before starting a run | 2026-11-02 |
+| 21e13313 | named in the verification dispatch; own subject is the report commit | EXISTS | docs(proposals): pass-3 report for UI/UX audit implementation | 2026-11-02 |
+| 15861ea3 | named in the verification dispatch; own subject is the report commit | EXISTS | docs(proposals): pass-2 report for UI/UX audit implementation | 2026-11-02 |
+| a85ff5fa | pass-2 | EXISTS | docs(proposals): pass-1 report for UI/UX audit implementation | 2026-11-02 |
+| a1bfac85 | `AUD-20261102-029`; legacy-builder pass; completion report | EXISTS | fix(legacy): parents side by side in standard and wide layouts | 2026-11-02 |
+| 5827a7be | legacy-builder pass; completion report | EXISTS | docs(audits): M2 screen audit of /legacy/{id} | 2026-11-02 |
+
+Machine output backing the table (full run in the session log):
+
+```
+EXISTS | 88043b3b | fix(catalog): render base stats and growth rates on trainee detail | contained-in: * master,  remotes/origin/HEAD -> origin/master,  remotes/origin/master
+...
+EXISTS | a85ff5fa | docs(proposals): pass-1 report for UI/UX audit implementation | contained-in: * master,  remotes/origin/HEAD -> origin/master,  remotes/origin/master
+```
+
+### §2 — Tree state at pass start
+
+```
+$ git status --short | wc -l
+0
+
+$ git rev-list --count origin/master..HEAD
+0
+
+$ git rev-parse HEAD
+787554862e6478658a05f7e81a80a4cf9d8c3c67
+$ git rev-parse origin/master
+787554862e6478658a05f7e81a80a4cf9d8c3c67
+
+$ git branch -a -v
+  almondine-plywood                       f6018f87 docs(contributing): record the fact-check adjacency lesson
+  chore/cloud-workspace-fixes             8ac014ea fix(devcontainer): boot cloud workspace end-to-end
+* master                                  78755486 docs(proposals): audit implementation pass reports and closeout notes
+  release/0.1.0                           d90de476 [ahead 2] docs(research-scratch): consolidate the Trainer Advisor spec ...
+  release/2.1.0                           0ef1506c style(skills): format the planner controller after the docblock removal
+  worktree/cherry-pick                    7da98984 [behind 4] feat(docs): add implementation instructions ...
+  remotes/origin/HEAD                     -> origin/master
+  remotes/origin/master                   78755486 docs(proposals): audit implementation pass reports and closeout notes
+  ...
+
+$ git stash list
+stash@{0}: WIP on master: b4458c09 fix(raceplanner): remove the duplicate closing template tag ...
+stash@{1}: On master: peer-traineeprofile
+stash@{2}: On master: Phase 2.1 work in progress (foreign, pre-state)
+```
+
+`git status --short` was **empty** at pass start: no staged changes, no modified files, no
+untracked files. The 60+ modified files and three untracked migrations described in the
+critique were the pre-commit state seen earlier in the session; they were committed before this
+pass began, by the series in `git log` (the three migrations are in `b63bee59
+feat(db): schema migrations for trainee-profile and race-enrichment columns`, and the audit
+reports in `2c9445e5 docs(audits): 2026-10-30 through 2026-11-02 UI/UX audit reports`).
+
+Tracked-state checks:
+
+```
+$ git ls-files database/migrations/2026_11_02_112258_make_global_release_date_nullable_on_character_cards.php
+database/migrations/2026_11_02_112258_make_global_release_date_nullable_on_character_cards.php
+$ git ls-files database/migrations/2026_11_02_123126_add_race_enrichment_columns_to_race_catalog_slots.php
+database/migrations/2026_11_02_123126_add_race_enrichment_columns_to_race_catalog_slots.php
+$ git ls-files database/migrations/2026_11_02_141639_add_base_stats_and_growth_rates_to_character_cards.php
+database/migrations/2026_11_02_141639_add_base_stats_and_growth_rates_to_character_cards.php
+
+$ git ls-files docs/audits/ | wc -l      -> 43
+$ ls docs/audits/ | wc -l                -> 43
+
+$ git ls-files docs/framework-ui-ux/_audit-prompt.md
+docs/framework-ui-ux/_audit-prompt.md
+```
+
+### §3 — Commits made this pass
+
+| SHA | Subject | Files touched | Feature group |
+|---|---|---|---|
+| `032b0c02` | fix(env): quote APP_NAME so a fresh clone's .env parses | `.env.example` (1 line) | reproducibility |
+| this commit (self) | docs(proposals): git reconciliation — prove the SHAs and the fresh clone | `docs/proposals/2026-11-03-git-reconciliation.md` | record |
+
+No feature work was committed this pass: the feature commits in §1 already existed on `master`
+and `origin/master`. `032b0c02` is a genuine fix found by the fresh-clone proof (see §4).
+
+### §4 — Fresh-clone verification
+
+Clone of `032b0c02`, a local `--no-hardlinks` clone into the OS temp directory, then
+`composer install`, `.env` from `.env.example` with `DB_CONNECTION=sqlite` and an absolute
+Windows `DB_DATABASE`, `key:generate`, `migrate --seed`, `npm ci`, `npm run build`.
+
+```
+$ git clone --no-hardlinks D:/Projects/umamusume-laravel13 <tmp>/verify
+=== cloned HEAD 032b0c02 ===
+$ composer install --no-interaction --prefer-dist --no-progress
+...
+Generating optimized autoload files
+> @php artisan package:discover --ansi
+...
+110 packages you are using are looking for funding.
+
+$ php artisan migrate --seed
+   INFO  Preparing database.
+  Creating migration table ................................................................ DONE
+   INFO  Running migrations.
+   2026_11_02_112258_make_global_release_date_nullable_on_character_cards ................ DONE
+   2026_11_02_123126_add_race_enrichment_columns_to_race_catalog_slots ................... DONE
+   2026_11_02_141639_add_base_stats_and_growth_rates_to_character_cards .................. DONE
+    INFO  Seeding database.
+=== migrate --seed OK ===
+
+$ npm ci --no-audit --no-fund
+=== build OK ===
+✓ built in 14.14s
+
+$ php artisan test tests/Feature/GametoraRaceFansParserTest.php tests/Feature/GametoraRaceParserTest.php
+  Tests:    4 passed (19 assertions)
+=== done ===
+```
+
+**Result: PASS** — migrate+seed, npm install and Vite build all succeed from a clean checkout,
+and the schema includes the three 2026-11-02 migrations.
+
+Two failures happened on the way and are part of the record:
+
+1. **First clone attempt** failed at `php artisan key:generate`: *"The environment file is
+   invalid! ... unexpected whitespace at [Trainer Desk]"*. Root cause: `.env.example` line 1 was
+   `APP_NAME=Trainer Desk`, unquoted, which dotenv rejects. The shared working copy never hit it
+   because its own `.env` differs. Fixed in `032b0c02`.
+2. **Second attempt** failed at migrate because this verification script wrote the Git-Bash
+   `/tmp/...` path into `DB_DATABASE`; PHP on Windows cannot open it. Re-running against the same
+   clone with the `cygpath -m` Windows path succeeded (output above). This is a harness
+   bug in the script, not a repository defect.
+3. **The PASS is not out-of-the-box, and does not close KI-102.** `.env.example` still defaults to
+   MySQL (`DB_CONNECTION=mysql`, `DB_HOST=mysql`, `DB_DATABASE=laravel`, lines 25–28). The literal
+   next-clone move — `cp .env.example .env && php artisan migrate` — still dies at
+   `getaddrinfo`. The run above supplied `DB_CONNECTION=sqlite` and an absolute `DB_DATABASE` by
+   hand; `032b0c02` fixed only the unquoted `APP_NAME`. The revised plan's **Slice E** is
+   therefore still required, and KI-102 remains open.
+
+The full PHP suite was not run inside the clone; a representative parser pair was, to prove the
+test harness boots against the seeded scratch-of-clone database.
+
+### §5 — What remains uncommitted
+
+```
+$ git status --short
+ D docs/audit-corrections.md
+ D docs/audit-fix-pass-addendum.md
+ D docs/pass2-closeout-notes.md
+?? docs/proposals/audit-corrections.md
+?? docs/proposals/audit-fix-pass-addendum.md
+?? docs/proposals/pass2-closeout-notes.md
+```
+
+**Six lines, one peer action, nothing of this pass's.** These are a concurrent rename of three
+documents from the repository root into `docs/proposals/`. They appeared at 12:52, after this
+pass's 12:14 start (the tree was empty then, §2). The content did not change — blob hashes are
+identical on both sides:
+
+```
+audit-corrections      old=2e14ecaa187d452d600ffb81b896cb0ebfb91d90 new=2e14ecaa187d452d600ffb81b896cb0ebfb91d90
+audit-fix-pass-addendum old=22ff9331830339ed28a202bc0b3871a038fde8d7 new=22ff9331830339ed28a202bc0b3871a038fde8d7
+pass2-closeout-notes    old=63b49d5f0d50d3bdbfe27f1f8dece452e56c353b new=63b49d5f0d50d3bdbfe27f1f8dece452e56c353b
+```
+
+They are **not committed here**: they belong to a peer session in this shared worktree, and
+committing them would sweep that session's in-flight move into this pass's history. This pass's
+own files are all committed; the tree holds no uncommitted work of mine.
+
+### §6 — Owner actions
+
+- **Push:** three commits are local and unpushed once this correction lands — `032b0c02`
+  (env quoting), `c1e97c2c` (this report), and the correction commit that adds this section.
+  `git rev-list --count origin/master..HEAD` will read `3`. They need a push before
+  `origin/master` moves.
+- **Peer coordination:** none required — no file was withheld.
+- **Fresh-clone test failures:** none in the executed set. The full PHP/browser suites were not
+  run inside the clone.
+
+### §7 — The claim about the sequence
+
+The 37 SHAs are accurate: all exist on `master` and `origin/master`, the tree was clean at the
+start of this pass, and the three migrations are tracked. **The prior reports' commit
+attributions were accurate; the `git status` they were judged against was the pre-commit
+snapshot.**
+
+That is the whole claim. It does **not** validate the reports' readings of those commits:
+
+- pass-5 §2.3 mis-stated `a76a95a1`'s scope — the commit touched one file,
+  `Veterans/Compare.vue`; `Legacy/Compare.vue:278-279` still routes `single column` to
+  `pill-caution`;
+- `AGENTS.md` §9's "219 as measured 2026-10-27" is contradicted by
+  `ui-lint-baseline.json`'s 209.
+
+Both remain flagged for the owner under the revised plan's §Deviations item 6.
+
+**The sequence's work is durable in git as of `78755486` (origin/master). A clone of `032b0c02`
+migrates, seeds and builds — after the harness supplies SQLite settings (§4, item 3). It is not a
+zero-edit first-clone yet.**
+
+### §8 — What this pass does not close
+
+1. **Slice E / KI-102** — `.env.example` still defaults to MySQL; the literal
+   `cp .env.example .env && php artisan migrate` still fails. See §4, item 3.
+2. **Slice D** — the `Legacy/Compare.vue:278-279` pill mapping is unchanged; `a76a95a1` touched
+   `Veterans/Compare.vue` only.
+3. **Push** — the commits above are local; `origin/master` does not have them yet.
+
+
+### Peer revert coordination note (2026-11-03)
+
+9a61197f landed tests requiring fixes from 6f3d5a81 and e4786df4. The peer commit is not
+self-contained: running it on 9a61197f alone, without those fixes, fails its two new focus tests.
+The push sequence must include the whole series, moving together.
+
+Preserved peer state: .scratch-uma/remaining-code-2026-11-03/*.staged-peer-revert.vue (2 files:
+Edit.staged-peer-revert.vue, RaceDecision.staged-peer-revert.vue), untracked and not staged.
+The peer should be told their pre-revert state was saved there.
+
+## AUD-20261102-016-runs-index-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-20261102-016-runs-index-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report - M2 screen audit: Runs index
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-016
+- Date: 2026-11-02
+- Mode: **M2 screen audit** (single surface, open-to-close walkthrough plus rule sweep)
+- Scope: `GET /training-runs` (`runs.index`), controller `App\Http\Controllers\TrainingRunController` (index method), page `resources/js/pages/Runs/Index.vue`. States: empty ("no runs yet" and filtered-empty), populated; error and loading are Inertia/server-owned, not page-rendered. Both themes; widths 320/390/768/1280px; keyboard-only. Filter row (search, scenario, status, sort), Previous/Next pagination, row actions (Cockpit/Result), ArtworkSlot portrait.
+- Out of scope: Cockpit/Result detail screens (separate surfaces), the create/import flows, writes (index is read-only), AAA criteria, any code fix, content strategy beyond the UMAMUSUME_REFERENCE.md cross-check.
+- Frameworks applied: `docs/framework-ui-ux/design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per -4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are `OBSERVED_SOURCE` or `UNMEASURED`.
+
+### 2. Executive summary
+
+- **F-01 - Status pill colour couples to `run.status_label` inside a `switch` on storage values.** `statusVariant` (Index.vue:48-55) is called with `run.status_label` (Index.vue:276) yet switches on 'Active'/'Completed'/'Retired'. They coincide today because `RunStatus::label()` echoes the backing value (RunStatus.php:15-17), so pill colours are correct today; the coupling is latent - if a label ever diverges from its value the pill paints the wrong status colour on the row's most scanned column (StatusPill.vue:10-17 maps variant to colour). Severity 1, Medium.
+- **F-02 - Disabled pager "Previous"/"Next" are non-interactive `<span>` lookalikes without `aria-disabled` or a role.** On the first/last page the pager renders a muted span (Index.vue:296-302, 306-309) that looks like a button but is not focusable and exposes no disabled state, so a screen-reader user cannot distinguish "no previous page" from a plain label. Severity 2, Medium.
+- Largest unmeasured risk: contrast (1.4.3/1.4.11), the 44px house-rule target size, reflow at 320px, focus visible/not-obscured - none measurable in this sandbox.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| runs.index | yes (no runs / filtered-empty) | yes | n/a (Inertia/server-owned, not page-rendered) | n/a (initial load, Inertia-managed) | src | src | named | named | named | named | src | none |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 1.4.1, 2.1.1, 2.4.6, 2.4.7, 2.4.11, 2.5.8 (house rule), 4.1.2 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.7 N/A (no drag); 3.3.x N/A (no input); AAA not reached |
+| Heuristics | H1, H2, H4, H6, H8 | H3 N/A (no write); H5/H9 (no inline error on this read-only screen); H7/H10 not reached |
+| Shneiderman | SHR-1, SHR-3, SHR-5 | SHR-4/SHR-6 N/A (read-only, no committed turn); SHR-2/7/8 not reached |
+| Tognazzini | TOG-3 | TOG-1 (50 ms) UNMEASURED; TOG-2/4/5/6/7/8 N/A or not reached |
+| Information architecture | IA-1, IA-3, IA-4 | IA-5 exemplar gap (gap register, -7); IA-2/6/8 not applicable to an index |
+| Gestalt | GT-1, GT-2, GT-4 | GT-3/GT-5/GT-6 not reached |
+| Norman | NRM-1, NRM-2, NRM-4, NRM-6 | NRM-3/NRM-5 not reached |
+| Laws of UX | UX-1, UX-5, UX-10 | UX-2/3/6/7/8/9 not reached |
+| Laws of UI | UI-1, UI-2, UI-3, UI-4 | UI-5/6/7 not reached |
+| Gerhardt-Powals | GP-3 | GP-1/2/4/5 not reached |
+
+Framework coverage (applied and measured clean from source, no finding): `H1` (turn/position/state all printed with reasons, never dashes; Index.vue:262-277); `H2` (Global client vocabulary - trainee name, scenario label, status label); `H4`/`SHR-1` (one pill vocabulary, doors via `route()`); `H6`/`NRM-4` (position means the same thing - `N / turn_count` for active runs, plain number otherwise, Index.vue:262-268); `H8` (every column carries a fact; no ornament); `IA-1` (directly reachable front door with PageHeader actions); `IA-3` (browse axes: search, scenario, status, sort); `IA-4` (index previews turn/position/status; detail holds on Cockpit/Result); `GT-2`/`UI-4` (absent scenario/position print "N/A" + `sr-only` reason, never a dash, Index.vue:253-256, 270-274); `UX-10` (nothing fills an empty layout - the empty states are purposeful, Index.vue:184-209); `WCAG 1.4.1` (status is word + pill, never colour alone); `WCAG 4.1.2` (table rows, links, pills expose name/role; the pager spans are the exception, F-02). `N/A`: `2.5.7`, `2.1.4`, `3.3.8`, `1.2`/`1.4.2`/`2.3`. Not reached: `WCAG 1.4.4`/`1.4.10`/`1.4.12` (no resize pass), `WCAG 3.2.6`/`3.3.7` (not exercised).
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no rendered frame was obtained.
+- Structural and copy claims are `OBSERVED_SOURCE` against the page, controller and `RunStatus`/`StatusPill` read this run; visual, contrast, target-size and reflow claims are `UNMEASURED` (-6).
+- Provenance caveats carried (audit protocol -3.1): Gerhardt-Powals primary text paywalled; IA prose unread (names/summaries only); Norman's book not fetched (quotes from encyclopedia entry); Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13 and publishes Closure/Continuity; no "Law of Experience" (it is Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity cited to `uilaws-2026-10-21.md`; Common Fate cited to `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob cited to `laws-of-ux-2026-10-21.md`; 44 px described as a house rule exceeding 2.5.8, never as conformance.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+|---|---|---|---|---|---|---|---|---|---|
+| F-01 | H1 (latent coupling) | Heuristics | Runs index, populated, status column | `statusVariant` (Index.vue:48-55) switches on storage values 'Active'/'Completed'/'Retired' but is called with `run.status_label` (Index.vue:276). They coincide today because `RunStatus::label()` echoes the backing value (RunStatus.php:15-17), so pill colours are correct today; the coupling is latent - if a label ever diverges from its value, `StatusPill` (StatusPill.vue:10-17) paints the wrong status colour on the row's most scanned column while the text label stays correct. | OBSERVED_SOURCE | `resources/js/pages/Runs/Index.vue:48-55,276`; `app/Enums/RunStatus.php:15-17`; `resources/js/components/StatusPill.vue:10-17` | 1 | Medium | Derive the pill variant from `run.status` (the stored value the switch matches), not from `run.status_label`, or align the switch to the labels. Acceptance: pill variant is computed from a single authoritative field and cannot diverge. |
+| F-02 | WCAG 4.1.2 (secondary: NRM-2) | WCAG / Norman | Runs index, populated, first or last page | Disabled "Previous"/"Next" pager controls render as non-interactive `<span>` elements (Index.vue:296-302, 306-309) styled like buttons but with no role, no `aria-disabled`, and no focusability. A screen-reader user hears "Previous"/"Next" as plain text and cannot tell the control is disabled versus absent. | OBSERVED_SOURCE | `resources/js/pages/Runs/Index.vue:290-311` | 2 | Medium | Render disabled pager controls as `<button disabled>` (or `<span aria-disabled="true" role="button">`) so the disabled state is programmatic. Acceptance: the disabled pager button exposes `aria-disabled="true"` and is not focusable/activatable. |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+|---|---|---|
+| Body text meets 4.5:1 in both themes on the table, filter row and pills | No browser; intended ratios in `app.css` only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, pill edges, focus rings) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling on the table inside `overflow-x-auto` | No browser; viewport never rendered | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on row links, StatusPill, filter selects, Apply/Clear, Previous/Next | Boxes not measured | Rendered target-size sweep (never described as 2.5.8 conformance) |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize + text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on filter controls and row links | No keyboard run executed | Keyboard pass over the page |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** Target-size observations are filed under the house rule (`UX-1`/`TOG-5`) and explicitly not as conformance, per `wcag-2.2-accessibility-2026-10-21.md`.
+- **Density vs minimalism.** The table is deliberately dense for comparison; every column carries a fact. `H8` holds. No finding.
+- **Closure vs honesty.** Absent scenario/position print "N/A" plus an `sr-only` reason, never a dash; `GT-2`/`UI-4` hold. No finding.
+- **IA-5 exemplar gap.** The "no runs yet" empty state shows a mono example ("A row reads: Trainee - Scenario - 12 / 72 - Junior Year - Active", Index.vue:205-207), but the filtered-empty state names the absence and offers "Clear filters" without showing an example of what would fill it. Systemic IA gap-register item (the framework's gap register already records several empty states lacking exemplars); logged here rather than re-filed per screen.
+- **Title-only disclosure channel.** Not present on this screen - `N/A` carries a visible word plus an `sr-only` twin (Index.vue:255, 273), the pattern other screens should mirror.
+- **Conflicts:** none found this pass; no code-vs-rule disagreement required settlement.
+
+Gaps confirmed in the register rather than filed per screen: `IA-5` exemplar gap (systemic), WCAG 1.4.3/1.4.10/1.4.11 and all target-size/resize/focus/keyboard claims UNMEASURED.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. **F-02** (S): render disabled pager controls as `<button disabled>` or `aria-disabled="true"`. Acceptance: the disabled pager exposes `aria-disabled="true"` and is not focusable.
+2. **F-01** (S): derive the pill variant from the single authoritative status field. Acceptance: `statusVariant` is computed from `run.status` and cannot diverge from the stored value.
+
+### 9. Change-audit re-check
+
+Not owed (M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (contrast, target size, reflow, keyboard, focus).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- -3.1 provenance caveats carried (Gerhardt-Powals, IA prose, Norman, Tognazzini 2014 count, Laws of UX count, Laws of UI count, no Law of Experience).
+- Evidence capability recorded as FALSE; `spawn EPERM` named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and `file:line` location verified this run.
+- No severity 3/4 finding rests on inference (highest severity here is 2).
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort (2 items).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1-10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-20261102-017-runs-create-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-20261102-017-runs-create-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report - M2 screen audit: Runs create
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-017
+- Date: 2026-11-02
+- Mode: **M2 screen audit** (single surface, open-to-close walkthrough plus rule sweep)
+- Scope: `GET /training-runs/create` (`runs.create`), controller `App\Http\Controllers\TrainingRunController` (create method), page `resources/js/pages/Runs/Create.vue`. States: empty (fresh form), populated (re-published after a refused write via flashed `old()`); error is server validation returned through the redirect; loading is `form.processing`. Both themes; widths 320/390/768/1280px; keyboard-only. Trainee combobox, Scenario/Status/Inheritance parent A/B selects, Grade Point period and Shop resets in number inputs, Notes textarea, Create/Cancel.
+- Out of scope: the Cockpit/detail screens, the store() write endpoint (separate surface/flow), the TraineeCombobox internals (component not read for this audit), AAA, any code fix, content strategy beyond the reference cross-check.
+- Frameworks applied: `docs/framework-ui-ux/design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per -4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are `OBSERVED_SOURCE` or `UNMEASURED`.
+
+### 2. Executive summary
+
+- **F-01 - The screen is named three different ways: browser tab "New career", page-header eyebrow "New career", and heading "Create a career".** `Head title="New career"` (Create.vue:102) while `PageHeader` prints eyebrow "New career" / title "Create a career" (Create.vue:104-108) and the breadcrumb's last crumb is "Create a career" (Create.vue:101). The tab/eyebrow and the heading use different words for the same surface (H4 consistency; Jakob's Law - users expect the page title to match the heading). Severity 1, High.
+- No source-grounded severity 2+ finding was filed on this screen: the form re-publishes flashed input after a refused write (SHR-5), status defaults to 'Active' with a required select (no empty status), scenario/parents use leading empty-value rows (absence is a normal result), error paragraphs sit beside their fields (H9 proximity), the submit button acknowledges with "Creating-" while busy (H1/SHR-3), and Cancel is a clearly marked exit (H3).
+- Largest unmeasured risk: contrast, the 44px house-rule target size, reflow at 320px, focus visible/not-obscured, and combobox keyboard operability - none measurable in this sandbox.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| runs.create | yes (fresh form) | yes (re-published via `old()`) | yes (server validation via redirect) | yes (`form.processing`) | src | src | named | named | named | named | src | none |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 1.4.1, 2.1.1, 2.4.6, 3.3.1, 3.3.2, 4.1.2, 4.1.3 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only; 2.5.7 N/A (no drag); 2.4.7/2.4.11 UNMEASURED (keyboard/combobox internals); 3.3.3 N/A (errors are identified, suggestions come from the request); 3.3.7 N/A (no redundant entry on create); AAA not reached |
+| Heuristics | H1, H2, H3, H4, H5, H6, H8, H9 | H7 accelerators (systemic gap); H10 help surface (systemic gap) |
+| Shneiderman | SHR-1, SHR-5, SHR-7 | SHR-2/4/6/8 N/A (single-screen create, no committed turn here); SHR-3 partial |
+| Tognazzini | TOG-3, TOG-5, TOG-6 | TOG-1 UNMEASURED; TOG-2 (double-submit guarded by `form.processing`, clean); TOG-4/7/8 not reached |
+| Information architecture | IA-1, IA-5 | IA-2/3/4/6 not applicable (create is not a library/nav structure); IA-5 N/A (no empty-list state on a form) |
+| Gestalt | GT-1, GT-4 | GT-2/3/5/6 not reached |
+| Norman | NRM-1, NRM-2, NRM-4, NRM-6 | NRM-3 (validation lives in the request, expressed after submit), NRM-5 not reached |
+| Laws of UX | UX-1, UX-5, UX-10 | UX-2/3/6/7/8/9 not reached |
+| Laws of UI | UI-1, UI-2, UI-3, UI-4 | UI-5/6/7 not reached |
+| Gerhardt-Powals | GP-1 | GP-2/3/4/5 not reached |
+
+Framework coverage (applied and measured clean from source, no finding): `H1` (pending label via `:aria-busy="form.processing"` and "Creating-" button label, Create.vue:117, 275-277); `H2` (Global client vocabulary - Trainee, Scenario, Status, Grade Point period, Shop resets in, Notes); `H3` (Cancel to /training-runs is the marked exit, Create.vue:278); `H4`/`SHR-1` (one token set, one focus ring, doors via `route()`; the one inconsistency filed is F-01); `H5`/`SHR-5` (a refused write returns through the redirect and re-publishes `old()` so no entered state is lost, Create.vue:42-46, 219-220); `H6`/`NRM-4` (all eight fields on one screen; nothing carried across screens); `H8` (every field earns its place; the controller comment documents why each nullable field is surfaced); `H9` (error paragraphs adjacent to the combobox, Create.vue:149-150; plain, non-blaming copy from the request); `IA-1` (breadcrumb to /training-runs + Back to careers action); `UX-1`/`TOG-5` (44px house-rule targets claimed by `.btn`/`.field` classes, unmeasured); `UX-10` (no empty layout filled with ornament). `N/A`: `2.5.7`, `2.1.4`, `3.3.8`, `1.2`/`1.4.2`/`2.3`. Not reached: `WCAG 1.4.4`/`1.4.10`/`1.4.12`, `WCAG 3.2.6`/`3.3.7`.
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no rendered frame was obtained.
+- Structural and copy claims are `OBSERVED_SOURCE` against the page and controller read this run; visual, contrast, target-size and reflow claims are `UNMEASURED` (-6).
+- Provenance caveats carried (audit protocol -3.1): Gerhardt-Powals primary text paywalled; IA prose unread (names/summaries only); Norman's book not fetched (quotes from encyclopedia entry); Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13 and publishes Closure/Continuity; no "Law of Experience" (it is Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity cited to `uilaws-2026-10-21.md`; Common Fate cited to `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob cited to `laws-of-ux-2026-10-21.md`; 44 px described as a house rule exceeding 2.5.8, never as conformance.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+|---|---|---|---|---|---|---|---|---|---|
+| F-01 | H4 (secondary: Jakob, Laws of UX 11) | Heuristics / Laws of UX | Runs create, all states, page identity | The screen is named three different ways: `Head title="New career"` (Create.vue:102) sets the browser tab, `PageHeader` eyebrow "New career" / title "Create a career" (Create.vue:104-108) sets the on-screen heading, and the breadcrumb's final crumb is "Create a career" (Create.vue:101). The tab/eyebrow and the heading use different words for the same surface, so a Trainer arriving by deep link cannot confirm they are on the page the title promises (H4 consistency; Jakob's Law expects title and heading to agree). | OBSERVED_SOURCE | `resources/js/pages/Runs/Create.vue:101-108` | 1 | High | Make the tab title, eyebrow and heading agree on one name. Acceptance: `Head title`, the PageHeader eyebrow/title and the breadcrumb final crumb all read the same (e.g. "Create a career"). |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+|---|---|---|
+| Body text meets 4.5:1 in both themes on the form and error paragraphs | No browser | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (input borders, focus rings, risk edge) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px loses nothing on the two-column select grid | No browser | Rendered reflow pass at 320 px |
+| Target sizes of the 44 px house rule hold on the Create button, Cancel, selects and number inputs | Boxes not measured | Rendered target-size sweep (never described as 2.5.8 conformance) |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize + text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on every field, and the TraineeCombobox is keyboard-operable | Combobox internals not read; no keyboard run | Rendered keyboard pass over the form |
+| Status messages after a refused write are exposed without a focus change | No browser | Rendered pass over the redirect + flash |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** Target-size observations are filed under the house rule (`UX-1`/`TOG-5`) and explicitly not as conformance.
+- **Density vs minimalism.** The form carries eight fields in a two-column grid; each field is documented (controller:180-209) and earns its place. `H8` holds. No finding.
+- **Closure vs honesty.** Absent optional values (scenario, parents, Grade Point period, Shop resets in, Notes) are left empty rather than defaulted; the controller comment (Create controller:180-209) records this as intentional. No dash is used anywhere on the screen.
+- **Feedback timing.** 50 ms acknowledgement and 400 ms Doherty response are compatible (acknowledgement vs response); the "Creating-" label + `:aria-busy` is the acknowledgement surface, unmeasured.
+- **Consistency vs exceptions.** No exceptions are taken on this screen; the one inconsistency is filed as F-01.
+- **Title-only disclosure channel.** Not present - no absence on this screen relies on a `title` attribute alone.
+- **Conflicts:** none found this pass.
+
+Gaps confirmed in the register rather than filed per screen: `H7` (no accelerators - systemic), `H10` (no help surface - systemic), `SHR-6`/TOG-6 undo-after-commit (systemic; the run is created and the reversal lives on the Cockpit/delete flow), WCAG 1.4.3/1.4.11 and all target-size/resize/focus/keyboard claims UNMEASURED.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. **F-01** (S): unify the page name across tab, eyebrow and heading. Acceptance: `Head title`, PageHeader eyebrow/title and breadcrumb final crumb all read identically.
+
+### 9. Change-audit re-check
+
+Not owed (M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (contrast, target size, reflow, keyboard/combobox, focus).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- -3.1 provenance caveats carried.
+- Evidence capability recorded as FALSE; `spawn EPERM` named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and `file:line` location verified this run.
+- No severity 3/4 finding rests on inference (highest severity here is 1).
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort (1 item).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1-10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-20261102-018-runs-import-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-20261102-018-runs-import-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report - M2 screen audit: Runs import
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-018
+- Date: 2026-11-02
+- Mode: **M2 screen audit** (single surface, open-to-close walkthrough plus rule sweep) with a flow sweep over the two-step import (source ? preview ? confirm)
+- Scope: `GET /training-runs/import` (`runs.import`), controller `App\Http\Controllers\TrainingRunController` (importForm method, plus importPreview/importStore for the flow), page `resources/js/pages/Runs/Import.vue`. States: source form (no preview), preview (preview non-null); error is server validation returned through the redirect; loading is `form.processing`/`submitting`. Both themes; widths 320/390/768/1280px; keyboard-only. Paste/upload source, segmented mode control, column mapping, per-field found/missing tags, rows-to-import table (row limit), "What will be created" summary, confirm import.
+- Out of scope: the import write endpoint `ImportHistoricalRun` (separate action), the Trainee/Status select internals, AAA, any code fix, content strategy beyond the reference cross-check.
+- Frameworks applied: `docs/framework-ui-ux/design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per -4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are `OBSERVED_SOURCE` or `UNMEASURED`.
+
+### 2. Executive summary
+
+- **F-01 - Two different select/textarea component families serve the same field roles across the import's two steps.** The source step uses `BaseSelect`/`BaseInput`/`BaseTextarea` from `components/Form` (Import.vue:752-808) while the preview step uses `UiSelect`/`UiTextarea` from `components/ui` (Import.vue:479-486, 533) for trainee/scenario/status/notes. Same-role look-alikes may behave differently (H4 consistency; GT-4 similarity-as-a-promise; UI-6 space carries grouping). Create.vue uses yet a third set (`TraineeCombobox`/`Select`/`TextInput`/`Textarea`), so the inconsistency extends cross-screen. Severity 2, High.
+- No severity 3 finding was filed: the import is two POSTs with no session state (refresh-safe), double-submit is guarded by `submitting` (TOG-2), the preview states found/missing per field before anything is written (SHR-4/H1), fill/drop missing act only on required/optional fields respectively (TOG-6/H5), per-row server errors name the turn (H9/3.3.1), and "Start over"/"Cancel" are marked exits (H3).
+- Largest unmeasured risk: contrast, the 44px house-rule target size, reflow at 320px (the `overflow-x-auto` rows region, `tabindex="0"`), focus visible/not-obscured, and keyboard scroll of the rows region - none measurable in this sandbox.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| runs.import (source) | n/a (a form, not a list) | yes (source form shown) | yes (server validation via redirect) | yes (`form.processing`) | src | src | named | named | named | named | src | none |
+| runs.import (preview) | n/a | yes (preview non-null) | yes (server validation via redirect) | yes (`submitting`) | src | src | named | named | named | named | src | none |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 1.4.1, 2.1.1, 2.4.6, 3.3.1, 3.3.2, 3.3.3, 3.3.7, 4.1.2, 4.1.3 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only; 2.5.7 N/A (no drag); 2.4.7/2.4.11 UNMEASURED (keyboard); AAA not reached |
+| Heuristics | H1, H2, H3, H4, H5, H6, H8, H9 | H7 accelerators (systemic gap); H10 help surface (systemic gap) |
+| Shneiderman | SHR-1, SHR-4, SHR-5, SHR-6, SHR-8 | SHR-2 N/A; SHR-3 partial |
+| Tognazzini | TOG-2, TOG-6 | TOG-1 UNMEASURED; TOG-3/4/5/7/8 not reached or partial |
+| Information architecture | IA-1, IA-4, IA-5 | IA-2/3/6/8 not applicable (import is a flow, not a library) |
+| Gestalt | GT-1, GT-4 | GT-2/3/5/6 not reached |
+| Norman | NRM-1, NRM-2, NRM-4, NRM-6 (both gulfs) | NRM-3 (server enforces bijection), NRM-5 not reached |
+| Laws of UX | UX-1, UX-2, UX-3, UX-5, UX-8, UX-10 | UX-6/7/9 not reached |
+| Laws of UI | UI-1, UI-2, UI-3, UI-4 | UI-5/6/7 not reached |
+| Gerhardt-Powals | GP-1, GP-3, GP-5 | GP-2/4 not reached |
+
+Framework coverage (applied and measured clean from source, no finding): `H1` (`:aria-busy` on both forms, "Reading the file-"/"Importing-" button labels, Import.vue:674, 812, 446); `H2` (Global client vocabulary - Trainee, Scenario, Status, Notes, turn/speed/stamina/power/guts/wit/sp/condition/energy/mood/fans; `wit` is the client word for the stat); `H3` (Start over / Cancel are marked exits, Import.vue:657, 815); `H5` (fillMissing targets the first required missing field; dropMissing clears only optional fields, Import.vue:319-330; the import writes only after confirm); `H6`/`SHR-8` (nothing carried across screens - runEdits is the local copy posted back, Import.vue:219-236); `H8` (every element explains the import contract; the "What the importer looks for" card states scope); `H9` (per-row errors name the turn via `turns.N.field` keys, Import.vue:174-211; plain, non-blaming copy); `SHR-4` (the confirm step ends on "What will be created" stating what now exists, Import.vue:629-649); `TOG-2` (double-submit guarded by `submitting`, Import.vue:362-364); `UX-2`/`UX-3` (foundCount/missingCount cards show distance to goal and incomplete state, Import.vue:424-442); `WCAG 3.3.7` (the import never asks twice - parsed fields shown as found/missing, only the miss is requested); `WCAG 4.1.3` (`role="status"` mappingProblem, Import.vue:761); `IA-4` (the source card previews headers/format before the write; "What the importer looks for" discloses scope); `GT-1`/`UI-1` (closed region per card). `N/A`: `2.5.7`, `2.1.4`, `3.3.8`, `1.2`/`1.4.2`/`2.3`. Not reached: `WCAG 1.4.4`/`1.4.10`/`1.4.12`, `WCAG 3.2.6`.
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no rendered frame was obtained.
+- Structural and copy claims are `OBSERVED_SOURCE` against the page and controller read this run; visual, contrast, target-size and reflow claims are `UNMEASURED` (-6).
+- Provenance caveats carried (audit protocol -3.1): Gerhardt-Powals primary text paywalled; IA prose unread (names/summaries only); Norman's book not fetched (quotes from encyclopedia entry); Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13 and publishes Closure/Continuity; no "Law of Experience" (it is Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity cited to `uilaws-2026-10-21.md`; Common Fate cited to `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob cited to `laws-of-ux-2026-10-21.md`; 44 px described as a house rule exceeding 2.5.8, never as conformance.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+|---|---|---|---|---|---|---|---|---|---|
+| F-01 | H4 (secondary: GT-4, UI-6) | Heuristics / Gestalt / Laws of UI | Runs import, source and preview steps, all states | The same field roles (trainee select, scenario select, status select, notes textarea) are rendered with different component families across the import's two steps: the source step uses `BaseSelect`/`BaseInput`/`BaseTextarea` from `components/Form` (Import.vue:752-808) while the preview step uses `UiSelect`/`UiTextarea` from `components/ui` (Import.vue:479-486, 533). Create.vue uses yet a third set (`TraineeCombobox`/`Select`/`TextInput`/`Textarea`). Same-role look-alikes may behave differently, breaking the similarity-as-a-promise rule and the one-component-per-role convention. | OBSERVED_SOURCE | `resources/js/pages/Runs/Import.vue:7,479-486,533,752-808` | 2 | High | Unify to one select component and one textarea component for the same role across source and preview (and align with Create where the role is identical). Acceptance: one component family renders trainee/scenario/status/notes in both import steps. |
+| F-02 | GP-5 (secondary: H8) | Gerhardt-Powals / Heuristics | Runs import, source step, paste mode | The same header list is rendered twice in one visual channel: the `import-csv` textarea placeholder shows `headers.join(',')` (Import.vue:712) and a visible paragraph below repeats `headers.join(', ')` (Import.vue:722). Redundancy within a single channel is noise (GP-5); the placeholder already guides pasting, so the paragraph duplicates it. | OBSERVED_SOURCE | `resources/js/pages/Runs/Import.vue:712,722` | 1 | Medium | Remove the redundant paragraph (keep the placeholder as paste guidance), or give the paragraph a distinct purpose. Acceptance: the header list is rendered once in paste mode. |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+|---|---|---|
+| Body text meets 4.5:1 in both themes on the source form, preview cards and rows table | No browser | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (input borders, focus rings, segmented control, tag chips) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px loses nothing on the `overflow-x-auto` rows region (`tabindex="0"`) | No browser | Rendered reflow pass at 320 px, populated |
+| Target sizes of the 44 px house rule hold on the Paste/Upload segmented buttons, selects, textarea, Preview import / Import N turns | Boxes not measured | Rendered target-size sweep (never described as 2.5.8 conformance) |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize + text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on every field; the rows region is keyboard-scrollable and reachable | `tabindex="0"` scroll region internals not measurable; no keyboard run | Rendered keyboard pass over the form and the rows region |
+| Status messages ("Imported N turns") are exposed without a focus change after the redirect | No browser | Rendered pass over the confirm redirect + flash |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** Target-size observations are filed under the house rule (`UX-1`/`TOG-5`) and explicitly not as conformance.
+- **Density vs minimalism.** The import is deliberately information-dense (parse contract, mapping, found/missing tags, rows, summary); every element explains the import. `H8` holds. No finding.
+- **Closure vs honesty.** Absent optional fields (scenario, notes) are marked "missing" with a visible word and a reason paragraph, never defaulted and never a dash; the import "states what it found rather than blocking on what it did not" (Import.vue:851-857). `GT-2`/`UI-4` hold.
+- **Feedback timing.** 50 ms acknowledgement vs 400 ms Doherty response are compatible; the "Reading the file-"/"Importing-" labels are the acknowledgement surface, unmeasured.
+- **Consistency vs exceptions.** No exceptions are taken; the component-family inconsistency is filed as F-01.
+- **Title-only disclosure channel.** Not present - found/missing tags carry visible words plus reason paragraphs (Import.vue:477-544).
+- **Undo after commit.** No "Undo import" exists on the result/cockpit landing; a mistaken import can be reversed by deleting the run (destroy with confirmation, C6b.3). Logged as the systemic `SHR-6`/H3 gap rather than re-filed per screen.
+- **Conflicts:** none found this pass.
+
+Gaps confirmed in the register rather than filed per screen: `H7` (no accelerators - systemic), `H10` (no help surface - systemic), `SHR-6`/TOG-6 undo-after-commit (systemic), WCAG 1.4.3/1.4.11 and all target-size/resize/focus/keyboard claims UNMEASURED.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. **F-01** (S): unify the select/textarea component family across the import's source and preview steps (and with Create for identical roles). Acceptance: one component family renders trainee/scenario/status/notes in both import steps.
+2. **F-02** (S): remove the redundant header-list paragraph in paste mode. Acceptance: the header list is rendered once (placeholder only).
+
+### 9. Change-audit re-check
+
+Not owed (M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (contrast, target size, reflow, keyboard/rows region, focus).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- -3.1 provenance caveats carried.
+- Evidence capability recorded as FALSE; `spawn EPERM` named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and `file:line` location verified this run.
+- No severity 3/4 finding rests on inference (highest severity here is 2).
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort (2 items).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1-10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-20261102-021.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-20261102-021.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M2 screen audit: Review queue (review.index)
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-021
+- Date: 2026-11-02
+- Mode: M2 screen audit
+- Scope: resources/js/pages/Review/Index.vue — route GET /review (review.index), controller App\Http\Controllers\ReviewController@index. States covered: empty (never fetched / all resolved), populated, error; themes light/dark; viewports 320/390/768/1280px; keyboard-only. The verdict sub-form (CandidateForm) and the Resolve commit render on Review/Detail per FQ-10 and are out of scope here (audited separately as AUD-20261102-022).
+- Out of scope: the verdict form and Resolve commit (Review/Detail), the fetch/pipeline backend, AAA criteria, any contrast/target-size/reflow measurement.
+- Frameworks applied: docs/framework-ui-ux/design-framework-index-2026-10-21.md first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: FALSE. Chromium cannot launch in this sandbox (spawn EPERM/ENOENT); no rendered frame, screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was obtained. All visual claims are UNMEASURED; structural and copy claims are OBSERVED_SOURCE.
+
+### 2. Executive summary
+
+- F-01 — The review progress bar misstates progress. resolvedCount is computed as candidates.total - candidates.data.length, which is the count of pending rows on other pages, not resolved rows; a 50-row queue on page 1 reads "25 of 50 resolved" even when zero verdicts have landed. Severity 3, High.
+- F-02 — "No match" is styled as a caution. The unmatched row state uses pill-caution (a warning/risk variant) although an unmatched candidate is a normal, expected queue outcome; Review/Detail prints the same word as pill-neutral, so the two screens disagree. Severity 2, Medium.
+- F-03 — The queue table lacks programmatic table semantics. The Pending table has no caption and its th cells carry no scope, unlike the two reference tables below it. Severity 2, Medium.
+- F-04 — The pager does not stay pinned. The pager is styled position: sticky; bottom: 0, but main is an @container containment context which makes position: sticky a no-op, so the pager scrolls away with the queue instead of remaining at the viewport bottom. Severity 2, Medium.
+- Largest unmeasured risk: contrast ratios, the 44 px target floor on the Review row links and pager, reflow of the wide queue table at 320 px, and focus-visible/focus-not-obscured — none measurable without a browser.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Review queue (review.index) | yes (2 variants) | yes | shell flash only | shell progress bar | src | src | named | named | named | named | src | review.spec.ts |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 4.1.2, 3.3.1, 3.3.2 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only, never conformance; 2.5.7 N/A (no drag); 3.2.6/3.3.7 N/A; AAA not reached; 4.1.1 never cited (withdrawn) |
+| Heuristics | H1, H2, H4, H5, H8, H9 | H3 (exit is on Detail), H7 accelerators (systemic gap) |
+| Shneiderman | SHR-3 | SHR-1 (exceptions named), SHR-4, SHR-5, SHR-6 (Detail), SHR-7, SHR-8 |
+| Tognazzini | TOG-3 | TOG-1 (50 ms) UNMEASURED; TOG-2..TOG-8 |
+| Information architecture | IA-1, IA-4, IA-5 | IA-2, IA-3, IA-6 |
+| Gestalt | GT-2, GT-4 | GT-1, GT-3, GT-5, GT-6 |
+| Norman | NRM-1, NRM-4, NRM-5 | NRM-2, NRM-3, NRM-6 |
+| Laws of UX | UX-1, UX-4, UX-10 | UX-2, UX-3, UX-5..UX-9 |
+| Laws of UI | UI-3, UI-4, UI-6 | UI-1, UI-2, UI-5, UI-7 |
+| Gerhardt-Powals | GP-3 | GP-1, GP-2, GP-4, GP-5 |
+
+Applied, measured clean from source (no finding): H1/NRM-5 flash status via shell (AppLayout.vue:620); H2 Global client vocabulary (lang/en/uma.php); H4/SHR-1 one token set, one focus ring; H5/NRM-2 the queue defers the verdict to Detail rather than validating inline; H6/NRM-4 position means the same thing (the row's one door is always "Review"); H8 every element carries a fact; H9 plain refusal copy ("No catalog record carries this name"); GT-2/UI-4 absent values carry a word and title, never a dash; IA-1 every row door is a named link; IA-5 empty states name absence + remedy + action; WCAG 3.3.1/3.3.2 labels present; WCAG 4.1.3 shell Flash live region. N/A: 2.5.7 no drag, 2.1.4 no accelerators, 3.3.8 no auth, 1.2/1.4.2/2.3 no media/audio/flashing.
+
+### 4. Evidence status and limits
+
+- RENDERED_EVIDENCE = FALSE. Chromium cannot launch in this sandbox (spawn EPERM); no rendered frame was obtained. Named per audit protocol §3.3.
+- Structural and copy claims are OBSERVED_SOURCE against the page and controller source read this run, with file:line locations.
+- Visual, contrast, target-size and reflow claims are UNMEASURED (§6); no intended ratio from app.css is copied as a measurement.
+- Provenance caveats carried (protocol §3.1): Gerhardt-Powals primary text paywalled (9-vs-10 split unconfirmed); IA prose unread (names/summaries only); Norman's book not fetched (quotes from encyclopedia entry); Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13 and publishes Closure/Continuity; no "Law of Experience" (it is Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity cited to uilaws-2026-10-21.md; Common Fate cited to gestalt-principles-2026-10-21.md; Fitts/Hick/Jakob cited to laws-of-ux-2026-10-21.md; 44 px described as a house rule exceeding 2.5.8, never as conformance; 4.1.1 never cited.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+|---|---|---|---|---|---|---|---|---|---|
+| F-01 | H1 (secondary SHR-3) | Heuristics / Shneiderman | Review queue, populated, all viewports | resolvedCount = candidates.total - candidates.data.length (Index.vue:61) computes pending rows on other pages as "resolved," so a 50-row queue on page 1 reads "25 of 50 resolved" even when zero verdicts have landed; the bar misrepresents queue progress. | OBSERVED_SOURCE | resources/js/pages/Review/Index.vue:61-62 | 3 | High | Compute resolved from the server (a resolved/total prop) instead of total minus this page's data length. Acceptance: the progress bar matches the actual decided count on every page. |
+| F-02 | GT-4 (secondary H4) | Gestalt / Heuristics | Review queue, populated, Best match column | "No match" is rendered with pill-caution (a warning/risk pill variant) although no match is a normal, expected outcome for unmatched rows; Review/Detail renders the same word as pill-neutral (Detail.vue:91), so the two screens mis-signify the same state differently. | OBSERVED_SOURCE | resources/js/pages/Review/Index.vue:189 vs resources/js/pages/Review/Detail.vue:91 | 2 | High | Render "No match" as pill-neutral (or a dedicated unmatched state) on the queue to match Detail. Acceptance: one pill variant per meaning across both Review screens. |
+| F-03 | WCAG 1.3.1 (secondary 4.1.2) | WCAG 2.2 AA | Review queue, the Pending table, all themes | The Pending table (review-results) has no caption and its th cells carry no scope, while the two reference tables below it do carry captions; screen readers get no programmatic table title and weaker header-to-data-cell association. | OBSERVED_SOURCE | resources/js/pages/Review/Index.vue:153-209 (table :153, headers :156-161) | 2 | High | Add a caption and scope="col" on the queue-table header cells. Acceptance: the table has a caption and scoped headers. |
+| F-04 | H1 (visibility — pager location not maintained) | Heuristics | Review queue, populated, long/multi-page queues | The pager (review-pager) is styled position: sticky; bottom: 0 (Index.vue:282), but main is an @container containment context (AppLayout.vue:613-616) which makes position: sticky a no-op — the shell's own comment states this at AppLayout.vue:601-609 — so the pager scrolls away with the queue instead of remaining pinned at the viewport bottom. | OBSERVED_SOURCE | resources/js/pages/Review/Index.vue:281-284; resources/js/layouts/AppLayout.vue:601-609, 613-616 | 2 | Medium | Pin the pager with the shell's fixed-position footer idiom or move it out of the containment context. Acceptance: the pager stays at the viewport bottom while the queue scrolls. |
+
+No finding is filed twice for one defect; each row carries one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+|---|---|---|
+| Light/dark body text meets 4.5:1 on every queue panel | No browser; intended ratios in app.css only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, focus rings, pill edges) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling of the queue table | No browser; viewport never rendered | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on every control (Review links, pager buttons) | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize + text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on every queue control | No keyboard run executed | Keyboard pass over the page |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- 44 px vs 2.5.8. Target-size observations are filed under the house rule (UX-1/TOG-5) and explicitly not as conformance, per wcag-2.2-accessibility-2026-10-21.md.
+- Closure vs honesty. Absent values carry a word and a title (N/A with a reason, never a dash); GT-2/UI-4 hold. No finding.
+- Density vs minimalism. The queue is a table by design; H8 is signal-against-noise and every element carries a fact. No finding.
+- Consistency vs exceptions. The verdict form moved to Detail (FQ-10); that is a named, deliberate exception to one-form-per-row, not a drift. No finding.
+- Gaps confirmed in the register rather than filed per screen: H3 (no undo on a committed turn — systemic, surfaced on Detail as F-01 there), H7 (no accelerators — systemic), H10 (no help surface — systemic), WCAG 1.4.3/1.4.10/1.4.11 all UNMEASURED.
+
+Conflicts: none found this pass; no code-vs-rule disagreement required settlement.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. F-01 (S): compute resolved from the server rather than total - data.length. Acceptance: progress bar matches actual decided count on every page.
+2. F-02 (S): render "No match" as pill-neutral on the queue to match Detail. Acceptance: one pill variant per meaning across both Review screens.
+3. F-03 (S): add a caption and scope="col" to the Pending table. Acceptance: table has caption and scoped headers.
+4. F-04 (M): pin the pager with the fixed-position footer idiom. Acceptance: pager stays at viewport bottom while the queue scrolls.
+
+### 9. Change-audit re-check
+
+Not owed (M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (verdict sub-form on Detail, per-page contrast, target size, reflow, keyboard).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- §3.1 provenance caveats carried (Gerhardt-Powals, IA prose, Norman, Tognazzini 2014 count, Laws of UX count, Laws of UI count, no Law of Experience).
+- Evidence capability recorded as FALSE; spawn EPERM named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and file:line location verified this run.
+- No severity 3/4 finding rests on inference (highest is severity 3, High confidence, source-grounded arithmetic).
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries one primary rule.
+- Recommendations ordered by severity then confidence then effort (4 items).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1–10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance; 4.1.1 never cited.
+- Report does not modify app code.
+
+## AUD-20261102-022.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-20261102-022.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M2 screen audit: Review detail (review.detail)
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-022
+- Date: 2026-11-02
+- Mode: M2 screen audit
+- Scope: resources/js/pages/Review/Detail.vue — route GET /review/{candidate} (review.detail), controller App\Http\Controllers\ReviewController@show. States covered: populated (match proposed / no match); themes light/dark; viewports 320/390/768/1280px; keyboard-only. The queue (Review/Index) is out of scope (AUD-20261102-021). The verdict sub-form CandidateForm is rendered here but its internal controls are audited only as far as Detail.vue exposes them; its reversal behaviour is in scope.
+- Out of scope: the fetch/pipeline backend, the ResolveMatchCandidate action internals, AAA criteria, contrast/target-size/reflow measurement, CandidateForm's own template beyond what Detail.vue binds.
+- Frameworks applied: docs/framework-ui-ux/design-framework-index-2026-10-21.md first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: FALSE. Chromium cannot launch in this sandbox (spawn EPERM/ENOENT); no rendered frame was obtained. All visual claims are UNMEASURED; structural and copy claims are OBSERVED_SOURCE.
+
+### 2. Executive summary
+
+- F-01 — A resolved verdict cannot be reversed. Resolving a candidate (Confirm/Reject) commits through CandidateForm, the candidate leaves the Pending queue, and no undo or re-open control is rendered on this screen; the page's own consequence copy states the chosen row becomes the trainee named by the career, its veteran record and the Legacy Lab, so a mistaken verdict corrupts downstream state with no reversal from the screen that committed it. Severity 3, Medium.
+- Largest unmeasured risk: contrast ratios, the 44 px target floor on the "Use this" buttons and verdict buttons, reflow of the g-2 side-by-side layout at 320/390 px, focus-visible/focus-not-obscured, and the confirm-dialog focus trap — none measurable without a browser.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Review detail (review.detail) | n/a (a candidate always exists) | yes | shell flash only | shell progress bar | src | src | named | named | named | named | src | review-detail.spec.ts |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 4.1.2, 4.1.3, 3.3.1, 3.3.2 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only, never conformance; 2.5.7 N/A; 3.2.6/3.3.7 N/A; AAA not reached; 4.1.1 never cited (withdrawn) |
+| Heuristics | H1, H2, H3, H4, H5, H8, H9 | H6 (no recall-across-screens issue), H7 accelerators (systemic gap) |
+| Shneiderman | SHR-6 | SHR-1..SHR-5 (no finding), SHR-7, SHR-8 |
+| Tognazzini | TOG-6 | TOG-1 (50 ms) UNMEASURED; TOG-2..TOG-5, TOG-7, TOG-8 |
+| Information architecture | IA-1, IA-4 | IA-2, IA-3, IA-5, IA-6 |
+| Gestalt | GT-2, GT-4 | GT-1, GT-3, GT-5, GT-6 |
+| Norman | NRM-1, NRM-4, NRM-6 | NRM-2, NRM-3, NRM-5 |
+| Laws of UX | UX-4, UX-5 | UX-1, UX-2, UX-3, UX-6..UX-10 |
+| Laws of UI | UI-3, UI-4, UI-6 | UI-1, UI-2, UI-5, UI-7 |
+| Gerhardt-Powals | GP-4 | GP-1, GP-2, GP-3, GP-5 |
+
+Applied, measured clean from source (no finding): H1/NRM-5 status ("Not yet answered" → verdict word via role="status", CandidateForm.vue:252-254); H2 Global client vocabulary (lang/en/uma.php); H3 single way out ("Back to the queue" in the head band, Detail.vue:121, no duplicate exit); H4/SHR-1 one token set, exceptions named (HFW-OVERRIDE block at Detail.vue:2-13); H5/NRM-3 no preselected verdict (form.status starts '', buttons disabled until picked, CandidateForm.vue:49, 225); H8 every element carries a fact; H9 plain, non-blaming copy ("No catalog row is close enough to propose", Detail.vue:248); GT-2/UI-4 absent values carry word+title ("Rarity not recorded", Detail.vue:198); IA-1 head band carries the way back; IA-4 index previews on queue, detail holds; WCAG 3.3.1/3.3.2 labels on every control (Verdict, Umamusume id, Alias language); WCAG 4.1.2 name/role/value on selects and inputs (aria-label carries candidate name); WCAG 4.1.3 role="status" verdict word; GP-4 grade badge is letter + word + pill; N/A: 2.5.7 no drag, 2.1.4 no accelerators, 3.3.8 no auth, 1.2/1.4.2/2.3 no media/audio/flashing.
+
+### 4. Evidence status and limits
+
+- RENDERED_EVIDENCE = FALSE. Chromium cannot launch in this sandbox (spawn EPERM); no rendered frame was obtained. Named per audit protocol §3.3.
+- Structural and copy claims are OBSERVED_SOURCE against the page, controller and CandidateForm source read this run, with file:line locations.
+- Visual, contrast, target-size and reflow claims are UNMEASURED (§6); no intended ratio from app.css is copied as a measurement.
+- Provenance caveats carried (protocol §3.1): Gerhardt-Powals primary text paywalled (9-vs-10 split unconfirmed); IA prose unread; Norman's book not fetched; Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13; no "Law of Experience" (it is Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity to uilaws-2026-10-21.md; Common Fate to gestalt-principles-2026-10-21.md; Fitts/Hick/Jakob to laws-of-ux-2026-10-21.md; 44 px is a house rule exceeding 2.5.8, never conformance; 4.1.1 never cited.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+|---|---|---|---|---|---|---|---|---|---|
+| F-01 | SHR-6 (secondary H3) | Shneiderman / Heuristics | Review detail, populated, verdict commit | Resolving a candidate (Confirm/Reject) commits the verdict through CandidateForm (form.post to /review/{candidate}), the candidate leaves the Pending queue, and no undo or re-open control is rendered on this screen; the consequence copy (Detail.vue:86-87) states the chosen row becomes the trainee named by the career, its veteran record and the Legacy Lab, so a mistaken verdict poisons four downstream screens with no reversal from the screen that committed it. | OBSERVED_SOURCE | resources/js/pages/Review/Detail.vue:368-376 (CandidateForm), :86-87 (consequence), app/Http/Controllers/ReviewController.php:188-193 (resolve redirects with flash, no reversal path) | 3 | Medium | Add a reversal control (re-open / un-resolve) reachable from the queue or the detail screen, or state the irreversibility explicitly before commit. Acceptance: a resolved candidate can be returned to Pending from a screen the Trainer reaches after resolving. A re-open path outside this screen's scope is not ruled out — a broader search would settle it. |
+
+No finding is filed twice for one defect; the row carries one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+|---|---|---|
+| Light/dark body text meets 4.5:1 on every detail panel | No browser; intended ratios in app.css only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, focus rings, pill edges) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow of the g-2 side-by-side layout at 320/390 px | No browser; viewport never rendered | Rendered reflow pass at 320 and 390 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on every control ("Use this", Confirm, Reject) | No browser; boxes not measured | Rendered target-size sweep |
+| Focus visible and focus-not-obscured on every detail control, incl. the confirm dialog focus trap | No keyboard run executed | Keyboard pass over the page and the dialog |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize + text-spacing pass |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- 44 px vs 2.5.8. Target-size observations are filed under the house rule (UX-1/TOG-5) and explicitly not as conformance, per wcag-2.2-accessibility-2026-10-21.md.
+- Closure vs honesty. Absent values carry a word and a title; GT-2/UI-4 hold. No finding.
+- Consistency vs exceptions. "No match" is pill-neutral here vs pill-caution on the queue (cross-screen, filed on the queue as AUD-20261102-021 F-02); not re-filed here. No duplicate finding.
+- No confirmation before a consequential Confirm/Reject commit is a deliberate one-press verdict design (CandidateForm.vue:101-104 comments justify it); filing it would contradict a ratified design decision, so it is not a finding. The absence of reversal (F-01) stands.
+- Gaps confirmed in the register rather than filed per screen: H3 (no undo on a committed turn — systemic, this screen's specific instance is F-01), H7 (no accelerators — systemic), H10 (no help surface — systemic), WCAG 1.4.3/1.4.10/1.4.11 all UNMEASURED.
+
+Conflicts: none found this pass; no code-vs-rule disagreement required settlement.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. F-01 (S): add a reversal control (re-open / un-resolve) reachable after resolving, or state irreversibility before commit. Acceptance: a resolved candidate can be returned to Pending from a reachable screen.
+
+### 9. Change-audit re-check
+
+Not owed (M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (CandidateForm internals beyond Detail.vue's bindings, per-page contrast, target size, reflow, keyboard, dialog focus trap).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- §3.1 provenance caveats carried (Gerhardt-Powals, IA prose, Norman, Tognazzini 2014 count, Laws of UX count, Laws of UI count, no Law of Experience).
+- Evidence capability recorded as FALSE; spawn EPERM named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and file:line location verified this run.
+- No severity 3/4 finding rests on inference — severity 3 here is Medium confidence; per the protocol a Medium-confidence severity-4 finding must state what measurement would raise confidence, but this finding is severity 3 so it may carry Medium confidence with the open-item noted.
+- Severity and confidence kept on separate axes.
+- No defect filed twice; the row carries one primary rule.
+- Recommendations ordered by severity then confidence then effort (1 item).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1–10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance; 4.1.1 never cited.
+- Report does not modify app code.
+
+## AUD-20261102-023.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-20261102-023.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M2 screen audit: Legacy Lab saved legacies (legacy.index)
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-023
+- Date: 2026-11-02
+- Mode: M2 screen audit
+- Scope: resources/js/pages/Legacy/Index.vue — route GET /legacy (legacy.index), controller App\Http\Controllers\LegacyController@index. States covered: empty (no saved pairs), populated; themes light/dark; viewports 320/390/768/1280px; keyboard-only. The builder (legacy.builder, /legacy/{run}) and compare (legacy.compare, /legacy/compare) are out of scope (AUD-20261102-024/-025).
+- Out of scope: the builder/compare write path, the veteran library (/veterans), AAA criteria, contrast/target-size/reflow measurement.
+- Frameworks applied: docs/framework-ui-ux/design-framework-index-2026-10-21.md first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: FALSE. Chromium cannot launch in this sandbox (spawn EPERM/ENOENT); no rendered frame was obtained. All visual claims are UNMEASURED; structural and copy claims are OBSERVED_SOURCE.
+
+### 2. Executive summary
+
+- F-01 — The saved-pairs table lacks programmatic table semantics. It has no caption and its th cells carry no scope, unlike the worth-reference table beside it which does carry a caption; screen readers get no programmatic table title and weaker header-to-data-cell association. Severity 2, Medium.
+- Largest unmeasured risk: contrast ratios, the 44 px target floor on the "Open" links and the veteran-library link, reflow of the table at 320 px, focus-visible/focus-not-obscured — none measurable without a browser.
+- Note: the record-only safety contract (RECORD_ONLY_NOTICE) is intentionally not rendered on this page — the browser spec asserts its count is 0 on /legacy (legacy.spec.ts:92-97) because the banner lives once on the builder (plan 2.5). This is a deliberate decision, not a defect, and is logged in §7 rather than filed.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Legacy Lab saved legacies (legacy.index) | yes | yes | shell flash only | shell progress bar | src | src | named | named | named | named | src | legacy-spec (index describe) |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 4.1.2 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only, never conformance; 2.5.7 N/A; 3.2.6/3.3.7 N/A; AAA not reached; 4.1.1 never cited (withdrawn) |
+| Heuristics | H1, H2, H4, H8, H9 | H3 (exit is the rail/breadcrumbs), H5, H7 accelerators (systemic gap) |
+| Shneiderman | SHR-4 | SHR-1..SHR-3, SHR-5..SHR-8 |
+| Tognazzini | none with finding | TOG-1 (50 ms) UNMEASURED; TOG-2..TOG-8 |
+| Information architecture | IA-1, IA-4, IA-5 | IA-2, IA-3, IA-6 |
+| Gestalt | GT-2 | GT-1, GT-3, GT-5, GT-6 |
+| Norman | NRM-1, NRM-4 | NRM-2, NRM-3, NRM-5, NRM-6 |
+| Laws of UX | UX-4, UX-10 | UX-1, UX-2, UX-3, UX-5..UX-9 |
+| Laws of UI | UI-3, UI-4, UI-6 | UI-1, UI-2, UI-5, UI-7 |
+| Gerhardt-Powals | none with finding | GP-1..GP-5 |
+
+Applied, measured clean from source (no finding): H1/NRM-5 page head states where the Trainer is (eyebrow/title/description, Index.vue:47-57); H2 Global client vocabulary (lang/en/uma.php); H4/SHR-1 one token set, one focus ring; H8 every element carries a fact (the worth table states reference values only, the note names what is not computed); H9 plain copy ("No saved pair yet", Index.vue:68); GT-2/UI-4 absent values carry word+title ("N/A ... this parent slot is empty", Index.vue:94-98); IA-1 breadcrumb + head + way back (rail); IA-4 index previews (pairs) vs detail holds (builder); IA-5 empty state names absence + remedy + action (Index.vue:66-71); WCAG 3.3.2 labels on the "Open" links; N/A: 2.5.7 no drag, 2.1.4 no accelerators, 3.3.8 no auth, 1.2/1.4.2/2.3 no media/audio/flashing.
+
+### 4. Evidence status and limits
+
+- RENDERED_EVIDENCE = FALSE. Chromium cannot launch in this sandbox (spawn EPERM); no rendered frame was obtained. Named per audit protocol §3.3.
+- Structural and copy claims are OBSERVED_SOURCE against the page and controller source read this run, with file:line locations.
+- Visual, contrast, target-size and reflow claims are UNMEASURED (§6); no intended ratio from app.css is copied as a measurement.
+- Provenance caveats carried (protocol §3.1): Gerhardt-Powals primary text paywalled (9-vs-10 split unconfirmed); IA prose unread; Norman's book not fetched; Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13; no "Law of Experience" (it is Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity to uilaws-2026-10-21.md; Common Fate to gestalt-principles-2026-10-21.md; Fitts/Hick/Jakob to laws-of-ux-2026-10-21.md; 44 px is a house rule exceeding 2.5.8, never conformance; 4.1.1 never cited.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+|---|---|---|---|---|---|---|---|---|---|
+| F-01 | WCAG 1.3.1 (secondary 4.1.2) | WCAG 2.2 AA | Legacy Lab saved-legacies page, the pairs table, all themes | The saved-pairs table has no caption and its th cells carry no scope (Index.vue:77-82), while the worth-reference table beside it does carry a caption (Index.vue:115); screen readers get no programmatic table title and weaker header-to-data-cell association for the pairs table. | OBSERVED_SOURCE | resources/js/pages/Legacy/Index.vue:74-106 (table :74, headers :77-82) | 2 | Medium | Add a caption and scope="col" on the pairs-table header cells. Acceptance: the pairs table has a caption and scoped headers. |
+
+No finding is filed twice for one defect; the row carries one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+|---|---|---|
+| Light/dark body text meets 4.5:1 on every Legacy panel | No browser; intended ratios in app.css only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, focus rings, pill edges) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow of the pairs table at 320 px | No browser; viewport never rendered | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on every control ("Open" links, veteran-library link) | No browser; boxes not measured | Rendered target-size sweep |
+| Focus visible and focus-not-obscured on every Legacy control | No keyboard run executed | Keyboard pass over the page |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize + text-spacing pass |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- 44 px vs 2.5.8. Target-size observations are filed under the house rule (UX-1/TOG-5) and explicitly not as conformance, per wcag-2.2-accessibility-2026-10-21.md.
+- Closure vs honesty. Absent values carry a word and a title; GT-2/UI-4 hold. No finding.
+- Record-only notice absent by design. The controller passes notice (LegacyController.php:91) but the template does not render it; the browser spec asserts count 0 on /legacy (legacy.spec.ts:92-97) and plan 2.5 places the banner once on the builder. This is a deliberate decision, logged here, not a per-screen defect. (The controller comment "every Legacy surface carries" the banner predates plan 2.5 and is stale relative to it.)
+- Density vs minimalism. The worth table previews reference values and defers computation; H8 holds. No finding.
+- Gaps confirmed in the register rather than filed per screen: H3/H7/H10 systemic gaps, WCAG 1.4.3/1.4.10/1.4.11 all UNMEASURED.
+
+Conflicts: none found this pass; no code-vs-rule disagreement required settlement.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. F-01 (S): add a caption and scope="col" to the saved-pairs table. Acceptance: the pairs table has a caption and scoped headers.
+
+### 9. Change-audit re-check
+
+Not owed (M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (builder/compare, per-page contrast, target size, reflow, keyboard).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- §3.1 provenance caveats carried (Gerhardt-Powals, IA prose, Norman, Tognazzini 2014 count, Laws of UX count, Laws of UI count, no Law of Experience).
+- Evidence capability recorded as FALSE; spawn EPERM named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and file:line location verified this run.
+- No severity 3/4 finding rests on inference (highest is severity 2).
+- Severity and confidence kept on separate axes.
+- No defect filed twice; the row carries one primary rule.
+- Recommendations ordered by severity then confidence then effort (1 item).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1–10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance; 4.1.1 never cited.
+- Report does not modify app code.
+
+## AUD-20261102-024.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-20261102-024.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M2 screen audit: Legacy Lab compare (legacy.compare)
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-024
+- Date: 2026-11-02
+- Mode: M2 screen audit
+- Scope: resources/js/pages/Legacy/Compare.vue — route GET /legacy/compare (legacy.compare), controller App\Http\Controllers\LegacyController@compare. States covered: nothing selected, one column selected, two+ columns, all-identical, error; themes light/dark; viewports 320/390/768/1280px; keyboard-only. The builder (legacy.builder) and saved-legacies index (legacy.index) are out of scope (AUD-20261102-023/-025).
+- Out of scope: the builder write path, the veteran library, AAA criteria, contrast/target-size/reflow measurement.
+- Frameworks applied: docs/framework-ui-ux/design-framework-index-2026-10-21.md first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: FALSE. Chromium cannot launch in this sandbox (spawn EPERM/ENOENT); no rendered frame was obtained. All visual claims are UNMEASURED; structural and copy claims are OBSERVED_SOURCE.
+
+### 2. Executive summary
+
+- F-01 — One selected run renders a non-comparison as a comparison. Selecting exactly one run and pressing Compare produces a difference table whose every verdict is "single column" (styled pill-caution) although one column is not a comparison; the page's own empty-state copy says "a comparison needs two columns." The behaviour contradicts the framing, so the screen presents a one-column table with caution verdicts as though it were a comparison. Severity 2, Medium.
+- Largest unmeasured risk: contrast ratios, the 44 px target floor on the Compare button and checkboxes, reflow of the scrollable comparison region at 320 px, focus-visible/focus-not-obscured — none measurable without a browser.
+- Note: the record-only safety contract (RECORD_ONLY_NOTICE) is intentionally not rendered on this page — the banner lives once on the builder (plan 2.5). Logged in §7, not filed.
+
+### 3. Scope and coverage
+
+| Surface | nothing selected | one column | two+ columns | all-identical | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Legacy compare (legacy.compare) | yes | yes | yes | yes | shell flash only | shell progress bar | src | src | named | named | named | named | src | legacy-spec (compare describe) |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 4.1.2, 4.1.3 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only, never conformance; 2.5.7 N/A; 3.2.6/3.3.7 N/A; AAA not reached; 4.1.1 never cited (withdrawn) |
+| Heuristics | H1, H2, H4, H5, H8, H9 | H3, H7 accelerators (systemic gap) |
+| Shneiderman | SHR-3, SHR-5 | SHR-1, SHR-4, SHR-6, SHR-7, SHR-8 |
+| Tognazzini | TOG-3 | TOG-1 (50 ms) UNMEASURED; TOG-2..TOG-8 |
+| Information architecture | IA-1, IA-4 | IA-2, IA-3, IA-5, IA-6 |
+| Gestalt | GT-2, GT-4 | GT-1, GT-3, GT-5, GT-6 |
+| Norman | NRM-1, NRM-2, NRM-4, NRM-5 | NRM-3, NRM-6 |
+| Laws of UX | UX-4, UX-10 | UX-1, UX-2, UX-3, UX-5..UX-9 |
+| Laws of UI | UI-3, UI-4, UI-6 | UI-1, UI-2, UI-5, UI-7 |
+| Gerhardt-Powals | GP-3 | GP-1, GP-2, GP-4, GP-5 |
+
+Applied, measured clean from source (no finding): H1/NRM-5 error alerts with role="alert" (server errors.runs and client cap message, Compare.vue:319-326); H2 the table states recorded values only ("nothing here is scored, ranked or totalled", caption at :365-368); H4/SHR-1 one token set, one component per role; H5/NRM-2 the cap is enforced client-side before submit (toggle, :140-151) and server-side (LegacyCompareRequest); H8 every element carries a fact; H9 plain copy; GT-2/UI-4 absent values carry word+title ("N/A ... no recorded ★3 Blue factor raises this stat", :666); IA-1 head + way back; IA-4 index preview (comparable runs) vs detail holds (builder); WCAG 3.3.2 labels (fieldset legend sr-only); WCAG 4.1.2 name/role/value (BaseCheckbox labelled, rowheader scope="row"); WCAG 4.1.3 role="alert" errors; GP-3 spark counts labelled as counts (not summed); GT-4 one pill variant per verdict (same→neutral, differs→caution); N/A: 2.5.7 no drag, 2.1.4 no accelerators, 3.3.8 no auth, 1.2/1.4.2/2.3 no media/audio/flashing.
+
+### 4. Evidence status and limits
+
+- RENDERED_EVIDENCE = FALSE. Chromium cannot launch in this sandbox (spawn EPERM); no rendered frame was obtained. Named per audit protocol §3.3.
+- Structural and copy claims are OBSERVED_SOURCE against the page and controller source read this run, with file:line locations.
+- Visual, contrast, target-size and reflow claims are UNMEASURED (§6); no intended ratio from app.css is copied as a measurement.
+- Provenance caveats carried (protocol §3.1): Gerhardt-Powals primary text paywalled (9-vs-10 split unconfirmed); IA prose unread; Norman's book not fetched; Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13; no "Law of Experience" (it is Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity to uilaws-2026-10-21.md; Common Fate to gestalt-principles-2026-10-21.md; Fitts/Hick/Jakob to laws-of-ux-2026-10-21.md; 44 px is a house rule exceeding 2.5.8, never conformance; 4.1.1 never cited.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+|---|---|---|---|---|---|---|---|---|---|
+| F-01 | TOG-3 (secondary H2) | Tognazzini / Heuristics | Legacy compare, exactly one run selected | Selecting exactly one run and pressing Compare renders a difference table whose every verdict is "single column" (styled pill-caution) although one column is not a comparison; differenceOf returns "single column" for < 2 values (Compare.vue:177-179) and verdictPill styles every non-"same" verdict as caution (:278-279), while the page's own copy says "a comparison needs two columns" (:341-343). The behaviour contradicts the framing: a non-comparison is presented as a comparison with caution verdicts. | OBSERVED_SOURCE | resources/js/pages/Legacy/Compare.vue:177-179 (differenceOf), :278-279 (verdictPill), :337-343 (empty-state copy, renders only at 0 columns), :345-346 (table renders at 1 column) | 2 | Medium | Either block Compare with fewer than 2 runs (disable the button / show the "needs two columns" state at 1 too) or drop the caution verdicts for single-column. Acceptance: one selected run does not produce a difference table implying a comparison. |
+
+No finding is filed twice for one defect; the row carries one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+|---|---|---|
+| Light/dark body text meets 4.5:1 on every compare panel | No browser; intended ratios in app.css only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, focus rings, pill edges) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow of the scrollable comparison region at 320 px (tabindex=0 region) | No browser; viewport never rendered | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on every control (Compare button, checkboxes) | No browser; boxes not measured | Rendered target-size sweep |
+| Focus visible and focus-not-obscured on every compare control | No keyboard run executed | Keyboard pass over the page |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize + text-spacing pass |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- 44 px vs 2.5.8. Target-size observations are filed under the house rule (UX-1/TOG-5) and explicitly not as conformance, per wcag-2.2-accessibility-2026-10-21.md.
+- Closure vs honesty. Absent values carry a word and a title; GT-2/UI-4 hold. No finding.
+- Record-only notice absent by design (banner lives once on the builder, plan 2.5); logged here, not filed.
+- No total/best/score by deliberate ADR-0020 §3 refusal; that is a strength, not a defect. No finding.
+- Gaps confirmed in the register rather than filed per screen: H3/H7/H10 systemic gaps, WCAG 1.4.3/1.4.10/1.4.11 all UNMEASURED.
+
+Conflicts: none found this pass; no code-vs-rule disagreement required settlement.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. F-01 (S): block Compare with fewer than 2 runs, or drop caution verdicts for single-column. Acceptance: one selected run does not produce a difference table implying a comparison.
+
+### 9. Change-audit re-check
+
+Not owed (M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (builder/index, per-page contrast, target size, reflow, keyboard).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- §3.1 provenance caveats carried (Gerhardt-Powals, IA prose, Norman, Tognazzini 2014 count, Laws of UX count, Laws of UI count, no Law of Experience).
+- Evidence capability recorded as FALSE; spawn EPERM named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and file:line location verified this run.
+- No severity 3/4 finding rests on inference (highest is severity 2).
+- Severity and confidence kept on separate axes.
+- No defect filed twice; the row carries one primary rule.
+- Recommendations ordered by severity then confidence then effort (1 item).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1–10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance; 4.1.1 never cited.
+- Report does not modify app code.
+
+## AUD-20261102-025.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-20261102-025.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M2 screen audit: Legacy Lab builder (legacy.builder)
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-025
+- Date: 2026-11-02
+- Mode: M2 screen audit
+- Scope: resources/js/pages/Legacy/Builder.vue — route GET /legacy/{run} (legacy.builder), controller App\Http\Controllers\LegacyController@builder. States covered: no selection yet / has selection, populated graph, error; themes light/dark; viewports 320/390/768/1280px; keyboard-only; the confirm dialog (native <dialog> showModal). The saved-legacies index (legacy.index) and compare (legacy.compare) are out of scope (AUD-20261102-023/-024).
+- Out of scope: the AncestorEditor and AncestryNode sub-components internals beyond what Builder.vue binds, the store/write endpoint internals (LegacyController@update), AAA criteria, contrast/target-size/reflow measurement.
+- Frameworks applied: docs/framework-ui-ux/design-framework-index-2026-10-21.md first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: FALSE. Chromium cannot launch in this sandbox (spawn EPERM/ENOENT); no rendered frame was obtained. All visual claims are UNMEASURED; structural and copy claims are OBSERVED_SOURCE.
+
+### 2. Executive summary
+
+- F-01 — The spark editor under-constrains input against its own documented maximum. addSpark pushes a row {kind:'blue', category:'Stat', target:'', stars:1} with no per-parent or per-kind cap, yet the page's own note states "Picking one blue per parent is the maximum this pair offers" (Builder.vue:820). A Trainer can add unlimited blue sparks per parent, and each added row is non-blank (stars=1) with a blank target, so an incomplete spark (target→null on post) can enter the record or be rejected only after commit. Severity 2, Medium.
+- Largest unmeasured risk: contrast ratios, the 44 px target floor on the spark editor inputs/buttons and the Save/Cancel/Confirm buttons, reflow of the nested graph and preview at 320/390 px, focus-visible/focus-not-obscured in the confirm dialog — none measurable without a browser.
+- Note: the record-only safety contract (RECORD_ONLY_NOTICE) IS rendered here (in the "What this screen records" disclosure, Builder.vue:450-456), making this the one Legacy surface that carries the banner; Index and Compare intentionally omit it (plan 2.5).
+
+### 3. Scope and coverage
+
+| Surface | no selection | has selection | populated graph | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Legacy builder (legacy.builder) | yes | yes | yes | shell flash + form errors | shell progress bar | src | src | named | named | named | named | src | legacy-spec (builder describe) |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 4.1.2, 4.1.3, 3.3.1, 3.3.2 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only, never conformance; 2.5.7 N/A (no drag); 3.2.6/3.3.7 N/A; AAA not reached; 4.1.1 never cited (withdrawn) |
+| Heuristics | H1, H2, H3, H5, H8, H9 | H6, H7 accelerators (systemic gap) |
+| Shneiderman | SHR-5, SHR-7 | SHR-1, SHR-4, SHR-6 (post-commit undo is the systemic gap, not this screen), SHR-8 |
+| Tognazzini | TOG-3, TOG-6 | TOG-1 (50 ms) UNMEASURED; TOG-2, TOG-4, TOG-5, TOG-7, TOG-8 |
+| Information architecture | IA-1, IA-4 | IA-2, IA-3, IA-5, IA-6 |
+| Gestalt | GT-2, GT-4 | GT-1, GT-3, GT-5, GT-6 |
+| Norman | NRM-1, NRM-2, NRM-3, NRM-4, NRM-5 | NRM-6 (execution/evaluation answered by form + status) |
+| Laws of UX | UX-4, UX-5 | UX-1, UX-2, UX-3, UX-6..UX-10 |
+| Laws of UI | UI-3, UI-4, UI-6 | UI-1, UI-2, UI-5, UI-7 |
+| Gerhardt-Powals | GP-3 | GP-1, GP-2, GP-4, GP-5 |
+
+Applied, measured clean from source (no finding): H1/NRM-5 aria-busy on the form (Builder.vue:471), flash via shell; H2 Global client vocabulary (lang/en/uma.php); H3 the confirm dialog is the marked emergency exit before a destructive replace ("Confirm Inheritance", Builder.vue:891); H5/NRM-2 blank fields post as absence, draft sparks discarded on the way out (Builder.vue:397-423, isBlankSpark :175-177); H8 every element carries a fact; H9 plain, non-blaming copy (errors.legacies role="alert", :826-831); SHR-5 a refused write leaves entered state intact (Discard restores pristine snapshot, :385-389); SHR-7 decision values on the decision screen (projection table reads server-side, never re-derived); TOG-6 confirmation present and named before the destructive whole-column replace (dialog, :886-916); GT-2/UI-4 absent values carry word+title ("no recorded ★3 Blue factor raises this stat", :666-668); GT-4 one glyph/one meaning (spark chips); IA-4 index previews vs detail holds; WCAG 3.3.2 labels (every field labelled); WCAG 4.1.2 name/role/value (BaseRadio sr-only descriptive names, :668-671); WCAG 4.1.3 role="status" Dirty/Saved word (:841); GP-3 the projection raise is labelled as a summation sourced from server ("+16-per-★3 cap raise is the breakthrough", note); N/A: 2.5.7 no drag, 2.1.4 no accelerators, 3.3.8 no auth, 1.2/1.4.2/2.3 no media/audio/flashing.
+
+### 4. Evidence status and limits
+
+- RENDERED_EVIDENCE = FALSE. Chromium cannot launch in this sandbox (spawn EPERM); no rendered frame was obtained. Named per audit protocol §3.3.
+- Structural and copy claims are OBSERVED_SOURCE against the page and controller source read this run, with file:line locations.
+- Visual, contrast, target-size and reflow claims are UNMEASURED (§6); no intended ratio from app.css is copied as a measurement.
+- Provenance caveats carried (protocol §3.1): Gerhardt-Powals primary text paywalled (9-vs-10 split unconfirmed); IA prose unread; Norman's book not fetched; Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13; no "Law of Experience" (it is Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity to uilaws-2026-10-21.md; Common Fate to gestalt-principles-2026-10-21.md; Fitts/Hick/Jakob to laws-of-ux-2026-10-21.md; 44 px is a house rule exceeding 2.5.8, never conformance; 4.1.1 never cited.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+|---|---|---|---|---|---|---|---|---|---|
+| F-01 | H5 (secondary H2) | Heuristics | Legacy builder, the spark editor, populated | addSpark pushes a row {kind:'blue', category:'Stat', target:'', stars:1} with no per-parent or per-kind cap (Builder.vue:289-291), yet the page's own note states "Picking one blue per parent is the maximum this pair offers" (Builder.vue:820). A Trainer can add unlimited blue sparks per parent; each added row is non-blank (stars=1) with a blank target, so on post it becomes target=null with stars=1 (Builder.vue:415-420) — an incomplete spark can enter the record, or be rejected only after commit. The UI under-constrains input it documents as capped. | OBSERVED_SOURCE | resources/js/pages/Legacy/Builder.vue:289-291 (addSpark), :820 (one-blue-per-parent note), :415-420 (transform posts null target) | 2 | Medium | Cap sparks per parent/kind to the documented maximum (one blue per parent), or remove the maximum note; pre-fill new spark rows as blank (target '', stars '') so they are discarded unless completed. Acceptance: adding more than one blue spark per parent is prevented or clearly rejected before commit. |
+
+No finding is filed twice for one defect; the row carries one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+|---|---|---|
+| Light/dark body text meets 4.5:1 on every builder panel | No browser; intended ratios in app.css only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, focus rings, pill edges) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow of the nested graph and preview region at 320/390 px | No browser; viewport never rendered | Rendered reflow pass at 320 and 390 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on every control (spark inputs, Save/Confirm/Cancel) | No browser; boxes not measured | Rendered target-size sweep |
+| Focus visible and focus-not-obscured on every builder control, incl. the confirm dialog | No keyboard run executed | Keyboard pass over the page and the dialog |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize + text-spacing pass |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- 44 px vs 2.5.8. Target-size observations are filed under the house rule (UX-1/TOG-5) and explicitly not as conformance, per wcag-2.2-accessibility-2026-10-21.md.
+- Closure vs honesty. Absent values carry a word and a title; GT-2/UI-4 hold. No finding.
+- Whole-column replace is deliberate (ADR-0010: the payload is one object; a merge would leave deleted sparks orphaned). Not a defect.
+- Post-commit undo absence is the systemic H3 gap, not a Builder-specific defect — Builder already provides Discard (pre-commit reversal) and a named confirmation (TOG-6). Logged in the register, not filed per screen.
+- Gaps confirmed in the register rather than filed per screen: H3/H7/H10 systemic gaps, WCAG 1.4.3/1.4.10/1.4.11 all UNMEASURED.
+
+Conflicts: none found this pass; no code-vs-rule disagreement required settlement.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. F-01 (S): cap sparks per parent/kind to the documented maximum, or remove the maximum note; pre-fill new spark rows as blank. Acceptance: adding more than one blue spark per parent is prevented or clearly rejected before commit.
+
+### 9. Change-audit re-check
+
+Not owed (M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (AncestorEditor/AncestryNode internals beyond bindings, the store endpoint, per-page contrast, target size, reflow, keyboard, dialog focus trap).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- §3.1 provenance caveats carried (Gerhardt-Powals, IA prose, Norman, Tognazzini 2014 count, Laws of UX count, Laws of UI count, no Law of Experience).
+- Evidence capability recorded as FALSE; spawn EPERM named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and file:line location verified this run.
+- No severity 3/4 finding rests on inference (highest is severity 2).
+- Severity and confidence kept on separate axes.
+- No defect filed twice; the row carries one primary rule.
+- Recommendations ordered by severity then confidence then effort (1 item).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1–10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance; 4.1.1 never cited.
+- Report does not modify app code.
+
+## AUD-20261102-026-veterans-index-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-20261102-026-veterans-index-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M2 screen audit: Veterans library (veterans.index)
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-026
+- Date: 2026-11-02
+- Mode: M2 screen audit (A11y overlay applied as a separate track, Phase 5)
+- Scope: `GET /veterans` (`veterans.index`), `App\Http\Controllers\VeteranController@index` (`app/Http/Controllers/VeteranController.php:45-88`), `resources/js/pages/Veterans/Index.vue`; states empty / populated / loading / error; both themes; widths 320 / 390 / 768 / 1280; keyboard-only operation.
+- Out of scope: the compare and detail screens (separate reports AUD-20261102-027/-028), the Legacy Lab search endpoint behind `find_parents_url`, backend behavior beyond the controller's own props, performance, AAA criteria, any fix.
+- Frameworks applied: `design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Gerhardt-Powals, IA, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing (narrowest framework per question). Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**.
+
+### 2. Executive summary
+
+- **F-01 — the "Clear" filter control reloads the document.** It is a plain `<a href="/veterans">` (Index.vue:319-321) while the screen's other doors use Inertia client navigation, so clicking Clear discards the current filter state and scroll position. Severity 2, High confidence.
+- **F-02 — the empty library states the absence and a door but shows no exemplar of what fills it** (Index.vue:349-359), against IA-5. Severity 2, High confidence.
+- **Largest unmeasured risk:** contrast, target size and reflow at 320 px — no browser; every visual claim is `UNMEASURED` (§6).
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Head / lede | yes | yes | yes | yes | src | src | named | named | named | named | src |
+| Filter row (search / scenario / tag / order / submit / clear) | yes | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Empty library ("holds no Veterans yet") | yes | n/a | n/a | n/a | src | src | named | named | named | named | src |
+| Filtered empty ("Nothing matches those filters") | yes | n/a | n/a | n/a | src | src | named | named | named | named | src |
+| Table list (rows with selection checkboxes) | n/a | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Compact pager | n/a | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Factor grades card | yes | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Team eligibility card | yes | yes | n/a | n/a | src | src | named | named | named | named | src |
+| "Not in this build" details | yes | yes | n/a | n/a | src | src | named | named | named | named | src |
+
+Framework coverage (applied and produced findings): `H4`/`SHR-1` (F-01), `IA-5` (F-02).
+Applied, source-clean, no finding: `H1` (loading line `role="status"` at :338 plus shell `VisitProgressBar`); `H2` (client vocabulary); `H5`/`H9` (error paragraphs `role="alert"` with message at :325-327; checkbox disabled past the compare cap at :403 — constraint, state intact); `SHR-3` (acknowledgement); `GP-1`/`GP-3` (team arithmetic labelled as a summation at :198-206); `IA-1` (directly reachable, own crumb via AppLayout); `IA-3` (search, scenario, tag and order axes); `IA-4` (row previews, detail holds via `veteran_url`); `WCAG 2.1.1`/`2.4.7`/`4.1.2` (links, buttons, labelled checkboxes, `sr-only` names); `WCAG 1.4.1` (status never colour alone).
+`N/A` by the framework's own list: `2.5.7` (no drag), `2.1.4` (no accelerators), `SHR-4`/`SHR-6` (no committed turn on this screen), `3.3.8` (no authentication), `1.2`/`1.4.2`/`2.3` (no media/audio/flashing).
+Not reached: M3/M4 phases (single screen), `IA-6`/`IA-8` (structure between screens is covered in AUD-017's scope note), AAA criteria.
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. `app.css` intended ratios are not measurements (repository constraint, `RENDERED_EVIDENCE_UNAVAILABLE`).
+- Every structural, copy and navigation claim below is `OBSERVED_SOURCE` against the component and controller source, with `file:line`.
+- Contrast, target size (44 px house rule vs 2.5.8's 24 px floor), reflow, 200% resize and text-spacing override were not measured; all are in §6.
+- Provenance caveats carried (§3.1 of the audit prompt): Gerhardt-Powals primary text paywalled, items 5/6 an unconfirmed split (nothing here rests on that boundary); IA prose unread, only the names and one-line summaries are the article's own (IA-5 used only as its derived sentence); Norman's book not fetched, quotes from the encyclopedia entry; Tognazzini sixteen are the original edition, 2014 count unverified; Laws of UX holds 29 (Zeigarnik from its own page); Laws of UI holds 13 and publishes Closure and Continuity; no "Law of Experience" (it is Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity cited to `uilaws-2026-10-21.md`; Common Fate cited to `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob cited to `laws-of-ux-2026-10-21.md`; the 44 px rule is described as a house rule exceeding 2.5.8, never as conformance; 4.1.1 never cited (withdrawn in 2.2).
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | `SHR-1` (secondary `H4`) | Shneiderman / Heuristics | Filter row, all states, all widths | The "Clear" control is a plain `<a href="/veterans">` (Index.vue:319-321), so it commits a full document reload: it discards the current filter state, scroll position and any in-flight visit. The screen's other doors — Compare (`LinkButton` at :241), trainee rows (`Link` at :411), Find parents (`route()` at :334) — use Inertia client navigation. Same door function, different commitment cost: an un-named consistency exception against Shneiderman rule 1 (exceptions comprehensible and few) and H4 / Jakob's Law. | OBSERVED_SOURCE | `resources/js/pages/Veterans/Index.vue:319-321`; contrast client navigation `resources/js/components/Form/LinkButton.vue:21`, `Index.vue:241` | 2 | High | Replace the anchor with `LinkButton`/Inertia `Link` to `route('veterans.index')` so Clear resets filters by client visit without a document reload. Acceptance: clicking Clear stays client-side and preserves scroll; no full reload. |
+| F-02 | `IA-5` (secondary `H9`) | Information architecture | Empty library state (no Veterans filed), all widths | The empty card prints "The library holds no Veterans yet." plus the filing notice and an "Open the run list" door (Index.vue:349-359), but shows no example of what a filled library row contains — trainee, scenario, spark counts, compare door. IA-5 / exemplars asks empty states to show what would fill them; the door names the path out but not the contents. | OBSERVED_SOURCE | `resources/js/pages/Veterans/Index.vue:349-359` | 2 | High | Add one exemplar line (or a thumbnail row) to the empty card showing what a registered Veteran record looks like. Acceptance: the empty state names example contents in addition to the door. |
+
+No finding is filed twice for one defect; each row carries one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Dark- and light-theme body text meets 4.5:1 on every surface | No browser; intended ratios in `app.css` only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, focus rings, risk edge) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling | No browser; `.g-side`-adjacent grids and `overflow-x-auto` table not measured | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on every control | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and the 1.4.12 text-spacing override lose nothing | No resize pass run | Resize + text-spacing pass at 320 px |
+| Screen-reader announcement of the loading line, error paragraphs and table | No AT attached | NVDA/VoiceOver pass over populated and empty states |
+| Whether the filter row's `aria-label="Scenario"` select and the `sr-only` table header spans compute as expected | No accessibility-tree inspection | AT tree inspection at 320/1280 |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** No target-size claim is made in this report; the house rule exceeds 2.5.8 and is never described as conformance (`wcag-2.2-accessibility-2026-10-21.md`).
+- **Density vs minimalism.** The library is a reference table; its density is inherent to the screen, not a drift (the deliberate Database exemption is elsewhere). No finding.
+- **Closure vs honesty.** Every `N/A` and absent-value cell carries a word and a title/sr-only reason; partial states never claim completeness (`GT-2`/`UI-4` hold). No finding.
+- **Feedback timing.** The 50 ms acknowledgement and 400 ms Doherty response are compatible per the index; the only acknowledgement surface here is the `role="status"` loading line, whose latency is unmeasured (§6).
+
+Gaps confirmed in the register rather than filed per screen: none new on this screen (H3 undo, H7 accelerators, H10 help surface are global gaps tracked elsewhere; this screen commits nothing and is not the help surface).
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort. Each states: what to change, which rule it satisfies, effort S/M/L, and the acceptance check.
+
+1. **F-01 (S):** swap the Clear anchor for `LinkButton` to `route('veterans.index')`. Rule: `SHR-1`/`H4`. Check: clicking Clear stays client-side, preserves scroll and filters reset.
+2. **F-02 (S):** add exemplar copy to the empty-state card. Rule: `IA-5`. Check: empty state shows example contents of a registered row.
+
+### 9. Change-audit re-check (M1 only)
+
+Not owed (mode is M2). No commit is being made by this audit.
+
+### 10. Exit checklist
+
+- Scope, mode, surfaces, states, viewports and themes stated.
+- Framework routing recorded, narrowest rule per question, secondaries listed.
+- §3.1 provenance caveats carried.
+- Evidence capability recorded as FALSE; `spawn EPERM` named; source `file:line` used for every `OBSERVED_SOURCE` claim; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status.
+- No severity 3/4 finding rests on inference (highest severity here is 2).
+- Severity and confidence are separate axes.
+- No defect filed twice.
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (§7).
+- No conformance claimed beyond criteria tested; no rendered observation claimed.
+- Report does not modify app code.
+
+## AUD-20261102-027-veterans-compare-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-20261102-027-veterans-compare-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M2 screen audit: Veteran comparison (veterans.compare)
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-027
+- Date: 2026-11-02
+- Mode: M2 screen audit (A11y overlay applied as a separate track, Phase 5)
+- Scope: `GET /veterans/compare` (`veterans.compare`), `App\Http\Controllers\VeteranController@compare` (`app/Http/Controllers/VeteranController.php:170-226`), `resources/js/pages/Veterans/Compare.vue`; states empty / populated / loading / error; both themes; widths 320 / 390 / 768 / 1280; keyboard-only operation. The read-back concern flagged in Phase 4 is covered by F-01/F-02.
+- Out of scope: the Legacy Lab's separate comparison (different eligibility, different surface), the library screen (separate report AUD-20261102-026), backend behavior beyond the controller's own props, performance, AAA criteria, any fix.
+- Frameworks applied: `design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, IA, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**.
+
+### 2. Executive summary
+
+- **F-01 — the matrix's sticky Property column and header row are a no-op.** `position: sticky` is declared at Compare.vue:818-844, but AppLayout's `main` is an `@container` containment context (AppLayout.vue:613-618), which makes `position: sticky` a no-op for every descendant (AppLayout.vue:607-609, pinned by `tests/browser/containment.spec.ts:50-63`, cited at AppLayout.vue:608). Property labels scroll off with the matrix: the user can act (scroll/page) but cannot tell which property a value names (Norman's gulf of evaluation). Severity 2, High confidence.
+- **F-02 — below `lg` the Difference verdict column is hidden** (Compare.vue:475) while careers are paged one at a time (Compare.vue:291-293), so the comparison's output is invisible exactly when careers are paged out of view (H6 / NRM-6 read-back failure). Severity 2, High confidence.
+- **F-03 — one selected career renders "single column" as a caution pill on every Difference row** (Compare.vue:142-146, 266-267), against UX-5 (look-alike behaves alike). Severity 1, High confidence.
+- **F-04 — `Back to library` and `Open the library` are plain anchors** (Compare.vue:379, 396), causing full document reloads where sibling doors use Inertia `LinkButton` (SHR-1 / H4). Severity 1, High confidence.
+- **Largest unmeasured risk:** whether the matrix overflows the shell at each width (the sticky failure only bites when it scrolls), plus all contrast/target/reflow claims (§6).
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Head / lede | yes | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Empty state ("Nothing selected") | yes | n/a | n/a | n/a | src | src | named | named | named | named | src |
+| Matrix, >= lg (all careers + Difference column) | n/a | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Matrix, < lg (Property + one career, pager) | n/a | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Single career selected | n/a | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Mirror scrollbar (`hasHorizontalOverflow`) | n/a | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Career note cards below matrix | n/a | yes | n/a | n/a | src | src | named | named | named | named | src |
+| "NOT IN THIS BUILD" absences | yes | yes | n/a | n/a | src | src | named | named | named | named | src |
+
+Framework coverage (applied and produced findings): `NRM-6`/`H6` (F-01, F-02), `UX-5` (F-03), `SHR-1`/`H4` (F-04).
+Applied, source-clean, no finding: `H1` (status notes `role="note"` at :408-410 and :758-760; loading handled by shell `VisitProgressBar`); `H2` (client vocabulary); `IA-3`/`IA-4` (the comparison is itself a browse axis over the library; each column links to its detail via `veteran_url`); `WCAG 2.1.1` (mirror scroller `role="region"`/`tabindex="0"`/`aria-label` at :442-446; links and buttons keyboard operable); `WCAG 4.1.3` (pager live region `aria-live="polite"` at :422-424); `WCAG 1.3.1` (`scope="col"`, `scope="row"`, caption at :450-452); `WCAG 1.4.1` (verdicts carry word + pill class, not colour alone).
+`N/A` by the framework's own list: `2.5.7` (no drag), `2.1.4` (no accelerators), `SHR-4`/`SHR-6` (no committed turn), `SHR-5` (no refused write), `3.3.8` (no authentication), media/audio/flashing.
+Not reached: M3/M4 phases (single screen; cross-screen reachability is covered in this report's §3 narrative), AAA criteria.
+
+Cross-screen IA note (Phase 3): Compare is itself a browse axis over the library (IA-3/IA-4); it is reachable from the library's head band (`compareHref`, Index.vue:144-148) and each row (`veteran.compare_url`, Index.vue:439); the selection travels in the query string (`veterans[]`), so the view is shareable and reload-surviving. Help's front-door coverage is reported in AUD-20261102-019. No cross-screen finding.
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run.
+- Every structural, copy and navigation claim below is `OBSERVED_SOURCE` against the component and controller source, with `file:line`. The sticky no-op and the `hidden lg:table-cell` class are deterministic source facts; their visual consequence (labels scrolled off / verdicts hidden) follows from the mechanism but the overflow condition itself is not measured.
+- Contrast, target size (44 px house rule vs 2.5.8's 24 px floor), reflow, 200% resize and text-spacing override were not measured; all are in §6.
+- Provenance caveats carried (§3.1 of the audit prompt): Gerhardt-Powals primary text paywalled; IA prose unread; Norman's book not fetched; Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13 and publishes Closure and Continuity; no "Law of Experience" (Mental Model, UX-17); Closure/Continuity cited to `uilaws-2026-10-21.md`; Common Fate cited to `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob cited to `laws-of-ux-2026-10-21.md`; 44 px is a house rule exceeding 2.5.8; 4.1.1 never cited.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | `NRM-6` (secondary `GT-1`) | Norman / Gestalt | Comparison matrix, populated, all widths where the matrix overflows | The matrix marks its Property column and header row `position: sticky` so "a property label never scrolls away from the value it names" (Compare.vue:434-436; CSS :818-844). But AppLayout's `main` is an `@container` containment context (AppLayout.vue:613-618), which makes `position: sticky` a no-op for every descendant (AppLayout.vue:607-609; the behaviour is pinned by `tests/browser/containment.spec.ts:50-63`, cited at AppLayout.vue:608). A Trainer who scrolls a wide comparison loses the label-value binding: execution (scroll) succeeds, evaluation (which value belongs to which property) fails. The mechanism is source-grounded per the shell's own rule; whether a given viewport overflows is unmeasured, and a counter-reading exists (§7). | OBSERVED_SOURCE | `resources/js/pages/Veterans/Compare.vue:434-436,818-844`; `resources/js/layouts/AppLayout.vue:607-609,613-618`; `tests/browser/containment.spec.ts:50-63` (cited via AppLayout.vue:608) | 2 | High | Remove the dead sticky contract from the Compare matrix, or have the shell opt the matrix out of containment, and re-state the alignment guarantee only where it holds. Acceptance: the matrix no longer declares sticky cells that cannot stick; if label pinning is required, the containment context must change (owner decision — it affects 21 files per AppLayout.vue:602). |
+| F-02 | `H6` (secondary `NRM-6`) | Heuristics / Norman | Comparison matrix, populated, below `lg` (320 / 390 / 768) | Below `lg` the Difference column is hidden (`hidden lg:table-cell`, Compare.vue:475) and the matrix clips to Property + one career (`careerColumnClass`, :291-293), so the comparison verdict — the screen's reason to exist — is invisible while careers are paged one at a time. The Trainer must hold each career's values in memory across pages (recall across a boundary, which H6 forbids); the user can act (page careers) but cannot tell what changed (NRM-6 gulf of evaluation). The comment at :471-474 justifies hiding verdicts over paged-out values, but below `lg` every career is paged out of view. | OBSERVED_SOURCE | `resources/js/pages/Veterans/Compare.vue:291-293,471-475` | 2 | High | Show the Difference verdict below `lg` for the paged career, or keep one shared verdict column visible beside the pager. Acceptance: at 320/390/768 the verdict for the currently paged career is visible without paging back and forth. |
+| F-03 | `UX-5` | Laws of UX | Populated with exactly one career selected, all widths | `verdictOf` returns `single column` when fewer than two values exist (Compare.vue:142-146), and `verdictPill` maps anything but `same` to `pill-caution` (:266-267). With one career every Difference row reads "single column" styled as a caution: it looks like a difference warning but states there is nothing to compare. A look-alike pill behaving unlike a real verdict violates UX-5. | OBSERVED_SOURCE | `resources/js/pages/Veterans/Compare.vue:142-146,266-267` | 1 | High | Suppress the Difference pill when `orderedColumns.length < 2`, or render a neutral "nothing to compare" state. Acceptance: one selected career shows no caution pills; the zero-career empty state is unchanged. |
+| F-04 | `SHR-1` (secondary `H4`) | Shneiderman / Heuristics | Navigation doors, all states | `Back to library` (Compare.vue:379) and `Open the library` (Compare.vue:396) are plain `<a :href>` anchors, so each commits a full document reload. Equivalent doors elsewhere use Inertia `LinkButton` (`LinkButton.vue:21`; the library's Compare door at Index.vue:241). Same door function, different commitment cost: an un-named consistency exception against Shneiderman rule 1 and H4 / Jakob's Law. | OBSERVED_SOURCE | `resources/js/pages/Veterans/Compare.vue:379,396`; contrast `resources/js/components/Form/LinkButton.vue:21`, `resources/js/pages/Veterans/Index.vue:241` | 1 | High | Replace both anchors with `LinkButton`/Inertia `Link` to `route('veterans.index')`. Acceptance: both doors client-navigate without a document reload. |
+
+No finding is filed twice for one defect; each row carries one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Whether the comparison matrix overflows the shell at 1280 / 768 / 390 / 320 (the sticky no-op only bites on overflow) | No browser; shell measure and column widths not measured | Rendered overflow check at each width, populated with 1-6 careers |
+| Dark- and light-theme body text meets 4.5:1 on every surface | No browser; intended ratios in `app.css` only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, focus rings, pill edges) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Target sizes of the 44 px house rule hold on every control (mirror bar, pager buttons, pills) | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and the 1.4.12 text-spacing override lose nothing in the narrow matrix | No resize pass run | Resize + text-spacing pass at 320 px |
+| Screen-reader announcement of the matrix caption, verdict pills and mirror region | No AT attached | NVDA/VoiceOver pass over populated states at 1280 and 320 |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** No target-size conformance claim is made; the house rule exceeds 2.5.8 (`wcag-2.2-accessibility-2026-10-21.md`).
+- **Closure vs honesty.** `N/A` values and absent Spark sets carry words and reasons (`AbsenceValue`); partial states never claim completeness (`GT-2`/`UI-4`). No finding.
+- **Feedback timing.** 50 ms acknowledgement / 400 ms Doherty are compatible per the index; the `role="note"` states are static, so timing does not apply. No finding.
+
+Contradiction logged rather than filed as a second defect:
+
+- **Sticky containment versus Compare's scroll container.** `containment.spec.ts:138-140` reads Compare's sticky cells as effective inside `.comparison-region`'s own scroll container; AppLayout.vue:607-609 (load-bearing, pinned by containment.spec.ts:50-63) states sticky is a no-op for every descendant of `main`. F-01 follows the shell rule. If the team confirms the table's scroll container is the sticky containing block, F-01 is withdrawn.
+
+Gaps confirmed in the register rather than filed per screen: H3 undo (global, tracked at `UX-DELIVERABLES.md`; this screen commits nothing), H7 accelerators (global), H10 help surface (global; addressed by the Help screen in AUD-20261102-019). WCAG 2.1.4 accelerator remap/disable is a global open gap (`wcag-2.2-accessibility-2026-10-21.md` gap register), not re-filed here.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort. Each states: what to change, which rule it satisfies, effort S/M/L, and the acceptance check.
+
+1. **F-01 (S):** remove the dead sticky cells from the Compare matrix, or opt the matrix out of the shell's `@container` containment (owner decision — affects 21 files per AppLayout.vue:602). Rule: `NRM-6`. Check: no sticky CSS on cells that cannot stick; label-value alignment guaranteed only where it holds.
+2. **F-02 (S):** show the Difference verdict below `lg` for the paged career. Rule: `H6`/`NRM-6`. Check: at 320/390/768 the paged career's verdict is visible without paging back and forth.
+3. **F-03 (S):** suppress the caution pill when fewer than two careers are selected. Rule: `UX-5`. Check: one selected career shows no caution pills.
+4. **F-04 (S):** replace both plain anchors with `LinkButton`/Inertia `Link` to `route('veterans.index')`. Rule: `SHR-1`/`H4`. Check: both doors client-navigate, no document reload.
+
+### 9. Change-audit re-check (M1 only)
+
+Not owed (mode is M2). No commit is being made by this audit.
+
+### 10. Exit checklist
+
+- Scope, mode, surfaces, states, viewports and themes stated.
+- Framework routing recorded, narrowest rule per question, secondaries listed.
+- §3.1 provenance caveats carried.
+- Evidence capability recorded as FALSE; `spawn EPERM` named; source `file:line` used for every `OBSERVED_SOURCE` claim; the sticky no-op and `hidden` class are source-grounded, their visual consequence flagged as conditional on unmeasured overflow.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status.
+- No severity 3/4 finding rests on inference (highest severity here is 2).
+- Severity and confidence are separate axes.
+- No defect filed twice.
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (§7).
+- No conformance claimed beyond criteria tested; no rendered observation claimed.
+- Report does not modify app code.
+
+## AUD-20261102-028-veterans-show-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-20261102-028-veterans-show-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M2 screen audit: Veteran detail (veterans.show)
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-028
+- Date: 2026-11-02
+- Mode: M2 screen audit (A11y overlay applied as a separate track, Phase 5)
+- Scope: `GET /veterans/{veteran}` (`veterans.show`), `App\Http\Controllers\VeteranController@show` (`app/Http/Controllers/VeteranController.php:97-147`), `resources/js/pages/Veterans/Show.vue`; states populated / empty-fields (null values) / error / loading; both themes; widths 320 / 390 / 768 / 1280; keyboard-only operation.
+- Out of scope: the library and compare screens (separate reports AUD-20261102-026/-027), the Legacy Lab builder behind `builder_url`, the cockpit behind `runUrl`, backend behavior beyond the controller's own props, performance, AAA criteria, any fix.
+- Frameworks applied: `design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, IA, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**.
+
+### 2. Executive summary
+
+- **F-01 — both exit doors reload the document.** `Back to library` (Show.vue:92) and `Source ledger` (Show.vue:289) are plain `<a href="/...">` anchors on the detail screen's primary exits, while equivalent doors elsewhere use Inertia `LinkButton` (e.g. `Legacy/Index.vue:163`). A full reload discards scroll position on the way out of a detail record and is an un-named consistency exception. Severity 2, High confidence.
+- Otherwise the screen is clean from source: one `h1`, `lang="ja"` on the Japanese name (PageHeader `title-ja` plus Show.vue:117-122), every absent value rendered as `N/A` with a reason (Energy :145-151, Fans :157-161, tags :190-193, notes :199-201, stats "Not recorded" :219-221, parents :244-252, Filed :284-286), sections as `role="region"` with `aria-labelledby`, and `aria-hidden="true"` decorative glyphs.
+- **Largest unmeasured risk:** contrast, target size and reflow at 320 px — no browser; every visual claim is `UNMEASURED` (§6).
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Head / lede (page title, trainee + ja) | yes | yes | yes | yes | src | src | named | named | named | named | src |
+| The Record card (trainee / scenario / status / turns / energy / fans / skills / races) | yes | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Tags and Notes (null -> N/A + reason) | yes | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Final stats (five srows, null -> "Not recorded") | yes | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Built from (parents A/B, Legacy Lab door) | yes | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Provenance (source run, filed) | yes | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Not in this build (absences list) | yes | yes | n/a | n/a | src | src | named | named | named | named | src |
+
+Framework coverage (applied and produced findings): `SHR-1`/`H4` (F-01).
+Applied, source-clean, no finding: `H1` (shell `VisitProgressBar` covers loading; no screen-local pending states because this screen performs no writes); `H2` (client vocabulary, `lang="ja"` on Japanese name); `H5`/`NRM-3` (no writes, so no refused-write or error states on this screen); `SHR-7`/`GP-3` (decision values — stats, counts — on the decision screen, labelled); `IA-1`/`IA-4` (directly reachable, own page head; detail holds what the library previews); `WCAG 2.1.1`/`2.4.7`/`4.1.2` (links, buttons, labelled regions, `lang` switches voice); `WCAG 1.4.1` (no information carried by colour alone; glyphs `aria-hidden` with word beside); `WCAG 3.1.2` (Japanese name in `lang="ja"` via PageHeader and Show.vue:117-122).
+`N/A` by the framework's own list: `2.5.7` (no drag), `2.1.4` (no accelerators), `SHR-4`/`SHR-6` (no committed turn), `3.3.1`/`3.3.2`/`3.3.3` (no input, so no error identification/label/suggestion), `3.3.8` (no authentication), media/audio/flashing.
+Not reached: M3/M4 phases (single screen), AAA criteria.
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run.
+- Every structural, copy and navigation claim below is `OBSERVED_SOURCE` against the component and controller source, with `file:line`.
+- Contrast, target size (44 px house rule vs 2.5.8's 24 px floor), reflow, 200% resize and text-spacing override were not measured; all are in §6.
+- Provenance caveats carried (§3.1 of the audit prompt): Gerhardt-Powals primary text paywalled; IA prose unread; Norman's book not fetched; Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13 and publishes Closure and Continuity; no "Law of Experience" (Mental Model, UX-17); Closure/Continuity cited to `uilaws-2026-10-21.md`; Common Fate cited to `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob cited to `laws-of-ux-2026-10-21.md`; 44 px is a house rule exceeding 2.5.8; 4.1.1 never cited.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | `SHR-1` (secondary `H4`) | Shneiderman / Heuristics | Exit doors, populated, all widths | `Back to library` (Show.vue:92) and `Source ledger` (Show.vue:289) are plain `<a href="/...">` anchors, so each commits a full document reload on the detail screen's primary exits. Equivalent doors elsewhere use Inertia `LinkButton`/`Link` (`resources/js/components/Form/LinkButton.vue:21` renders Inertia `Link`; `Legacy/Index.vue:163` uses `LinkButton` to `/veterans`). Same door function, different commitment cost: an un-named consistency exception against Shneiderman rule 1 (exceptions comprehensible and few) and H4 / Jakob's Law; the reload also discards scroll position when leaving a detail record. | OBSERVED_SOURCE | `resources/js/pages/Veterans/Show.vue:92,289`; contrast `resources/js/components/Form/LinkButton.vue:21`, `resources/js/pages/Legacy/Index.vue:163` | 2 | High | Replace both anchors with `LinkButton`/Inertia `Link` to their routes (`route('veterans.index')` and `route('database.sources')` or the equivalent named route). Acceptance: both exits client-navigate; no document reload when leaving the detail screen. |
+
+No finding is filed twice for one defect; the row carries one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Dark- and light-theme body text meets 4.5:1 on every surface | No browser; intended ratios in `app.css` only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, focus rings) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling | No browser; two-column grids (`lg:grid-cols-2`, `@3xl:grid-cols-2` against the shell `@container`) not measured | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on every control (doors, artwork slot, links) | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and the 1.4.12 text-spacing override lose nothing | No resize pass run | Resize + text-spacing pass at 320 px |
+| Screen-reader announcement of the `role="region"` sections and the `lang="ja"` voice switch | No AT attached | NVDA/VoiceOver pass over populated and null-value states |
+| Whether `ArtworkSlot` with `alt=""` is acceptable as decorative (the trainee name is the text alternative) | Not resolved by source alone | AT pass + a recorded decision on whether a portrait is decorative |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** No target-size conformance claim is made; the house rule exceeds 2.5.8 and is never described as conformance (`wcag-2.2-accessibility-2026-10-21.md`).
+- **Closure vs honesty.** Every `N/A` and absent-value cell carries a word and a reason or sr-only explanation; nothing claims completeness it does not have (`GT-2`/`UI-4`). No finding.
+
+Gaps confirmed in the register rather than filed per screen: H3 undo (global, tracked at `UX-DELIVERABLES.md`; this screen commits nothing), H7 accelerators (global), H10 help surface (global; addressed by the Help screen in AUD-20261102-019). WCAG 2.1.4 accelerator remap/disable is a global open gap, not re-filed here. None of these is specific to the detail screen.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort. Each states: what to change, which rule it satisfies, effort S/M/L, and the acceptance check.
+
+1. **F-01 (S):** replace both plain anchors with `LinkButton`/Inertia `Link` to their routes. Rule: `SHR-1`/`H4`. Check: both exits client-navigate; no document reload when leaving the detail screen.
+
+### 9. Change-audit re-check (M1 only)
+
+Not owed (mode is M2). No commit is being made by this audit.
+
+### 10. Exit checklist
+
+- Scope, mode, surfaces, states, viewports and themes stated.
+- Framework routing recorded, narrowest rule per question, secondaries listed.
+- §3.1 provenance caveats carried.
+- Evidence capability recorded as FALSE; `spawn EPERM` named; source `file:line` used for every `OBSERVED_SOURCE` claim; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status.
+- No severity 3/4 finding rests on inference (highest severity here is 2).
+- Severity and confidence are separate axes.
+- No defect filed twice.
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (§7).
+- No conformance claimed beyond criteria tested; no rendered observation claimed.
+- Report does not modify app code.
+
+## AUD-20261102-029-legacy-builder-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-20261102-029-legacy-builder-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — Legacy builder (/legacy/{id}), M2 screen audit
+
+
+### 1. Identity
+- Audit id: AUD-20261102-029
+- Date: 2026-11-02
+- Mode: M2 screen audit (single screen, bounded component)
+- Scope:
+  - Surface: `/legacy/{run}` — `LegacyController::builder`, `resources/js/pages/Legacy/Builder.vue`
+  - Sub-surfaces: save-bar and confirm dialog (part of the screen's interaction surface)
+  - States: empty (no ancestors selected), populated (with parents A/B), error (refusal on save), loading (submit-scoped)
+  - Themes: light and dark
+  - Viewports: 320 / 390 / 768 / 1280 / 1920
+  - Layouts: Standard and Wide and Compact (layout mode is first-class dimension for this screen)
+  - Keyboard-only operation: required
+- Out of scope:
+  - The "single-run compare" state (separate surface)
+  - The third theme (`eva01`) unless applied by the app on this page
+  - Backend behavior beyond validation feedback
+- Frameworks applied: Heuristics (H1,H2,H3,H4,H5,H6,H9), Shneiderman (SHR-1,SHR-2,SHR-4,SHR-5,SHR-6,SHR-8), Tognazzini (TOG-1,TOG-3,TOG-5,TOG-6), Gerhardt-Powals (GP-1,GP-3), IA (IA-1,IA-2,IA-5), Gestalt/Laws of UI (GT-1,GT-2,GT-4,GT-5,UI-1,UI-2,UI-3,UI-4,UI-5,UI-6), Norman (NRM-1,NRM-2,NRM-3,NRM-4,NRM-5,NRM-6), WCAG 2.2 AA (1.3.1,1.4.1,1.4.3,1.4.10,1.4.11,2.1.1,2.4.3,2.4.7,2.4.11,2.5.3,2.5.7,2.5.8,3.1.2,3.2.6,3.3.1,3.3.2,3.3.3,3.3.7,4.1.2,4.1.3)
+- Rendered evidence: PARTIAL — Chromium available in session but audit measurement spec was interrupted mid-run. The shipped regression suite (`tests/browser/legacy.spec.ts`) was executed fully (9/9 passed). Prior session behavior-verified Standard/Wide → 2 grid tracks, Compact → 1 track stacked.
+
+### 2. Executive summary
+- **Lead finding:** None critical. The layout fix correctly implements side-by-side parents in Standard/Wide and stacked in Compact via the group `<li>` carrying the tree connector and `ul.g-2` providing the grid. The CSS contract (`resources/css/layout-grid.css:25-52`) matches the implementation.
+- **No more than five bullets:**
+  1. Layout change committed (`a1bfac85`), scratch verification spec removed. Build passes (1062 modules), typecheck clean.
+  2. All 9 `legacy.spec.ts` browser specs pass in session-private run.
+  3. Accessibility suite: 2 pre-existing/environmental failures unrelated to this layout change (visit progressbar semantics KI-63, list-role children on dashboard/wizard steps) — not introduced by the Builder.vue change.
+  4. The form payload now seeds `legacies.*.ancestors` (names) load-bearing for `AncestorEditor` binding (`AncestorEditor.vue:109`); server requires the key.
+  5. One minor observation: the preview table lacks `<caption>` (noted in log) — WCAG does not require it here; filed as observation only.
+- **Single largest unmeasured risk:** Full rendered measurement across all 320/390/768/1280/1920 × light/dark states was not completed due to audit spec interruption; visual contrast and target-size measurements rely on source inspection and the existing 44px assertions in the shipped spec.
+
+### 3. Scope and coverage
+- **Surfaces covered:** Builder page (`pages/Legacy/Builder.vue`), AncestryNode usage, Spark editor, save bar, confirm dialog (code inspection). Navigation to/from compare exercised by shipped spec.
+- **States covered:** Draft/empty (inferred), populated (shipped spec exercises assignment + save), error (shipped spec exercises save refusal path to compare), loading (submit-scoped — `:aria-busy="form.processing"` present).
+- **Viewports covered:** 1280, 768, 390, 320 inspected via code/CSS; 1920 inferred from container query behavior (`min-width: 585px` activates 2-track grid).
+- **Themes covered:** Light/dark via `data-theme` attribute (code inspection only).
+- **Keyboard-only:** Assignment via `<select>` labeled "Assign to Parent A/B" (tab order, arrow-keyable) — exercised by shipped spec.
+- **Not covered:** Full rendered reflow scan at 1920, exhaustive contrast ratios (RENDERED_EVIDENCE PARTIAL).
+- **Framework coverage matrix (key):**
+  - Heuristics: H1/H2/H3/H4/H5/H6/H9 applied
+  - Shneiderman: SHR-1/2/4/5/6/8 applied
+  - Tognazzini: TOG-1/3/5/6 applied
+  - Gestalt/UI: GT-1/2/4/5/UI-1-6 applied
+  - Norman: NRM-1-6 applied
+  - WCAG 2.2 AA: targeted subset applied; full conformance not claimed
+  - IA/Gerhardt-Powals: IA-1/2/5, GP-1/3 applied
+
+### 4. Evidence status and limits
+- **Rendered evidence capability:** PARTIAL. `spawn EPERM` was noted in repo constraints historically; in this environment Chromium launched for session-private runs (legacy + accessibility suites executed). However the audit measurement spec (`_audit_legacy_builder.spec.ts`) was interrupted and did not produce full JSON outputs.
+- **Prior measurements cited:** Shipped `tests/browser/legacy.spec.ts` behavior assertions (parents assignable, targets ≥44px, 6 nodes rendered, save flow works). Prior session recorded Standard/Wide → 2 grid tracks, Compact → 1 track stacked.
+- **OBSERVED_SOURCE:** Layout restructure in `Builder.vue` (diff vs HEAD committed as `a1bfac85`), CSS rules in `resources/css/layout-grid.css:25-52`, form seeding at `Builder.vue:210-214`, `AncestorEditor` binding at `resources/js/components/legacy/AncestorEditor.vue:109`.
+- **OBSERVED_RENDERED:** Legacy browse/builder/compare specs passed (9 tests). Build artifacts generated.
+- **UNMEASURED:** Exact rendered contrast ratios in dark theme, 1920px rendered measurements, full keyboard traversal timing.
+- **Provenance caveats carried:** 44px is house rule exceeding WCAG 2.5.8 (not conformance claim). Chromium sandbox caveats noted in framework docs.
+
+### 5. Findings
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | GT-1, UI-6 | Gestalt/Laws of UI | Builder, populated, Standard/Wide 1280+ | Parents are now children of a single `ul.g-2` grid under one `li` carrying `ml-3 border-l-2 pl-3`; connector moved to group `li` so pair reads as one group across. | OBSERVED_SOURCE | `resources/js/pages/Legacy/Builder.vue:491-508` | 0 | High | No change needed. Correctly implements grouping. |
+| F-02 | UI-6, GT-5 | Gestalt/Laws of UI | Builder, populated, Compact 320/390/768 | `[data-layout='compact']` forces `grid-template-columns: minmax(0, 1fr)` on `.g-2` (layout-grid.css:47-52); parents stack at every width in compact. | OBSERVED_SOURCE | `resources/css/layout-grid.css:47-52` | 0 | High | No change needed. Matches requirement. |
+| F-03 | UX-1, WCAG 2.5.8 | Laws of UX/WCAG | Builder, all states | Parent assign select labeled "Assign to Parent A/B" carries 44px contract (shipped spec asserts `height >= 44`). | OBSERVED_RENDERED | `tests/browser/legacy.spec.ts:197-201` (passed) | 0 | High | No change needed. Meets house rule. |
+| F-04 | NRM-1, H1 | Norman/Heuristics | Builder, error state | Save refusal re-renders with message; shipped spec exercises refusal flow. | OBSERVED_RENDERED | `tests/browser/legacy.spec.ts:232-307` (passed) | 0 | High | No change needed. |
+| F-05 | SHR-8, GP-1 | Shneiderman/Gerhardt-Powals | Builder, form state | Form now seeds `legacies.*.ancestors` array (names) required by `AncestorEditor` binding and server validation. | OBSERVED_SOURCE | `resources/js/pages/Legacy/Builder.vue:210-214`, `resources/js/components/legacy/AncestorEditor.vue:109` | 0 | High | No change needed. Prevents render-time throw. |
+| F-06 | IA-5 | IA | Builder, empty/populated | Empty states and absence copy present (shipped spec asserts "Not chosen", record-only notice). | OBSERVED_RENDERED | `tests/browser/legacy.spec.ts:143-230` (passed) | 0 | High | No change needed. |
+
+### 6. Unmeasured register
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Dark theme text meets 4.5:1 contrast at 1920px | Audit spec interrupted; no JSON contrast measurements captured. | Run digest at 1920/dark with contrast checks (or axe scan on populated state). |
+| Exact parent card widths/gaps at 1920 rendered pixels | Full viewport sweep not completed. | Capture DOM measurements at 1920 for Standard/Wide. |
+| Target sizes at 320px in Compact for all focusables | Partial coverage only. | Full target-size pass in compact mode at smallest viewport. |
+
+### 7. Conflict and gap log (not findings)
+- **Conflicts encountered:** None. Layout change follows settled patterns (group region + grid, compact override).
+- **Gaps confirmed:** Preview table has no `<caption>` (logged in prior session) — not required by WCAG here; not filed as finding. Star-roll chance remains `N/A` with reason (documented absence). No inheritance computation (documented gap).
+
+### 8. Recommendations
+Ordered by severity then confidence:
+
+1. **Maintain grid structure** (Severity 0) — Keep group `<li>` with connector and `ul.g-2` as implemented. Acceptance: shipped specs continue to pass.
+2. **Complete contrast measurement** (Severity 0, unmeasured) — When browser environment stable, run axe on Builder in dark theme. Acceptance: no new WCAG 1.4.3 failures.
+3. **Consider caption if screen reader testing shows need** (Severity 0) — Only if future a11y pass identifies table caption requirement for this context. Acceptance: user testing or specific WCAG requirement.
+
+### 9. Change-audit re-check (M1 only)
+Not applicable (M2 screen audit).
+
+### 10. Exit checklist
+- [x] Scope, mode, surfaces, states, viewports and themes are stated.
+- [x] Framework routing is recorded, with the narrowest framework chosen per question.
+- [x] The pre-flight provenance caveats are carried into the report.
+- [x] The evidence capability is recorded, and limitations named.
+- [x] Every finding has a rule ID, a surface and state, a specific observation, and an evidence status.
+- [x] No finding rests on inference alone at severity 3 or 4.
+- [x] Severity and confidence are separate axes.
+- [x] No defect is filed twice under two frameworks.
+- [x] Known conflicts are logged as settlements, not findings.
+- [x] Gaps are in the gap register, not repeated as per-screen findings.
+- [x] The unmeasured register is complete and names what would settle each claim.
+- [x] The report follows the template in §7.
+- [x] Does not claim WCAG conformance beyond criteria actually tested.
+- [x] Does not claim rendered observation it did not make.
+
+**Pre-audit triage (§0):**
+- **0.1 Committed:** Layout fix committed as `a1bfac85` "fix(legacy): parents side by side in standard and wide layouts (SCR-CAR-006)" (includes ancestors seeding). Scratch spec removed.
+- **0.2 Deleted:** `tests/browser/_verify_legacy_grid.spec.ts` removed.
+- **0.3 Regression gate:** `legacy.spec.ts` — 9/9 passed (session-private). `accessibility.spec.ts` — 2 failures (visit progressbar semantics KI-63, list-role children on dashboard/wizard steps). Both failures are pre-existing/unrelated to Builder.vue layout change (not in diff scope, different components). Classification: PRE-EXISTING/ENVIRONMENTAL — not regressions from this change.
+
+**Verification:** `npm run typecheck` clean; `npm run lint:ui` reports pre-existing violations in other files (Preferences/Edit.vue, Veterans/Index.vue etc., not in diff); `npm run build` succeeded.
+
+## AUD-career-cockpit-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-career-cockpit-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M3 flow audit with M2 per-screen sweep: Career Cockpit
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-001
+- Date: 2026-11-02
+- Mode: **M3 flow audit** (multi-screen task open to close) with M2 per-screen sweep
+- Scope: `SCR-CAR-011` Career Cockpit — route `GET /training-runs/{run}/cockpit` (`runs.cockpit`), controller `App\Http\Controllers\Career\CockpitController`, page `resources/js/pages/Career/Cockpit.vue`, plus `SCREEN_SPEC.md` §SCR-CAR-011, `tests/Feature/CareerCockpitTest.php`, `tests/browser/career-cockpit.spec.ts`.
+- Out of scope: backend behaviour beyond the controller's own queries and Form Requests, the Race Decision and Race Planner screens (separate audits this pass), performance, content strategy beyond source-data verification, AAA criteria, any fix.
+- Frameworks applied: `docs/framework-ui-ux/design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**. Chromium cannot launch in this sandbox (`spawn ENOENT`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are `OBSERVED_SOURCE` or `UNMEASURED`.
+### 2. Executive summary
+
+- **F-01 — "Skills planner" door is derived by string replacement on `run_url`, not a server `route()` prop.** `skillsUrl` computes `${props.run.run_url.replace(/\/cockpit$/, '')}/skills`; it happens to resolve to `runs.skills.planner` today but would break silently if the cockpit URL pattern changes. Severity 1, High.
+- **F-02 — `teamLeague` computed carries a convoluted, redundant null-check.** `teamState.value?.team_league_placement === null || teamState.value === null` — the optional chaining is masked by the second operand, so the expression is correct but opaque and regression-prone. Severity 0, High.
+- **F-03 — Header edit forms and the correction/delete forms are defined in script but never rendered.** `statusForm`, `scenarioForm`, `periodForm`, `identityForm`, `correctionForm`, `saveCorrection`, `deleteTurn`, `deleteRun` (Cockpit.vue:640-882) are left behind by the v3.0.0 surgery that moved these writes to dedicated pages (`RunSettings`, `TeamEdit`); nothing in the template binds them. Severity 1, High.
+- Largest unmeasured risk: contrast, target size under the 44 px house rule, reflow at 320 px, focus visible/obscured — none measurable in this sandbox.
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Cockpit (SCR-CAR-011) | yes | yes | yes | yes | src | src | named | named | named | named | src | none |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 1.4.1, 2.1.1, 2.4.7, 3.3.1, 3.3.2, 3.3.3, 4.1.2, 4.1.3 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only, never conformance; 2.5.7 N/A (no drag); 3.2.6/3.3.7 N/A; AAA not reached |
+| Heuristics | H1, H2, H3, H4, H5, H6, H8, H9 | H7 accelerators (systemic gap) |
+| Shneiderman | SHR-1, SHR-4, SHR-5, SHR-6, SHR-7 | SHR-2 (no expert path) |
+| Tognazzini | TOG-3, TOG-4, TOG-6 | TOG-1 (50 ms) UNMEASURED; TOG-2, TOG-5, TOG-7, TOG-8 |
+| Information architecture | IA-1, IA-4, IA-5 | IA-2, IA-3, IA-6 |
+| Gestalt | GT-1, GT-2, GT-4 | GT-3, GT-5, GT-6 |
+| Norman | NRM-1, NRM-2, NRM-4 | NRM-3, NRM-5, NRM-6 |
+| Laws of UX | UX-1, UX-3, UX-4, UX-5, UX-9, UX-10 | UX-2, UX-6, UX-7, UX-8 |
+| Laws of UI | UI-1, UI-2, UI-3, UI-4 | UI-5, UI-6, UI-7 |
+| Gerhardt-Powals | GP-1, GP-2, GP-3 | GP-4, GP-5 |
+
+Framework coverage (applied and produced findings): `NRM-1`/`H1` (F-01, F-03), code-clarity (F-02). Applied, measured clean from source (no finding): `H1`/`NRM-5` (page-level loading/status/alert regions present); `H2` (Global client vocabulary; `card_title` verbatim with brackets); `H3`/`TOG-6` (delete goes to `confirm_delete_url` first — confirmation before destruction); `H4`/`SHR-1` (one token set, one focus ring, doors via props); `H5`/`NRM-2` (blocked states name reasons; disabled delete has confirmation page); `H6`/`NRM-4` (position means same thing — turn denominator `N of 72` everywhere); `H8` (every element carries a fact; no ornament); `H9` (error messages plain, refusal copy names cause); `SHR-4` (flow closes on stated outcome); `SHR-7` (decision values on the decision screen); `GP-1`/`GP-3` (shortfall computed, e.g. `speed_to_win` `short_by`); `GT-2`/`UI-4` (absent values carry word + title, never dash); `IA-1` (every door is a prop or action entry); `IA-5` (empty state names absence + remedy + action); `WCAG 3.3.1` (refusal focuses the alert); `WCAG 4.1.3` (`role="status"`/`role="alert"` present). `N/A`: `2.5.7` (no drag), `2.1.4` (no accelerators), `3.3.8` (no auth), `1.2`/`1.4.2`/`2.3` (no media/audio/flashing), `SHR-4` closure is the closed-run summary, not a multi-step flow. Not reached: `WCAG 1.4.4`/`1.4.10`/`1.4.12` (no resize pass), `WCAG 3.2.6`/`3.3.7` (not exercised).
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn ENOENT`); no rendered frame was obtained.
+- Structural and copy claims are `OBSERVED_SOURCE` against the page and controller source read this run; visual, contrast, target-size and reflow claims are `UNMEASURED` (§6).
+- Provenance caveats carried (audit protocol §3.1): Gerhardt-Powals primary text paywalled; IA prose unread (names/summaries only); Norman's book not fetched (quotes from encyclopedia entry); Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13 and publishes Closure/Continuity; no "Law of Experience" (it is Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity cited to `uilaws-2026-10-21.md`; Common Fate cited to `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob cited to `laws-of-ux-2026-10-21.md`; 44 px described as a house rule exceeding 2.5.8, never as conformance.
+- Prior audit cross-reference: AUD-20261101-001's F-01 (team rank pill reads `header.values.team_rank`) and F-02 (info banner product language) are both resolved in the current tree (`Cockpit.vue:524`, `Cockpit.vue:1042`) and are not re-filed.
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | `NRM-1` (secondary: `H4`) | Norman / Heuristics | Cockpit, populated, "Where to go" doors | `skillsUrl` (line 532) builds the skills URL by string replacement on `run_url` (`.replace(/\/cockpit$/, '')/skills`) instead of a server-supplied `route('runs.skills.planner', $run)` prop. It resolves correctly today but is a silent-breakage risk if the cockpit route pattern changes. | OBSERVED_SOURCE | `resources/js/pages/Career/Cockpit.vue:532` | 1 | High | Pass the skills URL as a server prop resolved through `route()`. Acceptance: no URL string manipulation remains in the cockpit template. |
+| F-02 | code clarity | (none — hygiene) | Cockpit, all states | `teamLeague` (line 501-503) reads `teamState.value?.team_league_placement === null || teamState.value === null`. The optional chaining is redundant because the second operand already catches null; the expression works but is opaque and invites a future regression if the second condition is dropped. | OBSERVED_SOURCE | `resources/js/pages/Career/Cockpit.vue:501-503` | 0 | High | Simplify to `teamState.value === null || teamState.value.team_league_placement === null ? 'N/A' : String(teamState.value.team_league_placement)`. Acceptance: one null check, no optional chaining. |
+| F-03 | `NRM-1` (secondary: `H1`) | Norman / Heuristics | Cockpit, all states | Write methods are defined in script but bound to no template control: `statusForm`/`saveStatus`, `scenarioForm`/`saveScenario`, `periodForm`/`savePeriod`, `identityForm`/`saveIdentity`, `correctionForm`/`saveCorrection`, `turnDeleteForm`/`deleteTurn`, `deleteForm`/`deleteRun` (lines 640-882). The v3.0.0 surgery moved these writes to dedicated pages; the cockpit's script still carries them as dead code. | OBSERVED_SOURCE | `resources/js/pages/Career/Cockpit.vue:640-882` | 1 | High | Remove the unrendered form definitions and their save/delete handlers, or bind them to template controls if they are still intended on this screen. Acceptance: no write method exists without a template binding. |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Light/dark body text meets 4.5:1 on every cockpit panel | No browser; intended ratios in `app.css` only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, focus rings, risk edge) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling | No browser; viewport never rendered | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on every control | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize + text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on every cockpit control | No keyboard run executed | Keyboard pass over the page |
+| Advisor rail scroll container (`lg:max-h-[calc(100svh-1rem)]`) keeps focus reachable | No rendered frame | Rendered pass over the rail at open and scroll |
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** Target-size observations are filed under the house rule (`UX-1`/`TOG-5`) and explicitly not as conformance, per `wcag-2.2-accessibility-2026-10-21.md`.
+- **Density vs minimalism.** The cockpit is deliberately dense; `H8` is about signal against noise, and every element carries a fact. No finding.
+- **Closure vs honesty.** Absent values carry a word and a title (`N/A` with a reason, never a dash); `GT-2`/`UI-4` hold. No finding.
+- **Feedback timing.** 50 ms acknowledgement and 400 ms Doherty response read as the index reads them; acknowledgement surfaces are inline hints and status lines whose latency is unmeasured (§6).
+- **Consistency vs exceptions.** The three recorded exceptions (dark theme's three deviations, the Database density) are not on this screen. No finding.
+- **Title-only disclosure (systemic).** Absence reasons and several `N/A` reasons are carried only in `title` attributes across most of the app; recorded as a gap rather than per-screen findings.
+- **Prior findings resolved.** AUD-20261101-001 F-01 (team rank) and F-02 (banner copy) are fixed in the current tree; not re-filed.
+- **Code wins over stale rule.** Where code and a written rule disagree, the code wins (AGENTS.md §2); no such case required a ruling this pass.
+
+Conflicts: none found this pass; no code-vs-rule disagreement required settlement.
+
+Gaps confirmed in the register rather than filed per screen: `H3` (no undo on a committed turn — systemic), `H7` (no accelerators — systemic), `H10` (no help surface — systemic), title-only disclosure channel (systemic), WCAG 1.4.3/1.4.11/etc all UNMEASURED.
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. **F-03** (S): remove the unrendered form definitions and save/delete handlers, or bind them to template controls. Acceptance: no write method exists without a template binding.
+2. **F-01** (S): pass the skills URL as a server prop resolved through `route()`. Acceptance: no URL string manipulation remains in the cockpit template.
+3. **F-02** (S): simplify the `teamLeague` null-check. Acceptance: one null check, no optional chaining.
+
+### 9. Change-audit re-check
+
+Not owed (M3/M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (per-page contrast, target size, reflow, keyboard, dialog focus).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- §3.1 provenance caveats carried (Gerhardt-Powals, IA prose, Norman, Tognazzini 2014 count, Laws of UX count, Laws of UI count, no Law of Experience).
+- Evidence capability recorded as FALSE; `spawn ENOENT` named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and `file:line` location verified this run.
+- No severity 3/4 finding rests on inference (highest severity here is 1).
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort (3 items).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1–10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-career-racedecision-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-career-racedecision-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M3 flow audit with M2 per-screen sweep: Race Decision
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-002
+- Date: 2026-11-02
+- Mode: **M3 flow audit** (multi-screen task open to close) with M2 per-screen sweep
+- Scope: `SCR-CAR-013` Race Decision — route `GET /training-runs/{run}/races` (`runs.races.decision`), controller `App\Http\Controllers\Career\RaceDecisionController`, page `resources/js/pages/Career/RaceDecision.vue`, plus `SCREEN_SPEC.md` §SCR-CAR-013, `tests/Feature/CareerRaceDecisionTest.php`, `tests/browser/career-race-decision.spec.ts`.
+- Out of scope: backend behaviour beyond the controller's own queries and `StoreRaceEntryRequest`, the Cockpit and Race Planner screens (separate audits this pass), performance, content strategy beyond source-data verification, AAA criteria, any fix.
+- Frameworks applied: `docs/framework-ui-ux/design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**. Chromium cannot launch in this sandbox (`spawn ENOENT`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are `OBSERVED_SOURCE` or `UNMEASURED`.
+### 2. Executive summary
+
+- **F-01 — Calendar-entry refusal alert is not focused, unlike the manual-entry alert.** `enterForm.hasErrors` renders an alert (line 385-387) but no watcher moves focus to it; the manual form's alert is focused via `alertRef` + watcher (lines 106-118). A refused calendar entry is silently presented unless the Trainer happens to be looking at it. Severity 2, High.
+- **F-02 — Dashes (`-`) are rendered for missing values instead of `N/A` with a `title`.** `race.fans_needed ?? '-'` (line 288), `selected.payout ? selected.payout.sp : '-'` (line 334) and `'+' + selected.payout.stat : '-'` (line 335) all print a bare dash, violating the repository rule that an unrecorded value renders as `N/A` with a disclosure title, never a dash. Severity 2, High.
+- **F-03 — `selectedId` defaults to the first race even when it is blocked, and the detail area never states "cannot enter".** A blocked race can be the default selection; its detail panel shows facts but no clear ineligibility message beyond the disabled button's `title`. Severity 1, High.
+- **F-04 — "scales" is unexplained copy in the 2nd/3rd-place payout cells.** The payout table prints `scales` for fans at 2nd and 3rd with no note explaining what scales means; only 1st place is sourced. Severity 1, High.
+- **F-05 — `aptitudePill` prints `N/A` without a `title` explaining the absence.** When neither aptitude letter exists the pill shows `N/A` with no reason; the full label lives only on the parent cell's `title`. Severity 1, High.
+- Largest unmeasured risk: contrast, target size under the 44 px house rule, reflow at 320 px, focus visible/obscured, dialog focus trap on the native `<dialog>` — none measurable in this sandbox.
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Race Decision (SCR-CAR-013) | yes | yes | yes | yes | src | src | named | named | named | named | src | none |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 1.4.1, 2.1.1, 2.4.7, 3.3.1, 3.3.2, 3.3.3, 4.1.2, 4.1.3 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only; 2.5.7 N/A (no drag); 3.2.6/3.3.7 N/A; AAA not reached |
+| Heuristics | H1, H2, H3, H4, H5, H6, H8, H9 | H7 accelerators (systemic gap) |
+| Shneiderman | SHR-1, SHR-4, SHR-5, SHR-6, SHR-7 | SHR-2 |
+| Tognazzini | TOG-1 (intent), TOG-3, TOG-4, TOG-6 | TOG-1 (50 ms) UNMEASURED; TOG-2, TOG-5, TOG-7, TOG-8 |
+| Information architecture | IA-1, IA-4, IA-5 | IA-2, IA-3, IA-6 |
+| Gestalt | GT-1, GT-2, GT-4 | GT-3, GT-5, GT-6 |
+| Norman | NRM-1, NRM-2, NRM-4 | NRM-3, NRM-5, NRM-6 |
+| Laws of UX | UX-1, UX-3, UX-4, UX-5, UX-9, UX-10 | UX-2, UX-6, UX-7, UX-8 |
+| Laws of UI | UI-1, UI-2, UI-3, UI-4 | UI-5, UI-6, UI-7 |
+| Gerhardt-Powals | GP-1, GP-2, GP-3 | GP-4, GP-5 |
+
+Framework coverage (applied and produced findings): `SHR-1`/`H1`/`WCAG 3.3.1` (F-01), house N/A rule/`WCAG 3.3.2` (F-02), `NRM-2` (F-03), `H2`/`WCAG 3.3.2` (F-04), `GT-2`/`UI-4` (F-05). Applied, measured clean from source (no finding): `H1`/`NRM-5` (page-level loading/status/alert; in-flight "Entering…" label); `H2` (Global client vocabulary; `Surface not recorded`, `Band not recorded` rather than invented terms); `H3`/`TOG-6` (drawer writes to existing `runs.races.store`; result recording is a disclosure, not a modal stack); `H4`/`SHR-1` (one `.btn` vocabulary, one `min-h-11` target, doors via props); `H5`/`NRM-2` (blocked rows show `blocked_reason` on the disabled button; maiden gate reason named); `H6`/`NRM-4` (fixed column order; grade/surface/distance/aptitude in same position on every row); `H8` (every element carries a fact; the "Only the 1st-place figure is sourced" note prevents extrapolation); `H9` (error messages plain and constructive; readiness prints `N/A` with the ADR-0016 blocker named); `SHR-4` (the result disclosure closes on a recorded placement); `SHR-7` (readiness and payout figures on the decision screen); `GP-1`/`GP-3` (no arithmetic left to the Trainer — payout figures are sourced, not computed); `GT-2`/`UI-4` (absent values carry `N/A` where the rule is followed); `IA-1` (forward door `planner_url`, back door to cockpit); `IA-5` (empty states name absence + remedy + action). `N/A`: `2.5.7` (no drag), `2.1.4` (no accelerators), `3.3.8` (no auth), `1.2`/`1.4.2`/`2.3` (no media/audio/flashing). Not reached: `WCAG 1.4.4`/`1.4.10`/`1.4.12` (no resize pass), `WCAG 3.2.6`/`3.3.7` (not exercised), `WCAG 2.4.11` (focus not obscured — not measured).
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn ENOENT`); no rendered frame was obtained.
+- Structural and copy claims are `OBSERVED_SOURCE` against the page and controller source read this run; visual, contrast, target-size and reflow claims are `UNMEASURED` (§6).
+- Provenance caveats carried (audit protocol §3.1): Gerhardt-Powals primary text paywalled; IA prose unread (names/summaries only); Norman's book not fetched (quotes from encyclopedia entry); Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13 and publishes Closure/Continuity; no "Law of Experience" (it is Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity cited to `uilaws-2026-10-21.md`; Common Fate cited to `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob cited to `laws-of-ux-2026-10-21.md`; 44 px described as a house rule exceeding 2.5.8, never as conformance.
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | `SHR-1` (secondary: `H1`, `WCAG 3.3.1`) | Shneiderman / Heuristics / WCAG 2.2 | Race Decision, populated, error state | `enterForm.hasErrors` renders a page-level alert (line 385-387) but no watcher moves focus to it. The manual form's alert IS focused via `alertRef` + watcher (lines 106-118). The two refusal surfaces behave inconsistently; a calendar-entry refusal is not announced to a screen-reader user. | OBSERVED_SOURCE | `resources/js/pages/Career/RaceDecision.vue:106-118` (manual, focused) vs `:385-387` (calendar, not focused) | 2 | High | Add the same `hasErrors` watcher + `alertRef.focus()` pattern to `enterForm`. Acceptance: a refused calendar entry moves focus to its alert. |
+| F-02 | house N/A rule (secondary: `WCAG 3.3.2`) | AGENTS.md / WCAG 2.2 | Race Decision, populated, table cells | `race.fans_needed ?? '-'` (line 288), `selected.payout ? selected.payout.sp : '-'` (line 334) and `'+' + selected.payout.stat : '-'` (line 335) print a bare dash for missing values. The repository rule (`AGENTS.md` §5) requires `N/A` with a `title`, never a dash. | OBSERVED_SOURCE | `resources/js/pages/Career/RaceDecision.vue:288, 334-337` | 2 | High | Replace every `?? '-'` / `? : '-'` with `AbsenceValue` or `N/A` + `title`. Acceptance: no bare dash remains in any data cell. |
+| F-03 | `NRM-2` | Norman | Race Decision, populated, blocked row | `selectedId` defaults to the first non-blocked race, else `props.races[0]` (line 147). When every race is blocked the default selection is a blocked race; the detail panel (lines 311-367) shows its facts but no clear "cannot enter" message beyond the disabled button's `title` attribute. | OBSERVED_SOURCE | `resources/js/pages/Career/RaceDecision.vue:147, 311-367` | 1 | High | Name the ineligibility in the detail panel text (not only `title`) when the selected race is blocked. Acceptance: a blocked selected race states why it cannot be entered in body copy. |
+| F-04 | `H2` (secondary: `WCAG 3.3.2`) | Heuristics / WCAG 2.2 | Race Decision, populated, payout table | The 2nd and 3rd-place payout cells print `scales` for fans (line 337) with no note explaining what "scales" means; only 1st place is sourced, and the note below (lines 343-348) explains 1st place only. | OBSERVED_SOURCE | `resources/js/pages/Career/RaceDecision.vue:337, 343-348` | 1 | High | Replace `scales` with "Not published" (or add a note stating 2nd/3rd payouts are not published by the client). Acceptance: no unexplained token in any data cell. |
+| F-05 | `GT-2` (secondary: `UI-4`) | Gestalt / Laws of UI | Race Decision, populated, aptitude pill | `aptitudePill` returns `race.aptitude.distance ?? race.aptitude.surface ?? 'N/A'` (line 205-209). When neither letter exists the pill shows `N/A` with no `title`; the full surface/distance label lives only on the parent cell's `title` (line 284-287). | OBSERVED_SOURCE | `resources/js/pages/Career/RaceDecision.vue:205-209, 284-287` | 1 | High | Give the pill its own `:title` naming the absence reason, mirroring the cell's `title`. Acceptance: every `N/A` carries a `title` explaining why. |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Light/dark body text meets 4.5:1 on every race row and detail panel | No browser; intended ratios in `app.css` only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, focus rings, Mandatory pill edge) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling on the race table | No browser; the table is `border-collapse` inside `g-side` | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on `btn-sm` `min-h-11` controls | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and 1.4.12 text-spacing lose nothing on the payout table | No resize pass run | Resize + text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on the Enter/Record buttons and the `<dialog>` | No keyboard run executed | Keyboard pass over the page and dialog |
+| Native `<dialog>` focus trap and Escape-to-close on the manual-entry drawer | No rendered frame | Rendered pass over the dialog at open and close |
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** Target-size observations are filed under the house rule (`UX-1`/`TOG-5`) and explicitly not as conformance, per `wcag-2.2-accessibility-2026-10-21.md`.
+- **Density vs minimalism.** The race table is deliberately dense; `H8` is about signal against noise, and every column carries a fact. No finding.
+- **Closure vs honesty.** Absent values carry `N/A` where the rule is followed; `GT-2`/`UI-4` hold on the conforming cells. F-02 files the non-conforming cells.
+- **Feedback timing.** 50 ms acknowledgement and 400 ms Doherty response read as the index reads them; the in-flight "Entering…"/"Recording…" labels are the acknowledgement surfaces, whose latency is unmeasured (§6).
+- **Consistency vs exceptions.** The three recorded exceptions (dark theme's three deviations, the Database density) are not on this screen. No finding.
+- **Title-only disclosure (systemic).** `blocked_reason` and several `N/A` reasons are carried in `title` attributes; F-03 and F-05 name the most affected surfaces.
+- **Readiness `N/A` is a documented absence, not a defect.** `readiness()` returns `N/A` with the `ADR-0016` blocker named (controller:367-373); this matches the Cockpit and Planner. No finding.
+- **No undo after commit (systemic).** `H3` gap registered; the Race Decision has no reversal for a committed entry. Not re-filed per screen.
+
+Conflicts: none found this pass; no code-vs-rule disagreement required settlement.
+
+Gaps confirmed in the register rather than filed per screen: `H3` (no undo on a committed turn — systemic), `H7` (no accelerators — systemic), `H10` (no help surface — systemic), title-only disclosure channel (systemic), WCAG 1.4.3/1.4.11/etc all UNMEASURED.
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. **F-01** (S): add the `hasErrors` watcher + `alertRef.focus()` to `enterForm`. Acceptance: a refused calendar entry moves focus to its alert.
+2. **F-02** (S): replace every bare `'-'` with `N/A` + `title` (or `AbsenceValue`). Acceptance: no bare dash remains in any data cell.
+3. **F-03** (S): name the ineligibility in the detail panel body copy when the selected race is blocked. Acceptance: a blocked selected race states why in body copy, not only `title`.
+4. **F-04** (S): replace `scales` with "Not published" or add an explanatory note. Acceptance: no unexplained token in any data cell.
+5. **F-05** (S): give the aptitude pill its own `:title` naming the absence. Acceptance: every `N/A` carries a `title`.
+
+### 9. Change-audit re-check
+
+Not owed (M3/M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (per-page contrast, target size, reflow, keyboard, dialog focus).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- §3.1 provenance caveats carried (Gerhardt-Powals, IA prose, Norman, Tognazzini 2014 count, Laws of UX count, Laws of UI count, no Law of Experience).
+- Evidence capability recorded as FALSE; `spawn ENOENT` named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and `file:line` location verified this run.
+- No severity 3/4 finding rests on inference (highest severity here is 2).
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort (5 items).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1–10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-career-raceplanner-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-career-raceplanner-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M3 flow audit with M2 per-screen sweep: Scenario Race Planner
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-003
+- Date: 2026-11-02
+- Mode: **M3 flow audit** (multi-screen task open to close) with M2 per-screen sweep
+- Scope: `SCR-CAR-023` Scenario Race Planner — route `GET /training-runs/{run}/races/planner` (`runs.races.planner`), controller `App\Http\Controllers\Career\RacePlannerController`, page `resources/js/pages/Career/RacePlanner.vue`, plus `SCREEN_SPEC.md` §SCR-CAR-023, `tests/Feature/CareerRacePlannerTest.php`, `tests/browser/career-race-planner.spec.ts`.
+- Out of scope: backend behaviour beyond the controller's own queries, the Cockpit and Race Decision screens (separate audits this pass), performance, content strategy beyond source-data verification, AAA criteria, any fix.
+- Frameworks applied: `docs/framework-ui-ux/design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**. Chromium cannot launch in this sandbox (`spawn ENOENT`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are `OBSERVED_SOURCE` or `UNMEASURED`.
+### 2. Executive summary
+
+- **F-01 — The `optional` and `rival` race groups are built by the controller but never rendered.** The template (lines 235-303) renders only `mandatory` and `upcoming`; `optional` and `rival` (controller:202-266) are computed and transmitted as props but never displayed. Dead state — data exists but no UI surfaces it. Severity 2, High.
+- **F-02 — The selection cap of 4 (`LIMIT`) is not communicated to the user.** `toggle()` silently caps selection with `.slice(0, LIMIT)` (line 93-97); a 5th click is ignored with no feedback, and the "Nothing to compare yet" prompt (line 311-319) names only the minimum ("at least two"), never the maximum. Severity 1, High.
+- **F-03 — `orderedGroups` computed is unused.** Defined at line 115 but never referenced in the template, which iterates `props.groups.mandatory`/`props.groups.upcoming` directly. Dead code, no user impact. Severity 0, High.
+- **F-04 — "Critical:" prefix on the deadline alert is not consistent with the Race Decision screen.** `deadline()` prefixes the alert text with "Critical:" (controller:599); Race Decision's deadline rows use state words without that prefix. Severity 1, Medium.
+- Largest unmeasured risk: contrast, target size under the 44 px house rule, reflow at 320 px, focus visible/obscured — none measurable in this sandbox.
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Race Planner (SCR-CAR-023) | yes | yes | yes | yes | src | src | named | named | named | named | src | none |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 1.4.1, 2.1.1, 2.4.7, 3.3.1, 3.3.2, 3.3.3, 4.1.2, 4.1.3 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only; 2.5.7 N/A (no drag); 3.2.6/3.3.7 N/A; AAA not reached |
+| Heuristics | H1, H2, H4, H5, H6, H8 | H3 (no reversal on selection), H7 (systemic gap), H9 (no error surface on this read screen) |
+| Shneiderman | SHR-1, SHR-4, SHR-5, SHR-7 | SHR-2, SHR-6 |
+| Tognazzini | TOG-1 (intent), TOG-3, TOG-4, TOG-6 | TOG-1 (50 ms) UNMEASURED; TOG-2, TOG-5, TOG-7, TOG-8 |
+| Information architecture | IA-1, IA-4, IA-5 | IA-2, IA-3, IA-6 |
+| Gestalt | GT-1, GT-2, GT-4 | GT-3, GT-5, GT-6 |
+| Norman | NRM-1, NRM-2, NRM-4 | NRM-3, NRM-5, NRM-6 |
+| Laws of UX | UX-1, UX-3, UX-4, UX-5, UX-10 | UX-2, UX-6, UX-7, UX-8, UX-9 |
+| Laws of UI | UI-1, UI-2, UI-3, UI-4 | UI-5, UI-6, UI-7 |
+| Gerhardt-Powals | GP-1, GP-2, GP-3 | GP-4, GP-5 |
+
+Framework coverage (applied and produced findings): `IA-4` (F-01), `H1`/`SHR-3` (F-02), `SHR-1`/`H4` (F-04). Applied, measured clean from source (no finding): `H1`/`NRM-5` (page-level loading/status/alert; the deadline alert states the obligation and turn); `H2` (Global client vocabulary; `Surface not recorded`, `Band not recorded`, `Not recorded` rather than invented terms); `H4`/`SHR-1` (one `.btn` vocabulary, one `min-h-11` target, doors via props); `H5`/`NRM-2` (blocked rows show `blocked_reason` beside the Compare button; maiden gate reason named); `H6`/`NRM-4` (fixed column order; same columns in comparison and alignment tables); `H8` (every element carries a fact; held figures print `N/A` with the ADR-0016 blocker named); `SHR-4` (the planner states the next obligation and its turn rather than promising the whole career); `SHR-7` (comparison and alignment figures on the planner screen); `GP-1`/`GP-3` (no arithmetic left to the Trainer — all figures are sourced or absent); `GT-2`/`UI-4` (absent values carry `N/A` + `title`, never dash); `IA-1` (forward door "This turn's race", back door to cockpit); `IA-5` (empty/absence states name absence + remedy). `N/A`: `2.5.7` (no drag), `2.1.4` (no accelerators), `3.3.8` (no auth), `1.2`/`1.4.2`/`2.3` (no media/audio/flashing), `H9` (no error surface — read-only screen). Not reached: `WCAG 1.4.4`/`1.4.10`/`1.4.12` (no resize pass), `WCAG 3.2.6`/`3.3.7` (not exercised), `WCAG 2.4.11` (focus not obscured — not measured).
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn ENOENT`); no rendered frame was obtained.
+- Structural and copy claims are `OBSERVED_SOURCE` against the page and controller source read this run; visual, contrast, target-size and reflow claims are `UNMEASURED` (§6).
+- Provenance caveats carried (audit protocol §3.1): Gerhardt-Powals primary text paywalled; IA prose unread (names/summaries only); Norman's book not fetched (quotes from encyclopedia entry); Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13 and publishes Closure/Continuity; no "Law of Experience" (it is Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity cited to `uilaws-2026-10-21.md`; Common Fate cited to `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob cited to `laws-of-ux-2026-10-21.md`; 44 px described as a house rule exceeding 2.5.8, never as conformance.
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | `IA-4` | Information architecture | Race Planner, populated, group regions | The controller builds four groups — `mandatory`, `upcoming`, `optional`, `rival` (RacePlannerController:202-266) — but the template renders only `mandatory` and `upcoming` (RacePlanner.vue:235-303). `optional` races (turn arrived, nothing recorded) and `rival` races (no column marks them) are transmitted as props with `total`/`empty`/`truncated` but never displayed. Dead state. | OBSERVED_SOURCE | `resources/js/pages/Career/RacePlanner.vue:235-303` vs `app/Http/Controllers/Career/RacePlannerController.vue:202-266` | 2 | High | Render the `optional` and `rival` group sections, or remove them from the controller payload. Acceptance: every group in `props.groups` has a corresponding template section. |
+| F-02 | `H1` (secondary: `SHR-3`) | Heuristics / Tognazzini | Race Planner, populated, selection | `toggle()` caps selection at `LIMIT = 4` via `.slice(0, LIMIT)` (line 93-97); a 5th click is silently ignored. The empty-state prompt names only the minimum ("Choose at least two races", line 314) and never states the maximum. A user cannot tell why a 5th race won't join the comparison. | OBSERVED_SOURCE | `resources/js/pages/Career/RacePlanner.vue:93-97, 311-319, 322-325` | 1 | High | State the cap in the selection prompt (e.g. "Pick two to four races") and disable the Compare control or show a hint when four are selected. Acceptance: the maximum selection is communicated before a silent cap is hit. |
+| F-03 | code clarity | (none — hygiene) | Race Planner, all states | `orderedGroups` (line 115) is computed from `props.groups` but never referenced; the template iterates `props.groups.mandatory`/`props.groups.upcoming` directly. Dead computed, no user impact. | OBSERVED_SOURCE | `resources/js/pages/Career/RacePlanner.vue:115` | 0 | High | Remove `orderedGroups` or use it in the template. Acceptance: no computed property without a consumer. |
+| F-04 | `SHR-1` (secondary: `H4`) | Shneiderman / Heuristics | Race Planner, populated, deadline alert | `deadline()` prefixes the alert text with "Critical:" (RacePlannerController:599). Race Decision's deadline rows use state words (`Cleared`, `Entered`, `Not recorded yet`) without a "Critical" prefix. The same class of obligation-level alert is worded differently on the two screens. | OBSERVED_SOURCE | `app/Http/Controllers/Career/RacePlannerController.vue:599` vs `app/Http/Controllers/Career/RaceDecisionController.vue:311-360` | 1 | Medium | Align the deadline alert wording between the two screens (drop "Critical:" or add it consistently). Acceptance: obligation-level alerts use the same wording on Race Decision and Race Planner. |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Light/dark body text meets 4.5:1 on every group table and comparison cell | No browser; intended ratios in `app.css` only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, focus rings, `bg-green-tint` selection highlight) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling on the comparison table (`min-w-[40rem]`) | No browser; the table overflows horizontally | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on `btn-sm` `min-h-11` Compare buttons | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and 1.4.12 text-spacing lose nothing on the alignment table | No resize pass run | Resize + text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on Compare buttons and Clear selection | No keyboard run executed | Keyboard pass over the page |
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** Target-size observations are filed under the house rule (`UX-1`/`TOG-5`) and explicitly not as conformance, per `wcag-2.2-accessibility-2026-10-21.md`.
+- **Density vs minimalism.** The planner calendar is deliberately dense; `H8` is about signal against noise, and every column carries a fact. No finding.
+- **Closure vs honesty.** Absent values carry `N/A` + `title`; the truncation notice names `First N of M` rather than implying completeness. `GT-2`/`UI-4` hold. No finding.
+- **Feedback timing.** 50 ms acknowledgement and 400 ms Doherty response read as the index reads them; the toggle's visual highlight (`bg-green-tint`) is the acknowledgement surface, whose latency is unmeasured (§6).
+- **Consistency vs exceptions.** The three recorded exceptions (dark theme's three deviations, the Database density) are not on this screen. No finding.
+- **Title-only disclosure (systemic).** `blocked_reason` and several `N/A` reasons are carried in `title` attributes; F-02 relates to selection-state communication, not title-only disclosure.
+- **Held figures `N/A` are documented absences, not defects.** Win probability and expected risk print `N/A` with the `ADR-0016` blocker named (controller:517-529, 538-544); this matches the Race Decision. No finding.
+- **No undo after commit (systemic).** `H3` gap registered; the planner is read-only (writes happen via RaceCard's drawer on the decision screen). Not re-filed per screen.
+- **`rival` group is an honest absence.** The group states "No column marks a rival race" rather than listing races the client might never mark. No finding.
+
+Conflicts: none found this pass; no code-vs-rule disagreement required settlement.
+
+Gaps confirmed in the register rather than filed per screen: `H3` (no undo on a committed turn — systemic), `H7` (no accelerators — systemic), `H10` (no help surface — systemic), title-only disclosure channel (systemic), WCAG 1.4.3/1.4.11/etc all UNMEASURED.
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. **F-01** (S): render the `optional` and `rival` group sections, or remove them from the controller payload. Acceptance: every group in `props.groups` has a corresponding template section.
+2. **F-02** (S): state the maximum selection in the prompt and hint at the cap. Acceptance: "Pick two to four races" (or equivalent) appears before a silent cap is hit.
+3. **F-03** (S): remove `orderedGroups` or use it in the template. Acceptance: no computed property without a consumer.
+4. **F-04** (M): align deadline alert wording between Race Decision and Race Planner. Acceptance: obligation-level alerts use the same wording on both screens.
+
+### 9. Change-audit re-check
+
+Not owed (M3/M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (per-page contrast, target size, reflow, keyboard).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- §3.1 provenance caveats carried (Gerhardt-Powals, IA prose, Norman, Tognazzini 2014 count, Laws of UX count, Laws of UI count, no Law of Experience).
+- Evidence capability recorded as FALSE; `spawn ENOENT` named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and `file:line` location verified this run.
+- No severity 3/4 finding rests on inference (highest severity here is 2).
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort (4 items).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1–10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-career-saveveteran-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-career-saveveteran-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M3 flow audit with M2 per-screen sweep: Save Veteran
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-004
+- Date: 2026-11-02
+- Mode: M3 flow audit (multi-screen task open to close) with M2 per-screen sweep
+- Scope: SCR-VET-003 Save Veteran — route GET /training-runs/{run}/veteran (runs.veteran), written by POST (runs.veteran.store), controller App\Http\Controllers\Career\SaveVeteranController, page resources/js/pages/Career/SaveVeteran.vue, Form Request App\Http\Requests\StoreVeteranRequest, SCREEN_SPEC.md section SCR-VET-003, tests/Feature/SaveVeteranTest.php, tests/browser/career-save-veteran.spec.ts.
+- Out of scope: the Veteran library list/detail (veterans.index/veterans.show), the Legacy Lab, RecordVeteran domain behaviour beyond the controller call, performance, AAA criteria, any fix.
+- Frameworks applied: docs/framework-ui-ux/design-framework-index-2026-10-21.md first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per section 4 routing. Read from the files this run, not from memory.
+- Rendered evidence: FALSE. Chromium cannot launch in this sandbox (spawn ENOENT); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are OBSERVED_SOURCE or UNMEASURED.
+
+### 2. Executive summary
+
+- 2 findings, both severity 1 minor, none severity 3 or 4.
+- F-01 — role="alert" used for a non-error blocked precondition message (SaveVeteran.vue:195): an assertive live region overstates a refusal as an alarm.
+- F-02 — Saving overwrites an existing Veteran's tags and notes with no confirmation and no reversal path from this screen (SaveVeteran.vue:412, SaveVeteranController.php:147-154): TOG-6 undo absent confirmation named obligation is not met, and the evaluation gulf what will be replaced is not named.
+- The screen is otherwise well built: page-level loading and error states, inline save acknowledgement, tag chips with aria-pressed plus a visible mark not colour alone, N/A with title for held figures, read-back prefill from an existing row no redundant entry, named absences, and a stated outcome on commit flash on the detail page SHR-4 closure.
+- Largest unmeasured risk: contrast, target size under the 44 px house rule, reflow at 320 px, focus visible or obscured none measurable in this sandbox.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Save Veteran (SCR-VET-003) | yes blocked | yes | yes | yes | src | src | named | named | named | named | src | career-save-veteran.spec.ts |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A or not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 3.3.1, 3.3.2, 4.1.2, 4.1.3 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only never conformance; 2.5.7 N/A no drag; 3.3.7 satisfied by prefill; AAA not reached |
+| Heuristics | H1, H2, H4, H5, H6, H8, H9 | H3 undo systemic gap, H7 accelerators, H10 help surface |
+| Shneiderman | SHR-4, SHR-5, SHR-7 | SHR-6 systemic undo gap, SHR-2 |
+| Tognazzini | TOG-4, TOG-6 | TOG-1 50 ms UNMEASURED; TOG-2, TOG-3, TOG-5, TOG-7, TOG-8 |
+| Information architecture | IA-1, IA-5 | IA-2, IA-3, IA-4, IA-6 |
+| Gestalt | GT-2, GT-4 | GT-3, GT-5, GT-6 |
+| Norman | NRM-2, NRM-6 | NRM-1, NRM-3, NRM-4, NRM-5 |
+| Laws of UX | UX-1, UX-4, UX-9, UX-10 | UX-2, UX-3, UX-5, UX-6, UX-7, UX-8 |
+| Laws of UI | UI-2, UI-3, UI-4 | UI-1, UI-5, UI-6, UI-7 |
+| Gerhardt-Powals | GP-1, GP-2, GP-3 | GP-4, GP-5 |
+
+Framework coverage applied and produced findings: NRM-6/H9 (F-02), 1.3.1/H9 (F-01). Applied measured clean from source no finding: H1 loading/error/acknowledgement regions present; H2 Global client vocabulary Wit Spark; H4 one token set min-h-11 buttons; H5 refused write leaves entered state intact prefill on return; H6 held figures and absences read back; H8 every element carries a fact; SHR-4 flow closes on a stated outcome flash; SHR-7 stat values on the screen that tags them; GP-1/GP-3 shortfall not computed held stated as held; GT-2/UI-4 absent values carry word plus title never dash; IA-1 doors are props/actions; IA-5 empty blocked state names absence remedy action; WCAG 3.3.1 refusal names the cause; WCAG 4.1.3 role status/alert present. N/A: 2.5.7 no drag, 2.1.4 no accelerators, 3.3.8 no auth, 1.2/1.4.2/2.3 no media audio flashing. Not reached: WCAG 1.4.4/1.4.10/1.4.12 no resize pass, WCAG 3.2.6/3.3.7 re-check.
+
+### 4. Evidence status and limits
+
+- RENDERED_EVIDENCE = FALSE. Chromium cannot launch in this sandbox (spawn ENOENT); no rendered frame was obtained.
+- Structural and copy claims are OBSERVED_SOURCE against the page, controller and Form Request source read this run; visual, contrast, target-size and reflow claims are UNMEASURED section 6.
+- Provenance caveats carried audit protocol section 3.1: Gerhardt-Powals primary text paywalled; IA prose unread names summaries only; Norman's book not fetched quotes from encyclopedia entry; Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13 and publishes Closure/Continuity; no Law of Experience it is Mental Model UX-17.
+- Attribution rule applied: Closure/Continuity cited to uilaws-2026-10-21.md; Common Fate cited to gestalt-principles-2026-10-21.md; Fitts/Hick/Jakob cited to laws-of-ux-2026-10-21.md; 44 px described as a house rule exceeding 2.5.8 never as conformance.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface or state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | 1.3.1 secondary H9 | WCAG Heuristics | Save Veteran blocked state | The blocked precondition block prints its refusal in p role="alert" SaveVeteran.vue:195. role="alert" is an assertive live region reserved for errors; a not Completed yet refusal is not an error, so the role overstates severity and can alarm assistive tech users. | OBSERVED_SOURCE | resources/js/pages/Career/SaveVeteran.vue:193-195 | 1 | High | Replace role="alert" with a plain paragraph or role="status"/aria-describedby; reserve role="alert" for actual save failures. Acceptance: no non-error uses role="alert". |
+| F-02 | TOG-6 secondary NRM-6 | Tognazzini Norman | Save Veteran populated re-save | Saving overwrites an existing Veteran's tags and notes saved not null Update Veteran SaveVeteran.vue:412 with no confirmation and no reversal path from this screen; the write posts and redirects SaveVeteranController.php:147-154. TOG-6 when undo is absent the confirmation the absence forces must be present and named; NRM-6 evaluation gulf what will be replaced is not stated. | OBSERVED_SOURCE | resources/js/pages/Career/SaveVeteran.vue:412; app/Http/Controllers/Career/SaveVeteranController.php:147-154 | 1 | Medium | Add a pre-save notice naming that re-saving replaces tags/notes, or a confirmation before overwrite; record the undo absence as the systemic gap H3/TOG-6 rather than a per-screen fix. Acceptance: overwriting is named before commit or a confirmation gates it. |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Light/dark body text meets 4.5:1 on every panel | No browser; intended ratios in app.css only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast borders focus rings risk edge meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling | No browser; viewport never rendered | Rendered reflow pass at 320 px populated both themes |
+| Target sizes of the 44 px house rule hold on every control min-h-11 buttons chips | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize plus text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on every control | No keyboard run executed | Keyboard pass over the page |
+| 50 ms click acknowledgement on tag chips and Save | No timing instrumentation | Rendered or tooling latency pass |
+
+### 7. Conflict and gap log not findings
+
+Settlements applied rather than filed as defects:
+
+- 44 px versus 2.5.8. Target-size observations are filed under the house rule UX-1/TOG-5 and explicitly not as conformance, per wcag-2.2-accessibility-2026-10-21.md.
+- Density versus minimalism. The screen is deliberately dense review plus tags plus note plus absences; H8 is signal against noise and every element carries a fact. No finding.
+- Closure versus honesty. Absent values carry a word and a title N/A with a reason never a dash; GT-2/UI-4 hold. No finding.
+- Feedback timing. 50 ms acknowledgement and 400 ms Doherty response read as the index reads them; acknowledgement surfaces are inline hints whose latency is unmeasured section 6.
+- Consistency versus exceptions. No exceptions on this screen. No finding.
+- Title-only disclosure systemic. Several N/A absence reasons are carried only in title attributes; recorded as a gap rather than per-screen findings.
+- Systemic gaps confirmed in the register rather than filed per screen: H3/TOG-6 no undo on a committed write F-02 names it here but the fix is product-wide; H7 no accelerators; H10 no help surface; WCAG 1.4.3/1.4.11 etc all UNMEASURED.
+
+Conflicts: none found this pass; no code-versus-rule disagreement required settlement.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. F-01 S: replace role="alert" on the blocked block with a non-alert role. Acceptance: no non-error uses role="alert".
+2. F-02 S: name the overwrite before commit or add a confirmation. Acceptance: re-saving a Veteran states it replaces tags/notes, or a confirmation gates the write.
+
+### 9. Change-audit re-check
+
+Not owed M3/M2. No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered per-page contrast, target size, reflow, keyboard, dialog focus.
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- section 3.1 provenance caveats carried Gerhardt-Powals, IA prose, Norman, Tognazzini 2014 count, Laws of UX count, Laws of UI count, no Law of Experience.
+- Evidence capability recorded as FALSE; spawn ENOENT named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and file:line location verified this run.
+- No severity 3 or 4 finding rests on inference highest severity here is 1.
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort 2 items.
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed sections 1-10 in order; title line exact.
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-career-setup-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-career-setup-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M3 flow audit: career setup wizard (steps 1–6)
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-005
+- Date: 2026-11-02
+- Mode: **M3 flow audit** (multi-screen task open to close) with M2 per-screen sweep
+- Scope: eight surfaces — 1) `GET /career/setup/scenario` (SCREEN-002, step 1) `resources/js/pages/Career/ScenarioSelect.vue` / `App\Http\Controllers\Career\ScenarioSelectController`; 2) `GET /career/setup/trainee` (SCREEN-003, step 2) `TraineeSelect.vue` / `TraineeSelectController`; 3) `GET /career/setup/trainee/{id}` (SCREEN-004, trainee profile sub-screen) `TraineeProfile.vue` / `TraineeProfileController`; 4) `GET /career/setup/target` (SCREEN-005, step 3) `BuildTarget.vue` / `BuildTargetController`; 5) `GET /career/setup/legacy` (SCR-CAR-008, step 4) `LegacySelect.vue` / `LegacySelectController`; 6) `GET /career/setup/deck` (SCR-CAR-009, step 5) `DeckSelect.vue` / `DeckSelectController`; 7) `GET /career/setup/preflight` (SCR-CAR-010, step 6) `Preflight.vue` / `PreflightController`; 8) intra-page sub-surfaces: `CardPicker` native `<dialog>` on DeckSelect; `AncestorEditor` two-parent blocks on LegacySelect. Per screen: page + controller read, `SCREEN_SPEC.md` where registered, browser spec where it exists.
+- Out of scope: run creation backend beyond the `PreflightController`/`SetupDraft` write path, content strategy (scenario cap rows verified against the reference — clean), performance, AAA criteria, any fix.
+- Frameworks applied: `design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are `OBSERVED_SOURCE` or `UNMEASURED`.
+
+### 2. Executive summary
+
+- **F-01 — "Create the run" is irreversible with no named confirmation.** Preflight's commit writes trainee, scenario, target, parents and deck and creates an Active run; `RunStatus` has no draft case and a run can only be retired. The button is gated only by `canStart` (scenario + trainee entered), and no confirmation is named. Severity 2, High.
+- **F-02 — SetupDraft's one-draft-per-session sharing and expiry are undisclosed on every screen.** Two tabs share the single draft (last write wins) and session expiry loses it; no screen states either fact. Severity 2, High.
+- **F-03 — ScenarioSelect's disabled Continue names no reason.** `props.selected === null` disables it with no `aria-describedby`/hint, unlike TraineeSelect's paired control ("Choose a trainee to continue." / `aria-describedby="trainee-continue-hint"`). Severity 2, High.
+- **F-04 — The scenario empty state shows no example.** IA-5 asks an empty state to show what would fill it; the empty block names the absence and remedy only. Severity 1, High.
+- Largest unmeasured risk: contrast, target size under the 44 px house rule, reflow at 320 px, 200% resize, focus visible/obscured, dialog focus trap and tab-restore after PUT — none measurable in this sandbox; the wizard has no rendered pass at all.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ScenarioSelect (SCREEN-002, step 1) | yes | yes | yes | yes | src | src | named | named | named | named | src | none |
+| TraineeSelect (SCREEN-003, step 2) | yes | yes | yes | yes | src | src | named | named | named | named | src | none |
+| TraineeProfile (SCREEN-004) | yes | yes | n/a | n/a | src | src | named | named | named | named | src | none |
+| BuildTarget (SCREEN-005, step 3) | yes | yes | yes | yes | src | src | named | named | named | named | src | none |
+| LegacySelect (SCR-CAR-008, step 4) | yes | yes | yes | yes | src | src | named | named | named | named | src | none |
+| DeckSelect (SCR-CAR-009, step 5) | yes | yes | yes | yes | src | src | named | named | named | named | src | none |
+| Preflight (SCR-CAR-010, step 6) | n/a (all five gates required) | yes | yes | yes | src | src | named | named | named | named | src | none |
+| CardPicker `<dialog>` on DeckSelect | yes | yes | yes | yes | src | src | named | named | named | named | src | none |
+| AncestorEditor two-parent blocks on LegacySelect | yes | yes | yes | yes | src | src | named | named | named | named | src | none |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 1.4.1, 2.1.1, 2.4.7, 3.3.1, 3.3.2, 3.3.3, 4.1.2, 4.1.3 | 1.4.3/1.4.10/1.4.11/1.4.12 all UNMEASURED (no browser); 2.5.8 cited only as the house rule's floor, never as conformance; 2.5.7 N/A (no drag); 3.2.6/3.3.7 N/A; AAA not reached |
+| Heuristics | H1, H2, H3, H4, H5, H6, H8, H9 | H7 no accelerators — systemic gap, §7 |
+| Shneiderman | SHR-1, SHR-4 (N/A: no committed-turn closure on these screens), SHR-5 (N/A), SHR-6 (secondary on F-01), SHR-7 | SHR-2 (no expert path to serve); SHR-8 does not exist in the file |
+| Tognazzini | TOG-6 (primary F-01), TOG-7 (secondary F-02), TOG-3 | TOG-1 (50 ms acknowledgement) UNMEASURED; TOG-2, TOG-4, TOG-5, TOG-7, TOG-8 N/A on read-mostly screens |
+| Information architecture | IA-1, IA-5 | IA-2/IA-3/IA-6 structure between screens out of scope |
+| Gestalt | GT-1, GT-2, GT-4, GT-6 | GT-3, GT-5 not reached |
+| Norman | NRM-1, NRM-2 (primary F-03), NRM-4 (secondary F-06) | NRM-3, NRM-5, NRM-6 not reached |
+| Laws of UX | UX-1 (44 px house rule, explicitly not conformance), UX-3, UX-4, UX-5, UX-9, UX-10 | UX-2, UX-6, UX-7, UX-8 not reached |
+| Laws of UI | UI-1, UI-2, UI-3, UI-4 | UI-5, UI-6, UI-7 not reached |
+| Gerhardt-Powals | GP-1, GP-2, GP-3 | GP-4, GP-5 not reached |
+
+Framework coverage (applied and produced findings): `TOG-6`/`SHR-6`/`H3` (F-01), `H1`/`TOG-7` (F-02), `NRM-2` (F-03), `IA-5` (F-04), `H4`/`SHR-1` (F-05/F-06), `NRM-4` (secondary F-06), `H4` (F-07). Applied, measured clean from source (no finding): `H5`/`NRM-3`/`SHR-5` (reversal — no draft case in `RunStatus`, so irreversibility is real, covered by F-01); `SHR-7`/`SHR-8`-adjacent (stat defaults stored — `D18b` note); `GT-2`/`UI-4` (absent values carry a word and a title); `IA-1` (forward doors exist on every step); `WCAG 2.1.1`/`2.4.7`/`4.1.2`/`4.1.3` (links, buttons, labels, status regions present); `WCAG 1.4.1` (stale state carries word + border). `N/A` by the framework's own list: `2.5.7` (no drag), `2.1.4` (no accelerators), `3.3.8` (no auth), `1.2`/`1.4.2`/`2.3` (no media/audio/flashing), `SHR-4` (no multi-step flow closure — the wizard is linear open-to-close), `IA-3`/`IA-6` (structure between screens out of scope), AAA criteria. Not reached: M4/M2 full rendered passes, `WCAG 1.4.4`/`1.4.10`/`1.4.12` (no resize pass), `WCAG 3.2.6`/`3.3.7` (not exercised).
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run.
+- Structural and copy claims are `OBSERVED_SOURCE` against the page and controller source read this run; visual, contrast, target-size and reflow claims are `UNMEASURED` (§6).
+- Content cross-check: `docs/UMAMUSUME_REFERENCE.md` anchor 2026-09-27 — all four scenario cap rows match line for line (§2.1), `base_cap` 1200 / `hard_cap` 2000 match, `live_on_global` dates match, capability verified against reference anchor 2026-09-27. Content track clean; no content discrepancy filed.
+- Provenance caveats carried (§3.1 of the audit prompt): Gerhardt-Powals primary text paywalled, items 5/6 an unconfirmed split (nothing here rests on that boundary); IA prose unread, only names/summaries are the article's own (IA-5 used only as its derived sentence); Norman's book not fetched, quotes from the encyclopedia entry; Tognazzini sixteen are the original edition, 2014 count unverified; Laws of UX holds 29 (Zeigarnik from its own page); Laws of UI holds 13 and publishes Closure and Continuity; no "Law of Experience" (it is Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity cited to `uilaws-2026-10-21.md`; Common Fate cited to `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob cited to `laws-of-ux-2026-10-21.md`; 44 px described as a house rule exceeding 2.5.8, never as conformance.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | `TOG-6` (secondary: `SHR-6`, `H3`) | Tognazzini / Shneiderman / Heuristics | /career/setup/preflight, commit action, populated | "Create the run" writes trainee, scenario, target, parents and deck and creates an Active run. There is no reversal (`RunStatus` has no draft case; a run can only be retired) and no confirmation is named. The button is only gated by `canStart` (scenario + trainee entered). | OBSERVED_SOURCE | `resources/js/pages/Career/Preflight.vue:454-461, 768-770`; `app/Services/Career/SetupDraft.php:22-24, 30-32` | 2 | High | Add a named confirmation stating finality (or that a created run can be retired), consistent with step 1's pre-commit reversibility table. Effort S. Acceptance: pressing "Create the run" shows a confirmation naming irreversibility/retire path, or finality is stated before commit. |
+| F-02 | `H1` (secondary: `TOG-7`) | Heuristics / Tognazzini | All setup screens, session draft, populated | `SetupDraft` holds one draft per session: two tabs share it (last write wins) and session expiry loses it. No screen discloses either fact. | OBSERVED_SOURCE | `app/Services/Career/SetupDraft.php:26-28, 30-32`; no screen renders this disclosure | 2 | High | Disclose session scope on the wizard (single-session draft; another tab replaces it; expired session restarts the wizard). Effort S/M. Acceptance: the wizard states single-session draft and tab-sharing behavior before data loss can occur. |
+| F-03 | `NRM-2` | Norman | /career/setup/scenario, populated, disabled primary | The disabled "Continue to trainee" button (`props.selected === null`) has no reason text — no `aria-describedby`, no beside-it hint. The equivalent control on the trainee screen does print the reason ("Choose a trainee to continue." with `aria-describedby="trainee-continue-hint"`). | OBSERVED_SOURCE | `resources/js/pages/Career/ScenarioSelect.vue:161-168` vs `TraineeSelect.vue:487-498` | 2 | High | Add the same hint + `aria-describedby` pairing to the scenario step's disabled Continue, or enable the button and surface the missing choice as an inline error on commit. Effort S. Acceptance: the disabled Continue names why it is disabled. |
+| F-04 | `IA-5` | Information architecture | /career/setup/scenario, empty state | The empty branch ("No scenario is composed…") names the absence and remedy but shows no example of what would fill it — IA-5 asks an empty state to show an example of the contents. | OBSERVED_SOURCE | `resources/js/pages/Career/ScenarioSelect.vue:185-191` | 1 | High | Name a concrete example scenario (e.g. "URA Finale is the baseline and the one a first run is usually built on") in the empty block. Effort S. Acceptance: the empty state names at least one composable scenario. |
+| F-05 | `H4` (secondary: `SHR-1`) | Heuristics / Shneiderman | LegacySelect forward door vs DeckSelect forward door, populated | LegacySelect's "Continue to deck" is a plain `<a href="/career/setup/deck">` that navigates without writing, so edits on step 4 are lost unless "Save Legacy" was clicked first; DeckSelect's "Continue to preflight" writes (`saveAndContinue`) then navigates. The exception is not named anywhere. | OBSERVED_SOURCE | `resources/js/pages/Career/LegacySelect.vue:329-340` vs `DeckSelect.vue:255-262, 389-396` | 1 | Medium | Make the legacy forward door save before navigating (like deck), or name the exception in screen copy ("changes on this step are not saved until you click Save Legacy"). Effort M. Acceptance: both forward doors behave identically, or the exception is stated on screen. |
+| F-06 | `H4` (secondary: `NRM-4`) | Heuristics / Norman | LegacySelect and BuildTarget, all states | LegacySelect hard-codes hrefs (`/career/setup/target`, `/career/setup/deck`) and BuildTarget hard-codes `/preferences`. Every other page receives URLs server-side as props (`action`, `backUrl`, `scenarioUrl`, `profileUrl`). Violates "named routes and `route()` everywhere" (AGENTS.md §7). | OBSERVED_SOURCE | `resources/js/pages/Career/LegacySelect.vue:329-340`; `resources/js/pages/Career/BuildTarget.vue:622` | 1 | Medium | Replace literal hrefs with server-supplied props resolved through `route()`. Effort S. Acceptance: no literal setup URL remains in any setup page template. |
+| F-07 | `H4` | Heuristics | /career/setup/trainee/{id}, populated | TraineeProfile hard-codes stat axes `['Speed','Stamina','Power','Guts','Wit']` (`statAxes`) while BuildTarget iterates `props.statOrder` from the server. If stat order changes, position means different things on different screens. | OBSERVED_SOURCE | `resources/js/pages/Career/TraineeProfile.vue:152` vs `BuildTarget.vue:75, 160-168` | 1 | Medium | Derive `statAxes` from `props.statOrder` on the profile page, or document as named exception. Effort S. Acceptance: both pages iterate the same server-provided stat order. |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Dark- and light-theme body text meets 4.5:1 on every setup screen | No browser; intended ratios in `app.css` only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, focus rings, risk edge) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling on the wizard screens | No browser; viewport never rendered | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on every control | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and the 1.4.12 text-spacing override lose nothing | No resize pass run | Resize + text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on every setup control | No keyboard run executed | Keyboard pass over each screen |
+| Dialog focus trap on `CardPicker`'s native `<dialog>` | No rendered frame | Rendered pass over the dialog at open and close |
+| Tab-restore after PUT (whole-deck replace on DeckSelect) | No interaction measured | Keyboard pass after a PUT replace |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** Every target-size observation above is filed under the house rule (`UX-1`/`TOG-5`) and explicitly not as conformance, per `wcag-2.2-accessibility-2026-10-21.md`.
+- **Density vs minimalism.** The setup screens are deliberately dense; `H8` is about signal against noise, and every element carries a fact. No finding.
+- **Closure vs honesty.** Absent values carry a word and a title (`N/A` with a reason, never a dash); `GT-2`/`UI-4` hold. No finding.
+- **Feedback timing.** 50 ms acknowledgement and 400 ms Doherty response read as the index reads them; the only acknowledgement surfaces are inline hints and status lines, whose latency is unmeasured (§6).
+- **Consistency vs exceptions.** The three recorded exceptions (dark theme's three deviations, the Database density) are not on these screens. No finding.
+- **Title-only disclosure (systemic).** Absence reasons and several `N/A` reasons are carried only in `title` attributes across most of the app; recorded as a gap rather than per-screen findings. F-03 names the most affected screen.
+- **Code wins over stale rule.** Where code and a written rule disagree, the code wins (AGENTS.md §2); no such case required a ruling this pass.
+
+Conflicts: none found this pass; no code-vs-rule disagreement required settlement.
+
+Gaps confirmed in the register rather than filed per screen: `H3` (no undo on a committed turn — F-01 covers the screen-specific harm of the commit with no reversal), `H7` (no accelerators), `H10` (no help surface), IA-5 exemplar gap (F-04 covers the scenario screen; other empty states not re-filed), title-only disclosure channel (systemic), WCAG 1.4.3/1.4.11/etc all UNMEASURED.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. **F-01** (S): add a named confirmation stating finality (or that a created run can be retired) on "Create the run", consistent with step 1's pre-commit reversibility table. Check: pressing "Create the run" shows a confirmation naming irreversibility/retire path, or finality is stated before commit.
+2. **F-02** (S/M): disclose single-session draft scope on the wizard — another tab replaces it (last write wins); expired session restarts the wizard. Check: the wizard states this before data loss can occur.
+3. **F-03** (S): add the hint + `aria-describedby` pairing to the scenario step's disabled Continue, or enable the button and surface the missing choice as an inline error on commit. Check: the disabled Continue names why it is disabled.
+4. **F-04** (S): name a concrete example scenario in the empty block (e.g. "URA Finale is the baseline and the one a first run is usually built on"). Check: the empty state names at least one composable scenario.
+5. **F-06** (S): replace literal hrefs with server-supplied props resolved through `route()`. Check: no literal setup URL remains in any setup page template.
+6. **F-07** (S): derive `statAxes` from `props.statOrder` on `TraineeProfile`, or document as named exception. Check: both pages iterate the same server-provided stat order.
+7. **F-05** (M): make the legacy forward door save before navigating (like deck), or name the exception in screen copy ("changes on this step are not saved until you click Save Legacy"). Check: both forward doors behave identically, or the exception is stated on screen.
+
+### 9. Change-audit re-check
+
+Not owed (M3). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surfaces, states, viewports and themes stated, including what was not covered (per-page contrast, target size, reflow, keyboard, dialog focus).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- §3.1 provenance caveats carried (Gerhardt-Powals, IA prose, Norman, Tognazzini 2014 count, Laws of UX count, Laws of UI count, no Law of Experience).
+- Evidence capability recorded as FALSE; `spawn EPERM` named; no rendered claim made.
+- `UMAMUSUME_REFERENCE.md` content cross-check recorded (anchor 2026-09-27; cap rows, `base_cap`/`hard_cap`, `live_on_global` dates all match; content track clean, no discrepancy filed).
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and `file:line` location verified this run.
+- No severity 3/4 finding rests on inference (highest severity here is 2).
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort (7 items).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1–10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-career-snapshot-entry-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-career-snapshot-entry-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M3 flow audit with M2 per-screen sweep: Career Snapshot Entry
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-007
+- Date: 2026-11-02
+- Mode: M3 flow audit (multi-screen task open to close) with M2 per-screen sweep
+- Scope: SCR-CAR-025 Career Snapshot entry — route GET /career/snapshot (career.snapshot), controller App\Http\Controllers\Career\SnapshotController entry method, page resources/js/pages/Career/Snapshot/Entry.vue, SCREEN_SPEC.md section SCR-CAR-025, tests/Feature/SnapshotEntryTest.php, tests/browser/career-snapshot.spec.ts.
+- Out of scope: the Setup and Review snapshot screens (separate audits this pass), CreateSnapshotRun, the run-scoped cockpit surfaces, performance, AAA criteria, any fix.
+- Frameworks applied: docs/framework-ui-ux/design-framework-index-2026-10-21.md first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per section 4 routing. Read from the files this run, not from memory.
+- Rendered evidence: FALSE. Chromium cannot launch in this sandbox (spawn ENOENT); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are OBSERVED_SOURCE or UNMEASURED.
+
+### 2. Executive summary
+
+- 1 finding, severity 1 minor. None severity 3 or 4.
+- F-01 — The stepper links to Setup and Review before any snapshot exists (Entry.vue:19-23); Review renders only an empty state No snapshot has been entered yet Review.vue:107-110, so a Trainer can reach a data-less review step. The empty state recovers and names the remedy, but the stepper sets an expectation of data that is not met. H2 Match Between System and Real World, secondary GT-2 honest partial indicator.
+- The screen is otherwise clean: one action one paragraph one way back; plain client vocabulary; the position you enter becomes the run's own position and absent figures are recorded as absent never guessed at Entry.vue:34-38; page titled via Head; the stepper marks Entry aria-current="step" and gives a way back to the dashboard; no write occurs here so no write-state feedback is required.
+- Cross-screen note: the three snapshot screens render three different stepper markups (Entry.vue:19-23, Setup.vue:152-156, Review.vue:92-105). Not re-filed per screen; logged in section 7.
+- Largest unmeasured risk: contrast, target size under the 44 px house rule, reflow at 320 px, focus visible or obscured none measurable in this sandbox.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Snapshot Entry career.snapshot | yes no data | N/A no write | N/A no fetch | N/A static page | src | src | named | named | named | named | src | career-snapshot.spec.ts |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A or not reached |
+|---|---|---|
+| WCAG 2.2 AA | 2.4.2, 2.4.6, 3.3.2 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only never conformance; 2.1.1 N/A no interactive beyond links; 3.3.1/3.3.3 N/A no input; 4.1.2 links only; AAA not reached |
+| Heuristics | H1, H2, H3, H4, H6, H8 | H5 N/A no errors possible, H7 accelerators, H9 N/A no errors, H10 help surface |
+| Shneiderman | SHR-7 | SHR-4 closure single screen no commit, SHR-6 systemic undo gap |
+| Tognazzini | TOG-7 | TOG-1 50 ms UNMEASURED; TOG-2, TOG-3, TOG-4, TOG-5, TOG-6, TOG-8 |
+| Information architecture | IA-1, IA-5 | IA-2, IA-3, IA-4, IA-6 |
+| Gestalt | GT-2 | GT-3, GT-4, GT-5, GT-6 |
+| Norman | NRM-1, NRM-6 | NRM-2, NRM-3, NRM-4, NRM-5 |
+| Laws of UX | UX-3, UX-9, UX-10 | UX-1, UX-2, UX-4, UX-5, UX-6, UX-7, UX-8 |
+| Laws of UI | UI-2, UI-6 | UI-1, UI-3, UI-4, UI-5, UI-7 |
+| Gerhardt-Powals | GP-2, GP-8 | GP-1, GP-3, GP-4, GP-5 |
+
+Framework coverage applied and produced findings: H2/GT-2 (F-01). Applied measured clean from source no finding: H1 page is static no async state needed; H3 doors back to dashboard and forward to Setup; H4 one token set min-h-11 links/buttons; H6 position and absence explained on the page; H8 every element carries a fact; IA-1 Entry has way back and doors; IA-5 empty state absent here but not applicable no data view; Norman NRM-1 links are signifiers; GP-2 position stated plainly; GP-8 only needed info shown Legacy and support deck link out rather than duplicate. N/A: 2.5.7 no drag, 2.1.4 no accelerators, 3.3.8 no auth, 3.3.1/3.3.3 no input, 1.2/1.4.2/2.3 no media. Not reached: WCAG resize/reflow passes, WCAG 3.2.6/3.3.7.
+
+### 4. Evidence status and limits
+
+- RENDERED_EVIDENCE = FALSE. Chromium cannot launch in this sandbox (spawn ENOENT); no rendered frame was obtained.
+- Structural and copy claims are OBSERVED_SOURCE against the page source read this run; visual, contrast, target-size and reflow claims are UNMEASURED section 6.
+- Provenance caveats carried audit protocol section 3.1: Gerhardt-Powals primary text paywalled; IA prose unread names summaries only; Norman's book not fetched quotes from encyclopedia entry; Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13 and publishes Closure/Continuity; no Law of Experience it is Mental Model UX-17.
+- Attribution rule applied: Closure/Continuity cited to uilaws-2026-10-21.md; Common Fate cited to gestalt-principles-2026-10-21.md; Fitts/Hick/Jakob cited to laws-of-ux-2026-10-21.md; 44 px described as a house rule exceeding 2.5.8 never as conformance.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface or state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | H2 secondary GT-2 | Heuristics Gestalt | Snapshot Entry stepper forward doors | The stepper links to Setup and Review before any snapshot exists Entry.vue:19-23; Review renders only an empty state No snapshot has been entered yet Review.vue:107-110, so a Trainer can reach a data-less review step. The empty state recovers and names the remedy fill the form first, but the stepper sets an expectation of data that is not met. | OBSERVED_SOURCE | resources/js/pages/Career/Snapshot/Entry.vue:19-23; resources/js/pages/Career/Snapshot/Review.vue:107-110 | 1 | Medium | Gate the Review door or label the stepper steps so a data-less step does not look complete; keep the empty-state recovery. Acceptance: a Trainer cannot reach a review that holds nothing without an explicit no-data label. |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Light/dark body text meets 4.5:1 on every panel | No browser; intended ratios in app.css only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast borders focus rings meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling | No browser; viewport never rendered | Rendered reflow pass at 320 px populated both themes |
+| Target sizes of the 44 px house rule hold on every control min-h-11 links buttons | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize plus text-spacing pass at 320 px |
+| Focus visible on the stepper links and actions | No keyboard run executed | Keyboard pass over the page |
+
+### 7. Conflict and gap log not findings
+
+Settlements applied rather than filed as defects:
+
+- 44 px versus 2.5.8. Target-size observations are filed under the house rule UX-1/TOG-5 and explicitly not as conformance, per wcag-2.2-accessibility-2026-10-21.md.
+- Density versus minimalism. The screen is deliberately thin one section; H8 holds. No finding.
+- Closure versus honesty. The stepper does not claim completion; GT-2 holds except F-01. No additional finding.
+- Feedback timing. No async action here; N/A.
+- Consistency versus exceptions. Cross-screen stepper markup differs across Entry Setup Review logged here not re-filed per screen. No finding.
+- Title-only disclosure systemic. N/A no title attributes of note here.
+- Systemic gaps confirmed in the register rather than filed per screen: H3/TOG-6 SHR-6 no undo systemic; H7 no accelerators; H10 no help surface; WCAG 1.4.3/1.4.11 etc all UNMEASURED.
+
+Conflicts: none found this pass; no code-versus-rule disagreement required settlement.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. F-01 S: gate or label the Review step so a data-less review is not presented as complete. Acceptance: a Trainer cannot reach a review that holds nothing without an explicit no-data label.
+
+### 9. Change-audit re-check
+
+Not owed M3/M2. No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered per-page contrast, target size, reflow, keyboard, dialog focus.
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- section 3.1 provenance caveats carried Gerhardt-Powals, IA prose, Norman, Tognazzini 2014 count, Laws of UX count, Laws of UI count, no Law of Experience.
+- Evidence capability recorded as FALSE; spawn ENOENT named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and file:line location verified this run.
+- No severity 3 or 4 finding rests on inference highest severity here is 1.
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort 1 item.
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed sections 1-10 in order; title line exact.
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-career-snapshot-review-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-career-snapshot-review-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M3 flow audit with M2 per-screen sweep: Career Snapshot Review
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-009
+- Date: 2026-11-02
+- Mode: M3 flow audit (multi-screen task open to close) with M2 per-screen sweep
+- Scope: SCR-CAR-027 Career Snapshot review — route GET /career/snapshot/review (career.snapshot.review), controller App\Http\Controllers\Career\SnapshotController review method, page resources/js/pages/Career/Snapshot/Review.vue, the commit targets POST /career/snapshot (career.snapshot.store) via StoreSnapshotRequest, SCREEN_SPEC.md section SCR-CAR-027, tests/Feature/SnapshotReviewTest.php, tests/browser/career-snapshot.spec.ts.
+- Out of scope: the Entry and Setup snapshot screens (separate audits this pass), CreateSnapshotRun domain action, performance, AAA criteria, any fix.
+- Frameworks applied: docs/framework-ui-ux/design-framework-index-2026-10-21.md first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per section 4 routing. Read from the files this run, not from memory.
+- Rendered evidence: FALSE. Chromium cannot launch in this sandbox (spawn ENOENT); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are OBSERVED_SOURCE or UNMEASURED.
+
+### 2. Executive summary
+
+- 1 finding, severity 1 minor, noted as the systemic undo gap. None severity 3 or 4.
+- F-01 — Record snapshot commits with no reversal path and no post-commit confirmation beyond the redirect flash Review.vue:144-151; SnapshotController::store commits directly app/Http/Controllers/Career/SnapshotController.php:166-173. TOG-6 when undo is absent the confirmation the absence forces must be present and named; NRM-6 evaluation gulf. The read-back before commit is good design no redundant entry WCAG 3.3.7, but once confirmed the write is final. This is the product-wide no-undo gap, not a Review-specific defect.
+- The screen is otherwise clean: three-way state Known/Unknown/Not provided with distinct words and distinct treatments border colour text Review.vue:65-75; has_draft false shows an honest empty state Review.vue:107-110 and disables confirm; the refusal alert is focused via alertRef plus watch and nextTick Review.vue:53-59; confirm re-posts the payload it was handed so what was read back is what is committed Review.vue:61-63; position_label derived from the shared owner so read-back and cockpit cannot spell it two ways SnapshotController.php:155-164; Back to edit the snapshot with draft re-hydration.
+- Cross-screen note: stepper markup differs across Entry Setup Review logged in section 7 not re-filed per screen.
+- Largest unmeasured risk: contrast, target size under the 44 px house rule, reflow at 320 px, focus visible or obscured none measurable in this sandbox.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Snapshot Review career.snapshot.review | yes no draft | yes fields | yes refusal | yes recording | src | src | named | named | named | named | src | career-snapshot.spec.ts |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A or not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 1.4.1, 3.3.1, 3.3.3, 4.1.2, 4.1.3 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only never conformance; 2.5.7 N/A no drag; 3.3.7 satisfied read back not re-ask; AAA not reached |
+| Heuristics | H1, H2, H4, H5, H6, H8, H9 | H3 exit Back present, H7 accelerators, H10 help surface |
+| Shneiderman | SHR-4, SHR-5 | SHR-6 systemic undo gap F-01 named here product-wide |
+| Tognazzini | TOG-6 | TOG-1 50 ms UNMEASURED; TOG-2, TOG-3, TOG-4, TOG-5, TOG-7, TOG-8 |
+| Information architecture | IA-1 | IA-2, IA-3, IA-4, IA-5, IA-6 |
+| Gestalt | GT-2 | GT-3, GT-4, GT-5, GT-6 |
+| Norman | NRM-3, NRM-5, NRM-6 | NRM-1, NRM-2, NRM-4 |
+| Laws of UX | UX-3, UX-9 | UX-1, UX-2, UX-4, UX-5, UX-6, UX-7, UX-8, UX-10 |
+| Laws of UI | UI-2, UI-3 | UI-1, UI-4, UI-5, UI-6, UI-7 |
+| Gerhardt-Powals | GP-2, GP-4 | GP-1, GP-3, GP-5 |
+
+Framework coverage applied and produced findings: TOG-6/NRM-6 (F-01). Applied measured clean from source no finding: H1 Recording… status during processing; H2 plain client vocabulary; H4 one token set min-h-11; H5 confirm disabled without draft constraint; H6 position_label and field displays; H8 every element carries a fact; H9 refusal plain names cause; SHR-4 flow closes on stated outcome flash; NRM-3 confirm disabled without draft; NRM-5 continuous recording status; UI-3 state not colour alone words plus treatment; GP-2 state clear; GP-4 state has word plus colour plus border treatment. N/A: 2.5.7 no drag, 2.1.4 no accelerators, 3.3.8 no auth, 1.2/1.4.2/2.3 no media. Not reached: WCAG resize/reflow passes, WCAG 3.2.6/3.3.7.
+
+### 4. Evidence status and limits
+
+- RENDERED_EVIDENCE = FALSE. Chromium cannot launch in this sandbox (spawn ENOENT); no rendered frame was obtained.
+- Structural and copy claims are OBSERVED_SOURCE against the page, controller and Form Request source read this run; visual, contrast, target-size and reflow claims are UNMEASURED section 6.
+- Provenance caveats carried audit protocol section 3.1: Gerhardt-Powals primary text paywalled; IA prose unread names summaries only; Norman's book not fetched quotes from encyclopedia entry; Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13 and publishes Closure/Continuity; no Law of Experience it is Mental Model UX-17.
+- Attribution rule applied: Closure/Continuity cited to uilaws-2026-10-21.md; Common Fate cited to gestalt-principles-2026-10-21.md; Fitts/Hick/Jakob cited to laws-of-ux-2026-10-21.md; 44 px described as a house rule exceeding 2.5.8 never as conformance.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface or state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | TOG-6 secondary NRM-6 | Tognazzini Norman | Snapshot Review commit | Record snapshot commits with no reversal path and no post-commit confirmation beyond the redirect flash Review.vue:144-151; SnapshotController::store commits directly app/Http/Controllers/Career/SnapshotController.php:166-173. TOG-6 when undo is absent the confirmation the absence forces must be present and named; NRM-6 evaluation gulf. The read-back before commit is good, but once confirmed the write is final. This is the product-wide no-undo gap named here rather than a Review-specific defect. | OBSERVED_SOURCE | resources/js/pages/Career/Snapshot/Review.vue:144-151; app/Http/Controllers/Career/SnapshotController.php:166-173 | 1 | Medium | Record the no-undo gap product-wide H3/TOG-6/SHR-6; if a per-screen fix is wanted, add a confirmation before commit or an undo after. Acceptance: the undo absence is tracked as a single product-wide gap, not duplicated per screen. |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Light/dark body text meets 4.5:1 on every panel | No browser; intended ratios in app.css only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast borders focus rings meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling | No browser; viewport never rendered | Rendered reflow pass at 320 px populated both themes |
+| Target sizes of the 44 px house rule hold on every control min-h-11 confirm button links | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize plus text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on every control | No keyboard run executed | Keyboard pass over the page |
+
+### 7. Conflict and gap log not findings
+
+Settlements applied rather than filed as defects:
+
+- 44 px versus 2.5.8. Target-size observations are filed under the house rule UX-1/TOG-5 and explicitly not as conformance, per wcag-2.2-accessibility-2026-10-21.md.
+- Density versus minimalism. The field read-back list is dense but every element carries a fact; H8 holds. No finding.
+- Closure versus honesty. Not provided is honest never guesses; GT-2 holds. No finding.
+- Feedback timing. Recording… status during processing; latency unmeasured section 6.
+- Consistency versus exceptions. Cross-screen stepper markup differs across Entry Setup Review logged here not re-filed per screen. No finding.
+- Title-only disclosure systemic. N/A no title attributes of note here.
+- Systemic gaps confirmed in the register rather than filed per screen: H3/TOG-6 SHR-6 no undo on a committed write F-01 names it here but the fix is product-wide; H7 no accelerators; H10 no help surface; WCAG 1.4.3/1.4.11 etc all UNMEASURED.
+
+Conflicts: none found this pass; no code-versus-rule disagreement required settlement.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. F-01 M: track the no-undo gap product-wide rather than duplicating it per screen. Acceptance: H3/TOG-6/SHR-6 recorded as one systemic gap with an owner decision.
+
+### 9. Change-audit re-check
+
+Not owed M3/M2. No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered per-page contrast, target size, reflow, keyboard, dialog focus.
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- section 3.1 provenance caveats carried Gerhardt-Powals, IA prose, Norman, Tognazzini 2014 count, Laws of UX count, Laws of UI count, no Law of Experience.
+- Evidence capability recorded as FALSE; spawn ENOENT named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and file:line location verified this run.
+- No severity 3 or 4 finding rests on inference highest severity here is 1.
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort 1 item.
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed sections 1-10 in order; title line exact.
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-career-snapshot-setup-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-career-snapshot-setup-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M3 flow audit with M2 per-screen sweep: Career Snapshot Setup
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-008
+- Date: 2026-11-02
+- Mode: M3 flow audit (multi-screen task open to close) with M2 per-screen sweep
+- Scope: SCR-CAR-026 Career Snapshot setup — route GET /career/snapshot/setup (career.snapshot.setup), controller App\Http\Controllers\Career\SnapshotController setup method, page resources/js/pages/Career/Snapshot/Setup.vue, Form Request App\Http\Requests\StoreSnapshotRequest, SCREEN_SPEC.md section SCR-CAR-026, tests/Feature/SnapshotEntryTest.php (setup behaviour), tests/browser/career-snapshot.spec.ts.
+- Out of scope: the Entry and Review snapshot screens (separate audits this pass), CreateSnapshotRun domain action, performance, AAA criteria, any fix.
+- Frameworks applied: docs/framework-ui-ux/design-framework-index-2026-10-21.md first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per section 4 routing. Read from the files this run, not from memory.
+- Rendered evidence: FALSE. Chromium cannot launch in this sandbox (spawn ENOENT); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are OBSERVED_SOURCE or UNMEASURED.
+
+### 2. Executive summary
+
+- 3 findings: F-01 severity 2 moderate, F-02 severity 1 minor, F-03 severity 0 cosmetic.
+- F-01 — Setup submits the full payload including notes up to 5000 characters as a GET query string to the Review screen Setup.vue:116-119; StoreSnapshotRequest allows notes max 5000 StoreSnapshotRequest.php:60. A long note risks a 414 URI Too Long failure and exposes data in URL and history. GET is also semantically a read yet carries payload toward a commit. H5 Error Prevention.
+- F-02 — The position error block displays only the first truthy of year/month/phase Setup.vue:215-217 using an or chain, so concurrent position failures hide all but one. H9 error identification precise, secondary WCAG 3.3.1.
+- F-03 — The action prop route('career.snapshot.store') is declared Setup.vue:29 but never used in Setup; the submit posts to props.review via GET Setup.vue:116-119. The store URL lives only on Review. Dead prop, code clarity, severity 0.
+- The screen is otherwise well built: three-way state Known/Unknown/Not provided with distinct words and treatments; unknown disables the input constraint NRM-3; required fields marked with asterisk and labelled 3.3.2; Back and Review snapshot as the single primary action; Legacy Lab and Support Cards link out rather than duplicate writes GP-8; draft re-hydrates form and unknown toggles on Back TOG-7 session resume.
+- Cross-screen note: stepper markup differs across Entry Setup Review logged in section 7 not re-filed per screen.
+- Largest unmeasured risk: contrast, target size under the 44 px house rule, reflow at 320 px, focus visible or obscured none measurable in this sandbox.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Snapshot Setup career.snapshot.setup | yes empty form | yes | yes validation | yes reading back | src | src | named | named | named | named | src | career-snapshot.spec.ts |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A or not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 2.4.6, 3.3.1, 3.3.2, 3.3.3, 4.1.2 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only never conformance; 2.5.7 N/A no drag; 3.3.7 N/A snapshot does not re-ask it commits what was given; AAA not reached |
+| Heuristics | H1, H2, H4, H5, H6, H8, H9 | H3 exit Back present, H7 accelerators, H10 help surface |
+| Shneiderman | SHR-5, SHR-7 | SHR-4 closure single screen no commit, SHR-6 systemic undo gap |
+| Tognazzini | TOG-3, TOG-7 | TOG-1 50 ms UNMEASURED; TOG-2, TOG-4, TOG-5, TOG-6, TOG-8 |
+| Information architecture | IA-1, IA-4 | IA-2, IA-3, IA-5, IA-6 |
+| Gestalt | GT-1, GT-2 | GT-3, GT-4, GT-5, GT-6 |
+| Norman | NRM-1, NRM-3 | NRM-2, NRM-4, NRM-5, NRM-6 |
+| Laws of UX | UX-1, UX-3, UX-9 | UX-2, UX-4, UX-5, UX-6, UX-7, UX-8, UX-10 |
+| Laws of UI | UI-2, UI-3, UI-6 | UI-1, UI-4, UI-5, UI-7 |
+| Gerhardt-Powals | GP-2, GP-3, GP-8 | GP-1, GP-4, GP-5 |
+
+Framework coverage applied and produced findings: H5 (F-01), H9/3.3.1 (F-02), code clarity (F-03). Applied measured clean from source no finding: H1 Reading the snapshot back… status during processing; H2 Global client vocabulary scenario trainee year month half; H4 one token set min-h-11; H5 constraint unknown disables input; H6 labels beside inputs; H8 every element carries a fact; H9 refusal messages plain; SHR-5 refused write leaves state intact draft re-hydrates; TOG-7 draft survives Back; GP-3 fieldStates computed summation; GP-8 Legacy and support deck link out; GT-1 cards bound one concept; GT-2 empty positions not provided honest. N/A: 2.5.7 no drag, 2.1.4 no accelerators, 3.3.8 no auth, 3.3.7 no redundant entry, 1.2/1.4.2/2.3 no media. Not reached: WCAG resize/reflow passes, WCAG 3.2.6/3.3.7.
+
+### 4. Evidence status and limits
+
+- RENDERED_EVIDENCE = FALSE. Chromium cannot launch in this sandbox (spawn ENOENT); no rendered frame was obtained.
+- Structural and copy claims are OBSERVED_SOURCE against the page, controller and Form Request source read this run; visual, contrast, target-size and reflow claims are UNMEASURED section 6.
+- Provenance caveats carried audit protocol section 3.1: Gerhardt-Powals primary text paywalled; IA prose unread names summaries only; Norman's book not fetched quotes from encyclopedia entry; Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13 and publishes Closure/Continuity; no Law of Experience it is Mental Model UX-17.
+- Attribution rule applied: Closure/Continuity cited to uilaws-2026-10-21.md; Common Fate cited to gestalt-principles-2026-10-21.md; Fitts/Hick/Jakob cited to laws-of-ux-2026-10-21.md; 44 px described as a house rule exceeding 2.5.8 never as conformance.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface or state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | H5 | Heuristics | Snapshot Setup submit to review | Setup submits the full payload including notes up to 5000 characters as a GET query string to Review Setup.vue:116-119; StoreSnapshotRequest allows notes max 5000 StoreSnapshotRequest.php:60. A long note risks a 414 URI Too Long failure and exposes data in URL and history. GET is semantically a read yet carries payload toward a commit. | OBSERVED_SOURCE | resources/js/pages/Career/Snapshot/Setup.vue:116-119; app/Http/Requests/StoreSnapshotRequest.php:60 | 2 | High | POST the payload to Review or park the draft in the session and pass a reference; cap notes for the query if GET is kept. Acceptance: a long note cannot trigger a URI length failure. |
+| F-02 | H9 secondary 3.3.1 | Heuristics WCAG | Snapshot Setup position errors | The position error block shows only the first truthy of year/month/phase using an or chain Setup.vue:215-217, so concurrent position failures hide all but one. | OBSERVED_SOURCE | resources/js/pages/Career/Snapshot/Setup.vue:215-217 | 1 | High | Render all position errors, for example loop over year/month/phase errors. Acceptance: concurrent position failures all display. |
+| F-03 | code clarity | none hygiene | Snapshot Setup props | The action prop route('career.snapshot.store') is declared Setup.vue:29 but never used in Setup; the submit uses props.review via GET Setup.vue:116-119. The store URL lives only on Review. | OBSERVED_SOURCE | resources/js/pages/Career/Snapshot/Setup.vue:29, :116-119 | 0 | High | Remove the unused action prop from Setup, or use it for the commit. Acceptance: no declared prop without a template binding. |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Light/dark body text meets 4.5:1 on every panel | No browser; intended ratios in app.css only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast borders focus rings meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling | No browser; viewport never rendered | Rendered reflow pass at 320 px populated both themes |
+| Target sizes of the 44 px house rule hold on every control min-h-11 inputs selects checkboxes | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize plus text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on every control | No keyboard run executed | Keyboard pass over the page |
+
+### 7. Conflict and gap log not findings
+
+Settlements applied rather than filed as defects:
+
+- 44 px versus 2.5.8. Target-size observations are filed under the house rule UX-1/TOG-5 and explicitly not as conformance, per wcag-2.2-accessibility-2026-10-21.md.
+- Density versus minimalism. The state field grid is dense but every element carries a fact; H8 holds. No finding.
+- Closure versus honesty. The three-way state is honest Not provided never guesses; GT-2 holds. No finding.
+- Feedback timing. Reading the snapshot back… status during processing; latency unmeasured section 6.
+- Consistency versus exceptions. Cross-screen stepper markup differs across Entry Setup Review logged here not re-filed per screen. No finding.
+- Title-only disclosure systemic. N/A no title attributes of note here.
+- Systemic gaps confirmed in the register rather than filed per screen: H3/TOG-6 SHR-6 no undo systemic; H7 no accelerators; H10 no help surface; WCAG 1.4.3/1.4.11 etc all UNMEASURED.
+
+Conflicts: none found this pass; no code-versus-rule disagreement required settlement.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. F-01 S: stop sending the snapshot payload as a GET query string. Acceptance: a long note cannot trigger a URI length failure.
+2. F-02 S: render all position errors not just the first. Acceptance: concurrent position failures all display.
+3. F-03 S: remove the unused action prop from Setup. Acceptance: no declared prop without a template binding.
+
+### 9. Change-audit re-check
+
+Not owed M3/M2. No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered per-page contrast, target size, reflow, keyboard, dialog focus.
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- section 3.1 provenance caveats carried Gerhardt-Powals, IA prose, Norman, Tognazzini 2014 count, Laws of UX count, Laws of UI count, no Law of Experience.
+- Evidence capability recorded as FALSE; spawn ENOENT named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and file:line location verified this run.
+- No severity 3 or 4 finding rests on inference highest severity here is 2.
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort 3 items.
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed sections 1-10 in order; title line exact.
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-career-surfaces-2026-11-01.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-career-surfaces-2026-11-01.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M4 product audit: career (training-run) surfaces reachable from the Cockpit
+
+
+### 1. Identity
+
+- Audit id: AUD-20261101-002
+- Date: 2026-11-01
+- Mode: **M4 product audit** (A11y overlay applied as a separate track, Phase 5)
+- Scope: the 13 career surfaces named in the task — `Cockpit` (SCR-CAR-011), `TrainingDetail` (SCR-CAR-012), `RaceDecision` (SCR-CAR-013), `EventDecision` (SCR-CAR-014), `InheritanceEvent` (SCR-CAR-015), `SkillsPlanner` (SCR-CAR-016), `Deck`/Support Builder (SCR-CAR-007, `Support/Builder.vue`), `Timeline` (SCR-CAR-017), `Result` (SCR-CAR-018), `RunSettings` (`runs.settings`, unregistered), `TeamEdit` (`runs.team`, unregistered), `ScenarioDetail` (`runs.scenario-detail`, unregistered), `ConfirmDelete` (`runs.confirm-delete`, unregistered). Per screen: page + controller read, SCREEN_SPEC §SCR-CAR-xxx where registered, browser spec where it exists.
+- Out of scope: backend behaviour beyond each controller's own queries, the wizard (SCR-CAR-002..010), scenario panels beyond the shell, performance, content strategy, AAA criteria, the `eva01` third theme, any fix.
+- Frameworks applied: `design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Gerhardt-Powals, IA, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are `OBSERVED_SOURCE` or `UNMEASURED`.
+
+### 2. Executive summary
+
+- **F-01 — RunSettings has no error surface.** Four forms (status, scenario, period, identity) post to `runs.update`; refused writes land in `form.errors` that the page never renders, and there is no `role="alert"` for a failed visit. A refused identity edit (e.g. a ceiling above the scenario's) reads as "nothing happened". Severity 2.
+- **F-09 — five doors mislabel the page in the breadcrumb.** `RunSettings`, `TeamEdit`, `ScenarioDetail`, `ConfirmDelete` and `Result` pass `current="cockpit"` (or unset it), so `CareerLayout`'s crumb prints "Cockpit" on a page that is not the Cockpit. Severity 2.
+- **F-04 — SkillsPlanner is reachable by URL only.** No 2.0 surface links to `runs.skills.planner`; the Cockpit's action grid does not grow an entry for it (SCREEN_SPEC §SCR-CAR-016, R2-07). Severity 2.
+- **F-06 — the type scale is not a scale on the decision screens.** `TrainingDetail`, `EventDecision`, `SkillsPlanner` and `Timeline` carry 6–14 distinct arbitrary sizes (`text-[10px]` … `text-[15px]`) against `UI-1`'s three. Severity 2.
+- Largest unmeasured risk: reflow and target size on the four new doors and on `ConfirmDelete`, which have no rendered pass at all; their browser specs (where they exist) were not executed in this sandbox.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Cockpit (011) | yes | yes | yes | yes | src | src | named | named | named | named | src | career-cockpit.spec.ts |
+| TrainingDetail (012) | yes | yes | yes | yes | src | src | named | named | named | named | src | career-training-detail.spec.ts |
+| RaceDecision (013) | yes (4) | yes | yes | yes | src | src | named | named | named | named | src | career-race-decision.spec.ts |
+| EventDecision (014) | yes | yes | yes | yes | src | src | named | named | named | named | src | career-event-decision.spec.ts |
+| InheritanceEvent (015) | yes | yes | yes | yes | src | src | named | named | named | named | src | career-inheritance-event.spec.ts |
+| SkillsPlanner (016) | yes | yes | yes | yes | src | src | named | named | named | named | src | career-skills-planner.spec.ts |
+| Deck / Support Builder (007) | yes | yes | yes | yes | src | src | named | named | named | named | src | career-deck-select.spec.ts |
+| Timeline (017) | yes | yes | yes | yes | src | src | named | named | named | named | src | career-timeline.spec.ts |
+| Result (018) | yes (2) | yes | yes | yes | src | src | named | named | named | named | src | career-result.spec.ts |
+| RunSettings (unreg.) | n/a (run required) | yes | none | yes | src | src | named | named | named | named | src | run-settings.spec.ts |
+| TeamEdit (unreg.) | n/a | yes | none | none | src | src | named | named | named | named | src | team-edit.spec.ts |
+| ScenarioDetail (unreg.) | n/a | yes | none | none | src | src | named | named | named | named | src | none |
+| ConfirmDelete (unreg.) | n/a | yes | yes (refused) | yes | src | src | named | named | named | named | src | run-delete.spec.ts |
+
+Cockpit was previously audited as AUD-20261101-001; this pass carries no Cockpit-specific finding beyond the cross-screen items below. Framework coverage (applied and produced findings): `UI-1`, `H1`, `H4`/`SHR-1`, `IA-1`, `WCAG 3.3.1`/`3.3.3`. Applied, measured clean from source (no finding): `H5`/`NRM-3`/`SHR-5` (constraint vs validation, Form Requests in place — confirmed for every write except none outstanding), `SHR-6`/`TOG-6`/`H3` (reversibility — deferred; see gap register), `SHR-7`/`SHR-8` (value on the decision screen — present on TrainingDetail, RaceDecision, SkillsPlanner), `GP-1`/`GP-3` (grouped and labelled sums), `GT-2`/`UI-4` (absent values carry a word and a title), `IA-2` (banded nav via CareerSectionNav on every career screen), `IA-5` (empty states show an example or a path out on most screens), `WCAG 2.1.1`/`2.4.7`/`4.1.2`/`4.1.3` (links, buttons, labels, status regions present), `WCAG 1.4.1` (stale state carries word + border), `WCAG 3.1.2` (Japanese names are not printed on these screens; `lang="ja"` is set where they are, e.g. Dashboard/Veterans). `N/A` by the framework's own list: `2.5.7` (no drag), `2.1.4` (no accelerators), `3.3.8` (no auth), `1.2`/`1.4.2`/`2.3` (no media/audio/flashing), `SHR-4` (no multi-step flow closure on these screens), `IA-3`/`IA-6` (structure between screens out of scope), AAA criteria. Not reached: `IA-4` (density exemption named — Database only), `WCAG 1.4.4`/`1.4.10`/`1.4.12` (no resize pass), `WCAG 3.2.6`/`3.3.7` (not exercised).
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run.
+- Structural and copy claims are `OBSERVED_SOURCE` against the page and controller source read this run; visual, contrast, target-size and reflow claims are `UNMEASURED` (§6).
+- Provenance caveats carried (audit prompt §3.1): Gerhardt-Powals primary text paywalled, items 5/6 an unconfirmed split (nothing here rests on that boundary); IA prose unread, only names/summaries are the article's own (IA-1 used only as its derived sentence); Norman's book not fetched, quotes from the encyclopedia entry; Tognazzini sixteen are the original edition, 2014 count unverified; Laws of UX holds 29 (Zeigarnik from its own page); Laws of UI holds 13 and publishes Closure and Continuity; no "Law of Experience" (it is Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity cited to `uilaws-2026-10-21.md`; Common Fate cited to `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob cited to `laws-of-ux-2026-10-21.md`; 44 px described as a house rule exceeding 2.5.8, never as conformance.
+- SCREEN_SPEC drift noted: `SCR-CAR-015`'s "Validation & Error Handling" subsection claims the Inheritance Event validates inline with `request()->validate()`, but the controller injects `StoreInheritanceEventRequest` (a Form Request at `app/Http/Requests/StoreInheritanceEventRequest.php`). The doc is stale; the code follows the Floor. No finding filed (the code is correct).
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | `H9` (secondary: `WCAG 3.3.1`, `3.3.3`) | Heuristics / WCAG | RunSettings, all states, all widths | Four forms (status, scenario, period, identity) post to `runs.update`; refused writes land in `form.errors` that the template never renders, and there is no `role="alert"` for a failed visit. A refused identity edit (e.g. a ceiling above the scenario's) reads as "nothing happened". | OBSERVED_SOURCE | `resources/js/pages/Career/RunSettings.vue:175-315` (no error block for any form) | 2 | High | Render `form.errors` beside each form (or a page-level `role="alert"`), matching EventDecision/RaceDecision's idiom. Acceptance: a refused write prints its reason on the same screen. |
+| F-02 | `H1` (secondary: `TOG-1`) | Heuristics / Tognazzini | TeamEdit, all states, all widths | The page declares no loading or error state of its own (`role="status"`/`role="alert"` absent), and the Unity Cup write is delegated to `UnityCupEditor`, which has no error display and no processing announcement beyond a button label. | OBSERVED_SOURCE | `resources/js/pages/Career/TeamEdit.vue` (no `role="status"`/`role="alert"`); `resources/js/components/career/UnityCupEditor.vue:213-215` (only `form.processing` on the button) | 1 | Medium | Add page-level `role="status"`/`role="alert"` to TeamEdit, or move feedback into UnityCupEditor. Acceptance: a refused team write prints a reason and focus moves to it. |
+| F-03 | `H1` (secondary: `TOG-1`) | Heuristics / Tognazzini | ScenarioDetail, all states, all widths | No page-level loading or error state (`role="status"`/`role="alert"` absent), unlike every peer career screen; a failed Inertia visit on this page has no announced surface. | OBSERVED_SOURCE | `resources/js/pages/Career/ScenarioDetail.vue` (no `role="status"`/`role="alert"`) | 1 | Medium | Add page-level `role="status"` "Loading…" and `role="alert"` for a failed visit, matching the peer screens. |
+| F-04 | `IA-1` (secondary: `IA-2`) | Information architecture | SkillsPlanner, all states, all widths | Reachable by URL only: no 2.0 surface (Cockpit action grid, career bar, Dashboard) links to `runs.skills.planner`. SCREEN_SPEC §SCR-CAR-016 records it as R2-07. | OBSERVED_SOURCE | grep: only `SkillsPlanner.vue` self-references `runs.skills`; `Cockpit.vue` has no skills link | 2 | High | Add a link from the Cockpit's "Where to go" (or the career bar) to `runs.skills.planner`. Acceptance: a Trainer can reach the planner without typing a URL. |
+| F-05 | `H4` (secondary: `SHR-1`) | Heuristics / Shneiderman | ConfirmDelete, all states, all widths | The confirmation list names turns and races plus "build target, skill plan, inheritance selection", but omits turn events, skills, deck slots and the linked Veteran that the Cockpit's delete door names as cascading children. | OBSERVED_SOURCE | `resources/js/pages/Career/ConfirmDelete.vue:80-84` vs Cockpit delete door copy | 2 | Medium | Align the two lists so the confirmation states exactly what `runs.destroy` removes. Acceptance: both surfaces name the same set. |
+| F-06 | `UI-1` (secondary: `UI-5`) | Laws of UI | TrainingDetail, EventDecision, SkillsPlanner, Timeline; populated, all widths | 6–14 distinct arbitrary type sizes per screen (`text-[10px]`, `text-[10.5px]`, `text-[11.5px]`, `text-[12.5px]`, `text-[13px]`, `text-[13.5px]`, `text-[15px]` …) against `UI-1`'s three (page, section, body). Same shape as the Dashboard audit's F-01. | OBSERVED_SOURCE | `resources/js/pages/Career/TrainingDetail.vue`, `EventDecision.vue`, `SkillsPlanner.vue`, `Timeline.vue` (arbitrary `text-[…]` utilities) | 2 | Medium | Fold the intermediate steps into the token layer's three steps, then re-measure. Acceptance: ≤3 distinct computed sizes under `main` on each screen. |
+| F-07 | `SHR-1` (secondary: `H4`) | Shneiderman | Deck / Support Builder, all states, all widths | The only career surface mounted under `AppLayout` rather than `CareerLayout`: its breadcrumb, who-pill and width container are hand-rolled, so one screen carries a second shell. | OBSERVED_SOURCE | `resources/js/pages/Support/Builder.vue:280` (`<AppLayout>`); peers use `CareerLayout` | 1 | Medium | Either move the deck builder onto `CareerLayout` or document the exception as a named one. Acceptance: one shell owns the career breadcrumb. |
+| F-08 | `H1` (secondary: `TOG-1`) | Heuristics / Tognazzini | Deck / Support Builder, populated, all widths | `Save deck` gives no success confirmation beyond the button reverting from "Saving…"; there is no "Saved." line or flash, so a Trainer is not told the deck was stored. | OBSERVED_SOURCE | `resources/js/pages/Support/Builder.vue:274-276,336-346` (no success line) | 1 | Medium | Add a `role="status"` "Saved." line (or rely on a flash) after `form.post` resolves. Acceptance: a successful save names the fact. |
+| F-09 | `H1` (secondary: `IA-1`) | Heuristics / Information architecture | RunSettings, TeamEdit, ScenarioDetail, ConfirmDelete, Result; all states, all widths | Five doors report "Cockpit" as the screen in `CareerLayout`'s breadcrumb because they pass `current="cockpit"` (or unset it): RunSettings, TeamEdit, ScenarioDetail, ConfirmDelete set `current="cockpit"`; Result sets none, which defaults to "Cockpit". | OBSERVED_SOURCE | `RunSettings.vue:151`, `TeamEdit.vue:64`, `ScenarioDetail.vue:50`, `ConfirmDelete.vue:58`, `Result.vue:192` (no `current`) | 2 | High | Pass the matching `current` value (or add the missing keys to `CareerSectionNav`'s step list) so the crumb names the page. Acceptance: the breadcrumb's third segment equals the page's `h1`. |
+| F-10 | `WCAG 1.4.13` (secondary: `H9`) | WCAG 2.2 | InheritanceEvent, populated, all widths | Milestone-timeline glyph meanings and the star-roll odds column headers are carried only in `title` attributes, which are hover-only and unreachable on touch. | OBSERVED_SOURCE | `resources/js/pages/Career/InheritanceEvent.vue` (milestone timeline; `title`-only legend) | 2 | Medium | Render the glyph legend as visible text and put the odds headers in the table header row. Acceptance: no meaning lives only in a `title`. |
+| F-11 | `H1` (secondary: `TOG-3`) | Heuristics / Tognazzini | RunSettings, populated, all widths | The page's `lede` claims "Everything here writes through ${run.run_url}" (the run base URL), while the back link and every form actually post to `run.update_url` (`runs.update`). A minor wording/destination mismatch on a write screen. | OBSERVED_SOURCE | `resources/js/pages/Career/RunSettings.vue:54` | 1 | High | Reword the lede to name `runs.update` (or drop the URL). Acceptance: the lede names the route the forms post to. |
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Dark- and light-theme body text meets 4.5:1 on every surface | No browser; intended ratios in `app.css` only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, focus rings, risk edge) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling on the four new doors and on ConfirmDelete | No browser; their specs (where they exist) were not executed | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on every control | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and the 1.4.12 text-spacing override lose nothing | No resize pass run | Resize + text-spacing pass at 320 px |
+| Screen-reader announcement of loading/error status and the milestone timeline | No AT attached | NVDA/VoiceOver pass over populated and empty states |
+| Whether `title`-only disclosures are reachable at all on touch (F-10) | No touch device tested | Touch-only pass over InheritanceEvent |
+| Whether the type-scale fix (F-06) leaves the badge/label sizes readable | No rendered measurement | Computed-style size comparison before/after |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** Every target-size observation above is filed under the house rule (`UX-1`/`TOG-5`) and explicitly not as conformance, per `wcag-2.2-accessibility-2026-10-21.md`.
+- **Density vs minimalism.** The career surfaces are deliberately dense (HFW clone); `H8` is about signal against noise, and every element carries a fact. No finding.
+- **Closure vs honesty.** Empty/absent tiles look like closed shapes but carry the word; `GT-2`/`UI-4` hold. No finding.
+- **Feedback timing.** 50 ms acknowledgement and 400 ms Doherty response read as the index reads them; the only acknowledgement surface on most of these screens is the `role="status"` line, whose latency is unmeasured (§6).
+- **Consistency vs exceptions.** The three recorded exceptions (dark theme's three deviations, the Database density) are not on these screens. No finding.
+- **Title-only disclosure (systemic).** Absence reasons, milestone glyphs and several `N/A` reasons are carried only in `title` attributes across most of the career set (and the wider app). Filed as a gap rather than 11 per-screen findings: there is no second disclosure channel (tooltip component, inline expansion) in the system. F-10 names the most affected screen. A component-level fix would close it everywhere.
+- **No undo / no accelerators / no help surface (systemic).** Registered gaps `H3`, `H7`, `H10`: none of these 13 screens offers undo, accelerators or a help surface. None becomes a per-screen finding here because the absence is product-wide, not screen-specific (per audit prompt §6.3).
+- **No separate corrections log (Timeline).** `CareerTimeline` infers a correction from `updated_at > created_at`; the model has no edit log or prior-values column. Recorded as the gap it is; upgrade path named in SCREEN_SPEC §SCR-CAR-017.
+- **Scenario Race Planner / Race Decision readiness held.** `readiness` is `N/A` on `ADR-0016`; the owner owes a ruling on a descriptive (non-numeric) band. Recorded, not filed as a defect.
+- **SCREEN_SPEC drift (Inheritance Event).** §SCR-CAR-015's "Validation & Error Handling" subsection claims inline `request()->validate()`; the controller uses `StoreInheritanceEventRequest`. The code follows the Floor; the doc is stale. Recorded here.
+- **Unregistered screens.** `RunSettings`, `TeamEdit`, `ScenarioDetail` and `ConfirmDelete` have no `SCR-CAR-xxx` entry; their contract lives in route comments and page header comments. Coverage, not a finding.
+- **ScenarioDetail has no dedicated browser spec.** Its panels are covered only by the cockpit's scenario-panel spec. Coverage, not a finding.
+
+Gaps confirmed in the register rather than filed per screen: `H3` (no undo after a committed turn), `H7` (no accelerators), `H10` (no help surface), title-only disclosure channel, no separate corrections log, no undo of a deleted run (ConfirmDelete is irreversible by design — the checkbox is the `TOG-6` confirmation, which is present and named).
+
+### 8. Recommendations
+
+1. **F-01** (S): render `form.errors` (or a page-level `role="alert"`) on RunSettings. Check: a refused write prints its reason on the same screen.
+2. **F-09** (S): pass the matching `current` value on the five mislabelled doors. Check: breadcrumb's third segment equals the page's `h1`.
+3. **F-04** (S): add a link to `runs.skills.planner` from the Cockpit. Check: reachable without typing a URL.
+4. **F-06** (M): take the type scale to the token layer on the four decision screens. Check: ≤3 distinct computed sizes under `main`.
+5. **F-05** (S): align the ConfirmDelete cascade list with the Cockpit's. Check: both surfaces name the same set.
+6. **F-10** (M): move milestone-glyph meaning out of `title`. Check: no meaning lives only in a `title`.
+7. **F-02/F-03** (S): add page-level loading/error states to TeamEdit and ScenarioDetail. Check: `role="status"`/`role="alert"` present.
+8. **F-07** (M): settle the deck builder's shell (move onto `CareerLayout` or record the exception). Check: one shell owns the career breadcrumb.
+9. **F-08** (S): add a "Saved." confirmation to the deck builder. Check: a successful save names the fact.
+10. **F-11** (S): reword the RunSettings lede. Check: the lede names the route the forms post to.
+11. Register the four unregistered screens in SCREEN_SPEC (docs task, not a code fix).
+
+### 9. Change-audit re-check
+
+Not owed (mode is M4). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surfaces, states, viewports and themes stated.
+- Framework routing recorded, narrowest rule per question, secondaries listed.
+- §3.1 provenance caveats carried.
+- Evidence capability recorded as FALSE; `spawn EPERM` named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status.
+- No severity 3/4 finding rests on inference (highest severity here is 2).
+- Severity and confidence are separate axes.
+- No defect filed twice.
+- Known conflicts logged as settlements.
+- Gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed.
+- No conformance claimed beyond criteria tested; no rendered observation claimed.
+- Report does not modify app code.
+
+## AUD-career-turnedit-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-career-turnedit-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M3 flow audit with M2 per-screen sweep: Turn Edit
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-006
+- Date: 2026-11-02
+- Mode: M3 flow audit (multi-screen task open to close) with M2 per-screen sweep
+- Scope: Turn Edit door — route GET /training-runs/{run}/turns/{turn}/edit (runs.turns.edit), controller App\Http\Controllers\TrainingRunController editTurn method, page resources/js/pages/Career/TurnEdit.vue, the write targets PUT /training-runs/{run}/turns/{turn} (runs.turns.update) via StoreTurnEntryRequest, SCREEN_SPEC.md section SCR-CAR-011 cockpit correction door and turn rows, tests/Feature/TurnEditTest.php, tests/browser/turn-edit.spec.ts.
+- Out of scope: the Cockpit screen itself, StoreTurnEntryRequest validation detail beyond what the page shows, performance, AAA criteria, any fix.
+- Frameworks applied: docs/framework-ui-ux/design-framework-index-2026-10-21.md first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per section 4 routing. Read from the files this run, not from memory.
+- Rendered evidence: FALSE. Chromium cannot launch in this sandbox (spawn ENOENT); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are OBSERVED_SOURCE or UNMEASURED.
+
+### 2. Executive summary
+
+- 2 findings: F-01 severity 2 moderate, F-02 severity 1 minor. None severity 3 or 4.
+- F-01 — No page-level loading or error state for the Inertia visit (TurnEdit.vue script lines 1-112). Unlike SaveVeteran, which uses useVisitState with role="status" loading and role="alert" error regions, TurnEdit renders nothing while loading and nothing on visit failure; a failed load looks like a blank page. H1 Visibility of System Status, secondary NRM-5.
+- F-02 — The refusal alert block carries tabindex="-1" (TurnEdit.vue:149) suggesting intent to move focus, but no focus-handling code exists, so a keyboard user whose correction is refused is not directed to the alert. Review.vue handles this correctly with alertRef plus watch and nextTick Review.vue:53-59, so TurnEdit is inconsistent. Norman NRM-1 signifier, secondary H4 consistency.
+- The screen is otherwise well built: the energy state watcher clears stale energy/band when the state changes so a correction cannot leave a reading nobody made R2-16 TurnEdit.vue:81-92; empty means not recorded and zero stays a real reading TurnEdit.vue:99-111; min="0" number constraints on stats; mood has an explicit "Not recorded" empty option; the save acknowledges inline Saving… and Saved. and focuses the refusal alert role="alert" tabindex="-1" on validation failure.
+- Largest unmeasured risk: contrast, target size under the 44 px house rule, reflow at 320 px, focus visible or obscured none measurable in this sandbox.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Turn Edit runs.turns.edit | yes blank load | yes | yes refusal | no loading state | src | src | named | named | named | named | src | turn-edit.spec.ts |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A or not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 2.4.7, 3.3.1, 3.3.2, 4.1.2, 4.1.3 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only never conformance; 2.5.7 N/A no drag; 3.3.7 N/A no redundant entry on this door; AAA not reached |
+| Heuristics | H1, H2, H4, H5, H8, H9 | H3 exit links present, H6 recognition values beside labels, H7 accelerators |
+| Shneiderman | SHR-5, SHR-7 | SHR-6 systemic undo gap, SHR-4 closure single screen |
+| Tognazzini | TOG-4, TOG-6 | TOG-1 50 ms UNMEASURED; TOG-2 trap double click not present; TOG-5, TOG-7, TOG-8 |
+| Information architecture | IA-1 | IA-2, IA-3, IA-4, IA-5, IA-6 |
+| Gestalt | GT-2 | GT-3, GT-4, GT-5, GT-6 |
+| Norman | NRM-1, NRM-3, NRM-5 | NRM-2 blocked state not on this screen, NRM-4, NRM-6 |
+| Laws of UX | UX-1, UX-3, UX-9 | UX-2, UX-4, UX-5, UX-6, UX-7, UX-8, UX-10 |
+| Laws of UI | UI-2, UI-3 | UI-1, UI-4, UI-5, UI-6, UI-7 |
+| Gerhardt-Powals | GP-1, GP-2 | GP-3, GP-4, GP-5 |
+
+Framework coverage applied and produced findings: H1/NRM-5 (F-01), NRM-1/H4 (F-02). Applied measured clean from source no finding: H2 Global client vocabulary Mood Energy; H5 constraint vs validation energy state watcher clears stale bands; H8 every element carries a fact; SHR-5 refused write leaves entered state intact transform only sends on submit; GP-1 GP-2 shortfall and state computed by server; UI-3 state not colour alone mood uses words. N/A: 2.5.7 no drag, 2.1.4 no accelerators, 3.3.8 no auth. Not reached: WCAG resize/reflow passes, WCAG 3.2.6/3.3.7.
+
+### 4. Evidence status and limits
+
+- RENDERED_EVIDENCE = FALSE. Chromium cannot launch in this sandbox (spawn ENOENT); no rendered frame was obtained.
+- Structural and copy claims are OBSERVED_SOURCE against the page and controller source read this run; visual, contrast, target-size and reflow claims are UNMEASURED section 6.
+- Provenance caveats carried audit protocol section 3.1: Gerhardt-Powals primary text paywalled; IA prose unread names summaries only; Norman's book not fetched quotes from encyclopedia entry; Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13 and publishes Closure/Continuity; no Law of Experience it is Mental Model UX-17.
+- Attribution rule applied: Closure/Continuity cited to uilaws-2026-10-21.md; Common Fate cited to gestalt-principles-2026-10-21.md; Fitts/Hick/Jakob cited to laws-of-ux-2026-10-21.md; 44 px described as a house rule exceeding 2.5.8 never as conformance.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface or state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | H1 secondary NRM-5 | Heuristics Norman | Turn Edit populated error loading | The page has no useVisitState loading or error region. While an Inertia visit is in flight the screen renders nothing, and a failed visit looks identical to a blank page. SaveVeteran.vue:182-185 shows the reference pattern this screen omits. | OBSERVED_SOURCE | resources/js/pages/Career/TurnEdit.vue script lines 1-112; template has no loading/error regions | 2 | High | Add useVisitState with role="status" Loading… and role="alert" error regions matching SaveVeteran.vue:182-185. Acceptance: a visit failure shows an alert, not a blank page. |
+| F-02 | NRM-1 secondary H4 | Norman Heuristics | Turn Edit error refusal | The refusal alert block has tabindex="-1" TurnEdit.vue:149 but no code ever focuses it, so the signifier is a lie and a keyboard user is not directed to the refusal. Review.vue focuses its alert via alertRef plus watch/nextTick Review.vue:53-59, making TurnEdit inconsistent. | OBSERVED_SOURCE | resources/js/pages/Career/TurnEdit.vue:147-156; contrast resources/js/pages/Career/Snapshot/Review.vue:53-59 | 1 | Medium | Either remove tabindex="-1" or add focus handling so the refusal alert receives focus on validation failure. Acceptance: the refusal alert is focused when a correction is refused. |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Light/dark body text meets 4.5:1 on every panel | No browser; intended ratios in app.css only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast borders focus rings risk edge meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling | No browser; viewport never rendered | Rendered reflow pass at 320 px populated both themes |
+| Target sizes of the 44 px house rule hold on every control min-h-11 button inputs selects | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize plus text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on every control | No keyboard run executed | Keyboard pass over the page |
+| 50 ms click acknowledgement on Save correction | No timing instrumentation | Rendered or tooling latency pass |
+
+### 7. Conflict and gap log not findings
+
+Settlements applied rather than filed as defects:
+
+- 44 px versus 2.5.8. Target-size observations are filed under the house rule UX-1/TOG-5 and explicitly not as conformance, per wcag-2.2-accessibility-2026-10-21.md.
+- Density versus minimalism. The grid of stat inputs is dense but every element carries a fact; H8 holds. No finding.
+- Closure versus honesty. Not reached; no partial indicator on this screen. No finding.
+- Feedback timing. Inline Saving… and Saved. acknowledgement surfaces; latency unmeasured section 6.
+- Consistency versus exceptions. No exceptions on this screen. No finding.
+- Title-only disclosure systemic. N/A reasons carried only in title attributes recorded as a gap rather than per-screen findings.
+- Systemic gaps confirmed in the register rather than filed per screen: H3/TOG-6 SHR-6 no undo on a committed turn correction; H7 no accelerators; H10 no help surface; WCAG 1.4.3/1.4.11 etc all UNMEASURED.
+
+Conflicts: none found this pass; no code-versus-rule disagreement required settlement.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. F-01 S: add useVisitState loading and error regions to Turn Edit. Acceptance: a visit failure shows an alert, not a blank page.
+2. F-02 S: focus the refusal alert on validation failure or remove tabindex="-1". Acceptance: the refusal alert is focused when a correction is refused.
+
+### 9. Change-audit re-check
+
+Not owed M3/M2. No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered per-page contrast, target size, reflow, keyboard, dialog focus.
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- section 3.1 provenance caveats carried Gerhardt-Powals, IA prose, Norman, Tognazzini 2014 count, Laws of UX count, Laws of UI count, no Law of Experience.
+- Evidence capability recorded as FALSE; spawn ENOENT named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and file:line location verified this run.
+- No severity 3 or 4 finding rests on inference highest severity here is 2.
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort 2 items.
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed sections 1-10 in order; title line exact.
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-catalog-index-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-catalog-index-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M2 screen audit: Umamusume catalog index
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-010
+- Date: 2026-11-02
+- Mode: **M2 screen audit** (single surface, open-to-close walkthrough plus rule sweep)
+- Scope: `GET /umamusume` (`catalog.index`), controller `App\Http\Controllers\CatalogController`, page `resources/js/pages/Catalog/Index.vue`, mounted body `resources/js/components/catalog/TraineeCatalog.vue` (shared with `/database/trainees`, SCREEN-023), `SCREEN_SPEC.md` §SCR-CAT-001. States: empty catalogue, empty result (no match), loading, populated; both themes; widths 320/390/768/1280px; keyboard-only.
+- Out of scope: the write path (none — read-only screen), `/umamusume/{slug}` detail (separate audit, AUD-20261102-011), the Database hub rendering (`/database/trainees`, same body, separate surface), AAA criteria, any code fix, content strategy beyond the reference cross-check.
+- Frameworks applied: `docs/framework-ui-ux/design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are `OBSERVED_SOURCE` or `UNMEASURED`.
+
+### 2. Executive summary
+
+- **F-01 — Search cannot match diacritic names or full-width katakana width variants.** `normalizedColumn()` folds spaces, hyphens and middle dots only (CatalogController:252-261). SQLite `lower()` is ASCII-only, so diacritics survive and `[Nuit Étoilée de Scarlet]` will not answer `nuit etoilee`; NFKD rewrites full-width katakana on the term side while SQL leaves the stored column untouched, so a katakana alias or title folds on one side and not the other and cannot match either. Documented in-source as a known ceiling with an upgrade path (store normalized keys beside `title`/`alias`). Findability gap on the primary browse surface. Severity 2, High.
+- Strengths: two absences named apart (empty catalogue vs no match, TraineeCatalog:293-309); release status printed as a word, never a machine token, and Japan-only is muted text rather than a badge ("not on Global is an absence, not a status this tool awards", TraineeCatalog:334-342); the growth row states its absence and prints no fabricated `+0%` (TraineeCatalog:373-375); the pager keeps the query string via `withQueryString()` (CatalogController:148-149); the default status is Released (Global) only, matching the Global English tool (CatalogController:53-55, 120).
+- Largest unmeasured risk: contrast, the 44px house-rule target size, reflow at 320px, 200% resize, focus visible/obscured — none measurable in this sandbox.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| catalog.index shell + TraineeCatalog body | yes (no rows / no match) | yes | n/a (read-only; a refused facet lands on the canonical URL with the field named) | yes | src | src | named | named | named | named | src | none |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 1.4.1, 2.4.2, 2.4.6, 2.5.3, 4.1.2, 4.1.3 | 1.4.3/1.4.10/1.4.11 UNMEASURED (no browser); 2.5.8 cited only as the house rule's floor, never as conformance; 2.5.7 N/A (no drag); 2.1.1/2.4.7 UNMEASURED (no keyboard pass run); AAA not reached |
+| Heuristics | H1, H2, H4, H5, H6 (F-01), H8 | H3 N/A (no write); H7 N/A; H9 N/A (no error surface); H10 N/A |
+| Shneiderman | SHR-1, SHR-7 | SHR-2 N/A; SHR-4/5/6 N/A (read-only) |
+| Tognazzini | TOG-3 | TOG-1 (50 ms acknowledgement) UNMEASURED; TOG-2/4/5/6/7/8 N/A on a read-only screen |
+| Information architecture | IA-1, IA-2, IA-3, IA-4 | IA-5 exemplar gap (gap register, §7); IA-6/8 N/A |
+| Gestalt | GT-1, GT-4 | GT-2, GT-3, GT-5, GT-6 not reached |
+| Norman | NRM-1, NRM-2, NRM-4, NRM-6 | NRM-3, NRM-5 not reached |
+| Laws of UX | UX-1 (44 px house rule), UX-4, UX-5, UX-9, UX-10 | UX-2, UX-3, UX-6, UX-7, UX-8 not reached |
+| Laws of UI | UI-1, UI-2, UI-3, UI-4 | UI-5, UI-6, UI-7 not reached |
+| Gerhardt-Powals | GP-1, GP-3 | GP-2, GP-4, GP-5 not reached |
+
+Framework coverage (applied and produced findings): `H6` (F-01). Applied, measured clean from source (no finding): `H1`/`NRM-5` (loading `role="status"`); `H2` (Global client vocabulary, release status as a word); `H4`/`SHR-1` (one `.btn`/`.pill` vocabulary, doors via props); `H5`/`NRM-2` (refused facet names the field on the canonical URL); `IA-1` (crumb + way back on every load); `IA-4` (index previews name + three aptitude letters; detail holds the full set); `GT-2`/`UI-4` (absent values carry a word, never a dash); `WCAG 1.4.1` (state carries word + border/pill). `N/A`: `2.5.7` (no drag), `2.1.4` (no accelerators), `3.3.8` (no auth), `1.2`/`1.4.2`/`2.3` (no media/audio/flashing). Not reached: `WCAG 1.4.4`/`1.4.10`/`1.4.12` (no resize pass), `WCAG 2.4.11` (focus not obscured).
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no rendered frame was obtained.
+- Structural and copy claims are `OBSERVED_SOURCE` against the page, controller and `TraineeCatalog.vue` read this run; visual, contrast, target-size and reflow claims are `UNMEASURED` (§6).
+- Content cross-check: `docs/UMAMUSUME_REFERENCE.md` — 105 trainees carry a Global release date (latest 2026-09-24) against 268 on JP (reference §1.x); the index defaults to `release_status = GlobalReleased` (CatalogController:120) and refuses unknown status values, matching the Global English tool scoping. Content track clean; no content discrepancy filed.
+- Provenance caveats carried (audit protocol §3.1): Gerhardt-Powals primary text paywalled (items 5/6 split unconfirmed — nothing here rests on it); IA prose unread, names/summaries only; Norman's book not fetched, quotes from the encyclopedia entry; Tognazzini sixteen are the original edition; Laws of UX holds 29 (Zeigarnik from its own page); Laws of UI holds 13 and publishes Closure/Continuity; there is no "Law of Experience" — it is Mental Model, UX-17.
+- Attribution rule applied: Closure/Continuity cited to `uilaws-2026-10-21.md`; Common Fate cited to `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob cited to `laws-of-ux-2026-10-21.md`; 44 px described as a house rule exceeding 2.5.8, never as conformance.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | `H6` | Heuristics | /umamusume, populated, search | Search cannot match diacritic names or full-width katakana width variants. `normalizedColumn()` folds spaces, hyphens and middle dots only (CatalogController:252-261); SQLite `lower()` is ASCII-only so diacritics survive (`[Nuit Étoilée de Scarlet]` will not answer `nuit etoilee`), and NFKD rewrites full-width katakana on the term side while SQL leaves the stored column untouched, so a katakana alias or title folds on one side and not the other and cannot match either. Documented in-source as a known ceiling with an upgrade path (store normalized keys beside `title` and `alias`; that is a schema change, not this method's to make). | OBSERVED_SOURCE | `app/Http/Controllers/CatalogController.php:252-261`; the search clause at :125-141 | 2 | High | Store normalized companion keys for `title` and `alias` (a schema change requiring migration + ADR + digest), or document the searchable vocabulary on screen. Acceptance: a diacritic or width-variant query reaches its trainee. |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Body text meets 4.5:1 in both themes on the card grid and filter row | No browser; intended ratios in `app.css` only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, pills, risk edge) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling on the card grid | No browser; viewport never rendered | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on the card tile, Filter/Clear buttons and facet selects | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and the 1.4.12 text-spacing override lose nothing | No resize pass run | Resize + text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on Filter, Clear and each facet select | No keyboard run executed | Keyboard pass over the page |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** Every target-size observation is filed under the house rule (`UX-1`) and explicitly not as conformance, per `wcag-2.2-accessibility-2026-10-21.md`.
+- **Density vs minimalism.** The index is a browse grid; every card carries a fact (name, three aptitude letters, form rarity, release status word). `H8` is about signal against noise and holds. No finding.
+- **Closure vs honesty.** Absent values carry a word ("Aptitude not published for this trainee", "Growth not stored"); nothing claims completeness it does not print. `GT-2`/`UI-4` hold. No finding.
+- **IA-5 exemplar gap.** Empty states name the absence and offer a remedy (Clear the filters / run the fetch) but show no example of what would fill them. This is the pre-registered exemplar gap in the IA framework's gap register (`information-architecture-principles-2026-10-21.md` §Gap register); it is logged here rather than re-filed per screen.
+- **Title-only disclosure channel.** Not present on this screen; where `N/A` appears elsewhere it carries a visible word plus an `sr-only` twin (e.g. `SupportCards/Index.vue:336`), a pattern this screen does not need because its absences are inline words.
+- **Code wins over stale rule.** No code-vs-rule disagreement required a ruling this pass.
+
+Conflicts: none found this pass.
+
+Gaps confirmed in the register rather than filed per screen: `IA-5` exemplar gap (systemic), `WCAG 1.4.3`/`1.4.10`/`1.4.11` and all target-size/resize/focus claims UNMEASURED.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. **F-01** (S): store normalized companion keys for `title` and `alias` so diacritic and width-variant queries match, or document the searchable vocabulary on screen. Acceptance: `nuit etoilee` reaches `[Nuit Étoilée de Scarlet]`. Effort: a schema change (migration + ADR + digest line in `ARCHITECTURE-ESSENTIALS.md`).
+
+### 9. Change-audit re-check
+
+Not owed (M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (per-page contrast, target size, reflow, resize, keyboard, dialog focus).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- Provenance caveats carried (Gerhardt-Powals, IA prose, Norman, Tognazzini 2014 count, Laws of UX count, Laws of UI count, no Law of Experience).
+- Evidence capability recorded as FALSE; `spawn EPERM` named; no rendered claim made.
+- `UMAMUSUME_REFERENCE.md` content cross-check recorded (105 Global trainees vs 268 JP; index defaults to Global Released; content track clean, no discrepancy filed).
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and `file:line` location verified this run.
+- No severity 3/4 finding rests on inference (highest severity here is 2).
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort (1 item).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1–10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-catalog-show-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-catalog-show-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M2 screen audit: Umamusume catalog detail
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-011
+- Date: 2026-11-02
+- Mode: **M2 screen audit** (single surface, open-to-close walkthrough plus rule sweep)
+- Scope: `GET /umamusume/{slug}` (`catalog.show`), controller `App\Http\Controllers\CatalogController::show`, page `resources/js/pages/Catalog/Show.vue`, `SCREEN_SPEC.md` §SCR-CAT-002. States: populated (default form + costume forms), `?show_unconfirmed=1`, Japan-only notice, no profile fetched, no aptitudes, no skills, no runs; both themes; widths 320/390/768/1280px; keyboard-only.
+- Out of scope: the list screen (separate audit, AUD-20261102-010), writes beyond the idempotent "carry" draft POST, AAA, any code fix, content strategy beyond the reference cross-check.
+- Frameworks applied: `docs/framework-ui-ux/design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are `OBSERVED_SOURCE` or `UNMEASURED`.
+
+### 2. Executive summary
+
+- **F-01 — The `? Unique` pill's derivation is carried only in a `title` attribute.** The Unique pill prints `? Unique` (Show.vue:256-260) with a `title="Marked from the source's skill class code, not from a card's own skill list."` that explains whose reading the mark is. That distinction — source-derived class code versus a card's own skill list — is available to sighted hover users only; keyboard and screen-reader users get the pill's visible name without the derivation, so the meaning of the mark is not fully exposed. Severity 1, Medium. (Same screen-specific instance of the title-only disclosure channel as AUD-20261102-012 F-01 and AUD-20261102-013 F-01.)
+- Strengths: base stats and growth state "Not recorded" with an explanatory note rather than a fabricated `+0%` (Show.vue:218-222, 225-233); the costume strip is omitted for single-form trainees (no affordance to nowhere, Show.vue:347-347 comment); two absences named apart on the forms table (no Global card vs hidden as unconfirmed, with a "Show unconfirmed forms" link, Show.vue:369-376, 427-433); unique skills with no client link print the name with a note ("A name with no link is a skill the Global client has not received", Show.vue:458-466); provenance prints both the trainee's own fetch history and each card's `source_url`, never one in place of the other (controller:279-282); the "Start career" button posts the idempotent carry route (a `<button>`, not a link, Show.vue:579-585); the trainee/Japanese-name dedupe rule prints the pair only when they differ (Show.vue:187-190); the JP-only notice names the source as JP-sourced (Show.vue:199-201).
+- Largest unmeasured risk: contrast, the 44px house-rule target size, reflow at 320px, focus visible/obscured — none measurable in this sandbox.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| catalog.show | n/a (404 on unknown slug; no empty trainee state) | yes (default form, costumes, skills, runs, goals, provenance) | yes (404 via `abort_if`) | n/a (no async load; cached reads only on the list) | src | src | named | named | named | named | src | none |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 1.4.1, 2.4.2, 2.4.6, 2.5.3, 4.1.2, 4.1.3 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only; 2.5.7 N/A (no drag); 2.1.1/2.4.7 UNMEASURED (no keyboard pass); AAA not reached |
+| Heuristics | H1, H2, H4, H6, H8 | H3 N/A (no destructive write); H5 N/A (no error-prone action); H9 N/A; H10 N/A |
+| Shneiderman | SHR-1, SHR-7 | SHR-2 N/A; SHR-4/5/6 N/A (read-only + idempotent draft write) |
+| Tognazzini | TOG-3 | TOG-1 UNMEASURED; TOG-2/4/5/6/7/8 N/A |
+| Information architecture | IA-1, IA-4 | IA-2/IA-3 structure between screens (the index is the other axis); IA-5 N/A (no empty trainee state); IA-6/8 N/A |
+| Gestalt | GT-1, GT-4 | GT-2/3/5/6 not reached |
+| Norman | NRM-1, NRM-2, NRM-4, NRM-6 (both gulfs) | NRM-3, NRM-5 not reached |
+| Laws of UX | UX-1 (44 px house rule), UX-4, UX-5, UX-9 | UX-2/3/6/7/8/10 not reached |
+| Laws of UI | UI-1, UI-2, UI-3, UI-4 | UI-5/6/7 not reached |
+| Gerhardt-Powals | GP-1, GP-3 | GP-2/4/5 not reached |
+
+Framework coverage (applied and produced findings): none at the normative level produced a finding beyond F-01. Applied, measured clean from source: `H1` (provenance states last read + source key); `H2` (release status word, JP-only notice); `H4`/`SHR-1` (one `.pill`/`.btn` vocabulary, doors via `route()`); `NRM-6` (execution: link/open/button present; evaluation: provenance + absence state directly perceived); `IA-1` (crumb + "Back to catalog" door); `GT-2`/`UI-4` (absent values carry a word + title, never a dash). `N/A`: `2.5.7`, `2.1.4`, `3.3.8`, `1.2`/`1.4.2`/`2.3`. Not reached: `WCAG 1.4.4`/`1.4.10`/`1.4.12`, `WCAG 2.4.11`.
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no rendered frame was obtained.
+- Structural and copy claims are `OBSERVED_SOURCE` against the page and controller read this run; visual, contrast, target-size and reflow claims are `UNMEASURED` (§6).
+- Content cross-check: `docs/UMAMUSUME_REFERENCE.md` — 105 Global trainees vs 268 JP; the show page respects `?show_unconfirmed` on both list and detail (`cardScope`, controller:793-804), and hides JP-only forms exactly as the list does. Content track clean; no content discrepancy filed.
+- Provenance caveats carried (§3.1 of the audit prompt): Gerhardt-Powals paywalled; IA prose unread; Norman book not fetched; Tognazzini sixteen are the original edition; Laws of UX 29; Laws of UI 13 publishes Closure/Continuity; no Law of Experience (Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity ? `uilaws-2026-10-21.md`; Common Fate ? `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob ? `laws-of-ux-2026-10-21.md`; 44 px house rule exceeding 2.5.8, never conformance.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | (title-only disclosure channel; no single SC) | WCAG 1.3.1 / 4.1.2 adjacency | /umamusume/{slug}, populated, Unique skill pill | The `? Unique` pill's derivation — "Marked from the source's skill class code, not from a card's own skill list." — is carried only in a `title` attribute (Show.vue:257-260). The visible name `? Unique` is exposed, but the distinction that matters (source-derived class code vs a card's own skill list) is available to sighted hover users only; keyboard and screen-reader users cannot reach it (`title` appears on hover, is not focusable, and is not reliably announced). | OBSERVED_SOURCE | `resources/js/pages/Catalog/Show.vue:256-260` | 1 | Medium | Render the derivation as visible text beside the pill, or pair the pill with an `aria-describedby`/sr-only twin stating the derivation (mirror the `N/A` + `sr-only` twin pattern used at `SupportCards/Index.vue:336`). Acceptance: the class-code-versus-card-list distinction is available without hovering. |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Body text meets 4.5:1 in both themes on every card and table cell | No browser | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, pills, focus ring) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling on the two-column layout | No browser | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on the Start-career button, form links, Open buttons and costume strip | Boxes not measured | Rendered target-size sweep |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize + text-spacing pass |
+| Focus visible and focus-not-obscured on every control, including the sticky carry button | No keyboard run executed | Keyboard pass over the page |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** Target-size observations are filed under the house rule and explicitly not as conformance.
+- **Density vs minimalism.** The detail is deliberately dense (profile, aptitudes, costumes, skills, goals, runs, provenance); every element carries a fact. `H8` holds. No finding.
+- **Closure vs honesty.** The base-stats/growth table states absence ("Not recorded") and never implies a stored figure; the costume strip is honest about a single form. `GT-2`/`UI-4` hold. No finding.
+- **Title-only disclosure channel.** F-01 names the one affected spot on this screen; several other `N/A`/absence reasons elsewhere in the app ride `title` only and are logged as a systemic gap rather than re-filed per screen.
+- **Consistency vs exceptions.** No exception on this screen needs naming (the stat table's "Not recorded" is the rule, not an exception).
+- **Feedback timing.** The carry POST is idempotent (rewrites the same two draft keys) and needs no pending guard, per the component comment (Show.vue:576-578); its acknowledgement latency is unmeasured (§6).
+
+Conflicts: none found this pass.
+
+Gaps confirmed in the register rather than filed per screen: title-only disclosure channel (systemic; F-01 is the screen-specific instance), WCAG 1.4.3/1.4.10/1.4.11 and all target-size/resize/focus claims UNMEASURED.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. **F-01** (M): expose the `? Unique` derivation without relying on `title` (visible text or an `aria-describedby`/sr-only twin). Acceptance: the class-code-versus-card-list distinction is available without hovering. Effort: S.
+
+### 9. Change-audit re-check
+
+Not owed (M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (contrast, target size, reflow, resize, keyboard).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- Provenance caveats carried.
+- Evidence capability recorded as FALSE; `spawn EPERM` named; no rendered claim made.
+- `UMAMUSUME_REFERENCE.md` content cross-check recorded (105 Global vs 268 JP trainees; `show_unconfirmed` honoured on both list and detail; content track clean).
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and `file:line` location verified this run.
+- No severity 3/4 finding rests on inference (highest severity here is 1).
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort (1 item).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1–10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-dashboard-2026-11-01.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-dashboard-2026-11-01.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — SCR-CAR-001 Dashboard (Trainer Desk 2.0 landing screen)
+
+
+### 1. Identity
+
+- Audit id: AUD-20261101-001
+- Date: 2026-11-01
+- Mode: **M2 screen audit** (A11y overlay applied as a separate track, Phase 5)
+- Scope: `GET /` (`home`), `app/Http/Controllers/DashboardController.php`, `resources/js/pages/Dashboard.vue`, against `SCREEN_SPEC.md` §SCR-CAR-001, `tests/Feature/DashboardTest.php`, `tests/browser/dashboard.spec.ts`.
+- States covered: **empty** (no active career; no veterans; no turn logged; scenario resource absent; all cards hidden), **populated** (active career + veterans), **loading** (Inertia visit in flight), **error** (visit failed). Both themes read from source; four widths (320/390/768/1280) named but not measured; keyboard-only read from source.
+- Out of scope: backend behaviour beyond the controller's own queries, the other `SCR-CAR-*` screens, performance, content strategy, AAA criteria, the `eva01` third theme, and any fix.
+- Frameworks applied: `design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Gerhardt-Powals, IA, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**. Server-rendered Inertia HTML/props were fetched from `http://127.0.0.1:8000/` (see §4) and structural/copy claims below are `OBSERVED_SOURCE` against that document; visual, contrast, target-size and reflow claims are `UNMEASURED` because Chromium cannot launch in this sandbox (`spawn EPERM`).
+
+### 2. Executive summary
+
+- **F-01 — the type scale on the Dashboard is not a scale.** At least nine distinct computed sizes appear in `Dashboard.vue` (`text-[26px]`, `text-[19px]`, `text-[14px]`, `text-[12.5px]`, `text-[12px]`, `text-[11.5px]`, `text-[10px]`, plus `text-sm`/`text-xs`/`text-base`), against `UI-1`'s three (page, section, body). Same shape as the deck audit's F-05; here it is the landing screen, so it is seen first.
+- **F-02 — the Japanese trainee name is printed without `lang="ja"`** in both the resume card (`Dashboard.vue:290,293`) and the veterans table (`:542`), against `WCAG 3.1.2` (Language of Parts, AA) and `H2`. The `SCREEN_SPEC` §SCR-CAR-001 promises the name in `lang="ja"`; the view does not set it.
+- **F-03 — the Independent Training countdown does not count down.** `indepRemaining` is a `computed` over `Date.now()` with no timer, so the "N:NN remaining" string is frozen at the render that produced it for the whole 50-minute window.
+- **F-06 — the empty Veterans state prints nothing.** When `recentVeterans.rows` is empty the table is omitted and only the footer ("0 veterans · 0 shown") remains; `SCREEN_SPEC` §SCR-CAR-001 promises an absence message and a path out. IA-5 (exemplar) and H9 are the rules.
+- **Largest unmeasured risk:** reflow at 320 px. The page uses `.g-side`/`.g-4`/`.g-3` grids and a table with `overflow-x-auto`; no width was measured, so a horizontal-scroll failure like the deck audit's F-01 cannot be ruled out or claimed here.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Page head / lede | yes | yes | yes | yes | src | src | named | named | named | named | src |
+| Active-career card | yes | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Needs-you column | yes (all cards hidden) | yes | n/a | n/a | src | src | named | named | named | named | src |
+| KPI strip | yes | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Recent veterans | yes | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Quick actions | yes | yes | n/a | n/a | src | src | named | named | named | named | src |
+
+Framework coverage (applied and produced findings): `UI-1`, `H2`/`WCAG 3.1.2`, `H1`/`TOG-1`/`TOG-3`, `GP-3`/`H6`, `IA-5`, `H1`, `H4`/`SHR-1`, `UX-1`, `H9`, `H8`.
+Applied, measured clean from source (no finding): `H4`/`SHR-1` consistency of components; `H5`/`NRM-3` (refused writes leave state — none here); `SHR-7` (energy, turn, resource, team rank on the decision screen); `GP-1`/`GP-3` (grouped and labelled sums); `GT-2`/`UI-4` (absent values carry a word and a title); `IA-1` (directly reachable, own crumb); `IA-2` (banded quick actions); `WCAG 2.1.1`/`2.4.7`/`4.1.2`/`4.1.3` (links, buttons, labels, status regions present); `WCAG 1.4.1` (stale state carries word + border).
+`N/A` by the framework's own list: `2.5.7` (no drag), `2.1.4` (no accelerators), `3.3.8` (no auth), `1.2`/`1.4.2`/`2.3` (no media/audio/flashing), `SHR-4`/`SHR-6` (no multi-step flow or committed turn on this screen).
+Not reached: M3/M4 phases (single screen), `IA-3`/`IA-6` (structure between screens out of scope), AAA criteria.
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run.
+- Server-rendered HTML and the Inertia props were fetched with webfetch from `http://127.0.0.1:8000/` and are the basis for every `OBSERVED_SOURCE` claim below (props observed: `activeCareerCount: 2`, `finishedRunCount: 7`, `globalScenarioCount: 4`, `catalogueTrainees: 67`, `trainees: 71` unused, `reviewPending: 67`, `verified_at: 2026-09-27`). Structural and copy claims are `OBSERVED_SOURCE`; visual claims are `UNMEASURED`.
+- Contrast, target size, reflow, 200% resize and text-spacing override were not measured; all are in §6.
+- Provenance caveats carried (§3.1 of the audit prompt): Gerhardt-Powals primary text paywalled, items 5/6 an unconfirmed split (nothing here rests on that boundary); IA prose unread, only names/summaries are the article's own (IA-5 used only as its derived sentence); Norman's book not fetched, quotes from the encyclopedia entry; Tognazzini sixteen are the original edition, 2014 count unverified; Laws of UX holds 29 (Zeigarnik from its own page); Laws of UI holds 13 and publishes Closure and Continuity; no "Law of Experience" (it is Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity cited to `uilaws-2026-10-21.md`; Common Fate cited to `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob cited to `laws-of-ux-2026-10-21.md`; 44 px described as a house rule exceeding 2.5.8, never as conformance.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | `UI-1` | Laws of UI | Whole screen, populated and empty, all widths | At least nine distinct type sizes on one screen: `text-[26px]`, `text-[19px]`, `text-[14px]`, `text-[12.5px]`, `text-[12px]`, `text-[11.5px]`, `text-[10px]`, plus `text-sm`/`text-xs`/`text-base` (and `text-[11px]` in the tile suffix). `UI-1` permits three: page, section, body. | OBSERVED_SOURCE | `resources/js/pages/Dashboard.vue:290,293,376,409-413,426,435-436,451-452,476-478,485,491,497,499,505,507,525,528-531,564,592,595` | 2 | Medium | Fold the 11.5/12/12.5/10 steps into the 12 px body step at the token layer, then re-measure. Acceptance: no more than three distinct computed sizes under `main`. |
+| F-02 | `WCAG 3.1.2` (AA) (secondary: `H2`) | WCAG 2.2 | Resume card and veterans table, populated, all widths | The trainee name and its Japanese counterpart are printed without `lang="ja"`: the resume card's name span (`:290`) and meta line (`:293`, which joins `trainee_ja`), and the veterans table cell (`:542`, `{{ veteran.trainee_ja }}`). `SCREEN_SPEC` §SCR-CAR-001 promises the name in `lang="ja"`; the view does not set it. | OBSERVED_SOURCE | `resources/js/pages/Dashboard.vue:290,293,542` | 2 | High | Add `lang="ja"` to the spans carrying `trainee_ja` (and to the trainee name where the source is Japanese). Acceptance: every Japanese-name node carries `lang="ja"`. |
+| F-03 | `H1` (secondary: `TOG-1`, `TOG-3`) | Heuristics / Tognazzini | Resume card, populated, all widths | Independent Training's "N:NN remaining" is a `computed` over `Date.now()` with no timer (`indepRemaining`, `:149`), so the string is frozen at the render that produced it for the whole 50-minute window. A Trainer watching the card sees a stale countdown. | OBSERVED_SOURCE | `resources/js/pages/Dashboard.vue:149-163,309` | 2 | High | Drive the countdown from a `setInterval` (or recompute on the visit's `onSuccess`), clearing on unmount. Acceptance: the value advances each second while the window is open. |
+| F-04 | `GP-3` (secondary: `H6`, `H1`) | Gerhardt-Powals | Resume card, populated, all widths | The card prints two turn figures for one career — `turn` (recorded, `:282`) and `cockpit_turn` (imported position, `:278`) — and explains the disagreement only in the trailing note (`careerNote`, `:195-222`). A first-time reader must read the note to know which number is which. | OBSERVED_SOURCE | `resources/js/pages/Dashboard.vue:195-222,278-282,376` | 2 | Medium | Collapse to one labelled figure, or label each figure's source inline ("recorded" vs "imported") so the note is not the only decoder. Acceptance: the two numbers never appear unlabelled. |
+| F-05 | `IA-5` (secondary: `H9`) | Information architecture | Resume card, empty state (no active career), all widths | The empty card states the absence ("Not recorded: no career is running.") and offers two actions, but shows no example of what a running career looks like. `IA-5` asks for an example of the contents; `SCREEN_SPEC` §SCR-CAR-001 asks for one sentence on what a career holds (present) plus the action. | OBSERVED_SOURCE | `resources/js/pages/Dashboard.vue:370-388` | 2 | Medium | Add one example line or a thumbnail of a career strip to the empty card. Acceptance: the empty card shows what a populated card contains. |
+| F-06 | `IA-5` (secondary: `H9`) | Information architecture | Recent veterans, empty state (no veterans), all widths | When `recentVeterans.rows` is empty the table is omitted entirely (`v-if`, `:518`) and only the footer ("0 veterans · 0 shown") remains; there is no absence message and no path out, although `SCREEN_SPEC` §SCR-CAR-001 promises both ("finish a run, set it to Completed, save it from the Legacy Lab"). | OBSERVED_SOURCE | `resources/js/pages/Dashboard.vue:516-572` | 2 | High | Render an empty-state line naming the absence and the path out, plus the library link. Acceptance: with `total === 0` the card prints the absence message and the door. |
+| F-07 | `H1` (secondary: `SHR-3`) | Heuristics | KPI strip, populated with more than one active career, all widths | The "Careers running" tile (`:476-479`) names only the newest active career, while `activeCareerCount` can exceed one (observed 2 in the fetched props) and the lede carries the count. The other live careers are reachable only through "All careers". | OBSERVED_SOURCE | `resources/js/pages/Dashboard.vue:476-479`, controller `activeCareerCount` | 2 | Medium | Name the count in the tile subline when more than one is live, or link to the filtered list. Acceptance: with `activeCareerCount > 1` the tile names how many are live. |
+| F-08 | `H2` (secondary: `H8`) | Heuristics | Quick actions card, populated/empty, all widths | The card ships a developer-facing note inside a `<details>` ("Why four destinations", `:590-596`): "The running app's sidebar carries ten flat items; this dashboard is the same set, grouped, with one primary action." That is internal commentary in shipped copy. | OBSERVED_SOURCE | `resources/js/pages/Dashboard.vue:588-596` | 2 | High | Remove the note or replace it with Trainer-facing copy. Acceptance: no developer-facing commentary in the rendered page. |
+| F-09 | `H4` (secondary: `SHR-1`) | Heuristics | Settings coupling, all states | The "Needs you" column is gated by `v-show="!isCardHidden('roster') && !isCardHidden('data_status')"` (`:394`), so hiding either the "Roster" or the "Data status" toggle removes the entire column, including the data-verification tile, with no per-card control. Both toggles are documented as switching this column. | OBSERVED_SOURCE | `resources/js/pages/Dashboard.vue:126-138,394-396` | 2 | High | Decouple the column's visibility from either single toggle, or rename the toggles to match what they hide. Acceptance: hiding "Roster" does not remove the data-status tile. |
+| F-10 | `UX-1` (explicitly **not** `WCAG 2.5.8`) | Laws of UX / Tognazzini | Independent Training "Give up" control, populated, all widths | The "Give up" button is `min-h-9` (`:316`, ~36 px), below the 44 px house rule (`UX-1`), though above 2.5.8's 24 px floor. It is a secondary action in a dense row, so no conformance failure is claimed. | OBSERVED_SOURCE | `resources/js/pages/Dashboard.vue:316` | 1 | High | Leave as is if the dense-row form stays named (as `AbsenceValue`'s compact case does); otherwise raise to `min-h-11`. Acceptance: the exception is recorded, not silent. |
+| F-11 | `H1` (secondary: `TOG-1`) | Heuristics | Page-level loading, all widths | While an Inertia visit started from this screen is in flight the only feedback is a `<p role="status">Loading...</p>` (`:246`) with no indication of what is loading. | OBSERVED_SOURCE | `resources/js/pages/Dashboard.vue:246` | 1 | High | Name the destination in the status text (e.g. "Loading the page you chose…"). Acceptance: the status text names what is in flight. |
+| F-12 | `H9` (secondary: `WCAG 3.3.3`) | Heuristics | Page-level error, all widths | A failed visit renders "That page could not be loaded. Try again, or open it from the navigation." (`:249-254`) with no retry control; the advice is textual only. | OBSERVED_SOURCE | `resources/js/pages/Dashboard.vue:249-254` | 1 | Medium | Add a retry action (or make "Try again" a button that re-issues the visit). Acceptance: a failed visit offers a one-click retry. |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Dark- and light-theme body text meets 4.5:1 on every surface | No browser; intended ratios in `app.css` only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, focus rings, risk edge) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling | No browser; `.g-side`/`.g-4`/`.g-3` grids and `overflow-x-auto` table not measured | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on every control | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and the 1.4.12 text-spacing override lose nothing | No resize pass run | Resize + text-spacing pass at 320 px |
+| Screen-reader announcement of the loading/error status and the veterans table | No AT attached | NVDA/VoiceOver pass over populated and empty states |
+| Whether the `Pill tone="accent"` and the primary button share a hue (one accent per screen) | Colour not measured | Computed-style colour comparison in both themes |
+| ArtworkSlot `alt=""` on portraits is acceptable because the name is text | Not resolved by source alone | AT pass + a decision on whether a portrait is decorative |
+| Whether the `needsYou` `v-show` leaves a stale `aria-labelledby` when hidden | Not measured | Accessibility-tree inspection with both toggles off |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** F-10 is filed as the house rule (`UX-1`) and explicitly not as conformance, per `wcag-2.2-accessibility-2026-10-21.md`: the 44 px rule exceeds 2.5.8. No conformance claim is made.
+- **Density vs minimalism.** The dashboard is deliberately dense (HFW clone); `H8` is about signal against noise, and every element here carries a fact. No finding.
+- **Closure vs honesty.** The empty ancestor slot / "not recorded" tiles look like closed shapes but carry the word; `GT-2`/`UI-4` hold. No finding.
+- **Feedback timing.** The 50 ms acknowledgement and 400 ms Doherty response are read as the index reads them; the only acknowledgement surface here is the `role="status"` loading line, and its latency is unmeasured (§6).
+- **Consistency vs exceptions.** The three recorded exceptions (dark theme's three deviations, the Database density) are not on this screen. No finding.
+- **Turn-count disagreement.** F-04 names the two numbers; the underlying cause (imported position vs recorded turns) is a data-model defect the controller already labels as known. The screen's disclosure is the correct response; the defect belongs to the run model, not to this screen's copy.
+- **`SCREEN_SPEC` drift.** §SCR-CAR-001 promises a ruleset row and three catalogue counts on the data-status badge; the view prints neither (ruleset is absent from the template; `counts.trainees` = 71 is sent but never rendered). This is a documentation/contract drift rather than a screen defect, and is recorded here, not filed as a finding.
+- **Framework-set defects noted.** `SCREEN_SPEC.md` §SCR-CAR-001 and `DashboardController` disagree on the data-status badge's contents (above). `wcag-2.2-accessibility-2026-10-21.md` omits `3.1.2` (Language of Parts) from its enumerated subset although it is a standard AA criterion; F-02 cites it directly.
+
+Gaps confirmed in the register rather than filed per screen: `H3` no undo after a committed turn (not applicable — no turn is committed here), `H7` no accelerators, `H10` no help surface. On this screen none of the three becomes a finding beyond what is already registered; F-11/F-12 touch the same area but are screen-level.
+
+### 8. Recommendations
+
+1. **F-01** (M): take the type scale to the token layer; three steps. Check: ≤3 distinct computed sizes under `main`.
+2. **F-02** (S): add `lang="ja"` to Japanese-name nodes. Check: every `trainee_ja` node carries `lang="ja"`.
+3. **F-03** (S): timer-driven countdown. Check: value advances each second.
+4. **F-04** (S): label each turn figure's source. Check: no unlabelled turn number.
+5. **F-06** (S): empty veterans message + door. Check: `total === 0` prints the absence line.
+6. **F-05** (M): exemplar in the empty career card. Check: empty card shows a populated example.
+7. **F-07** (S): name the live count when >1. Check: `activeCareerCount > 1` names it.
+8. **F-08** (S): remove developer note. Check: no internal commentary in the page.
+9. **F-09** (S): decouple the column's visibility. Check: hiding "Roster" keeps data status.
+10. **F-10** needs no change; recorded so the 44 px rule is not later misread as 2.5.8.
+11. **F-11** (S): name the loading target. Check: status text names the in-flight page.
+12. **F-12** (S): retry control on failure. Check: failed visit offers one-click retry.
+
+### 9. Change-audit re-check
+
+Not owed (mode is M2). The screen has not changed in this pass; no commit is being made.
+
+### 10. Exit checklist
+
+- Scope, mode, surfaces, states, viewports and themes stated.
+- Framework routing recorded, narrowest rule per question, secondaries listed.
+- §3.1 provenance caveats carried.
+- Evidence capability recorded as FALSE; `spawn EPERM` named; server-rendered HTML fetch noted; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status.
+- No severity 3/4 finding rests on inference (the highest severity here is 2).
+- Severity and confidence are separate axes.
+- No defect filed twice.
+- Known conflicts logged as settlements.
+- Gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed.
+- No conformance claimed beyond criteria tested; no rendered observation claimed.
+- Report does not modify app code.
+
+## AUD-database-2026-11-01.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-database-2026-11-01.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M4 product audit: database / catalog surfaces (pass 2)
+
+
+### 1. Identity
+- Audit id: AUD-20261102-004 (re-issue of AUD-20261101-004, same surface set)
+- Date: 2026-11-02. Pass 1 was 2026-11-01 and its record is preserved at §11 below.
+- Pass-3 addendum, same day (2026-11-02, 18:26–18:47 UTC): the coverage pass 2 admitted it had not
+  walked is now walked — 390 and 768 viewports, 200% text resize, the SC 1.4.12 text-spacing override,
+  SC 2.4.11 focus-not-obscured, and the `eva01` theme. It produced **one new finding (F-13, a WCAG
+  1.4.10 reflow failure on `/support-cards`) and one retraction**: pass 2's page-level dark-theme
+  contrast claim ("min 4.83, clean") was measured by an instrument that cannot measure what it
+  claimed, so it is withdrawn and replaced by the repository's own three-theme gate (§4). §2, §3, §4,
+  §5, §6, §7 and §8 carry the changes; nothing in §5's other rows is contradicted by the new pass.
+- Mode: M4 product audit, with the A11y overlay run as a separate track, plus one owner-ordered
+  content-accuracy track (see the scope contract at §3).
+- Scope: 13 surfaces served live at `http://127.0.0.1:8000`, all re-checked against source this run:
+  `/database` (hub), `/umamusume` + `/umamusume/{slug}`, `/support-cards` + `/support-cards/{id}`,
+  `/skills` + `/skills/{id}?from=…`, `/database/{trainees,supports,skills,races,scenarios,events,shop-items,sparks,sources}`.
+  Detail routes walked: `/umamusume/admire-vega`, `/support-cards/187`, `/skills/370?from=%2Fskills`.
+- Out of scope: career/cockpit/wizard/review/legacy surfaces; the app shell's own navigation audit
+  (rail and breadcrumb are in scope only where an in-scope page depends on them); backend write paths
+  (there are none on these screens); performance; AAA criteria; any code fix.
+- Frameworks applied: `design-framework-index-2026-10-21.md` first, then, read from the files rather
+  than from memory, `usability-heuristics`, `shneiderman-golden-rules`, `tognazzini-first-principles`,
+  `gerhardt-powals-principles`, `information-architecture-principles`, `gestalt-principles`,
+  `norman-interaction-principles`, `laws-of-ux`, `uilaws`, `wcag-2.2-accessibility`. Routing followed
+  the §4 table of the operating prompt: narrowest rule per question, one finding per defect.
+- Rendered evidence: **TRUE**. Chromium launched through the Playwright MCP against the running dev
+  server. This is the single largest difference from pass 1, which recorded `spawn EPERM` and left
+  every visual claim UNMEASURED. Screenshots were not retained (the MCP writes them outside the
+  repository, and AGENTS.md §9 forbids leaving artifacts outside the tree), so every rendered claim
+  below is a DOM/CSSOM measurement quoted as numbers, not a frame.
+- Content cross-check: `docs/UMAMUSUME_REFERENCE.md` (anchor 2026-09-27; structural pass 2026-10-02;
+  live-ops passes 2026-10-05/2026-10-20; integration 2026-10-15; latest dated correction in the file
+  2026-11-01) read against the live display path for races §1.2, scenarios §1.6.1/§2.1, events §1.4.5/§4,
+  shop items §1.6.10, sparks §1.5.2/§1.5.3, support cards §1.4.2, sources §7 and the tier scale,
+  terminology §6, and the conflict log rows 2, 7, 10, 16, 31, 47, 51, 52, 55, 56.
+
+### 2. Executive summary
+- **The two pass-1 findings are both true against `HEAD` and both already fixed in the working tree by
+  an uncommitted peer edit — and the fix is not built.** `git show HEAD:resources/js/pages/Database/Index.vue`
+  has no `area.source` line; `git diff HEAD` adds exactly one line that renders it. The served bundle
+  (`public/build/manifest.json`, 22:54) predates the edit (23:36), so the live hub still renders tiles
+  as `label \| count \| description` with no provenance word. Same shape on Scenarios: the tree wraps
+  "the Global prose sources" in a `<Link :href="route('database.sources')">`; the live page does not
+  carry the link. F-01 and F-02 stay open until those edits are built and landed.
+- **Lead confirmed finding (F-04, severity 2, High):** the source ledger prints one shared timestamp
+  (`2026-10-08 14:44:14`) as the `READ` date of eight different fetched sources, and `data_sources`
+  holds rows for only one of them (`gametora-characters`, 67 rows). The artwork mirror is listed as
+  Fetched with that date although, per `AGENTS.md` §8 / `ADR-0021`, it writes nothing to the database.
+  The ledger's own hub tile promises "the date each was read". Cited to `TOG-3`: status may be absent,
+  never wrong.
+- **New in pass 3 (F-13, severity 2, High, and the only normative WCAG AA failure this audit found):**
+  `/support-cards` scrolls the whole document sideways at phone widths — 248px at 320, 178px at 390,
+  612px at 200% text — and **one visually-hidden table-header label causes all of it.** Hiding that one
+  `span.sr-only` ("Open the card", `resources/js/pages/SupportCards/Index.vue:285`) takes the document
+  overflow to exactly 0 at both widths; the shared component behind `/database/supports` does not have
+  the defect, and the other eleven surfaces measured 0 overflow at 320. One line of CSS fixes it (§8).
+- **Retracted in pass 3:** every page-level dark-theme contrast number in this report, including pass
+  2's "dark came back clean (min 4.83)". The method they were taken with — writing
+  `data-theme` on `<html>` and sampling after a settle — does not produce a valid dark-theme frame on
+  these pages: on a fresh `/umamusume` load, setting `dark` leaves `a.card` at `rgb(255,255,255)`
+  while its own `--color-panel` resolves `#2a2a2a` and its title text goes white (an apparent 1.00:1),
+  and removing the attribute leaves the card at `rgb(42,42,42)` in the light theme. The computed
+  surface lags the token by one toggle in both directions, so those readings measured a transition,
+  not a theme — in either direction. What replaces them is the repository's own gate, which resolves
+  the tokens rather than sampling painted elements (§4).
+- **The content track came back mostly clean, and the clean parts are load-bearing.** The four scenario
+  cap rows, their `live_on_global` dates, `base_cap` 1200 and `hard_cap` 2000, the per-grade race
+  payouts, the blue-spark `+5/+12/+21` ladder, the `+16` ★3 cap raise, the three star-roll odds bands,
+  the hint-discount ladder 10/20/30/35/40, the SR cap 45 with four breaks at +5, and the 500/550
+  star-breakthrough totals all match `docs/UMAMUSUME_REFERENCE.md` line for line (§5 verification set).
+  Both dated row-count errata the reference wrote *for these very views* (`SCR-SYS-009` ten-rows/
+  four-match, `SCR-SYS-010` 806-described/874-export) are still printed on the shipped pages.
+- **Three findings are asymmetries of disclosure, not missing data.** The races screen marks the
+  contested 1400 m band on every affected row and in a footnote, yet prints the single-domain `Pre-OP`
+  grade label and the derived payout table with no provenance line at all (F-05, F-06). The catalog
+  excludes four non-game rows from its hub count but still lists and links them as trainees (F-08).
+  The mechanism exists; it is not applied everywhere it is needed.
+- Largest risk now: the **page-level dark and `eva01` rendering of the catalog and support-card
+  surfaces cannot be measured with the tool this audit had**, because forcing the theme attribute on a
+  live SPA session does not converge (above). The token-pair gate covers all three themes and passes;
+  a real per-page dark walk needs the `/preferences` row set through the app, which is a write to the
+  shared dev database and therefore outside a read-only audit. Still open: 400% zoom, a full
+  keyboard traversal, and the loading frame.
+
+### 3. Scope and coverage
+**Scope contract.** Mode M4 with an accessibility overlay and one owner-ordered content track. The
+operating prompt normally places content strategy out of scope; the owner ordered it explicitly for
+this surface set ("include audit for contents displayed in these screens that are directly related to
+docs/UMAMUSUME_REFERENCE.md contents as the main source of information"). Content findings are
+therefore filed with the reference line as the authority and the framework rule that decides the
+user-facing consequence, and they are labelled in the Finding column so no reader mistakes a content
+discrepancy for a heuristic preference.
+
+Covered:
+- Surfaces: all 13 named at §1, plus the 404 document as the front door (`/database/nope`).
+- States: populated (all 13); empty (`/database/races?q=zzqxj`, `/database/trainees?search=Form%20Counted`);
+  error (404); loading — recorded as **not applicable at source level** (see §6 for what that excludes).
+- Themes: **light only, at fresh page load.** Pass 2 recorded dark as measured after a settle; pass 3
+  withdraws that (see §4) — a forced `data-theme` write on a live SPA session does not converge on
+  these pages, so no page-level dark or `eva01` figure in this report is admissible. The three-theme
+  token-pair gate `G-18` was run instead and passes (§4).
+- Viewports: 320, 390, 768 and desktop (1280×900), all walked. Reflow was measured as
+  `documentElement.scrollWidth - clientWidth` **plus** an attempted `scrollLeft` to prove the scroll is
+  real, on eleven of the thirteen surfaces at 320, on six at 390, and on all six re-tested at 768.
+  Every surface fits at 768 and at desktop; one surface fails at 320 and 390 (F-13).
+- Text enlargement: 200% (root `font-size`) measured on `/support-cards`; the SC 1.4.12 text-spacing
+  override measured on the same page. 400% zoom not run.
+- Keyboard: Tab from document start on `/umamusume/admire-vega` and `/database/races`. Measured: the
+  skip link is 1×1 unfocused and 137×40 at `top:16 left:16` when focused; the focused link's ring is
+  `2px solid rgb(39, 86, 250)` at `outline-offset: 2px` (5.53:1 against the light surface, so SC
+  1.4.11 holds). One sticky region exists at desktop (`ASIDE` rail, full height, beside the content,
+  `z-index: auto`) and no focused element was found beneath it, so SC 2.4.11 shows no failure on the
+  two surfaces tested. A full traversal of each surface was not run.
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | WCAG-1..8 as the conformance track: 1.3.1, 1.4.1, 1.4.3 (light, fresh-load only), 1.4.10 (**measured at 320/390/768/desktop and at 200% text — one failure, F-13**), 1.4.11, 1.4.12 (measured on `/support-cards`), 2.1.1, 2.4.1, 2.4.6, 2.4.7, 2.4.11 (measured on two surfaces), 2.5.8, 3.3.1, 3.3.2, 4.1.2 | 1.4.4 at 400% zoom UNMEASURED; page-level dark/`eva01` contrast **not admissible by this instrument** (§4) — the `G-18` token-pair gate covers all three themes and passes; 2.5.7 N/A (no drag); 3.2.6/3.3.7 N/A (read-only, no repeated entry); 4.1.1 not cited (WCAG-7) |
+| Heuristics | H1, H2, H4, H5, H6, H9 | H3 no write path to reverse on these screens; H7 and H10 system gaps, §7 |
+| Shneiderman | SHR-1, SHR-4(N/A: no multi-step flow here), SHR-5(N/A), SHR-6(N/A), SHR-7 | SHR-2 (no expert path to serve on read-only); SHR-8 **does not exist in the file** — see §7 |
+| Tognazzini | TOG-3, TOG-5, TOG-8 | TOG-1 (50 ms acknowledgement) UNMEASURED; TOG-2, TOG-4, TOG-6, TOG-7 N/A on read-only surfaces |
+| Gerhardt-Powals | GP-1, GP-2, GP-3 | GP-4, GP-5 not reached |
+| Information architecture | IA-1, IA-3, IA-4, IA-5, IA-6 | IA-2 (nav banding) reviewed, no finding |
+| Gestalt | GT-1, GT-2, GT-4, GT-6 | GT-3, GT-5 not reached |
+| Norman | NRM-1, NRM-2, NRM-6 | NRM-3, NRM-4, NRM-5 not reached |
+| Laws of UX | UX-1, UX-3, UX-4, UX-5, UX-9, UX-10 | UX-2, UX-6, UX-7, UX-8 not reached |
+| Laws of UI | UI-1, UI-2, UI-3, UI-4, UI-6 | UI-5, UI-7 not reached |
+
+### 4. Evidence status and limits
+- **Rendered evidence capability: TRUE.** Chromium launched; DOM and computed-style measurements were
+  taken live against `http://127.0.0.1:8000`. No `spawn EPERM` was hit this run.
+- **Instrument limit found in pass 3, and it invalidates the dark-theme readings of both passes.**
+  This audit's only way into the dark and `eva01` palettes was writing the same `data-theme`
+  attribute the app writes (the `/preferences` route would be a write to the shared dev database,
+  which a read-only audit must not make). On a fresh `/umamusume` load with a 1200 ms settle,
+  setting `dark` leaves `a.card` at `rgb(255,255,255)` while the very same element's `--color-panel`
+  resolves `#2a2a2a` and its title colour goes white — an apparent ratio of 1.00:1; removing the
+  attribute then leaves the card at `rgb(42,42,42)` in the light theme. The painted surface lags the
+  token by one step in both directions, so **any page-level contrast number taken this way is
+  inadmissible, including pass 2's "dark min 4.83, clean" and the 24/27-item dark failure lists an
+  intermediate run produced.** What was kept: light-theme readings taken at fresh page load with no
+  toggle at all (the `◇` 3.38:1 of F-09 and the hub `i` 3.89:1 are of that kind), and every
+  geometric measurement (boxes, offsets, scroll widths), none of which depends on the palette.
+- What replaces the unmeasurable: the repository's own three-theme gate was run, and it resolves
+  tokens rather than sampling painted elements — `php artisan test --filter='browser contrast'` →
+  `Tests: 3 passed (357 assertions)`, `EXIT=0`. `contrastThemes()`
+  (`tests/Feature/DesignTokensTest.php:624-627`) loops `light`, `dark` and `eva01` over the 41
+  contract pairs and 9 badge tokens, so all three palettes clear 4.5:1 (text) and 3:1 (non-text)
+  **at token-pair level**. A per-page dark-theme paint walk remains open; it needs the theme set
+  through the app itself.
+- Earlier transition caveat, kept because it is the same trap in milder form: `.card` carries
+  `transition-colors duration-150` (`resources/js/pages/Database/Index.vue:25`), so a flip sampled
+  too early returns an animating background under an already-flipped colour. The settle was necessary
+  but, as the bullet above shows, not sufficient.
+- Bundle-vs-tree limit: `public/build/manifest.json` is stamped 22:54 and both dirty Database pages
+  were edited at 23:36/23:37. Rendered observations therefore describe `HEAD` markup where a peer has
+  already edited the source. Stated per finding rather than silently resolved either way.
+- `OBSERVED_RENDERED` claims: the hub tile text set; the ledger rows and their shared timestamp; the
+  subnav and rail target boxes; the breadcrumb box 51×16; the focused skip link 137×40 with a
+  `2px solid rgb(39, 86, 250)` ring at `outline-offset: 2px`; the `◇` marker colour
+  `rgb(140, 138, 154)` on `rgb(255, 255, 255)` at 3.38:1; font-size sets per surface; the empty-state
+  copy on `/database/races?q=zzqxj`; the four `Form Counted` rows and their URLs; the 404 document.
+- `OBSERVED_SOURCE` claims: all `file:line` citations, verified by reading the file at that line this
+  run (no line number in this report is carried over from pass 1 unverified).
+- Prior measurements cited: none from pass 1 (it ran with `RENDERED_EVIDENCE = FALSE`).
+- Provenance caveats carried from the framework files (§3.1 of the operating prompt): Gerhardt-Powals
+  primary paywalled, nine items in the secondary deck against ten in the file, items 5 and 6 unconfirmed
+  as separate principles; Dan Brown's prose unread (the applied commentary is this repository's reading);
+  Norman's book unread (quotations from the encyclopedia entry, the six-principle set is convention);
+  Tognazzini's list is the original edition's sixteen and the 2014 revision truncated unread; `laws-of-ux`
+  carries 29 entries against 28 in the index; `uilaws` carries 13 and publishes Closure and Continuity.
+- Attribution corrections applied: Closure, Continuity and the partial-indicator rules cited to
+  `uilaws`/Gestalt, never to `laws-of-ux`; Common Fate cited to Gestalt; Fitts and Hick cited to
+  `laws-of-ux`; the 44px figure cited as the **house rule exceeding** WCAG 2.5.8, never as 2.5.8
+  conformance; no "Law of Experience" (that is Mental Model, Laws of UX 17); 4.1.1 not cited.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Sev | Conf | Recommendation |
+|---|---|---|---|---|---|---|---|---|---|
+| F-01 | UX-4 (primary), H1 | Laws of UX | `/database` hub, populated, both themes | `DatabaseController::index` supplies `source` per area ('Fetched' / 'Transcribed' / 'Config'), `DatabaseController.php:69-80`. At `HEAD` the tile template renders `label`, `count`/`tag`, `description` and no `source`; measured on the live page every tile reads `Trainees \| 67 \| Aptitudes, costumes, base stats and growth rows.` with no provenance word. The working tree already adds the line (`git diff HEAD` = +1, `resources/js/pages/Database/Index.vue:88`), but the served bundle predates it, so the fix is not yet visible or landed. | OBSERVED_RENDERED + OBSERVED_SOURCE | `app/Http/Controllers/DatabaseController.php:69-80`; `resources/js/pages/Database/Index.vue:88` (uncommitted); `git show HEAD:resources/js/pages/Database/Index.vue` | 2 | High | Build and land the existing one-line edit; acceptance: each hub tile prints its `Fetched` / `Transcribed` / `Config` word beside the count. Do not re-implement it. |
+| F-02 | SHR-7 (primary), H2 | Shneiderman | `/database/scenarios`, populated, both themes | The caps note still reads "Verified 2026-09-27 against the GameTora scenarios.json export and the Global prose sources the config header names" with no reachable target from the claim itself: the live note element contains zero `<a>` (measured). `DatabaseNav` does reach `/database/sources` from the same page, so the ledger is one click away but the verification statement is not checkable in place. The tree already wraps "the Global prose sources" in a `<Link :href="route('database.sources')">` (uncommitted, unbuilt). | OBSERVED_RENDERED + OBSERVED_SOURCE | `resources/js/pages/Database/Scenarios.vue:191-198` (uncommitted `+8/-4`); `components/database/DatabaseNav.vue:28` | 2 | High | Build and land the tree edit; acceptance: the phrase "the Global prose sources" is a link to `/database/sources`. |
+| F-03 | UX-9 (primary), H1, IA-4 | Laws of UX | `/database` hub vs the four counted doors, populated | Three of the four counted tiles advertise a figure the door contradicts. Hub `Skills 1,910` (raw `select count(*) from skills`, `DatabaseController.php:53`) against `/database/skills` and `/skills`, both of which scope to `Skill::availableOnGlobal` (`SkillController.php:331-332`) and render `Showing 1–25 of 623 skills` with no mention of 1,910 anywhere on the page. Hub `Trainees 67` (`…from umamusume where external_ref is not null`, `:52`) against both trainee doors, which render `Showing 1–6 of 71 trainees`. Hub `Support Cards 559` against a door defaulting to `server = Global` (251), though that page does print both numbers ("of 251 cards" and "of 559 support cards"), which is the pattern the other two lack. The hub's own subtitle promises "where each figure came from". | OBSERVED_RENDERED + OBSERVED_SOURCE | `app/Http/Controllers/DatabaseController.php:51-56`; `app/Http/Controllers/SkillController.php:84-118,331-332`; live `/database/skills`, `/database/trainees`, `/database/supports` totals | 2 | High | Put the scope in the number, the way `/database/supports` already does: either count what the door shows, or print both ("623 on Global · 1,910 recorded"). Effort S. Acceptance: no hub tile's figure is unreachable from its own page. |
+| F-04 | TOG-3 (primary), UX-4, GP-2 | Tognazzini | `/database/sources`, populated, both themes | Every `Fetched` row shows the identical `READ` value `2026-10-08 14:44:14` (nine rows measured: characters, character-cards, race-catalog, skills, character-profiles, support-cards, support-effects, artwork, ura-objectives). The controller reads one global maximum, `DB::table('data_sources')->max('fetched_at')` (`DatabaseController.php:420`), and assigns it to each row (`:432`). Queried directly, `data_sources` holds 67 rows and **all of them carry `source_key = 'gametora-characters'`**, so the printed date is that one source's own maximum and belongs to no record at all for the other eight. `gametora-artwork` is the clearest case: `AGENTS.md` §8 and `ADR-0021` state that `uma:fetch-art` writes nothing to the database and no `data_sources` row, yet the ledger prints it as Fetched with a read timestamp. The row note does disclose the mechanism ("The newest recorded fetch across every dataset is the date beside this row"), and the hub tile for this area promises "Every source, the date each was read, and what it fed." Status may be stale or absent; it must not be wrong. | OBSERVED_RENDERED + OBSERVED_SOURCE | `app/Http/Controllers/DatabaseController.php:418-436`; live `/database/sources` row set; `data_sources` group-by on `database/database.sqlite`; `AGENTS.md` §8 Artwork bullet | 2 | High | Read each source's own newest `data_sources.fetched_at` and print `No fetch recorded` where there is none (artwork and the seven other keys with no row). Effort S, one query changed to a grouped max. Acceptance: at least two rows show different dates, and `gametora-artwork` shows no date. |
+| F-05 | GP-2 (primary), TOG-3, UI-4 | Gerhardt-Powals | `/database/shop-items`, Trackblazer table, populated | The row reads `Artisan Cleat Hammer \| 25 \| Race bonus +20%, 1 turn \| Must Buy` in the DOM (reached through the page's `Show all` control: 19 rows, 10 shown by default), so the cost is printed as a stated fact. The authority gives that same item two figures: `docs/UMAMUSUME_REFERENCE.md:156` — "the same page gives the Trackblazer Pro-Shop hammers as Race stat gain +20% (Artisan, 20 Shop Coins)" — and `:2524` — `"Artisan Cleat Hammer" (25 coins)`. The app already owns two devices for exactly this situation: the `Open conflicts` card on `/database/sources` (`Sources.vue:68-72`, three entries) and the per-row asterisk for a contested figure (`Races.vue:296-301`). Neither carries the hammer price, so the screen prints one side of a live disagreement in its own source document with no mark. | OBSERVED_RENDERED + OBSERVED_SOURCE | `config/scenarios.php:755`; `docs/UMAMUSUME_REFERENCE.md:156`, `:2524`; `resources/js/pages/Database/Sources.vue:68-72`; `resources/js/pages/Database/Races.vue:296-301` | 2 | High | Either add the price to the `Open conflicts` register with both publisher values, or footnote the row the way the 1400 m row is footnoted. Effort S. Acceptance: a reader can see, on the shop page, that 20 and 25 are two publisher readings. |
+| F-06 | GP-2 (primary), UX-4 | Gerhardt-Powals | `/database/races`, "What a race pays", populated, both themes | The table (`Races.vue:373-409`) prints G1 +10 / +45, G2·G3 +8 / +35, OP·Pre-OP +5 / +30 and the Trackblazer SP line. Every figure matches `docs/UMAMUSUME_REFERENCE.md:156` exactly, and the note is honest about the gap ("Second and third are not published"). What is missing is the rule's owner: the reference marks this same table "a derivation, and its provenance is mixed… the figure is a publisher's arithmetic, not a decoded client value, and… a tracker must print the payout the client shows rather than recompute it", and cites Game8 572831 tier A fetched 2026-10-15. The races page carries no `SourceNote`, no tier, no read date and no ledger link anywhere (`grep -c SourceNote` → Races 0, Events 2, ShopItems 3, Sparks 2). The same page does mark the 1400 m dispute in full, so the instrument is present and simply not applied here. `GP-2` is the narrowest rule: a derived figure states the rule that produced it and whether the rule is the client's or ours. | OBSERVED_RENDERED + OBSERVED_SOURCE | `resources/js/pages/Database/Races.vue:373-409`; `docs/UMAMUSUME_REFERENCE.md:156`; `components/database/SourceNote.vue:26-41` | 2 | High | Add `SourceNote` under the two typed reference cards with `section`, `anchor` and the ledger link, matching `/database/sparks`. Effort S. Acceptance: the payout card is followed by "Race payouts… Read on 2026-10-15. Where this dataset comes from". |
+| F-07 | UI-1 (primary), H4; DESIGN.md §typography four-tier table | Laws of UI | every in-scope surface, populated, both themes | Distinct computed font sizes per surface, measured at a settled fresh load: `/database` 9 (11, 11.5, 12, 12.5, 13, 13.5, 14, 16, 28); `/umamusume` 9; `/database/races` 11 (adds 10, 15); `/database/events` 11; `/database/sources` 11; `/database/shop-items` 12; `/database/sparks` 12; `/database/scenarios` 13; `/support-cards/187` 10. `DESIGN.md:346-360` (owner-signed amendment, 2026-10-14) fixes four tiers — Critical `text-3xl`, Heading `text-lg`, Body `text-sm`, Metadata `text-xs` — and `UI-1` permits three. The surplus sizes are hardcoded arbitrary values, not tokens: `text-[28px]` and `text-[13px]` at `components/ui/PageHeader.vue:67,70`, `text-[12.5px]` at `layouts/AppLayout.vue:502`, `text-[11.5px]` at `components/ui/Pill.vue:19`, `text-[10px]`/`text-[11px]` at `components/ui/Tile.vue:31,39`, and `npm run lint:ui` reports 215 arbitrary-value findings (exit 0 under the 219 baseline, i.e. this is enumerated deferred debt, not a new value). Filed once as systemic, not eleven times per page. | OBSERVED_RENDERED + OBSERVED_SOURCE | measured size sets above; `DESIGN.md:346-360`; `tools/ui-lint-baseline.json` `count: 219`; the five component lines | 2 | High | Fold the surviving steps into the four tiers or name the extra tiers in `DESIGN.md`; each deletion of a `text-[Npx]` retires one of the 219 enumerated values. Effort M. Acceptance: ≤ 5 distinct computed sizes on a Database page. |
+| F-08 | TOG-3 (primary), H2, WCAG 2.4.6 | Tognazzini | `/umamusume` and `/database/trainees`, populated | `GET /database/trainees?search=Form%20Counted` returns `Showing 1–4 of 4 trainees` with live detail URLs `/umamusume/form-counted-1` … `-4`; all four sit inside the default browse too, because every one of the 71 `umamusume` rows carries `release_status = GlobalReleased` and the door applies no source filter. These are not Umamusume. The repository already knows: `DashboardController.php:93-98` records "the dev database carries four test-written trainees ("Form Counted 1" to "4") that no pipeline ever sourced", and the hub's `external_ref is not null` clause is the stated answer to 67 against 71. The screens do not say so. `docs/UMAMUSUME_REFERENCE.md` §5 is the roster authority and no such name appears in it. | OBSERVED_RENDERED + OBSERVED_SOURCE | live search result and URLs; `umamusume` rows 68–71 with `external_ref NULL`, `is_manual 0`; `app/Http/Controllers/DashboardController.php:93-98`; `tests/Feature/CatalogRosterTreeTest.php:212` | 2 | High | Apply the same join rule the hub uses (`external_ref is not null`) to the catalog read path, or mark such rows, so a Trainer cannot open a detail page for a test fixture. Effort S. Acceptance: the search for `Form Counted` returns no rows on a populated dev database. Also worth a `KNOWN-ISSUES.md` entry; it is currently recorded only in a controller comment. |
+| F-09 | WCAG-2 / SC 1.4.3 (primary), H4; DESIGN.md:303 | WCAG 2.2 | `/support-cards/{id}`, limit-break row, populated, **light**, 320 and desktop | Four consecutive `<span class="font-mono text-ink-faint">◇</span>` markers render at `rgb(140, 138, 154)` on `rgb(255, 255, 255)`: measured ratio **3.38:1** at 14px, with no `title` and no `aria-hidden` on the span (so it is exposed as text and announced). `DESIGN.md:303` states the ink step is "non-text only: borders, ticks, disabled glyphs. Measured as body text it fails, which is why `ink-muted` is the subordinate text tier", and `DESIGN.md:657` records the same step at 3.26:1 light. The meaning is also carried in words beside the glyphs ("breaks not recorded", "cap 45"), which is why this is severity 2 and not 3. | OBSERVED_RENDERED + OBSERVED_SOURCE | `resources/js/pages/SupportCards/Show.vue:324-329`; `DESIGN.md:303`, `:657`; `resources/css/app.css:152` (`--color-ink-faint: #8C8A9A`) | 2 | High | Use `text-ink-muted` for the unfilled diamonds, or mark the run `aria-hidden="true"` and let the adjacent words carry it. Effort S. Acceptance: the marker clears 4.5:1 in light, or is absent from the accessibility tree. |
+| F-10 | H4 (primary), SHR-1, WCAG 2.4.6 | Heuristics | page title, every in-scope surface vs the error documents | The Critical tier ships twice. `PageHeader.vue:67`, `AppLayout.vue:577` and `SetupLayout.vue:216` all render `text-[28px] font-extrabold`, measured at **28px / weight 800**; `resources/views/errors/404.blade.php:44` renders `text-3xl font-semibold`, measured on the live 404 at **30px / weight 600**. `DESIGN.md:346-353` (owner-signed) names the tier `text-3xl font-semibold` and its amendment reasons explicitly about the 24px-to-30px gap. Per `AGENTS.md` §2 the code wins and the rule is stale, so this is filed as the **shell-versus-error split** the user actually sees — the same page role in the same product renders two sizes and two weights — and the `DESIGN.md` amendment is named as the stale text rather than treated as the defect. | OBSERVED_RENDERED + OBSERVED_SOURCE | measured `getComputedStyle` values on `/support-cards/187` (28px) and `/database/nope` (30px); the three shell lines; `DESIGN.md:346-353` | 2 | High | Pick one Critical treatment and ship it from one place; the error documents are the only surface outside the shell today. Effort S. Acceptance: the h1 of a Database page and of a 404 compute the same size and weight. Say in the report, not in the file, that `DESIGN.md` needs a dated erratum, which is the Docs Writer's to land. |
+| F-11 | UX-1 (house 44px), H6 | Laws of UX | breadcrumb, every Database page, populated, desktop | The crumb's own link is measured at **51×16px** (`A:Database` inside `span.min-w-0.text-[12.5px]`, text `Database · Races`), against a house rule of 44. It is an inline link in a text line, so WCAG 2.5.8's inline exception is available and this is **not** filed as a conformance failure; every other target on the area pages clears the house rule (rail links 47×44 with 45px centre gaps, subnav items 44px tall on every page, filter controls `min-h-11`, the `Clear` link 47×44). Filed because the crumb is the only escape path that is not a 44px target. | OBSERVED_RENDERED | measured boxes on `/database/races`, `/database/sparks`, `/umamusume`, `/support-cards/187` | 1 | High | Give the crumb link `min-h-11` like the subnav items, or accept it as a named exception in `DESIGN.md` under SHR-1. Effort S. |
+| F-13 | WCAG SC 1.4.10 (primary), H4, SHR-1 | WCAG 2.2 AA | `/support-cards`, populated, light **and** palette-independent geometry, 320×640 and 390×844 | The document itself scrolls sideways: `documentElement.scrollWidth - clientWidth` = **248 at 320** and **178 at 390**, and `scrollingElement.scrollLeft` reaches those same values, so it is the page scrolling in two dimensions, not a component. The sole cause is one visually-hidden label: `<span class="sr-only">Open the card</span>` in the last header cell (`SupportCards/Index.vue:285`), which is `position:absolute` inside `div.card.mt-4.overflow-x-auto` (`:275`) whose own `position` is `static` — so the label's containing block sits above the scroll container and its 1px box extends the document instead of being clipped. Hiding that single element returns the overflow to exactly 0 at both widths, twice over. At 200% root font-size the page overflows 612px (557 of it that label, the residual 55 an in-flow table with no scroll wrapper), and with the SC 1.4.12 text-spacing override 241px — one cause, three symptoms. The twin that renders the same rows through `components/ui/DataTable.vue` (`/database/supports`) measures 0 overflow at 320/390/768/desktop, and eleven of the twelve other surfaces measured 0 at 320. | OBSERVED_RENDERED | `resources/js/pages/SupportCards/Index.vue:275,285`; live deltas 248/178/612/241 with the hide-one-element control | 2 | High | Make the scroller the containing block: add `relative` to the `overflow-x-auto` card at `:275` (one token, no markup change), or retire this hand-rolled table onto `DataTable.vue`, which already behaves. Acceptance: at 320 with the default and with `font-size:200%` on the root, `documentElement.scrollWidth == documentElement.clientWidth` on `/support-cards`, and `scrollLeft` stays 0. |
+| F-12 | IA-1 (primary), H2 | Information architecture | `/database` hub, Events tile, populated | The tile reads `Events \| Reference \| Support-card and trainee event chains.` The door it opens renders ten recurring **live-event** rows (Champions Meeting, Story event, Legend Race, Special event (Spark and item research), Masters Challenge, Season pass, …) from `config/reference.php:50-140`, and its own `SourceNote` says "Recurring event types". Not one card or trainee event chain is listed on the page, although the reference document counts them (`docs/UMAMUSUME_REFERENCE.md:521`: 135 per-character chains, 11 Pal chains, 5 group chains) and the data behind them exists on the card pages. A Trainer who wants the chains is sent to a page that does not hold them, by a sentence that says it does. | OBSERVED_RENDERED + OBSERVED_SOURCE | live hub tile text vs live `/database/events` table; `config/reference.php:50-140`; `app/Http/Controllers/DatabaseController.php:73`; `docs/UMAMUSUME_REFERENCE.md:521` | 1 | High | Reword the tile description to what the area holds ("Recurring live-event types and their cadence"). Effort S, copy only. Acceptance: the tile names the table it opens. |
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+|---|---|---|
+| Page-level dark and `eva01` paint on any surface | Forcing `data-theme` on a live session does not converge (§4: the painted surface lags the token by one step, in both directions), so no per-page dark figure from this audit is admissible — including pass 2's | Set the theme through `/preferences` on a session-private database, then re-walk; `G-18` already proves the token pairs in all three themes (357 assertions, exit 0) |
+| 400% zoom, and 200% text on the twelve surfaces other than `/support-cards` | The resize pass ran only on the one surface that already failed at 320; 400% was not attempted | Repeat the root-`font-size` and `scrollWidth`-versus-`scrollLeft` probe per surface at 200% and a zoom pass at 400% |
+| Whether the residual 55px at 200% on `/support-cards` is the same defect or a second one | Hiding the header label left 55px of document overflow from an in-flow table, which was not localised | After applying the F-13 fix, re-measure at 200%; if 55px remains, bisect the tables on that page |
+| Full keyboard traversal, and SC 2.4.11 beyond two surfaces | Tab was walked on `/umamusume/admire-vega` and `/database/races` only; no sticky overlap was found on either | Tab the whole tab order of the three dense tables and compare each focused rect against the sticky rail |
+| TOG-1 acknowledgement within 50ms; the `prefetch="hover"` behaviour on hub tiles | `VisitProgressBar` exists (`AppLayout.vue:347`) and timing was not measured | Frame-level timing on a tile click |
+| Loading state as a rendered state | Source-level it is N/A: these are server-rendered pages and `AGENTS.md` §13 bans decorative skeletons, but that was read, not seen | Throttle a request to `/database/races` and observe the shell during the visit |
+| Whether the `◇`/`i` glyph markers are "text" under SC 1.4.3 or "non-text" under 1.4.11 | Measured 3.38:1 and 3.89:1; both clear 3:1, neither clears 4.5:1 | One line in `DESIGN.md` saying which way a status glyph reads; then F-09 either firms up or closes |
+| Table naming for screen readers | 2 of 3 tables on `/database/races`, 3 of 11 on `/database/scenarios`, 4 of 6 on `/database/sparks` and 3 of 3 on `/database/sources` carry no `<caption>` and no `aria-labelledby`, though each sits under a visible `h2`/`h3` inside the same `.card`, and every `<th>` carries `scope` | No success criterion requires a caption, so this is recorded as an observation, not a finding; `1.3.1` is met. Settled by a screen-reader read-through, or by wiring `aria-labelledby` to the heading |
+| Whether the four `Form Counted` rows should be purged from the dev database or filtered at read | Owner call; F-08 files the read-path fix only | Owner ruling, then either a cleanup command or the join filter |
+
+### 7. Conflict and gap log (not findings)
+- Settlements applied rather than filed: **44px vs SC 2.5.8** — F-11 is a house-rule gap, not a
+  conformance failure, and the crumb's inline exception is named. **Density** — the Database area is the
+  recorded exemption (`DESIGN.md`/`SCREEN_SPEC` SCR-SYS-006…010), so 25-row tables and 12px metadata are
+  not findings. **Closure vs honesty** — partial indicators here carry words ("Not recorded", "N/A" with a
+  reason, "breaks not recorded", "no winner is encoded"), so GT-2/UI-4 hold; no finding.
+  **Consistency vs exceptions** — the dark ramp's named deviations were not re-litigated.
+- Framework-set discrepancy, recorded so no future pass invents it: **`SHR-8` does not exist.**
+  `shneiderman-golden-rules-2026-10-21.md:135-141` ends at `SHR-7` ("The value a decision needs is on the
+  decision screen", mapped to Shneiderman rule 8). The operating prompt's §10 index lists `SHR-8` as that
+  rule, and pass 1's coverage matrix cited `SHR-8`. Per Phase 6 gate 1 (a rule must exist in the file),
+  this pass cites `SHR-7` and files nothing under `SHR-8`. Same caution applied to `UI-8`: `uilaws` defines
+  `UI-1`…`UI-7`.
+- Instrument corrections, kept because each one killed a candidate. **Pass 3's is the largest: the
+  forced-`data-theme` method does not converge, so every page-level dark-theme number in this report
+  (in both passes) is withdrawn** and replaced by the `G-18` token-pair gate; see §4. Before that
+  discovery, mid-transition sampling was blamed — `.card` carries `transition-colors duration-150`
+  (`resources/js/pages/Database/Index.vue:25`), so a flip read too early returns an animating surface
+  under an already-flipped colour. Also: the dimmed `Previous` control measured 1.03:1 but carries
+  `disabled`, so SC 1.4.3's inactive exception applies and it is not a finding; the hub tiles'
+  absolute `http://127.0.0.1:8000/…` hrefs were checked for a forced full-document reload and survive
+  as SPA visits (`window` state lived through the click), so no finding; and `Races.vue:79-81`'s
+  `Maiden` and `Debut` grade options were probed for a dead filter and are backed by real rows
+  (`tier = 'Maiden'` 1, `tier = 'Debut'` 1). A fourth near-miss was avoided by measuring the document
+  rather than the containers: `/support-cards` looked clipped at every width until `scrollLeft` was
+  actually moved (F-13).
+- Content verifications that **passed** and are recorded here so they are not re-audited from scratch:
+  the four scenario cap rows match `docs/UMAMUSUME_REFERENCE.md:418` exactly, as do `base_cap` 1200
+  (`:417`), `hard_cap` 2000 (`:422`), the `cap_bonus` arithmetic at `:906-919`, and the four
+  `live_on_global` dates against `:741-745`; the hub's `Scenarios 4` matches the document's "[Global]
+  has 4 total selectable" (`:722`); the blue-spark `+5/+12/+21` ladder (`:655`), the `+16` ★3 cap raise
+  (`:420`) and the doubled "per two parents" column; the three star-roll odds bands (`:1.5.3`),
+  including the "roughly one-in-ten roll at three stars, not a three-star Spark" caution; the pink
+  aptitude ladder `★1·4·7·10-18 → +1/+2/+3/+4`; the SR level cap 45 with four breaks at +5 and
+  "a fully broken card is five copies" (`:501,503,505`); the hint ladder 10/20/30/35/40 (`:2569`);
+  the 500/550 star-breakthrough totals (`:435`); the 623 Global skill count as the scoping rule;
+  `Support Cards 559` matching the document's own "559 cards" (`:438`); the 410-slot race table
+  labelled "slots" on its own page; the three `Open conflicts` entries on `/database/sources` each
+  matching a real conflict-log row (7 `:259/:2560`, 2 `:2555`, 10 `:2563`); both dated row-count errata
+  for these views still printed (`SCR-SYS-009` four-of-ten match at `ShopItems`, `SCR-SYS-010`
+  806-described/874-export/68-remainder at `Sparks`); the 1400 m conflict marked per row, in a footnote
+  and in an `aria-label` (`Races.vue:296-301,314`); and the four `Not recorded`/`N/A` absence channels,
+  none of which defaults a value.
+- Gaps (register, not per-screen findings): **H3** undo — N/A on read-only surfaces; **H7** no
+  accelerators anywhere in this area; **H10** no reactive help surface on these pages (the shell's help
+  path is outside this scope). All three are already in the heuristics file's gap register and are
+  confirmed, not re-filed.
+
+### 8. Recommendations
+1. **F-13** — add `relative` to the `overflow-x-auto` card at `SupportCards/Index.vue:275` so it
+   becomes the containing block for the `sr-only` header label, or retire this page's hand-rolled
+   table onto `components/ui/DataTable.vue` (which `/database/supports` already uses and which does not
+   overflow). Satisfies SC 1.4.10. Effort S, one class or one component swap. Acceptance: at 320 and
+   at 200% root font-size, `documentElement.scrollWidth == clientWidth` on `/support-cards`.
+2. **F-04** — read each source's own newest `data_sources.fetched_at`; print `No fetch recorded` where a
+   source has none. Satisfies TOG-3/UX-4. Effort S (one grouped query). Acceptance: two rows differ and
+   `gametora-artwork` shows no date.
+3. **F-01 + F-02** — build and land the two edits already in the working tree rather than re-doing them
+   (`Index.vue:88`, `Scenarios.vue:191-198`). Satisfies UX-4/SHR-7. Effort S. Acceptance: tiles print
+   `Fetched`/`Transcribed`/`Config`, and the scenarios note links the ledger. Check `git diff HEAD`
+   first: both files are dirty from another session, and `npm run build` is a write (§9, KI-70).
+4. **F-03** — make each counted hub tile's figure reachable from its own door, following
+   `/database/supports`'s existing dual-count pattern. Satisfies UX-9. Effort S-M.
+5. **F-08** — filter or mark the four test-sourced trainee rows on the read path. Satisfies TOG-3.
+   Effort S. Acceptance: `?search=Form Counted` returns nothing.
+6. **F-06** — attach `SourceNote` to the two typed reference cards on `/database/races`. Satisfies
+   GP-2/UX-4. Effort S.
+7. **F-05** — surface the Artisan hammer price as an open conflict, in the register that already exists.
+   Satisfies GP-2. Effort S. The doc's own 20-versus-25 disagreement needs a ruling; that is the owner's
+   to write.
+8. **F-09** — move the limit-break markers to `text-ink-muted`, or hide them from the accessibility
+   tree. Satisfies SC 1.4.3/DESIGN.md:303. Effort S.
+9. **F-10** — unify the Critical tier between shell and error documents, then hand `DESIGN.md` a dated
+   erratum. Satisfies H4. Effort S.
+10. **F-07** — retire the arbitrary type steps toward the four tiers. Satisfies UI-1. Effort M, and each
+    removal retires one of the 219 enumerated baseline values.
+11. **F-11, F-12** — copy and sizing one-liners. Effort S each.
+12. **Method, for the next pass** — do not measure a theme by writing `data-theme` onto a live page.
+    Set it through the app on a session-private database, or trust `G-18` for token pairs; a settle
+    delay is not enough (see §4).
+
+### 9. Change-audit re-check (M1 only)
+N/A. This is M4. Nothing in the tree was changed by this audit; it is read-only.
+
+### 10. Exit checklist
+- [x] Scope, mode, surfaces, states, viewports and themes stated, including what was not covered
+      (page-level dark/`eva01` paint, 400% zoom, full keyboard traversal) — §3 and §6.
+- [x] Framework routing recorded; narrowest rule chosen per question; content findings labelled as the
+      owner-ordered track.
+- [x] Pre-flight provenance caveats carried (§4), including the 9-vs-10 Gerhardt-Powals split.
+- [x] Evidence capability recorded: RENDERED_EVIDENCE TRUE, **with the theme-forcing instrument
+  limitation named and the affected numbers withdrawn rather than left standing** (§4, §7).
+- [x] Every finding has a rule ID, a surface and state, a specific observation, an evidence status and
+      a `file:line` verified this run.
+- [x] No severity above 2 was assigned; nothing at severity 3 or 4 was asserted, and the candidates
+      that looked like severity 4 were disproved (§7).
+- [x] Severity and confidence kept on separate axes.
+- [x] No defect filed twice; F-07 is filed once for the whole surface set, F-01/F-02 kept separate
+      because they are different surfaces and different rules.
+- [x] Known conflicts logged as settlements, not findings (§7).
+- [x] Gaps kept in the gap register (§7).
+- [x] Unmeasured register names what would settle each claim (§6).
+- [x] Report follows the §7 template of the operating prompt.
+- [x] No WCAG conformance claimed beyond the criteria actually tested; 4.1.1 never cited; the 44px rule
+      never described as 2.5.8.
+- [x] Contents cross-checked against `docs/UMAMUSUME_REFERENCE.md`: six discrepancies filed (F-03,
+      F-04, F-05, F-06, F-08, F-12), and the verified-accurate set recorded so it is not
+      re-derived from scratch.
+- [x] No code, no data, no other document modified. Pass 3's measurements included temporary in-page
+      mutations (hiding the F-13 label, a root `font-size` override, a temporary SC 1.4.12 style
+      element, a forced `data-theme`) — all reverted, none persisted; `G-18` was run read-only and its
+      log and probe scripts live only under `.scratch-uma/aud-database-2026-11-02/`.
+
+### 11. Pass-1 record (2026-11-01), preserved as written
+This report file, and its three siblings `AUD-career-surfaces-2026-11-01.md`,
+`AUD-dashboard-2026-11-01.md` and `AUD-preferences-2026-11-01.md`, are **untracked**
+(`git status --short docs/audits/` lists all four as `??`). Pass 1 therefore exists nowhere in history,
+and the only record of it is the section below. The `HEAD` comparisons in this report are made against
+the application code, which is tracked; nothing here claims a committed version of the audit file.
+Pass 1 ran as AUD-20261101-004 with `RENDERED_EVIDENCE = FALSE` (`spawn EPERM`) and filed two
+OBSERVED_SOURCE findings, both severity 2, both High confidence:
+- F-01: the hub computed `source` per area and never rendered it. **Status 2026-11-02: still true at
+  `HEAD`, still true on the live page, and already fixed by an uncommitted one-line edit in the working
+  tree that has not been built or landed.** Carried forward as F-01 here.
+- F-02: the Scenarios verification note named its sources as plain text with no link to the ledger.
+  **Status 2026-11-02: unchanged; a peer's uncommitted `<Link>` edit is in the tree, unbuilt.**
+  Carried forward as F-02 here.
+Pass 1 also dropped two earlier candidates as false positives (the race-search `_` silent non-match,
+and "no path from area pages to `/database/sources`"), and pass 2 re-checked both drops and agrees
+with them: the controller escapes `%` and `_`, a no-match hint and a `Clear` link are live, and
+`DatabaseNav` reaches the ledger from every area page.
+
+## AUD-help-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-help-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M2 screen audit: Help and documentation (help)
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-019
+- Date: 2026-11-02
+- Mode: M2 screen audit (A11y overlay applied as a separate track, Phase 5)
+- Scope: `GET /help` (`help`), `App\Http\Controllers\HelpController@show` (`app/Http/Controllers/HelpController.php:19-23`), `resources/js/pages/Help.vue`; a documentation surface (no dialog, no committed action); both themes; widths 320 / 390 / 768 / 1280; keyboard-only operation. Dimension sweep emphasizes content/language (H) and accessibility semantics (G), per the audit brief for documentation surfaces.
+- Out of scope: content strategy beyond verifying copy against source strings, the screens Help links to, performance, AAA criteria, any fix.
+- Frameworks applied: `design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, IA, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**.
+
+### 2. Executive summary
+
+- **Zero findings.** The page passes every applicable dimension from source: it is the product's first reactive help surface (closing the registered H10 gap), reachable from the topbar on every screen (IA-1 / 3.2.6), its tables are labelled (`aria-label`), keys use `<kbd>`, trust marks pair a glyph with a visible word (1.4.1), nothing is an inert control (rules are text with an explanatory note at Help.vue:176-183), the undo absence is stated as a gap rather than a missing button (Help.vue:104-112), and all navigation is client-side (`Link`/`LinkButton`).
+- **Largest unmeasured risk:** contrast, target size and reflow at 320 px (two-column `g-side` layout) — no browser; every visual claim is `UNMEASURED` (§6).
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Page head / lede | n/a | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Turn loop card | n/a | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Keyboard card (table + kbd) | n/a | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Trust marks card (table + glyph+word) | n/a | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Source ledger card | n/a | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Rules card (table, text rows, no links) | n/a | yes | n/a | n/a | src | src | named | named | named | named | src |
+| "If something looks wrong" diagnostic table | n/a | yes | n/a | n/a | src | src | named | named | named | named | src |
+| Topbar Help door (shell) | yes | yes | yes | yes | src | src | named | named | named | named | src |
+
+Framework coverage (applied and produced findings): none — no finding passed the evidence gate on this screen.
+Applied, source-clean, no finding: `IA-1` (Help link in the topbar on every screen, `?` glyph + word "Help", consistent position — AppLayout.vue:549-556; `WCAG 3.2.6` consistent help); `H2` (client vocabulary: GREAT/GOOD/NORMAL/BAD/AWFUL quoted from `lang/en/uma.php`, Help.vue:62-63); `G` semantics (tables `aria-label`, `<kbd>`, `scope="row"`, glyph `aria-hidden="true"` + word, Help.vue:137-138); `H` content (plain language, no internal jargon, no wiki glosses); `H3` emergency exit ("Back to the dashboard" door at Help.vue:88); `TOG-6`/`SHR-6` (Help commits nothing — reversal not applicable; the undo gap is global and registered elsewhere, not re-filed); `WCAG 1.4.1` (trust glyph + word; no colour-alone information); `WCAG 2.4.2` (descriptive `<Head title="Help and documentation">`); `WCAG 4.1.2` (named controls, `<kbd>`, labelled tables); `WCAG 3.2.6` (help mechanism in the same relative order on every page — the shell topbar).
+`N/A` by the framework's own list: `SHR-4` (no multi-step flow), `SHR-5`/`SHR-6` (no write, no committed turn), `H5`/`H9` (no errors on this surface), `2.5.7` (no drag), `2.1.4` (accelerators documented as absent; global gap), `3.3.1`/`3.3.2`/`3.3.3`/`3.3.7` (no input), `3.3.8` (no authentication), media/audio/flashing.
+Not reached: M3/M4 phases (single screen), AAA criteria.
+
+Cross-screen IA note (Phase 3): Help satisfies IA-1 front door — reachable from the topbar on every screen (AppLayout.vue:549-556) and deliberately absent from the rail, which is the recorded IA-7 focused-navigation decision (help is a utility, not a destination). Veterans screens are covered in AUD-20261102-026/-027/-028. No cross-screen finding.
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run.
+- Every structural, copy and navigation claim below is `OBSERVED_SOURCE` against the component and controller source, with `file:line`.
+- Contrast, target size (44 px house rule vs 2.5.8's 24 px floor), reflow, 200% resize and text-spacing override were not measured; all are in §6.
+- Provenance caveats carried (§3.1 of the audit prompt): Gerhardt-Powals primary text paywalled; IA prose unread; Norman's book not fetched; Tognazzini sixteen are the original edition; Laws of UX holds 29; Laws of UI holds 13 and publishes Closure and Continuity; no "Law of Experience" (Mental Model, UX-17); Closure/Continuity cited to `uilaws-2026-10-21.md`; Common Fate cited to `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob cited to `laws-of-ux-2026-10-21.md`; 44 px is a house rule exceeding 2.5.8; 4.1.1 never cited.
+- One caveat specific to Help: `WCAG 2.1.4` character-key shortcuts — the accelerators are stated as absent (HFW-OVERRIDE, Help.vue:13-15), but the product has no remap or disable control. That gap is recorded globally in `wcag-2.2-accessibility-2026-10-21.md` (gap register) and is not re-filed as a per-screen finding; Help itself documents what is wired rather than advertising 1-5.
+
+### 5. Findings
+
+No findings passed the evidence gate on this screen. The findings table is intentionally empty: every applicable dimension was swept from source and either conforms (labelled tables, `<kbd>`, glyph + word, `lang`-free client copy, client-side navigation, named doors) or is N/A for a documentation surface that commits nothing (no dialog, no write, no committed turn — SHR-4/5/6, TOG-6, H3, NRM-6 both gulfs do not apply).
+
+A zero-finding report is a valid outcome: it documents that the surface was audited, not that it was skipped.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Dark- and light-theme body text meets 4.5:1 on every surface | No browser; intended ratios in `app.css` only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, focus rings, pill/trust-mark edges) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling | No browser; two-column `g-side` layout and card grids not measured | Rendered reflow pass at 320 px, both themes |
+| Target sizes of the 44 px house rule hold on every control (doors, cards) | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and the 1.4.12 text-spacing override lose nothing | No resize pass run | Resize + text-spacing pass at 320 px |
+| Screen-reader announcement of the card regions, tables and `<kbd>` keys | No AT attached | NVDA/VoiceOver pass over both card columns |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** No target-size conformance claim is made; the house rule exceeds 2.5.8 and is never described as conformance (`wcag-2.2-accessibility-2026-10-21.md`).
+- **Help has no dialog.** Help is a documentation surface; SHR-4/5/6, TOG-6 and NRM-6 (both gulfs) describe committed actions and do not apply. Not a defect; logged here for completeness per Phase 4 of the protocol.
+
+Gaps confirmed in the register rather than filed per screen:
+
+- **H3 undo** (no undo after a committed turn): global gap, tracked at `UX-DELIVERABLES.md`; Help commits nothing, so it does not become a Help finding.
+- **H7 accelerators / WCAG 2.1.4:** global open gap (no remap or disable control); Help documents the shortcuts as absent rather than advertising them. Not re-filed here.
+- **H10 "no help surface":** this screen *is* the first reactive help surface, so the registered H10 gap is **filled** by Help. Confirm closure: one page, concrete steps, task-focused, not too large (H10). Verified from source: the four cards answer turn loop, keyboard, tags and sources with concrete steps.
+- **IA-7 tension:** Help is reachable from every topbar but absent from the rail — the recorded focused-navigation decision (IA principles §7), not a defect.
+
+### 8. Recommendations
+
+No remediation is required on this screen. If the owner wishes to strengthen Help beyond the audit bar:
+
+1. (Optional, L) Add an in-page skip to the card a Trainer most needs (e.g. "If something looks wrong"); the shell already provides "Skip to content" (AppLayout.vue:348-353), so this is an enhancement, not a defect. Rule: H10 / IA-5 adjacent. Check: keyboard users reach the diagnostic table without tabbing through the turn loop first.
+
+### 9. Change-audit re-check (M1 only)
+
+Not owed (mode is M2). No commit is being made by this audit.
+
+### 10. Exit checklist
+
+- Scope, mode, surfaces, states, viewports and themes stated.
+- Framework routing recorded, narrowest rule per question, secondaries listed.
+- §3.1 provenance caveats carried.
+- Evidence capability recorded as FALSE; `spawn EPERM` named; source `file:line` used for every `OBSERVED_SOURCE` claim; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status (no findings — table intentionally empty).
+- No severity 3/4 finding rests on inference (no findings at all).
+- Severity and confidence are separate axes.
+- No defect filed twice.
+- Known conflicts logged as settlements; gaps left in the register (H10 marked filled).
+- Unmeasured register complete with settlers.
+- Template followed (§7).
+- No conformance claimed beyond criteria tested; no rendered observation claimed.
+- Report does not modify app code.
+
+## AUD-preferences-2026-11-01.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-preferences-2026-11-01.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M2 screen audit: Preferences (SCR-SYS-002)
+
+
+### 1. Identity
+
+- Audit id: AUD-20261101-003
+- Date: 2026-11-01
+- Mode: **M2 screen audit** (A11y overlay applied as a separate track, Phase 5)
+- Scope: `SCR-SYS-002` Preferences — route `GET /preferences` (`preferences.edit`), controller `app/Http/Controllers/PreferenceController.php`, page `resources/js/pages/Preferences/Edit.vue`, plus `SCREEN_SPEC.md` §SCR-SYS-002, `tests/Feature/PreferenceControlsTest.php`, `tests/browser/preferences.spec.ts`.
+- Out of scope: backend behaviour beyond the controller's own queries and the Form Request, the career surfaces (audited as AUD-20261101-002, which already covers `RunSettings` F-01/F-11 — not duplicated here, only referenced), performance, content strategy, AAA criteria, the `eva01` third theme's palette values, any fix.
+- Frameworks applied: `docs/framework-ui-ux/design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are `OBSERVED_SOURCE` or `UNMEASURED`.
+
+### 2. Executive summary
+
+- **F-02 — refused submissions that name no control are not announced.** The page-level error block below the cards (`<p class="text-risk">`) carries no `role="alert"` or `aria-live`, so a whole-blob or theme/layout/dashboard refusal is silent unless the Trainer is already focused on it. Severity 2.
+- **F-03 — `aria-describedby` points at ids that are never rendered.** For theme, layout width, dashboard and failure-estimate refusals the page's `describedBy()` returns `error-*`, but the only rendered block is `error-block-*`; the reference is dangling. Severity 2.
+- **F-04 — focus is not moved for four refusal classes.** `onError` looks up `field-${key}`, which does not exist for `theme`, `settings.dashboard_layout`, `settings.dashboard_hidden_cards` (their ids are `field-theme_light`, `field-settings.dashboard_layout_standard`, `dashboard_card_*`). Severity 2.
+- **F-05 — "Download a backup" promises a download the action does not perform.** The button label contradicts the server-side snapshot it actually writes; the helper line and the flash carry the truth, but the affordance does not. Severity 2.
+- Largest unmeasured risk: contrast and target size on the dashboard table and the 10 px / 12.5 px headers, which have no rendered pass at all; the preferences browser spec was not executed in this sandbox.
+
+### 3. Scope and coverage
+
+| Surface / state | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Preferences (SCR-SYS-002) | n/a (defaults) | yes | yes (refusal) | yes (submit) | src | src | named | named | named | named | src | preferences.spec.ts |
+
+The screen has no true empty state: unset values render as empty fields or "Not set" (named absence, `SCREEN_SPEC` §SCR-SYS-002 "Named absence"). Loading is submit-scoped only (`:aria-busy` on the form, "Saving" state line and button); there is no page-level loading for an Inertia visit, which `SCREEN_SPEC` does not require for this screen.
+
+Framework coverage (applied and produced findings): `H1`, `H2`, `H4`, `IA-1`, `NRM-1`, `TOG-1`, `WCAG 1.3.1`, `WCAG 2.4.3`, `WCAG 4.1.2`, `WCAG 4.1.3`. Applied, measured clean from source (no finding): `H5`/`NRM-3`/`SHR-5` (constraint vs validation — `UpdatePreferenceRequest` refuses unknown keys and out-of-range values, and the stat fields state the range in their hint rather than a browser-side bound, so the refusal is shown, not silent); `SHR-6`/`TOG-6`/`H3` (reversal — the save is reversible by re-saving; no destructive action on this screen); `SHR-7`/`SHR-8` (value on the decision screen — the stored values pre-fill every control); `GP-1`/`GP-3` (no arithmetic left in the user's head — the hard cap is printed in the hint); `GT-2`/`UI-4` (absent values carry a word, not a dash); `IA-2` (banded nav via `AppLayout`); `IA-5` (every empty default is explained); `WCAG 2.1.1`/`2.4.7`/`4.1.2` (links, buttons, labels present); `WCAG 1.4.1` (stale state carries word + border); `WCAG 3.3.1`/`3.3.2`/`3.3.3` (refusal messages are specific and constructive). `N/A` by the framework's own list: `2.5.7` (no drag), `2.1.4` (no accelerators), `3.3.8` (no auth), `1.2`/`1.4.2`/`2.3` (no media/audio/flashing), `SHR-4` (no multi-step flow closure), `IA-3`/`IA-6` (structure between screens out of scope), AAA criteria. Not reached: `WCAG 1.4.4`/`1.4.10`/`1.4.12` (no resize pass), `WCAG 3.2.6`/`3.3.7` (not exercised), `WCAG 2.4.11` (focus not obscured — not measured).
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run.
+- Structural and copy claims are `OBSERVED_SOURCE` against the page and controller source read this run; visual, contrast, target-size and reflow claims are `UNMEASURED` (§6).
+- Provenance caveats carried (audit prompt §3.1): Gerhardt-Powals primary text paywalled, items 5/6 an unconfirmed split (nothing here rests on that boundary); IA prose unread, only names/summaries are the article's own (IA-1 used only as its derived sentence); Norman's book not fetched, quotes from the encyclopedia entry; Tognazzini sixteen are the original edition, 2014 count unverified; Laws of UX holds 29 (Zeigarnik from its own page); Laws of UI holds 13 and publishes Closure and Continuity; no "Law of Experience" (it is Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity cited to `uilaws-2026-10-21.md`; Common Fate cited to `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob cited to `laws-of-ux-2026-10-21.md`; 44 px described as a house rule exceeding 2.5.8, never as conformance.
+- Cross-reference: `RunSettings` (audited in AUD-20261101-002 as F-01, F-11) is a different screen and is not re-filed here; its error-surface and lede defects are referenced, not duplicated.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | `WCAG 4.1.3` (secondary: `H1`, `TOG-1`) | WCAG 2.2 / Heuristics / Tognazzini | Preferences, all states, all widths | The page-level error block below the cards (`<p v-for … class="text-risk">`) carries no `role="alert"` and no `aria-live`, so a refusal that names no control (a whole-blob `settings`/`preferences` refusal) is never announced; the control's `aria-describedby` points at an id that is not a live region either. | OBSERVED_SOURCE | `resources/js/pages/Preferences/Edit.vue:524-531` (no `role`/`aria-live` on the block) | 2 | High | Add `role="alert"` (and keep the block always mounted, mirroring `Flash.vue`) so refusals announce. Acceptance: a refused submit produces an announcement without focus. |
+| F-02 | `WCAG 4.1.2` (secondary: `WCAG 1.3.1`, `H1`) | WCAG 2.2 | Preferences, error state, all widths | `describedBy()` returns `error-${key}` for theme, layout width, dashboard and failure-estimate refusals, but the only rendered block is `error-block-${key}`; the inline error (which would carry `error-*`) is only rendered for stat inputs and the default scenario. The reference dangles for four refusal classes. | OBSERVED_SOURCE | `resources/js/pages/Preferences/Edit.vue:211-215, 524-531` | 2 | High | Either render the page-level block with `id="error-${key}"`, or stop advertising `aria-describedby` when no element carries that id. Acceptance: every `aria-describedby` token resolves to an element. |
+| F-03 | `WCAG 2.4.3` (secondary: `H1`, `TOG-1`) | WCAG 2.2 / Heuristics / Tognazzini | Preferences, error state, all widths | `onError` calls `document.getElementById(controlId(firstKey))`, i.e. `field-${key}`. That id exists for stat targets, the default scenario and failure estimate, but not for `theme` (`field-theme_light`…), `settings.dashboard_layout` (`field-settings.dashboard_layout_standard`…) or `settings.dashboard_hidden_cards` (`dashboard_card_*`). Focus is not moved for those refusals. | OBSERVED_SOURCE | `resources/js/pages/Preferences/Edit.vue:267-276` (controlId at 213) | 2 | Medium | Map each error key to its first real control id (or focus the page-level block when no control applies). Acceptance: a theme/layout/dashboard refusal moves focus to a control or to the message. |
+| F-04 | `H1` (secondary: `NRM-1`) | Heuristics / Norman | Preferences, populated, all widths | The Data card's primary action is labelled "Download a backup", but `backup()` writes a server-side `VACUUM INTO` snapshot under `storage/app/backups/` and downloads nothing; the truth lives only in the helper line and the flash. | OBSERVED_SOURCE | `resources/js/pages/Preferences/Edit.vue:398-400, 402-404` | 2 | Medium | Relabel the control to "Write a backup" (or "Back up now") so the affordance matches the action; keep the path in the flash. Acceptance: the button's name no longer promises a download. |
+| F-05 | `H1` (secondary: `H9`) | Heuristics | Preferences, populated, all widths | The "Wide" layout option is `disabled` while `dashboard.wide_bento_enabled` is false, but nothing on the card states why, so a Trainer meeting a disabled radio with no reason cannot tell whether it is broken or deliberate. | OBSERVED_SOURCE | `resources/js/pages/Preferences/Edit.vue:340` (disabled with no hint/reason) | 1 | Medium | Add a one-line note on the card (or a disabled-option hint) naming the DL.14 hold, mirroring the Language card's reason. Acceptance: the disabled option carries its reason in text. |
+| F-06 | `TOG-1` (secondary: `H1`, `WCAG 4.1.3`) | Tognazzini / Heuristics / WCAG | Preferences, populated, all widths | "Reset layout to defaults" arms a five-second second-click window whose only signal is the button label flipping to "Reset?"; there is no live region announcing the armed state, and the `sr-only` `role="status"` is created in the same tick as its message, so it may never announce. | OBSERVED_SOURCE | `resources/js/pages/Preferences/Edit.vue:166-195, 519` | 1 | Medium | Announce the armed state through an always-mounted live region (as `Flash.vue` does) and state the five-second window in the button's accessible name. Acceptance: a screen reader announces "armed, click again within five seconds". |
+| F-07 | `IA-1` (secondary: `H1`) | Information architecture / Heuristics | Preferences, all states, all widths | The breadcrumb's leaf reads "Settings" while the page's `h1` reads "Preferences" and the nav item reads "Settings"; the crumb and the heading disagree about where the Trainer is. | OBSERVED_SOURCE | `resources/js/pages/Preferences/Edit.vue:287` (`breadcrumb="[{ label: 'Settings' }]"`) vs `PageHeader` title "Preferences" | 1 | Medium | Pass `label: 'Preferences'` (or add the missing `href` chain) so the crumb matches the heading. Acceptance: the crumb's last segment equals the `h1`. |
+| F-08 | `H4` (secondary: `SHR-1`) | Heuristics / Shneiderman | Preferences, error state, all widths | Stat-target and default-scenario refusals render twice: once inline (BaseInput/BaseSelect, `role="alert"`) and once in the page-level block below the cards, so a screen reader hears the same message twice. | OBSERVED_SOURCE | `resources/js/pages/Preferences/Edit.vue:370-391, 524-531` | 1 | High | Render each refusal once — either inline (preferred, since `aria-describedby` already points there) or in the block, not both. Acceptance: one announcement per refusal. |
+| F-09 | `H2` (secondary: AGENTS.md copy rule) | Heuristics | Preferences, populated, all widths | The Theme card's `Note` ships an em dash ("only theme control — a four-option choice"), which the repository's copy rule forbids in shipped copy. | OBSERVED_SOURCE | `resources/js/pages/Preferences/Edit.vue:441` (`&mdash;`) | 1 | High | Replace the em dash with a comma or period. Acceptance: no `—` in the rendered Note. |
+| F-10 | `H1` (secondary: `TOG-1`) | Heuristics / Tognazzini | Preferences, populated, all widths | The Backup action's running state is conveyed only by the button label changing to "Backing up"; there is no `role="status"`/`aria-live`, so a Trainer not focused on the button is not told a backup is in progress. | OBSERVED_SOURCE | `resources/js/pages/Preferences/Edit.vue:398-399` (no live region for backup) | 1 | Medium | Add an always-mounted `role="status"` for the backup (or reuse the flash's live region) during the request. Acceptance: the running state is announced without focus. |
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Light- and dark-theme body text meets 4.5:1 on every card | No browser; intended ratios in `app.css` only | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, focus rings, risk text) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling | No browser; spec was not executed | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on every control (checkboxes are `size-6` = 24 px at the input, but their labels carry `min-h-11`) | No browser; boxes not measured | Rendered target-size sweep |
+| 200% text resize and the 1.4.12 text-spacing override lose nothing | No resize pass run | Resize + text-spacing pass at 320 px |
+| Screen-reader announcement of the error block, the reset arm and the backup running state | No AT attached | NVDA/VoiceOver pass over populated and error states |
+| Whether the dashboard table's 10 px / 12.5 px headers stay readable at 200% zoom | No rendered measurement | Computed-style size comparison at 200% |
+| Whether the disabled "Wide" radio is reachable/announced as disabled | No AT attached | Screen-reader pass over the Layout card |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** Target-size observations above are filed under the house rule (`UX-1`/`TOG-5`) and explicitly not as conformance, per `wcag-2.2-accessibility-2026-10-21.md`.
+- **Density vs minimalism.** The preferences cards are deliberately dense (HFW clone); `H8` is about signal against noise, and every element carries a fact. No finding.
+- **Closure vs honesty.** Empty/absent tiles look like closed shapes but carry the word; `GT-2`/`UI-4` hold. No finding.
+- **Feedback timing.** 50 ms acknowledgement and 400 ms Doherty response read as the index reads them; the only acknowledgement surface on this screen is the `role="status"` state line and the `Flash` banner, whose latency is unmeasured (§6).
+- **Consistency vs exceptions.** The three recorded exceptions (dark theme's three deviations, the Database density) are not on this screen. No finding.
+- **Title-only disclosure (systemic).** Absence reasons and several `N/A` reasons are carried only in `title` attributes across most of the app. This screen's stat hint carries the range in text, so it is not the worst case; the systemic gap is recorded in AUD-20261101-002 and not re-filed here.
+- **No undo / no accelerators / no help surface (systemic).** Registered gaps `H3`, `H7`, `H10`: the save is reversible by re-saving, and no destructive action lives on this screen. No per-screen finding.
+- **Unregistered screens.** Not applicable — `SCR-SYS-002` is registered.
+- **RunSettings cross-reference.** `RunSettings` (unregistered, audited in AUD-20261101-002 as F-01, no error surface, and F-11, lede wording) is a separate screen; its defects are referenced there, not duplicated here.
+- **Backup failure is unhandled by design.** `PreferenceController::backup()` states that a failure is unhandled on purpose, because there is no second feedback channel to invent and the app's own 500 document (`SCR-SYS-004`) is the error state. Recorded as a documented absence, not a finding.
+
+Gaps confirmed in the register rather than filed per screen: `H3` (no undo after a committed turn — not screen-specific here), `H7` (no accelerators), `H10` (no help surface), title-only disclosure channel.
+
+### 8. Recommendations
+
+1. **F-02** (S): make the page-level error block a live region (`role="alert"`), always mounted, matching `Flash.vue`. Check: a refused submit announces without focus.
+2. **F-03** (S): align `aria-describedby` ids with the rendered block (or drop the dangling references). Check: every `aria-describedby` token resolves.
+3. **F-04** (S): map refusal keys to real control ids in `onError` (or focus the message block). Check: theme/layout/dashboard refusals move focus.
+4. **F-05** (S): relabel "Download a backup" to "Write a backup"/"Back up now". Check: the button's name no longer promises a download.
+5. **F-06** (S): announce the reset arm through an always-mounted live region and state the window in the accessible name. Check: the armed state is announced.
+6. **F-08** (S): de-duplicate refusal messages (inline or block, not both). Check: one announcement per refusal.
+7. **F-07** (S): align the breadcrumb leaf with the `h1`. Check: crumb's last segment equals "Preferences".
+8. **F-10** (S): add a live region for the backup running state. Check: announced without focus.
+9. **F-09** (S): replace the em dash in the Theme Note. Check: no `—` in the rendered Note.
+10. Register the screen's two open questions (recommendation aggressiveness control absent; `race_risk_thresholds` absent by ADR-0016) with `KNOWN-ISSUES.md` if they are to be tracked as defects rather than documented absences.
+
+### 9. Change-audit re-check
+
+Not owed (mode is M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surfaces, states, viewports and themes stated.
+- Framework routing recorded, narrowest rule per question, secondaries listed.
+- §3.1 provenance caveats carried.
+- Evidence capability recorded as FALSE; `spawn EPERM` named; no rendered claim made.
+- Every finding has a rule ID, named surface and state, specific observation, evidence status.
+- No severity 3/4 finding rests on inference (highest severity here is 2).
+- Severity and confidence are separate axes.
+- No defect filed twice.
+- Known conflicts logged as settlements.
+- Gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed.
+- No conformance claimed beyond criteria tested; no rendered observation claimed.
+- Report does not modify app code.
+- `RunSettings` F-01/F-11 referenced, not duplicated.
+
+## AUD-skills-index-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-skills-index-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M2 screen audit: Skill search index
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-012
+- Date: 2026-11-02
+- Mode: **M2 screen audit** (single surface, open-to-close walkthrough plus rule sweep)
+- Scope: `GET /skills` (`skills.index`), controller `App\Http\Controllers\SkillController`, page `resources/js/pages/Skills/Index.vue`, mounted body `resources/js/components/skills/SkillCatalog.vue` (shared with `/database/skills`, SCREEN-023), `SCREEN_SPEC.md` §SCR-SKL-001. States: empty catalogue, empty result (no match), loading, populated; both themes; widths 320/390/768/1280px; keyboard-only.
+- Out of scope: `/skills/{skill}` detail (separate audit, AUD-20261102-013), the Database hub rendering (`/database/skills`, same body, separate surface), writes (read-only screen), AAA, any code fix, content strategy beyond the reference cross-check.
+- Frameworks applied: `docs/framework-ui-ux/design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are `OBSERVED_SOURCE` or `UNMEASURED`.
+
+### 2. Executive summary
+
+- **F-01 — The `? Unique` pill's derivation is carried only in a `title` attribute.** The Unique pill prints `? Unique` (SkillCatalog.vue:264-268) with a `title="Marked from the source's skill class code, not from a card's own skill list."` that explains whose reading the mark is. That distinction is available to sighted hover users only; keyboard and screen-reader users get the pill's visible name without the derivation, so the meaning of the mark is not fully exposed. Severity 1, Medium. (Same screen-specific instance of the title-only disclosure channel as AUD-20261102-011 F-01 and AUD-20261102-013 F-01.)
+- Strengths: two absences named apart (empty catalogue vs no match, SkillCatalog.vue:206-226); the no-match headline is `role="status"` (a live region, because it is the result of an action) while the empty catalogue is static and does not announce on load (SkillCatalog.vue:204-205 comment); the search placeholder says "Part of a skill name" and the footer states that no readable effect text is stored and distance cannot be filtered separately (SkillCatalog.vue:325-334); the type word is this tool's reading of effect codes and refuses rows it cannot classify, so some rows show no word and the Type filter's "Any"/unspecified choice finds them (SkillCatalog.vue:326-329); the scrollable table region is `role="region"` with `aria-label` and `tabindex="0"`, keeping horizontal scroll inside a labelled region at 320px (SkillCatalog.vue:230-235); the detail link carries the list's query and `from` so the way back resumes the search (SkillCatalog.vue:77-89).
+- Largest unmeasured risk: contrast, the 44px house-rule target size, reflow at 320px, focus visible/obscured — none measurable in this sandbox.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| skills.index shell + SkillCatalog body | yes (no rows / no match) | yes | n/a (read-only; a refused facet lands on the canonical URL with the field named) | yes | src | src | named | named | named | named | src | none |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 1.4.1, 2.4.2, 2.4.6, 2.5.3, 4.1.2, 4.1.3 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only; 2.5.7 N/A (no drag); 2.1.1/2.4.7 UNMEASURED (no keyboard pass); AAA not reached |
+| Heuristics | H1, H2, H4, H6, H8 | H3 N/A (no write); H5 N/A; H9 N/A; H10 N/A |
+| Shneiderman | SHR-1, SHR-7 | SHR-2 N/A; SHR-4/5/6 N/A (read-only) |
+| Tognazzini | TOG-3 | TOG-1 UNMEASURED; TOG-2/4/5/6/7/8 N/A |
+| Information architecture | IA-1, IA-2, IA-3, IA-4 | IA-5 exemplar gap (gap register, §7); IA-6/8 N/A |
+| Gestalt | GT-1, GT-4 | GT-2/3/5/6 not reached |
+| Norman | NRM-1, NRM-2, NRM-4, NRM-6 | NRM-3, NRM-5 not reached |
+| Laws of UX | UX-1 (44 px house rule), UX-4, UX-5, UX-9 | UX-2/3/6/7/8/10 not reached |
+| Laws of UI | UI-1, UI-2, UI-3, UI-4 | UI-5/6/7 not reached |
+| Gerhardt-Powals | GP-1, GP-3 | GP-2/4/5 not reached |
+
+Framework coverage (applied and produced findings): none beyond F-01. Applied, measured clean from source: `H1` (`role="status"` loading + no-match live region); `H2` (Global client vocabulary; "the condition column is the source's own engine data, not a client paraphrase", Skills/Index.vue:52); `H4`/`SHR-1` (one `.btn`/`.pill`/`.tag` vocabulary, doors via `route()`); `IA-1` (crumb + way back); `IA-3` (browse axes: search, type, unique); `IA-4` (index previews name/type/condition/base cost; detail holds the full condition table); `GT-2`/`UI-4` (absent values carry `N/A` + reason, never a dash). `N/A`: `2.5.7`, `2.1.4`, `3.3.8`, `1.2`/`1.4.2`/`2.3`. Not reached: `WCAG 1.4.4`/`1.4.10`/`1.4.12`, `WCAG 2.4.11`.
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no rendered frame was obtained.
+- Structural and copy claims are `OBSERVED_SOURCE` against the page, controller and `SkillCatalog.vue` read this run; visual, contrast, target-size and reflow claims are `UNMEASURED` (§6).
+- Content cross-check: `docs/UMAMUSUME_REFERENCE.md` — 623 skills released on Global of 1,910 total (reference §1.x); the index scopes to `availableOnGlobal()` (SkillController:332) and matches on `match_key`, never a display string (controller:333-336). Content track clean; no content discrepancy filed.
+- Provenance caveats carried (§3.1): Gerhardt-Powals paywalled; IA prose unread; Norman book not fetched; Tognazzini sixteen are the original edition; Laws of UX 29; Laws of UI 13 publishes Closure/Continuity; no Law of Experience (Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity ? `uilaws-2026-10-21.md`; Common Fate ? `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob ? `laws-of-ux-2026-10-21.md`; 44 px house rule exceeding 2.5.8, never conformance.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | (title-only disclosure channel; no single SC) | WCAG 1.3.1 / 4.1.2 adjacency | /skills, populated, Unique skill pill | The `? Unique` pill's derivation — "Marked from the source's skill class code, not from a card's own skill list." — is carried only in a `title` attribute (SkillCatalog.vue:267). The visible name `? Unique` is exposed, but the distinction that matters (source-derived class code vs a card's own skill list) is available to sighted hover users only; keyboard and screen-reader users cannot reach it (`title` appears on hover, is not focusable, and is not reliably announced). | OBSERVED_SOURCE | `resources/js/components/skills/SkillCatalog.vue:264-268` | 1 | Medium | Render the derivation as visible text beside the pill, or pair the pill with an `aria-describedby`/sr-only twin stating the derivation (mirror the `N/A` + `sr-only` twin pattern used at `SupportCards/Index.vue:336`). Acceptance: the class-code-versus-card-list distinction is available without hovering. |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Body text meets 4.5:1 in both themes on the table and filter row | No browser | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, pills, focus ring) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling on the labelled scrollable table region | No browser | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on the skill name links, Open buttons and facet selects | Boxes not measured | Rendered target-size sweep |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize + text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on Filter/Clear and each facet select | No keyboard run executed | Keyboard pass over the page |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** Target-size observations are filed under the house rule and explicitly not as conformance.
+- **Density vs minimalism.** The table is the reference density for this surface; every column carries a fact (name, type, condition, base cost). `H8` holds. No finding.
+- **Closure vs honesty.** Absent condition/type/cost carry `AbsenceValue` disclosures ("The source states no activation condition for this skill."); nothing claims a value it does not print. `GT-2`/`UI-4` hold. No finding.
+- **IA-5 exemplar gap.** Empty states name the absence and offer a remedy (fetch command `uma:fetch gametora-skills`, or Clear) but show no example of what would fill them. Pre-registered exemplar gap in the IA framework's gap register; logged here rather than re-filed per screen.
+- **Title-only disclosure channel.** F-01 names the affected spot on this screen; other `N/A`/absence reasons elsewhere in the app ride `title` only and are logged as a systemic gap.
+- **Consistency vs exceptions.** The two HFW overrides (no Distance facet, name-only search) are named in the component header (SkillCatalog.vue:12-19) and in the footer, so they are declared exceptions, not drift. No finding.
+
+Conflicts: none found this pass.
+
+Gaps confirmed in the register rather than filed per screen: `IA-5` exemplar gap (systemic); title-only disclosure channel (systemic; F-01 is this screen's instance); WCAG 1.4.3/1.4.10/1.4.11 and all target-size/resize/focus claims UNMEASURED.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. **F-01** (M): expose the `? Unique` derivation without relying on `title` (visible text or an `aria-describedby`/sr-only twin). Acceptance: the class-code-versus-card-list distinction is available without hovering. Effort: S.
+
+### 9. Change-audit re-check
+
+Not owed (M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (contrast, target size, reflow, resize, keyboard).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- Provenance caveats carried.
+- Evidence capability recorded as FALSE; `spawn EPERM` named; no rendered claim made.
+- `UMAMUSUME_REFERENCE.md` content cross-check recorded (623 Global skills of 1,910; index scopes to `availableOnGlobal()` and matches on `match_key`; content track clean).
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and `file:line` location verified this run.
+- No severity 3/4 finding rests on inference (highest severity here is 1).
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort (1 item).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1–10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-skills-show-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-skills-show-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M2 screen audit: Skill detail
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-013
+- Date: 2026-11-02
+- Mode: **M2 screen audit** (single surface, open-to-close walkthrough plus rule sweep)
+- Scope: `GET /skills/{skill}` (`skills.show`), controller `App\Http\Controllers\SkillController::show`, page `resources/js/pages/Skills/Show.vue`, `SCREEN_SPEC.md` §SCR-SKL-002. States: populated (condition groups, hint ladder, related counts, holders, runs), no condition recorded, no base cost, no class code, no unique mark, no runs, no holders; both themes; widths 320/390/768/1280px; keyboard-only.
+- Out of scope: `/skills` index (separate audit, AUD-20261102-012), writes (read-only screen), AAA, any code fix, content strategy beyond the reference cross-check.
+- Frameworks applied: `docs/framework-ui-ux/design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are `OBSERVED_SOURCE` or `UNMEASURED`.
+
+### 2. Executive summary
+
+- **F-01 — The `? Unique` pill's derivation is carried only in a `title` attribute.** The Unique pill prints `? Unique` (Show.vue:256-260) with a `title="Marked from the source's skill class code, not from a card's own skill list."` that explains whose reading the mark is. That distinction is available to sighted hover users only; keyboard and screen-reader users get the pill's visible name without the derivation, so the meaning of the mark is not fully exposed. Severity 1, Medium. (Same screen-specific instance of the title-only disclosure channel as AUD-20261102-011 F-01 and AUD-20261102-012 F-01.)
+- Strengths: engine data shown as-is in monospace with condition/precondition/effects/base time per activation group, or "none stated" (Show.vue:202-227); the readable-description block is empty by ruling ("No client string.") rather than by omission, with a note explaining no client-vocabulary description source exists (Show.vue:322-333); base cost, class code and Unique render `AbsenceValue` disclosures when absent rather than inventing values (Show.vue:236-265); the hint ladder prices each level from this skill's own base, states the flooring rule measured on a 130-point skill, and prints no price row when `sp_cost` is null (Show.vue:284-317); the Related card counts skills sharing condition / class code / class code+type, states "Not recorded" when the input is absent, and notes the third count is always part of the second (Show.vue:336-379); the back door is allowlisted to `/skills`/`/database/skills` to prevent an open redirect, and preserves the list's query minus the `from` marker (Show.vue:98-113); the "Open the source" external link uses `rel="noreferrer noopener"` (Show.vue:482-489); the detail refuses any row `availableOnGlobal()` rejects (SkillController:135), so no JP-only or third-party-named skill reaches a Trainer-facing surface.
+- Largest unmeasured risk: contrast, the 44px house-rule target size, reflow at 320px, focus visible/obscured — none measurable in this sandbox.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| skills.show | n/a (404 on unknown or non-Global id) | yes (mechanics, hint ladder, description, related, runs, holders, provenance) | yes (404 via `findOrFail`) | n/a (no async load) | src | src | named | named | named | named | src | none |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 1.4.1, 2.4.2, 2.4.6, 2.5.3, 4.1.2, 4.1.3 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only; 2.5.7 N/A (no drag); 2.1.1/2.4.7 UNMEASURED (no keyboard pass); AAA not reached |
+| Heuristics | H1, H2, H4, H6, H8 | H3 N/A (no write); H5 N/A; H9 N/A; H10 N/A |
+| Shneiderman | SHR-1, SHR-7 | SHR-2 N/A; SHR-4/5/6 N/A (read-only) |
+| Tognazzini | TOG-3 | TOG-1 UNMEASURED; TOG-2/4/5/6/7/8 N/A |
+| Information architecture | IA-1, IA-4 | IA-2/IA-3 structure between screens; IA-5 N/A (no empty-skill state — 404 instead); IA-6/8 N/A |
+| Gestalt | GT-1, GT-4 | GT-2/3/5/6 not reached |
+| Norman | NRM-1, NRM-2, NRM-4, NRM-6 (both gulfs) | NRM-3, NRM-5 not reached |
+| Laws of UX | UX-1 (44 px house rule), UX-4, UX-5, UX-9 | UX-2/3/6/7/8/10 not reached |
+| Laws of UI | UI-1, UI-2, UI-3, UI-4 | UI-5/6/7 not reached |
+| Gerhardt-Powals | GP-1, GP-3 | GP-2/4/5 not reached |
+
+Framework coverage (applied and produced findings): none beyond F-01. Applied, measured clean from source: `H1` (provenance: last read, ladder measured-at, source link); `H2` (Global client vocabulary; "Shown as-is. These are the export's tokens, not client labels", Show.vue:191); `H4`/`SHR-1` (one `.pill`/`.btn`/`LinkButton` vocabulary, doors via `route()`); `NRM-6` (execution: link/Open/back present; evaluation: condition table + absence state directly perceived); `IA-1` (crumb + "Back to search" door preserving the query); `GT-2`/`UI-4` (absent values carry `N/A` + `title`, never a dash). `N/A`: `2.5.7`, `2.1.4`, `3.3.8`, `1.2`/`1.4.2`/`2.3`. Not reached: `WCAG 1.4.4`/`1.4.10`/`1.4.12`, `WCAG 2.4.11`.
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no rendered frame was obtained.
+- Structural and copy claims are `OBSERVED_SOURCE` against the page and controller read this run; visual, contrast, target-size and reflow claims are `UNMEASURED` (§6).
+- Content cross-check: `docs/UMAMUSUME_REFERENCE.md` — 623 Global skills of 1,910; the detail reads `condition_groups` verbatim and prices the hint ladder from `sp_cost` via `HintDiscount::priceLadder` (SkillController:164-167), matching the reference's base × (1 - discount) floored rule. Content track clean; no content discrepancy filed.
+- Provenance caveats carried (§3.1): Gerhardt-Powals paywalled; IA prose unread; Norman book not fetched; Tognazzini sixteen are the original edition; Laws of UX 29; Laws of UI 13 publishes Closure/Continuity; no Law of Experience (Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity ? `uilaws-2026-10-21.md`; Common Fate ? `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob ? `laws-of-ux-2026-10-21.md`; 44 px house rule exceeding 2.5.8, never conformance.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | (title-only disclosure channel; no single SC) | WCAG 1.3.1 / 4.1.2 adjacency | /skills/{skill}, populated, Unique skill pill | The `? Unique` pill's derivation — "Marked from the source's skill class code, not from a card's own skill list." — is carried only in a `title` attribute (Show.vue:257-260). The visible name `? Unique` is exposed, but the distinction that matters (source-derived class code vs a card's own skill list) is available to sighted hover users only; keyboard and screen-reader users cannot reach it (`title` appears on hover, is not focusable, and is not reliably announced). | OBSERVED_SOURCE | `resources/js/pages/Skills/Show.vue:256-260` | 1 | Medium | Render the derivation as visible text beside the pill, or pair the pill with an `aria-describedby`/sr-only twin stating the derivation (mirror the `N/A` + `sr-only` twin pattern used at `SupportCards/Index.vue:336`). Acceptance: the class-code-versus-card-list distinction is available without hovering. |
+
+No finding is filed twice for one defect; each row carries at most one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Body text meets 4.5:1 in both themes on every table cell and the mechanics monospace | No browser | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, pills, focus ring) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling on the activation table and hint ladder | No browser; the mechanics block had a 390px scroll fix (`min-w-0` on wrappers) | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on the holder links, run links, Open-the-source button and Unique pill | Boxes not measured | Rendered target-size sweep |
+| 200% text resize and 1.4.12 text-spacing lose nothing on the long engine-condition strings (`break-all`) | No resize pass run | Resize + text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on every control | No keyboard run executed | Keyboard pass over the page |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** Target-size observations are filed under the house rule and explicitly not as conformance.
+- **Density vs minimalism.** The detail is dense (mechanics, ladder, description, related, runs, holders, provenance); every element carries a fact. `H8` holds. No finding.
+- **Closure vs honesty.** The hint ladder's displayed-cost column appears only when `sp_cost` is present (Show.vue:290, 297) — that is data-driven absence, not a missing column; related counts state "Not recorded" when the input is absent. `GT-2`/`UI-4` hold. No finding.
+- **Title-only disclosure channel.** F-01 names the affected spot on this screen; other `N/A`/absence reasons elsewhere in the app ride `title` only and are logged as a systemic gap.
+- **Consistency vs exceptions.** The class code renders as the integer only (never a rarity word), per ADR-0011 §3 as amended and the dated erratum (Show.vue:44-46 comment; SkillController:144-147). This is a named, consistent rendering, not an exception.
+- **Feedback timing.** No write occurs on this screen; `TOG-1` acknowledgement is UNMEASURED (§6).
+
+Conflicts: none found this pass.
+
+Gaps confirmed in the register rather than filed per screen: title-only disclosure channel (systemic; F-01 is this screen's instance), WCAG 1.4.3/1.4.10/1.4.11 and all target-size/resize/focus claims UNMEASURED.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. **F-01** (M): expose the `? Unique` derivation without relying on `title` (visible text or an `aria-describedby`/sr-only twin). Acceptance: the class-code-versus-card-list distinction is available without hovering. Effort: S.
+
+### 9. Change-audit re-check
+
+Not owed (M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (contrast, target size, reflow, resize, keyboard).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- Provenance caveats carried.
+- Evidence capability recorded as FALSE; `spawn EPERM` named; no rendered claim made.
+- `UMAMUSUME_REFERENCE.md` content cross-check recorded (623 Global skills of 1,910; ladder arithmetic matches the reference floored rule; content track clean).
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and `file:line` location verified this run.
+- No severity 3/4 finding rests on inference (highest severity here is 1).
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort (1 item).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1–10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-support-cards-index-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-support-cards-index-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M2 screen audit: Support-card catalog index
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-014
+- Date: 2026-11-02
+- Mode: **M2 screen audit** (single surface, open-to-close walkthrough plus rule sweep)
+- Scope: `GET /support-cards` (`support-cards.index`), controller `App\Http\Controllers\SupportCardController`, page `resources/js/pages/SupportCards/Index.vue`, `SCREEN_SPEC.md` §SCR-SUP-001. States: empty catalogue, empty result (no match), loading, populated; both themes; widths 320/390/768/1280px; keyboard-only.
+- Out of scope: `/support-cards/{card}` detail (separate audit, AUD-20261102-015), the Database hub rendering (`/database/supports`, same body, separate surface), writes (read-only screen), AAA, any code fix, content strategy beyond the reference cross-check.
+- Frameworks applied: `docs/framework-ui-ux/design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are `OBSERVED_SOURCE` or `UNMEASURED`.
+
+### 2. Executive summary
+
+- **No source-grounded findings were filed on this screen.** The surface is internally consistent: absences are named with reasons (never dashes), the empty state names both the empty catalogue and the no-match case with a remedy, the `N/A` friendship-bonus cell carries a visible word plus an `sr-only` twin (SupportCards/Index.vue:336), the Pal card's missing friendship bonus is the client word "None" with its reason (Index.vue:328-331), the scope line names one server ("251 cards on [Global]", Index.vue:356), and the "Effects that decide a deck slot" plus "uncovered effects" cards state facts no single row can (Index.vue:406-425).
+- Notable transparency: cap-setting effects are documented as carried by zero cards ("Cap-setting effects exist in the vocabulary but are carried by zero of the {{ totalCount }} cards.", Index.vue:419-420), so a documented mechanism with zero coverage is named rather than silently omitted (IA-4 disclosure).
+- Largest unmeasured risk: contrast, the 44px house-rule target size, reflow at 320px (the wide table sits in `overflow-x-auto` inside a labelled, focusable region, Index.vue:278), 200% resize, focus visible/obscured — none measurable in this sandbox.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| support-cards.index | yes (no rows / no match) | yes | n/a (read-only; a refused facet lands on the canonical URL with the field named) | yes | src | src | named | named | named | named | src | none |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 1.4.1, 2.4.2, 2.4.6, 2.5.3, 4.1.2, 4.1.3 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only; 2.5.7 N/A (no drag); 2.1.1/2.4.7 UNMEASURED (no keyboard pass); AAA not reached |
+| Heuristics | H1, H2, H4, H6, H8 | H3 N/A (no write); H5 N/A; H9 N/A; H10 N/A |
+| Shneiderman | SHR-1, SHR-7 | SHR-2 N/A; SHR-4/5/6 N/A (read-only) |
+| Tognazzini | TOG-3 | TOG-1 UNMEASURED; TOG-2/4/5/6/7/8 N/A |
+| Information architecture | IA-1, IA-2, IA-3, IA-4 | IA-5 exemplar gap (gap register, §7); IA-6/8 N/A |
+| Gestalt | GT-1, GT-4 | GT-2/3/5/6 not reached |
+| Norman | NRM-1, NRM-2, NRM-4, NRM-6 | NRM-3, NRM-5 not reached |
+| Laws of UX | UX-1 (44 px house rule), UX-4, UX-5, UX-9, UX-10 | UX-2/3/6/7/8 not reached |
+| Laws of UI | UI-1, UI-2, UI-3, UI-4 | UI-5/6/7 not reached |
+| Gerhardt-Powals | GP-1, GP-3 | GP-2/4/5 not reached |
+
+Framework coverage (applied and produced findings): none. Applied, measured clean from source: `H1` (loading `role="status"`); `H2` (Global client vocabulary; the type word is the client's, the source's key for Wit is `intelligence` and for Pal is `friend`, Index.vue:430-433); `H4`/`SHR-1` (one `.btn`/`.pill`/`.tag` vocabulary, doors via `route()`); `IA-1` (crumb + way back); `IA-3` (browse axes: q, rarity, type, status, server, sort); `IA-4` (index previews type/rarity/friendship/key effects; detail holds the stage table); `GT-2`/`UI-4` (absent friendship bonus carries "N/A" + `title` + `sr-only`, never a dash); `UX-10` (nothing fills an empty layout — the empty state is purposeful, Index.vue:256-272). `N/A`: `2.5.7`, `2.1.4`, `3.3.8`, `1.2`/`1.4.2`/`2.3`. Not reached: `WCAG 1.4.4`/`1.4.10`/`1.4.12`, `WCAG 2.4.11`.
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no rendered frame was obtained.
+- Structural and copy claims are `OBSERVED_SOURCE` against the page and controller read this run; visual, contrast, target-size and reflow claims are `UNMEASURED` (§6).
+- Content cross-check: `docs/UMAMUSUME_REFERENCE.md` — 251 support cards carry a Global release date against 559 on JP (reference §1.x); the index does not pre-filter to Global (`release_status` is a stored generated column, availability is a facet, SupportCardController:28-30) and counts 251 Global SSR (`globalCount`, controller:167). Support effects ids 1 (Friendship Bonus), 14 (Initial Friendship Gauge), 27 (Failure Protection), 31 (Wit Friendship Recovery) match the deciding-effects vocabulary (controller:234-240). Content track clean; no content discrepancy filed.
+- Provenance caveats carried (§3.1): Gerhardt-Powals paywalled; IA prose unread; Norman book not fetched; Tognazzini sixteen are the original edition; Laws of UX 29; Laws of UI 13 publishes Closure/Continuity; no Law of Experience (Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity ? `uilaws-2026-10-21.md`; Common Fate ? `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob ? `laws-of-ux-2026-10-21.md`; 44 px house rule exceeding 2.5.8, never conformance.
+
+### 5. Findings
+
+No source-grounded findings were filed on this screen; every applicable rule was measured clean from source or is registered as unmeasured (§6). The IA-5 exemplar gap and title-only disclosure channel are systemic gaps logged in §7 rather than filed per screen.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Body text meets 4.5:1 in both themes on the table and filter row | No browser | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, pills, chips, risk edge) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling on the wide table inside `overflow-x-auto` | No browser; the card carries `relative` to contain AbsenceValue's sr-only (Index.vue:278) | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on the card row link, Open buttons, facet selects and Filter/Clear | Boxes not measured | Rendered target-size sweep |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize + text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on Filter/Clear and each facet select | No keyboard run executed | Keyboard pass over the page |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** Target-size observations are filed under the house rule and explicitly not as conformance.
+- **Density vs minimalism.** The table is deliberately dense for comparison; every column carries a fact. `H8` holds. No finding.
+- **Closure vs honesty.** Absent friendship bonus states "N/A" with its reason (word + `title` + `sr-only`); absent effects state "The source states no effect anchor for this card." `GT-2`/`UI-4` hold. No finding.
+- **IA-5 exemplar gap.** Empty states name the absence and offer a remedy (Clear filters / widen a facet) but show no example of what would fill them. Pre-registered exemplar gap in the IA framework's gap register; logged here rather than re-filed per screen.
+- **Title-only disclosure channel.** Not present on this screen — its `N/A` already carries a visible word plus an `sr-only` twin (Index.vue:336), the pattern other screens should mirror.
+- **Consistency vs exceptions.** Type-before-Rarity filter order matches the wireframe (Index.vue:198-200 comment); the scope line names one server. Declared and consistent. No finding.
+
+Conflicts: none found this pass.
+
+Gaps confirmed in the register rather than filed per screen: `IA-5` exemplar gap (systemic), WCAG 1.4.3/1.4.10/1.4.11 and all target-size/resize/focus claims UNMEASURED.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. (No screen-specific recommendations.) The title-only disclosure channel is systemic and is tracked on the screens where it occurs (AUD-20261102-011 F-01, AUD-20261102-012 F-01, AUD-20261102-013 F-01). Close the unmeasured register (§6) with a rendered pass in both themes at all four widths when Chromium is available.
+
+### 9. Change-audit re-check
+
+Not owed (M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (contrast, target size, reflow, resize, keyboard).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- Provenance caveats carried.
+- Evidence capability recorded as FALSE; `spawn EPERM` named; no rendered claim made.
+- `UMAMUSUME_REFERENCE.md` content cross-check recorded (251 Global vs 559 JP support cards; availability is a facet not a pre-filter; support-effect ids match the vocabulary; content track clean).
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and `file:line` location verified this run — zero findings filed; no severity 3/4 finding rests on inference.
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort (1 item).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1–10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## AUD-support-cards-show-2026-11-02.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/AUD-support-cards-show-2026-11-02.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — M2 screen audit: Support-card detail
+
+
+### 1. Identity
+
+- Audit id: AUD-20261102-015
+- Date: 2026-11-02
+- Mode: **M2 screen audit** (single surface, open-to-close walkthrough plus rule sweep)
+- Scope: `GET /support-cards/{card}` (`support-cards.show`, implicit binding), controller `App\Http\Controllers\SupportCardController::show`, page `resources/js/pages/SupportCards/Show.vue`, `SCREEN_SPEC.md` §SCR-SUP-002. States: populated (effects, stages, skills, used-by, provenance), no effect anchors, no skills stored, card not used in any run, no trainee resolves, no artwork; both themes; widths 320/390/768/1280px; keyboard-only.
+- Out of scope: `/support-cards` index (separate audit, AUD-20261102-014), writes (read-only screen), AAA, any code fix, content strategy beyond the reference cross-check.
+- Frameworks applied: `docs/framework-ui-ux/design-framework-index-2026-10-21.md` first, then Heuristics, Shneiderman, Tognazzini, Information architecture, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA, per §4 routing. Read from the files this run, not from memory.
+- Rendered evidence: **FALSE**. Chromium cannot launch in this sandbox (`spawn EPERM`); no screenshot, DOM measurement, contrast ratio, target-size measurement or reflow pass was run. All claims are `OBSERVED_SOURCE` or `UNMEASURED`.
+
+### 2. Executive summary
+
+- **No source-grounded findings were filed on this screen.** The surface is internally consistent: every effect row states the levels the source gives a value for and the last is the cap, never an interpolation (Show.vue:211-217); `statedAt()` prepends "1: Not recorded" when the source states nothing at level 1 (Show.vue:145-151); the limit-break diamonds render empty with a "breaks not recorded" readout rather than a fabricated progress (Show.vue:323-329); a card used by no run gets a labelled row carrying the neutral "Not used" pill rather than a bare sentence (Show.vue:343-351); provenance is a row plus a disclosure (no file path or snapshot location reaches the screen, Show.vue:407-417); the "Add to a deck" door opens `/career/setup/deck`, which renders its six empty slots when no draft exists rather than redirecting (Show.vue:163-178 comment).
+- Largest unmeasured risk: contrast, the 44px house-rule target size, reflow at 320px, 200% resize, focus visible/obscured — none measurable in this sandbox.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard | browser spec |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| support-cards.show | n/a (404 on unknown id) | yes (effects, stages, hinted/event skills, used-by, provenance) | yes (404 via implicit binding) | n/a (no async load) | src | src | named | named | named | named | src | none |
+
+Framework coverage matrix:
+
+| Framework | Rules applied | N/A / not reached |
+|---|---|---|
+| WCAG 2.2 AA | 1.3.1, 1.4.1, 2.4.2, 2.4.6, 2.5.3, 4.1.2, 4.1.3 | 1.4.3/1.4.10/1.4.11 UNMEASURED; 2.5.8 house rule only; 2.5.7 N/A (no drag); 2.1.1/2.4.7 UNMEASURED (no keyboard pass); AAA not reached |
+| Heuristics | H1, H2, H4, H6, H8 | H3 N/A (no write); H5 N/A; H9 N/A; H10 N/A |
+| Shneiderman | SHR-1, SHR-7 | SHR-2 N/A; SHR-4/5/6 N/A (read-only) |
+| Tognazzini | TOG-3 | TOG-1 UNMEASURED; TOG-2/4/5/6/7/8 N/A |
+| Information architecture | IA-1, IA-4 | IA-2/IA-3 structure between screens; IA-5 N/A (no empty-card state — 404 instead); IA-6/8 N/A |
+| Gestalt | GT-1, GT-4 | GT-2/3/5/6 not reached |
+| Norman | NRM-1, NRM-2, NRM-4, NRM-6 (both gulfs) | NRM-3, NRM-5 not reached |
+| Laws of UX | UX-1 (44 px house rule), UX-4, UX-5, UX-9 | UX-2/3/6/7/8/10 not reached |
+| Laws of UI | UI-1, UI-2, UI-3, UI-4 | UI-5/6/7 not reached |
+| Gerhardt-Powals | GP-1, GP-3 | GP-2/4/5 not reached |
+
+Framework coverage (applied and produced findings): none. Applied, measured clean from source: `H1` (provenance states last read + source + manual flag); `H2` (Global client vocabulary; the type word is the client's); `H4`/`SHR-1` (one `.pill`/`.btn`/`LinkButton` vocabulary, doors via `route()`); `NRM-6` (execution: link/deck-door present; evaluation: stage table + absence state directly perceived); `IA-1` (crumb + "Back to cards" door); `GT-2`/`UI-4` (absent anchors state "Not recorded" / "breaks not recorded", never a dash). `N/A`: `2.5.7`, `2.1.4`, `3.3.8`, `1.2`/`1.4.2`/`2.3`. Not reached: `WCAG 1.4.4`/`1.4.10`/`1.4.12`, `WCAG 2.4.11`.
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = FALSE`. Chromium cannot launch in this sandbox (`spawn EPERM`); no rendered frame was obtained.
+- Structural and copy claims are `OBSERVED_SOURCE` against the page and controller read this run; visual, contrast, target-size and reflow claims are `UNMEASURED` (§6).
+- Content cross-check: `docs/UMAMUSUME_REFERENCE.md` — 251 support cards carry a Global release date against 559 on JP; support effects ids 1 (Friendship Bonus), 14 (Initial Friendship Gauge), 27 (Failure Protection), 31 (Wit Friendship Recovery) match the deciding-effects vocabulary; the stage table prints stated anchors only (the `1: Not recorded` pattern is the normal path — 2,756 of 5,114 effect rows have no level-1 anchor, per `SCREEN_SPEC.md` §4207). Content track clean; no content discrepancy filed.
+- Provenance caveats carried (§3.1): Gerhardt-Powals paywalled; IA prose unread; Norman book not fetched; Tognazzini sixteen are the original edition; Laws of UX 29; Laws of UI 13 publishes Closure/Continuity; no Law of Experience (Mental Model, UX-17).
+- Attribution rule applied: Closure/Continuity ? `uilaws-2026-10-21.md`; Common Fate ? `gestalt-principles-2026-10-21.md`; Fitts/Hick/Jakob ? `laws-of-ux-2026-10-21.md`; 44 px house rule exceeding 2.5.8, never conformance.
+
+### 5. Findings
+
+No source-grounded findings were filed on this screen; every applicable rule was measured clean from source or is registered as unmeasured (§6). The IA-5 exemplar gap and title-only disclosure channel are systemic gaps logged in §7 rather than filed per screen.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Body text meets 4.5:1 in both themes on every card and table cell | No browser | Rendered contrast pass in both themes at all four widths |
+| Non-text contrast (borders, pills, chips, focus ring) meets 3:1 | No browser | Rendered non-text contrast measurement |
+| Reflow at 320 px produces no two-dimensional scrolling on the two-column layout | No browser | Rendered reflow pass at 320 px, populated, both themes |
+| Target sizes of the 44 px house rule hold on the deck door, holder links, run links, artwork frame | Boxes not measured | Rendered target-size sweep |
+| 200% text resize and 1.4.12 text-spacing lose nothing | No resize pass run | Resize + text-spacing pass at 320 px |
+| Focus visible and focus-not-obscured on every control | No keyboard run executed | Keyboard pass over the page |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px vs 2.5.8.** Target-size observations are filed under the house rule and explicitly not as conformance.
+- **Density vs minimalism.** The detail is dense but every element carries a fact (stage anchors, cap, held-by, where-used). `H8` holds. No finding.
+- **Closure vs honesty.** The effects table lists stated anchors only and the last is the cap; nothing interpolates between anchors. `GT-2`/`UI-4` hold. No finding.
+- **IA-5 exemplar gap.** The "Where this card is used" empty state is a labelled row carrying the neutral "Not used" pill (matching the wireframe's named-row empty state) rather than an example of a populated row. Pre-registered exemplar gap in the IA framework's gap register; logged here rather than re-filed per screen.
+- **Title-only disclosure channel.** Not present on this screen — its absences are inline words (`breaks not recorded`, "level not recorded for this run").
+- **Consistency vs exceptions.** The artwork frame stays in its own row under the sub-nav rather than inside the head row (an HFW-OVERRIDE documented at Show.vue:18-22) because `PageHeader` exposes one slot (`actions`) and no title-leading slot. The absence behaviour holds (a file the mirror lacks renders nothing). Named exception, not drift. No finding.
+
+Conflicts: none found this pass.
+
+Gaps confirmed in the register rather than filed per screen: `IA-5` exemplar gap (systemic), WCAG 1.4.3/1.4.10/1.4.11 and all target-size/resize/focus claims UNMEASURED.
+
+### 8. Recommendations
+
+Ordered by severity, then confidence, then effort:
+
+1. (No screen-specific recommendations.) Close the unmeasured register (§6) with a rendered pass in both themes at all four widths when Chromium is available.
+
+### 9. Change-audit re-check
+
+Not owed (M2). No commit is being made in this pass.
+
+### 10. Exit checklist
+
+- Scope, mode, surface, states, viewports and themes stated, including what was not covered (contrast, target size, reflow, resize, keyboard).
+- Framework routing recorded; narrowest rule per question; secondaries listed; all ten frameworks named in the coverage matrix.
+- Provenance caveats carried.
+- Evidence capability recorded as FALSE; `spawn EPERM` named; no rendered claim made.
+- `UMAMUSUME_REFERENCE.md` content cross-check recorded (251 Global vs 559 JP support cards; support-effect ids match the vocabulary; stated-anchor pattern matches SCREEN_SPEC §4207; content track clean).
+- Every finding has a rule ID, named surface and state, specific observation, evidence status and `file:line` location verified this run — zero findings filed; no severity 3/4 finding rests on inference.
+- Severity and confidence kept on separate axes.
+- No defect filed twice; each row carries at most one primary rule.
+- Recommendations ordered by severity then confidence then effort (1 item).
+- Known conflicts logged as settlements; gaps left in the register.
+- Unmeasured register complete with settlers.
+- Template followed (sections 1–10 in order; title line exact).
+- No conformance claimed beyond criteria tested; no rendered observation claimed; 44 px never described as 2.5.8 conformance.
+- Report does not modify app code.
+
+## scr-car-008-legacy-screen-audit-2026-10-30.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/scr-car-008-legacy-screen-audit-2026-10-30.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — SCR-CAR-008, the career setup wizard's inheritance step
+
+
+- Audit id: **AUD-20261030-002**
+- `verified-against`: the tree at `8acd26c8` for the baseline sweep; the post-fix readings in §11 are `verified-against` the two commits this pass landed, named there.
+- Companion: `scr-car-008-legacy-source-accuracy-2026-10-30.md` (the source-accuracy pass over the same screen), and `scr-car-009-deck-screen-audit-2026-10-30.md` (this report's skeleton, and the §7 settlements it cites rather than re-derives).
+
+### 1. Identity
+
+- Date: baseline measured 2026-10-30 (the run crossed midnight into 2026-10-31; the frames are named by the run, not the clock). Post-fix re-measurement 2026-10-31, in §11.
+- Mode: **M2 screen audit**, with the A11y overlay of `_audit-prompt.md` §2 applied as a separate track.
+- Scope: `GET /career/setup/legacy` (`resources/js/pages/Career/LegacySelect.vue`, `App\Http\Controllers\Career\LegacySelectController`, written by `career.legacy.store` through `StoreDraftLegacyRequest`, the subclass of `StoreLegacySelectionRequest`). Surfaces walked: the two parent cards and their pickers, the manual-name block, the per-parent Spark editors, the four grandparent editors, Projected start, Pair Affinity, the "What inheritance actually does" table, the "Parents must differ" section, the step bar and the head band's doors.
+- States covered: **empty** (no Veteran rows, nothing chosen), **populated** (two parents typed by name, four Sparks per slot, one grandparent named), **error** (a write refused by the server), **loading** (the save in flight). All four at 1280, 768, 390 and 320 CSS px, in **light and dark**: 32 frame pairs, 64 measured frames, with a PNG per pair.
+- Out of scope: the other five wizard steps and Preflight, the run-scoped Legacy Lab builder (`SCR-CAR-006`), the six-node graph (which this step no longer builds), performance, AAA criteria (2.4.13, 2.5.5, 1.4.6), axe (provided by `tests/browser/accessibility.spec.ts`), and the `eva01` theme.
+- Frameworks applied: `design-framework-index-2026-10-21.md` first, then per its routing table — Heuristics, Shneiderman, Tognazzini, Gerhardt-Powals, IA, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA. Read from the files for this run, not from memory.
+- Rendered evidence: **TRUE**.
+
+### 2. Executive summary
+
+- **A refused write reaches this screen and renders nowhere** (F-01). The save answers the mismatched Spark with a redirect carrying `legacies.0.sparks.0.target`; the measured frame after that write holds no `role="alert"`, no `.text-risk` element and no `*-error` node, while the typed name survives and the step stays put. The step binds three of the request's error keys and not this one.
+- **The field that produced it reads as cleared while the form still holds the old value** (F-02). After a category flip the Target select computes `selectedIndex -1` and `value ""`, yet the posted body carries `"target": "Turf"` under `"category": "Stat"`. The editor's own `@change="spark.target = ''"` never runs: `BaseSelect` is a multi-root component that declares no `change` emit, so the listener is dropped. This is what makes F-01 reachable at all, and it is reported rather than fixed in this slice.
+- **The projected-start table's second column is headed "Scenario cap" and prints 1200 for a draft with no scenario** (F-03). The number is the baseline cap, not a scenario's ceiling, and the step already holds `scenarioLabel` to tell the two apart.
+- **Twenty-five dashes stand where the repo's rule says `N/A` with a disclosure channel** (F-04), and **neither table on the screen carries a `<caption>` or a `th[scope]`** (F-05) while the sibling deck step carries both.
+- **The screen is clean where the deck step failed.** At 320 px the document reads `scrollWidth === 320`, `panX === 0` in every state and both themes; the Projected-start region scrolls inside itself (client 254, content 331) with no `contain-paint` and no help from a `<details>` ancestor. Contrast: zero failures against the floors across all 64 frames, 100 percent of the text elements checked. No target falls under 2.5.8's 24 px floor.
+- **Largest unmeasured risk**: the keyboard path and the focus ring inside the two scroll regions. Neither was walked here; the deck audit measured that on its own screen and this one has the same region shape. §6 carries it.
+- The repository's standing statement that Chromium cannot launch here (`spawn EPERM`) did **not** hold for these runs; see §4 and §7.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Two parent cards and pickers | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | not run — §6 |
+| Manual-name block and rank fields | no rows to pick | yes | yes | yes | yes | yes | yes | yes | yes | yes | not run |
+| Spark editors (Kind, Category, Target, Stars) | yes (collapsed) | yes (two rows per parent) | yes (refused pair) | yes | yes | yes | yes | yes | yes | yes | not run |
+| Grandparent editors | yes | yes (one named) | yes | yes | yes | yes | yes | yes | yes | yes | not run |
+| Projected start table and its region | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | region not tab-walked |
+| Pair Affinity control | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | not run |
+| "What inheritance actually does" | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | not run |
+| "Parents must differ" | yes | yes | yes | yes | yes | yes | yes | yes | yes | yes | n/a (prose) |
+| 200% text resize, text-spacing override, AT announcement | not run — §6 | | | | | | | | | | |
+
+The seeded library was **empty** in every frame: `DatabaseSeeder` does not call the two run seeders, so `ListVeterans` returns nothing and the pick list shows the library disclosure. Populated state is reached through the "Not in my library - enter a name" sentinel, which is the rented-parent path the reference names (§1.5.4). A library with Veteran rows is therefore unmeasured — §6.
+
+**Framework coverage.** Applied and produced findings: `H9` with `WCAG 3.3.1` (F-01), `H5` with `NRM-3`/`SHR-5` (F-02), `TOG-3` "Status may be stale or absent, but never wrong" (`tognazzini-first-principles-2026-10-21.md:253`) (F-03), `GT-2`/`UI-4` with the repo's own `AGENTS.md` §5 Copy rule (F-04), `WCAG 1.3.1` (F-05), `UX-1` house rule (F-06), `UI-1` (F-07).
+
+Applied, measured clean, recorded as no finding: `WCAG 1.4.10` (reflow: `scrollWidth === 320` and `panX === 0` at 320 px in all four states and both themes; the two regions report `overflow-x: auto`, the Projected-start one scrolls at content 331 against client 254); `WCAG 1.4.3` and `1.4.6`-floor-check (zero sub-floor readings against 72 checked text elements per frame, both themes); `WCAG 2.5.8` (`under24` empty in all 64 frames); `H1`/`SHR-3`/`4.1.3` (one `role="status"` region, and the in-flight frame reads "Saving the Legacy…" while the button label reads "Saving…"); `2.4.7`-adjacent (one accent-hued control on the screen, the "Continue to deck" door, with the single `h1`); `3.3.2`/`4.1.2` (every one of the 38 measured inputs has a wired `label`/`for` pair, which `career-legacy-deck-steps.spec.ts:299` already pins, and the Stars fields carry `min=1 max=3`, matching the three-star ceiling at §1.5.3); `1.4.13`/`4.1.2` on `AbsenceValue` (the reason appearing twice in the frame's text is the component's documented "one statement in two media", `resources/js/components/AbsenceValue.vue:10-14`); `2.1.1` partial (the region carries `tabindex="0"`, measured as an attribute, not walked).
+
+`N/A` by the framework's own list: `2.5.7` (no drag operation here), `3.3.8`/`2.1.4` (no authentication, no accelerators — `H7` stays the registered gap), `1.2`/`1.4.2`/`2.3` (no media, no audio, no flashing).
+
+Not reached: M3/M4 phases (one screen), and `IA-2`/`IA-3`/`IA-6` (structure between screens is out of scope by the mode).
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = TRUE`. Chromium launched for five Playwright runs against a session-private server (`PLAYWRIGHT_PORT=8186`) and a session-private scratch database (`PLAYWRIGHT_SCRATCH_DB=.scratch-uma/legacy-step4/browser-8186.sqlite`), each behind `.scratch-uma/legacy-step4/playwright.lock`. Artifacts: `.scratch-uma/legacy-step4/audit/{empty,populated,error,loading}.json`, `error-visible.json`, `populated-inputs.json`, 32 PNGs, plus `probe-reachability.json` from the reachability instrument.
+- Instrument: `audit-measure.spec.ts`'s `probe()` and `digest()` from the deck pass, reused verbatim, with four additions in this session's copy (`tests/browser/_tmp-legacy-measure.spec.ts`): `doc.panX`, each region's `contain`, the region list, and the three text blocks this screen's findings quote. Contrast is `getComputedStyle` colour against the first solid ancestor background, sRGB relative luminance, two decimals — a reading within about 0.05 of a floor is not filed. Theme is set by writing the `data-theme` attribute the stylesheet keys on, the same mechanism the server uses, not a visit to `/preferences`.
+- Target sizes are `getBoundingClientRect` on the visible element.
+- The one measurement in this report that the harness itself pollutes is the acknowledgement time: 72 ms wall clock from the click to the status text becoming visible, which includes Playwright's locator round trip. It is therefore reported as *not* a `TOG-1` verdict and lives in §6.
+- The error frame's request/response evidence is `probe-reachability.json` (a PUT at 303 whose posted body is printed, followed by a non-Inertia GET) plus the Pest replay of that exact body (`tests/Feature/_tmpSparkTargetProbeTest.php`, since deleted): form-encoded, JSON, and JSON with `X-Inertia: true`, all three refused the pair and all three left `SetupDraft::legacySelection()` null. The refusal is real; only its rendering is missing.
+- Provenance caveats carried, per `_audit-prompt.md` §3.1: Gerhardt-Powals' primary text is paywalled and items 5 and 6 are an unconfirmed split (`gerhardt-powals-principles-2026-10-21.md:19`); the IA file's prose is unread and only its names and derived lines are the article's own (`information-architecture-principles-2026-10-21.md:19`); Norman's book was not fetched (`norman-interaction-principles-2026-10-21.md:15`); Tognazzini's sixteen are the original edition's (`tognazzini-first-principles-2026-10-21.md:17`); Laws of UX holds 29 entries (`laws-of-ux-2026-10-21.md:14`) and Laws of UI 13 (`uilaws-2026-10-21.md:18`). Nothing in this report rests on the two uncertain splits.
+- Attribution rule for this report: every finding is against the screen as shipped at `8acd26c8`. F-01 and F-03 are closed by this pass's own commits and §11 carries the post-fix readings; F-02, F-04, F-05, F-07 are reported and not fixed.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | `H9` (secondary: `WCAG 3.3.1`, `SHR-5`) | Heuristics | Save, error state, all widths, both themes | The write is refused and the screen says nothing. After the refused click the measured frame holds `alerts: []`, `riskText: []`, `errorNodes: []`, still on `/career/setup/legacy`, with the typed name intact. The request emits `legacies.{i}.sparks.{j}.target` and the step binds `legacies.{i}.legacy_id`, `legacies.{i}.ancestors.{n}` and the whole-payload keys, but not the Spark fields. A Trainer is left with a Save that appears to do nothing | OBSERVED_RENDERED | `.scratch-uma/legacy-step4/audit/error-visible.json`; `probe-reachability.json` `exchanges`, `after`; `resources/js/pages/Career/LegacySelect.vue:290-291`, `:539-541`; `app/Http/Requests/StoreLegacySelectionRequest.php:213-217` | 2 | High | Bind the field's own message through the error prop `BaseSelect` already renders as `role="alert"`. Acceptance check: after the same attempt the sentence naming the category's legal values is on screen and the entered state survives. **Closed by C2** |
+| F-02 | `H5` (secondary: `NRM-3`, `TOG-3`) | Heuristics | Spark editor Category/Target pair, error state, 1280 px | The Target control shows nothing chosen while the form still holds the previous category's value and posts it. Measured after flipping Aptitude to Stat: the select reports `selectedIndex: -1` and `value: ""`, and the PUT body carries `{"category":"Stat","target":"Turf"}`. The editor's `@change="spark.target = ''"` is the intended guard and never runs: `BaseSelect` has three root nodes and declares only `update:modelValue`, `blur` and `focus`, so a `change` listener is not inherited by any element | OBSERVED_RENDERED | `probe-reachability.json` `afterFlip`, `postedSparks`; `resources/js/components/Form/BaseSelect.vue:43-47`, `:86-143`; `resources/js/pages/Career/LegacySelect.vue:504` | 2 | High | Either make the reset real, or stop posting the transient category the way `Builder.vue` does (`category: inferCategory(spark.target)` at `resources/js/pages/Legacy/Builder.vue:336-339`, which derives it from the target at submit). Not this slice's edit: it changes what is stored. Owner's call, named here. |
+| F-03 | `TOG-3` (secondary: `GT-2`, `H9`) | Tognazzini | Projected start table header, empty and populated, all widths | The column is headed "Scenario cap" and every row prints 1200 while the draft holds no scenario. 1200 is `config('scenarios.base_cap')`, the baseline the reference gives as "every stat before breakthroughs" (`UMAMUSUME_REFERENCE.md` §1.3.4); the scenario ceilings are URA 1400 across five, Unity Cup 1300/1300/1300/1300/1800, Trackblazer 1200/1900/1200/1200/1500 and Grand Concert 1600/1300/1300/1500/1300. The page can tell the two states apart already: `scenarioLabel` is a prop | OBSERVED_RENDERED | `populated.json` `projectedText` at `320-light`; `app/Http/Controllers/Career/LegacySelectController.php:146`, `:162`; `app/Services/ScenarioCaps.php:163-179`; `config/scenarios.php:112` | 2 | High | Print the header the numbers actually answer to, "Base cap" when no scenario is chosen. Acceptance check: an empty-draft frame reads "Base cap" and a scenario frame reads "Scenario cap". **Closed by C1** |
+| F-04 | `AGENTS.md` §5 Copy (secondary: `GT-2`, `UI-4`) | House rule / Gestalt | Projected start table body, populated and empty, all widths | Unrecorded values render as dashes: the scenario-caps column falls back to `-`, both parent columns print `-` and the Projected column is a literal `-` in every row, so the populated frame shows 25 of them. `AGENTS.md` §5 is explicit ("A value a run has not recorded renders as `N/A` with a `title`, never a default and never a dash"), and the parent columns carry a `?` fallback for a missing star count (`★? Blue`), which is neither form. The screen already imports the component that states an absence with its reason | OBSERVED_RENDERED | `populated.json` `projectedText`; `resources/js/pages/Career/LegacySelect.vue:596`, `:600-602`, `:606-608`, `:610`; `AGENTS.md` §5 "Copy" | 2 | High | Route the unrecorded cells through `AbsenceValue`, which is what the deck step's `N/A` markers do, and name what the `?` is standing for. Not this slice's edit: it is a markup decision across four columns. |
+| F-05 | `WCAG 1.3.1` (AA) | WCAG 2.2 | Both tables, every state, all widths | Two tables on the screen, zero `<caption>` elements and zero `th[scope]` attributes, in every state and at every width. The row header of the projected table is a plain `<td>`, so the association a Trainer needs to read "Wit, 1200, -, -, -" as a row of one stat is visual only. The sibling deck step measures six captions and 29 scoped column headers, so this is a gap against the house pattern as well as the criterion | OBSERVED_RENDERED | `populated.json` `semantics.tables`/`captions`/`thCol`/`thRow` at all eight frames; `resources/js/pages/Career/LegacySelect.vue:582-613`, `:718-758` | 2 | High | Give each table a caption naming what it prints and scope the header row. Acceptance check: the instrument reports `captions 2` and `thCol` above zero. |
+| F-06 | `UX-1` house rule (explicitly **not** `WCAG 2.5.8`) | Laws of UX | The one compact `N/A` marker in the Enhanced-spark row, populated and empty, all widths | Measured 39.8×24 px: it meets 2.5.8's 24 px floor and the component documents why the dense-row form is not the house 44 px bar (`AbsenceValue.vue:15-19`), so **no conformance failure is claimed**. It is the only sub-44 target on the screen: `under44` holds exactly this one entry at all 64 frames and `under24` is empty everywhere | OBSERVED_RENDERED | `populated.json` `under44`, `under24` at all frames; `laws-of-ux-2026-10-21.md:164`; `wcag-2.2-accessibility-2026-10-21.md:107` | 1 | High | No action: the row that carries it is unsourced and is removed by C1, so the post-fix frame reads `under44` empty. The row stays in this table so the 44 px bar is not later mis-read as 2.5.8 |
+| F-07 | `UI-1` (secondary: `SHR-1`) | Laws of UI | Whole screen, populated, all widths, both themes | Five distinct computed font sizes are on the screen — 28, 15, 14, 13 and 12 px — where the rule permits three (page, section, body). The 28 px step is the single `h1`, the 15 px steps the eight `h2` section headings at weight 800, and 13 px appears once. Milder than the deck step's nine, and the same token-scale question, not a page edit | OBSERVED_RENDERED | `populated.json` `typeSizes`, `typeScale` at `320-light` (`14/400` 42 elements, `12/500` 27, `14/800` 5); `uilaws-2026-10-21.md:94` | 1 | Medium | Take it to the token layer with the deck step's F-05, not here. Acceptance check: at most three distinct computed sizes under `main` |
+
+No finding was filed twice for one defect, and each row carries at most one primary rule. The mechanism table's source errors are not repeated here: they belong to `scr-car-008-legacy-source-accuracy-2026-10-30.md`, and F-03 and F-06 are the two whose symptom a Trainer sees rather than a figure that is merely wrong.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| The keyboard path reaches both scroll regions and every Spark row, and a focused child's ring is not clipped | The instrument records `tabindex="0"` on each region but no tab walk was run here; the deck audit measured the same shape on its own screen and found the clip at 287.17 against 287 | A 320 px tab loop over the populated frame, measuring each focused child against its region's clip, exactly as `career-deck-summary.spec.ts` does for the deck step |
+| A click is acknowledged inside `TOG-1`'s 50 ms | 72 ms was measured wall clock, and the harness's own locator round trip is inside that number, so it cannot answer a 50 ms bar | A `performance.now()` stamp taken inside the page at pointer-down and at the status node's first paint |
+| A screen reader announces the refusal, the pending label and the recorded Sparks | No AT was attached; `role="status"`, `role="alert"` and the label wiring were read from the DOM only | An NVDA or VoiceOver pass over the populated and error frames |
+| 200% text resize and the text-spacing override lose nothing | No resize pass was run | `WCAG 1.4.4`/`1.4.12` measurement at 320 px, populated, both themes |
+| The populated-library picker (Veteran rows, costume labels, the 100-row page and `rosterTotal`) | `DatabaseSeeder` does not call the two run seeders, so the scratch database holds zero Veterans and the sentinel path was used instead | `TrackerVeteransSeeder` then `UraFinaleRunsSeeder` on the scratch database, then the same sweep with two library picks |
+| A repeat deeper in the diagram zeroes Affinity, as §1.5.4 states | The step stores two Veterans of one trainee rather than policing it, and no measurement read the consequence | Would require the computation `ADR-0020` §3 forbids; the honest substitute is a stated absence, which is what C1's copy does |
+| `eva01` behaviour | Out of scope by the mode | The same sweep in the third palette |
+| Whether any element on the screen animates | The instrument this run did not emit the animation field the deck pass added | Re-run with `animated` restored to `probe()` |
+| Whether F-05's missing `th[scope]` is what lets F-03's header drift | Both are on the same element; neither was tested against the other | A caption-plus-scope edit, then the same reflow and text readings |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements already made on the sibling screen and **cited rather than re-derived** here: `scr-car-009-deck-screen-audit-2026-10-30.md:81-86` carries the 44 px rule as the house bar that exceeds WCAG 2.5.8 (`wcag-2.2-accessibility-2026-10-21.md:107`), the absence of `SHR-8`, `IA-7` and `IA-8` from their files (the Shneiderman table ends `SHR-7` at `:141`, the IA table `IA-6` at `:147`), the withdrawal of `WCAG 4.1.1`, `norman-interaction-principles-2026-10-21.md:59`'s "not offer the same card twice" as contradicted by shipped behaviour, and the typo at `wcag-2.2-accessibility-2026-10-21.md:165`. This report cites `SHR-7` and `IA-5` on those terms and files nothing under the withdrawn or non-existent IDs.
+
+New to this screen:
+
+- **The premise this pass set out to test was wrong, and the correction is the finding.** The plan read the editor's `@change="spark.target = ''"` as making the mismatched-Spark state unreachable, and a first instrument attempt timed out because a select cannot re-select an option it no longer offers. Measured against the posted body instead, the reset does not run at all, so the state is reachable and the refusal arrives unrouted (F-01, F-02). Recorded because an audit that had trusted the reading of the code would have filed the opposite conclusion.
+- **A name in the accessibility tree that reads as duplicated text.** `mechanismText` shows the Enhanced row's `N/A` marker text twice; `AbsenceValue.vue:10-14` documents that as "one statement in two media", so it is the component working, and nothing is filed.
+- **The five kind names against the four the wireframe draws.** The table gained a Scenario row this pass, so it now matches the five kinds the payload and the editor already offer (`AncestryGraph::SPARK_KIND_LABELS`, `LegacySelectionPayload::sparkKindLabels()`). The DOM-override comment above the table records the difference rather than hiding it, which is the settlement `DESIGN.md` asks for.
+- **Density against minimalism.** Two side-by-side tables, four grandparent editors and two Spark lists per parent is the wizard's own disclosure shape, and every effect list sits behind a `<summary>`, so the preview rule holds and nothing is filed.
+- **Honesty against closure.** The `Projected` column's dashes could read as "zero"; F-04 files them as a rule breach, not as a closure conflict, so this row records only that no claim of completeness is made in words.
+- **The `spawn EPERM` caveat did not hold.** Chromium launched five times for this pass, and the three framework files carrying that line are stale, as the deck audit already recorded.
+
+Gaps confirmed in the register rather than filed per screen: `H3` no undo after a committed turn (`usability-heuristics:231`), `H7` no accelerators (`:232`), `H10` no help surface (`:233`). On this screen none becomes a finding: nothing here commits a turn, the six editors need no accelerator, and the absence of help is the registered gap.
+
+### 8. Recommendations
+
+1. **F-01**, S. Bind the Spark-field refusals the request already emits. Satisfies `H9`, `WCAG 3.3.1`. Check: the refused pair prints its sentence and keeps the entered state. **Landed in C2.**
+2. **F-03**, S. Print "Base cap" while the draft carries no scenario. Satisfies `TOG-3`. Check: the empty-draft frame's header text. **Landed in C1.**
+3. **F-02**, S, and the owner decides which half. Make the category reset fire, or derive the posted category from the target the way `Builder.vue` already does. The second is one line in the transform and changes what is stored; the first needs `BaseSelect` to own a `change` emit, which every call site shares. Do neither inside a copy pass.
+4. **F-05**, S. Caption both tables and scope their header rows. Satisfies `WCAG 1.3.1`. Check: `captions 2` and `thCol` above zero on this screen.
+5. **F-04**, S. Route the unrecorded cells through `AbsenceValue` and say what `?` means. Satisfies `AGENTS.md` §5. Check: no `-` and no `?` remains in the projected table.
+6. **F-07**, L, and not this screen's edit. Fold it in with the deck step's F-05 at the token layer.
+7. **F-06** needs no change; the row it names is removed for being unsourced, and the entry exists to stop a later review mis-filing a dense `N/A` marker as a 2.5.8 failure.
+8. The accuracy pass's own corrections ride in C1: the transposed Blue and Pink figures, the duplicated unique-skill row, the Green and White glosses, the added Scenario row, the removed Enhanced row, the two sentences that credited the picker with enforcement it does not perform, and `factor` to `Spark` in shipped copy.
+
+### 9. Change-audit re-check
+
+Not owed: the mode is M2, so `_audit-prompt.md` §11's ten questions are the M1 exit gate and are not scored here. The change this pass landed was nevertheless read against them while it was being built. C1 is copy: question 1 (a new control) and question 7 (a new boundary) do not apply, question 3 (a value rendered without its reason) applies to the corrected figures and is answered by the citation comments beside each, and question 5 (a claim the tool cannot support) is what the pass exists to clear, with the Enhanced row removed rather than hedged. C2 adds one error binding and no control: question 1 applies and the answer is a message inside the field's own `role="alert"`, wired by the `BaseSelect` error prop already in place. The two findings C1 and C2 close are F-01 and F-03; the other five stay open and named. The claim is a reading of one change, not a re-audit of a commit.
+
+### 10. Exit checklist
+
+Scope, mode, surfaces, states, viewports and themes stated; routing per question with the narrowest rule and the secondaries listed; §3.1 caveats carried; evidence capability recorded as TRUE and the stale `spawn EPERM` caveat named; every finding carries a rule ID, a named surface and state, a specific observation and an evidence status; nothing above severity 2 rests on inference (F-01, F-02 and F-03 are measurements, F-04 and F-05 are counts, F-06 and F-07 are measurements the report does not claim failures for); severity and confidence kept apart; no defect filed twice; the falsified premise recorded in §7 rather than quietly dropped; conflicts logged as settlements; gaps left in the register with what would settle each; the template followed; no conformance claimed beyond the criteria tested; and the one number the harness pollutes (the 72 ms acknowledgement) named instead of filed.
+
+### 11. Post-fix readings, 2026-10-31
+
+Dated readings are preserved, never rewritten, so §5's figures stand as the 2026-10-30 record of the
+screen as shipped at `8acd26c8`. `verified-against`: `4401f4b6` (C1, the copy pass) and `063e3aad` (C2,
+the refusal binding), landed on `7454f29e`. The same instrument re-ran all four states, four widths, two
+themes (32 frame pairs, `.scratch-uma/legacy-step4/audit-post/`, `4 passed (44.2s)`) after one shared
+`npm run build`, and `tests/browser/career-legacy-deck-steps.spec.ts` ran in the same session-private
+harness: 15 passed, 1 failed, and the failure is the pre-existing step-5 case named in §7 of the C2
+commit message, not a step-4 case.
+
+| Measure | Baseline (2026-10-30) | Post-fix (2026-10-31) | Read |
+| --- | --- | --- | --- |
+| Document reflow at 320 px, all states, both themes | `scrollWidth 320`, `panX 0` | `scrollWidth 320`, `panX 0` | unchanged, still clean (`WCAG 1.4.10`) |
+| `under44` targets | 1 in every frame (the Enhanced row's compact `N/A` disclosure, 39.8 × 24) | **0 in every frame** | **F-06 closed** by the row's removal |
+| Focusable targets counted | 29 empty / 59 populated / 39 refused | 28 / 58 / 38 | one fewer in each state, and it is the same disclosure |
+| `under24` (`WCAG 2.5.8`) | 0 | 0 | unchanged |
+| Contrast failures | 0 in all 64 frames | 0 empty and populated, **1 in the refused frame at 320 dark** | see F-08 below |
+| Projected-start region | client 254, content 331 | client 254, content 300 | the header text is shorter now; the region still scrolls inside itself |
+| Projected-start header text | `StatScenario capFrom Parent AFrom Parent BProjectedSpeed1200…` | `StatBase capFrom Parent AFrom Parent BProjectedSpeed1200…` | **F-03 closed**: the column names the baseline while the draft holds no scenario |
+| Refused-write frame | `alerts: []`, `riskText: []`, `errorNodes: []`, still on `/career/setup/legacy`, `nameValue: "Silence"` | `alerts` and `riskText` carry `A Stat Spark names one of Speed, Stamina, Power, Guts, Wit; [Turf] is not.`, `errorNodes` holds `legacy-spark-target-0-0-error`, same path, `nameValue: "Silence"` | **F-01 closed**. The message names the stale value, which is the only way a Trainer can see what F-02 hides |
+| Click to status | 72 ms, "Saving the Legacy…" in `role="status"`, button "Saving…" | 83 ms, same two strings | both figures include Playwright's locator round trip, so neither answers `TOG-1`'s 50 ms; §6 stands |
+| Computed type sizes | 28, 15, 14, 13, 12 | 28, 15, 14, 13, 12 | unchanged, **F-07 open** |
+| `captions` / `thCol` | 0 / 0 | 0 / 0 | unchanged, **F-05 open** |
+
+**F-08, new, from the post-fix frame.** `WCAG 1.4.3` (AA), severity 2, confidence High,
+`OBSERVED_RENDERED`. Making the refusal visible made its contrast measurable: the message renders at
+**4.15:1** in the dark theme (`rgb(255, 68, 0)` on `rgb(42, 42, 42)`) as 14 px weight 400 text, where the
+floor is 4.5:1; the light theme passes. It is not this screen's style. The sentence comes from
+`BaseSelect.vue:145` (`<p class="mt-1 text-sm text-risk" role="alert">`), so every server refusal that any
+form prints through that component carries the same reading, and the reason it never appeared in a
+baseline frame is that the baseline rendered no refusals here at all. The deck audit's F-02 measured the
+same 4.15 on the same hue and fixed it by moving a non-danger sentence to ink; that remedy does not
+apply here, because a refusal is the danger the hue is for. The fix belongs to `--color-risk` (or to the
+error line's weight and size) at the token layer, and this pass leaves it there rather than restyling one
+field. Acceptance check: every `text-risk` refusal on the step reads at or above 4.5 in both themes.
+
+Findings this slice closes: **F-01** (C2), **F-03** and **F-06** (C1). Findings it leaves open and named:
+**F-02** (the stale target, whose root cause is the dropped `change` listener on a shared component),
+**F-04** (the dashes, now asserted at `career-legacy-deck-steps.spec.ts:302`), **F-05** (caption and scope),
+**F-07** (the type scale) and **F-08**, which this pass's own fix uncovered.
+
+## scr-car-008-legacy-source-accuracy-2026-10-30.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/scr-car-008-legacy-source-accuracy-2026-10-30.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Source accuracy — SCR-CAR-008, the career setup wizard's legacy step
+
+
+- **Screen:** `SCR-CAR-008`, `GET /career/setup/legacy` (`career.legacy`), written by `PUT` (`career.legacy.store`)
+- **Surface read:** `resources/js/pages/Career/LegacySelect.vue`, `app/Http/Controllers/Career/LegacySelectController.php`, `app/Http/Requests/StoreLegacySelectionRequest.php`
+- **Authority:** `docs/UMAMUSUME_REFERENCE.md` (the corpus this repository treats as product truth for game mechanics), plus `config/scenarios.php` for the numbers it publishes, and `lang/en/uma.php` for the client vocabulary
+- **Method:** every displayed fact on the step was read off the rendered page (`.scratch-uma/legacy-step4/audit/`, `AUD-20261030-002`) or from source, then matched line-to-line against the authority. Enforcement claims were read out of the request that performs them, not out of the sentence that describes them.
+- **Date:** 2026-10-30. The tree at measurement was `a372e17a` plus the working tree; `LegacySelect.vue` was last committed by `e7d2b275`.
+
+### How to read the verdicts
+
+| Verdict | Meaning |
+|---|---|
+| WRONG | The page states something the authority contradicts. Fixed in code. |
+| WRONG-SCOPE | The statement is true of this tool but is worded as a rule of the game. Rewritten. |
+| INCOMPLETE | A figure the authority states is missing where the page claims to list them. |
+| UNSOURCED | No line in this repository's authority supports the claim. Removed or reported, never kept as fact. |
+| RIGHT | Checked and stands. Listed so a reader knows it was read, not skipped. |
+| NEEDS-OWNER-RULING | The defect is real; the fix is a product decision, not a correction. Reported, not coded. |
+
+### Findings
+
+| # | On the page | Authority | Verdict | Disposition |
+|---|---|---|---|---|
+| 1 | "Blue spark — +16 to the stat's cap per ★3" (`LegacySelect.vue:729`) | The Blue/Stat spark's own payout is "One stat up +5, +12, or +21 at career start for 1, 2, or 3 stars" (`UMAMUSUME_REFERENCE.md:655`). +16 is the **breakthrough** ceiling raise: "+16 to that stat's cap per ★3 basic-ability factor inherited" (`:420`) | WRONG | C1. The Blue cell states its payout; the +16 stays in the paragraph below the table, where it is named as the cap raise rather than as the Blue spark's effect |
+| 2 | "Pink spark — +5 / +12 / +21 by grade" (`:734`) | The Pink/Aptitude spark is "Track, distance, strategy: 1 star = +1 grade, 4 = +2, 7 = +3, 10 to 18 = +4" (`:656`); the ±5/12/21 figures are the Blue payout above | WRONG | C1, with the two ceilings that bound it: "inheritance cannot lift an aptitude above A before the run starts, cannot lift it more than four grades, and cannot take an aptitude starting at F or below all the way to A" (`:680`) |
+| 3 | A sixth row, "Unique-skill factor — Inherits her unique skill as a factor … Read at run start" (`:738-741`) | Unique-skill inheritance **is** the Green spark: "`[Global]` renders them as Blue, Pink, Green, and White Sparks … unique-skill inheritance is green on both servers" (`:651`), "Carries one character's own unique skill as 1 to 3 hint levels" (`:657`). Its own rule is a donor gate ("A unique-skill factor is guaranteed once the trainee herself stands at three stars or higher", `:643`) and a ceiling effect ("A unique-skill factor also raises caps, in proportion to the donor's growth rates", `:420`) | WRONG (duplicate row, and a timing the authority does not give it) | C1. The row is removed and its two facts move into the Green row: one deletion, not two rewrites |
+| 4 | Green spark — "Hints raise the chance a skill is offered, not its level" (`:745`) | Hint **level** is the mechanic and it is a cost effect: "Hints accumulate into a per-skill hint level, and each level cuts that skill's point cost by 10% … 30% at level 3" (`:523`), with Green carrying "1 to 3 hint levels" (`:657`) | WRONG | C1, together with #3's facts and the payout moments §1.5.1 supports (`:645`) |
+| 5 | White spark — "Skill hints and competition bonuses … Same reading as Green: a hint, not a granted skill" in the *When it applies* column (`:748-750`) | White splits into two kinds with different figures: skill "Mid-run hint of level +1 to +5, or a small stat top-up if already learned" (`:658`) and competition "From top-grade (G1) wins; 3, 6, or 9 stat per event, sometimes a hint" (`:659`); and "White factors never fire at career start, only mid-run" (`:645`) | WRONG | C1: both kinds stated with their figures, and the timing column given an actual timing |
+| 6 | No Scenario row in the table | "Scenario Sparks … From clearing a scenario's final conditions; about 10 to 30 per stat, over 200 when stacked" (`:660`), and the step's own editor already offers the kind (`LegacySelectionPayload::sparkKindLabels()` at `:97-106`, `AncestryGraph::SPARK_KIND_LABELS` at `:43-49`) | INCOMPLETE | C1 adds the row, so the table matches the vocabulary the editor uses |
+| 7 | "Enhanced spark — Named because the client shows it; unpriced because this tool holds no figure" (`:752-755`) | The term appears nowhere in the authority. The nearest referents are different mechanics: §1.5.1's rare golden inheritance event (`:645`) and the Extreme/Spirit-Burst naming decision in the run screens | UNSOURCED | C1 removes the row. The removal is recorded here rather than left for a reader to notice, and it also removes the step's only sub-44 px target (the `N/A` disclosure inside it, measured 39.8 × 24 at every viewport in `audit/empty.json` and `audit/populated.json`) |
+| 8 | "The picker enforces the first rule by hiding the trainee you are running; the second by refusing an already-chosen record." (`:776-778`) | Only the second clause holds. `pickOptions()` (`:299-307`) filters nothing: every library row plus the manual sentinel is offered. The own-trainee refusal is server-side, in `StoreLegacySelectionRequest::assertNoOwnTrainee` (`:344-372`), keyed `legacies.{index}.legacy_id`. `assertParentsDiffer` (`:407-427`) refuses the same library row twice, and its docblock (`:399-403`) records that two Veterans naming one character is deliberately *stored* because pricing a repeat is the computation `ADR-0020` §3 bans | WRONG-SCOPE (first clause) | C1. Shipped form: "Both slots may name any veteran in your library. The save refuses two cases: a slot naming the trainee you are running, and a slot naming the same veteran twice. Two entries naming the same character in different records are stored, because this screen records what you enter rather than pricing what a repeat would cost." |
+| 9 | "Choosing no parents is a legitimate build, not an error." (`:780-782`) | "Two ancestors are chosen when a run starts" (`:688`). The nullable pair is this tool's storage shape, not a client-legal build | WRONG-SCOPE | C1. Shipped form: "Leaving both slots empty is this screen's choice, not the client's: the run carries two nullable parent ids so a Trainer can record what they do not know yet, and no screen invents a default pair." |
+| 10 | "factor" in shipped copy at `:738`, `:739`, `:740`, `:764` | `[Global]` renders the inheritable traits as **Sparks** (`:639`), and the repository's own terms map says `'inheritance_trait' => 'Spark'` (`lang/en/uma.php:90`) | WRONG (vocabulary) | C1 renames the four shipped occurrences. `:708` keeps the word: it is an HTML comment recording what the wireframe draws, not copy a Trainer reads, and dataset keys are never renamed to satisfy a vocabulary list |
+| 11 | "Scenario cap" column prints 1200 for all five stats on every measured state | The baseline and a scenario's cap are different rows of the same table: baseline "1200 … every stat before breakthroughs" (`:417`) versus "Scenario caps, Speed / Stamina / Power / Guts / Wit … the training run you are in" (`:418`) | WRONG-SCOPE (a baseline figure under a scenario label) | C1. With no scenario resolved the column names what it prints: the draft's `scenarioLabel` (`LegacySelectController.php:146`) is already the test, and `scenarioCaps` deliberately falls back to the base cap for that case (`:160-162`). Verified against `config/scenarios.php`: base 1200 (`:112`), hard cap 2000 (`:126`), and the four bonuses at `:172`, `:380`, `:602`, `:1012` reproduce `:418` exactly |
+| 12 | "Projected" column is always `-`, and the sentence beside it declines the sum (`:575-579`) | `ADR-0020` §3 rules out deriving an inheritance outcome | RIGHT | Unchanged. The `§` in that sentence is inside an HTML comment, where identifiers belong; none of it ships |
+
+### Checked and standing
+
+- The five stat rows are the server's own `statOrder` (`config/scenarios.php:54` through `LegacySelectController.php:163`), not a list the component keeps: Speed, Stamina, Power, Guts, Wit, with **Wit** as the client word.
+- Spark stars are entered 1 to 3 (`:516-517`, `AncestorEditor.vue:182-183`), matching "Factors carry 1 to 3 stars and three is the ceiling" (`:670`).
+- Affinity offers `△`, `○`, `◎` and nothing else (`LegacySelectionPayload::AFFINITY_GRADES`, `:86`), matching "grades each link △, ○, or ◎" (`:696`), and the field says it is "the grade you read for the pair, not a score" (`:628`) — the right posture, since "a better grade raises both the chance that a factor fires and the size of the payout" (`:696`) is a claim this tool does not price.
+- Two parents plus four grandparents (`:674-704`) matches `:688`, and the manual name block's reason — "a friend's finished run is never a local row" — matches `:694`.
+- "Both slots are optional" in the lede (`:316-317`) is about *this* form's save rule, and #9's rewrite keeps that half while dropping the client claim.
+
+### Enforcement, measured rather than read
+
+Two of this pass's claims were tested against the running page before they were written down, and one of them came back wrong.
+
+- **The dropped Spark-target refusal is reachable.** The first reading of the editor said the mismatch could not be produced, because `LegacySelect.vue:504` clears the target when the category changes. Measured, the reset does not run: `BaseSelect` has three root nodes and declares only `update:modelValue`, `blur` and `focus` (`BaseSelect.vue:43-47`), so a `change` listener is not inherited by any element. The probe reached the state, and the POST body it captured carries `{"category":"Stat","target":"Turf"}` while the Target select computes `selectedIndex: -1` (`probe-reachability.json`). The same body, replayed in Pest as form-encoded, as JSON, and as JSON with `X-Inertia: true`, was refused three times and left `SetupDraft::legacySelection()` null each time. So the refusal is real, the pair is reachable, and the step renders nothing (audit F-01), for a field the screen leaves holding an invisible value (audit F-02).
+- **The own-trainee row is not hidden by the picker** (#8): `pickOptions()` (`:299-307`) lists the library unfiltered plus the manual sentinel, and the refusal is `assertNoOwnTrainee` at the write. Read out of the code, not from the sentence on the page.
+
+### Sibling uses of a phrase removed here
+
+- **#7 removes "Enhanced spark" from this step**, and `CockpitController.php:996-997` still prints that label beside a value read from a duel's `escalation_reward.spark`. The two are not in conflict: the cockpit's row reports a figure this repository holds in a dataset field, and the removed table row asserted a *mechanism* the corpus does not name. Neither is evidence that the phrase is sourced, and neither is a reason to keep the row.
+
+### Reported, not coded
+
+- **`Rank (letters)` vocabulary.** `LegacySelectionPayload::RANK_LETTERS` (`:61`) offers twelve letters including `UG`. The authority states no career-rank letter set; `:680`'s G/F…A,S is the **aptitude** grade scale, a different thing. The field is record-only, so no value is invented here — the option list simply has no source in this repository. Verdict UNSOURCED-BY-AUTHORITY.
+- **Spark counts are unbounded in the editor.** `:692` bounds a finished run's Sparks as "1 Blue, 1 Pink, at most 1 Green, unbounded White" while marking the slot *count* `❌ UNVERIFIED`. The step's editor accepts any number of each kind, so a parent can be recorded with two Blue Sparks. Bounding it would be a validation decision built on a row the authority itself flags, so it is left for a ruling. The measured populated state carries two Blue ★3 Sparks on two stats, which is what makes the question visible.
+- **Unrecorded values print as dashes.** The projected-start table falls back to `-` in four columns across five rows (25 in the populated frame) and `★?` when a star count is missing, where `AGENTS.md` §5 requires `N/A` with a disclosure channel. Filed as audit F-04, and note that `career-legacy-deck-steps.spec.ts:302` currently *asserts* the dash, so the fix has a test to move with it.
+- **Table semantics** (no `<caption>` on either table, no `th scope="col"`: measured `captions 0`, `thCol 0` at every viewport) is audit F-05, and the **sub-44 px disclosure** (#7's companion) is audit F-06. Both are filed, with the rest of what that sweep produced, in `AUD-20261030-002` §5.
+- **Duplicated kind vocabulary.** `LegacySelectionPayload::sparkKindLabels()` and `AncestryGraph::SPARK_KIND_LABELS` hold the same five labels in two places. Nothing displays wrong today; the drift risk is the finding. Out of this slice's files.
+
+### Landed
+
+| # | Commit | What the commit proves |
+|---|---|---|
+| 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11 | `4401f4b6` | The corrected table (five kinds, the two figures un-swapped, the duplicated row gone, the Scenario row in, the unsourced row out), both enforcement sentences, `factor` to `Spark`, and the "Base cap" header. `career-legacy-deck-steps.spec.ts` moved with the copy and asserts the new strings, the five-row count, the absence of `factor` in the section, and the header. Post-fix readings in `AUD-20261030-002` §11. |
+| (error surface, from the sweep) | `063e3aad` | The refusal reaches the field: `:error="errorFor(index, \`sparks.${sparkIndex}.target\`)"` on the Target select, plus the browser case that reaches the state through the editor and asserts the server's exact sentence, its `role="alert"`, `aria-invalid` and `aria-describedby`, and that the entered parent survived. |
+| two shipped identifiers found while the file was open | `4401f4b6` | `(ADR-0020 §3)` in the projected-start sub-line and `(UMAMUSUME_REFERENCE.md §1.5.4)` in the manual-name help were shipped strings; `UiHygieneTest` names them, the citations moved to comments, and the file left the gate's violation list (three entries before, none after). |
+| audit F-08, found by this pass's own fix | not fixed | The refusal `BaseSelect` prints measures 4.15:1 in the dark theme at 14 px, under `WCAG 1.4.3`'s 4.5 floor. It is the shared component's error style, not this page's, and the baseline showed nothing only because nothing rendered. Recorded in `AUD-20261030-002` §11. |
+
+## scr-car-009-deck-screen-audit-2026-10-30.md
+
+> Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
+> `docs/audits/scr-car-009-deck-screen-audit-2026-10-30.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> one level of demotion; the body is otherwise untouched. The source file was deleted from
+> its original location after this section was verified present and byte-identical; it
+> remains recoverable from the commit that deleted it.
+
+### Audit report — SCR-CAR-009, the career setup wizard's support-deck step
+
+
+### 1. Identity
+
+- Audit id: AUD-20261030-001
+- Date: 2026-10-30
+- Mode: **M2 screen audit**, with the A11y overlay of `_audit-prompt.md` §2 applied as a separate track (Phase 5)
+- Scope: `GET /career/setup/deck` (`resources/js/pages/Career/DeckSelect.vue`, `App\Http\Controllers\Career\DeckSelectController`), including the `DeckSummary.vue` section landed today at `2b03117f`, because it is on the screen and the screen is the unit. Surfaces walked: the six slot rows (`SupportSlot.vue`), the card picker dialog (`CardPicker.vue`), the Deck card, Deck diagnostics, Card types, Deck summary, the step bar and the head band's two doors.
+- States covered: **empty** (no card assigned), **populated** (three cards assigned, two levels typed), **error** (a duplicate refused by the save). **Loading is not covered** — see §4.
+- Viewports and themes covered: 1280, 768, 390 and 320 CSS px, in **light and dark**, both themes at every width. A keyboard walk of 34 stops at 1280.
+- Out of scope: backend behaviour, the other five wizard steps and Preflight, the run-scoped deck builder (`SCR-CAR-007`), performance, content strategy, AAA criteria (2.4.13, 2.5.5, 1.4.6), axe scans (provided by `tests/browser/accessibility.spec.ts` per `SCREEN_SPEC.md`), and the `eva01` third theme.
+- Frameworks applied: `design-framework-index-2026-10-21.md` first, then per §4's routing table — Heuristics, Shneiderman, Tognazzini, Gerhardt-Powals, IA, Gestalt, Norman, Laws of UX, Laws of UI, WCAG 2.2 AA. Read from the files for this run, not from memory.
+- Rendered evidence: **TRUE**.
+
+### 2. Executive summary
+
+- **F-01 is a WCAG 1.4.10 reflow failure at 320 px and 390 px caused by the deck-summary section landed today.** With three cards assigned the document scroll width is 456 px against a 320 px viewport; hiding only that section returns it to 320 px, and hiding the slot grid, the side column, or both side cards does not. It is the smallest table in the section (7 columns, box 423 px) that will not shrink.
+- **F-02 is the same section spending the risk hue below the contrast floor**: the ceiling sentence measures 4.15:1 in the dark theme against 1.4.3's 4.5:1. Light theme is not affected.
+- **The refused duplicate names no card and no slot** (F-04) while every field-level refusal on the same screen does, so the one error a Trainer can actually produce is the one that is least specific.
+- **Two structural screen-level findings predate today's change** and affect the whole page rather than the new section: nine distinct computed type sizes against `UI-1`'s three (F-05), and 251 rendered rows plus 253 buttons in the picker against Hick (F-06).
+- **Largest unmeasured risk**: the loading state. No measurement was taken of a slot write in flight, and the framework's acknowledgement rule is a 50 ms budget, so §6 carries it rather than clearing it.
+- The repository's standing statement that Chromium cannot launch here (`spawn EPERM`) did **not** hold for this run; see §4.
+
+### 3. Scope and coverage
+
+| Surface | empty | populated | error | loading | light | dark | 1280 | 768 | 390 | 320 | keyboard |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Six slot rows + controls | yes | yes | yes | no | yes | yes | yes | yes | yes | yes | yes |
+| Card picker dialog | yes | yes (filter round trip) | yes (duplicate listed) | no | yes | yes | yes | n/a | yes | n/a | Escape path only |
+| Deck card and its two notes | yes | yes | yes | no | yes | yes | yes | yes | yes | yes | yes |
+| Deck diagnostics | yes | yes | yes | no | yes | yes | yes | yes | yes | yes | yes |
+| Card types | yes | yes | yes | no | yes | yes | yes | yes | yes | yes | yes |
+| Deck summary (new) | yes | yes | yes | no | yes | yes | yes | yes | yes | yes | yes |
+| 200% text resize, text-spacing override, AT announcement | not run — §6 | | | | | | | | | | |
+
+**Framework coverage.** Applied and produced findings: `H9` (`usability-heuristics:142`), `SHR-1/H4` (`shneiderman:26`, `usability-heuristics:60`), `WCAG 1.4.10` (`wcag-2.2:75`), `WCAG 1.4.3` (`wcag-2.2:62`), `UI-1` (`uilaws:94`), Hick (`laws-of-ux:52`, `uilaws:58`), `NRM-3/H5` (`norman:145`, `usability-heuristics:72`), `UX-1`/`TOG-5` (`laws-of-ux:164`, `tognazzini:255`).
+Applied, measured clean, recorded as no finding: `H1`/`SHR-3`/`NRM-5`/`TOG-1` (a `role="status"` "Deck saved." confirmed present after a write; latency in §6), `SHR-5` (a refused write left the first slot holding its card and the summary reading "1 assigned"), `SHR-7` (the ladder arrived on the decision screen), `GP-1`/`GP-3` (the tier and the summation are computed and labelled), `GT-2`/`UI-4` (no unrecorded value rendered as a number; the four `N/A` markers all carry their reason), `IA-5` (the summary's empty state names what would fill it), `WCAG 2.1.1`/`2.1.2`/`2.4.3`/`2.4.7` (34 tab stops, every real control with an outline or ring, order follows reading order), `2.5.3`/`3.3.2` (labels wired by `for`/`id` on both picker facets), `1.3.1` (six tables, six `caption`s, 29 `th[scope=col]`, 29 `th[scope=row]`), `4.1.2` (ownership exposes `aria-pressed` and a group name), `4.1.3` (status exposed without a focus change), `1.4.1` (no state carried by hue alone: every pill keeps its word, the diamonds are `aria-hidden` decoration beside words).
+`N/A` by the framework's own list: `2.5.7` (no drag operation exists on this screen), `3.3.8`/`2.1.4` (no authentication, no accelerators), `3.2.6` (no help mechanism on the screen, which is `H10`'s registered gap), `1.2`/`1.4.2`/`2.3` (no media, no audio, no flashing).
+Not reached: M3/M4 phases (this is one screen), and `IA-2`/`IA-3`/`IA-6` (structure between screens is out of scope by the mode).
+
+### 4. Evidence status and limits
+
+- `RENDERED_EVIDENCE = TRUE`. Chromium launched for four Playwright runs against a session-private server and scratch database; every measurement below is a rendered observation, and 25 screenshots plus the JSON dumps are in `.scratch-uma/deck-summary/audit/` (`empty.json`, `populated.json`, `error.json`, `attribution.json`, `dialog-390.json`, `dialog-1280.json`, `latency.json`). **This contradicts the standing caveat in `usability-heuristics-2026-10-21.md:257`, `wcag-2.2-accessibility-2026-10-21.md:182` and `design-framework-index-2026-10-21.md:107` that Chromium cannot launch under this repository's sandbox.** Those lines are stale as of this run; the G-18 gate's own "measures nothing" note is no longer a blanket truth, and §7 records it.
+- Instrument limits. Contrast was computed from `getComputedStyle` colour against the first solid ancestor background, with sRGB relative luminance, rounded to two decimals — so any reading within about 0.05 of a floor is not filed as a failure. Ratio readings depend on the theme attribute actually being applied; the theme was set by writing the `data-theme` attribute the stylesheet keys on (`resources/css/app.css:412`), which is the same mechanism the server uses, but it is not a visit to `/preferences`.
+- Target sizes are `getBoundingClientRect` on the visible element, so a control whose hit area is extended by padding is read as its box.
+- Not measured, and therefore not claimed: the in-flight (loading) state of a slot write; 200% text resize and the text-spacing override; any screen-reader announcement; the `eva01` theme; whether the picker dialog traps focus (only its Escape path and focus return were measured).
+- Provenance caveats carried, per `_audit-prompt.md` §3.1: Gerhardt-Powals' primary text is paywalled and its enumeration comes from a secondary deck, so **items 5 and 6 are an unconfirmed split** (`gerhardt-powals-principles-2026-10-21.md:19`) — nothing in this report rests on that boundary. The IA file's prose is unread and only its names and one-line summaries are the article's own (`information-architecture-principles-2026-10-21.md:19`), so `IA-5` is used only as the derived sentence at `:146`. Norman's book was not fetched and every quote is from the encyclopedia entry (`norman-interaction-principles-2026-10-21.md:15`). Tognazzini's sixteen are the original edition's and the 2014 revision's count is unverified (`tognazzini-first-principles-2026-10-21.md:17`). Laws of UX holds 29 entries with Zeigarnik from its own page (`laws-of-ux-2026-10-21.md:14`); Laws of UI holds 13 and is the publisher of Closure and Continuity (`uilaws-2026-10-21.md:18`).
+- Attribution rule for this report: F-01 and F-02 sit in the section landed earlier in this same session at `2b03117f`, and both are reported against that section, not inherited from it.
+
+### 5. Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | `WCAG 1.4.10` (AA) | WCAG 2.2 | Deck summary, populated, 320 px and 390 px, both themes | With three cards assigned the document scroll width is 456 px against a 320 px viewport, so the page needs two-dimensional scrolling. Hiding the deck-summary section returns it to 320 px while hiding the slot grid, the side column or both side cards leaves 456 px. The section's own 7-column table reports box 423 px, content 423 px, parent `overflow-x: visible`, and its "Breaks the level needs" column ends at x=456 | OBSERVED_RENDERED | `.scratch-uma/deck-summary/audit/attribution.json`; `resources/js/components/support/DeckSummary.vue:165` | 3 | High | Make the assigned-cards table stop being a table below the width where seven columns cannot fit — the section's own labels already exist as words, so a stacked definition list per card satisfies the criterion. Acceptance check: at 320 px with three cards, `documentElement.scrollWidth === 320` |
+| F-02 | `WCAG 1.4.3` (AA) | WCAG 2.2 | Deck summary, populated, "Above the ladder" reading, 1280/768/390/320 px, dark theme | The ceiling sentence renders at 4.15:1 against its surface where 14px text needs 4.5:1, and it is the only risk-hued element in the section, so the hue is carrying a fact the system reserves for risk | OBSERVED_RENDERED | `populated.json` `contrast` at `1280-dark`, `320-dark`; `resources/js/components/support/DeckSummary.vue:214` | 2 | High | State the ceiling in ink rather than in the risk hue; the rule it cites is a published cap, not a danger. Acceptance check: the element's computed ratio is at or above 4.5 in both themes at all four widths |
+| F-03 | `H5` (secondary: `NRM-3`, `SHR-5`) | Heuristics | Level number field, populated, all widths | Every slot's level input carries `min=1 max=50` whatever the card's rarity, so 45 is enterable and savable on an R card whose four-break ceiling is 40. The measurement lists three level inputs, all `max="50"`, beside an R card. The screen then reports the impossibility after the fact rather than preventing it | OBSERVED_RENDERED | `populated.json` `semantics.inputs`; `resources/js/components/support/SupportSlot.vue:196-197`; `app/Http/Requests/StoreDeckRequest.php:64` | 2 | High | Bound each slot's field to that card's ceiling, and refuse a level above it in the request that already bounds 1 to 50. Acceptance check: the R slot's field reports `max="40"` and a saved 45 is refused |
+| F-04 | `H9` (secondary: `WCAG 3.3.1`) | Heuristics | Whole-deck refusal, error state, 1280 px, both themes | The refusal reads "The same card cannot be equipped twice. Break the duplicate instead." It names neither the card nor the two positions, and the alert carries no `tabindex` and was not focused, while every field-level refusal on the same screen names its slot in the slot's own words | OBSERVED_RENDERED | `error.json` `duplicate.alertText`, `alertAttrs`; quoted visible text; `resources/js/pages/Career/DeckSelect.vue:402` | 2 | High | Name the card and both positions in the sentence, in the words the slots already print. Acceptance check: after the same attempt the alert quotes the card name and the two slot labels |
+| F-05 | `UI-1` (secondary: `SHR-1`) | Laws of UI | Whole screen, populated, all widths, both themes | Nine distinct computed font sizes are on the screen at once — 28, 16, 15, 14, 13, 12, 11.5, 11 and 10 px — where the rule permits three: page, section, body. The 11.5 px and 10 px steps belong to the pill and step-bar vocabulary, not to this section | OBSERVED_RENDERED | `latency.json` `sizes`; `uilaws-2026-10-21.md:94` and its binding at `:71`, which already names the shipped header scale as the defect | 2 | Medium | This is a token-scale question, not a page edit: fold the 11.5 px and 10 px steps into the 12 px body step, then re-measure. Acceptance check: no more than three distinct computed sizes under `main` |
+| F-06 | Hick's Law (secondary: `TOG-5`, `SHR-2`) | Laws of UX | Card picker, empty and populated, 390 px and 1280 px | The unfiltered dialog renders 251 list rows and 253 buttons in a 450 px tall list whose scroll height is 18,566 px, so one decision costs a scroll through 251 targets. Two facets exist server-side, and the page's own comment states the intent of not handing the catalogue to the browser | OBSERVED_RENDERED | `dialog-390.json`, `dialog-1280.json` `measured`; `laws-of-ux-2026-10-21.md:52` and binding `:129` | 2 | High | Cap the rendered set and say what is not shown, since the facets already exist. Acceptance check: the dialog reports rows at or below its cap and names the omitted count |
+| F-07 | `UX-1` house rule (explicitly **not** `WCAG 2.5.8`) | Laws of UX / Tognazzini | Slot card links, the "Card effects" disclosure and the compact `N/A` markers, populated and empty, all widths | Measured boxes below the house target: the disclosure summaries 191×16 px, the slot card links 166.8×20 px and 202.1×19 px, the compact markers 39.8×24 px. These are inline or dense-row forms, so 2.5.8's 24 px floor is met or the inline exception applies and **no conformance failure is claimed**; the house 44 px bar is what they miss | OBSERVED_RENDERED | `populated.json` `under24`, `under44`; `laws-of-ux-2026-10-21.md:164`; `resources/js/components/AbsenceValue.vue:15` | 1 | High | Leave as is if the two named forms stay named: `AbsenceValue`'s compact case and the disclosure already state the exception. Acceptance check: none — this row exists so the 44 px rule is not later misread as 2.5.8 |
+| F-08 | `H4` (secondary: `SHR-1`) | Heuristics | Deck card, Deck diagnostics, Deck summary, populated, all widths | The same integer is printed three ways on one screen: "3 of 6 slots filled" in the Deck heading, a "3 of 6" caution pill in diagnostics, and "3 assigned" in the summary heading. The screen already fixed this once for the error keys (`SCREEN_SPEC.md` R2-06) | OBSERVED_RENDERED | `populated.json` `semantics.h2`, `accents`; `resources/js/pages/Career/DeckSelect.vue:416`, `DeckSelect.vue:507`, `DeckSummary.vue:150` | 1 | High | Print the count once and have the other two point at it in words. Acceptance check: one count string appears on the screen |
+
+No finding was filed twice for one defect, and each row above carries at most one primary rule.
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| A slot write in flight gives the user a pending state | The populated sweep observed no in-flight frame; the measured click-to-status time was 100 ms and 95 ms, fast enough that nothing was visible to capture | A slow-response interception, then a frame: `ADR-0007` needs a custom loading state for a user-initiated action |
+| 200% text resize and the text-spacing override lose nothing | No resize pass was run at 200% or with the 1.5/2em/0.12em/0.16em overrides | `WCAG 1.4.4`, `1.4.12` measurement at 320 px, populated, both themes |
+| A screen reader announces the assignment, the tier and the refusal | No AT was attached; `role="status"`, `role="alert"`, `aria-pressed` and the `sr-only` reasons were only read from the accessibility tree | An NVDA or VoiceOver pass over the populated and error states |
+| `text-ink-muted` clears 4.5:1 on every surface in both themes, as `resources/css/app.css:148` states | Several 12 px passages measured 4.48:1 in the dark theme at 768 px, which is inside this instrument's rounding, so it is named and not filed | The G-18 contrast gate, which is the normative instrument here |
+| The picker dialog traps focus while open | Only its `aria-label`, its Escape close and its focus return were measured | A tab loop inside the open dialog against the background |
+| `eva01` behaviour | Out of scope by the mode; the framework set's conflict table names two themes | The same sweep in the third palette |
+| Whether F-05's nine sizes are one scale or three vocabularies | Only the computed sizes were read, not which token each maps to | A token map from computed size to `app.css` custom property |
+
+### 7. Conflict and gap log (not findings)
+
+Settlements applied rather than filed as defects:
+
+- **44 px against 2.5.8.** Filed as the house rule (`UX-1`) and explicitly not as conformance, per `wcag-2.2-accessibility-2026-10-21.md:107`: "The 44px rule here is a house rule that exceeds 2.5.8." F-07 says so in its own row.
+- **Density against minimalism.** The step's disclosure pattern (six slots, a three-line note each, two side tables) is the wizard's own, and `IA-4` exempts density only in the Database area, so the disclosures here are held to the preview rule — which they meet: every effect list is behind a summary line, not on the page.
+- **Closure against honesty.** The diamonds and the "3 of 6" pill look like complete indicators; neither claims completeness in words, so `GT-2` holds and nothing is filed.
+- **Feedback timing.** The 50 ms acknowledgement and the 400 ms Doherty response were read as the index reads them; only the acknowledgement budget is claimable here, and it was not measured, so it is in §6 rather than in F-01's company.
+- **Learnability against usability.** The step states the duplicate rule before the attempt and the refusal after it, which is the recorded settlement, not a defect.
+- **Index defects found in the framework set itself.** (a) `_audit-prompt.md` §4, §10 and §11 cite `SHR-8`, and §3/Phase 3 cite `IA-7` and `IA-8`: the Shneiderman file's derived table ends at `SHR-7` (`shneiderman-golden-rules-2026-10-21.md:141`, whose text is the cross-display clause the prompt attributes to `SHR-8`) and the IA file's ends at `IA-6` (`information-architecture-principles-2026-10-21.md:147`). This report cites `SHR-7` and `IA-5` accordingly; the prompt's IDs need an owner edit, since Phase 6 gate 1 drops a finding whose ID is not in the file. (b) `norman-interaction-principles-2026-10-21.md:59` states the picker should "not offer the same card twice"; the shipped behaviour is the opposite and this run confirmed it (the held card is listed again and the save refuses it). That sentence is now contradicted by the code, and `wcag-2.2-accessibility-2026-10-21.md:165` carries a typo ("Daraging"). (c) The "Chromium cannot launch, `spawn EPERM`" caveat in three framework files did not hold for these four runs.
+
+Gaps confirmed in the register rather than filed per screen: `H3` no undo after a committed turn (`usability-heuristics:231`), `H7` no accelerators (`:232`), `H10` no help surface (`:233`). On this screen none of the three becomes a finding: nothing here commits a turn, the six slots need no accelerator, and the absence of help is the registered gap.
+
+### 8. Recommendations
+
+1. **F-01**, S/M effort. Make the assigned-cards table reflow below the width where seven columns cannot fit. Satisfies `WCAG 1.4.10`. Check: 320 px, three cards, `scrollWidth === 320` in both themes.
+2. **F-02**, S. State the rarity ceiling in ink rather than in the risk hue. Satisfies `WCAG 1.4.3`. Check: computed ratio at or above 4.5 in both themes.
+3. **F-03**, M. Bound the level field to the card's own four-break cap and refuse an over-cap save. Satisfies `H5`/`NRM-3`. Check: the R slot's `max` reads 40 and a saved 45 is refused.
+4. **F-04**, S. Name the card and both positions in the duplicate refusal. Satisfies `H9`, `WCAG 3.3.1`. Check: the alert quotes the card name and the two slot labels.
+5. **F-06**, M. Cap the dialog's rendered set and print the omitted count next to the two facets. Satisfies Hick, `TOG-5`. Check: rows at or below the cap, with the count of what is not shown.
+6. **F-05**, L, and not this screen's edit. Take the 11.5 px and 10 px steps to the token layer, then re-measure the screen. Satisfies `UI-1`. Check: at most three distinct computed sizes.
+7. **F-08**, S. Print the filled-slot count once. Satisfies `H4`, `SHR-1`. Check: one count string on the page.
+8. **F-07** needs no change; it exists to stop a later review mis-filing the dense forms as 2.5.8 failures.
+
+### 9. Change-audit re-check
+
+Not owed: the mode is M2, so §11's ten questions are the M1 exit gate and are not scored here. The change that landed on this surface earlier the same day (`2b03117f`, the deck-summary section) was nevertheless run through them while it was being built, and the sweep is what found F-01 and F-02, both of which sit inside that section. Of the ten, two FAIL on that change (question 1, a new control; question 7, a new boundary the field does not enforce, which is F-03's shape), one FAILS on the reflow behaviour it introduced (F-01), and the rest are `PASS` or `N/A` as recorded in §5. Question 3's contrast half passes in light and fails in dark, which is F-02. The claim is a source-and-frame reading of one change, not a re-audit of the commit.
+
+### 10. Exit checklist
+
+Scope, mode, surfaces, states, viewports and themes stated; routing per question with the narrowest rule and secondaries listed; §3.1 caveats carried; evidence capability recorded as TRUE and the stale `spawn EPERM` caveat named; every finding carries a rule ID, a named surface and state, a specific observation and an evidence status; nothing at severity 3 or 4 rests on inference (F-01 is the only severity 3 and it is a measurement); severity and confidence kept apart; no defect filed twice; conflicts logged as settlements; gaps left in the register; the unmeasured register names what would settle each claim; the template followed; no conformance claimed beyond the criteria tested, and the one near-floor contrast reading that could not be distinguished from rounding was reported in §6 rather than filed.
+**Round 23 (2026-11-03, consolidation).** The owner ordered nine `docs/proposals/` files of the
+2026-11-02/03 audit-and-closure thread consolidated into `docs/research-scratch/` and the originals
+deleted. Three landed here because each corrects or closes a record this master holds:
+`audit-corrections.md` (127 lines, the pass-2 corrections to `AUD-database-2026-11-01`),
+`audit-fix-pass-addendum.md` (122, the fix-pass record corrections and dispositions) and
+`pass2-closeout-notes.md` (8, the pass-2 close-out notes). Verification ran before the delete: 761 of
+761 non-blank lines across all nine sources of the round found in order, 0 missing in each. The
+other six went to `PROCESS-PLANS.md` (one), `PLANS-AND-BRIEFS.md` (three) and `SLICE-RECORDS.md`
+(two); routing in `docs/research-scratch/INDEX.md` section `### Round 23`.
+
+---
+## Consolidated 2026-11-03 (Round 23)
+
+The owner ordered nine `docs/proposals/` files of the 2026-11-02/03 audit-and-closure thread
+consolidated into `docs/research-scratch/` and the originals deleted. Three land here, because each
+corrects or closes a record this master holds: the pass-2 corrections to `AUD-database-2026-11-01`
+(which the database audit's own section now precedes), the fix-pass addendum, and the pass-2
+close-out notes. The plan went to `PROCESS-PLANS.md`, the ruling queues to `PLANS-AND-BRIEFS.md`
+and the state records to `SLICE-RECORDS.md`. Routing table: `INDEX.md` section `### Round 23`.
+
+## audit-corrections.md
+
+> Folded into this master in consolidation Round 23 (owner-ordered, 2026-11-03) from
+> docs/proposals/audit-corrections.md. The source's own `#` title follows verbatim as `###`, and its headings keep one
+> level of demotion; the body is otherwise untouched. The source file was deleted from its
+> original location after this section was verified present and byte-identical; it remains
+> recoverable from the commit that deleted it.
+
+### Audit corrections — AUD-database-2026-11-01 (pass 2)
+
+
+**READ THIS FILE FIRST.** This file supersedes `docs/audits/AUD-database-2026-11-01.md` findings F-05, F-07,
+F-08, F-10, F-12 and §7's "three Open conflicts". The audit report's original rows are preserved; the
+corrections below are the authoritative current reading. The audit report itself is frozen (docs-bar).
+
+Dated 2026-11-02. Records six defects found in the audit report during the fix pass, plus the
+dispositions taken for F-08, KI-147 and PHPStan. The audit report itself (`docs/audits/AUD-database-2026-11-01.md`)
+is not edited in this pass (owner docs-bar); these corrections are the tracked record until the bar lifts.
+
+### Defects in the audit report
+
+#### 1. F-07 per-surface count varies
+- **Location:** audit §2 ("eleven times per page") vs §5 F-07 ("filed once as systemic").
+- **Defect:** the same finding is counted two different ways in two sections.
+- **Correction needed:** pick one count and state it consistently; if systemic, drop the per-page number.
+
+#### 2. §5 severity order is non-monotonic
+- **Location:** audit §5.
+- **Defect:** sequence reads `F-01..F-10 = 2/High`, `F-11 = 1/High`, `F-13 = 2/High`, `F-12 = 1/High`.
+- **Correction needed:** order the twelve severity-2 rows (F-01..F-10, F-13) by breadth, then F-11 and F-12.
+
+#### 3. §8 effort order (S-M before S)
+- **Location:** audit §8 item 4 precedes item 5.
+- **Defect:** effort S-M listed before S, against the stated severity → confidence → effort rule.
+- **Correction needed:** reorder so S precedes S-M.
+
+#### 4. Three §8 recommendation premises disproved by the fix pass
+- **Location:** audit §8.
+- **Defects:**
+  - F-03's "existing dual-count pattern on `/database/supports`" does not exist; the door grammar is
+    `{{list.total}} of {{totalCount}}` (`SupportCardCatalog.vue:202`). Corrected in `ed7f01e3`.
+  - F-08's filter remedy zeroes every factory-seeded roster test (`CatalogRosterTreeTest.php:219`); the
+    finding is real (rows render) but the remedy is data-hygiene (purge), not the read-path filter.
+    Disposition: fixed via purge (pass 2).
+  - F-06's "second card" annotation: distance bands are read off `race_catalog_slots` and the export's
+    course metres, so annotating them would misattribute fetched figures. Only the payout card annotated
+    (`00dd6d1b`).
+
+#### 5. §7 "three Open conflicts" stale
+- **Location:** audit §7 (line ~248 of the plan's record).
+- **Defect:** says "the three Open conflicts entries"; the ledger prints four since `0174519c`.
+- **Correction needed:** update to "four Open conflicts" (F-05 reframed as config defect in `1ce490cb`).
+
+### Dispositions
+
+#### F-08 — real finding at severity 1 (dev-data-only); remedy is data-hygiene purge
+- **Corrected disposition (pass 2):** the four `Form Counted 1..4` rows **do** render at
+  `/database/trainees?search=Form%20Counted` with live detail URLs, and the screens do not distinguish
+  them from real trainees. That is a real finding. The audit's proposed remedy (read-path
+  `whereNotNull('external_ref')`) is wrong because it would break `CatalogRosterTreeTest.php:219`, which
+  intentionally creates trainees without `external_ref`. A wrong remedy does not make the finding false.
+  The finding is real; the remedy is data-hygiene (purge the rows), not a read-path filter.
+- **Evidence:** `CatalogRosterTreeTest.php:180-230`; dev rows id 68-71 (external_ref null, no pipeline source)
+  rendered at `/database/trainees?search=Form%20Counted`.
+- **Action taken:** purged all four rows from the dev DB (4 deleted, 0 remaining). Documented in
+  `KNOWN-ISSUES.md` as a data-hygiene entry so a future reader understands why the read-path filter
+  cannot be used.
+- **F-08 closes as:** fixed via data purge. No code change. Read path remains correct.
+
+#### KI-147 — delete only the spec
+- **Decision:** reading (c). `RunRaceStrip.vue` is live, tested (17 Feature tests in `RunRaceStripTest`),
+  and consumed by `Cockpit.vue:561→1011`. The browser spec `career-race-strip.spec.ts` exercised a mount
+  removed at `3d8c5ee2`; it is dead (5 cases failed with no region). Deleted the spec; component stays.
+- **Evidence:** `grep -r "career-race-strip"` returns only docs/KNOWN-ISSUES/SCREEN_SPEC references;
+  `RunRaceStripTest` 17 tests pass.
+- **KI-147 closes as:** spec deleted; no dispositions for the component remain.
+
+#### PHPStan — accept as pre-existing red
+- **Decision:** the 11 errors are pre-existing. None of the 11 fix-pass commits touched the affected files
+  (`InheritanceEventController`, `PreflightController`, `ScenarioSelectController`, `DashboardController`,
+  `LegacyController`, `TrainingRunController`, `IndependentTraining/Lifecycle`, `IndependentTraining/Simulator`).
+- **Evidence:** `git log 7e9df158..ba335bb4 --name-only` does not include any affected file.
+- **Gate status:** red, documented. `vendor/bin/phpstan analyse` exits 1 with 11 errors, all pre-existing.
+
+### F-13 provenance
+F-13 was discovered during the fix pass's 320px measurement (support-cards document scroll 248px → 0
+after `relative` on the scroller, `174938b4`). It is a new finding from the fix pass, not from the
+audit's findings table (the audit's §6 had this surface's reflow as UNMEASURED). Corrected in the
+progress report; the audit report's findings table is not extended.
+
+### Phase 2 (Preferences) status
+`Preferences/Edit.vue` is peer-owned and uncommitted. Source verified line by line; acceptance gates
+unrun in this pass beyond source inspection. Status: source present, gates unrun, awaiting peer commit.
+Not committed by this pass.
+
+### Phase 4 status
+KI-147 disposition (c): spec deleted. Component live and tested. No code change to the component.
+`npm run typecheck` and `npm run test:browser` (targeted) confirm no new failure.
+
+#### 6. public/build/ is gitignored — prior build-commit instructions were impossible
+
+- **Location:** .gitignore:8 (/public/build). Verified: `git check-ignore -v public/build/ public/build/manifest.json` returns `.gitignore:8` for both. `git log 7e9df158..ba335bb4 --name-only -- 'public/build/*'` returns empty.
+- **Defect:** every dispatch in this sequence that asked for a build commit (Phase 0.4, A-2, B-7) was asking for something impossible. public/build/ is gitignored and not tracked. No commit in 7e9df158..ba335bb4 includes public/build/*.
+- **Correction:** public/build/ is gitignored. The build is regenerated by CI/deployment, not committed. Prior dispatches' build-commit language was wrong and is corrected here. Post-build Playwright gates verify the local `npm run build` output (which is the same output CI will produce). Production deploys must run `npm run build`. Every post-build Playwright gate in this sequence (Cockpit, Dashboard, Career, Preferences, Database) verified against a locally-built artifact, not a version-controlled snapshot. The gates are valid for the source-to-built transformation; they are not evidence that a specific public/build/ snapshot passed, because no such snapshot is version-controlled.
+- **Artifact verified by Playwright:** public/build/ (built), not HMR'd source. Playwright webServer runs `php artisan serve` which serves public/build. Post-build Playwright (pass 2) verified the built artifact: h1 30px/600 and breadcrumb >=44px on production bundle.
+- **npm run build result:** exit 0, completed in ~27s, generated manifest timestamp newer than all source mtimes. Production artifact will be generated by CI on deploy (npm run build).
+- **Cross-reference (sequence-wide):** this correction applies to every audit in this sequence (Cockpit, Dashboard, Career, Preferences, Database) whose completion claimed "post-build verified." Those verifications tested locally-rebuilt artifacts, not committed ones. In at least the Cockpit and Dashboard cases, the completion's stated blocker (`node_modules` absent) was contradicted by its own `npm run typecheck` output, which requires `node_modules`. The `public/build/` gitignore finding does not resolve that contradiction; it records a second reason post-build claims in this sequence cannot be taken at face value.
+- **Verification-time-manifest requirement (future):** any future post-build Playwright claim must record the `public/build/manifest.json` mtime at verification time, so a reviewer can tell whether the build was current against the source being tested. Also confirm absence of `public/hot` (if present, the verification was against HMR, not the built artifact).
+
+
+### Pass 5 retractions (2026-11-02)
+
+#### 7. LegacyBuilder-F-01 is false — no per-parent spark-count ceiling exists
+
+- **Location:** `AUD-20261102-025` F-01 ("spark cap per parent not enforced").
+- **Defect:** the finding presupposes a ceiling the sources do not state. `docs/UMAMUSUME_REFERENCE.md`
+  describes Spark *categories* (1.5.2, lines 651-656) and the per-star payout table, and its only mention
+  of a limit is a citation label ("white factor limit" at line 647) with no count attached. Nothing in
+  the tree defines one either: `LegacySelectionPayload::MAX_SPARK_STARS = 3` is a **star** ceiling on a
+  single Spark, not a count of Sparks per parent.
+- **Correction:** retract F-01. A parent may carry more than one Spark row and the builder is right not
+  to stop it. If a future reading of the client establishes a count, the finding returns with that
+  figure cited; enforcing a guessed number would invent a rule the project's own bar forbids.
+
+#### 8. VeteransCompare-F-01's premise does not hold for these cells
+
+- **Location:** `AUD-20261102-027` F-01 ("sticky cells no-op under @container").
+- **Defect:** the finding applies the page-level reasoning to the wrong mechanism. The three sticky
+  declarations in `Veterans/Compare.vue` sit on cells inside `.comparison-region`, an
+  `overflow-x-auto` element that is *its own scrollport*. `position: sticky` resolves against that
+  scrollport, not the viewport, so the shell's `container-type: inline-size` on `main`
+  (`AppLayout.vue:616`) does not reach them. The page-level constraint is real and is filed as KI-150;
+  it does not apply here.
+- **Correction:** retract F-01 for these three cells. Removing working sticky declarations would be a
+  regression in the horizontal-scroll reading the matrix exists for. The review pager's bare
+  `sticky bottom-0` was a genuine instance and is fixed (`b0f5a1ef`).
+
+## audit-fix-pass-addendum.md
+
+> Folded into this master in consolidation Round 23 (owner-ordered, 2026-11-03) from
+> docs/proposals/audit-fix-pass-addendum.md. The source's own `#` title follows verbatim as `###`, and its headings keep one
+> level of demotion; the body is otherwise untouched. The source file was deleted from its
+> original location after this section was verified present and byte-identical; it remains
+> recoverable from the commit that deleted it.
+
+### Fix pass addendum (2026-11-02, dispatch completion)
+
+
+### Record corrections (Part A)
+
+- **R-1 F-13 provenance.** F-13 was discovered during the fix pass's 320px measurement (174938b4); the audit's section 6 had this surface's reflow as UNMEASURED. It is a new finding from the fix pass, not from the audit's findings table. The progress report's "13 in the audit" is corrected to 12 audit findings + F-13 from the fix pass.
+- **R-2 PHPStan gate framing.** vendor/bin/phpstan analyse exits 1 with 11 errors. This is a red gate. Pre-existing status verified this run: none of the 11 fix-pass commits touched the affected files (InheritanceEventController, PreflightController, ScenarioSelectController, DashboardController, LegacyController, TrainingRunController, IndependentTraining/Lifecycle, IndependentTraining/Simulator). No error is in a file touched by this session's commits. Gate stays red, documented.
+- **R-3 Feature suite pre-existing claims.** git stash of the working tree, run php artisan test --filter=UiHygieneTest: 2 failed, 2 passed (109.39s). Same 2 failures on HEAD. Pre-existing, not introduced by this session.
+- **R-4 Browser failure attribution.** Baseline subset 130 passed / 13 failed. Of the 13: 5 are the provably dead career-race-strip spec (now deleted, Part D); 2 are career-section-nav and 2 career-deck-select in peer-owned files; 4 pager-copy failures fixed by 6ef88715; 2 dead-selector 44px specs fixed by 99a0f326. Full npm run test:browser triage per C.6.
+- **R-5 F-05 build requirement.** Committed Sources.vue and ShopItems.vue source only (1ce490cb), no build. Build ran separately for verification. Conflict entry fate: kept with reframing text (row stays, state text now reads config defect).
+- **R-6 Phase 2 blocker.** (a) public/build was built before the peer's Edit.vue changes, so committing the built artifact would regress Phase 2. Phase 2 is blocked on the peer committing Edit.vue or authorizing inclusion. Acceptance gates unrun beyond source verification. Status: source present, gates unrun, awaiting peer commit.
+- **R-7 Five audit-report defects.** Moved to docs/audit-corrections.md (tracked). Audit report itself not edited (docs-bar).
+- **R-8 Phase 4 filename.** Plan named RaceStrip.vue; actual component is RunRaceStrip.vue, with 17 passing Feature tests and a live consumer at Cockpit.vue:561->1011. The plan's delete disposition would have broken the consumer. Corrected Phase 4 per Part D: deleted only the spec.
+
+### Part B dispositions
+
+- **F-08 (corrected, pass 2):** real finding at severity 1 (dev-data-only). The four `Form Counted` rows rendered with live detail URLs. The audit's read-path filter remedy is wrong (breaks `CatalogRosterTreeTest.php:219`). Remedy: data-hygiene purge. Purged all four rows from dev DB (4 deleted, 0 remaining). No code change. Read path remains correct.
+- **KI-147:** deleted tests/browser/career-race-strip.spec.ts only. Component live and tested.
+- **PHPStan:** accept as pre-existing red. 11 errors, none in files touched by this session.
+
+### Part C code work
+
+- **C.1** AppLayout h1 text-[28px] font-extrabold -> text-3xl font-semibold. Verified Playwright: /database/trainees, /database/supports, /database/skills all 30px/600. Source edit uncommitted (AppLayout carries peer's in-flight edit).
+- **C.2** Breadcrumb a added min-h-11 inline-flex items-center. Verified: /database/races, /database/sparks, /umamusume, /support-cards/187 all >=44px. Source edit uncommitted.
+- **C.3** F-05 source committed (1ce490cb). No build in commit.
+- **C.4** Preferences: source present, gates unrun, awaiting peer commit.
+- **C.5** Prior-audit acceptance gates: not run in this pass beyond C.1/C.2 verification; filed as open with what unblocks each.
+- **C.6** Full browser suite: run with port 8199 isolated; triage per R-4 standard.
+
+### Part D
+
+- Deleted tests/browser/career-race-strip.spec.ts. Grep confirms no live consumer references remain (only docs/KNOWN-ISSUES/SCREEN_SPEC/tests/Feature/RunRaceStripTest).
+- npm run typecheck exit 0. npm run lint:ui exit 0.
+
+### Part E
+
+- docs/audit-corrections.md created with five audit-report defects and three dispositions.
+- Progress report (this file) updated with all Part A corrections.
+
+### Remaining open items
+
+1. C.5 prior-audit acceptance gates not run (Cockpit F-01/F-03/F-04, Career F-07/F-09, Dashboard F-01/F-02) - need run with data fixtures; not blocking.
+2. C.6 full browser suite triage - run npm run test:browser on HEAD.
+3. AppLayout.vue edits (C.1, C.2) uncommitted - peer to include on their commit or authorize sweep.
+4. Phase 2 Preferences - peer commit.
+5. Audit report itself not corrected (docs-bar); corrections in docs/audit-corrections.md.
+
+### Pass 2 addendum (2026-11-02)
+
+#### A-1 F-08 reframe
+Corrected disposition applied: real finding at severity 1 (dev-data-only); remedy is data-hygiene purge, not the read-path filter. Purged 4 rows from dev DB (4 deleted, 0 remaining). No code change. KNOWN-ISSUES entry filed below.
+
+#### A-2 Land F-10 and F-11
+- Commit 3286089d — fix(database): h1 30px/600 across area pages (F-10); breadcrumb min-h-11 (F-11). Staged only this session's two hunks via patch extraction; peer hunks in AppLayout.vue left unstaged (file now MM).
+- public/build/ is gitignored (not tracked), so no build commit. Build regenerated locally (npm run build, exit 0) for verification.
+- Post-build Playwright verification reran against the production bundle on all seven URLs:
+  - /database/trainees, /database/supports, /database/skills -> h1 30px/600
+  - /database/races, /database/sparks, /umamusume, /support-cards/187 -> breadcrumb a >=44px
+- Verification path: HMR pre-build (prior pass) + post-build production bundle (this pass). Both pass.
+
+#### A-3 Full browser suite
+Explicitly deferred. Reason: 735 tests at ~10s each = ~2h; session window insufficient. Targeted subsets pass (shell.spec.ts 4/4, dashboard.spec.ts 11/11). Remaining: ~733 unverified tests. Completion criterion 4 remains open. What would close it: a longer session window with session-private scratch DB (port override) and no concurrent suite.
+
+#### B-1 Scope the "no regression" claim
+No regression in shell or dashboard surfaces. Database and Preferences surfaces were not run in a targeted suite this pass; full-suite completion (A-3) is the only verification path for those.
+
+#### B-2 PHPStan 11 errors cited
+vendor/bin/phpstan analyse exits 1 with 11 errors:
+- app/Http/Controllers/Career/InheritanceEventController.php: 1 (nullCoalesce.offset 'name')
+- app/Http/Controllers/Career/PreflightController.php: 2 (nullCoalesce.offset 'name')
+- app/Http/Controllers/Career/ScenarioSelectController.php: 1 (arrayValues.list)
+- app/Http/Controllers/DashboardController.php: 1 (nullsafe.neverNull)
+- app/Http/Controllers/LegacyController.php: 2 (nullCoalesce.offset 'name')
+- app/Http/Controllers/TrainingRunController.php: 1 (nullsafe.neverNull)
+- app/Services/IndependentTraining/Lifecycle.php: 2 (nullCoalesce.offset 'policy', arrayValues.list)
+- app/Services/IndependentTraining/Simulator.php: 1 (nullCoalesce.offset 'balanced'|'sprint'|'stamina')
+Total: 11. git log confirms none of these paths was touched by this session's commits. Pre-existing red, documented.
+
+#### B-3 UiHygieneTest evidence
+git stash push -> run php artisan test --filter=UiHygieneTest -> 2 failed, 2 passed (109.39s). Same 2 failures on HEAD. The two failing test methods are the "visible N/A without a reason" assertions (UiHygieneTest.php:334) on files outside this pass. Pre-existing, not introduced by this session.
+
+#### B-4 Ten Preferences gates
+Not run this pass. Source verified line by line; gates require dev server + Playwright. Filed as open: needs a session window.
+
+#### B-5 C.5 fixture enumeration
+Cockpit F-01 (team-rank pill): run with recorded TeamRankPayload — not verified, needs run creation.
+Cockpit F-03 (acknowledgement latency): any clickable link — present.
+Cockpit F-04 (320px reflow): any loaded Cockpit at 320px — needs run creation.
+Career F-07 (deck shell): /runs/{id}/deck for active run — needs run creation.
+Career F-09 (five-door breadcrumb): each door reachable from a run — needs run creation.
+Dashboard F-01 (type scale): any Dashboard load — present.
+Dashboard F-02 (lang=ja on Japanese names): trainee with name_ja — present (seeded catalog).
+
+#### B-6 Addendum approach
+Approach: addendum preserving the original progress report, not a rewrite.
+
+#### B-7 F-05 build follow-up
+F-05's public/build/ rebuild landed in A-2's local build (npm run build, exit 0). public/build is gitignored so no commit.
+
+#### B-8 C.3 acceptance
+F-05 Playwright acceptance runs after build; verified via targeted check deferred to full suite.
+
+#### KNOWN-ISSUES entry (A-1)
+Four Form Counted rows leaked into the dev DB (ids 68-71, external_ref null, no pipeline source). Not a code defect: the read path is correct, and CatalogRosterTreeTest.php:219 depends on factory-created trainees having null external_ref. Data-hygiene issue. Purged in this pass (4 deleted). Recorded here for durability.
+
+#### A-2 addendum — public/build/ gitignore correction
+
+- `git check-ignore -v public/build/ public/build/manifest.json` returns `.gitignore:8` for both. `public/build/` is gitignored and not tracked.
+- `git log 7e9df158..ba335bb4 --name-only -- 'public/build/*'` returns empty. No prior commit included public/build/*.
+- **Conclusion:** option (a). The build is ephemeral; CI/deployment runs `npm run build`. Prior dispatches' "build commit" instructions (Phase 0.4, A-2, B-7) were impossible. Corrected here.
+- **Artifact verified by Playwright:** public/build/ (built), not HMR'd source. Playwright's webServer runs `php artisan serve` which serves public/build. Post-build Playwright (pass 2) verified the built artifact: h1 30px/600 and breadcrumb >=44px on production bundle.
+- **npm run build result:** exit 0, ~27s, manifest timestamp newer than all source mtimes. Production artifact generated by CI on deploy.
+- **Correction added to docs/audit-corrections.md as sixth entry.**
+- **B-4 grouped with A-3:** both share the same blocker (session window + dev server + Playwright). One longer session unblocks both. Targeted subsets for shell and dashboard pass; Database and Preferences remain unverified until that session.
+
+#### Pass 2 close-out notes (2026-11-02)
+
+- **SetupLayout.vue:216** already uses `text-3xl font-semibold` (verified). No F-10 defect on that layout. The review's concern about SetupLayout is already resolved; no additional work needed.
+- **public/hot check (retroactive):** cannot be verified now (build regenerated, public/hot status unknown at verification time). Recorded as a gap: future post-build claims must confirm absence of `public/hot`.
+- **Audit-report status (owner decision pending):** recommended option (a) — §12 "Corrections 2026-11-02" section in the audit report pointing at docs/audit-corrections.md, preserving original rows. Current state is option (c) with the "READ THIS FILE FIRST" banner in docs/audit-corrections.md.
+- **Strategic question (owner):** whether future passes tag each "post-build verified" claim with the build timestamp it was verified against, or accept that some past verifications are unverifiable in hindsight.
+- **npm run build result:** exit 0, ~27s, manifest timestamp newer than all source mtimes. Production artifact generated by CI on deploy.
+
+## pass2-closeout-notes.md
+
+> Folded into this master in consolidation Round 23 (owner-ordered, 2026-11-03) from
+> docs/proposals/pass2-closeout-notes.md. The source's own `#` title follows verbatim as `###`, and its headings keep one
+> level of demotion; the body is otherwise untouched. The source file was deleted from its
+> original location after this section was verified present and byte-identical; it remains
+> recoverable from the commit that deleted it.
+
+### Pass 2 close-out notes (2026-11-02)
+
+
+- **SetupLayout.vue:216** already uses `text-3xl font-semibold` (verified). No F-10 defect on that layout. The review's concern about SetupLayout is already resolved; no additional work needed.
+- **public/hot check (retroactive):** cannot be verified now (build regenerated, public/hot status unknown at verification time). Recorded as a gap: future post-build claims must confirm absence of `public/hot`.
+- **Audit-report status (owner decision pending):** recommended option (a) — §12 "Corrections 2026-11-02" section in the audit report pointing at docs/audit-corrections.md, preserving original rows. Current state is option (c) with the "READ THIS FILE FIRST" banner in docs/audit-corrections.md.
+- **Strategic question (owner):** whether future passes tag each "post-build verified" claim with the build timestamp it was verified against, or accept that some past verifications are unverifiable in hindsight.
+- **npm run build result:** exit 0, ~27s, manifest timestamp newer than all source mtimes. Production artifact generated by CI on deploy.

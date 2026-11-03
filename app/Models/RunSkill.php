@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
  *
  * @property string $status
  * @property int|null $turn_acquired
+ * @property int|null $hint_level
  */
 class RunSkill extends Pivot
 {
@@ -20,4 +21,12 @@ class RunSkill extends Pivot
     protected $primaryKey = null;
 
     public $incrementing = false;
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return ['hint_level' => 'integer'];
+    }
 }

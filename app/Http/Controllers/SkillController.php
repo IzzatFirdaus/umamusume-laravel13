@@ -15,6 +15,7 @@ use App\Services\HintDiscount;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\QueryException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Inertia\Inertia;
@@ -85,8 +86,9 @@ class SkillController extends Controller
 
         $search = $request->validated('search');
         $type = $request->validated('type');
+        $distance = $request->validated('distance');
 
-        $skills = $this->query($search, $type, $request->boolean('unique'))
+        $skills = $this->query($search, $type, $request->boolean('unique'), $distance)
             ->orderBy('name')
             ->paginate($perPage)
             ->withQueryString()
@@ -117,6 +119,7 @@ class SkillController extends Controller
             'unique' => $request->boolean('unique'),
             'totalCount' => $this->availableCount(),
             'askedFor' => $this->describeAsk($search, $type, $request->boolean('unique')),
+            'distance' => $distance,
         ];
     }
 
@@ -130,9 +133,15 @@ class SkillController extends Controller
      * same refusal. The parameter is the local `skills.id`, the key a row on this tree
      * can name, not the source's export id, which no screen prints.
      */
-    public function show(string $skill): Response
+    public function show(string $skill, Request $request): Response
     {
         $model = Skill::query()->availableOnGlobal()->findOrFail((int) $skill);
+
+        $compareSkill = null;
+        $compareId = $request->query('compare');
+        if ($compareId !== null && $compareId !== '' && (int) $compareId !== $model->id) {
+            $compareSkill = Skill::query()->availableOnGlobal()->find((int) $compareId);
+        }
 
         return Inertia::render('Skills/Show', [
             'skill' => [
@@ -149,6 +158,8 @@ class SkillController extends Controller
                 'source_url' => $model->source_url,
                 // A stored instant renders through the display timezone (US-7); the view names the date only.
                 'fetched_at_display' => $model->fetched_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
+                // P3: description from export's desc_en, or null when not recorded.
+                'description' => $model->description,
             ],
             'uniqueHolders' => $this->holderRows($model, 'skills_unique'),
             'innateHolders' => $this->holderRows($model, 'skills_innate'),
@@ -179,6 +190,20 @@ class SkillController extends Controller
                 ],
             ],
             'runs' => $this->runRows($model),
+            // P5: optional second skill for side-by-side comparison, from ?compare=<skillId> query param.
+            'compareSkill' => $compareSkill ? [
+                'id' => $compareSkill->id,
+                'name' => $compareSkill->name,
+                'name_ja' => $compareSkill->name_ja,
+                'type' => $compareSkill->type,
+                'sp_cost' => $compareSkill->sp_cost,
+                'rarity' => $compareSkill->rarity,
+                'is_unique' => $compareSkill->is_unique,
+                'condition_groups' => $compareSkill->condition_groups,
+                'source_url' => $compareSkill->source_url,
+                'fetched_at_display' => $compareSkill->fetched_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
+                'description' => $compareSkill->description,
+            ] : null,
         ]);
     }
 
@@ -322,28 +347,25 @@ class SkillController extends Controller
     /**
      * The filter, built once so the count and the page cannot disagree about what "these rows" means.
      *
+     * @param  ?string  $distance  exact distance_type value (1..4) or null for Unspecified
      * @return Builder<Skill>
      */
-    private function query(?string $search, ?string $type, bool $unique): Builder
+    private function query(?string $search, ?string $type, bool $unique, ?int $distance = null): Builder
     {
         $key = $search === null ? null : $this->normalizer->normalize($search);
 
         return Skill::query()
             ->availableOnGlobal()
-            // D-62: skill search matches on `match_key`, never on a display string. The query goes through
-            // the same normalizer that wrote the key, so `Corner  Adept` reaches `corneradept×` and a query
-            // differing only in case or spacing is the same query.
+            // D-62: skill search matches on `match_key` OR `description_match_key`, never on a display string.
+            // The query goes through the same normalizer that wrote the key, so `Corner  Adept` reaches
+            // `corneradept×` and a query differing only in case or spacing is the same query.
             ->when(
                 $key !== null && $key !== '',
-                fn (Builder $q): Builder => $q->whereRaw(
-                    // SQLite has no default LIKE escape character, so the clause names one, and `%` and `_`
-                    // in the query are escaped before it: `NameNormalizer` leaves both alone, so unescaped a
-                    // Trainer typing `%` would get the whole catalog. That is KI-26 on `/umamusume`, where it
-                    // was reproduced and not fixed. The value stays a bound parameter, so this is a
-                    // pattern-escaping question, not an SQL one.
-                    "match_key LIKE ? ESCAPE '\\'",
-                    ['%'.addcslashes($key, '\\%_').'%'],
-                ),
+                fn (Builder $q): Builder => $q->where(function (Builder $q2) use ($key): void {
+                    $escaped = '%'.addcslashes($key, '\\%_').'%';
+                    $q2->whereRaw("match_key LIKE ? ESCAPE '\\'", [$escaped])
+                        ->orWhereRaw("description_match_key LIKE ? ESCAPE '\\'", [$escaped]);
+                }),
             )
             ->when(
                 $type !== null,
@@ -353,7 +375,14 @@ class SkillController extends Controller
                     ? $q->whereNull('type')
                     : $q->where('type', $type),
             )
-            ->when($unique, fn (Builder $q): Builder => $q->where('is_unique', true));
+            ->when($unique, fn (Builder $q): Builder => $q->where('is_unique', true))
+            // P3: distance filter — exact match on parsed distance_type column
+            ->when(
+                $distance !== null,
+                fn (Builder $q): Builder => $distance === 0
+                    ? $q->whereNull('distance_type')
+                    : $q->where('distance_type', $distance),
+            );
     }
 
     /**

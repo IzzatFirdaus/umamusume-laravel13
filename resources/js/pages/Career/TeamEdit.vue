@@ -47,6 +47,7 @@ const props = defineProps<{
         stat_grades: { key: string; label: string; grade: string | null }[];
     };
     backUrl: string;
+    scenarioDetailUrl: string;
 }>();
 
 const { visiting, visitFailed } = useVisitState();
@@ -72,6 +73,7 @@ const lede = `Recorded team state for ${props.run.scenario_label}. `
             <PageHeader eyebrow="Team" title="Edit team state" :description="lede">
                 <template #actions>
                     <LinkButton :href="props.backUrl" variant="secondary" size="sm">Back to Cockpit</LinkButton>
+                    <LinkButton :href="props.scenarioDetailUrl" variant="secondary" size="sm">Scenario detail</LinkButton>
                 </template>
             </PageHeader>
         </template>

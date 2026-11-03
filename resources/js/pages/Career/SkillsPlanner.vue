@@ -21,6 +21,7 @@ import SkillPlanRow from '../../components/career/SkillPlanRow.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import AcquisitionStatusEditor from '../../components/career/AcquisitionStatusEditor.vue';
 import { BaseButton, BaseSelect } from '../../components/Form';
+import SearchableSkillPicker from '../../components/Form/SearchableSkillPicker.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
@@ -38,7 +39,7 @@ interface PlanRow {
     name_ja: string | null;
     is_unique: boolean;
     sp_cost: number | null;
-    recorded: { status: string; turn: number | null; current_level: number | null } | null;
+    recorded: { status: string; turn: number | null; current_level: number | null; hint_level: number | null } | null;
     conditions: string | null;
     fit: FitCell[];
     note: string | null;
@@ -50,6 +51,14 @@ interface Group {
     glyph: string;
     rows: PlanRow[];
     absent: string;
+}
+
+interface RecommendedSection {
+    rows: { id: number; name: string; sp_cost: number; hint_adjusted_cost: number }[];
+    total: number;
+    count: number;
+    sp: number | null;
+    shortfall: number | null;
 }
 
 const props = defineProps<{
@@ -79,12 +88,14 @@ const props = defineProps<{
      * shortfall against the run's recorded SP (§2.2/§2.3).
      */
     purchasable: {
-        rows: { id: number; name: string; sp_cost: number }[];
+        rows: { id: number; name: string; sp_cost: number; hint_adjusted_cost: number }[];
         total: number;
         count: number;
         sp: number | null;
         shortfall: number | null;
     };
+    /** P4: budget-aware recommendation — covers priorities first, then cheapest remaining skills. */
+    recommended: RecommendedSection;
     groups: Group[];
     acquisition_options: { value: string; label: string }[];
     /** UMAMUSUME_REFERENCE.md §1.1.4: the hint discount ladder, caption and percentage per row. */
@@ -147,7 +158,7 @@ function commitPlan(): void {
         turn_acquired: null,
     }));
 
-    pickerForm.post(props.run.skills_sync_url, {
+pickerForm.post(props.run.skills_sync_url, {
         preserveScroll: true,
         onSuccess: () => {
             planned.value = [];
@@ -155,6 +166,17 @@ function commitPlan(): void {
     });
 }
 
+/** P2: hint discount percentage for a given hint level (1-5). */
+function getHintDiscount(level: number): number {
+    const discounts: Record<number, number> = { 1: 10, 2: 20, 3: 30, 4: 35, 5: 40 };
+    return discounts[level] ?? 0;
+}
+
+/** P2: hint-adjusted cost (floor of base * (1 - discount/100)). */
+function getHintAdjustedCost(base: number, level: number): number {
+    const discount = getHintDiscount(level);
+    return Math.floor(base * (100 - discount) / 100);
+}
 
 // The reorder is a local edit to the Trainer's list until it is saved, so it lives outside the
 // props; a props change (the save's own response among them) re-syncs it to what the server
@@ -188,6 +210,26 @@ function saveLevel(row: PlanRow, value: string): void {
             status: row.recorded.status,
             turn_acquired: row.recorded.turn,
             current_level: value === '' ? null : Number(value),
+        }],
+    }, { preserveScroll: true });
+}
+
+/**
+ * P2: save the hint level for a skill. The row's status and turn travel with it
+ * because the sync rewrites the pivot row and the hint level together.
+ */
+function saveHint(row: PlanRow, value: number | null): void {
+    if (row.id === null || row.recorded === null) {
+        return;
+    }
+
+    router.post(props.run.skills_sync_url, {
+        skills: [{
+            skill_id: row.id,
+            status: row.recorded.status,
+            turn_acquired: row.recorded.turn,
+            current_level: row.recorded.current_level,
+            hint_level: value,
         }],
     }, { preserveScroll: true });
 }
@@ -253,9 +295,9 @@ function save(): void {
  * skill. This posts the same payload shape the editor's rows use, to the same run-scoped endpoint,
  * so there is one write path and one vocabulary.
  */
-const pickedSkill = ref<number | string>('');
+const pickedSkillId = ref<number | null>(null);
 
-const pickerForm = useForm<{ skills: { skill_id: number | string; status: string; turn_acquired: number | null }[] }>({
+const pickerForm = useForm<{ skills: { skill_id: number | string; status: string; turn_acquired: number | null; hint_level: number | null }[] }>({
     skills: [],
 });
 
@@ -272,19 +314,35 @@ const pickerError = computed(() => {
     return key === undefined ? null : pickerForm.errors[key];
 });
 
+function onSkillPicked(payload: { id: number; name: string }): void {
+    pickedSkillId.value = payload.id;
+}
+
 function addPickedSkill(): void {
-    if (pickedSkill.value === '') {
+    if (pickedSkillId.value === null) {
         return;
     }
 
-    pickerForm.skills = [{ skill_id: pickedSkill.value, status: pickerStatus.value, turn_acquired: null }];
+    pickerForm.skills = [{ skill_id: pickedSkillId.value, status: pickerStatus.value, turn_acquired: null, hint_level: null }];
 
     pickerForm.post(props.run.skills_sync_url, {
         preserveScroll: true,
         onSuccess: () => {
-            pickedSkill.value = '';
+            pickedSkillId.value = null;
         },
     });
+}
+
+function addRecommendation(): void {
+    const recommendedIds = props.recommended.rows.map((r) => r.id);
+    const newIds = recommendedIds.filter((id) => !planned.value.includes(id));
+
+    if (newIds.length === 0) {
+        return;
+    }
+
+    // Use the same commit path as "Learn planned skills" — append to planned array
+    planned.value = [...planned.value, ...newIds];
 }
 
 // ADR-0001 §2 wants the constants behind a number visible wherever the number appears, so the two
@@ -390,8 +448,22 @@ const coverageConstants = computed(() =>
                                 </td>
                                 <td class="py-2 pr-3">{{ row.is_unique ? 'Unique' : 'Standard' }}</td>
                                 <td class="py-2 pr-3 text-right font-mono">{{ row.sp_cost ?? 'N/A' }}</td>
-                                <td class="py-2 pr-3 text-right font-mono text-ink-muted" title="No column records a hint level per skill; a hinted cost would be invented here.">N/A</td>
-                                <td class="py-2 pr-3 text-right font-mono"><b>{{ row.sp_cost ?? 'N/A' }}</b></td>
+                                <td class="py-2 pr-3 text-right font-mono">
+                                    <template v-if="row.recorded !== null && row.recorded.hint_level !== null">
+                                        {{ getHintDiscount(row.recorded.hint_level) }}%
+                                    </template>
+                                    <template v-else>
+                                        <span class="text-ink-muted" title="No hint level recorded; full base cost applies.">N/A</span>
+                                    </template>
+                                </td>
+                                <td class="py-2 pr-3 text-right font-mono">
+                                    <template v-if="row.sp_cost !== null && row.recorded !== null && row.recorded.hint_level !== null">
+                                        <b>{{ getHintAdjustedCost(row.sp_cost, row.recorded.hint_level) }}</b>
+                                    </template>
+                                    <template v-else>
+                                        <b>{{ row.sp_cost ?? 'N/A' }}</b>
+                                    </template>
+                                </td>
                                 <td class="py-2 text-right">
                                     <span v-if="row.recorded !== null" class="pill pill-neutral">{{ row.recorded.status }}</span>
                                     <span v-else-if="row.id !== null && planned.includes(row.id) && remaining !== null && remaining < 0" class="pill pill-caution">Too expensive</span>
@@ -560,11 +632,56 @@ const coverageConstants = computed(() =>
                                     <span class="font-mono tabular-nums text-ink-strong">{{ skill.sp_cost }} SP</span>
                                 </li>
                             </ol>
-                            <p v-else class="mt-1 text-sm text-ink">The catalogue prices no skill this run has not already acquired.</p>
+<p v-else class="mt-1 text-sm text-ink">The catalogue prices no skill this run has not already acquired.</p>
                         </section>
-                
-                        <!-- UMAMUSUME_REFERENCE.md §1.1.4: the hint discount ladder, read off the client Learn screen.
-                             Displayed cost is floor(base × (1 − discount)); the ladder is not linear past Lv3. -->
+
+                        <!-- P4: Budget-aware recommendation panel -->
+                        <section aria-labelledby="skills-recommended-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
+                            <h2 id="skills-recommended-heading" class="flex items-center gap-2 text-lg font-semibold text-ink-strong">
+                                Recommended <span class="pill pill-neutral">Calculated</span>
+                            </h2>
+                            <p class="sub mt-1">
+                                Covers required priorities first at their hint-adjusted costs, then fills remaining SP
+                                with the cheapest remaining skills. The rule is this tool's heuristic, not a client
+                                mechanic.
+                            </p>
+                            <div v-if="props.recommended.rows.length > 0" class="mt-2">
+                                <p class="text-sm text-ink">
+                                    <span v-if="props.recommended.count > props.recommended.rows.length">Showing the first </span>
+                                    <span class="font-mono tabular-nums">{{ props.recommended.rows.length }}</span>
+                                    <span v-if="props.recommended.count > props.recommended.rows.length">
+                                        of <span class="font-mono tabular-nums">{{ props.recommended.count }}</span>
+                                    </span>
+                                    recommended skills cost
+                                    <span class="font-mono tabular-nums">{{ props.recommended.total }}</span> SP
+                                    <template v-if="props.recommended.sp !== null">
+                                        , and the run holds <span class="font-mono tabular-nums">{{ props.recommended.sp }}</span> SP
+                                        <template v-if="props.recommended.shortfall !== null && props.recommended.shortfall > 0">
+                                            , a shortfall of <span class="font-mono tabular-nums">{{ props.recommended.shortfall }}</span> SP
+                                        </template>
+                                    </template>.
+                                </p>
+                                <ol tabindex="0" aria-label="Recommended skills for this run" class="mt-2 max-h-72 space-y-1 overflow-y-auto text-sm">
+                                    <li v-for="skill in props.recommended.rows" :key="skill.id" class="flex items-baseline justify-between gap-3">
+                                        <span class="text-ink">{{ skill.name }}</span>
+                                        <span class="font-mono tabular-nums text-ink-strong">{{ skill.hint_adjusted_cost }} SP</span>
+                                    </li>
+                                </ol>
+                                <button
+                                    type="button"
+                                    class="btn btn-primary min-h-11 mt-2"
+                                    :disabled="planned.some(p => props.recommended.rows.some(r => r.id === p))"
+                                    @click="addRecommendation"
+                                >
+                                    Add recommendation to plan
+                                </button>
+                            </div>
+                            <p v-else class="mt-1 text-sm text-ink-muted">
+                                No recommendation can be generated: the run has no recorded SP, or all skills are already acquired.
+                            </p>
+                        </section>
+
+                        <!-- UMAMUSUME_REFERENCE.md §1.1.4: the hint discount ladder, read off the client Learn screen. -->
                         <section aria-labelledby="skills-hints-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
                             <h2 id="skills-hints-heading" class="text-lg font-semibold text-ink-strong">Hint discounts</h2>
                             <p class="mt-1 text-sm text-ink">
@@ -606,6 +723,7 @@ const coverageConstants = computed(() =>
                                     :movable="group.key === 'required'"
                                     @move="(delta: number) => move(index, delta)"
                                     @level="(value: string) => saveLevel(row, value)"
+                                    @hint="(value: number | null) => saveHint(row, value)"
                                 />
                             </ol>
                         </section>
@@ -647,7 +765,7 @@ const coverageConstants = computed(() =>
                             Nothing to save: a run with no build target has no priority list to reorder.
                         </p>
                 
-                        <!-- The acquired/skipped status write (F2, plan §9.6 ruling 5). The build target is a plan;
+<!-- The acquired/skipped status write (F2, plan §9.6 ruling 5). The build target is a plan;
                              the acquisition status is a record of what the run actually has. The two are separate
                              writes on separate routes so one cannot overwrite the other. This form POSTs through
                              `runs.skills.sync`, the same Form Request the 2.0.0 record screen used. -->
@@ -660,19 +778,17 @@ const coverageConstants = computed(() =>
                                 Nothing left to add: the catalogue offers no Global skill this run does not already hold.
                             </p>
                             <form v-else class="mt-3 flex max-w-3xl flex-wrap items-end gap-3 text-sm" @submit.prevent="addPickedSkill">
-                                <BaseSelect
-                                    v-model="pickedSkill"
-                                    id="add-skill-picker"
-                                    name="skill"
+                                <SearchableSkillPicker
+                                    :options="props.picker_skills.map(s => ({ id: s.id, name: s.name, type: '' }))"
                                     label="Skill to add"
-                                    :options="[{ value: '', label: 'Choose a skill' }, ...props.picker_skills.map(s => ({ value: s.id, label: s.name }))]"
+                                    placeholder="Search and add a skill…"
+                                    hint="Pick a skill by name; type to filter. The selected skill is added to the run."
+                                    @select="onSkillPicked"
                                 />
-                                <BaseButton type="submit" variant="secondary" :disabled="pickerForm.processing">
-                                    Add skill
+                                <BaseButton type="submit" variant="secondary" size="md" :disabled="!pickedSkillId || form.processing">
+                                    Add to run
                                 </BaseButton>
                             </form>
-                            <p v-if="pickerForm.processing" role="status" class="mt-2 text-sm text-ink-muted">Adding the skill…</p>
-                            <p v-if="pickerError" role="alert" class="mt-2 text-sm text-risk">{{ pickerError }}</p>
                         </section>
                 
                         <AcquisitionStatusEditor

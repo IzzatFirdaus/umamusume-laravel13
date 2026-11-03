@@ -32,8 +32,8 @@ Completed all steps from the dispatch:
 - `tests/browser/_verify_legacy_grid.spec.ts` (scratch verification spec)
 
 ### Added
-- `docs/audits/AUD-20261102-029-legacy-builder-2026-11-02.md` — M2 screen audit report
-- `docs/proposals/2026-11-02-legacy-builder-pass.md` — Pass report with triage and resolution
+- `docs/research-scratch/AUDIT-AND-VERIFICATION.md` section `## AUD-20261102-029-legacy-builder-2026-11-02.md` — M2 screen audit report
+- `docs/research-scratch/SLICE-RECORDS.md` section `## 2026-11-02-legacy-builder-pass.md` — Pass report with triage and resolution
 - `docs/reports/2026-11-02-legacy-builder-completion-report.md` — This completion report
 
 ## Verification

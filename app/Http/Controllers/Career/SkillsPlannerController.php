@@ -46,6 +46,8 @@ final class SkillsPlannerController extends Controller
             // A-0.8: the priced skills the run has not acquired, sorted by cost, with the sum and the
             // shortfall against the run's recorded SP (§2.2/§2.3).
             'purchasable' => $this->purchasableSection($run),
+            // P4: budget-aware recommendation — covers priorities first, then cheapest remaining skills
+            'recommended' => $this->recommendedSection($run, $required),
             // §1.1.4's hint discount ladder: the five captions and their percentages, shown so a
             // Trainer can read the rule the client applies. The base-price arithmetic below prices a
             // skill with no recorded hint level, which is the honest figure when none is stored.
@@ -84,8 +86,8 @@ final class SkillsPlannerController extends Controller
     }
 
     /**
-     * A-0.8: the priced skills the run has not acquired, sorted by cost, with the sum and the shortfall
-     * against the run's recorded SP (§2.2's "purchasable at or under N SP", §2.3's recommended spend).
+     * A-0.8: the priced skills the run has not acquired, sorted by base cost, with the sum and the shortfall
+     * against the run's recorded SP (§2.2/§2.3).
      *
      * Read-only and catalogue-only: the `skills` table carries `sp_cost`, so no schema is involved. A
      * skill already acquired is excluded — its SP is spent, not still to buy — and an unpriced row is
@@ -94,7 +96,7 @@ final class SkillsPlannerController extends Controller
      * recorded SP (`sp` null) the pool still lists and sums, and the shortfall is null rather than a
      * claim the run cannot afford.
      *
-     * @return array{rows: list<array{id: int, name: string, sp_cost: int}>, total: int, count: int, sp: int|null, shortfall: int|null}
+     * @return array{rows: list<array{id: int, name: string, sp_cost: int, hint_adjusted_cost: int}>, total: int, count: int, sp: int|null, shortfall: int|null}
      */
     private function purchasableSection(TrainingRun $run): array
     {
@@ -123,6 +125,7 @@ final class SkillsPlannerController extends Controller
                 'id' => (int) $skill->id,
                 'name' => (string) $skill->name,
                 'sp_cost' => (int) $skill->sp_cost,
+                'hint_adjusted_cost' => (int) $skill->sp_cost, // no hint recorded on unacquired skills yet
             ])
             ->values()
             ->all();
@@ -137,6 +140,110 @@ final class SkillsPlannerController extends Controller
             'count' => $count,
             'sp' => $sp,
             'shortfall' => $sp === null ? null : max(0, $total - $sp),
+        ];
+    }
+
+    /**
+     * P4: Budget-aware recommendation — covers priorities first at their hint-adjusted costs,
+     * then fills remaining SP with cheapest remaining skills.
+     *
+     * @param  list<array<string, mixed>>  $required
+     * @return array{rows: list<array{id: int, name: string, sp_cost: int, hint_adjusted_cost: int}>, total: int, count: int, sp: int|null, shortfall: int|null}
+     */
+    private function recommendedSection(TrainingRun $run, array $required): array
+    {
+        $latest = $run->turnEntries->sortByDesc('turn')->first();
+        $sp = $latest?->sp;
+
+        if ($sp === null) {
+            return [
+                'rows' => [],
+                'total' => 0,
+                'count' => 0,
+                'sp' => null,
+                'shortfall' => null,
+            ];
+        }
+
+        // Step 1: Build a map of required skills with their hint-adjusted costs
+        $requiredCosts = [];
+        $requiredIds = [];
+
+        foreach ($required as $row) {
+            if ($row['id'] === null) {
+                continue; // skill not in catalogue
+            }
+            $baseCost = $row['sp_cost'] === null ? null : (int) $row['sp_cost'];
+            $hintLevel = $row['recorded']['hint_level'] ?? null;
+            $cost = $baseCost !== null && $hintLevel !== null
+                ? HintDiscount::price($baseCost, $hintLevel)
+                : $baseCost;
+
+            if ($cost !== null) {
+                $requiredCosts[$row['id']] = $cost;
+                $requiredIds[] = $row['id'];
+            }
+        }
+
+        // Step 2: Sum priority costs
+        $priorityTotal = array_sum($requiredCosts);
+        $remainingSp = $sp - $priorityTotal;
+
+        // Step 3: Fill with cheapest remaining skills (base cost, no hint recorded yet)
+        $acquiredIds = $run->skills
+            ->filter(static fn (Skill $skill): bool => $skill->pivot->status === SkillAcquisition::Acquired->value)
+            ->pluck('id')
+            ->all();
+
+        $fillCandidates = Skill::query()
+            ->availableOnGlobal()
+            ->whereNotIn('id', array_merge($acquiredIds, $requiredIds))
+            ->whereNotNull('sp_cost')
+            ->orderBy('sp_cost')
+            ->orderBy('name')
+            ->get(['id', 'name', 'sp_cost'])
+            ->map(static fn (Skill $skill): array => [
+                'id' => (int) $skill->id,
+                'name' => (string) $skill->name,
+                'sp_cost' => (int) $skill->sp_cost,
+                'hint_adjusted_cost' => (int) $skill->sp_cost, // no hint recorded on unacquired skills
+            ])
+            ->values()
+            ->all();
+
+        $fillRows = [];
+        $fillTotal = 0;
+
+        foreach ($fillCandidates as $candidate) {
+            if ($fillTotal + $candidate['sp_cost'] > $remainingSp) {
+                break;
+            }
+            $fillRows[] = $candidate;
+            $fillTotal += $candidate['sp_cost'];
+        }
+
+        // Step 4: Combine priority rows and fill rows
+        $priorityRows = collect($required)
+            ->filter(fn ($row) => isset($requiredCosts[$row['id'] ?? -1]))
+            ->map(fn ($row) => [
+                'id' => (int) $row['id'],
+                'name' => (string) $row['name'],
+                'sp_cost' => (int) $row['sp_cost'],
+                'hint_adjusted_cost' => $requiredCosts[$row['id']],
+            ])
+            ->values()
+            ->all();
+
+        $allRows = array_merge($priorityRows, $fillRows);
+        $allTotal = $priorityTotal + $fillTotal;
+        $allShortfall = max(0, $allTotal - $sp);
+
+        return [
+            'rows' => $allRows,
+            'total' => $allTotal,
+            'count' => count($allRows),
+            'sp' => $sp,
+            'shortfall' => $allShortfall,
         ];
     }
 
@@ -192,7 +299,13 @@ final class SkillsPlannerController extends Controller
 
         foreach ($required as $row) {
             $name = (string) $row['name'];
-            $cost = $row['sp_cost'] === null ? null : (int) $row['sp_cost'];
+            $baseCost = $row['sp_cost'] === null ? null : (int) $row['sp_cost'];
+            $hintLevel = $row['recorded']['hint_level'] ?? null;
+
+            // Price at hint-adjusted cost when hint_level is recorded, base cost otherwise
+            $cost = $baseCost !== null && $hintLevel !== null
+                ? HintDiscount::price($baseCost, $hintLevel)
+                : $baseCost;
 
             $costs[$name] = $cost;
 
@@ -252,8 +365,8 @@ final class SkillsPlannerController extends Controller
             // there is nothing to price. Null while the figures resolve, so the page prints them.
             'absent' => $absent,
             'warn' => $state === 'cost' && $coverage !== null && $sp !== null && $coverage['total_cost'] > $sp,
-            // The total prices every skill at its base; the client pays less when a hint level is
-            // on the skill, and no column holds hint levels (G-SK-3), so the sum is the honest one.
+            // The total prices every skill at its hint-adjusted cost; the client pays less when a hint level is
+            // on the skill, and the planner uses the recorded hint level for each skill.
             'text' => $text,
         ];
     }
@@ -287,12 +400,19 @@ final class SkillsPlannerController extends Controller
                     'turn' => $skill->pivot->turn_acquired,
                     // ADR-0029 D4: the level the skill reached, or null when it was not recorded.
                     'current_level' => $levels[$skill->id] ?? null,
+                    // Per-run hint level for pricing; null = not recorded (full base cost)
+                    'hint_level' => $skill->pivot->hint_level ?? null,
                 ]);
             }
 
             if ($skill->pivot->status === SkillAcquisition::Suggested->value
                 && ! array_key_exists($skill->name, $prioritised)) {
-                $available[] = $this->skillRow($skill, $target);
+                $available[] = $this->skillRow($skill, $target, [
+                    'status' => SkillAcquisition::Suggested->value,
+                    'turn' => $skill->pivot->turn_acquired,
+                    'current_level' => $levels[$skill->id] ?? null,
+                    'hint_level' => $skill->pivot->hint_level ?? null,
+                ]);
             }
         }
 
@@ -365,7 +485,12 @@ final class SkillsPlannerController extends Controller
             $recorded = null;
 
             if ($pivot !== null) {
-                $recorded = ['status' => $pivot->pivot->status, 'turn' => $pivot->pivot->turn_acquired];
+                $recorded = [
+                    'status' => $pivot->pivot->status,
+                    'turn' => $pivot->pivot->turn_acquired,
+                    'current_level' => $pivot->pivot->current_level ?? null,
+                    'hint_level' => $pivot->pivot->hint_level ?? null,
+                ];
             }
 
             $rows[] = $this->skillRow($catalog->get($name), $target, $recorded, $name);
@@ -411,7 +536,7 @@ final class SkillsPlannerController extends Controller
      * One row, as the props test asserts it: the state's facts, the base price, the fit cells, and
      * the raw conditions the source states.
      *
-     * @param  array{status: string, turn: int|null}|null  $recorded
+     * @param  array{status: string, turn: int|null, current_level: int|null, hint_level: int|null}|null  $recorded
      * @return array<string, mixed>
      */
     private function skillRow(
@@ -446,10 +571,7 @@ final class SkillsPlannerController extends Controller
             return null;
         }
 
-        return implode(' | ', array_map(static fn (array $group): string => $group['condition']
-            .(isset($group['precondition']) && $group['precondition'] !== ''
-                ? " (precondition: {$group['precondition']})"
-                : ''), $groups));
+        return implode(' | ', array_map(static fn (array $group): string => $group['condition'], $groups));
     }
 
     /**

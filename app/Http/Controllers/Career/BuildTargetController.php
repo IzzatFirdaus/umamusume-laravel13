@@ -5,10 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Career;
 
 use App\Enums\BuildPurpose;
+use App\Enums\ReleaseStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Career\StoreDraftBuildTargetRequest;
 use App\Models\Advisor\BuildTargetPayload;
 use App\Models\Preference;
+use App\Models\Skill;
 use App\Services\Career\SetupDraft;
 use App\Services\ScenarioCaps;
 use Illuminate\Http\RedirectResponse;
@@ -114,7 +116,35 @@ class BuildTargetController extends Controller
                     [],
                 ),
             ],
+            // Skill catalogue for the searchable priority picker (P1): the Global scope every read
+            // path starts from (ADR-0011 §2), filtered to skills not already in the draft target.
+            'picker_skills' => $this->pickerSkills(),
         ]);
+    }
+
+    /**
+     * The catalogue skills a Trainer can add to the draft target's priority list: the Global scope
+     * every read path starts from (ADR-0011 §2), less the skills already named in the draft.
+     * `{id, name}` is the whole shape. The picker posts a name and the page accumulates names;
+     * the payload expects a list of names.
+     *
+     * @return list<array{id: int, name: string}>
+     */
+    private function pickerSkills(): array
+    {
+        $existingNames = array_values(array_filter(
+            (array) (SetupDraft::buildTarget()?->skill_priorities ?? []),
+            static fn (mixed $name): bool => is_string($name) && $name !== '',
+        ));
+
+        return array_values(Skill::query()
+            ->availableOnGlobal()
+            ->whereNotIn('name', $existingNames)
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(static fn (Skill $skill): array => ['id' => (int) $skill->id, 'name' => (string) $skill->name])
+            ->values()
+            ->all());
     }
 
     /**

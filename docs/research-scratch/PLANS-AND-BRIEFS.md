@@ -6897,3 +6897,238 @@ role, which would make B (config with an override) preferable to a hard env swit
 
 Each ruling is recorded as a dated note beside its governing KI or document; this table is
 then updated with the date, not rewritten.
+**Round 23 (2026-11-03, consolidation).** The owner ordered nine `docs/proposals/` files of the
+2026-11-02/03 audit-and-closure thread consolidated into `docs/research-scratch/` and the originals
+deleted. Three landed here, because each is a queue of options, a recommendation and a pending owner
+ruling, the class this master already carries (the Round 21 rulings-owed briefs):
+`2026-11-03-owner-decisions.md` (91 lines, Q1/Q2/Q4/Q5/Q6), `2026-11-03-design-rulings-pending.md` (48,
+the Dashboard type scale and the 14 section measures) and `2026-11-03-blocked-scenarios.md` (47, the
+Phase 4.1 and 4.2 evidence gaps). Verified line-by-line before the delete (761 of 761 non-blank lines
+across all nine sources of the round, in order, one-level heading demotion; 0 missing). The other six
+went to `PROCESS-PLANS.md` (one), `SLICE-RECORDS.md` (two) and `AUDIT-AND-VERIFICATION.md` (three);
+routing in `docs/research-scratch/INDEX.md` section `### Round 23`.
+
+---
+## Consolidated 2026-11-03 (Round 23)
+
+The owner ordered nine `docs/proposals/` files of the 2026-11-02/03 audit-and-closure thread
+consolidated into `docs/research-scratch/` and the originals deleted. Three land here, because each
+is a queue of options, a recommendation and a pending owner ruling, the class this master already
+carries (the Round 21 rulings-owed briefs): the owner decision queue (Q1, Q2, Q4, Q5, Q6), the
+pending design rulings (Dashboard type scale and 14 section measures) and the evidence-blocked
+scenarios (Phase 4.1 and 4.2). The plan went to `PROCESS-PLANS.md`, the state records to
+`SLICE-RECORDS.md` and the audit corrections to `AUDIT-AND-VERIFICATION.md`. Routing table:
+`INDEX.md` section `### Round 23`.
+
+## 2026-11-03-owner-decisions.md
+
+> Folded into this master in consolidation Round 23 (owner-ordered, 2026-11-03) from
+> docs/proposals/2026-11-03-owner-decisions.md. The source's own `#` title follows verbatim as `###`, and its headings keep one
+> level of demotion; the body is otherwise untouched. The source file was deleted from its
+> original location after this section was verified present and byte-identical; it remains
+> recoverable from the commit that deleted it.
+
+### Owner decisions pending — Q1, Q2, Q4, Q5, Q6
+
+
+Date: 2026-11-03 (final closure pass)
+
+Each question below blocks a specific future code slice. Options are listed with a recommendation; the owner picks one per question. Status is `pending` until ruled.
+
+---
+
+### Q1 — Manifest authorization
+
+**Question:** Authorize creation of a manifest that records each audit's ID, filename, date, and status?
+
+**Context:** The audit program has hit ID collisions five times (Save Veteran, KI-149 duplicate, KI-151, KI-152). A manifest would prevent future collisions. Small artifact, high durable value.
+
+**Options:**
+- (a) Authorize and create in the same commit
+- (b) Defer
+- (c) Reject
+
+**Recommendation:** (a) — authorize. The collision cost is real and recurring; the manifest is a small, cheap, high-value artifact.
+
+**Status:** pending owner
+
+---
+
+### Q2 — RENDERED_EVIDENCE re-probe of 30 `FALSE` reports
+
+**Question:** Re-probe the 30 reports claiming `RENDERED_EVIDENCE = FALSE` against the current sandbox to determine which findings could be upgraded to `OBSERVED_RENDERED`?
+
+**Context:** ~30 findings are currently classified `RENDERED_EVIDENCE = FALSE` because they were assessed without rendered verification (Chromium cannot launch under this sandbox). Re-probing would upgrade some to `OBSERVED_RENDERED`.
+
+**Options:**
+- (a) Authorize re-probe (each ~5 min; total ~2.5 h)
+- (b) Accept current classifications
+- (c) Re-probe only the ~15 behavioral findings
+
+**Recommendation:** (c) — the ~15 behavioral findings benefit from rendered verification; the source-only findings don't. Halves the cost while capturing the high-value upgrades.
+
+**Status:** pending owner
+
+---
+
+### Q4 — Phase 5 owner-gated findings (~15)
+
+**Question:** Proceed with Phase 5 owner-gated findings, or leave deferred?
+
+**Context:** Phase 5 contains ~15 owner-gated findings of mixed severity. Some may warrant immediate work; others can wait indefinitely. The group should be triaged per-finding rather than all-or-nothing.
+
+**Options:**
+- (a) Proceed — implement all ~15
+- (b) Leave deferred
+- (c) Pick specific findings to proceed with
+
+**Recommendation:** (c) — triage per-finding. The owner-gated group mixes severity levels; treating them as one block risks either over-investing in low-value findings or under-investing in high-value ones.
+
+**Status:** pending owner
+
+---
+
+### Q5 — `CatalogIndex-F-01` schema change
+
+**Question:** Resolve the diacritic/full-width katakana search mismatch with (a) schema change, (b) copy documentation fallback, or (c) leave open?
+
+**Context:** `CatalogController.php:251-256` has a search mismatch for diacritic and full-width katakana characters. A schema change (normalized column) would fix it; documentation would note the limitation.
+
+**Options:**
+- (a) Schema change — ADR + migration + digest update
+- (b) Document the limitation in column headers
+- (c) Leave open
+
+**Recommendation:** (b) — the schema change is disproportionate for the two affected columns. Document the search limitation and accept.
+
+**Status:** pending owner
+
+---
+
+### Q6 — Fixtures for behavioral verification
+
+**Question:** Authorize running behavioral verification fixtures for Career setup F-04, F-05, F-07 in the current environment?
+
+**Context:** These fixtures exist and running them is verification, not new work. They exercise specific Career setup behaviors that are currently unverified.
+
+**Options:**
+- (a) Authorize
+- (b) Defer
+- (c) Provide fixture data
+
+**Recommendation:** (a) — authorize. These are existing fixtures; running them is verification work, not feature work.
+
+**Status:** pending owner
+
+## 2026-11-03-design-rulings-pending.md
+
+> Folded into this master in consolidation Round 23 (owner-ordered, 2026-11-03) from
+> docs/proposals/2026-11-03-design-rulings-pending.md. The source's own `#` title follows verbatim as `###`, and its headings keep one
+> level of demotion; the body is otherwise untouched. The source file was deleted from its
+> original location after this section was verified present and byte-identical; it remains
+> recoverable from the commit that deleted it.
+
+### Design rulings pending — Dashboard type-scale and 14 section measures
+
+
+Date: 2026-11-03 (final closure pass)
+
+### Dashboard-F-01 (KI-151) — type-scale drift
+
+**Current state:** five live sizes on Dashboard: `text-xs`, `text-sm`, `text-base`, `text-lg`, `text-kpi`. The design system ratifies four tiers (Critical / Heading / Body / Metadata). The fifth tier (`text-kpi`) is a documented extension, but Dashboard uses five where four are ratified.
+
+**Cross-cutting:** `--text-kpi` feeds `KpiCard`, `Timeline`, and `SkillsPlanner` — changing the token affects all three.
+
+**Options:**
+- (a) Schedule a cross-cutting type-scale pass (touches Dashboard + KpiCard + Timeline + SkillsPlanner)
+- (b) Merge `text-kpi` into the Heading tier
+- (c) Accept five-tier documented exception
+
+**Recommendation:** (a) — but only when a session can absorb the cross-cutting touch. The fifth tier is legitimate for KPI display; the drift is that Dashboard uses all five where four would suffice.
+
+**Status:** pending owner
+
+---
+
+### 14 section-measure rulings (CQ-07)
+
+The following pages carry narrow section measures that need owner rulings. Each page has three options: keep narrow, widen, or add a named exception.
+
+| # | Page | Current measure | Notes |
+|---|---|---|---|
+| 1 | `Database/Sources.vue` | narrow | Source ledger table; wide content |
+| 2 | `Database/Races.vue` | narrow | Race catalog table |
+| 3 | `Database/Scenarios.vue` | narrow | Scenario list |
+| 4 | `Database/Events.vue` | narrow | Event list |
+| 5 | `Database/ShopItems.vue` | narrow | Shop item list |
+| 6 | `Database/Sparks.vue` | narrow | Spark list |
+| 7 | `Catalog/Index.vue` | narrow | Trainee catalog (25/page) |
+| 8 | `Catalog/Show.vue` | narrow | Trainee detail |
+| 9 | `SupportCards/Index.vue` | narrow | Card list |
+| 10 | `SupportCards/Show.vue` | narrow | Card detail |
+| 11 | `Skills/Index.vue` | narrow | Skill search |
+| 12 | `Skills/Show.vue` | narrow | Skill detail |
+| 13 | `Veterans/Index.vue` | narrow | Veteran library |
+| 14 | `Veterans/Show.vue` | narrow | Veteran detail |
+
+**Options per page:** (a) keep narrow, (b) widen to standard, (c) add named exception in `DESIGN.md`
+
+**Recommendation:** per-page ruling required — the owner should review each page at 1280px and decide. No blanket recommendation; the measures were set deliberately and changing them is a design decision.
+
+**Status:** pending owner (14 rulings)
+
+## 2026-11-03-blocked-scenarios.md
+
+> Folded into this master in consolidation Round 23 (owner-ordered, 2026-11-03) from
+> docs/proposals/2026-11-03-blocked-scenarios.md. The source's own `#` title follows verbatim as `###`, and its headings keep one
+> level of demotion; the body is otherwise untouched. The source file was deleted from its
+> original location after this section was verified present and byte-identical; it remains
+> recoverable from the commit that deleted it.
+
+### Blocked scenarios — Phase 4.1 and 4.2 evidence gaps
+
+
+Date: 2026-11-03 (final closure pass)
+
+### Phase 4.1 — Unity Training evaluator
+
+**Current state:** `docs/Unity-Cup-plan.md` §"Not implemented" records: *"Nothing. The absence is the finding."* The evaluator is unimplemented and the plan itself says the absence is the finding.
+
+**What's missing (the spec gap):**
+- Input shape: what state the evaluator reads (Unity Cup training parameters, spirit burst state, team board)
+- Output shape: what it produces (evaluation score, recommendation, confidence)
+- Validation rules: what inputs are valid, what ranges are acceptable
+- Calibrated-approximation boundary: whether the evaluator is exact or approximate, and if approximate, the calibration method
+
+**Options:**
+- (a) Provide the spec in `Unity-Cup-plan.md` — then implement per spec
+- (b) Accept the evaluator is unimplemented (current state) — no further work until evidence exists
+- (c) Descope the feature — remove the evaluator from the Unity Cup plan
+
+**Recommendation:** (b) — the plan itself says the absence is the finding. No further work until evidence exists. The Unity Cup scenario ships without the evaluator; the advisor works from the scenario's existing data.
+
+**Status:** blocked on missing spec (owner or Data Engineer to provide)
+
+---
+
+### Phase 4.2 — Grand Concert S8–S18 (evidence gaps)
+
+The following slices are `BLOCKED BY EVIDENCE` per `docs/proposals/Our-Grand-Concert-plan.md`. S3–S7 and S19–S22 are `COMPLETE`.
+
+| Slice | Title | Evidence gap |
+|---|---|---|
+| S8 | Lessons representation | No Lesson representation exists in the data model |
+| S11 | Songs | Noun and count settled, nothing a field could carry |
+| S14 | Live Bonus | Six renderings for three objects — no single representation |
+| S16 | Promo Concert | No `year` column, no concert kind, no schedule |
+
+**Additional blocked slices** (S9, S10, S12, S13, S15, S17, S18) — blocked on evidence from the above gaps cascading.
+
+**Options for the whole set:**
+- (a) Provision evidence in the reference corpus (`docs/UMAMUSUME_REFERENCE.md`) — then implement
+- (b) Descope the blocked slices — ship Grand Concert without Lessons, Songs, Live Bonus, Promo Concert
+- (c) Accept generic representation — implement with placeholder data until evidence arrives
+
+**Recommendation:** (b) for S16 (Promo Concert has a structural gap that needs schema work), (a) for S8/S11/S14 (evidence can be provisioned from the JP client without schema changes).
+
+**Status:** blocked on evidence (owner or Data Engineer to provision)

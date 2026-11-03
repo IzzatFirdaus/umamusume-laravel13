@@ -24,6 +24,8 @@ use Illuminate\Validation\Rule;
  * sign rule (`ADR-0011` §4, G-SK-18), and a filter that cannot reach them implies they are missing
  * something. `rarity` is deliberately absent: it is the export's class code with no client label
  * (`ADR-0011` §3), so a control over it would ask a Trainer to choose between numbers they cannot read.
+ *
+ * `distance` accepts 1..4 (Sprint/Mile/Medium/Long per config) plus Unspecified for null distance_type.
  */
 class SkillSearchRequest extends FormRequest
 {
@@ -58,6 +60,7 @@ class SkillSearchRequest extends FormRequest
             'search' => ['nullable', 'string', 'max:120'],
             'type' => ['nullable', Rule::in([...GametoraSkillsParser::CATEGORIES, self::UNSPECIFIED])],
             'unique' => ['nullable', 'boolean'],
+            'distance' => ['nullable', 'integer', Rule::in([0, 1, 2, 3, 4])],
         ];
     }
 
@@ -69,6 +72,7 @@ class SkillSearchRequest extends FormRequest
             'search' => $this->input('search') === '' ? null : $this->input('search'),
             'type' => $this->input('type') === '' ? null : $this->input('type'),
             'unique' => $this->input('unique') === '' ? null : $this->input('unique'),
+            'distance' => $this->input('distance') === '' ? null : $this->input('distance'),
         ]);
     }
 }

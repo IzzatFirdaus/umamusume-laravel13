@@ -337,7 +337,7 @@ it('prices the hint ladder from this skill\'s own base, floored', function (): v
             ->where('hintLadder.rows.5.label', 'Lv Max')
             ->where('hintLadder.rows.5.discount', 40)
             ->where('hintLadder.rows.5.price', 78)
-            ->where('hintLadder.measuredAt', 'Oct 3, 2026'));
+            ->where('hintLadder.measuredAt', 'Nov 2, 2026'));
 });
 
 it('lists the runs that record the skill, newest first, with their stored status and level', function (): void {

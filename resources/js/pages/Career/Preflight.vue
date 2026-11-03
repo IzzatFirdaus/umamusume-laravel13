@@ -305,7 +305,7 @@ const rows = computed<ChecklistRow[]>(() => [
     },
     {
         key: 'deck',
-        label: 'Support deck',
+        label: 'Deck',
         entered: props.contract.deck !== null,
         summary: props.contract.deck === null
             ? 'Not entered'

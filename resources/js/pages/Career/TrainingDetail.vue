@@ -569,8 +569,7 @@ const energyBandNote = computed(() =>
                                         <span v-if="discipline.recommended" class="ml-1 rounded bg-status-positive px-1.5 py-0.5 text-xs font-bold text-status-positive-ink">Recommended</span>
                                     </span>
                                     <span class="block text-xs text-ink-muted">
-                                        {{ discipline.feeder }} · Lv {{ discipline.level ?? 'not recorded' }} base ·
-                                        failure rate not published
+                                        {{ discipline.feeder }} · Lv {{ discipline.level ?? 'not recorded' }} base
                                     </span>
                                 </span>
                                 <span class="text-right font-mono text-sm text-ink-strong">
@@ -586,9 +585,7 @@ const energyBandNote = computed(() =>
 
                         <Note class="mt-3">
                             <b>Published per-level figures, before multipliers.</b> A discipline with no
-                            recorded facility level states that absence rather than a Level-1 number, and
-                            no source publishes a ranked discipline failure table, so the failure line
-                            says so instead of printing a percentage.
+                            recorded facility level states that absence rather than a Level-1 number.
                         </Note>
                     </section>
 
@@ -697,7 +694,7 @@ const energyBandNote = computed(() =>
                         <button type="button" class="btn btn-quiet min-h-11" title="The build has no undo; this screen proposes one.">Undo turn {{ undoableTurn }}</button>
                         <button type="button" class="btn min-h-11" @click="discard()">Discard</button>
                         <button type="submit" class="btn btn-primary min-h-11" :disabled="form.processing">
-                            {{ form.processing ? 'Recording…' : 'Record turn ' + props.write.turn }}
+                            {{ form.processing ? 'Recording…' : 'Record turn ' + form.turn }}
                         </button>
                     </div>
                 </div>
@@ -707,7 +704,7 @@ const energyBandNote = computed(() =>
                  request this form posts requires the turn number and the five client-read totals. They
                  stay available, collapsed, so the visible page is the wireframe's and the write still
                  validates against the boundary that already owns it. -->
-            <details class="card mt-4">
+            <details class="card mt-4" open>
                 <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">Client totals this turn (required to record)</summary>
                 <p class="mt-1 text-sm text-ink-muted">
                     What the client shows after the turn resolves. This tool does not project these, so
@@ -776,6 +773,49 @@ const energyBandNote = computed(() =>
                     Keyboard: <span class="kbd">1</span>-<span class="kbd">5</span> pick a discipline,
                     <span class="kbd">Enter</span> records the held choice, <span class="kbd">Esc</span> steps
                     back. Keys stand down while a field has focus.
+                </p>
+            </details>
+
+            <!-- The two readings the client prints before a turn resolves: the failure rate and the
+                 preview gains. Transcribed, not computed: the tool stores what the Trainer read
+                 and never projects an outcome (`ADR-0016`, `PRD.md` §6.11). Optional by design, so
+                 a turn logged without reading them stores neither. -->
+            <details class="rounded-md border border-rule bg-raised p-3">
+                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
+                    Preview readings
+                </summary>
+                <div class="mt-2 grid grid-cols-2 gap-3 md:grid-cols-6">
+                    <label class="col-span-2 flex flex-col gap-1 md:col-span-1">
+                        <span class="text-ink-muted">Failure rate</span>
+                        <input
+                            id="turn-failure_rate"
+                            v-model="form.failure_rate"
+                            type="number"
+                            name="failure_rate"
+                            min="0"
+                            max="100"
+                            :aria-describedby="describedBy('failure_rate')"
+                            class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
+                        >
+                        <span v-if="errorOf('failure_rate')" id="turn-failure_rate-error" class="text-xs text-risk">{{ errorOf('failure_rate') }}</span>
+                    </label>
+                    <label v-for="field in previewFields" :key="field.name" class="flex flex-col gap-1">
+                        <span class="text-ink-muted">{{ field.label }}</span>
+                        <input
+                            :id="`turn-preview_gains-${field.name}`"
+                            v-model="form.preview_gains[field.name]"
+                            type="number"
+                            :name="`preview_gains[${field.name}]`"
+                            :aria-describedby="errorOf(`preview_gains.${field.name}`) === undefined ? undefined : `turn-preview_gains-${field.name}-error`"
+                            class="min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink"
+                        >
+                        <span v-if="errorOf(`preview_gains.${field.name}`)" :id="`turn-preview_gains-${field.name}-error`" class="text-xs text-risk">{{ errorOf(`preview_gains.${field.name}`) }}</span>
+                    </label>
+                </div>
+                <p class="mt-2 text-xs text-ink-muted">
+                    What the client showed: the failure percentage and the gains it previewed. Enter
+                    a negative number when the preview showed a drop. Leave them blank when this turn
+                    did not read them.
                 </p>
             </details>
         </form>
