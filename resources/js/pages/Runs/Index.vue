@@ -276,7 +276,7 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
                             <StatusPill
                                 :label="run.status_label"
                                 :status="run.status"
-                                :variant="statusVariant(run.status_label)"
+                                :variant="statusVariant(run.status)"
                                 size="sm"
                             />
                         </td>

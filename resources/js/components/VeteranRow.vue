@@ -11,6 +11,8 @@ interface Props {
         trainee: string;
         trainee_ja: string | null;
         scenario_label: string;
+        /** The stored state; the pill's colour branches on this, never on the printed word. */
+        status: string;
         status_label: string;
         tags: string[];
         notes: string | null;
@@ -67,7 +69,8 @@ function statusVariant(status: string): 'info' | 'success' | 'warning' | 'neutra
             <div class="flex flex-wrap items-center gap-2 sm:shrink-0">
                 <StatusPill
                     :label="props.veteran.status_label"
-                    :variant="statusVariant(props.veteran.status_label)"
+                    :status="props.veteran.status"
+                    :variant="statusVariant(props.veteran.status)"
                     size="sm"
                 />
                 <!-- The card's primary action, in the header row beside the career it belongs to rather

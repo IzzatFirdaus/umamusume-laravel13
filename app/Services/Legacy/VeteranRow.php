@@ -36,7 +36,7 @@ final class VeteranRow
 {
     /**
      * @return array{id: int, run_id: int, label: string, trainee: string, trainee_ja: string|null, scenario_label: string,
-     *               status_label: string, tags: list<string>, notes: string|null,
+     *               status: string, status_label: string, tags: list<string>, notes: string|null,
      *               hasSelection: bool, builder_url: string|null, veteran_url: string, portrait_url: string|null,
      *               saved_at: string|null, blue: int, pink: int, unique: int, compare_url: string}
      */
@@ -56,6 +56,10 @@ final class VeteranRow
             'trainee' => $run->umamusume->name,
             'trainee_ja' => $run->umamusume->name_ja,
             'scenario_label' => self::scenarioLabel($run),
+            // Both halves of the status: the stored value is what a page branches on, the label is what
+            // it prints. Deriving a colour from the label couples the meaning to a translated word
+            // (`lang/en/uma.php`), which is the defect AUD-20261102-016 F-01 names.
+            'status' => $run->status->value,
             'status_label' => $run->status->label(),
             // Filtered to the stored strings the same way the model's own `booted()` guard folds the twin,
             // so a stray non-string entry cannot widen the list's type or reach a consumer.
