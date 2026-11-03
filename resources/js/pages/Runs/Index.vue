@@ -2,7 +2,7 @@
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { computed } from 'vue';
 import StatusPill from '../../components/StatusPill.vue';
 import { LinkButton } from '../../components/Form';
@@ -190,9 +190,9 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
                 <p class="mt-1 text-sm text-ink-muted">
                     Clear the filters to see every career you have started, played or imported.
                 </p>
-                <a href="/training-runs" class="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-ink underline">
+                <Link href="/training-runs" class="mt-3 inline-flex min-h-11 items-center text-sm font-medium text-ink underline">
                     Clear filters
-                </a>
+                </Link>
             </template>
             <template v-else>
                 <p class="text-sm font-semibold text-ink-strong">No runs yet</p>

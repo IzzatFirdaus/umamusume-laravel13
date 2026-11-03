@@ -14,7 +14,7 @@
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
 import Note from '../../components/ui/Note.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
 
@@ -153,7 +153,7 @@ const finaleText = computed(() => {
                 <template #actions>
                     <a :href="resultUrl" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">Career result</a>
                     <button type="button" class="btn btn-quiet min-h-11" title="The build has no undo; this screen proposes one.">Undo turn {{ lastTurn }}</button>
-                    <a href="/training-runs" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">All careers</a>
+                    <Link href="/training-runs" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">All careers</Link>
                 </template>
             </PageHeader>
         </template>

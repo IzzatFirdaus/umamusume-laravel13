@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AppLayout from '../../../layouts/AppLayout.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, Link } from '@inertiajs/vue3';
 
 /*
  * The snapshot entry point. One action, one paragraph, one way back: a Trainer arriving here is
@@ -24,12 +24,12 @@ const props = defineProps<{
              (AUD-20261102-007 F-01). -->
         <nav aria-label="Snapshot steps" class="flex flex-wrap items-center gap-2 text-sm">
             <span aria-current="step" class="inline-flex min-h-11 items-center rounded-full border-2 border-pick-line bg-green-tint px-3 font-bold text-ink-strong">Entry</span>
-            <a href="/career/snapshot/setup" class="inline-flex min-h-11 items-center rounded-full border border-rule px-3 font-medium text-ink hover:bg-raised">Setup</a>
-            <a
+            <Link href="/career/snapshot/setup" class="inline-flex min-h-11 items-center rounded-full border border-rule px-3 font-medium text-ink hover:bg-raised">Setup</Link>
+            <Link
                 v-if="props.hasDraft"
                 href="/career/snapshot/review"
                 class="inline-flex min-h-11 items-center rounded-full border border-rule px-3 font-medium text-ink hover:bg-raised"
-            >Review</a>
+            >Review</Link>
             <button
                 v-else
                 type="button"

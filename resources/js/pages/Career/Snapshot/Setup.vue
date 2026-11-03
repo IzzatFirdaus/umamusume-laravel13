@@ -317,8 +317,8 @@ const positionErrors = computed<string[]>(() => {
                     screens that own the write.
                 </p>
                 <div class="mt-3 flex flex-wrap gap-3">
-                    <a href="/legacy" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">Legacy Lab</a>
-                    <a href="/support-cards" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">Support Cards</a>
+                    <Link href="/legacy" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">Legacy Lab</Link>
+                    <Link href="/support-cards" class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out">Support Cards</Link>
                 </div>
             </section>
 
