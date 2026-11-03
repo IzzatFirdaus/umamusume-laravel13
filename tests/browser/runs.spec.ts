@@ -45,7 +45,28 @@ test('renders the run list, and says what happens next when it is empty', async 
     await expect(page.getByRole('heading', { name: 'Training runs', level: 1 })).toBeVisible();
 
     // An empty list is a real state, not a failure, so it names what happens next rather than
-    // reading as "no data".
+    // reading as "no data". Reset any runs left by an earlier spec so this case is isolated
+    // (runs.spec.ts:41 order dependency): the empty state is what the test pins, and a leaked
+    // run from a prior spec's failing teardown is not this page's defect.
+    const runLinks = await page.locator('a[href^="/training-runs/"]').evaluateAll((nodes) =>
+        nodes
+            .map((n) => (n as HTMLAnchorElement).getAttribute('href') ?? '')
+            .filter((h) => /^\\/training-runs\\/\\d+$/.test(h)),
+    );
+    const runIds = [...new Set(runLinks.map((h) => h.match(/\\/(\\d+)$/)?.[1]).filter(Boolean))] as string[];
+    for (const id of runIds) {
+        const cookie = (await page.context().cookies()).find((c) => c.name === 'XSRF-TOKEN');
+        await page.request.delete(`/training-runs/${id}`, {
+            maxRedirects: 0,
+            form: { confirmed: '1' },
+            ...(cookie ? { headers: { 'X-XSRF-TOKEN': decodeURIComponent(cookie.value) } } : {}),
+        });
+    }
+    if (runIds.length > 0) {
+        await page.reload();
+        await page.locator('#app > *').first().waitFor();
+    }
+
     await expect(page.getByText('No runs yet')).toBeVisible();
     await expect(page.getByText(/nothing to list until you start one/)).toBeVisible();
 
