@@ -278,13 +278,13 @@ test('the Data card offers the export and the backup, and the backup is a real w
     const card = page.locator('.card', { has: page.getByRole('heading', { name: 'Data', exact: true }) }).first();
     const exportLink = card.getByRole('link', { name: /Export everything as JSON/ });
     await expect(exportLink).toHaveAttribute('href', /export/);
-    await expect(card.getByRole('button', { name: 'Download a backup' })).toBeVisible();
+    await expect(card.getByRole('button', { name: 'Write a backup' })).toBeVisible();
     await expect(
         card.getByText('Export is a file download. A backup is a complete copy you can restore from.'),
     ).toBeVisible();
 
     // The backup writes a snapshot and says where it went.
-    await card.getByRole('button', { name: 'Download a backup' }).click();
+    await card.getByRole('button', { name: 'Write a backup' }).click();
     const flash = page.getByRole('status').filter({ hasText: 'Backup written to' });
     await expect(flash).toBeVisible();
     await expect(flash).toContainText('backups');
