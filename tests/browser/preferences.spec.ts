@@ -242,6 +242,33 @@ test('refuses a stat target above the engine ceiling and ties the message to its
     await expect(page.getByRole('button', { name: 'Save changes' })).toBeDisabled();
 });
 
+test('a default-scenario refusal moves focus to the scenario select', async ({ page }) => {
+    await ready(page);
+
+    // The select's own options are the accepted values, so no UI path offers an out-of-list choice.
+    // Add one and submit it: the refusal is the server's real rule, and the assertion is about
+    // where focus lands after it (AUD-20261102-003 F-03, the family `c2967b36` dropped from
+    // `firstControlId()`).
+    await page.evaluate(() => {
+        const select = document.querySelector('#field-settings_default_scenario') as HTMLSelectElement;
+        const option = document.createElement('option');
+        option.value = 'not-a-scenario';
+        option.textContent = 'Not a scenario';
+        select.appendChild(option);
+        select.value = 'not-a-scenario';
+        select.dispatchEvent(new Event('change', { bubbles: true }));
+    });
+
+    await expect(page.getByRole('button', { name: 'Save changes' })).toBeEnabled();
+    await page.getByRole('button', { name: 'Save changes' }).click();
+
+    // The select carries `controlId('settings.default_scenario')` from `BaseSelect`'s `:id`, so
+    // focus landing here is the fix; before it, the fallback `error-block-<key>` had no element.
+    const scenario = page.locator('#field-settings_default_scenario');
+    await expect(scenario).toHaveAttribute('aria-invalid', 'true');
+    await expect(scenario).toBeFocused();
+});
+
 test('the Data card offers the export and the backup, and the backup is a real write', async ({ page }) => {
     await ready(page);
 

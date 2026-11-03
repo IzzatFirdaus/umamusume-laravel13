@@ -152,6 +152,43 @@ test('loads with 200 and focuses the manual-race refusal', async ({ page }) => {
     await expect(alert).toBeFocused();
 });
 
+test('a calendar refusal moves focus to its alert', async ({ page }) => {
+    const runUrl = await openDecision(page);
+
+    await page.goto(`${runUrl}/races`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // Every row the calendar offers is already on this run's calendar, so the UI cannot produce
+    // the server's "not on this run's calendar" refusal. Forge only the row id on the wire and let
+    // the server refuse for real: the assertion is about focus after a genuine 422 round trip.
+    await page.route('**/training-runs/*/races', async (route) => {
+        if (route.request().method() !== 'POST') {
+            await route.continue();
+
+            return;
+        }
+
+        const body = route.request().postDataJSON() as Record<string, unknown>;
+        await route.continue({ postData: JSON.stringify({ ...body, race_catalog_slot_id: '999999' }) });
+    });
+
+    await page
+        .locator('table')
+        .first()
+        .locator('tbody tr')
+        .filter({ has: page.getByRole('button', { name: 'Enter' }) })
+        .first()
+        .getByRole('button', { name: 'Enter' })
+        .click();
+
+    // `enterAlertRef` is what AUD-20261102-002 F-01 added. The assertion is that the refusal
+    // receives focus; the live region at the foot of the page also announces, which is not the
+    // same thing (WCAG 2.4.3).
+    const alert = page.locator('p[role="alert"][tabindex="-1"]');
+    await expect(alert).toBeVisible(WRITE);
+    await expect(alert).toBeFocused();
+});
+
 test('Train instead escapes to the training screen', async ({ page }) => {
     const runUrl = await openDecision(page);
 
