@@ -4523,3 +4523,17 @@ for durability so a future reader understands why the read-path filter cannot be
 **Why not fixed here.** Out of scope of the trainee-profile slice; a separate plan should align the catalog detail surface. The audit observation that "catalogue stores no base value or growth row" (Database pass-2) becomes stale after ADR-0030 and should be corrected in `docs/audit-corrections.md` or the audit report when the follow-up lands.
 
 **Closure.** Update `CatalogController` and `Catalog/Show.vue` to read `base_stats`/`growth_rates` and render them, mirroring the trainee profile conditional rendering.
+
+## KI-151 — Dashboard type-scale drift is still open (Dashboard-F-01) - FILED 2026-11-03
+
+**State:** OPEN. `--text-kpi`, the KPI figure step, still feeds `KpiCard`, the Timeline value and
+the SkillsPlanner value, and the Dashboard's own headings carry a step that does not match the
+four-tier scale the rest of the shell uses. The 2026-11-01 audit filed it as Dashboard-F-01.
+
+**Why not fixed here.** A type-scale change to a shared token reaches three components and every
+screen that composes them; it is a cross-cutting pass, not a one-file correction, and the
+Slice A-G dispatch explicitly scoped it out.
+
+**Closure.** One pass that sets the KPI/timeline/planner step against DESIGN.md's four tiers,
+re-measures the thirteen screens the 15->16px change touched, and records the before/after on
+the Dashboard and the two composing components.
