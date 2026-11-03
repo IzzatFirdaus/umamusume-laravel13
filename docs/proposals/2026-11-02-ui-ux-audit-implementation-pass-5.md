@@ -134,3 +134,7 @@ of the same peer state and was left in place rather than dropped.
 | `b4458c09` | fix(raceplanner): remove the duplicate closing template tag the group loop left |
 
 Prior-pass commits are not counted here.
+
+---
+
+**Erratum — 2026-11-03.** §2.3 stated F-01's real defect was fixed by F-03's mapping. Verified 2026-11-03: git show --stat a76a95a1 touched only Veterans/Compare.vue. Legacy Compare.vue:278-279 was never updated. F-01's fix landed in e4786df4.
