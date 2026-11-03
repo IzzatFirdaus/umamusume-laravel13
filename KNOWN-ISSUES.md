@@ -4516,7 +4516,7 @@ for durability so a future reader understands why the read-path filter cannot be
   
  * * S t a t e : * *   O P E N   2 0 2 6 - 1 1 - 0 2 .   ` c h a r a c t e r _ c a r d s `   n o w   s t o r e s   ` b a s e _ s t a t s `   a n d   ` g r o w t h _ r a t e s `   ( A D R - 0 0 3 0 ,   m i g r a t i o n   ` 2 0 2 6 _ 1 1 _ 0 2 _ 1 4 1 6 3 9 ` ) ,   p o p u l a t e d   b y   t h e   r e p a r s e .   T h e   t r a i n e e   p r o f i l e   ( ` / c a r e e r / s e t u p / t r a i n e e / { i d } ` )   r e n d e r s   t h e m .   T h e   c a t a l o g   d e t a i l   p a g e   ( ` / u m a m u s u m e / { s l u g } ` )   s t i l l   p r i n t s   N o t  
  
-## KI-149 — Catalog Show does not render character_cards.base_stats / .growth_rates even when populated
+## KI-152 — Catalog Show does not render character_cards.base_stats / .growth_rates even when populated
 
 **State:** OPEN 2026-11-02. `character_cards` now stores `base_stats` and `growth_rates` (ADR-0030, migration `2026_11_02_141639`), populated by the reparse. The trainee profile (`/career/setup/trainee/{id}`) renders them. The catalog detail page (`/umamusume/{slug}`) still prints "Not recorded" for both, because `CatalogController` and `Catalog/Show.vue` were not updated in that slice.
 
