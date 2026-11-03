@@ -259,6 +259,13 @@ test.describe('Legacy Lab builder', () => {
         const table = page.getByRole('region', { name: /side by side/i }).getByRole('table');
         await expect(table).toBeVisible();
 
+        // AUD-20261102-024 F-01, on the builder's own single run: one column is not a difference, so no
+        // verdict cell may wear the caution tint. Asserted as the defect's absence, not as the class the
+        // neutral state happens to carry, so a later rename is not read as a regression. The positive
+        // check above is what stops the count below from passing on an empty table.
+        await expect(table.locator('td > span', { hasText: 'single column' }).first()).toBeVisible();
+        await expect(table.locator('td > span.pill-caution')).toHaveCount(0);
+
         // The compare surface holds no per-Spark row. A column carries a variable number of Sparks, so
         // rows would not align across columns; the surface therefore prints one count per kind, and the
         // kind is a word in the row header rather than a colour a Trainer has to decode (WCAG 1.4.1).
@@ -385,6 +392,12 @@ test.describe('Legacy Lab compare', () => {
 
         const scrollable = await region.evaluate((node) => node.scrollWidth > node.clientWidth);
         expect(scrollable, 'the compare region scrolls horizontally at 320px').toBe(true);
+
+        // The same AUD-20261102-024 F-01 pin as the builder flow, on the other path that reaches one
+        // column: this URL is how the Legacy Lab's own compare link arrives, so a re-regression that
+        // tinted these verdicts caution would otherwise slip past the case that comes through the form.
+        await expect(region.getByRole('table').locator('td > span', { hasText: 'single column' }).first()).toBeVisible();
+        await expect(region.getByRole('table').locator('td > span.pill-caution')).toHaveCount(0);
 
         // No horizontal overflow of the scrolling box, which is what 1.4.10 forbids.
         //

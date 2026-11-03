@@ -275,8 +275,15 @@ const verdictBy = computed((): Record<string, string> =>
     Object.fromEntries(differences.value.map((row) => [row.property, row.verdict])),
 );
 
+/*
+ * `same` and `single column` are neutral states, not differences: one says the runs agree, the other
+ * says there was nothing to compare against. Both wore the caution tint, which reads as "a difference
+ * was found" on a row that carries none (AUD-20261102-024 F-01). The one-column case stays a rendered
+ * table — the builder hands a single run to this surface on purpose (`legacy.spec.ts:232`, `:373`), so
+ * only the tint was wrong, not the guard that hid the table and was reverted for it.
+ */
 const verdictPill = (verdict: string): string =>
-    verdict === 'same' ? 'pill pill-neutral' : 'pill pill-caution';
+    verdict === 'same' || verdict === 'single column' ? 'pill pill-neutral' : 'pill pill-caution';
 </script>
 
 <template>
