@@ -251,3 +251,14 @@ zero-edit first-clone yet.**
 2. **Slice D** — the `Legacy/Compare.vue:278-279` pill mapping is unchanged; `a76a95a1` touched
    `Veterans/Compare.vue` only.
 3. **Push** — the commits above are local; `origin/master` does not have them yet.
+
+
+## Peer revert coordination note (2026-11-03)
+
+9a61197f landed tests requiring fixes from 6f3d5a81 and e4786df4. The peer commit is not
+self-contained: running it on 9a61197f alone, without those fixes, fails its two new focus tests.
+The push sequence must include the whole series, moving together.
+
+Preserved peer state: .scratch-uma/remaining-code-2026-11-03/*.staged-peer-revert.vue (2 files:
+Edit.staged-peer-revert.vue, RaceDecision.staged-peer-revert.vue), untracked and not staged.
+The peer should be told their pre-revert state was saved there.
