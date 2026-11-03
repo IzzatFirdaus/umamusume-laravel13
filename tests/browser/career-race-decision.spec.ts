@@ -215,8 +215,9 @@ test('meets the 44px floor and passes axe', async ({ page }) => {
         nodes.filter((node) => {
             const box = node.getBoundingClientRect();
             // Compact disclosure markers (AbsenceValue compact) are intentionally 24px per WCAG 2.5.8 floor;
-            // the house 44px bar applies to primary controls, not dense-row disclosures.
-            if (node.classList.contains('min-h-6')) return false;
+            // the house 44px bar applies to primary controls, not dense-row disclosures. Scoped to <summary>
+            // so a primary control built at min-h-6 by mistake is still caught (DESIGN.md 874).
+            if (node.tagName === 'SUMMARY' && node.classList.contains('min-h-6')) return false;
 
             return box.width > 0 && box.height > 0 && box.height < 44;
         }).length,
