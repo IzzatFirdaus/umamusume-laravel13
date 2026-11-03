@@ -27,7 +27,6 @@ const props = defineProps<{
     years: { value: number; label: string }[];
     phases: { value: string; label: string }[];
     review: string;
-    action: string;
     /** The payload the review screen confirmed, so Back re-hydrates this form. Null on a first visit. */
     draft?: Record<string, unknown> | null;
 }>();
@@ -114,8 +113,11 @@ const fieldStates = computed<Record<string, string>>(() => {
 });
 
 const submit = (): void => {
+    // A POST, not a GET: the notes field takes 5000 characters, and a query string would carry them
+    // into the address bar, the browser history and every request log between here and the review
+    // (AUD-20261102-008 F-01).
     form.transform((data) => ({ ...data, field_states: fieldStates.value }))
-        .get(props.review, { preserveScroll: true });
+        .post(props.review, { preserveScroll: true });
 };
 
 /*

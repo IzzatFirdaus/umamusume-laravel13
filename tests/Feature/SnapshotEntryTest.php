@@ -28,7 +28,6 @@ it('renders the setup form the entry screen leads to', function (): void {
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Career/Snapshot/Setup')
-            ->where('action', route('career.snapshot.store'))
             ->has('trainees')
             ->has('scenarios', 4)
             ->has('years', 3)

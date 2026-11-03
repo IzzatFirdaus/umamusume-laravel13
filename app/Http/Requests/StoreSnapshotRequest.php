@@ -35,9 +35,9 @@ class StoreSnapshotRequest extends FormRequest
     public const STATE_FIELDS = ['speed', 'stamina', 'power', 'guts', 'wit', 'energy', 'fans', 'skill_points'];
 
     /**
-     * The rules as a plain array, so the review GET can validate the same contract without
+     * The rules as a plain array, so the review POST can validate the same contract without
      * instantiating a request that has nothing to submit (the audit found the bare review URL
-     * bouncing to the setup form because the FormRequest refused an empty query).
+     * bouncing to the setup form because the FormRequest refused an empty submission).
      *
      * @return array<string, mixed>
      */

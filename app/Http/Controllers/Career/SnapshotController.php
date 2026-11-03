@@ -78,10 +78,10 @@ class SnapshotController extends Controller
                 static fn (CareerPhase $phase): array => ['value' => $phase->value, 'label' => $phase->value],
                 CareerPhase::cases(),
             ),
-            // The setup form's submit now opens the review, which is where the snapshot is read back
-            // before it is written; `action` stays the commit endpoint the review posts to.
+            // The setup form's submit opens the review, which is where the snapshot is read back before
+            // it is written. The commit endpoint is not handed to this form: the review screen posts to
+            // it, and it receives its own `action` from `review()`.
             'review' => route('career.snapshot.review'),
-            'action' => route('career.snapshot.store'),
             // The review screen's Back returns here, and without this the Trainer landed on a blank
             // form having just confirmed their entries. `review()` parks the validated payload in the
             // session for exactly this read; a first visit has none and the form opens empty.
@@ -92,10 +92,11 @@ class SnapshotController extends Controller
     /**
      * The read-back the Trainer confirms before committing.
      *
-     * It is a GET over the form the setup screen submitted, so the same `StoreSnapshotRequest`
-     * validates it here: a snapshot missing its position is refused with the field named before any
-     * row is written, not after. The validated payload travels to the page so the confirm button
-     * re-posts exactly what was read back rather than re-collecting it.
+     * It is a POST of the form the setup screen submitted, so nothing the Trainer typed travels in a
+     * URL, and the same `StoreSnapshotRequest` validates it here: a snapshot missing its position is
+     * refused with the field named before any row is written, not after. The validated payload travels
+     * to the page so the confirm button re-posts exactly what was read back rather than re-collecting
+     * it.
      */
     public function review(Request $request): Response
     {
@@ -122,8 +123,11 @@ class SnapshotController extends Controller
     }
 
     /**
-     * The payload the review reads: the form's own GET query when the setup screen submitted it,
+     * The payload the review reads: the submitted request body when the setup screen posted it,
      * otherwise the draft parked in the session by an earlier read, otherwise nothing.
+     *
+     * The body bag only, deliberately: reading `input()` would merge the query string, so a payload
+     * that reached this route in a URL would be honoured, and the URL is the thing being retired.
      *
      * The bare review URL is a real state, not an error: the HFW's review draws every field as
      * "Not provided" when no snapshot has been entered, and the confirm has nothing to re-post.
@@ -132,10 +136,10 @@ class SnapshotController extends Controller
      */
     private function reviewData(Request $request): array
     {
-        $query = $request->query();
+        $submitted = $request->request->all();
 
-        if (array_key_exists('career_year', $query) || array_key_exists('umamusume_id', $query)) {
-            return Validator::make($query, StoreSnapshotRequest::fieldRules())->validate();
+        if (array_key_exists('career_year', $submitted) || array_key_exists('umamusume_id', $submitted)) {
+            return Validator::make($submitted, StoreSnapshotRequest::fieldRules())->validate();
         }
 
         $draft = $request->session()->get('career.snapshot.draft');

@@ -107,8 +107,10 @@ Route::put('/career/setup/preflight', [PreflightController::class, 'store'])->na
  */
 Route::get('/career/snapshot', [SnapshotController::class, 'entry'])->name('career.snapshot');
 Route::get('/career/snapshot/setup', [SnapshotController::class, 'setup'])->name('career.snapshot.setup');
-// The read-back between the form and the write: a GET over the submitted form, so the Trainer reads
-// exactly what will be recorded before the confirm button posts it to the commit route below.
+// The read-back between the form and the write. The form arrives as a POST so its notes never enter
+// the URL, and the GET stays for the bare visit: opening Review without a submitted form and without
+// a parked draft is a real state, not an error - it renders every field as "Not provided".
+Route::post('/career/snapshot/review', [SnapshotController::class, 'review'])->name('career.snapshot.review.submit');
 Route::get('/career/snapshot/review', [SnapshotController::class, 'review'])->name('career.snapshot.review');
 Route::post('/career/snapshot', [SnapshotController::class, 'store'])->name('career.snapshot.store');
 

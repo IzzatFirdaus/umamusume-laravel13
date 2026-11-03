@@ -45,7 +45,7 @@ function reviewPayload(array $overrides = []): array
 }
 
 it('renders the three confidence states as three distinct labels', function (): void {
-    $this->get(route('career.snapshot.review', reviewPayload()))
+    $this->post(route('career.snapshot.review'), reviewPayload())
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Career/Snapshot/Review')
@@ -57,7 +57,7 @@ it('renders the three confidence states as three distinct labels', function (): 
 });
 
 it('keeps Unknown and Not provided apart rather than rendering both as one absence', function (): void {
-    $this->get(route('career.snapshot.review', reviewPayload()))
+    $this->post(route('career.snapshot.review'), reviewPayload())
         ->assertOk()
         ->assertInertia(function (Assert $page): void {
             $page->component('Career/Snapshot/Review');
@@ -95,7 +95,7 @@ it('refuses a snapshot missing a required field at the review step', function ()
     $payload = reviewPayload();
     unset($payload['career_phase']);
 
-    $this->get(route('career.snapshot.review', $payload))
+    $this->post(route('career.snapshot.review'), $payload)
         ->assertSessionHasErrors('career_phase');
 });
 
@@ -119,7 +119,7 @@ it('names the snapshot position through the same owner the race header reads', f
         ],
     ]);
 
-    $this->get(route('career.snapshot.review', $payload))
+    $this->post(route('career.snapshot.review'), $payload)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Career/Snapshot/Review')
@@ -155,11 +155,28 @@ it('opens on a bare visit with every field not provided instead of bouncing to t
 });
 
 it('reads back the session draft after the setup form opened the review once', function (): void {
-    $this->get(route('career.snapshot.review', reviewPayload()))->assertOk();
+    $this->post(route('career.snapshot.review'), reviewPayload())->assertOk();
 
     $this->get(route('career.snapshot.review'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('has_draft', true)
             ->where('fields.0.display', 'Known · Speed 607'));
+});
+
+it('reads the submitted body and refuses to read a payload carried in the query string', function (): void {
+    // AUD-20261102-008 F-01. Notes take 5000 characters, and a URL puts all of them in the browser
+    // history and in every request log between the form and the review. The review reads the request
+    // body only, so a query-string payload is not a payload the route honours.
+    $this->post(route('career.snapshot.review'), reviewPayload(['notes' => 'read from the body only']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/Snapshot/Review')
+            ->where('payload.notes', 'read from the body only'));
+
+    $this->get(route('career.snapshot.review', reviewPayload(['notes' => 'must not be read from a URL'])))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('has_draft', true)
+            ->where('payload.notes', 'read from the body only'));
 });

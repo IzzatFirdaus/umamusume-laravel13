@@ -11,8 +11,9 @@ import { STARTING_STATE, RICE_SHOWER } from './fixtures/riceShowerUnityCup.fixtu
  * copy the Trainer reads, the three state treatments the read-back keeps apart, that every state control
  * carries its own field name as an accessible name, the one accent per screen, and the axe scan.
  *
- * **Nothing here creates a run.** The suite stops at the review screen, which is a GET of the session
- * payload, so a fresh context leaves no rows behind. `rice-shower-unity-cup.spec.ts` owns the write.
+ * **Nothing here creates a run.** The suite stops at the review screen, which reads the posted payload
+ * back from the session, so a fresh context leaves no rows behind. `rice-shower-unity-cup.spec.ts`
+ * owns the write.
  */
 
 const WRITE = { timeout: 60_000 } as const;
@@ -36,11 +37,21 @@ async function fillSetupAndReview(page: import('@playwright/test').Page): Promis
     await page.locator('input[name="stamina"]').fill(String(STARTING_STATE.stats.stamina));
     await page.locator('input[name="power"]').fill(String(STARTING_STATE.stats.power));
 
+    // Notes take 5000 characters, which is exactly the payload that must not reach a URL. Filled in
+    // the shared helper so every case below walks the form with it set.
+    await page.locator('textarea[name="notes"]').fill('a note long enough that a URL would carry it');
+
     // The page draws the wireframe's pair in the head band and the same submit at the foot of the
     // form, so both buttons carry the label. The head one is the wireframe's first action.
     await page.locator('[data-region="hrow-actions"]').getByRole('button', { name: 'Review snapshot' }).click();
     await page.waitForURL(/\/career\/snapshot\/review/, WRITE);
     await page.locator('#app > *').first().waitFor();
+
+    // AUD-20261102-008 F-01: the form posts, so nothing the Trainer typed arrives in the address bar.
+    // A query string would carry the note into the browser history and every request log between
+    // here and the review, which is the whole finding.
+    expect(new URL(page.url()).search, 'the review URL carries a query string').toBe('');
+    expect(page.url(), 'the note reached the URL').not.toContain('long enough');
 }
 
 test.describe('Snapshot entry', () => {
