@@ -519,9 +519,8 @@ ruling.
 `npm run lint:ui` (plan slice 1.12) fails a Card inside a Card and any new arbitrary Tailwind value
 `bg-[#…]`, `w-[37px]`). The check is `tools/ui-framework-check.mjs` — `tools/ui-lint.mjs` was retired
 in Phase 1.6 and its two rules absorbed as rules 8 and 10 there. Arbitrary values are enumerated in
-`tools/ui-lint-baseline.json`; the debt count there is **219** as measured on 2026-10-27 (the earlier
-"sets `count: 0`" line described the gate's intent, not its state), and each remaining value is named
-individually, so any new one fails at 219 + 1. That list is deferred debt with a named intent, not a
+`tools/ui-lint-baseline.json`; the debt count there is **209** per `tools/ui-lint-baseline.json` (207 per the last observed run, 2026-11-03), and each remaining value is named
+individually, so any new one fails at 209 + 1. That list is deferred debt with a named intent, not a
 place to add. The
 identifier and bare-`N/A` rules are enforced by `tests/Feature/UiHygieneTest.php`, and the
 one-`h1`-per-route rule by `tests/browser/ui-hygiene.spec.ts`.
