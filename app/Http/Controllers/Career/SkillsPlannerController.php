@@ -590,9 +590,15 @@ final class SkillsPlannerController extends Controller
         ?BuildTargetPayload $target,
         ?array $recorded = null,
         ?string $priorityName = null,
-        bool $inPool = false,
+        bool $inPool = true,
     ): array {
         $name = $skill === null ? ($priorityName ?? '') : $skill->name;
+
+        $note = $this->prerequisiteNote($name);
+        if (!$inPool && $skill !== null) {
+            $poolNote = "This run's selected form does not publish this skill; it is recordable as a target but not in the learnable pool.";
+            $note = $note !== null ? $note . ' ' . $poolNote : $poolNote;
+        }
 
         return [
             'id' => $skill?->id,
@@ -603,7 +609,7 @@ final class SkillsPlannerController extends Controller
             'recorded' => $recorded,
             'conditions' => $this->conditionsLine($skill),
             'fit' => $this->fitCells($skill, $target),
-            'note' => $this->prerequisiteNote($name),
+            'note' => $note,
             'in_pool' => $inPool,
         ];
     }

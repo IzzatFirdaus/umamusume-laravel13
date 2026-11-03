@@ -106,13 +106,13 @@ class SupportCardController extends Controller
             if (! is_numeric($raw) || $parsed <= 0) {
                 $pageSize = 25;
             } else {
-                // Nearest option, tie-break toward the smaller option (15 → 25, 30 → 25)
+                // Nearest option, tie-break toward the larger option (15 → 25, 30 → 25)
                 $target = $pageSize;
                 $pageSize = $options[0];
                 $minDiff = abs($options[0] - $target);
                 foreach ($options as $option) {
                     $diff = abs($option - $target);
-                    if ($diff < $minDiff || ($diff === $minDiff && $option < $pageSize)) {
+                    if ($diff < $minDiff || ($diff === $minDiff && $option > $pageSize)) {
                         $minDiff = $diff;
                         $pageSize = $option;
                     }
