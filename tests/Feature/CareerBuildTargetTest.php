@@ -31,6 +31,7 @@ function draftTargetPayload(array $overrides = []): array
         'style' => 'Pace Chaser',
         'targets' => ['Speed' => 900, 'Stamina' => 800, 'Power' => 700, 'Guts' => 600, 'Wit' => 500],
         'skill_priorities' => ['Corner Adept'],
+        'hint_levels' => [],
     ], $overrides);
 }
 

@@ -34,10 +34,13 @@ use InvalidArgumentException;
  * `targets` is keyed by the stat matrix's own names and must carry exactly them. A four-stat target
  * or a six-stat one would leave the advisor ranking against a stat the run does not hold, and a
  * partial match is worse than a refusal because it looks like a complete target.
+ *
+ * `hint_levels` maps skill names to their hint level for SP discount calculation (UMAMUSUME_REFERENCE.md §1.1.4).
+ * Levels: '1'=10%, '2'=20%, '3'=30%, '4'=35%, 'max'=40%.
  */
 final readonly class BuildTargetPayload
 {
-    public const KEYS = ['purpose', 'distance', 'surface', 'style', 'targets', 'skill_priorities'];
+    public const KEYS = ['purpose', 'distance', 'surface', 'style', 'targets', 'skill_priorities', 'hint_levels'];
 
     public const DISTANCE_BANDS = ['Sprint', 'Mile', 'Medium', 'Long'];
 
@@ -48,6 +51,7 @@ final readonly class BuildTargetPayload
     /**
      * @param  array<string, int>  $targets  keyed by the stat matrix's names, exactly
      * @param  list<string>  $skillPriorities
+     * @param  array<string, string>  $hintLevels  skill name -> hint level ('1'..'4' or 'max')
      */
     public function __construct(
         public BuildPurpose $purpose,
@@ -56,6 +60,7 @@ final readonly class BuildTargetPayload
         public string $style,
         public array $targets,
         public array $skillPriorities,
+        public array $hintLevels = [],
     ) {}
 
     /**
@@ -72,11 +77,12 @@ final readonly class BuildTargetPayload
             self::oneOf($raw['style'], self::STYLES, 'running style'),
             self::targets($raw['targets']),
             self::skillPriorities($raw['skill_priorities']),
+            self::hintLevels($raw['hint_levels']),
         );
     }
 
     /**
-     * @return array{purpose: string, distance: string, surface: string, style: string, targets: array<string, int>, skill_priorities: list<string>}
+     * @return array{purpose: string, distance: string, surface: string, style: string, targets: array<string, int>, skill_priorities: list<string>, hint_levels: array<string, string>}
      */
     public function toArray(): array
     {
@@ -87,6 +93,7 @@ final readonly class BuildTargetPayload
             'style' => $this->style,
             'targets' => $this->targets,
             'skill_priorities' => $this->skillPriorities,
+            'hint_levels' => $this->hintLevels,
         ];
     }
 
@@ -177,6 +184,36 @@ final readonly class BuildTargetPayload
             }
 
             $clean[] = $name;
+        }
+
+        return $clean;
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    private static function hintLevels(mixed $hintLevels): array
+    {
+        if (! is_array($hintLevels)) {
+            return [];
+        }
+
+        $clean = [];
+
+        foreach ($hintLevels as $skillName => $level) {
+            if (! is_string($skillName) || $skillName === '') {
+                continue;
+            }
+
+            if (! is_string($level) || $level === '') {
+                continue;
+            }
+
+            if (! in_array($level, ['1', '2', '3', '4', 'max'], true)) {
+                continue;
+            }
+
+            $clean[$skillName] = $level;
         }
 
         return $clean;

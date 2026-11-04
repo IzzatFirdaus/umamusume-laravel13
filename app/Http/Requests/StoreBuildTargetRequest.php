@@ -80,6 +80,10 @@ class StoreBuildTargetRequest extends FormRequest
             'targets' => [$presence, 'array:'.implode(',', $order)],
             'skill_priorities' => ['present', 'array'],
             'skill_priorities.*' => ['string', 'max:255'],
+            // Hint level per skill for SP discount calculation (UMAMUSUME_REFERENCE.md §1.1.4).
+            // Lv1=10%, Lv2=20%, Lv3=30%, Lv4=35%, Lv Max=40%. String key allows 'max' as a key.
+            'hint_levels' => ['nullable', 'array'],
+            'hint_levels.*' => ['nullable', 'string', Rule::in(['1', '2', '3', '4', 'max'])],
         ];
 
         // Each stat is required by name rather than through `targets.*`. The `array:` rule above
@@ -203,6 +207,14 @@ class StoreBuildTargetRequest extends FormRequest
             $targets[$stat] = (int) $posted[$stat];
         }
 
+        // Hint levels for SP discount calculation (UMAMUSUME_REFERENCE.md §1.1.4).
+        $hintLevels = [];
+        foreach ((array) ($validated['hint_levels'] ?? []) as $skillName => $level) {
+            if (is_string($skillName) && $skillName !== '' && is_string($level) && $level !== '') {
+                $hintLevels[$skillName] = $level;
+            }
+        }
+
         return [
             'purpose' => (string) $validated['purpose'],
             'distance' => (string) $validated['distance'],
@@ -213,6 +225,7 @@ class StoreBuildTargetRequest extends FormRequest
                 static fn (mixed $name): string => (string) $name,
                 (array) ($validated['skill_priorities'] ?? []),
             )),
+            'hint_levels' => $hintLevels,
         ];
     }
 

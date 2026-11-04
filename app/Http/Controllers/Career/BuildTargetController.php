@@ -11,6 +11,7 @@ use App\Models\Advisor\BuildTargetPayload;
 use App\Models\Preference;
 use App\Models\Skill;
 use App\Services\Career\SetupDraft;
+use App\Services\HintDiscount;
 use App\Services\ScenarioCaps;
 use Illuminate\Http\RedirectResponse;
 use Inertia\Inertia;
@@ -124,10 +125,10 @@ class BuildTargetController extends Controller
     /**
      * The catalogue skills a Trainer can add to the draft target's priority list: the Global scope
      * every read path starts from (ADR-0011 §2), less the skills already named in the draft.
-     * `{id, name}` is the whole shape. The picker posts a name and the page accumulates names;
-     * the payload expects a list of names.
+     * `{id, name, sp_cost}` is the whole shape. The picker posts a name and the page accumulates names;
+     * the payload expects a list of names. The hint-adjusted cost is included for display.
      *
-     * @return list<array{id: int, name: string}>
+     * @return list<array{id: int, name: string, sp_cost: int, hint_level: string|null, hint_adjusted_cost: int}>
      */
     private function pickerSkills(): array
     {
@@ -136,13 +137,26 @@ class BuildTargetController extends Controller
             (array) ($target['skill_priorities'] ?? []),
             static fn (mixed $name): bool => is_string($name) && $name !== '',
         ));
+        $hintLevels = (array) ($target['hint_levels'] ?? []);
 
         return array_values(Skill::query()
             ->availableOnGlobal()
             ->whereNotIn('name', $existingNames)
             ->orderBy('name')
-            ->get(['id', 'name'])
-            ->map(static fn (Skill $skill): array => ['id' => (int) $skill->id, 'name' => (string) $skill->name])
+            ->get(['id', 'name', 'sp_cost'])
+            ->map(static function (Skill $skill) use ($hintLevels): array {
+                $base = (int) $skill->sp_cost;
+                $hintLevel = $hintLevels[$skill->name] ?? null;
+                $adjusted = $hintLevel !== null ? HintDiscount::price($base, $hintLevel) : $base;
+
+                return [
+                    'id' => (int) $skill->id,
+                    'name' => (string) $skill->name,
+                    'sp_cost' => $base,
+                    'hint_level' => $hintLevel,
+                    'hint_adjusted_cost' => $adjusted,
+                ];
+            })
             ->values()
             ->all());
     }
