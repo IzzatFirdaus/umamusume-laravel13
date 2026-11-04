@@ -77,7 +77,7 @@ final readonly class BuildTargetPayload
             self::oneOf($raw['style'], self::STYLES, 'running style'),
             self::targets($raw['targets']),
             self::skillPriorities($raw['skill_priorities']),
-            self::hintLevels($raw['hint_levels']),
+            self::hintLevels($raw['hint_levels'] ?? []),
         );
     }
 
