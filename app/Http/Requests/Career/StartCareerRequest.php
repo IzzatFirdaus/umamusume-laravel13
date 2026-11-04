@@ -8,6 +8,7 @@ use App\Enums\IndependentTrainingPolicy;
 use App\Enums\RunStatus;
 use App\Http\Requests\Concerns\ValidatesEnteredCaps;
 use App\Models\Advisor\BuildTargetPayload;
+use App\Models\CharacterCard;
 use App\Models\DeckSlot;
 use App\Models\Legacy\LegacySelectionPayload;
 use App\Models\Veteran;
@@ -133,7 +134,7 @@ class StartCareerRequest extends FormRequest
         /** @var array{0: int|null, 1: int|null} $parents */
         $parents = (array) $this->input('legacy_parents');
 
-        return [
+        $attributes = [
             'umamusume_id' => (int) $this->input('umamusume_id'),
             // The form the trainee step chose. Null is a complete answer: a trainee with one form, or a
             // Trainer who named none, starts a career with no form stated and the header prints no title.
@@ -154,6 +155,22 @@ class StartCareerRequest extends FormRequest
             'inheritance_parent_a_id' => Veteran::traineeId($parents[0] ?? null),
             'inheritance_parent_b_id' => Veteran::traineeId($parents[1] ?? null),
         ];
+
+        // Copy the growth rate from the selected character card (A6.3, UMAMUSUME_REFERENCE.md §1.3.5).
+        // The card's growth_rates are keyed by stat name with percentage values. If no card is selected
+        // or the card has no growth_rates, the run starts with null (entered, never derived).
+        $cardId = $this->input('character_card_id');
+        if (is_int($cardId)) {
+            $card = CharacterCard::query()
+                ->whereKey($cardId)
+                ->first();
+
+            if ($card !== null && is_array($card->growth_rates)) {
+                $attributes['growth_rate'] = $card->growth_rates;
+            }
+        }
+
+        return $attributes;
     }
 
     /**
