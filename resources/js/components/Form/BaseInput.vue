@@ -31,6 +31,7 @@ const emit = defineEmits<{
     blur: [event: FocusEvent];
     focus: [event: FocusEvent];
     change: [event: Event];
+    keydown: [event: KeyboardEvent];
 }>();
 
 const inputId = props.id;
@@ -74,6 +75,10 @@ function onBlur(event: FocusEvent): void {
 function onFocus(event: FocusEvent): void {
     emit('focus', event);
 }
+
+function onKeydown(event: KeyboardEvent): void {
+    emit('keydown', event);
+}
 </script>
 
 <template>
@@ -102,6 +107,7 @@ function onFocus(event: FocusEvent): void {
                 @change="onChange"
                 @blur="onBlur"
                 @focus="onFocus"
+                @keydown="onKeydown"
                 class="mt-1 block w-full min-h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring transition-colors duration-150 ease-out disabled:bg-sunken disabled:text-ink-muted disabled:cursor-not-allowed"
             />
     </label>
@@ -129,6 +135,7 @@ function onFocus(event: FocusEvent): void {
         @change="onChange"
         @blur="onBlur"
         @focus="onFocus"
+        @keydown="onKeydown"
         class="mt-1 block w-full min-h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring transition-colors duration-150 ease-out disabled:bg-sunken disabled:text-ink-muted disabled:cursor-not-allowed"
     />
     <p v-if="hint" :id="`hint-${id.replace(/^field-/, '')}`" class="mt-1 text-sm text-ink-muted">{{ hint }}</p>

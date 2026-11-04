@@ -95,6 +95,8 @@ const props = defineProps<{
      * rather than restated, so a published figure has one home.
      */
     finaleTargets: { staminaByDistance: Record<string, { min: number; max: number }> };
+    /** The skill catalogue for the searchable priority picker (P1). */
+    picker_skills: { id: number; name: string }[];
 }>();
 
 /**
@@ -266,7 +268,7 @@ function applyDefaults(): void {
 
 function onSkillPrioritySelect(payload: { id: number; name: string }): void {
     if (!form.skill_priorities.includes(payload.name)) {
-        form.skill_priorities.push(payload.name);
+        form.skill_priorities = [...form.skill_priorities, payload.name];
     }
 }
 
@@ -582,7 +584,7 @@ function onSkillPrioritySelect(payload: { id: number; name: string }): void {
 
 <p class="note mt-2" data-field="distance-conflict">
                     <b>Band edges are Game8's. 1400 m is an open conflict:</b>
-                    Game8 places it in {{ props.distanceBands[0] }, the data export files every 1400 m
+                    Game8 places it in {{ props.distanceBands[0] }}, the data export files every 1400 m
                     course under distance code 2, which reads as {{ props.distanceBands[1] }}, and the
                     client's own skills tagged for that band gate on <code>distance_type == 2</code>. This tool
                     states the disagreement rather than picking a side, so a 1400 m race can be typed

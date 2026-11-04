@@ -13,9 +13,8 @@
  * fully keyboard-operable (type, arrows, Enter, Escape — D-55 contract),
  * 44px targets and the standard focus ring.
  */
-import { computed, onMounted, ref, watch } from 'vue';
-import { BaseInput } from './BaseInput';
-import { BaseButton } from './BaseButton';
+import { computed, onBeforeUnmount, onMounted, ref, useId, watch } from 'vue';
+import BaseInput from './BaseInput.vue';
 
 interface Option {
     id: number;
@@ -44,11 +43,36 @@ const emit = defineEmits<{
     select: [payload: { id: number; name: string }];
 }>();
 
+// The label, the listbox and its options all need ids, and two pickers can share a page (the build
+// target and the planner's add form), so the ids come from `useId()` rather than a prop.
+const uid = useId();
+const inputId = `skill-picker-${uid}`;
+const listId = `${inputId}-list`;
+const hintId = `${inputId}-hint`;
+const errorId = `${inputId}-error`;
+const describedBy = computed(() =>
+    [props.hint === undefined ? null : hintId, props.error === undefined ? null : errorId]
+        .filter((id): id is string => id !== null)
+        .join(' ') || undefined,
+);
+
 const search = ref('');
 const isOpen = ref(false);
 const highlightedIndex = ref(-1);
-const inputRef = ref<HTMLInputElement | null>(null);
-const listRef = ref<HTMLUListElement | null>(null);
+const containerRef = ref<HTMLElement | null>(null);
+
+/**
+ * `BaseInput` is a component, so a template ref on it is the component instance, not an element:
+ * the picker's outside-click and blur paths read the DOM node by its id instead of assuming
+ * `contains()` or `blur()` exist on that instance.
+ */
+function blurInput(): void {
+    const input = document.getElementById(inputId);
+
+    if (input instanceof HTMLInputElement) {
+        input.blur();
+    }
+}
 
 const filteredOptions = computed(() => {
     const q = search.value.toLowerCase().trim();
@@ -60,10 +84,14 @@ const filteredOptions = computed(() => {
     );
 });
 
-function onInput(event: Event): void {
-    search.value = (event.target as HTMLInputElement).value;
+function onModelValue(value: string | number | File | null): void {
+    search.value = value === null ? '' : String(value);
     isOpen.value = true;
     highlightedIndex.value = -1;
+}
+
+function onInput(event: Event): void {
+    onModelValue((event.target as HTMLInputElement).value);
 }
 
 function onFocus(): void {
@@ -78,6 +106,14 @@ function onBlur(): void {
 }
 
 function onKeydown(event: KeyboardEvent): void {
+    // Escape closes even when the filter matched nothing: an empty list is still an open list.
+    if (event.key === 'Escape') {
+        isOpen.value = false;
+        blurInput();
+
+        return;
+    }
+
     const opts = filteredOptions.value;
     if (!opts.length) {
         return;
@@ -98,10 +134,6 @@ function onKeydown(event: KeyboardEvent): void {
                 selectOption(opts[highlightedIndex.value]);
             }
             break;
-        case 'Escape':
-            isOpen.value = false;
-            inputRef.value?.blur();
-            break;
         case 'Tab':
             isOpen.value = false;
             break;
@@ -112,7 +144,7 @@ function selectOption(opt: Option): void {
     emit('select', { id: opt.id, name: opt.name });
     search.value = '';
     isOpen.value = false;
-    inputRef.value?.blur();
+    blurInput();
 }
 
 function onOptionClick(opt: Option): void {
@@ -129,13 +161,12 @@ onMounted(() => {
     document.addEventListener('click', handleClickOutside);
 });
 
+onBeforeUnmount(() => {
+    document.removeEventListener('click', handleClickOutside);
+});
+
 function handleClickOutside(event: MouseEvent): void {
-    if (
-        inputRef.value &&
-        !inputRef.value.contains(event.target as Node) &&
-        listRef.value &&
-        !listRef.value.contains(event.target as Node)
-    ) {
+    if (containerRef.value !== null && !containerRef.value.contains(event.target as Node)) {
         isOpen.value = false;
     }
 }
@@ -151,15 +182,14 @@ function handleClickOutside(event: MouseEvent): void {
             {{ label }}
         </span>
 
-        <div class="relative" :class="{ 'ring-2 ring-brand-chrome': isOpen }">
+        <div ref="containerRef" class="relative" :class="{ 'ring-2 ring-brand-chrome': isOpen }">
             <BaseInput
-                ref="inputRef"
                 :id="inputId"
                 :name="inputId"
                 :placeholder="placeholder ?? 'Search skills…'"
                 :disabled="disabled"
-                :value="search"
-                @input="onInput"
+                :modelValue="search"
+                @update:modelValue="onModelValue"
                 @focus="onFocus"
                 @blur="onBlur"
                 @keydown="onKeydown"
@@ -209,7 +239,6 @@ function handleClickOutside(event: MouseEvent): void {
 
             <ul
                 v-if="isOpen && filteredOptions.length > 0"
-                ref="listRef"
                 :id="listId"
                 role="listbox"
                 :aria-label="label ?? 'Skill suggestions'"
