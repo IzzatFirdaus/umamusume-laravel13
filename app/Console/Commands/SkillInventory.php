@@ -6,8 +6,8 @@ namespace App\Console\Commands;
 
 use App\Enums\ReleaseStatus;
 use App\Models\Skill;
+use App\Services\DataPipeline\NameNormalizer;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
 use JsonException;
 
 /**
@@ -36,6 +36,7 @@ final class SkillInventory extends Command
 
             if ($seedFile === null) {
                 $this->error('No seed_file in config and no --file provided');
+
                 return 1;
             }
 
@@ -44,6 +45,7 @@ final class SkillInventory extends Command
 
         if (! file_exists($filePath)) {
             $this->error("File not found: {$filePath}");
+
             return 1;
         }
 
@@ -69,6 +71,7 @@ final class SkillInventory extends Command
 
         if ($body === false) {
             $this->error("Failed to read file: {$path}");
+
             return [];
         }
 
@@ -76,11 +79,13 @@ final class SkillInventory extends Command
             $skills = json_decode($body, true, 512, JSON_THROW_ON_ERROR);
         } catch (JsonException) {
             $this->error('Invalid JSON in export file');
+
             return [];
         }
 
         if (! is_array($skills)) {
             $this->error('Export file is not an array');
+
             return [];
         }
 
@@ -98,7 +103,6 @@ final class SkillInventory extends Command
     }
 
     /**
-     * @param  mixed  $skill
      * @return array{export_id: int, name: string, name_ja: string|null, name_is_client: bool,
      *                   release_status: string, rarity: int|null, is_unique: bool, sp_cost: int|null, type: string|null,
      *                   condition_groups: list<array<string, mixed>>, description: string|null, description_match_key: string|null, distance_type: int|null}|null
@@ -138,7 +142,7 @@ final class SkillInventory extends Command
             'condition_groups' => $this->conditionGroups($skill['condition_groups'] ?? null),
             'description' => $description,
             'description_match_key' => $description !== null
-                ? (new \App\Services\DataPipeline\NameNormalizer)->normalize($description)
+                ? (new NameNormalizer)->normalize($description)
                 : null,
             'distance_type' => $distanceType,
         ];
@@ -331,13 +335,13 @@ final class SkillInventory extends Command
             }
         }
 
-        $this->line("file.total=" . count($fileRows));
-        $this->line("file.desc_en_nonblank=" . count(array_filter($fileRows, fn ($r) => $r['description'] !== null)));
+        $this->line('file.total='.count($fileRows));
+        $this->line('file.desc_en_nonblank='.count(array_filter($fileRows, fn ($r) => $r['description'] !== null)));
         $this->line("file.distance_exact={$exactCount}");
         $this->line("file.distance_multi={$multiCount}");
-        $this->line("file.release_status.Global=" . count(array_filter($fileRows, fn ($r) => $r['release_status'] === ReleaseStatus::GlobalReleased->value)));
-        $this->line("file.release_status.JapanOnly=" . count(array_filter($fileRows, fn ($r) => $r['release_status'] === ReleaseStatus::JapanOnly->value)));
-        $this->line("file.release_status.Other=0");
+        $this->line('file.release_status.Global='.count(array_filter($fileRows, fn ($r) => $r['release_status'] === ReleaseStatus::GlobalReleased->value)));
+        $this->line('file.release_status.JapanOnly='.count(array_filter($fileRows, fn ($r) => $r['release_status'] === ReleaseStatus::JapanOnly->value)));
+        $this->line('file.release_status.Other=0');
         $this->line("table.total={$tableTotal}");
         $this->line("table.description_notnull={$tableDescriptionNotNull}");
         $this->line("table.distance_notnull={$tableDistanceNotNull}");
@@ -458,6 +462,7 @@ final class SkillInventory extends Command
         foreach ($fileById as $id => $fileRow) {
             if (! $tableRowsWithKey->has($id)) {
                 $fileOnly[] = $fileRow;
+
                 continue;
             }
 
@@ -477,9 +482,9 @@ final class SkillInventory extends Command
             $tableOnlyNullKey[] = ['export_id' => null, 'name' => $tableRow->name];
         }
 
-        $this->line("file_only=" . count($fileOnly));
-        $this->line("table_only=" . count($tableOnly));
-        $this->line("table_only_null_key=" . count($tableOnlyNullKey));
+        $this->line('file_only='.count($fileOnly));
+        $this->line('table_only='.count($tableOnly));
+        $this->line('table_only_null_key='.count($tableOnlyNullKey));
         $this->line("matched={$matched}");
 
         foreach ($fileOnly as $row) {
@@ -511,7 +516,7 @@ final class SkillInventory extends Command
         $descDiffs = array_filter($colDiffs, fn ($d) => $d['col'] === 'description');
 
         if (! empty($descDiffs)) {
-            $this->warn('desc_en diverges on ' . count($descDiffs) . ' rows. Up to 5 examples:');
+            $this->warn('desc_en diverges on '.count($descDiffs).' rows. Up to 5 examples:');
 
             $examples = array_slice($descDiffs, 0, 5);
 
@@ -526,7 +531,7 @@ final class SkillInventory extends Command
         $sum = $matched + count($tableOnly) + count($tableOnlyNullKey);
         $tableTotal = Skill::count();
         $sumCheck = $sum === $tableTotal ? 'OK' : 'FAIL';
-        $this->line("sum_check matched={$matched} + table_only=" . count($tableOnly) . " + table_only_null_key=" . count($tableOnlyNullKey) . " = {$sum} vs table.total={$tableTotal} — {$sumCheck}");
+        $this->line("sum_check matched={$matched} + table_only=".count($tableOnly).' + table_only_null_key='.count($tableOnlyNullKey)." = {$sum} vs table.total={$tableTotal} — {$sumCheck}");
 
         if ($sumCheck === 'FAIL') {
             return 2;
@@ -539,10 +544,9 @@ final class SkillInventory extends Command
      * @param  array{export_id: int, name: string, name_ja: string|null, name_is_client: bool,
      *                   release_status: string, rarity: int|null, is_unique: bool, sp_cost: int|null, type: string|null,
      *                   condition_groups: list<array<string, mixed>>, description: string|null, description_match_key: string|null, distance_type: int|null}  $fileRow
-     * @param  \App\Models\Skill  $tableRow
      * @param  list<array{key: int, col: string, file: string, table: string}>  $colDiffs
      */
-    private function compareRow(int $id, array $fileRow, \App\Models\Skill $tableRow, array &$colDiffs): void
+    private function compareRow(int $id, array $fileRow, Skill $tableRow, array &$colDiffs): void
     {
         $fileDesc = $fileRow['description'] ?? null;
         $tableDesc = $tableRow->description;

@@ -58,13 +58,13 @@ return new class extends Migration
         }
 
         // $this->command?->info("Normalized {$updated} multi-token distance_type rows to NULL");
-        \Log::info("Normalized {$updated} multi-token distance_type rows to NULL");
+        Log::info("Normalized {$updated} multi-token distance_type rows to NULL");
     }
 
     public function down(): void
     {
         // Down is not reversible without the original file state.
         // The import command is idempotent and will restore correct values from the export.
-        \Log::warn('Down not implemented; re-run import to restore distance_type from source.');
+        Log::warn('Down not implemented; re-run import to restore distance_type from source.');
     }
 };

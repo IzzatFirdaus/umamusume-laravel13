@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Models\SupportCard;
 use App\Models\SupportEffect;
-use App\Services\SupportCardEffects;
 use Inertia\Testing\AssertableInertia as Assert;
 
 uses()->group('support-cards');
@@ -34,6 +33,7 @@ it('includes stages in the index payload for each card', function (): void {
                 ->where('cards.data.0.stages', function ($stages) {
                     // Should have stages for effect 1
                     $stage = collect($stages)->firstWhere('effect_id', 1);
+
                     return $stage !== null
                         && count($stage['anchors']) > 0
                         && isset($stage['cap']);
@@ -54,6 +54,7 @@ it('stages match the detail page structure', function (): void {
                 ->component('SupportCards/Index')
                 ->where('cards.data.0.stages', function ($stages) {
                     $stage = collect($stages)->firstWhere('effect_id', 1);
+
                     return $stage !== null
                         && isset($stage['anchors'])
                         && isset($stage['cap']);
@@ -68,6 +69,7 @@ it('stages match the detail page structure', function (): void {
                 ->component('SupportCards/Show')
                 ->where('effectStages', function ($stages) {
                     $stage = collect($stages)->firstWhere('effect_id', 1);
+
                     return $stage !== null
                         && isset($stage['anchors'])
                         && isset($stage['cap']);
@@ -146,6 +148,7 @@ it('stages cap is the last stated anchor', function (): void {
                 ->component('SupportCards/Index')
                 ->where('cards.data.0.stages', function ($stages) {
                     $stage = collect($stages)->firstWhere('effect_id', 3);
+
                     return $stage !== null
                         && $stage['cap']['level'] === 50
                         && $stage['cap']['display'] === '55%';

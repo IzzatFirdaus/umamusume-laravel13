@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\ReleaseStatus;
+use App\Http\Controllers\SkillController;
 use App\Models\Skill;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -56,7 +57,7 @@ final class RangeOperatorCountTest extends TestCase
         ]);
 
         // Call the controller method directly via container
-        $controller = app(\App\Http\Controllers\SkillController::class);
+        $controller = app(SkillController::class);
         $count = $controller->rangeOperatorCount();
 
         // Only the range-operator skill should be counted
@@ -98,7 +99,7 @@ final class RangeOperatorCountTest extends TestCase
             ],
         ]);
 
-        $controller = app(\App\Http\Controllers\SkillController::class);
+        $controller = app(SkillController::class);
         $count = $controller->rangeOperatorCount();
 
         $this->assertSame(0, $count, 'rangeOperatorCount should be 0 when no range operators exist');
