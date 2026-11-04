@@ -14,6 +14,9 @@ use App\Services\DataPipeline\ArtworkMirror;
 use App\Services\PageSize;
 use App\Services\SupportCardEffects;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\JoinClause;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -87,6 +90,13 @@ class SupportCardController extends Controller
             };
         $sort = $request->validated('sort');
 
+        // New filters (D3): trainee, carries effect(s), used in deck, recorded as owned
+        $trainee = $request->validated('trainee');
+        $effects = $request->validated('effects');
+        // Use filled() to check presence with non-empty value; boolean() returns false for missing params
+        $usedInDeck = $request->filled('used_in_deck') ? $request->boolean('used_in_deck') : null;
+        $owned = $request->filled('owned') ? $request->boolean('owned') : null;
+
         // Read once for the page, not once per row: twenty-five cards ask the same 35 dictionary rows
         // the same question, which is the N+1 the deck panel avoids the same way.
         $dictionary = SupportCardEffects::dictionary();
@@ -133,14 +143,14 @@ class SupportCardController extends Controller
 
         if (in_array($sort, $derivedSorts, true)) {
             $cards = $this->paginateWithDerivedSort(
-                $this->filtered($q, $rarity, $type, $status, $server),
+                $this->filtered($q, $rarity, $type, $status, $server, $trainee, $effects, $usedInDeck, $owned),
                 $sort,
                 $dictionary,
                 $pageSize,
                 $request
             );
         } else {
-            $cards = $this->ordered($this->filtered($q, $rarity, $type, $status, $server), $sort)
+            $cards = $this->ordered($this->filtered($q, $rarity, $type, $status, $server, $trainee, $effects, $usedInDeck, $owned), $sort)
                 ->paginate($pageSize)
                 ->withQueryString()
                 ->through(function (SupportCard $card) use ($dictionary): array {
@@ -149,6 +159,10 @@ class SupportCardController extends Controller
                     return $this->mapCardForIndex($card, $effects);
                 });
         }
+
+        // Build filter options for the new facets (scoped to current server filter)
+        $traineeOptions = $this->traineeOptions($server);
+        $effectOptions = $this->effectOptions($server, $dictionary);
 
         return [
             'cards' => $cards,
@@ -185,6 +199,14 @@ class SupportCardController extends Controller
             // document's key for the same fact and is not a column on this table.
             'globalCount' => SupportCard::query()->whereNotNull('release_global')->count(),
             'askedFor' => $this->describeAsk($q, $rarity, $type, $status),
+            // New filter values (D3)
+            'trainee' => $trainee,
+            'effects' => $effects,
+            'usedInDeck' => $usedInDeck,
+            'owned' => $owned,
+            // New filter options (D3, C14, C15)
+            'traineeOptions' => $traineeOptions,
+            'effectOptions' => $effectOptions,
         ];
     }
 
@@ -206,6 +228,9 @@ class SupportCardController extends Controller
      */
     private function mapCardForIndex(SupportCard $card, array $effects): array
     {
+        $dictionary = SupportCardEffects::dictionary();
+        $stages = SupportCardEffects::stages($card, $dictionary);
+
         return [
             'id' => $card->id,
             'name' => $card->displayName(),
@@ -221,6 +246,7 @@ class SupportCardController extends Controller
             'release_status' => $card->release_status,
             'effects' => $effects,
             'friendship' => $this->friendshipBonus($effects),
+            'stages' => $stages,
         ];
     }
 
@@ -233,7 +259,7 @@ class SupportCardController extends Controller
      *
      * @param  Builder<SupportCard>  $query
      * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator<int, array<string, mixed>>
      */
     private function paginateWithDerivedSort(Builder $query, string $sort, array $dictionary, int $perPage, SupportCardSearchRequest $request): \Illuminate\Contracts\Pagination\LengthAwarePaginator
     {
@@ -267,14 +293,9 @@ class SupportCardController extends Controller
 
         // Sort: N/A (null) last, then by value descending, then by name
         $cardsWithSort = $cardsWithSort->sort(function (array $a, array $b): int {
-            // N/A last
-            if ($a['sortValue'] === null && $b['sortValue'] !== null) {
-                return 1;
-            }
-            if ($a['sortValue'] !== null && $b['sortValue'] === null) {
-                return -1;
-            }
-            if ($a['sortValue'] === null && $b['sortValue'] === null) {
+            $an = $a['sortValue'] === null;
+            $bn = $b['sortValue'] === null;
+            if ($an && $bn) {
                 // Both N/A: tie-break by name
                 $nameCmp = strcmp($a['char_name'], $b['char_name']);
                 if ($nameCmp !== 0) {
@@ -282,13 +303,17 @@ class SupportCardController extends Controller
                 }
                 return strcmp($a['title_en'], $b['title_en']);
             }
-
+            if ($an) {
+                return 1;
+            }
+            if ($bn) {
+                return -1;
+            }
             // Both have values: sort descending (higher is better)
             $valCmp = $b['sortValue'] <=> $a['sortValue'];
             if ($valCmp !== 0) {
                 return $valCmp;
             }
-
             // Tie-break by name
             $nameCmp = strcmp($a['char_name'], $b['char_name']);
             if ($nameCmp !== 0) {
@@ -619,15 +644,27 @@ class SupportCardController extends Controller
     /**
      * @return Builder<SupportCard>
      */
-    private function filtered(?string $q, ?string $rarity, ?string $type, ?string $status, ?string $server = null): Builder
+        /**
+     * @param  ?string  $q
+     * @param  ?string  $rarity
+     * @param  ?string  $type
+     * @param  ?string  $status
+     * @param  ?string  $server
+     * @param  ?string  $trainee
+     * @param  ?array<int>  $effects
+     * @param  ?bool  $usedInDeck
+     * @param  ?bool  $owned
+     * @return Builder<SupportCard>
+     */
+    private function filtered(?string $q, ?string $rarity, ?string $type, ?string $status, ?string $server = null, ?string $trainee = null, ?array $effects = null, ?bool $usedInDeck = null, ?bool $owned = null): Builder
     {
-        return SupportCard::query()
+        $query = SupportCard::query()
             ->when($q !== null, function (Builder $query) use ($q): void {
                 // The row prints `char_name` beside `title_en`, and a search field a Trainer types the
                 // printed label into has to answer both, including the Japanese name the source stores.
                 // SQLite has no default LIKE escape character, so the clause names one and `%`/`_` are
                 // escaped first: unescaped, a `%` would return the whole catalogue (KI-26's trap).
-                $pattern = '%'.addcslashes($q, '\\%_').'%';
+                $pattern = '%'.addcslashes($q, '\\\\%_').'%';
 
                 $query->where(static fn (Builder $inner): Builder => $inner
                     ->whereRaw("char_name LIKE ? ESCAPE '\\'", [$pattern])
@@ -641,6 +678,85 @@ class SupportCardController extends Controller
             // is the export's own split (`release_global` null). A two-server facet, not a third state.
             ->when($server === 'Global', fn (Builder $query): Builder => $query->whereNotNull('release_global'))
             ->when($server === 'JP', fn (Builder $query): Builder => $query->whereNull('release_global'));
+
+        // Trainee filter: join via umamusume.external_ref = 'gametora:char:{char_id}'
+        // Cards whose char_id does not resolve simply never match a trainee filter (no "unresolved" bucket).
+        if ($trainee !== null) {
+            $query->join('umamusume', function (JoinClause $join) use ($trainee): void {
+                $join->on('umamusume.external_ref', '=', DB::raw("CONCAT('gametora:char:', support_cards.char_id)"))
+                     ->where('umamusume.external_ref', $trainee);
+            });
+        }
+
+        // Carries effect(s): multi-select from the effect dictionary.
+        // A card matches when the effect's anchor array has at least one non -1 anchor (stated value; record-only).
+        // OR semantics: a card matches when it carries at least one of the selected effects (C23).
+        // Effects are stored as JSON: [effect_id, anchor1, anchor2, ...] where -1 = no anchor.
+        if ($effects !== null && ! empty($effects)) {
+            $query->where(function (Builder $q) use ($effects): void {
+                // Effects JSON structure: array of [effect_id, anchor1, anchor2, ...]
+                // Check if any effect row has effect_id in the selected list AND at least one anchor != -1
+                foreach ($effects as $effectId) {
+                    $q->orWhereRaw(
+                        "EXISTS (
+                            SELECT 1 FROM json_each(effects) WHERE
+                            json_extract(value, '\$[0]') = ? AND
+                            (
+                                json_extract(value, '\$[1]') != -1 OR
+                                json_extract(value, '\$[2]') != -1 OR
+                                json_extract(value, '\$[3]') != -1 OR
+                                json_extract(value, '\$[4]') != -1 OR
+                                json_extract(value, '\$[5]') != -1 OR
+                                json_extract(value, '\$[6]') != -1 OR
+                                json_extract(value, '\$[7]') != -1 OR
+                                json_extract(value, '\$[8]') != -1 OR
+                                json_extract(value, '\$[9]') != -1 OR
+                                json_extract(value, '\$[10]') != -1 OR
+                                json_extract(value, '\$[11]') != -1
+                            )
+                        )",
+                        [$effectId]
+                    );
+                }
+            });
+        }
+
+        // Used in a deck (library list page, context-free): the card appears in at least one saved run's deck slot.
+        // Derived set over recorded data -> Calculated treatment on the filter label.
+        // Scope to saved-run DeckSlot rows only (setup draft lives in session SetupDraft).
+        if ($usedInDeck === true) {
+            $query->whereHas('deckSlots', function (Builder $q): void {
+                $q->whereHas('trainingRun', function (Builder $rq): void {
+                    $rq->whereNotNull('id'); // saved run has an id
+                });
+            });
+        } elseif ($usedInDeck === false) {
+            $query->whereDoesntHave('deckSlots', function (Builder $q): void {
+                $q->whereHas('trainingRun', function (Builder $rq): void {
+                    $rq->whereNotNull('id'); // saved run has an id
+                });
+            });
+        }
+
+        // Recorded as owned: the card appears with ownership = OWNED in at least one deck slot.
+        // This is the explicit proxy for "owned" - no vault store is created or implied -> Calculated treatment.
+        if ($owned === true) {
+            $query->whereHas('deckSlots', function (Builder $q): void {
+                $q->where('ownership', 'OWNED')
+                    ->whereHas('trainingRun', function (Builder $rq): void {
+                        $rq->whereNotNull('id'); // saved run has an id
+                    });
+            });
+        } elseif ($owned === false) {
+            $query->whereDoesntHave('deckSlots', function (Builder $q): void {
+                $q->where('ownership', 'OWNED')
+                    ->whereHas('trainingRun', function (Builder $rq): void {
+                        $rq->whereNotNull('id'); // saved run has an id
+                    });
+            });
+        }
+
+        return $query;
     }
 
     /**
@@ -652,6 +768,94 @@ class SupportCardController extends Controller
             ->when($server === 'Global', fn (Builder $query): Builder => $query->whereNotNull('release_global'))
             ->when($server === 'JP', fn (Builder $query): Builder => $query->whereNull('release_global'))
             ->count();
+    }
+
+    /**
+     * Trainee options for the trainee filter (D3).
+     *
+     * Returns trainees with >= 1 card under the current server filter.
+     * Join via `umamusume.external_ref = 'gametora:char:{char_id}'` - no new FK, no migration.
+     * Cards whose `char_id` does not resolve simply never match a trainee filter.
+     *
+     * @return array<string, string>  [external_ref => display_name]
+     */
+    private function traineeOptions(string $server): array
+    {
+        return SupportCard::query()
+            ->when($server === 'Global', fn (Builder $query): Builder => $query->whereNotNull('release_global'))
+            ->when($server === 'JP', fn (Builder $query): Builder => $query->whereNull('release_global'))
+            ->whereNotNull('char_id')
+            ->join('umamusume', 'umamusume.external_ref', '=', DB::raw("CONCAT('gametora:char:', support_cards.char_id)"))
+            ->select('umamusume.external_ref', 'umamusume.name')
+            ->distinct()
+            ->orderBy('umamusume.name')
+            ->pluck('name', 'external_ref')
+            ->all();
+    }
+
+    /**
+     * Effect options for the carries effect filter (D3, C14, C15).
+     *
+     * Returns dictionary effects that have at least one card with a stated anchor under the server filter.
+     *
+     * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
+     * @return array<int, string>  [effect_id => name]
+     */
+    private function effectOptions(string $server, array $dictionary): array
+    {
+        // Get card IDs that have at least one non -1 anchor under the server filter
+        // Effects are stored as JSON: [effect_id, anchor1, anchor2, ...] where -1 = no anchor.
+        // Use json_each to iterate over the inner arrays and check anchors 1-11 (indices 1-11).
+        $cardIds = SupportCard::query()
+            ->when($server === 'Global', fn (Builder $query): Builder => $query->whereNotNull('release_global'))
+            ->when($server === 'JP', fn (Builder $query): Builder => $query->whereNull('release_global'))
+            ->whereRaw("
+                EXISTS (
+                    SELECT 1 FROM json_each(effects) WHERE
+                    json_extract(value, '\$[1]') != -1 OR
+                    json_extract(value, '\$[2]') != -1 OR
+                    json_extract(value, '\$[3]') != -1 OR
+                    json_extract(value, '\$[4]') != -1 OR
+                    json_extract(value, '\$[4]') != -1 OR
+                    json_extract(value, '\$[5]') != -1 OR
+                    json_extract(value, '\$[6]') != -1 OR
+                    json_extract(value, '\$[7]') != -1 OR
+                    json_extract(value, '\$[8]') != -1 OR
+                    json_extract(value, '\$[9]') != -1 OR
+                    json_extract(value, '\$[10]') != -1 OR
+                    json_extract(value, '\$[11]') != -1
+                )
+            ")
+            ->pluck('id')
+            ->all();
+
+        // Now get the effect IDs from these cards' effects JSON
+        $cardEffectIds = [];
+        if (! empty($cardIds)) {
+            $cards = SupportCard::whereIn('id', $cardIds)->get(['effects']);
+            foreach ($cards as $card) {
+                foreach ($card->effects as $effect) {
+                    $effectId = $effect[0];
+                    $anchors = array_slice($effect, 1);
+                    if (array_filter($anchors, fn ($v) => $v !== -1)) {
+                        $cardEffectIds[$effectId] = true;
+                    }
+                }
+            }
+        }
+
+        // Filter dictionary to only those effects, return [id => name] with integer keys
+        $filtered = array_filter(
+            $dictionary,
+            static fn (array $e, int $id): bool => isset($cardEffectIds[$id]),
+            ARRAY_FILTER_USE_BOTH
+        );
+
+        // Extract just the names, ensuring integer keys
+        return array_combine(
+            array_map('intval', array_keys($filtered)),
+            array_column($filtered, 'name')
+        );
     }
 
 /**

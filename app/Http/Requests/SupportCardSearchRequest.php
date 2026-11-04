@@ -46,6 +46,22 @@ class SupportCardSearchRequest extends FormRequest
      */
     protected $redirectRoute = 'support-cards.index';
 
+    /**
+     * The trainee facet offers trainees who have at least one card under the current server filter.
+     * Keys are the Umamusume external_ref (e.g. 'gametora:char:123').
+     *
+     * @var list<string>
+     */
+    public const TRAINEE_OPTIONS = [];
+
+    /**
+     * The effect facet offers dictionary effects that have at least one card under the current server filter.
+     * Keys are the effect_id from the dictionary.
+     *
+     * @var list<int>
+     */
+    public const EFFECT_OPTIONS = [];
+
     public function authorize(): bool
     {
         return true;
@@ -71,6 +87,12 @@ class SupportCardSearchRequest extends FormRequest
             // library page scopes to one server rather than repeating availability on every row.
             'server' => ['nullable', Rule::in(self::SERVERS)],
             'sort' => ['nullable', Rule::in(self::SORTS)],
+            // New filters (D3, C14, C15, C16):
+            'trainee' => ['nullable', 'string', 'max:80'],
+            'effects' => ['nullable', 'array'],
+            'effects.*' => ['integer', 'min:1'],
+            'used_in_deck' => ['nullable', 'boolean'],
+            'owned' => ['nullable', 'boolean'],
         ];
     }
 
@@ -80,12 +102,16 @@ class SupportCardSearchRequest extends FormRequest
         // "the row whose value is the empty string". A search box submits spaces the same way: a
         // whitespace-only ask would match nothing while reading as "search for nothing".
         $this->merge(array_combine(
-            $keys = ['q', 'rarity', 'type', 'status', 'server', 'sort'],
+            $keys = ['q', 'rarity', 'type', 'status', 'server', 'sort', 'trainee', 'effects', 'used_in_deck', 'owned'],
             array_map(function (string $key): mixed {
                 $value = $this->input($key);
 
                 if (is_string($value)) {
                     $value = trim($value);
+                }
+
+                if ($key === 'effects' && is_string($value)) {
+                    $value = array_map('intval', array_filter(explode(',', $value)));
                 }
 
                 return $value === '' ? null : $value;

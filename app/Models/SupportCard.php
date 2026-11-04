@@ -200,7 +200,7 @@ class SupportCard extends Model
         }
 
         return $this->isScenarioLink($scenarioKey)
-            ? ['state' => 'linked', 'note' => null]
-            : ['state' => 'not_linked', 'note' => null];
+                    ? ['state' => 'linked', 'note' => null]
+                    : ['state' => 'not_linked', 'note' => null];
     }
 }

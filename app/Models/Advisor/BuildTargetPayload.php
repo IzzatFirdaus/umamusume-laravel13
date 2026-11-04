@@ -223,6 +223,8 @@ final readonly class BuildTargetPayload
      * A json column accepts any key set, so a typo becomes a row that reads as nothing. Name the
      * offending keys rather than printing the expected shape and leaving the caller to diff them.
      *
+     * `hint_levels` is optional for backward compatibility with existing stored payloads.
+     *
      * @param  array<array-key, mixed>  $row
      * @param  list<string>  $expected
      */
@@ -230,6 +232,8 @@ final readonly class BuildTargetPayload
     {
         $unexpected = array_diff(array_keys($row), $expected);
         $missing = array_diff($expected, array_keys($row));
+        // Allow missing 'hint_levels' for backward compatibility
+        $missing = array_diff($missing, ['hint_levels']);
 
         if ($unexpected === [] && $missing === []) {
             return;

@@ -13,6 +13,19 @@ use App\Services\Scenario\FinaleReader;
 use InvalidArgumentException;
 
 /**
+ * Simple decision object for the advisor's alternative evaluation.
+ *
+ * @internal
+ */
+final readonly class AlternativeDecision
+{
+    public function __construct(
+        public string $action,
+        public string $reason,
+    ) {}
+}
+
+/**
  * Ranks the next turn's options against the Trainer's own build target (FR-F-2/3, `ADR-0020` §2).
  *
  * Pure over three inputs — the latest `TurnEntry`, the run's `BuildTargetPayload` and
@@ -72,6 +85,53 @@ final class TrainerAdvisor
         $constants = config('advisor.constants');
 
         return $constants;
+    }
+
+    /**
+     * Evaluates 0-energy and 0-failure alternatives before recommending Rest.
+     *
+     * Implements the priority cascade per UMAMUSUME_REFERENCE.md §1.1.5 and §2.4:
+     * 1. Extreme Spirit Burst (0% failure rate)
+     * 2. Wit training (0 energy cost, recovers small amount)
+     * 3. Scheduled race (0 energy cost, provides stat/fan gains)
+     * 4. Rest (fallback when energy < 50 and no alternatives)
+     *
+     * @param  array{
+     *     energy: int,
+     *     available_trainings: list<string>,
+     *     has_extreme_burst: bool,
+     *     has_zero_energy_race: bool
+     * }  $state
+     */
+    public function evaluateAlternatives(array $state): AlternativeDecision
+    {
+        $energy = $state['energy'];
+        $availableTrainings = $state['available_trainings'];
+        $hasExtremeBurst = $state['has_extreme_burst'];
+        $hasZeroEnergyRace = $state['has_zero_energy_race'];
+
+        // 1. Check for Extreme Spirit Burst (0% failure rate)
+        if ($hasExtremeBurst) {
+            return new AlternativeDecision('train', 'An Extreme Spirit Burst tile is available. It has a 0% failure rate regardless of energy.');
+        }
+
+        // 2. Check for Wit Training (0 energy cost)
+        if (in_array('wit', $availableTrainings, true)) {
+            return new AlternativeDecision('wit', 'Wit training is available. It costs 0 energy and recovers a small amount, making it safe at low energy.');
+        }
+
+        // 3. Check for Scheduled Race (0 energy cost)
+        if ($hasZeroEnergyRace) {
+            return new AlternativeDecision('race', 'A scheduled race is available. It costs 0 energy and provides stat and fan gains.');
+        }
+
+        // 4. If energy is low and no alternatives exist, Rest
+        if ($energy < 50) {
+            return new AlternativeDecision('rest', 'Energy is in the low band, and no 0-energy alternatives are available. Rest is advised.');
+        }
+
+        // Default to training if energy is fine
+        return new AlternativeDecision('train', 'Energy is sufficient for standard training.');
     }
 
     public function advise(?TurnEntry $latest, ?BuildTargetPayload $target, ?TrainingRun $run = null): Advice

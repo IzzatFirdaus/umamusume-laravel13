@@ -14,6 +14,8 @@ import ProvenanceBadge from '../ProvenanceBadge.vue';
 import SparkChip from '../SparkChip.vue';
 import BaseSelect from '../Form/BaseSelect.vue';
 import BaseButton from '../Form/BaseButton.vue';
+import BaseCheckbox from '../Form/BaseCheckbox.vue';
+import CardCompare from './CardCompare.vue';
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
@@ -62,6 +64,13 @@ const props = defineProps<{
     /** Where the filter form and the pager write back to. Required: a caller that omits it would
      *  silently filter from the Database URL back to `/support-cards`. */
     filterPath: string;
+    // New filters (D3)
+    trainee: string | null;
+    effects: number[] | null;
+    usedInDeck: boolean | null;
+    owned: boolean | null;
+    traineeOptions: Record<string, string>;
+    effectOptions: Record<number, string>;
 }>();
 
 const page = usePage();
@@ -72,7 +81,51 @@ const type = ref(props.type ?? '');
 const status = ref(props.status ?? '');
 const sort = ref(props.sort ?? '');
 const pageSize = ref(String((props as any).pageSize ?? 25));
+const trainee = ref(props.trainee ?? '');
+const effects = ref<number[]>((props.effects as number[]) ?? []);
+const usedInDeck = ref(props.usedInDeck ?? false);
+const owned = ref(props.owned ?? false);
 const loading = ref(false);
+
+const selectedCards = ref<number[]>([]);
+const showCompareModal = ref(false);
+
+const compareTriggerLabel = computed(() => `Compare (${selectedCards.value.length})`);
+const canCompare = computed(() => selectedCards.value.length >= 2);
+const compareDisabledReason = computed(() => {
+    if (selectedCards.value.length === 0) return 'select at least 2';
+    if (selectedCards.value.length === 1) return 'select at least 2';
+    return '';
+});
+
+const toggleCardSelection = (cardId: number): void => {
+    const index = selectedCards.value.indexOf(cardId);
+    if (index === -1) {
+        if (selectedCards.value.length >= 3) return; // Block 4th selection
+        selectedCards.value.push(cardId);
+    } else {
+        selectedCards.value.splice(index, 1);
+    }
+};
+
+const isCardSelected = (cardId: number): boolean => {
+    return selectedCards.value.includes(cardId);
+};
+
+const openCompareModal = (): void => {
+    if (canCompare.value) {
+        showCompareModal.value = true;
+    }
+};
+
+const closeCompareModal = (): void => {
+    showCompareModal.value = false;
+};
+
+const getSelectedCards = computed(() => {
+    // Filter the current page's cards to only selected ones
+    return props.cards.data.filter((card) => selectedCards.value.includes(card.id));
+};
 
 function applyFilters(): void {
     router.get(
@@ -83,6 +136,10 @@ function applyFilters(): void {
             status: status.value || undefined,
             sort: sort.value || undefined,
             pageSize: pageSize.value || undefined,
+            trainee: trainee.value || undefined,
+            effects: effects.value.length > 0 ? effects.value.join(',') : undefined,
+            used_in_deck: usedInDeck.value || undefined,
+            owned: owned.value || undefined,
             page: undefined,
         },
         {
@@ -112,6 +169,10 @@ function goToPage(page: number): void {
             status: status.value || undefined,
             sort: sort.value || undefined,
             pageSize: pageSize.value || undefined,
+            trainee: trainee.value || undefined,
+            effects: effects.value.length > 0 ? effects.value.join(',') : undefined,
+            used_in_deck: usedInDeck.value || undefined,
+            owned: owned.value || undefined,
             page,
         },
         {
@@ -155,13 +216,23 @@ function goToPage(page: number): void {
                 :error="errors.type"
             />
             <BaseSelect
-                v-model="status"
-                id="support-card-status"
-                name="status"
-                label="Availability"
-                :options="[{ value: '', label: 'All' }, ...availabilities.map((option) => ({ value: option, label: option }))]"
+                v-model="trainee"
+                id="support-card-trainee"
+                name="trainee"
+                label="Trainee"
+                :options="[{ value: '', label: 'All' }, ...Object.entries(traineeOptions).map(([value, label]) => ({ value, label }))]"
                 placeholder="All"
-                :error="errors.status"
+                :error="errors.trainee"
+            />
+            <BaseSelect
+                v-model="effects"
+                id="support-card-effects"
+                name="effects"
+                label="Carries effect(s)"
+                :options="Object.entries(effectOptions).map(([value, label]) => ({ value: Number(value), label }))"
+                placeholder="All"
+                :error="errors.effects"
+                multiple
             />
             <BaseSelect
                 v-model="sort"
@@ -180,11 +251,45 @@ function goToPage(page: number): void {
                 :options="[{ value: '5', label: '5' }, { value: '25', label: '25' }, { value: '50', label: '50' }, { value: '100', label: '100' }]"
                 :error="(errors as any).pageSize"
             />
+            <BaseCheckbox
+                v-model="usedInDeck"
+                id="support-card-used-in-deck"
+                name="used_in_deck"
+                label="Used in a deck (Calculated)"
+            />
+            <BaseCheckbox
+                v-model="owned"
+                id="support-card-owned"
+                name="owned"
+                label="Recorded as owned (Calculated)"
+            />
             <BaseButton type="submit" variant="primary" size="md" :loading="loading">
                 Filter
             </BaseButton>
         </form>
 
+    </div>
+
+    <!-- Compare controls (C17) -->
+    <div v-if="cards.data.length > 0" class="card mt-4">
+        <div class="flex flex-wrap items-center justify-between gap-3 p-4">
+            <div class="flex items-center gap-3">
+                <span class="text-sm text-ink-muted">{{ selectedCards.length }} of 3 selected</span>
+                <BaseButton
+                    variant="secondary"
+                    size="sm"
+                    :label="compareTriggerLabel"
+                    :disabled="!canCompare"
+                    @click="openCompareModal"
+                />
+            </div>
+            <p v-if="selectedCards.length > 0 && selectedCards.length < 2" class="text-xs text-ink-muted">
+                select at least 2
+            </p>
+            <p v-if="selectedCards.length === 3" class="text-xs text-ink-muted">
+                3 maximum — deselect one to add another
+            </p>
+        </div>
     </div>
 
     <p v-if="loading" role="status" class="mt-4 text-sm text-[var(--color-ink-muted)]">Loading results…</p>
@@ -220,6 +325,15 @@ function goToPage(page: number): void {
                 :key="card.id"
                 class="flex flex-wrap items-baseline gap-x-2 gap-y-1 px-4 py-3 text-sm"
             >
+                <!-- Compare checkbox (C17) -->
+                <BaseCheckbox
+                    v-model="selectedCards"
+                    :value="card.id"
+                    :disabled="!isCardSelected(card.id) && selectedCards.length >= 3"
+                    :aria-label="`Compare ${card.name}`"
+                    class="min-h-11"
+                />
+
                 <!-- The row thumbnail (`ADR-0021` read half, `design-2.0` §45a "Support-card index, card
                  row"): a `size-12` leading cell before the card's name link.
 
@@ -286,6 +400,13 @@ function goToPage(page: number): void {
             @navigate="goToPage"
         />
     </template>
+
+    <!-- Compare modal (C17, C24) -->
+    <CardCompare
+        v-if="showCompareModal"
+        :cards="getSelectedCards"
+        @close="closeCompareModal"
+    />
 
     <p class="mt-6 max-w-3xl text-xs text-[var(--color-ink-muted)]">
         Effect figures are each effect's highest stated anchor, not an interpolation, and the anchor a card

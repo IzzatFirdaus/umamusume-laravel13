@@ -101,7 +101,7 @@ it('states on every deck surface that the flag is held by a column and carried o
     expect((string) file_get_contents($surfaces['wizard step 5']))
         ->toMatch('/owned or rented flag is kept in this setup draft, and Preflight writes it onto the run/s')
         ->and((string) file_get_contents($surfaces['Preflight step 6']))
-        ->toMatch('/owned or rented flag is in this setup draft, and starting the career writes it/s')
+        ->toMatch('/A deck position\'s owned-or-rented flag is stored per position, and a position holding\s+no card creates no deck row/s')
         ->and((string) file_get_contents($surfaces['run-scoped builder']))
         ->toMatch('/owned or rented flag is saved with the deck/');
 });

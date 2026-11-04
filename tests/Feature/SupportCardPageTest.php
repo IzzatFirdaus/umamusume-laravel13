@@ -11,6 +11,8 @@ use App\Models\SupportCard;
 use App\Models\SupportEffect;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 use Inertia\Testing\AssertableInertia as Assert;
 
 /*
@@ -532,6 +534,146 @@ it('names the ask when a filter matches nothing', function (): void {
             ->where('askedFor', 'rarity SSR'));
 });
 
+it('filters by trainee', function (): void {
+    // Create a trainee
+    $trainee = Umamusume::factory()->create(['name' => 'Special Week', 'external_ref' => 'gametora:char:123']);
+    SupportCard::factory()->create(['char_name' => 'Special Week', 'char_id' => 123, 'title_en' => '[Tracen Academy]']);
+    SupportCard::factory()->create(['char_name' => 'Other', 'char_id' => 456, 'title_en' => '[Tracen Academy]']);
+
+    // Filter by the trainee
+    test()->get('/support-cards?trainee=gametora:char:123')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.char_name', 'Special Week')
+            ->where('trainee', 'gametora:char:123'));
+
+    // Trainee options should include the trainee
+    test()->get('/support-cards')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('traineeOptions.gametora:char:123', 'Special Week'));
+});
+
+it('filters by carries effect(s) with OR semantics', function (): void {
+    effectRow(1, 'Friendship Bonus');
+    effectRow(14, 'Initial Friendship Gauge');
+
+    // Card with Friendship Bonus (effect 1)
+    SupportCard::factory()->create(['char_name' => 'Has Friendship', 'effects' => [[1, 5, 10, 15, -1, -1, -1, -1, -1, -1, -1, -1]]]);
+
+    // Card with Initial Friendship Gauge (effect 14)
+    SupportCard::factory()->create(['char_name' => 'Has Gauge', 'effects' => [[14, 5, 10, 15, -1, -1, -1, -1, -1, -1, -1, -1]]]);
+
+    // Card with neither
+    SupportCard::factory()->create(['char_name' => 'No Effects', 'effects' => []]);
+
+    // Filter by Friendship Bonus only
+    test()->get('/support-cards?effects=1')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', 'Has Friendship [Tracen Academy]'));
+
+    // Filter by Initial Friendship Gauge only
+    test()->get('/support-cards?effects=14')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', 'Has Gauge [Tracen Academy]'));
+
+    // Filter by both (OR semantics)
+    test()->get('/support-cards?effects=1,14')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 2));
+
+    // Effect options should include the effects
+    test()->get('/support-cards')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('effectOptions.1', 'Friendship Bonus')
+            ->where('effectOptions.14', 'Initial Friendship Gauge'));
+});
+
+it('filters by used in a deck', function (): void {
+    $cardInDeck = SupportCard::factory()->create(['char_name' => 'In Deck', 'title_en' => '[Tracen Academy]']);
+    $cardNotInDeck = SupportCard::factory()->create(['char_name' => 'Not In Deck', 'title_en' => '[Tracen Academy]']);
+
+    // Create a saved run with the first card in a deck slot
+    $run = TrainingRun::factory()->create();
+    DeckSlot::factory()->create([
+        'training_run_id' => $run->id,
+        'support_card_id' => $cardInDeck->id,
+        'slot_position' => 1,
+    ]);
+
+    // Filter by used in deck
+    test()->get('/support-cards?used_in_deck=1')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', 'In Deck [Tracen Academy]'));
+
+    // Filter by not used in deck
+    test()->get('/support-cards?used_in_deck=0')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', 'Not In Deck [Tracen Academy]'));
+});
+
+it('filters by recorded as owned', function (): void {
+    $ownedCard = SupportCard::factory()->create(['char_name' => 'Owned', 'title_en' => '[Tracen Academy]']);
+    $rentedCard = SupportCard::factory()->create(['char_name' => 'Rented', 'title_en' => '[Tracen Academy]']);
+
+    // Create a saved run with owned card
+    $run = TrainingRun::factory()->create();
+    DeckSlot::factory()->create([
+        'training_run_id' => $run->id,
+        'support_card_id' => $ownedCard->id,
+        'slot_position' => 1,
+        'ownership' => 'OWNED',
+    ]);
+
+    // Create a saved run with rented card
+    $run2 = TrainingRun::factory()->create();
+    DeckSlot::factory()->create([
+        'training_run_id' => $run2->id,
+        'support_card_id' => $rentedCard->id,
+        'slot_position' => 1,
+        'ownership' => 'RENTED',
+    ]);
+
+    // Debug: check the query directly
+    $ownedCards = SupportCard::query()
+        ->whereHas('deckSlots', function (Builder $q): void {
+            $q->where('ownership', 'OWNED')
+                ->whereHas('trainingRun', function (Builder $rq): void {
+                    $rq->whereNotNull('id');
+                });
+        })
+        ->get();
+    Log::info('Direct query owned cards: '.$ownedCards->count());
+    foreach ($ownedCards as $c) {
+        Log::info("  Card: {$c->char_name} {$c->title_en}");
+    }
+
+    // Filter by owned
+    test()->get('/support-cards?owned=1')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', 'Owned [Tracen Academy]'));
+
+    // Filter by not owned (RENTED doesn't count)
+    test()->get('/support-cards?owned=0')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', 'Rented [Tracen Academy]'));
+});
+
 it('renders one card\'s own page with the fields the source states', function (): void {
     SupportCard::factory()->ssr()->create([
         'char_name' => 'Special Week',
@@ -878,4 +1020,138 @@ it('reconciles the type counts with the catalog total and the Global SSR count',
         expect($total)->toBe(4)
             ->and($globalSsr)->toBe(1);
     });
+});
+
+it('prunes effect options per server filter (C15)', function (): void {
+    // Create a Global card with effect 1 (Friendship Bonus)
+    effectRow(1, 'Friendship Bonus');
+    effectRow(2, 'Mood Effect');
+
+    SupportCard::factory()->create([
+        'char_name' => 'Global Card',
+        'effects' => [[1, 5, 10, 15, -1, -1, -1, -1, -1, -1, -1, -1]],
+    ]);
+
+    // Create a JP-only card with effect 2 (Mood Effect) - no Global cards have this
+    SupportCard::factory()->jpOnly()->create([
+        'char_name' => 'JP Card',
+        'effects' => [[2, 5, 10, 15, -1, -1, -1, -1, -1, -1, -1, -1]],
+    ]);
+
+    // Global server filter: only Friendship Bonus should appear in effectOptions
+    test()->get('/support-cards?server=Global')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('effectOptions.1', 'Friendship Bonus')
+            ->missing('effectOptions.2')); // Mood Effect not in Global
+
+    // JP server filter: only Mood Effect (from JP-only card) should appear
+    test()->get('/support-cards?server=JP')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->missing('effectOptions.1') // Friendship Bonus not in JP
+            ->where('effectOptions.2', 'Mood Effect'));
+
+    // Default (Global): only Friendship Bonus
+    test()->get('/support-cards')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('effectOptions.1', 'Friendship Bonus')
+            ->missing('effectOptions.2'));
+});
+
+it('unresolved char_id never matches any trainee option', function (): void {
+    // Create a trainee
+    $trainee = Umamusume::factory()->create(['name' => 'Special Week', 'external_ref' => 'gametora:char:123']);
+    SupportCard::factory()->create(['char_name' => 'Special Week', 'char_id' => 123, 'title_en' => '[Tracen Academy]']);
+
+    // Create a card with char_id that doesn't resolve to any Umamusume
+    SupportCard::factory()->create(['char_name' => 'Unresolved', 'char_id' => 9999, 'title_en' => '[Tracen Academy]']);
+
+    // Trainee options should only include the resolved trainee
+    test()->get('/support-cards')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('traineeOptions.gametora:char:123', 'Special Week')
+            ->missing('traineeOptions.gametora:char:9999'));
+
+    // Filter by the resolved trainee - only the resolved card matches
+    test()->get('/support-cards?trainee=gametora:char:123')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.char_name', 'Special Week'));
+
+    // Filter by unresolved trainee (should match nothing, not even the unresolved card)
+    test()->get('/support-cards?trainee=gametora:char:9999')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 0));
+});
+
+it('owned=0 and owned=1 are complementary; two-filter combination narrows correctly', function (): void {
+    $ownedCard = SupportCard::factory()->create(['char_name' => 'Owned Card', 'title_en' => '[Tracen Academy]']);
+    $rentedCard = SupportCard::factory()->create(['char_name' => 'Rented Card', 'title_en' => '[Tracen Academy]']);
+    $unusedCard = SupportCard::factory()->create(['char_name' => 'Unused Card', 'title_en' => '[Tracen Academy]']);
+
+    $trainee = Umamusume::factory()->create(['name' => 'Special Week', 'external_ref' => 'gametora:char:123']);
+    SupportCard::factory()->create(['char_name' => 'Special Week', 'char_id' => 123, 'title_en' => '[Tracen Academy]']);
+
+    // Create saved run with owned card
+    $run = TrainingRun::factory()->create();
+    DeckSlot::factory()->create([
+        'training_run_id' => $run->id,
+        'support_card_id' => $ownedCard->id,
+        'slot_position' => 1,
+        'ownership' => 'OWNED',
+    ]);
+
+    // Create saved run with rented card
+    $run2 = TrainingRun::factory()->create();
+    DeckSlot::factory()->create([
+        'training_run_id' => $run2->id,
+        'support_card_id' => $rentedCard->id,
+        'slot_position' => 1,
+        'ownership' => 'RENTED',
+    ]);
+
+    // owned=1 returns only owned cards
+    test()->get('/support-cards?owned=1')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', 'Owned Card [Tracen Academy]')
+        );
+
+    // owned=0 returns rented + unused + trainee card (complementary to owned=1 which returns 1 of 4 cards)
+    test()->get('/support-cards?owned=0')
+        ->assertOk()
+        ->assertInertia(function (Assert $page) {
+            $props = $page->toArray();
+            Log::info('DEBUG owned=0 assertInertia cards: '.json_encode(array_map(fn ($c) => $c['name'], $props['props']['cards']['data'] ?? [])));
+            $page->has('cards.data', 3);
+        });
+
+    // Two-filter combination: trainee + used_in_deck
+    // First, make the owned card belong to the trainee
+    $ownedCard->update(['char_id' => 123, 'char_name' => 'Special Week']);
+
+    $comboResponse = test()->get('/support-cards?trainee=gametora:char:123&used_in_deck=1');
+    $comboResponse->assertOk();
+    $comboContent = $comboResponse->getContent();
+    $comboData = json_decode($comboContent, true);
+    Log::info('DEBUG combo raw start: '.substr($comboContent, 0, 500));
+    Log::info('DEBUG combo cards: '.json_encode(array_map(fn ($c) => $c['name'], $comboData['page']['props']['cards']['data'] ?? [])));
+    $comboResponse->assertInertia(fn (Assert $page) => $page
+        ->has('cards.data', 1)
+        ->where('cards.data.0.name', 'Special Week [Tracen Academy]')
+    );
+
+    // Two-filter combination: owned + used_in_deck (both true should still return owned in deck)
+    test()->get('/support-cards?owned=1&used_in_deck=1')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 1)
+            ->where('cards.data.0.name', 'Special Week [Tracen Academy]')
+        );
 });

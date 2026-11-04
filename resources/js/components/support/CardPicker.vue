@@ -18,9 +18,10 @@
 import BaseButton from '../Form/BaseButton.vue';
 import BaseInput from '../Form/BaseInput.vue';
 import BaseSelect from '../Form/BaseSelect.vue';
+import BaseCheckbox from '../Form/BaseCheckbox.vue';
 import ArtworkSlot from '../ArtworkSlot.vue';
 import SupportTypeMark from './SupportTypeMark.vue';
-import { nextTick, ref } from 'vue';
+import { nextTick, ref, computed } from 'vue';
 
 interface Option {
     id: number;
@@ -30,6 +31,11 @@ interface Option {
     rarity_word: string;
     type: string;
     type_label: string;
+    // Slice 4 extensions
+    ownership_group: 'OWNED' | 'RENTED' | 'NOT_RECORDED';
+    in_deck_position: number | null;
+    type_match: boolean;
+    slot_type: string | null;
 }
 
 defineProps<{
@@ -53,14 +59,66 @@ const dialog = ref<HTMLDialogElement | null>(null);
 const opener = ref<HTMLElement | null>(null);
 const type = ref('');
 const query = ref('');
+const ownedOnly = ref(false);
 
-/**
- * Opens the dialog for a slot, remembering the control that opened it.
- *
- * The opener is captured here rather than passed as a prop because the six slots each have their own
- * button: one ref bound at mount could only ever point at one of them, and focus would return to the
- * wrong slot.
- */
+/** Group order for rendering: Owned → Rented → Not recorded */
+const GROUP_ORDER = ['OWNED', 'RENTED', 'NOT_RECORDED'] as const;
+
+/** Options grouped by ownership group, in the required order. */
+const groupedOptions = computed(() => {
+    const groups = {
+        OWNED: [] as Option[],
+        RENTED: [] as Option[],
+        NOT_RECORDED: [] as Option[],
+    };
+
+    for (const option of props.options) {
+        const group = option.ownership_group;
+        if (groups[group]) {
+            groups[group].push(option);
+        }
+    }
+
+    const result: { group: 'OWNED' | 'RENTED' | 'NOT_RECORDED'; options: Option[] }[] = [];
+    for (const group of GROUP_ORDER) {
+        if (groups[group].length > 0) {
+            result.push({ group, options: groups[group] });
+        }
+    }
+
+    return result;
+});
+
+/** Filtered options respecting the "Owned only" checkbox. */
+const filteredOptions = computed(() => {
+    if (!ownedOnly.value) {
+        return groupedOptions.value;
+    }
+
+    return groupedOptions.value
+        .filter(g => g.group === 'OWNED')
+        .map(g => ({ ...g, options: g.options }));
+});
+
+/** Group labels with derivation clauses (C16). */
+const groupLabels: Record<'OWNED' | 'RENTED' | 'NOT_RECORDED', { label: string; clause: string }> = {
+    OWNED: {
+        label: 'Owned',
+        clause: 'marked owned in a saved run\'s deck',
+    },
+    RENTED: {
+        label: 'Rented',
+        clause: 'marked rented in a saved run\'s deck',
+    },
+    NOT_RECORDED: {
+        label: 'Not recorded',
+        clause: 'no ownership recorded in any saved run',
+    },
+};
+
+/** Derivation clause for the "Owned only" checkbox. */
+const ownedOnlyClause = 'show only cards marked owned in a saved run\'s deck';
+
 function open(event: Event, filters: { type: string; query: string }): void {
     openAt(event.currentTarget as HTMLElement, filters);
 }
@@ -100,16 +158,16 @@ defineExpose({ open, openAt });
 <template>
     <dialog
         ref="dialog"
-        class="m-auto w-full max-w-2xl rounded-[var(--radius-lg)] border border-[var(--color-rule)] bg-[var(--color-panel)] p-4 text-[var(--color-ink)] backdrop:bg-black/40"
+        class="m-auto w-full max-w-2xl rounded-lg border-rule bg-panel p-4 text-ink backdrop:bg-black/40"
         :aria-label="`Choose a card for ${slotLabel}`"
         @close="closed"
     >
         <form method="dialog" class="flex items-center justify-between gap-3">
-            <h2 class="text-lg font-semibold text-[var(--color-ink-strong)]">Choose a card for {{ slotLabel }}</h2>
+            <h2 class="text-lg font-semibold text-ink-strong">Choose a card for {{ slotLabel }}</h2>
             <BaseButton type="submit" variant="secondary">Close</BaseButton>
         </form>
 
-        <p class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-[var(--color-ink-muted)]">
+        <p class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-ink-muted">
             <span class="text-xs font-semibold uppercase tracking-wide">The seven support types</span>
             <span v-for="kind in types" :key="kind.key" class="inline-flex items-center gap-1">
                 <SupportTypeMark :type="kind.key" :label="kind.label" />
@@ -134,24 +192,66 @@ defineExpose({ open, openAt });
             <BaseButton type="button" variant="secondary" @click="applyFilter">Filter</BaseButton>
         </div>
 
-        <ul v-if="options.length > 0" role="list" class="mt-3 max-h-[50vh] space-y-2 overflow-y-auto">
-            <li
-                v-for="option in options"
-                :key="option.id"
-                class="flex items-center gap-3 rounded-[var(--radius-md)] border border-[var(--color-rule)] p-2"
-            >
-                <ArtworkSlot :url="option.artworkURL" alt="" size="size-12" reserve />
-                <div class="min-w-0 flex-1">
-                    <p class="truncate text-sm font-semibold text-[var(--color-ink-strong)]">{{ option.name }}</p>
-                    <p v-if="option.name_ja" lang="ja" class="truncate text-xs text-[var(--color-ink-muted)]">{{ option.name_ja }}</p>
-                </div>
-                <SupportTypeMark :type="option.type" :label="option.type_label" />
-                <BaseButton variant="secondary" @click="equip(option.id)">Equip</BaseButton>
-            </li>
-        </ul>
+        <!-- "Owned only" checkbox (Slice 4) -->
+        <div class="mt-2 flex items-center gap-2">
+            <BaseCheckbox
+                v-model="ownedOnly"
+                id="deck-filter-owned-only"
+                name="owned_only"
+                :label="`Owned only (${ownedOnlyClause})`"
+            />
+        </div>
 
-        <p v-else class="note mt-3">
-            No support card matches that filter.
-        </p>
+        <template v-if="filteredOptions.length > 0">
+            <template v-for="groupData in filteredOptions" :key="groupData.group">
+                <!-- Group label with Calculated mark + derivation clause (C16) -->
+                <div class="mt-4 mb-2 flex items-center gap-2">
+                    <span class="text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                        {{ groupLabels[groupData.group].label }}
+                    </span>
+                    <span class="pill pill-neutral text-xs">Calculated</span>
+                    <span class="text-xs text-ink-muted">— {{ groupLabels[groupData.group].clause }}</span>
+                </div>
+
+                <ul role="list" class="max-h-[50vh] space-y-2 overflow-y-auto">
+                    <li
+                        v-for="option in groupData.options"
+                        :key="option.id"
+                        class="flex items-center gap-3 rounded-md border-rule p-2"
+                    >
+                        <ArtworkSlot :url="option.artworkURL" alt="" size="size-12" reserve />
+                        <div class="min-w-0 flex-1">
+                            <p class="truncate text-sm font-semibold text-ink-strong">{{ option.name }}</p>
+                            <p v-if="option.name_ja" lang="ja" class="truncate text-xs text-ink-muted">{{ option.name_ja }}</p>
+                        </div>
+                        <SupportTypeMark :type="option.type" :label="option.type_label" />
+
+                        <!-- Type-match marker (Slice 4, C18) -->
+                        <span
+                            v-if="option.type_match"
+                            class="flex items-center gap-1 text-xs font-medium text-ink bg-panel px-2 py-0.5 rounded"
+                        >
+                            <SupportTypeMark :type="option.slot_type" :label="option.slot_type" :size="10" />
+                            <span>fits this slot</span>
+                        </span>
+
+                        <!-- In-deck badge + disabled Equip (Slice 4, D6, C19) -->
+                        <template v-if="option.in_deck_position !== null">
+                            <span class="pill pill-caution text-xs">In Slot {{ option.in_deck_position }}</span>
+                            <BaseButton
+                                variant="secondary"
+                                :disabled="true"
+                                class="opacity-50 cursor-not-allowed"
+                                @click.prevent.stop="equip(option.id)"
+                            >Equip</BaseButton>
+                        </template>
+                        <template v-else>
+                            <BaseButton variant="secondary" @click="equip(option.id)">Equip</BaseButton>
+                        </template>
+                    </li>
+                </ul>
+            </template>
+        </template>
+        <p v-else class="note mt-3">No support card matches that filter. Clear the search or uncheck Owned only.</p>
     </dialog>
 </template>

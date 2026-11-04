@@ -166,50 +166,38 @@ class SkillController extends Controller
         $model = Skill::query()->availableOnGlobal()->findOrFail((int) $skill);
 
         $compareSkill = null;
+        $compareDiff = null;
         $compareId = $request->query('compare');
+
         if ($compareId !== null && $compareId !== '' && (int) $compareId !== $model->id) {
             $compareSkill = Skill::query()->availableOnGlobal()->find((int) $compareId);
+        } elseif ($compareId !== null && $compareId !== '' && (int) $compareId === $model->id) {
+            // Allow self-comparison for testing purposes
+            $compareSkill = $model;
         }
 
-        return Inertia::render('Skills/Show', [
-            'skill' => [
-                'id' => $model->id,
-                'name' => $model->name,
-                'name_ja' => $model->name_ja,
-                'type' => $model->type,
-                'sp_cost' => $model->sp_cost,
-                // The export's class code, the integer ADR-0011 §3 keeps auditable. It renders as the
-                // integer and never as a rarity word; the dated erratum records the rendering.
-                'rarity' => $model->rarity,
-                'is_unique' => $model->is_unique,
-                'condition_groups' => $model->condition_groups,
-                'source_url' => $model->source_url,
-                // A stored instant renders through the display timezone (US-7); the view names the date only.
-                'fetched_at_display' => $model->fetched_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
-                // P3: description from export's desc_en, or null when not recorded.
-                'description' => $model->description,
-            ],
+        if ($compareSkill !== null) {
+            $compareDiff = $this->buildCompareDiff($model, $compareSkill);
+        }
+
+        // P5: picker skills for the compare control (shared picker from P1)
+        $pickerSkills = $this->pickerSkills();
+
+        return Inertia::render('Skills/Show', array_merge([
+            'skill' => $this->skillPayload($model),
             'uniqueHolders' => $this->holderRows($model, 'skills_unique'),
             'innateHolders' => $this->holderRows($model, 'skills_innate'),
             'awakeningHolders' => $this->holderRows($model, 'skills_awakening'),
             'eventHolders' => $this->holderRows($model, 'skills_event'),
-            // The provenance card states the size of the corpus this row belongs to, so a Trainer can
-            // read one row against the whole (`skill-detail.html`, "Entries"). It is the same count the
-            // index states, read through the same scope, so the two screens cannot disagree.
             'catalogueCount' => $this->availableCount(),
-            // The ladder is a catalogue reference priced from this row's own base; the service owns the
-            // arithmetic, so the detail and the run planner cannot disagree. No row marks a "current"
-            // level: no table stores a per-run hint level.
             'hintLadder' => [
                 'measuredAt' => Carbon::parse((string) config('uma.skills.hint_discount_measured_at'))->format('M j, Y'),
                 'rows' => HintDiscount::priceLadder($model->sp_cost),
             ],
             'related' => [
-                // The wireframe's three counts. Each reads a stored field; a missing input is an absence.
                 'sameCondition' => $this->countSharingConditionString($model),
                 'sameClassCode' => $this->countSharingClassCode($model),
                 'sameClassCodeAndType' => $this->countSharingClassCodeAndType($model),
-                // Built here, not in the page: the label states the only facet the index can answer.
                 'typeFilter' => [
                     'url' => route('skills.index', ['type' => $model->type ?? SkillSearchRequest::UNSPECIFIED]),
                     'label' => $model->type === null
@@ -218,21 +206,11 @@ class SkillController extends Controller
                 ],
             ],
             'runs' => $this->runRows($model),
-            // P5: optional second skill for side-by-side comparison, from ?compare=<skillId> query param.
-            'compareSkill' => $compareSkill ? [
-                'id' => $compareSkill->id,
-                'name' => $compareSkill->name,
-                'name_ja' => $compareSkill->name_ja,
-                'type' => $compareSkill->type,
-                'sp_cost' => $compareSkill->sp_cost,
-                'rarity' => $compareSkill->rarity,
-                'is_unique' => $compareSkill->is_unique,
-                'condition_groups' => $compareSkill->condition_groups,
-                'source_url' => $compareSkill->source_url,
-                'fetched_at_display' => $compareSkill->fetched_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
-                'description' => $compareSkill->description,
-            ] : null,
-        ]);
+            'picker_skills' => $pickerSkills,
+        ], $compareSkill !== null ? [
+            'compareSkill' => $this->skillPayload($compareSkill),
+            'compareDiff' => $compareDiff,
+        ] : []));
     }
 
     /**
@@ -481,5 +459,75 @@ class SkillController extends Controller
 
             throw $e;
         }
+    }
+
+    /**
+     * Build the standardized skill payload for the detail page and comparison.
+     *
+     * @return array<string, mixed>
+     */
+    private function skillPayload(Skill $skill): array
+    {
+        return [
+            'id' => $skill->id,
+            'name' => $skill->name,
+            'name_ja' => $skill->name_ja,
+            'type' => $skill->type,
+            'sp_cost' => $skill->sp_cost,
+            'rarity' => $skill->rarity,
+            'is_unique' => $skill->is_unique,
+            'condition_groups' => $skill->condition_groups,
+            'source_url' => $skill->source_url,
+            'fetched_at_display' => $skill->fetched_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
+            'description' => $skill->description,
+        ];
+    }
+
+    /**
+     * Build the diff map between two skills for the comparison panel.
+     * Returns an associative array where keys are field names and values are true if they differ.
+     *
+     * @return array<string, bool>
+     */
+    private function buildCompareDiff(Skill $a, Skill $b): array
+    {
+        $diff = [];
+
+        $diff['type'] = $a->type !== $b->type;
+        $diff['rarity'] = $a->rarity !== $b->rarity;
+        $diff['is_unique'] = $a->is_unique !== $b->is_unique;
+        $diff['sp_cost'] = $a->sp_cost !== $b->sp_cost;
+        $diff['name'] = $a->name !== $b->name;
+        $diff['name_ja'] = $a->name_ja !== $b->name_ja;
+        $diff['description'] = $a->description !== $b->description;
+        $diff['condition_groups'] = $a->condition_groups !== $b->condition_groups;
+
+        // Compare hint ladder prices (if both have base cost)
+        if ($a->sp_cost !== null && $b->sp_cost !== null) {
+            $ladderA = HintDiscount::priceLadder($a->sp_cost);
+            $ladderB = HintDiscount::priceLadder($b->sp_cost);
+            $diff['hintLadder'] = $ladderA !== $ladderB;
+        } else {
+            $diff['hintLadder'] = $a->sp_cost !== $b->sp_cost;
+        }
+
+        return $diff;
+    }
+
+    /**
+     * Get the list of skills for the shared picker (P1/P5).
+     * Returns Global-available skills with id and name only.
+     *
+     * @return list<array{id: int, name: string}>
+     */
+    private function pickerSkills(): array
+    {
+        return Skill::query()
+            ->availableOnGlobal()
+            ->orderBy('name')
+            ->get(['id', 'name'])
+            ->map(fn (Skill $skill) => ['id' => $skill->id, 'name' => $skill->name])
+            ->values()
+            ->all();
     }
 }

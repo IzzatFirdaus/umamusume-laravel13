@@ -131,7 +131,22 @@ const visibleRows = computed(() => filteredRows.value.slice((page.value - 1) * P
 
 const plannedRows = computed<PlanRow[]>(() => allRows.value.filter((row) => row.id !== null && planned.value.includes(row.id)));
 
-const plannedSpend = computed(() => plannedRows.value.reduce((sum, row) => sum + (row.sp_cost ?? 0), 0));
+/**
+ * What one row costs the plan: its displayed (hint-adjusted) cost, the same figure the table's
+ * Cost column prints. Summing the base cost instead made the budget bar disagree with the row it
+ * was summing, and made a hinted plan look more expensive than the Learn screen charges.
+ */
+function rowCost(row: PlanRow): number {
+    if (row.sp_cost === null) {
+        return 0;
+    }
+
+    return row.recorded?.hint_level !== null && row.recorded?.hint_level !== undefined
+        ? getHintAdjustedCost(row.sp_cost, row.recorded.hint_level)
+        : row.sp_cost;
+}
+
+const plannedSpend = computed(() => plannedRows.value.reduce((sum, row) => sum + rowCost(row), 0));
 
 const remaining = computed(() => (props.coverage.sp === null ? null : props.coverage.sp - plannedSpend.value));
 
@@ -154,8 +169,11 @@ function commitPlan(): void {
 
     pickerForm.skills = plannedRows.value.map((row) => ({
         skill_id: row.id as number,
-        status: 'Learned',
+        // "Learned" is the screen's word; the enum's case for a spent, acquired skill is
+        // `Acquired`, and the Form Request validates against the enum (`SkillAcquisition`).
+        status: 'Acquired',
         turn_acquired: null,
+        hint_level: row.recorded?.hint_level ?? null,
     }));
 
 pickerForm.post(props.run.skills_sync_url, {
@@ -336,6 +354,10 @@ function addPickedSkill(): void {
 const addingRecommendation = ref(false);
 
 function addRecommendation(): void {
+    if (addingRecommendation.value) {
+        return;
+    }
+
     const recommendedIds = props.recommended.rows.map((r) => r.id);
     const newIds = recommendedIds.filter((id) => !planned.value.includes(id));
 
@@ -343,12 +365,32 @@ function addRecommendation(): void {
         return;
     }
 
-    // Double-click trap: set loading state to prevent rapid re-entry
-    addingRecommendation.value = true;
+    // A plan entry is a `run_skills` row: the write goes through the one sync endpoint, which
+    // upserts, so a double submit cannot create a second entry per skill (the guard here is the
+    // second line, not the first). The row then renders in Available with its hint selector, and
+    // the local `planned` marks it for "Learn planned skills".
+    const hintFor = (id: number): number | null => {
+        const row = allRows.value.find((candidate) => candidate.id === id);
 
-    // Use the same commit path as "Learn planned skills" — append to planned array
+        return row?.recorded?.hint_level ?? null;
+    };
+
+    addingRecommendation.value = true;
     planned.value = [...planned.value, ...newIds];
-    addingRecommendation.value = false;
+
+    router.post(props.run.skills_sync_url, {
+        skills: newIds.map((id) => ({
+            skill_id: id,
+            status: pickerStatus.value,
+            turn_acquired: null,
+            hint_level: hintFor(id),
+        })),
+    }, {
+        preserveScroll: true,
+        onFinish: () => {
+            addingRecommendation.value = false;
+        },
+    });
 }
 
 // ADR-0001 §2 wants the constants behind a number visible wherever the number appears, so the two
@@ -667,6 +709,9 @@ const coverageConstants = computed(() =>
                                         , and the run holds <span class="font-mono tabular-nums">{{ props.recommended.sp }}</span> SP
                                         <template v-if="props.recommended.shortfall !== null && props.recommended.shortfall > 0">
                                             , a shortfall of <span class="font-mono tabular-nums">{{ props.recommended.shortfall }}</span> SP
+                                        </template>
+                                        <template v-else>
+                                            , leaving <span class="font-mono tabular-nums">{{ props.recommended.sp - props.recommended.total }}</span> SP unspent
                                         </template>
                                     </template>.
                                 </p>

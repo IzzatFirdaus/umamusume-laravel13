@@ -440,3 +440,17 @@ it('verifies the P3 parser handles missing desc_en and distance_type in fixture 
     expect(Skill::whereNotNull('description')->count())->toBe(0);
     expect(Skill::whereNotNull('distance_type')->count())->toBe(0);
 });
+
+it('reports the range-operator count from the database so the footer never lies about it', function (): void {
+    skillScreenImport();
+
+    // The fixture carries no range-form tokens, so the count is zero and the footer renders the
+    // absence text ("no skill in the current catalog uses a range operator on distance") rather
+    // than a stale "0 skills carry range operators…".
+    $this->get(route('skills.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Skills/Index')
+            ->where('rangeOpCount', 0)
+        );
+});
