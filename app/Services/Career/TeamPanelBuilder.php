@@ -689,4 +689,63 @@ final class TeamPanelBuilder
 
         return null;
     }
+
+    /**
+     * The Spirit Burst countdown to the Senior November payout event.
+     *
+     * Only applies to Unity Cup (the only scenario with the Spirit Burst system).
+     * Returns null for other scenarios or when no turns have been recorded.
+     *
+     * The payout occurs at Senior Year, Late November (turn ~70).
+     * Gold Lv3 requires 13+ combined Spirit + Extreme bursts.
+     *
+     * @param  array<string, mixed>  $team  the team section payload from teamSection()
+     * @return array{
+     *     current_bursts: int,
+     *     target_bursts: int,
+     *     bursts_needed: int,
+     *     warning_message: string|null,
+     *     turns_left: int,
+     *     payout_turn: int
+     * }|null
+     */
+    public function burstCountdown(TrainingRun $run, array $team): ?array
+    {
+        // Only Unity Cup has the Spirit Burst system
+        if (! $run->composesPanel('team_rank_ladder') || ! in_array('spirit_bursts', (array) config('scenarios.scenarios.'.$run->scenarioKey().'.widgets', []), true)) {
+            return null;
+        }
+
+        // Need at least one turn recorded to calculate position
+        $latestTurn = $run->turnEntries->sortByDesc('turn')->first();
+        if ($latestTurn === null) {
+            return null;
+        }
+
+        $currentTurn = (int) $latestTurn->turn;
+        $payoutTurn = 70; // Senior Year, Late November ≈ turn 70
+        $turnsLeft = max(0, $payoutTurn - $currentTurn);
+
+        $combined = $team['combined_bursts'] ?? null;
+        if ($combined === null) {
+            return null;
+        }
+
+        $targetBursts = 13; // Gold Lv3 threshold
+        $burstsNeeded = max(0, $targetBursts - $combined);
+
+        $warningMessage = null;
+        if ($burstsNeeded > 0) {
+            $warningMessage = "Need {$burstsNeeded} more burst".($burstsNeeded === 1 ? '' : 's')." in {$turnsLeft} turn".($turnsLeft === 1 ? '' : 's').' for Gold Lv3 (Senior November payout).';
+        }
+
+        return [
+            'current_bursts' => $combined,
+            'target_bursts' => $targetBursts,
+            'bursts_needed' => $burstsNeeded,
+            'warning_message' => $warningMessage,
+            'turns_left' => $turnsLeft,
+            'payout_turn' => $payoutTurn,
+        ];
+    }
 }

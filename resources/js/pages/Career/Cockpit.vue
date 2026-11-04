@@ -529,6 +529,16 @@ const teamRank = computed((): string => {
 });
 
 /**
+ * Spirit Burst countdown to Senior November payout (Slice 2.2).
+ * Only renders for Unity Cup when the team panel is composed and a countdown warning exists.
+ */
+const teamBurstCountdown = computed((): string | null => {
+    const scenario = props.scenario as { team?: { burst_countdown?: { warning_message?: string | null } } };
+    const countdown = scenario.team?.burst_countdown;
+    return countdown?.warning_message ?? null;
+});
+
+/**
  * "Where to go": the screens a career's turn leads into, from the doors this page already carries.
  * Every href is a prop or an action-grid entry, so no destination is spelled here and none can drift
  * from the route table. HFW parity for all four variants; Unity Cup's own keybox names it.
@@ -913,6 +923,10 @@ const jumpToShop = (): void => {
                             <tr v-if="composesTeamPanel">
                                 <td>Bursts</td>
                                 <td class="font-mono tabular-nums">{{ teamBursts }}</td>
+                            </tr>
+                            <tr v-if="composesTeamPanel && teamBurstCountdown !== null">
+                                <td>Spirit Burst Countdown</td>
+                                <td class="text-amber-600 font-mono">{{ teamBurstCountdown }}</td>
                             </tr>
                             <tr v-if="composesTeamPanel">
                                 <td>Team rank</td>

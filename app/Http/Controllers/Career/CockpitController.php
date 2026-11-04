@@ -258,6 +258,9 @@ class CockpitController extends Controller
         // Built once: the header's rank and the scenario section's team panel read the same pass.
         $team = $this->team->teamSection($run);
 
+        // Add Spirit Burst countdown for Unity Cup (Slice 2.2)
+        $team['burst_countdown'] = $this->team->burstCountdown($run, $team);
+
         // Built once for the same reason: a run with no stored position derives one with a
         // `max(turn)` query, and three props read it.
         $position = $run->careerPosition();
