@@ -214,4 +214,7 @@ test('plan entries added from the recommendation stay editable and removable', a
     await page.getByRole('checkbox', { name: 'Plan Gourmand' }).first().uncheck();
     await expect(page.locator('.savebar')).toContainText('1 skill planned');
     await expect(budget.getByText('180', { exact: true })).toBeVisible();
+    // Outside-pool priorities offer no hint selector (P2: hint applies to pool skills only).
+    await expect(page.getByRole('combobox', { name: 'Hint level for Gourmand' })).toHaveCount(0);
+    await expect(page.getByRole('combobox', { name: 'Hint level for Unstoppable' })).toHaveCount(0);
 });

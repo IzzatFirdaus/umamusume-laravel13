@@ -155,7 +155,7 @@ async function move(delta: number): Promise<void> {
             v-else-if="props.row.recorded !== null && !props.row.in_pool"
             class="mt-1 text-xs text-ink-muted"
         >
-            Hint level: N/A <span class="text-ink-muted">· not in this run's form</span>
+            Hint level: N/A <span class="text-ink-muted">· not in this run's pool</span>
         </p>
 
         <!-- The conditions are engine expressions a Trainer reads only when asking what gates a skill,

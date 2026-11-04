@@ -145,7 +145,13 @@ final class SkillsPlannerController extends Controller
 
     /**
      * P4: Budget-aware recommendation — covers priorities first at their hint-adjusted costs,
-     * then fills remaining SP with cheapest remaining skills.
+     * then fills remaining SP with the cheapest remaining skills.
+     *
+     * A fill candidate is priced at the hint level the run has recorded for it, exactly as a
+     * required row is: `run_skills.hint_level` is stored for any pooled skill the Trainer has
+     * entered a hint for, not only for priorities, so a 130 SP skill at Hint Lv2 (104) sorts
+     * ahead of a 105 SP skill with no hint. The rows carry both figures — `sp_cost` is the
+     * catalogue base the row prints as "base", `hint_adjusted_cost` is what the plan spends.
      *
      * @param  list<array<string, mixed>>  $required
      * @return array{rows: list<array{id: int, name: string, sp_cost: int, hint_adjusted_cost: int}>, total: int, count: int, sp: int|null, shortfall: int|null}
@@ -198,20 +204,33 @@ final class SkillsPlannerController extends Controller
             ->pluck('id')
             ->all();
 
+        // Hint levels the run has recorded, keyed by catalogue id. A hint is not a priority-only
+        // fact: `setSkillHintLevel()` attaches a Suggested row for any pooled skill, and that
+        // recorded level prices the fill exactly as it prices a required row.
+        $recordedHints = $run->skills->mapWithKeys(
+            static fn (Skill $skill): array => [(int) $skill->id => $skill->pivot->hint_level]
+        );
+
         $fillCandidates = Skill::query()
             ->availableOnGlobal()
             ->whereIn('export_id', $poolSkillIds)
             ->whereNotIn('id', array_merge($acquiredIds, $requiredIds))
             ->whereNotNull('sp_cost')
-            ->orderBy('sp_cost')
-            ->orderBy('name')
             ->get(['id', 'name', 'sp_cost'])
-            ->map(static fn (Skill $skill): array => [
-                'id' => (int) $skill->id,
-                'name' => (string) $skill->name,
-                'sp_cost' => (int) $skill->sp_cost,
-                'hint_adjusted_cost' => (int) $skill->sp_cost, // no hint recorded on unacquired skills
-            ])
+            ->map(static function (Skill $skill) use ($recordedHints): array {
+                $base = (int) $skill->sp_cost;
+                $hintLevel = $recordedHints[(int) $skill->id] ?? null;
+
+                return [
+                    'id' => (int) $skill->id,
+                    'name' => (string) $skill->name,
+                    'sp_cost' => $base,
+                    'hint_adjusted_cost' => $hintLevel === null ? $base : HintDiscount::price($base, (int) $hintLevel),
+                ];
+            })
+            // Cheapest displayed cost first, name as the deterministic tie-break the catalogue order
+            // already uses.
+            ->sortBy([['hint_adjusted_cost', 'asc'], ['name', 'asc']])
             ->values()
             ->all();
 
@@ -219,11 +238,11 @@ final class SkillsPlannerController extends Controller
         $fillTotal = 0;
 
         foreach ($fillCandidates as $candidate) {
-            if ($fillTotal + $candidate['sp_cost'] > $remainingSp) {
+            if ($fillTotal + $candidate['hint_adjusted_cost'] > $remainingSp) {
                 break;
             }
             $fillRows[] = $candidate;
-            $fillTotal += $candidate['sp_cost'];
+            $fillTotal += $candidate['hint_adjusted_cost'];
         }
 
         // Step 4: Combine priority rows and fill rows
@@ -596,7 +615,7 @@ final class SkillsPlannerController extends Controller
 
         $note = $this->prerequisiteNote($name);
         if (! $inPool && $skill !== null) {
-            $poolNote = "This run's selected form does not publish this skill; it is recordable as a target but not in the learnable pool.";
+            $poolNote = "This run's selected form does not publish this skill; it is recordable as a target but not in this run's pool.";
             $note = $note !== null ? $note.' '.$poolNote : $poolNote;
         }
 
