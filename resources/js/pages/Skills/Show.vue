@@ -573,27 +573,27 @@ function relatedCount(type: 'sameCondition' | 'sameClassCode' | 'sameClassCodeAn
                             </thead>
                             <tbody>
                                 <tr class="border-b border-rule-soft">
-                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Type<span v-if="props.skill.type !== props.compareSkill?.type" class="ml-2 text-brand-chrome font-semibold text-xs">differs</span></th>
+                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Type<span v-if="props.skill.type !== props.compareSkill?.type" class="ml-2 text-brand-chrome font-semibold text-xs" data-differs><span aria-hidden="true">≠ </span>differs</span></th>
                                     <td class="py-2 px-3 text-center">{{ props.skill.type ?? 'N/A' }}</td>
                                     <td class="py-2 px-3 text-center">{{ props.compareSkill.type ?? 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b border-rule-soft">
-                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Class code<span v-if="props.skill.rarity !== props.compareSkill?.rarity" class="ml-2 text-brand-chrome font-semibold text-xs">differs</span></th>
+                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Class code<span v-if="props.skill.rarity !== props.compareSkill?.rarity" class="ml-2 text-brand-chrome font-semibold text-xs" data-differs><span aria-hidden="true">≠ </span>differs</span></th>
                                     <td class="py-2 px-3 text-center font-mono">{{ props.skill.rarity ?? 'N/A' }}</td>
                                     <td class="py-2 px-3 text-center font-mono">{{ props.compareSkill.rarity ?? 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b border-rule-soft">
-                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Unique<span v-if="props.skill.is_unique !== props.compareSkill?.is_unique" class="ml-2 text-brand-chrome font-semibold text-xs">differs</span></th>
+                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Unique<span v-if="props.skill.is_unique !== props.compareSkill?.is_unique" class="ml-2 text-brand-chrome font-semibold text-xs" data-differs><span aria-hidden="true">≠ </span>differs</span></th>
                                     <td class="py-2 px-3 text-center">{{ props.skill.is_unique ? '✦ Yes' : 'No' }}</td>
                                     <td class="py-2 px-3 text-center">{{ props.compareSkill.is_unique ? '✦ Yes' : 'No' }}</td>
                                 </tr>
                                 <tr class="border-b border-rule-soft">
-                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Base SP cost<span v-if="props.skill.sp_cost !== props.compareSkill?.sp_cost" class="ml-2 text-brand-chrome font-semibold text-xs">differs</span></th>
+                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Base SP cost<span v-if="props.skill.sp_cost !== props.compareSkill?.sp_cost" class="ml-2 text-brand-chrome font-semibold text-xs" data-differs><span aria-hidden="true">≠ </span>differs</span></th>
                                     <td class="py-2 px-3 text-center font-mono">{{ props.skill.sp_cost ?? 'N/A' }}</td>
                                     <td class="py-2 px-3 text-center font-mono">{{ props.compareSkill.sp_cost ?? 'N/A' }}</td>
                                 </tr>
                                 <tr class="border-b border-rule-soft">
-                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Condition<span v-if="compareCondition(props.skill) !== compareCondition(props.compareSkill)" class="ml-2 text-brand-chrome font-semibold text-xs">differs</span></th>
+                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Condition<span v-if="compareCondition(props.skill) !== compareCondition(props.compareSkill)" class="ml-2 text-brand-chrome font-semibold text-xs" data-differs><span aria-hidden="true">≠ </span>differs</span></th>
                                     <td class="py-2 px-3 text-center font-mono text-xs break-all">
                                         <span v-if="compareCondition(props.skill)">{{ compareCondition(props.skill) }}</span>
                                         <span v-else class="text-ink-muted">not recorded</span>
@@ -604,7 +604,7 @@ function relatedCount(type: 'sameCondition' | 'sameClassCode' | 'sameClassCodeAn
                                     </td>
                                 </tr>
                                 <tr class="border-b border-rule-soft">
-                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Precondition<span v-if="comparePrecondition(props.skill) !== comparePrecondition(props.compareSkill)" class="ml-2 text-brand-chrome font-semibold text-xs">differs</span></th>
+                                    <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Precondition<span v-if="comparePrecondition(props.skill) !== comparePrecondition(props.compareSkill)" class="ml-2 text-brand-chrome font-semibold text-xs" data-differs><span aria-hidden="true">≠ </span>differs</span></th>
                                     <td class="py-2 px-3 text-center font-mono text-xs break-all">
                                         <span v-if="comparePrecondition(props.skill)">{{ comparePrecondition(props.skill) }}</span>
                                         <span v-else class="text-ink-muted">not recorded</span>
@@ -648,7 +648,7 @@ function relatedCount(type: 'sameCondition' | 'sameClassCode' | 'sameClassCodeAn
                     <p class="note mt-3">
                         <span class="g" aria-hidden="true">○</span>
                         <span class="flex-1">
-                            Rows where the two skills differ are marked <span class="text-brand-chrome font-semibold">differs</span>.
+                            Rows where the two skills differ are marked <span class="text-brand-chrome font-semibold"><span aria-hidden="true">≠ </span>differs</span>.
                             Engine tokens are printed as-is; N/A means the source records nothing for that property.
                         </span>
                     </p>
