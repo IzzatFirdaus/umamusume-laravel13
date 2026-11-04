@@ -125,7 +125,7 @@ const closeCompareModal = (): void => {
 const getSelectedCards = computed(() => {
     // Filter the current page's cards to only selected ones
     return props.cards.data.filter((card) => selectedCards.value.includes(card.id));
-};
+});
 
 function applyFilters(): void {
     router.get(

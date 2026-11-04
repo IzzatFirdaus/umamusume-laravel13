@@ -40,6 +40,7 @@ const props = defineProps<{
     unique: boolean;
     totalCount: number;
     askedFor: string;
+    rangeOpCount: number;
 }>();
 </script>
 
@@ -61,6 +62,7 @@ const props = defineProps<{
             :unique="props.unique"
             :total-count="props.totalCount"
             :asked-for="props.askedFor"
+            :range-op-count="props.rangeOpCount"
             filter-path="/database/skills"
         />
     </AppLayout>

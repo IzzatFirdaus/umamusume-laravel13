@@ -346,6 +346,58 @@ final class SkillInventory extends Command
             $count = $releaseStatusCounts[$status->value] ?? 0;
             $this->line("table.release_status.{$status->value}={$count}");
         }
+
+        // The D6 cross-check: the footer's number is checked against this independent count, not
+        // against the controller method under test. Counted here from the same `condition_groups`
+        // column the surface reads, but through this command's own parser. Two lines because the
+        // catalogue footer counts only rows the Global scope admits: a JapanOnly range operator is
+        // in `table.range_op_count` and not in `table.range_op_count_global`, and that difference is
+        // the honest reason the two numbers can disagree.
+        $tableRangeOpCount = 0;
+        $tableRangeOpCountGlobal = 0;
+
+        foreach (Skill::query()->get(['condition_groups', 'release_status', 'name_is_client']) as $skill) {
+            if (! $this->hasRangeOperatorDistance($skill->condition_groups)) {
+                continue;
+            }
+
+            $tableRangeOpCount++;
+
+            if ($skill->release_status === ReleaseStatus::GlobalReleased && $skill->name_is_client) {
+                $tableRangeOpCountGlobal++;
+            }
+        }
+
+        $this->line("table.range_op_count={$tableRangeOpCount}");
+        $this->line("table.range_op_count_global={$tableRangeOpCountGlobal}");
+    }
+
+    /** Whether any condition/precondition atom in the stored JSON is a distance range operator. */
+    private function hasRangeOperatorDistance(mixed $groups): bool
+    {
+        if (! is_array($groups)) {
+            return false;
+        }
+
+        foreach ($groups as $group) {
+            if (! is_array($group)) {
+                continue;
+            }
+
+            foreach ([$group['condition'] ?? null, $group['precondition'] ?? null] as $predicate) {
+                if (! is_string($predicate)) {
+                    continue;
+                }
+
+                foreach (preg_split('/[@&]/', $predicate) ?: [] as $atom) {
+                    if (preg_match('/^distance_type[<>]=?[1-4]$/', trim($atom))) {
+                        return true;
+                    }
+                }
+            }
+        }
+
+        return false;
     }
 
     private function hasMultiTokenDistance(mixed $groups): bool

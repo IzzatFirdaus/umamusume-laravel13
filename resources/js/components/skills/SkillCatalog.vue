@@ -338,7 +338,7 @@ const engineCondition = (skill: Skill): string =>
             </div>
         </template>
 
-        <p class="mt-6 max-w-3xl text-xs text-ink-muted">
+        <p class="mt-6 max-w-3xl text-xs text-ink-muted" data-testid="catalogue-footer">
             The type word is this tool's reading of the source's effect codes, not a client label. The
             reading refuses a negative value and refuses a skill carrying two kinds of effect, so some
             rows show no word at all; the Type filter's “{{ props.unspecifiedType }}” choice finds those
@@ -347,8 +347,8 @@ const engineCondition = (skill: Skill): string =>
             it, and the run planner owns the level a run actually holds. Search matches the skill's name
             <strong>or the stored effect text</strong> (both case- and spacing-insensitive via the same
             normalized key). The Distance filter matches the parsed <code>distance_type</code> column
-(1=Sprint..4=Long, plus Unspecified for not-recorded); <strong v-if="rangeOpCount > 0">{{ rangeOpCount }} skills have
-range operators on distance that cannot be filtered</strong><span v-else>no skill in the current catalog uses a range operator on distance</span>.
+(1=Sprint..4=Long, plus Unspecified for not-recorded); <span data-testid="range-op-sentence"><strong v-if="rangeOpCount > 0">{{ rangeOpCount }} skills have
+range operators on distance that cannot be filtered</strong><span v-else>no skill in the current catalog uses a range operator on distance</span>.</span>
         </p>
     </div>
 </template>
