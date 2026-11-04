@@ -127,3 +127,72 @@ export function inventoryRangeOpCount(): number {
 
     return Number(match[1]);
 }
+
+const JAPAN_ONLY_EXPORT_ID = 990010;
+
+/** Seeds one JapanOnly skill that the Global-scoped picker must never offer. */
+export function seedJapanOnlySkill(name = 'Japan Only Fixture'): void {
+    const db = new DatabaseSync(resolvedScratchDatabase());
+
+    try {
+        const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+
+        db.prepare(
+            `INSERT INTO skills
+                (name, name_ja, match_key, sp_cost, type, is_unique, created_at, updated_at,
+                 export_id, rarity, release_status, name_is_client, source_url, snapshot_path,
+                 fetched_at, source_timezone, is_manual, condition_groups, description,
+                 description_match_key, distance_type)
+             VALUES (?, NULL, ?, 120, 'Speed', 0, ?, ?, ?, 1, 'JapanOnly', 1,
+                     'https://gametora.test/skills.json', NULL, ?, 'Asia/Tokyo', 0, NULL, NULL, NULL, NULL)`,
+        ).run(name, name.toLowerCase().replace(/\s+/g, ''), now, now, JAPAN_ONLY_EXPORT_ID, now);
+    } finally {
+        db.close();
+    }
+}
+
+/** Removes the fixture inserted by `seedJapanOnlySkill()`. */
+export function removeJapanOnlySkill(): void {
+    const db = new DatabaseSync(resolvedScratchDatabase());
+
+    try {
+        db.prepare('DELETE FROM skills WHERE export_id = ?').run(JAPAN_ONLY_EXPORT_ID);
+    } finally {
+        db.close();
+    }
+}
+
+const NO_DESCRIPTION_EXPORT_ID = 990011;
+
+/** Seeds one Global skill with a NULL description, so the "No client string." state is reachable. */
+export function seedNoDescriptionSkill(): void {
+    const db = new DatabaseSync(resolvedScratchDatabase());
+
+    try {
+        const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+
+        db.prepare(
+            `INSERT INTO skills
+                (name, name_ja, match_key, sp_cost, type, is_unique, created_at, updated_at,
+                 export_id, rarity, release_status, name_is_client, source_url, snapshot_path,
+                 fetched_at, source_timezone, is_manual, condition_groups, description,
+                 description_match_key, distance_type)
+             VALUES ('No String Fixture', NULL, 'nostringfixture', 150, 'Speed', 0, ?, ?, ?, 1,
+                     'GlobalReleased', 1, 'https://gametora.test/skills.json', NULL, ?, 'Asia/Tokyo',
+                     0, NULL, NULL, NULL, NULL)`,
+        ).run(now, now, NO_DESCRIPTION_EXPORT_ID, now);
+    } finally {
+        db.close();
+    }
+}
+
+/** Removes the fixture inserted by `seedNoDescriptionSkill()`. */
+export function removeNoDescriptionSkill(): void {
+    const db = new DatabaseSync(resolvedScratchDatabase());
+
+    try {
+        db.prepare('DELETE FROM skills WHERE export_id = ?').run(NO_DESCRIPTION_EXPORT_ID);
+    } finally {
+        db.close();
+    }
+}

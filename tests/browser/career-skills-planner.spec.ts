@@ -218,3 +218,98 @@ test('plan entries added from the recommendation stay editable and removable', a
     await expect(page.getByRole('combobox', { name: 'Hint level for Gourmand' })).toHaveCount(0);
     await expect(page.getByRole('combobox', { name: 'Hint level for Unstoppable' })).toHaveCount(0);
 });
+
+/*
+ * Inv-3 (DOM half): the recommendation panel's figures are marked "Calculated".
+ *
+ * `InvariantSelfCheckTest::test_inv3_calculated_figures_reach_the_payload` holds the payload; this
+ * holds the mark. A panel that printed the figures without the mark would pass the payload test
+ * and fail here, which is the invariant.
+ */
+test('marks the recommendation panel Calculated', async ({ page }) => {
+    const panel = await openRecommendation(page);
+    const heading = panel.getByRole('heading', { name: /Recommended/ });
+
+    await expect(heading).toBeVisible();
+    await expect(heading).toContainText('Calculated');
+
+    // The panel's own derivation note states the rule is the tool's, not the client's.
+    await expect(panel).toContainText("this tool's heuristic, not a client mechanic");
+});
+
+/*
+ * P1/F2: the add form's single `select` emit carries `{id, name}`, and a double submit lands one row.
+ *
+ * The picker emits the whole object rather than a bare id or name — both consumers (this form and
+ * the compare control) read `.id`, and the label shows `.name`. A double submit must upsert, not
+ * duplicate, which is the same dedupe direction the recommendation panel's button takes.
+ */
+test('adds a picked skill once even when the submit is double-clicked', async ({ page }) => {
+    await openPlanner(page);
+
+    // The add form lives inside the writers disclosure ("Build target, recorded skills and the add
+    // form"), which is collapsed by default.
+    const disclosure = page.locator('details').filter({ hasText: 'Build target, recorded skills and the add form' }).first();
+    if ((await disclosure.getAttribute('open')) === null) {
+        await disclosure.locator('summary').first().click();
+    }
+
+    const picker = page.getByRole('textbox', { name: 'Skill to add' });
+    await expect(picker).toBeVisible();
+
+    await picker.fill('Up-Tempo');
+    const option = page.getByRole('option', { name: /Up-Tempo/ }).first();
+    await expect(option).toBeVisible();
+    await option.click();
+
+    const add = page.getByRole('button', { name: 'Add to run' });
+    await expect(add).toBeEnabled();
+    await add.dblclick({ force: true });
+
+    // The endpoint upserts on (run, skill), so a double submit lands one row. The observable proof
+    // is that the skill leaves the picker's candidate list exactly once: `picker_skills` excludes
+    // every skill the run already holds, so a duplicated write would leave a second candidate and a
+    // missing write would leave the first.
+    await expect(page.getByRole('textbox', { name: 'Skill to add' })).toBeVisible();
+
+    await picker.fill('Up-Tempo');
+    await expect(page.getByRole('option', { name: /Up-Tempo/ })).toHaveCount(0);
+
+    // And the run now records it, in the status group the form defaults to.
+    await expect(page.getByText('Up-Tempo').first()).toBeVisible();
+});
+
+/*
+ * F2: the budget bar moves after each add and each remove.
+ *
+ * The bar's spend figure is the sum of planned rows, so it is the cheapest observable proof that
+ * the plan state is reactive rather than a snapshot. A add that did not re-render would leave the
+ * figure at 0; a remove that did not would leave it at the added total.
+ */
+test('moves the budget bar after each add and each remove', async ({ page }) => {
+    await openPlanner(page);
+    const budget = page.locator('section[aria-labelledby="skills-budget-heading"]');
+    const savebar = page.locator('.savebar');
+
+    // The plan starts empty — the fixture's priorities are *listed* as candidates, not planned.
+    await expect(savebar).toContainText('No skill planned');
+
+    // Add one: 180 SP of the 100 held, so the bar moves to 180 and the remainder goes negative.
+    await page.getByRole('checkbox', { name: 'Plan Gourmand' }).first().check();
+    await expect(savebar).toContainText('1 skill planned');
+    await expect(budget.getByText('180', { exact: true })).toBeVisible();
+
+    // Add the second: 360 total.
+    await page.getByRole('checkbox', { name: 'Plan Unstoppable' }).first().check();
+    await expect(savebar).toContainText('2 skills planned');
+    await expect(budget.getByText('360', { exact: true })).toBeVisible();
+
+    // Remove one: back to 180.
+    await page.getByRole('checkbox', { name: 'Plan Gourmand' }).first().uncheck();
+    await expect(savebar).toContainText('1 skill planned');
+    await expect(budget.getByText('180', { exact: true })).toBeVisible();
+
+    // Remove the last: back to zero.
+    await page.getByRole('checkbox', { name: 'Plan Unstoppable' }).first().uncheck();
+    await expect(savebar).toContainText('No skill planned');
+});

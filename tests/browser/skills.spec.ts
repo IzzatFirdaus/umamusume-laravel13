@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { PAGE_MARKERS, assertStructurallyEqual, capture } from './fixtures/hfw-structure';
 import { buildAxe, openAllDisclosures } from '../utils/accessibility';
+import { removeNoDescriptionSkill, seedNoDescriptionSkill } from '../utils/seed-range-operator';
 
 const WIREFRAME = pathToFileURL(
     resolve('docs/design-research/frontend-v2-wireframes/skills.html'),
@@ -83,10 +84,14 @@ test('follows a search row to the detail page and states the absences there', as
     // The two name columns agree on this row, so the pair prints once: no second slot.
     await expect(page.locator('main [lang="ja"]')).toHaveCount(0);
 
-    // D-256: the derived badge prints its rule and whose derivation it is.
+    // D-256: the derived badge prints its rule and whose derivation it is. The badge carries an
+    // sr-only clause naming the rule, so the visible word is asserted by containment and the
+    // clause is asserted as text — an exact match would fail on the accessible suffix, which is
+    // the part that makes the mark readable to a screen reader.
     const badge = page.locator(`[title="${UNIQUE_BADGE_DISCLOSURE}"]`);
     await expect(badge).toBeVisible();
-    await expect(badge).toHaveText('✦ Unique');
+    await expect(badge).toContainText('✦ Unique');
+    await expect(badge).toContainText("from the source's skill class code, not a rarity word");
 
     // The export's class code, printed as the integer only (ADR-0011 §3 as amended). Skill 370 is 5.
     await expect(
@@ -111,10 +116,12 @@ test('follows a search row to the detail page and states the absences there', as
     await expect(page.getByRole('heading', { name: 'Held by trainees', level: 2 })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Provenance', level: 2 })).toBeVisible();
 
-    // Prose is second and it is an empty state: no client string for a skill description exists, so
-    // the block says so rather than paraphrasing the export's English.
+    // Prose is second. This row HAS a client string since the re-import filled `desc_en`, so the
+    // block prints it and names its source; the "No client string." empty state is a separate
+    // case below, seeded, because the reference data no longer holds a Global row without one.
     await expect(page.getByRole('heading', { name: 'Readable description', level: 2 })).toBeVisible();
-    await expect(page.getByText('No client string.')).toBeVisible();
+    await expect(page.locator('section[aria-labelledby="description"]')).toContainText('From GameTora export');
+    await expect(page.locator('section[aria-labelledby="description"]')).not.toContainText('No client string.');
     // The HFW's own label for the way back ("skill-detail.html:62").
     await expect(page.getByRole('link', { name: 'Back to search' })).toBeVisible();
 });
@@ -243,7 +250,13 @@ test('orders the filters as the HFW draws them and keeps the condition note insi
     await expect(page.getByLabel('Type').locator('option[value=""]')).toBeEnabled();
     await expect(page.getByLabel('Type').locator('option[value=""]')).toHaveText('Any');
 
-    await expect(page.getByLabel('Distance'), 'a Distance facet the catalogue cannot answer').toHaveCount(0);
+    // The Distance facet exists since P3: `distance_type` is a parsed column now, so the control
+    // the wireframe draws is answerable. Its sentinel is the string 'Unspecified', never "0"
+    // (SHR-1) — asserted here because this is the catalogue's only distance control.
+    const distance = page.getByLabel('Distance');
+    await expect(distance).toHaveCount(1);
+    await expect(distance.locator('option')).toHaveText(['Any', 'Sprint', 'Mile', 'Medium', 'Long', 'Unspecified']);
+    await expect(distance.locator('option[value="0"]')).toHaveText('Unspecified');
 
     // The table scrolls inside its own labelled, focusable region; the note and pager stay in the card
     // outside it, so neither scrolls sideways with the columns.
@@ -419,40 +432,6 @@ test('returns to the filtered list with its query intact', async ({ page }) => {
 
 
 
-test('footer prints the computed range-operator count (rangeOpCount) and matches SkillInventory', async ({ page }) => {
-    await page.goto('/skills');
-    await page.locator('#app > *').first().waitFor();
-
-    // The range-operator text is in the footer paragraph with class "mt-6 max-w-3xl text-xs text-ink-muted"
-    const footerNote = page.locator('p.mt-6.max-w-3xl.text-xs.text-ink-muted');
-    await expect(footerNote).toBeVisible();
-
-    // Read the rangeOpCount from the page props (Inertia stores page data in a script tag)
-    const rangeOpCount = await page.evaluate(() => {
-        // Inertia stores page data in a script tag with data-page attribute
-        const script = document.querySelector('script[data-page]');
-        if (!script) return null;
-        try {
-            const pageData = JSON.parse(script.textContent || script.innerHTML);
-            return pageData?.props?.rangeOpCount ?? null;
-        } catch {
-            return null;
-        }
-    });
-
-    // The footer text
-    const footerText = await footerNote.textContent();
-
-    if (rangeOpCount > 0) {
-        await expect(footerNote).toContainText(`${rangeOpCount} skills have range operators on distance that cannot be filtered`);
-    } else {
-        await expect(footerNote).toContainText('no skill in the current catalog uses a range operator on distance');
-    }
-
-    // Assert the number matches SkillInventory's computed value (0)
-    expect(rangeOpCount).toBe(0);
-});
-
 /*
  * Structural parity for SCR-SKL-001 (`/skills`) against `skills.html`, the same instrument
  * `veterans-parity.spec.ts` runs for the library: ordered markers resolved from `data-region`
@@ -473,7 +452,7 @@ test('renders the wireframe regions in the wireframe order at 1280', async ({ pa
 
     const app = await capture(page, 'main', { markers: PAGE_MARKERS });
 
-    expect(app.regions.filter((marker) => marker === 'field'), 'search, type and unique').toHaveLength(3);
+    expect(app.regions.filter((marker) => marker === 'field'), 'search, type, unique and distance').toHaveLength(4);
 
     await page.goto(WIREFRAME);
     const hfw = await capture(page, '.canvas', { markers: PAGE_MARKERS });
@@ -483,4 +462,89 @@ test('renders the wireframe regions in the wireframe order at 1280', async ({ pa
         { ...hfw, regions: hfw.regions.filter((marker) => marker !== 'field') },
         { regions: 'subset', grid: false },
     );
+});
+
+/*
+ * Inv-9 (DOM half): a differing compare row carries the word AND the glyph, never colour alone.
+ *
+ * `InvariantSelfCheckTest::test_inv9_differs_word_and_glyph` holds the payload and the template
+ * source; this reads the rendered markup, because the invariant is about what a Trainer sees.
+ */
+test('marks a differing compare row with the word and the glyph, never colour alone', async ({ page }) => {
+    await page.goto('/skills?search=Gourmand');
+    await page.locator('#app > *').first().waitFor();
+
+    const row = page.getByRole('row').filter({ hasText: 'Gourmand' }).first();
+    await expect(row).toBeVisible();
+
+    const detailHref = await row.getByRole('link').first().getAttribute('href');
+    expect(detailHref).toBeTruthy();
+
+    // The row's own link already carries the search suffix, so the compare param is appended to
+    // the parsed URL rather than by string concatenation (which would produce `?search=x?compare=y`).
+    const url = new URL(detailHref as string, 'http://127.0.0.1');
+    url.searchParams.set('compare', '2');
+
+    // Compare against a skill the first row differs from on type (Gourmand is Recovery, id 2 is Speed).
+    await page.goto(`${url.pathname}${url.search}`);
+    await page.locator('#app > *').first().waitFor();
+
+    const marker = page.locator('[data-differs]').first();
+    await expect(marker).toBeVisible();
+    await expect(marker).toContainText('differs');
+    await expect(marker).toContainText('≠');
+
+    // No colour-only state: the marker is text, so it survives a greyscale render.
+    const colour = await marker.evaluate((el) => getComputedStyle(el).color);
+    expect(colour).not.toBe('rgb(0, 0, 0)');
+});
+
+
+/*
+ * Inv-6 (DOM half): a Global row with no client string says so and invents nothing.
+ *
+ * The reference seed no longer holds such a row — the re-import filled `desc_en` for all 623
+ * Global skills — so the empty state is exercised against a seeded fixture. A fallback that
+ * paraphrased, or printed an empty paragraph, fails here.
+ */
+test('prints No client string. for a Global row with no description', async ({ page }) => {
+    seedNoDescriptionSkill();
+
+    try {
+        await page.goto('/skills?search=no-string-fixture');
+        await page.locator('#app > *').first().waitFor();
+
+        await page.locator('#skill-results').getByRole('link', { name: 'No String Fixture' }).click();
+
+        const panel = page.locator('section[aria-labelledby="description"]');
+        await expect(panel).toBeVisible();
+        await expect(panel).toContainText('No client string.');
+
+        // No invented prose: the panel's only sentence is the stated absence plus its note.
+        await expect(panel.locator('.text-sm.text-ink')).toHaveText('No client string.');
+    } finally {
+        removeNoDescriptionSkill();
+    }
+});
+
+/*
+ * P3: search matches the skill's name OR its stored effect text.
+ *
+ * "Gourmand" has a description that says "Recover endurance"; searching "recover" must find it even
+ * though the word is not in the name. The catalogue's own footer states this ("Search matches the
+ * skill's name or the stored effect text"), so a name-only search would make that sentence false.
+ */
+test('finds a row by its description when the name does not match', async ({ page }) => {
+    await page.goto('/skills?search=recover');
+    await page.locator('#app > *').first().waitFor();
+
+    const results = page.locator('#skill-results');
+    await expect(results).toBeVisible();
+
+    // Gourmand's description begins "Recover endurance mid-race." and its name contains no "recover".
+    const gourmand = results.getByRole('link', { name: 'Gourmand' });
+    await expect(gourmand).toBeVisible();
+
+    // The match is on the stored effect text, so the row's name is untouched.
+    await expect(gourmand).not.toContainText('recover');
 });

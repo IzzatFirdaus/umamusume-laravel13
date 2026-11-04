@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { BODY_MARKERS, assertStructurallyEqual, capture } from './fixtures/hfw-structure';
 import { captureBoth } from './fixtures/wizard-screenshots';
+import { removeJapanOnlySkill, seedJapanOnlySkill } from '../utils/seed-range-operator';
 
 /*
  * Rendered-copy, state and accessibility evidence for SCREEN-005 (Build Target) and the shared
@@ -285,4 +286,28 @@ test('the shared skill picker filters, moves, selects and closes from the keyboa
     // (Covered by component logic: isOpen stays true until Escape/blur; no-match message is tested in component unit tests)
         await picker.press('Escape');
         await expect(page.getByText('Chosen:').first()).not.toContainText('Unstoppable');
+});
+
+/*
+ * D2 (non-leakage): a JapanOnly skill never appears in the picker.
+ *
+ * The picker reads through the same Global scope the catalogue does, so a JapanOnly row must be
+ * invisible to it. Seeded directly into the scratch DB because the reference seed is all Global —
+ * without a fixture the assertion would pass for the wrong reason (nothing to find).
+ */
+test('never offers a JapanOnly skill in the picker', async ({ page }) => {
+    seedJapanOnlySkill('Japan Only Fixture');
+
+    try {
+        await page.goto('/career/setup/target');
+        await page.locator('#app > *').first().waitFor();
+
+        const picker = page.getByRole('textbox', { name: 'Skill priorities' });
+        await picker.fill('Japan Only Fixture');
+
+        // The listbox either stays closed or opens with no match; either way the row is not offered.
+        await expect(page.getByRole('option', { name: /Japan Only Fixture/ })).toHaveCount(0);
+    } finally {
+        removeJapanOnlySkill();
+    }
 });
