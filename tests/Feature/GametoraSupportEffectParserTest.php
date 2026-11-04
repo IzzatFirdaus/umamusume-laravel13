@@ -10,12 +10,14 @@ use App\Services\DataPipeline\Parsers\GametoraSupportEffectParser;
  *
  * `database/seeders/data/support_effects.ca447e53.json` is the committed body: 35 records whose sha256
  * prefix is the `ca447e53` the manifest names for `support_effects`, and whose ids run 1 to 33 plus 41
- * and 9991. This is the table that names the ids sitting at position 0 of every anchor vector on a
- * support card, so a mis-shelved field here mislabels a deck panel rather than a dictionary.
+ * and 9991. Six records are marked `inactive: true` (ids 20-24 Max Stat effects, id 29 Minigame
+ * Effectiveness) and are filtered by the parser per §1.4.8 (zero live cards carry them), leaving
+ * 29 active effects. This is the table that names the ids sitting at position 0 of every anchor
+ * vector on a support card, so a mis-shelved field here mislabels a deck panel rather than a dictionary.
  *
  * The load-bearing one is `calc`. Four records declare it (`mult` on ids 1, 27 and 28, `add` on id 19)
- * and 31 declare nothing, and UMAMUSUME_REFERENCE.md §1.4.8 reads that absence itself as the finding:
- * exactly the effects declaring `calc` combine multiplicatively. So the 31 nulls are asserted as nulls
+ * and 25 declare nothing, and UMAMUSUME_REFERENCE.md §1.4.8 reads that absence itself as the finding:
+ * exactly the effects declaring `calc` combine multiplicatively. So the 25 nulls are asserted as nulls
  * and `flat`, this repository's prose word for them, is asserted absent. A parser that filled the gap in
  * would still produce a table that looked complete.
  */
@@ -26,7 +28,9 @@ function supportEffectsFixtureBody(): string
 }
 
 /**
- * The published rows keyed by the document's own `id`.
+ * The published rows keyed by the document's own `id`, filtered to active effects only.
+ * Six records are marked `inactive: true` (ids 20-24 Max Stat, id 29 Minigame) and are
+ * excluded per §1.4.8.
  *
  * @return array<int, array<string, mixed>>
  */
@@ -35,8 +39,10 @@ function supportEffectsDocument(): array
     $rows = json_decode(supportEffectsFixtureBody(), true, 512, JSON_THROW_ON_ERROR);
     expect(is_array($rows))->toBeTrue();
 
+    $active = array_filter($rows, fn (array $row): bool => ($row['inactive'] ?? false) !== true);
+
     /** @var array<int, array<string, mixed>> $keyed */
-    $keyed = array_column($rows, null, 'id');
+    $keyed = array_column($active, null, 'id');
 
     return $keyed;
 }
@@ -49,10 +55,10 @@ function parsedSupportEffects(): array
     return (new GametoraSupportEffectParser)->parse(supportEffectsFixtureBody());
 }
 
-it('reads all 35 dictionary rows and keys them on the export id', function (): void {
+it('reads all 29 active dictionary rows and keys them on the export id', function (): void {
     $records = parsedSupportEffects();
 
-    expect($records)->toHaveCount(35)
+    expect($records)->toHaveCount(29)
         ->and(array_column($records, 'effect_id'))->toBe(array_keys(supportEffectsDocument()))
         ->and(max(array_column($records, 'effect_id')))->toBe(9991);
 });
@@ -112,8 +118,8 @@ it('keeps symbol as the export words it, including the two records that state no
     ));
 
     expect($symbols)->toEqual([
-        'percent' => 11,
-        'none' => 21,
+        'percent' => 10,
+        'none' => 16,
         'level' => 1,
         '__absent__' => 2,
     ]);
@@ -129,10 +135,10 @@ it('describes a row from desc_en, falling back only to the same language', funct
     $document = supportEffectsDocument();
     $records = parsedSupportEffects();
 
-    // 32 records carry `desc_en`, both of the two that do not carry `desc_en_eon`, and id 33 carries
-    // neither, so 34 descriptions land and one row is honestly empty.
+    // 26 records carry `desc_en`, both of the two that do not carry `desc_en_eon`, and id 33 carries
+    // neither, so 28 descriptions land and one row is honestly empty.
     expect(array_filter($records, fn (array $record): bool => $record['description_en'] !== null))
-        ->toHaveCount(34)
+        ->toHaveCount(28)
         ->and(array_values(array_filter(
             $records,
             fn (array $record): bool => $record['description_en'] === null
@@ -159,7 +165,6 @@ it('emits only the six columns the dictionary has', function (): void {
     $document = supportEffectsDocument();
 
     expect($document[33])->toHaveKey('_note')
-        ->and($document[20])->toHaveKey('inactive')
         ->and($document[9991])->toHaveKey('no_value')
         ->and($document[1])->toHaveKey('name_ko');
 });

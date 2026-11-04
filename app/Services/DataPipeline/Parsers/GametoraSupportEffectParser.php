@@ -61,6 +61,14 @@ final class GametoraSupportEffectParser implements SupportEffectSourceParser
         $records = [];
 
         foreach ($effects as $effect) {
+            // §1.4.8: the export marks unused effects as "inactive": true (e.g., Max Stat effects
+            // ids 20-24). Zero live cards carry these, so we drop them rather than storing effects
+            // the game does not use. ADR-0014 declines the collection, but the dictionary must not
+            // surface inactive effects as available.
+            if (($effect['inactive'] ?? false) === true) {
+                continue;
+            }
+
             $row = $this->row($effect);
 
             if ($row !== null) {
