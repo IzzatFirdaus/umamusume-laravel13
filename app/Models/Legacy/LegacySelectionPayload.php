@@ -89,6 +89,39 @@ final readonly class LegacySelectionPayload
 
     public const MAX_ANCESTORS = 2;
 
+    /** Blue Spark stat bonus per star (UMAMUSUME_REFERENCE.md §1.5.3): 1★=+5, 2★=+12, 3★=+21 per Blue Spark. */
+    public const BLUE_SPARK_BONUS = [1 => 5, 2 => 12, 3 => 21];
+
+    /**
+     * Calculate the total Blue Spark stat bonus for a legacy's blue sparks.
+     *
+     * Per UMAMUSUME_REFERENCE.md §1.5.3: each Blue Spark gives a starting stat bonus
+     * based on its star rating: 1★=+5, 2★=+12, 3★=+21. Multiple Blue Sparks stack.
+     *
+     * @param  list<array{kind: string, target: mixed, stars: int|null}>  $sparks
+     * @return array<string, int> stat => total bonus
+     */
+    public static function calculateBlueSparkBonus(array $sparks): array
+    {
+        $bonus = ['Speed' => 0, 'Stamina' => 0, 'Power' => 0, 'Guts' => 0, 'Wit' => 0];
+
+        foreach ($sparks as $spark) {
+            if ($spark['kind'] !== 'blue') {
+                continue;
+            }
+
+            $stars = $spark['stars'] ?? 0;
+            $target = $spark['target'] ?? null;
+            $value = self::BLUE_SPARK_BONUS[$stars] ?? 0;
+
+            if ($value > 0 && is_string($target) && isset($bonus[$target])) {
+                $bonus[$target] += $value;
+            }
+        }
+
+        return $bonus;
+    }
+
     /**
      * The [Global] display labels for each Spark kind.
      *
@@ -106,7 +139,7 @@ final readonly class LegacySelectionPayload
     }
 
     /**
-     * @param  list<array{rank: int|null, rank_letter?: string, is_guest: bool, ancestors: list<string|null>, ancestors_meta?: list<array{id: int, name: string, costume: string|null}>, ancestors_sparks?: list<list<array{kind: string, target: mixed, stars: int|null}>>, ancestors_rank_letters?: list<string|null>, ancestors_rank?: list<int|null>, sparks: list<array{kind: string, target: mixed, stars: int|null}>}>  $legacies
+     * @param  list<array{rank: int|null, rank_letter?: string, is_guest: bool, ancestors: list<string|null>, ancestors_meta?: list<array{id: int, name: string, costume: string|null}>, ancestors_sparks?: list<list<array{kind: string, target: mixed, stars: int|null}>>, ancestors_rank_letters?: list<string|null>, ancestors_rank?: list<int|null>, name?: string, pick?: int, sparks: list<array{kind: string, target: mixed, stars: int|null}>}>  $legacies
      */
     public function __construct(
         public array $legacies,

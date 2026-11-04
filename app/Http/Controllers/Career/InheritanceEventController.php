@@ -149,7 +149,7 @@ class InheritanceEventController extends Controller
      * The legacy selection payload, flattened for the predicted section.
      *
      * @param  array{0: string|null, 1: string|null}  $parentNames
-     * @return array{affinity: string|null, parents: list<array{slot: string, label: string, name: string|null, rank: int|null, is_guest: bool, ancestors: list<string|null>, sparks: list<array{kind: string, kind_label: string, target: string|null, stars: int|null}>, spark_counts: list<array{kind: string, kind_label: string, count: int}>}>}
+     * @return array{affinity: string|null, parents: list<array{slot: string, label: string, name: string|null, rank: int|null, is_guest: bool, ancestors: list<string|null>, sparks: list<array{kind: string, kind_label: string, target: string|null, stars: int|null}>, spark_counts: list<array{kind: string, kind_label: string, count: int}>, blue_spark_bonus: array<string, int>}>}
      */
     private function legacySection(LegacySelectionPayload $legacy, array $parentNames): array
     {
@@ -161,7 +161,7 @@ class InheritanceEventController extends Controller
             $label = $index === 0 ? 'Parent A' : 'Parent B';
             // The stored relation wins; a slot typed by name has no inheritance_parent row, so the
             // payload's own name is the fallback (UMAMUSUME_REFERENCE.md §1.5.4's rented-parent case).
-            $name = $parentNames[$index] ?? ($legacyData['name'] ?? null);
+            $name = $parentNames[$index] ?? (array_key_exists('name', $legacyData) ? $legacyData['name'] : null);
 
             $sparks = [];
             foreach ($legacyData['sparks'] as $spark) {
@@ -185,6 +185,9 @@ class InheritanceEventController extends Controller
                 }
             }
 
+            // Blue Spark stat bonus per §1.5.3: 1★=+5, 2★=+12, 3★=+21 per Blue Spark.
+            $blueSparkBonus = LegacySelectionPayload::calculateBlueSparkBonus($legacyData['sparks']);
+
             $parents[] = [
                 'slot' => $slot,
                 'label' => $label,
@@ -196,6 +199,7 @@ class InheritanceEventController extends Controller
                 'ancestors' => $legacyData['ancestors'],
                 'sparks' => $sparks,
                 'spark_counts' => $sparkCounts,
+                'blue_spark_bonus' => $blueSparkBonus,
             ];
         }
 
