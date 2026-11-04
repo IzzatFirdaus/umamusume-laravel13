@@ -95,6 +95,8 @@ class DeckSelectController extends Controller
             ),
             'picker' => $this->picker($request, $selected),
             'scenarioLabel' => SetupDraft::scenarioLabel(),
+            'scenarioKey' => $scenarioKey,
+            'scenarioHints' => $this->scenarioHints($scenarioKey),
             'scenarioPending' => SetupDraft::read()['scenario'] === null,
             // The one write this step makes, stated as a URL the page never has to resolve.
             'action' => route('career.deck.store'),
@@ -105,6 +107,33 @@ class DeckSelectController extends Controller
             // The page's own address, for the GET filter that retargets the picker.
             'selfUrl' => route('career.deck'),
         ]);
+    }
+
+    /**
+     * Returns scenario-aware strategic hints for the deck builder.
+     *
+     * Per UMAMUSUME_REFERENCE.md §2.1, §2.2:
+     * - Unity Cup: Wit cap is 1800, highlight Wit-heavy deck
+     * - Trackblazer: No Race Goals, focus on Grade Point objectives
+     * - Our Grand Concert: Speed cap is 1600, Lessons/Songs mechanic active
+     * - URA Finale: Standard scenario, no extra systems
+     *
+     * @param  string|null  $scenarioKey
+     * @return list<string>
+     */
+    private function scenarioHints(?string $scenarioKey): array
+    {
+        if ($scenarioKey === null) {
+            return [];
+        }
+
+        return match ($scenarioKey) {
+            'unity_cup' => ['Wit cap is 1800. Consider a Wit-heavy deck.'],
+            'trackblazer' => ['No Race Goals. Focus on Grade Point objectives.'],
+            'our_grand_concert' => ['Speed cap is 1600. Lessons/Songs mechanic active.'],
+            'ura_finale' => ['Standard scenario. No extra systems beyond training, racing, and objectives.'],
+            default => [],
+        };
     }
 
     /**

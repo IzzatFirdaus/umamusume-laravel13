@@ -102,6 +102,8 @@ const props = defineProps<{
         fillingSlot: number;
     };
     scenarioLabel: string | null;
+    scenarioKey: string | null;
+    scenarioHints: string[];
     scenarioPending: boolean;
     action: string;
     /** `route('career.preflight')`, the forward door. */
@@ -419,6 +421,14 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                 reason="No scenario has been chosen in this setup draft yet, so a card's Scenario Link cannot be checked against a linked list."
             />
         </p>
+
+        <!-- Scenario-aware strategic hints (UMAMUSUME_REFERENCE.md §2.1, §2.2) -->
+        <div v-if="props.scenarioHints.length > 0" class="mt-3 p-3 rounded-md bg-accent-subtle border border-accent-muted">
+            <p class="text-sm font-medium text-ink-strong">Strategic hint for {{ props.scenarioLabel }}:</p>
+            <ul class="mt-1.5 list-disc list-inside text-sm text-ink">
+                <li v-for="(hint, idx) in props.scenarioHints" :key="idx">{{ hint }}</li>
+            </ul>
+        </div>
 
         <p
             v-if="form.errors.deck"
