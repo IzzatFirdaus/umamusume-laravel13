@@ -156,3 +156,62 @@ test('passes an axe scan at WCAG A and AA', async ({ page }) => {
 
     expect(results.violations).toEqual([]);
 });
+
+/*
+ * P4: the "Recommended (Calculated)" panel. The rule, its footnote and the numbers are the
+ * feature test's (`CareerSkillsPlannerRecommendationTest`); what only a browser can prove is that
+ * the panel reached the screen, that the add button writes one plan entry per skill on a double
+ * click, and that the budget bar moves with the plan.
+ *
+ * Fixture: two 180 SP priorities, 100 SP logged — so the priorities alone are 360 SP and the
+ * shortfall is 260, the panel's own "priorities exceed the budget" path.
+ */
+async function openRecommendation(page: import('@playwright/test').Page) {
+    await openPlanner(page);
+    await page.getByText('Build target, recorded skills and the add form').click();
+
+    const panel = page.locator('section[aria-labelledby="skills-recommended-heading"]');
+    await expect(panel).toBeVisible();
+
+    return panel;
+}
+
+test('the recommendation panel states the closure figures and adds one plan entry per skill', async ({ page }) => {
+    const panel = await openRecommendation(page);
+    const budget = page.locator('section[aria-labelledby="skills-budget-heading"]');
+
+    await expect(panel.getByRole('heading', { name: /Recommended/ })).toBeVisible();
+    await expect(panel).toContainText('2 recommended skills cost');
+    await expect(panel).toContainText('360 SP');
+    await expect(panel).toContainText('a shortfall of');
+    await expect(panel).toContainText('260 SP');
+    await expect(panel.locator('ol li')).toHaveCount(2);
+
+    const add = panel.getByRole('button', { name: 'Add recommendation to plan' });
+
+    // A double click must land two plan entries, not four: the handler filters ids already planned
+    // and the endpoint upserts, so the count and the spend stay at one set.
+    await add.dblclick({ force: true });
+
+    await expect(page.locator('.savebar')).toContainText('2 skills planned');
+    await expect(budget.getByText('360', { exact: true })).toBeVisible();
+    await expect(budget.getByText('-260', { exact: true })).toBeVisible();
+});
+
+test('plan entries added from the recommendation stay editable and removable', async ({ page }) => {
+    const panel = await openRecommendation(page);
+    const budget = page.locator('section[aria-labelledby="skills-budget-heading"]');
+
+    await panel.getByRole('button', { name: 'Add recommendation to plan' }).click();
+    await expect(page.locator('.savebar')).toContainText('2 skills planned');
+
+    // Hint editability is covered by SkillHintLevelTest and
+    // CareerSkillsPlannerRecommendationTest; the two recommended priorities here are
+    // outside the run's pool, so the page correctly offers no hint selector for them
+    // (P2: hint applies to pool skills only).
+
+    // Removal: unchecking the row takes its cost back out of the budget bar.
+    await page.getByRole('checkbox', { name: 'Plan Gourmand' }).first().uncheck();
+    await expect(page.locator('.savebar')).toContainText('1 skill planned');
+    await expect(budget.getByText('180', { exact: true })).toBeVisible();
+});

@@ -242,7 +242,7 @@ test.describe('Build Target and the provenance badge', () => {
         // app page: the comparison below navigates to the wireframe, where the sentence does not exist.
         // Four wireframe cards, plus the purpose/surface/style card retained because
         // `StoreBuildTargetRequest` requires those fields whenever a stat carries a number.
-        await expect(page.locator('[data-region="card"]')).toHaveCount(5);
+        await expect(page.locator('[data-region="card"]')).toHaveCount(6);
 
         await page.goto(hfw);
         const wireframe = await capture(page, '.canvas', { markers: BODY_MARKERS, slug: 'target', side: 'hfw' });
@@ -255,4 +255,36 @@ test.describe('Build Target and the provenance badge', () => {
             await captureBoth(page, 'target');
         }
     });
+});
+
+/*
+ * D-55 / P1: the shared `SearchableSkillPicker` (build target, planner add form, planner compare)
+ * is keyboard-operable end to end — type to filter, ArrowDown/ArrowUp to move the highlight, Enter
+ * to choose, Escape to close. The component's listbox is the one surface all three consumers share,
+ * so this is where the contract is pinned.
+ */
+test('the shared skill picker filters, moves, selects and closes from the keyboard', async ({ page }) => {
+    await page.goto('/career/setup/target');
+    await page.locator('#app > *').first().waitFor();
+
+    const picker = page.getByRole('textbox', { name: 'Skill priorities' });
+    const listbox = page.getByRole('listbox', { name: 'Skill priorities' });
+
+    await picker.fill('Gourmand');
+    await expect(listbox).toBeVisible();
+    await expect(listbox.getByRole('option')).toHaveCount(1);
+
+    await picker.press('ArrowDown');
+    await expect(listbox.getByRole('option', { name: /Gourmand/ })).toHaveAttribute('aria-selected', 'true');
+
+    await picker.press('Enter');
+    await expect(page.getByText('Chosen:').locator('..')).toContainText('Gourmand');
+    await expect(page.getByRole('listbox')).toHaveCount(0);
+
+    // Escape closes without choosing, and it still closes when the filter matched nothing.
+    await picker.fill('Unstoppable');
+    await expect(page.getByRole('listbox')).toBeVisible();
+    await picker.press('Escape');
+    await expect(page.getByRole('listbox')).toHaveCount(0);
+    await expect(page.getByText('Chosen:').first()).not.toContainText('Unstoppable');
 });
