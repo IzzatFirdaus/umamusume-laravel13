@@ -131,7 +131,7 @@ class SkillController extends Controller
      * Count of skills whose condition tokens contain range operators on distance_type (<= or >=).
      * Computed from the stored condition_groups JSON at query time.
      */
-    private function rangeOperatorCount(): int
+    public function rangeOperatorCount(): int
     {
         $count = 0;
         $skills = Skill::query()->availableOnGlobal()->get(['condition_groups']);
