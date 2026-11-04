@@ -195,7 +195,7 @@ final class SkillHintLevelTest extends TestCase
         $this->assertNull($row['sp_cost']);
     }
 
-    public function test_skill_outside_pool_shows_not_in_form(): void
+    public function test_skill_outside_pool_shows_not_in_run_pool(): void
     {
         $run = TrainingRun::factory()->create(['scenario' => 'unity_cup']);
         $skill = Skill::factory()->create([
