@@ -417,6 +417,42 @@ test('returns to the filtered list with its query intact', async ({ page }) => {
     await expect(page.getByLabel('Unique')).toHaveValue('1');
 });
 
+
+
+test('footer prints the computed range-operator count (rangeOpCount) and matches SkillInventory', async ({ page }) => {
+    await page.goto('/skills');
+    await page.locator('#app > *').first().waitFor();
+
+    // The range-operator text is in the footer paragraph with class "mt-6 max-w-3xl text-xs text-ink-muted"
+    const footerNote = page.locator('p.mt-6.max-w-3xl.text-xs.text-ink-muted');
+    await expect(footerNote).toBeVisible();
+
+    // Read the rangeOpCount from the page props (Inertia stores page data in a script tag)
+    const rangeOpCount = await page.evaluate(() => {
+        // Inertia stores page data in a script tag with data-page attribute
+        const script = document.querySelector('script[data-page]');
+        if (!script) return null;
+        try {
+            const pageData = JSON.parse(script.textContent || script.innerHTML);
+            return pageData?.props?.rangeOpCount ?? null;
+        } catch {
+            return null;
+        }
+    });
+
+    // The footer text
+    const footerText = await footerNote.textContent();
+
+    if (rangeOpCount > 0) {
+        await expect(footerNote).toContainText(`${rangeOpCount} skills have range operators on distance that cannot be filtered`);
+    } else {
+        await expect(footerNote).toContainText('no skill in the current catalog uses a range operator on distance');
+    }
+
+    // Assert the number matches SkillInventory's computed value (0)
+    expect(rangeOpCount).toBe(0);
+});
+
 /*
  * Structural parity for SCR-SKL-001 (`/skills`) against `skills.html`, the same instrument
  * `veterans-parity.spec.ts` runs for the library: ordered markers resolved from `data-region`
