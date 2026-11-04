@@ -14,6 +14,7 @@ use App\Services\DataPipeline\ArtworkMirror;
 use App\Services\SupportCardEffects;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\ViewErrorBag;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -128,6 +129,57 @@ class DeckSelectController extends Controller
     }
 
     /**
+     * Compute ownership group for a card from saved-run DeckSlot rows.
+     *
+     * Precedence: Owned if any saved-run slot records OWNED, else Rented if any records RENTED,
+     * else Not recorded. Session draft (SetupDraft) is NOT considered — ownership groups
+     * are derived from saved runs only (C6 scoping).
+     *
+     * @param  list<int>  $cardIds
+     * @return array<int, 'OWNED'|'RENTED'|'NOT_RECORDED'>
+     */
+    private function ownershipGroups(array $cardIds): array
+    {
+        if ($cardIds === []) {
+            return [];
+        }
+
+        $groups = [];
+
+        // Check for OWNED ownership in saved runs
+        $ownedIds = DB::table('deck_slots')
+            ->join('training_runs', 'deck_slots.training_run_id', '=', 'training_runs.id')
+            ->whereIn('deck_slots.support_card_id', $cardIds)
+            ->where('deck_slots.ownership', 'OWNED')
+            ->whereNotNull('training_runs.id')
+            ->pluck('deck_slots.support_card_id')
+            ->unique()
+            ->all();
+
+        // Check for RENTED ownership in saved runs
+        $rentedIds = DB::table('deck_slots')
+            ->join('training_runs', 'deck_slots.training_run_id', '=', 'training_runs.id')
+            ->whereIn('deck_slots.support_card_id', $cardIds)
+            ->where('deck_slots.ownership', 'RENTED')
+            ->whereNotNull('training_runs.id')
+            ->pluck('deck_slots.support_card_id')
+            ->unique()
+            ->all();
+
+        foreach ($cardIds as $cardId) {
+            if (in_array($cardId, $ownedIds, true)) {
+                $groups[$cardId] = 'OWNED';
+            } elseif (in_array($cardId, $rentedIds, true)) {
+                $groups[$cardId] = 'RENTED';
+            } else {
+                $groups[$cardId] = 'NOT_RECORDED';
+            }
+        }
+
+        return $groups;
+    }
+
+    /**
      * The picker: the offered set, narrowed by the two facets this step offers, and the slot it writes to.
      *
      * The labels carry the rarity word and the type word so one line per card says what it is, the way
@@ -174,6 +226,32 @@ class DeckSelectController extends Controller
             ->orderBy('char_name')
             ->orderBy('title_en');
 
+        // Get ownership groups for all cards in the picker
+        $allCardIds = $query->pluck('id')->all();
+        $ownershipGroups = $this->ownershipGroups($allCardIds);
+
+        // Get in-deck positions from the current draft
+        $draft = SetupDraft::deck() ?? $this->emptySlots();
+        $inDeckPositions = [];
+        foreach ($draft as $slot) {
+            if ($slot['support_card_id'] !== null) {
+                $inDeckPositions[$slot['support_card_id']] = $slot['position'];
+            }
+        }
+
+        // Get the slot's training type for the type-match marker
+        // Slot 1 = Speed, 2 = Stamina, 3 = Power, 4 = Guts, 5 = Wit, 6 = Friend
+        $slotTypeMap = [
+            1 => 'speed',
+            2 => 'stamina',
+            3 => 'power',
+            4 => 'guts',
+            5 => 'intelligence',
+            6 => 'friend',
+        ];
+        $fillingSlot = $this->fillingSlot($request);
+        $slotType = $slotTypeMap[$fillingSlot] ?? null;
+
         return [
             'options' => $query->get()
                 ->map(static fn (SupportCard $card): array => [
@@ -187,6 +265,11 @@ class DeckSelectController extends Controller
                     'type' => $card->type,
                     'type_label' => $card->typeLabel(),
                     'rarity_word' => $card->rarityWord(),
+                    // Extended payload for Deck Picker (Slice 4)
+                    'ownership_group' => $ownershipGroups[$card->id] ?? 'NOT_RECORDED',
+                    'in_deck_position' => $inDeckPositions[$card->id] ?? null,
+                    'type_match' => $slotType !== null && $card->type === $slotType,
+                    'slot_type' => $slotType,
                 ])
                 ->values()
                 ->all(),
@@ -246,12 +329,20 @@ class DeckSelectController extends Controller
      * ladder a card of this rarity has, not a claim about copies this tool has never seen.
      * (`UMAMUSUME_REFERENCE.md` §1.4.2, §1.4.7.)
      *
+     * §1.4.7: the Unique Perk unlock level is NOT the card level. The perk unlocks at a set level:
+     * Lv30 across the pool, Lv40 for Special Week at two limit breaks. The export does not carry this
+     * value (ADR-0014), so we note the default and the known exception rather than inventing per-card data.
+     *
      * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
-     * @return list<array{breaks: int, is_maximum: bool, level: int, effects: list<array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>}>
+     * @return list<array{breaks: int, is_maximum: bool, level: int, perk_unlock_level: int|null, effects: list<array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>, perk_note: string|null}>
      */
     private function levelLadder(SupportCard $card, array $dictionary): array
     {
         $tiers = [];
+
+        // §1.4.7: default perk unlock level is 30; Special Week is the known exception at 40 (at 2LB).
+        // The export does not carry this value (ADR-0014), so we apply the default and note the exception.
+        $perkUnlockLevel = $card->char_name === 'Special Week' ? 40 : 30;
 
         for ($breaks = 0; $breaks <= CardRarity::MAX_BREAKS; $breaks++) {
             $level = $card->rarity->levelAtBreak($breaks);
@@ -260,7 +351,11 @@ class DeckSelectController extends Controller
                 'breaks' => $breaks,
                 'is_maximum' => $breaks === CardRarity::MAX_BREAKS,
                 'level' => $level,
+                'perk_unlock_level' => $level >= $perkUnlockLevel ? $perkUnlockLevel : null,
                 'effects' => SupportCardEffects::atLevel($card, $level, $dictionary),
+                'perk_note' => $level >= $perkUnlockLevel
+                    ? 'Unique Perk unlocks at Lv'.$perkUnlockLevel.' (§1.4.7).'
+                    : 'Unique Perk not yet unlocked at this level (unlocks at Lv'.$perkUnlockLevel.', §1.4.7).',
             ];
         }
 
