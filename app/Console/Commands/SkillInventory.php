@@ -15,6 +15,7 @@ use JsonException;
  *
  * Reads the export file (from config or --file=) and emits machine-readable counts.
  * With --join, performs a bidirectional join between file and table on export_id.
+ * NULL export_id rows are tracked in a separate bucket to avoid keyBy collision.
  */
 final class SkillInventory extends Command
 {
@@ -384,36 +385,49 @@ final class SkillInventory extends Command
             $fileById[$row['export_id']] = $row;
         }
 
-        $tableRows = Skill::query()
+        // Separate table rows by export_id: those with a key, and those with NULL
+        $tableRowsWithKey = Skill::query()
             ->select('id', 'export_id', 'name', 'description', 'distance_type', 'release_status')
+            ->whereNotNull('export_id')
             ->get()
             ->keyBy('export_id');
 
+        $tableRowsNullKey = Skill::query()
+            ->select('id', 'export_id', 'name', 'description', 'distance_type', 'release_status')
+            ->whereNull('export_id')
+            ->get();
+
         $fileOnly = [];
         $tableOnly = [];
+        $tableOnlyNullKey = [];
         $matched = 0;
         $colDiffs = [];
 
         foreach ($fileById as $id => $fileRow) {
-            if (! $tableRows->has($id)) {
+            if (! $tableRowsWithKey->has($id)) {
                 $fileOnly[] = $fileRow;
                 continue;
             }
 
             $matched++;
-            $tableRow = $tableRows->get($id);
+            $tableRow = $tableRowsWithKey->get($id);
 
             $this->compareRow($id, $fileRow, $tableRow, $colDiffs);
         }
 
-        foreach ($tableRows as $id => $tableRow) {
+        foreach ($tableRowsWithKey as $id => $tableRow) {
             if (! isset($fileById[$id])) {
                 $tableOnly[] = ['export_id' => $id, 'name' => $tableRow->name];
             }
         }
 
+        foreach ($tableRowsNullKey as $tableRow) {
+            $tableOnlyNullKey[] = ['export_id' => null, 'name' => $tableRow->name];
+        }
+
         $this->line("file_only=" . count($fileOnly));
         $this->line("table_only=" . count($tableOnly));
+        $this->line("table_only_null_key=" . count($tableOnlyNullKey));
         $this->line("matched={$matched}");
 
         foreach ($fileOnly as $row) {
@@ -422,6 +436,10 @@ final class SkillInventory extends Command
 
         foreach ($tableOnly as $row) {
             $this->line("missing_in_file key={$row['export_id']} name={$row['name']}");
+        }
+
+        foreach ($tableOnlyNullKey as $row) {
+            $this->line("table_only_null_key key=<null> name={$row['name']}");
         }
 
         foreach ($colDiffs as $diff) {
@@ -433,8 +451,8 @@ final class SkillInventory extends Command
             $this->warn('Likely causes: import filter (release_status), key mismatch on export_id, or parser returned null for these rows.');
         }
 
-        if (! empty($tableOnly)) {
-            $this->warn('table_only > 0: rows present in skills table but absent from export.');
+        if (! empty($tableOnly) || ! empty($tableOnlyNullKey)) {
+            $this->warn('table_only + table_only_null_key > 0: rows present in skills table but absent from export.');
             $this->warn('Likely causes: legacy seeded rows, rows from a prior export version, or is_manual=true rows skipped by promotion.');
         }
 
@@ -452,7 +470,17 @@ final class SkillInventory extends Command
             }
         }
 
-        return (count($fileOnly) + count($tableOnly) > 0) ? 1 : 0;
+        // Sum check
+        $sum = $matched + count($tableOnly) + count($tableOnlyNullKey);
+        $tableTotal = Skill::count();
+        $sumCheck = $sum === $tableTotal ? 'OK' : 'FAIL';
+        $this->line("sum_check matched={$matched} + table_only=" . count($tableOnly) . " + table_only_null_key=" . count($tableOnlyNullKey) . " = {$sum} vs table.total={$tableTotal} — {$sumCheck}");
+
+        if ($sumCheck === 'FAIL') {
+            return 2;
+        }
+
+        return (count($fileOnly) + count($tableOnly) + count($tableOnlyNullKey) > 0) ? 1 : 0;
     }
 
     /**
