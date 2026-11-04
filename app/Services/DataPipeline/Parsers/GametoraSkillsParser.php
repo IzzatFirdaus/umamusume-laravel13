@@ -333,13 +333,23 @@ final class GametoraSkillsParser implements SkillSourceParser
     /**
      * Parse distance_type from exact equality tokens in condition groups.
      * Only `distance_type==N` (N=1..4) sets the column; range operators (<=, >=) leave it NULL.
-     * Returns the first exact match found, or null if none.
+     * Returns the exact match only if there is exactly one such token and no range operators;
+     * multi-token rows and rows with range operators return NULL.
+     *
+     * Derivation note (P3 reconciliation): a row may carry more than one exact token (225 rows
+     * on the 2026-11 export do). Such rows store NULL so the filter reads the tool's stored
+     * value (NULL) rather than an arbitrary first match. Rows with range operators also store
+     * NULL because the source does not name a single distance.
      */
     private function parseDistanceType(mixed $groups): ?int
     {
         if (! is_array($groups)) {
             return null;
         }
+
+        $exactTokens = 0;
+        $exactValue = null;
+        $hasRange = false;
 
         foreach ($groups as $group) {
             if (! is_array($group)) {
@@ -352,13 +362,20 @@ final class GametoraSkillsParser implements SkillSourceParser
                 }
 
                 foreach (preg_split('/[@&]/', $predicate) ?: [] as $atom) {
-                    if (preg_match('/^distance_type==([1-4])$/', trim($atom), $m) === 1) {
-                        return (int) $m[1];
+                    $atom = trim($atom);
+                    if (preg_match('/^distance_type==([1-4])$/', $atom, $m)) {
+                        $exactTokens++;
+                        if ($exactValue === null) {
+                            $exactValue = (int) $m[1];
+                        }
+                    } elseif (preg_match('/^distance_type[<>]=?[1-4]$/', $atom)) {
+                        $hasRange = true;
                     }
                 }
             }
         }
 
-        return null;
+        // Store only if exactly one exact token and no range operators
+        return ($exactTokens === 1 && ! $hasRange) ? $exactValue : null;
     }
 }

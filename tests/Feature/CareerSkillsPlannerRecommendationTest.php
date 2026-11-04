@@ -358,6 +358,7 @@ final class CareerSkillsPlannerRecommendationTest extends TestCase
             'style' => 'Pace Chaser',
             'targets' => ['Speed' => 900, 'Stamina' => 800, 'Power' => 700, 'Guts' => 600, 'Wit' => 500],
             'skill_priorities' => [],
+            'hint_levels' => [],
             ...$overrides,
         ];
     }
