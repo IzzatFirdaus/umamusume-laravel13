@@ -43,6 +43,13 @@ interface PlanRow {
     conditions: string | null;
     fit: FitCell[];
     note: string | null;
+    /**
+     * Whether this run's selected form publishes the skill. Sent on every row by
+     * `SkillsPlannerController::row()` (`:643`) and forwarded to `SkillPlanRow`, which renders the hint
+     * control only for a pool row. It was missing here while the child required it, so the row's own
+     * pool flag was invisible to this page.
+     */
+    in_pool: boolean;
 }
 
 interface Group {
@@ -83,12 +90,12 @@ const props = defineProps<{
         warn: boolean;
         text: string;
     };
-    /**
+/**
      * A-0.8: the priced skills the run has not acquired, sorted by cost, with the sum and the
-     * shortfall against the run's recorded SP (§2.2/§2.3).
+     * shortfall against the run's recorded SP (M-BM-'2.2/M-BM-'2.3).
      */
     purchasable: {
-        rows: { id: number; name: string; sp_cost: number; hint_adjusted_cost: number }[];
+        rows: { id: number; name: string; sp_cost: number; hint_adjusted_cost: number; rarity: number | null; is_gold: boolean; affordable?: boolean }[];
         total: number;
         count: number;
         sp: number | null;
@@ -153,6 +160,42 @@ const remaining = computed(() => (props.coverage.sp === null ? null : props.cove
 const budgetTitle = computed(() => (props.coverage.sp === null ? 'Spend Skill Points' : `Spend ${props.coverage.sp} Skill Points`));
 
 const canCommit = computed(() => plannedRows.value.length > 0 && remaining.value !== null && remaining.value >= 0);
+
+/** Slice 3.1: Gold skill warning — warn when White skills are selected but a Gold skill is within 50 SP of budget. */
+const goldSkillWarning = computed((): number | null => {
+    if (props.coverage.sp === null) {
+        return null;
+    }
+
+    // Check if any White skill is selected (planned)
+    const hasWhiteSelected = plannedRows.value.some((row) => {
+        if (row.id === null) {
+            return false;
+        }
+        // Find the skill in purchasable rows to check is_gold
+        const purchasableSkill = props.purchasable.rows.find((s) => s.id === row.id);
+        return purchasableSkill !== undefined && purchasableSkill.is_gold === false;
+    });
+
+    if (!hasWhiteSelected) {
+        return null;
+    }
+
+    // Find the cheapest Gold skill
+    const cheapestGold = props.purchasable.rows
+        .filter((s) => s.is_gold === true)
+        .sort((a, b) => (a.hint_adjusted_cost ?? a.sp_cost) - (b.hint_adjusted_cost ?? b.sp_cost))[0];
+
+    if (!cheapestGold) {
+        return null;
+    }
+
+    const goldCost = cheapestGold.hint_adjusted_cost ?? cheapestGold.sp_cost;
+    const diff = goldCost - props.coverage.sp;
+
+    // Warn if the Gold skill is within 50 SP of current budget
+    return diff > 0 && diff <= 50 ? diff : null;
+});
 
 function togglePlan(id: number | null): void {
     if (id === null) {
@@ -326,10 +369,13 @@ const pickerStatus = computed(() => props.acquisition_options[0]?.value ?? 'Sugg
 // A refusal is keyed by the row that failed (`skills.0.skill_id`), so the flat map is scanned for the
 // first key under `skills` rather than read as `errors.skills`. Silent failure would be worse than the
 // refusal: the picker offers only ids the server just sent, so a rejection means a stale render.
+// The bag is indexed as a record because Inertia types it from the form's own shape, whose only key is
+// `skills`: the server keys row failures `skills.<n>.<field>`, which those types cannot express.
 const pickerError = computed(() => {
-    const key = Object.keys(pickerForm.errors).find((name) => name.startsWith('skills'));
+    const errors = pickerForm.errors as Record<string, string | undefined>;
+    const key = Object.keys(errors).find((name) => name.startsWith('skills'));
 
-    return key === undefined ? null : pickerForm.errors[key];
+    return key === undefined ? null : errors[key] ?? null;
 });
 
 function onSkillPicked(payload: { id: number; name: string }): void {
@@ -669,6 +715,20 @@ const coverageConstants = computed(() =>
                             <p class="mt-1 text-xs text-ink-muted">
                                 This list reads the full catalogue, not this run's pool.
                             </p>
+                            <!-- Gold skill warning: warn if any white skill is selected while a gold skill is within 50 SP.
+                                 The surface is the caution pair from `app.css` -- `--color-status-caution` behind
+                                 `--color-status-caution-ink`, a G-18 contract row at 4.5:1 in both themes -- rather
+                                 than a raw amber palette shade: a hardcoded palette value cannot follow the theme,
+                                 which forks by flipping custom properties only (D-101), and `DesignTokensTest`
+                                 rejects palette classes outright. The shape follows the existing caution callout
+                                 precedent (`Legacy/Compare.vue`, `Runs/Import.vue`): a rule border on the caution fill. -->
+                            <div
+                                v-if="goldSkillWarning"
+                                class="mt-2 p-3 rounded-md border border-rule bg-status-caution text-status-caution-ink text-sm"
+                                role="alert"
+                            >
+                                <strong>Gold skill within reach:</strong> You have selected White skills while a Gold skill costs only {{ goldSkillWarning }} SP more than your current budget. Consider saving SP for the Gold skill.
+                            </div>
                             <!-- A capped scroll region is keyboard-reachable or it is not reachable (WCAG 2.1.1 and
                                  axe's `scrollable-region-focusable`): `tabindex` puts the list itself in the tab
                                  order and the name says what scrolling it reveals. -->
@@ -678,9 +738,18 @@ const coverageConstants = computed(() =>
                                 aria-label="Priced skills this run has not acquired"
                                 class="mt-2 max-h-72 space-y-1 overflow-y-auto text-sm"
                             >
-                                <li v-for="skill in props.purchasable.rows" :key="skill.id" class="flex items-baseline justify-between gap-3">
+                                <li
+                                    v-for="skill in props.purchasable.rows"
+                                    :key="skill.id"
+                                    class="flex items-baseline justify-between gap-3"
+                                    :class="[
+                                        skill.affordable === false ? 'opacity-50 pointer-events-none' : '',
+                                        skill.is_gold ? 'bg-yellow-50 border-l-2 border-yellow-400 pl-2' : '',
+                                    ]"
+                                >
                                     <span class="text-ink">{{ skill.name }}</span>
                                     <span class="font-mono tabular-nums text-ink-strong">{{ skill.sp_cost }} SP</span>
+                                    <span v-if="skill.is_gold" class="pill pill-yellow text-xs">Gold</span>
                                 </li>
                             </ol>
 <p v-else class="mt-1 text-sm text-ink">The catalogue prices no skill this run has not already acquired.</p>
@@ -716,7 +785,7 @@ const coverageConstants = computed(() =>
                                     </template>.
                                 </p>
                                 <p class="mt-1 text-xs text-ink-muted" id="recommended-source">
-                                    (a) The rule is this tool's own heuristic, not a client mechanic. (b) The fill reuses the cheapest-first ordering. (c) The pool is the run's form's skill list — the trainee profile's "Skills on this form" (unique + innate + awakening, plus acquired event skills). (d) When the budget outlasts the pool, the residual is printed.
+                                    (a) The rule is this tool's own heuristic, not a client mechanic. (b) The fill reuses the cheapest-first ordering. (c) The pool is the run's form's skill list, the trainee profile's "Skills on this form" (unique + innate + awakening, plus acquired event skills). (d) When the budget outlasts the pool, the residual is printed.
                                 </p>
                                 <ol tabindex="0" aria-label="Recommended skills for this run" class="mt-2 max-h-72 space-y-1 overflow-y-auto text-sm">
                                     <li v-for="skill in props.recommended.rows" :key="skill.id" class="flex items-baseline justify-between gap-3">

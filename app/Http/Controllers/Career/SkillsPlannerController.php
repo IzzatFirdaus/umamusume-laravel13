@@ -120,19 +120,30 @@ final class SkillsPlannerController extends Controller
             ->orderBy('sp_cost')
             ->orderBy('name')
             ->limit(100)
-            ->get(['id', 'name', 'sp_cost'])
+            ->get(['id', 'name', 'sp_cost', 'rarity'])
             ->map(static fn (Skill $skill): array => [
                 'id' => (int) $skill->id,
                 'name' => (string) $skill->name,
                 'sp_cost' => (int) $skill->sp_cost,
                 'hint_adjusted_cost' => (int) $skill->sp_cost, // no hint recorded on unacquired skills yet
+                'rarity' => $skill->rarity,
+                'is_gold' => $skill->rarity !== null && in_array($skill->rarity, [3, 4, 5, 6], true),
             ])
             ->values()
             ->all();
 
-        $total = array_sum(array_column($rows, 'sp_cost'));
         $latest = $run->turnEntries->sortByDesc('turn')->first();
         $sp = $latest?->sp;
+
+        // Add affordable flag based on current SP
+        if ($sp !== null) {
+            $rows = array_map(static fn (array $row): array => [
+                ...$row,
+                'affordable' => $sp >= $row['hint_adjusted_cost'],
+            ], $rows);
+        }
+
+        $total = array_sum(array_column($rows, 'sp_cost'));
 
         return [
             'rows' => $rows,
