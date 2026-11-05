@@ -99,22 +99,53 @@ it('passes the absences the dataset holds instead of a default', function (): vo
 });
 
 it('refuses a skill the global client cannot meet rather than rendering it', function (): void {
-    $japanOnly = skillDetailSkill([
-        'name' => 'Test JP Skill',
-        'release_status' => ReleaseStatus::JapanOnly,
-        'export_id' => 987656,
-    ]);
     $notClientNamed = skillDetailSkill([
         'name' => 'Test Third-Party Skill',
         'name_is_client' => false,
         'export_id' => 987657,
     ]);
 
-    // ADR-0011 §2: no row reaches a Trainer-facing surface that `availableOnGlobal()`
-    // rejects, and this page is one of those surfaces. An unknown id is the same refusal.
-    $this->get(route('skills.show', $japanOnly))->assertNotFound();
+    // ADR-0011 §2: no row reaches a Trainer-facing surface that `availableOnGlobal()` rejects AND that
+    // the catalogue cannot link to. `name_is_client = false` on a GlobalReleased row is that case: the
+    // catalogue's three scopes reach it through neither `availableOnGlobal()` (both columns) nor the
+    // `japan_only` override (status), so the detail must refuse it too. An unknown id is the same
+    // refusal.
     $this->get(route('skills.show', $notClientNamed))->assertNotFound();
     $this->get(route('skills.show', 424242))->assertNotFound();
+});
+
+/*
+ * The JapanOnly half of the same question, rewritten by `R1`.
+ *
+ * This test previously asserted that a JapanOnly row 404s on the detail, which was the rule before the
+ * catalogue grew its `japan_only` and `all` scopes. Once those exist the catalogue LINKS to those rows,
+ * so a 404 is a dead end a Trainer cannot tell from a deleted row. Reachability and display are two
+ * rules and `R1` separated them: the row is reachable, and its name and description are still refused
+ * at the payload edge. The display half is asserted here; the browser half is `skill-detail.spec.ts`'s
+ * "description panel refuses client prose" case.
+ */
+it('answers a JapanOnly row the catalogue links to, with no client string printed', function (): void {
+    $japanOnly = skillDetailSkill([
+        'name' => 'Test JP Skill',
+        'name_ja' => '掲げよ、己が魂の剣を！',
+        'release_status' => ReleaseStatus::JapanOnly,
+        'name_is_client' => false,
+        'description' => 'A third-party English sentence.',
+        'export_id' => 987656,
+    ]);
+
+    $this->get(route('skills.show', $japanOnly))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Skills/Show')
+            // Reached, so the catalogue's link is not a dead end...
+            ->where('skill.id', $japanOnly->id)
+            // ...but neither English column is sent to the screen. Ruling A nulls the name and ruling 1
+            // (symmetric) nulls the description on the same test, because both are third-party.
+            ->where('skill.name', null)
+            ->where('skill.description', null)
+            ->where('skill.name_ja', '掲げよ、己が魂の剣を！')
+        );
 });
 
 it('passes the trainees whose forms carry the skill, grouped by which list holds it', function (): void {

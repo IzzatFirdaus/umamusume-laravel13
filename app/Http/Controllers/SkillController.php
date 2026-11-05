@@ -260,10 +260,25 @@ class SkillController extends Controller
     public function show(string $skill, Request $request): Response
     {
         // Widened from `availableOnGlobal()` by `R1`: the catalogue's `japan_only` and `all` scopes make
-        // these rows reachable, so the detail must answer them. A row the catalogue links to that the
-        // detail 404s is a dead end a Trainer cannot tell from a deleted row. The name and description
-        // are still gated separately (`skillPayload`), because reachability and display are two rules.
-        $model = Skill::query()->findOrFail((int) $skill);
+        // JapanOnly rows reachable, so the detail must answer them. A row the catalogue links to that the
+        // detail 404s is a dead end a Trainer cannot tell from a deleted row.
+        //
+        // Widened to what the catalogue itself can LINK TO, and no further. `availableOnGlobal()` is
+        // `release_status = GlobalReleased AND name_is_client`; the two explicit scopes add
+        // `JapanOnly` (the `japan_only` scope) and any status at all (`all`). A row that is
+        // `GlobalReleased` with `name_is_client = false` is in neither: the catalogue never links to
+        // it, so a 200 here would be a surface no link reaches, printing a name the catalogue's own
+        // scope refuses (`SkillDetailTest`'s "refuses a skill the global client cannot meet", and
+        // `InvariantSelfCheckTest`'s Inv-6 half, both measure this).
+        //
+        // The name and description are still gated separately (`skillPayload`), because reachability
+        // and display are two rules.
+        $model = Skill::query()
+            ->where(function (Builder $query): void {
+                $query->availableOnGlobal()
+                    ->orWhere('release_status', ReleaseStatus::JapanOnly->value);
+            })
+            ->findOrFail((int) $skill);
 
         $compareSkill = null;
         $compareDiff = null;
@@ -601,7 +616,14 @@ class SkillController extends Controller
             'condition_groups' => $skill->condition_groups,
             'source_url' => $skill->source_url,
             'fetched_at_display' => $skill->fetched_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
-            'description' => $skill->description,
+            // Ruling 1 (symmetric), at the payload edge: `desc_en` on a JapanOnly row is third-party on
+            // the same test that bars its `name_en`, so it is nulled HERE as well as gated in the
+            // panel's `displayDescription()`. `indexProps()` already did this; `skillPayload()` did not,
+            // sending the stored string and relying on the row's availability alone. That asymmetry
+            // meant the two surfaces' payloads disagreed about what "the description" is, and the
+            // panel's footnote (`v-if` on the raw field) printed a source line for a string it refused
+            // to show. Both edges now null, and `displayDescription()` stays as the second guard.
+            'description' => $japanOnly ? null : $skill->description,
             // The description panel's gate is the row's own availability, not the scope it was opened
             // from (`R1`, ruling 1): a JapanOnly row's `desc_en` is third-party on the same test that
             // bars its `name_en`, whichever URL reached it.

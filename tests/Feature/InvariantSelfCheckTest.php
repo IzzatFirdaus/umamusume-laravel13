@@ -246,16 +246,36 @@ final class InvariantSelfCheckTest extends TestCase
         // null, not "", so the `v-else` branch that prints "No client string." is the one taken.
         $this->assertNull($skill->fresh()->description);
 
-        // And the non-leakage half: a JapanOnly row never reaches the surface at all.
+        // And the non-leakage half, restated by `R1`: a JapanOnly row IS reachable (the catalogue's
+        // `japan_only` and `all` scopes link to it), so the guard is not reachability but display. The
+        // row's English name and description are nulled at the payload edge, which is the half this
+        // test can see; printing it is the same rule at the other end.
         $hidden = Skill::factory()->create([
             'name' => 'Japan Only Skill',
             'release_status' => ReleaseStatus::JapanOnly,
             'name_is_client' => true,
             'export_id' => 880008,
-            'description' => null,
+            'description' => 'A third-party English sentence.',
         ]);
 
-        $this->get(route('skills.show', $hidden))->assertNotFound();
+        $this->get(route('skills.show', $hidden))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->component('Skills/Show')
+                ->where('skill.name', null)
+                ->where('skill.description', null),
+            );
+
+        // The row `availableOnGlobal()` rejects for its OTHER column is still refused outright: the
+        // catalogue cannot link to it at any scope, so no surface may answer it.
+        $unlinkable = Skill::factory()->create([
+            'name' => 'Not Client Named',
+            'release_status' => ReleaseStatus::GlobalReleased,
+            'name_is_client' => false,
+            'export_id' => 880009,
+        ]);
+
+        $this->get(route('skills.show', $unlinkable))->assertNotFound();
     }
 
     /**
