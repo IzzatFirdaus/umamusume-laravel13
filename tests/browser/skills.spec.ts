@@ -548,3 +548,42 @@ test('finds a row by its description when the name does not match', async ({ pag
     // The match is on the stored effect text, so the row's name is untouched.
     await expect(gourmand).not.toContainText('recover');
 });
+
+/*
+ * The distance seam's client half (R5).
+ *
+ * The server filters `?distance=2` to Mile rows and sends the value back as an int prop. This case is
+ * the only thing that can see whether the prop survives that last hop: `SkillCatalog.vue` read
+ * `props.distance` without declaring it in `defineProps`, so Vue dropped the server's value into
+ * `$attrs` and the select painted "Any" over Mile-only rows. `npm run typecheck` cannot see it
+ * (`tsc --noEmit` does not read `.vue`), which is why the assertion lives here.
+ *
+ * It also covers the server half from the user's side: the Filter click posts the form again, so a
+ * regression that re-introduced the `strict_types` TypeError would fail this click as a 500.
+ */
+test('paints the Distance facet from the URL and keeps it through a filter', async ({ page }) => {
+    await page.goto('/skills?distance=2');
+    await page.locator('#app > *').first().waitFor();
+
+    // The select reflects the request, not its default: this is the props drop.
+    await expect(page.getByLabel('Distance')).toHaveValue('2');
+    await expect(page.getByLabel('Distance')).not.toHaveValue('');
+
+    // The rows are the Mile rows, so the control and the table agree. The names are read from the
+    // scratch database's own mileage split (25 Mile rows at the current import), not assumed:
+    // 'Acceleration' is `distance_type=2`, and a Sprint row is asserted absent so this is a
+    // narrowing rather than a presence check.
+    const results = page.locator('#skill-results');
+    await expect(results.getByRole('link', { name: 'Acceleration', exact: true })).toBeVisible();
+    await expect(results.getByRole('link', { name: 'Blinding Flash', exact: true })).toHaveCount(0);
+
+    // Re-submitting the form is the path that reached the type error before the cast: the select's
+    // value goes back through the query string and into the same controller argument.
+    const distance = page.getByLabel('Distance');
+    await distance.selectOption('2');
+    const response = page.waitForResponse((r) => r.url().includes('/skills') && r.request().method() === 'GET');
+    await page.getByRole('button', { name: 'Filter' }).click();
+
+    expect((await response).status(), 'the filtered request answered').toBe(200);
+    await expect(distance).toHaveValue('2');
+});

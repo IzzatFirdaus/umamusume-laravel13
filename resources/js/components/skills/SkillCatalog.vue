@@ -53,6 +53,13 @@ const props = defineProps<{
     type: string | null;
     types: string[];
     unspecifiedType: string;
+    /**
+     * The parsed `distance_type` the request narrowed to (1..4), `0` for Unspecified, or null for no
+     * distance filter. Declared here because the select paints it: without the declaration Vue drops
+     * the server's value into `$attrs` and `props.distance` is undefined, so `?distance=2` filtered the
+     * rows while the control said "Any".
+     */
+    distance: number | null;
     unique: boolean;
     totalCount: number;
     askedFor: string;

@@ -454,3 +454,98 @@ it('reports the range-operator count from the database so the footer never lies 
             ->where('rangeOpCount', 0)
         );
 });
+
+/*
+ * The distance seam, both halves (R5).
+ *
+ * `?distance=2` reaches the controller as the string `"2"` and `query()` takes `?int $distance` from a
+ * `strict_types=1` file, so the value must be cast before the call or the request dies on a `TypeError`.
+ * The cast must not be unconditional either: `0` is the Unspecified sentinel (SHR-1/D6), a deliberate
+ * narrowing to the rows that store no `distance_type`, and it is distinct from "no distance filter".
+ *
+ * These rows are created rather than imported: `skillScreenImport()`'s fixture carries no
+ * `distance_type` token at all (asserted by the P3 case above), so it cannot reach either branch.
+ * `release_status` is set on every row because `Skill::availableOnGlobal()` filters on it and
+ * `SkillFactory` does not default it: a row without it is invisible to this screen, which would make
+ * each assertion below read green against an empty catalogue.
+ */
+it('takes ?distance=2 off the query string and narrows to that distance', function (): void {
+    Skill::factory()->create([
+        'name' => 'Mile Row',
+        'distance_type' => 2,
+        'release_status' => ReleaseStatus::GlobalReleased->value,
+        'name_is_client' => true,
+    ]);
+    Skill::factory()->create([
+        'name' => 'Sprint Row',
+        'distance_type' => 1,
+        'release_status' => ReleaseStatus::GlobalReleased->value,
+        'name_is_client' => true,
+    ]);
+    Skill::factory()->create([
+        'name' => 'Unrecorded Row',
+        'distance_type' => null,
+        'release_status' => ReleaseStatus::GlobalReleased->value,
+        'name_is_client' => true,
+    ]);
+
+    $this->get(route('skills.index', ['distance' => '2']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Skills/Index')
+            ->has('skills.data', 1)
+            ->where('skills.data.0.name', 'Mile Row')
+            // The prop carries an int, not the query string it arrived as. A string here would paint
+            // the select's "Any" option (its values are strings too) while the rows were filtered.
+            ->where('distance', 2)
+        );
+
+    // Positive control: the same rows, unasked, are all three. Without it the narrowing above would
+    // pass on a screen that had lost the other two rows for an unrelated reason.
+    $this->get(route('skills.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->has('skills.data', 3));
+});
+
+it('keeps the ?distance=0 sentinel distinct from no distance filter', function (): void {
+    Skill::factory()->create([
+        'name' => 'Mile Row',
+        'distance_type' => 2,
+        'release_status' => ReleaseStatus::GlobalReleased->value,
+        'name_is_client' => true,
+    ]);
+    Skill::factory()->create([
+        'name' => 'Unrecorded Row',
+        'distance_type' => null,
+        'release_status' => ReleaseStatus::GlobalReleased->value,
+        'name_is_client' => true,
+    ]);
+
+    // `0` asks for the rows the source recorded no distance for, the same way the Type facet's
+    // 'Unspecified' asks for the rows with no type word.
+    $this->get(route('skills.index', ['distance' => '0']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('skills.data', 1)
+            ->where('skills.data.0.name', 'Unrecorded Row')
+            ->where('distance', 0)
+        );
+});
+
+it('reports no distance filter as null rather than the sentinel', function (): void {
+    Skill::factory()->create([
+        'name' => 'Mile Row',
+        'distance_type' => 2,
+        'release_status' => ReleaseStatus::GlobalReleased->value,
+        'name_is_client' => true,
+    ]);
+
+    // The naive cast — `(int) $request->validated('distance')` — turns the absent value into `0`,
+    // which would send the screen down the Unspecified branch and hide every row that has a distance.
+    $this->get(route('skills.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('skills.data', 1)
+            ->where('distance', null)
+        );
+});

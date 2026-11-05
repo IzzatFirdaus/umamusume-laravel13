@@ -36,6 +36,7 @@ const props = defineProps<{
     type: string | null;
     types: string[];
     unspecifiedType: string;
+    distance: number | null;
     unique: boolean;
     totalCount: number;
     askedFor: string;
@@ -63,6 +64,7 @@ const props = defineProps<{
             :type="props.type"
             :types="props.types"
             :unspecified-type="props.unspecifiedType"
+            :distance="props.distance"
             :unique="props.unique"
             :total-count="props.totalCount"
             :asked-for="props.askedFor"

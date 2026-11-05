@@ -86,7 +86,12 @@ class SkillController extends Controller
 
         $search = $request->validated('search');
         $type = $request->validated('type');
-        $distance = $request->validated('distance');
+        // `?distance` arrives as a query string, and `query()` takes `?int $distance` from this
+        // `strict_types=1` file, where a numeric string is a TypeError rather than a coercion.
+        // Null must stay null: `?distance=0` is the Unspecified sentinel (D6), a state distinct from
+        // "no distance filter", so `(int)` cannot be applied unconditionally.
+        $rawDistance = $request->validated('distance');
+        $distance = $rawDistance === null ? null : (int) $rawDistance;
 
         $skills = $this->query($search, $type, $request->boolean('unique'), $distance)
             ->orderBy('name')
