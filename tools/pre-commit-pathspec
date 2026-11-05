@@ -15,7 +15,8 @@
 #
 # Deliberately NOT a prompt. `read -p` blocks any commit with no attached terminal — every agent run,
 # every scripted commit, every CI job — so it would hang instead of refusing. This refuses outright and
-# names the override.
+# names both release valves: a pathspec-scoped `git commit -- <paths>`, or UMA_ALLOW_BROAD_COMMIT=1.
+# `COMMIT_PATHS` is NOT one of them — it is check 1, and setting it does not release this count.
 #
 # Threshold: 20 files, overridable by UMA_COMMIT_FILE_LIMIT. Measured context: routine slice commits in
 # this repository run 1-12 files; the two sweep-ins carried 81 and 42. A legitimate broad commit (a
@@ -59,20 +60,28 @@ if [ "${UMA_ALLOW_BROAD_COMMIT:-0}" = "1" ]; then
     exit 0
 fi
 
-echo "pre-commit: refusing a commit of $count staged files (limit $limit)."
+echo "REFUSED: $count files staged (limit $limit)."
 echo ""
-echo "Two sessions share this worktree, and twice a broad commit has landed another session's"
-echo "work under a message that did not describe it (5927ca1b, 80025efe). Check the list:"
+echo "This threshold exists because twice a broad commit landed another session's work under"
+echo "a message that did not describe it (AGENTS.md section 14; incidents 5927ca1b and"
+echo "80025efe). Two sessions share this worktree. Check the list first:"
 echo ""
 echo "    git diff --cached --stat"
 echo ""
-echo "Then scope the commit to the paths that are yours:"
+echo "To proceed, either name each path on the command line so the commit is scoped:"
 echo ""
-echo "    git commit -m \"<message>\" -- <path> [<path> ...]"
+echo "    git commit -m \"<message>\" -- <path1> <path2> ..."
 echo ""
-echo "or state that the breadth is intended:"
+echo "or, when the breadth is genuinely intended, acknowledge it:"
 echo ""
 echo "    UMA_ALLOW_BROAD_COMMIT=1 git commit -m \"<message>\""
+echo ""
+echo "Do NOT use --no-verify. It disables this guard AND check 1 above, which is the"
+echo "COMMIT_PATHS pathspec enforcement this hook exists for in the first place."
+echo ""
+echo "Note on COMMIT_PATHS: it is check 1 (pathspec enforcement), not a bypass for this"
+echo "count. Setting it correctly still leaves a 25-file set refused here. Only"
+echo "UMA_ALLOW_BROAD_COMMIT=1 releases the count guard."
 echo ""
 echo "Staged files:"
 printf '%s\n' "$staged" | sed 's/^/  /'
