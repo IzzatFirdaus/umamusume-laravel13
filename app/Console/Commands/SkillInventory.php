@@ -16,6 +16,12 @@ use JsonException;
  * Reads the export file (from config or --file=) and emits machine-readable counts.
  * With --join, performs a bidirectional join between file and table on export_id.
  * NULL export_id rows are tracked in a separate bucket to avoid keyBy collision.
+ *
+ * @phpstan-type FileRow array{export_id: int, name: string, name_ja: string|null, name_is_client: bool,
+ *                             release_status: string, rarity: int|null, is_unique: bool, sp_cost: int|null, type: string|null,
+ *                             condition_groups: list<array{base_time: int|null, condition: string|null, precondition: string|null, effects: list<array{type: int, value: int}>}>,
+ *                             description: string|null, description_match_key: string|null, distance_type: int|null}
+ * @phpstan-type ColDiff array{key: int, col: 'description'|'distance_type'|'release_status', file: string, table: string}
  */
 final class SkillInventory extends Command
 {
@@ -61,9 +67,7 @@ final class SkillInventory extends Command
     }
 
     /**
-     * @return list<array{export_id: int, name: string, name_ja: string|null, name_is_client: bool,
-     *                   release_status: string, rarity: int|null, is_unique: bool, sp_cost: int|null, type: string|null,
-     *                   condition_groups: list<array<string, mixed>>, description: string|null, description_match_key: string|null, distance_type: int|null}>
+     * @return list<FileRow>
      */
     private function parseFile(string $path): array
     {
@@ -192,6 +196,11 @@ final class SkillInventory extends Command
         3 => 'Passive',
     ];
 
+    /**
+     * The projected condition-group list. The shape is the `FileRow` type alias's.
+     *
+     * @return list<array{base_time: int|null, condition: string|null, precondition: string|null, effects: list<array{type: int, value: int}>}>
+     */
     private function conditionGroups(mixed $groups): array
     {
         if (! is_array($groups)) {
@@ -276,6 +285,9 @@ final class SkillInventory extends Command
         return null;
     }
 
+    /**
+     * @param  list<FileRow>  $fileRows
+     */
     private function runInventory(array $fileRows): void
     {
         $tableTotal = Skill::count();
@@ -295,19 +307,14 @@ final class SkillInventory extends Command
         $hasAnyTokenCount = 0;
 
         foreach ($fileRows as $row) {
-            $groups = $row['condition_groups'] ?? null;
-            if (! is_array($groups)) {
-                continue;
-            }
+            // `condition_groups` is non-optional in `FileRow` and `conditionGroups()` always returns a
+            // list, so neither needs a shape test: the type states what the projection guarantees.
+            $groups = $row['condition_groups'];
 
             $exactTokens = 0;
             $hasRange = false;
 
             foreach ($groups as $group) {
-                if (! is_array($group)) {
-                    continue;
-                }
-
                 foreach ([$group['condition'] ?? null, $group['precondition'] ?? null] as $predicate) {
                     if (! is_string($predicate)) {
                         continue;
@@ -404,35 +411,9 @@ final class SkillInventory extends Command
         return false;
     }
 
-    private function hasMultiTokenDistance(mixed $groups): bool
-    {
-        if (! is_array($groups)) {
-            return false;
-        }
-
-        $exactCount = 0;
-
-        foreach ($groups as $group) {
-            if (! is_array($group)) {
-                continue;
-            }
-
-            foreach ([$group['condition'] ?? null, $group['precondition'] ?? null] as $predicate) {
-                if (! is_string($predicate)) {
-                    continue;
-                }
-
-                foreach (preg_split('/[@&]/', $predicate) ?: [] as $atom) {
-                    if (preg_match('/^distance_type==([1-4])$/', trim($atom))) {
-                        $exactCount++;
-                    }
-                }
-            }
-        }
-
-        return $exactCount > 1;
-    }
-
+    /**
+     * @param  list<FileRow>  $fileRows
+     */
     private function runJoin(array $fileRows): int
     {
         $fileById = [];
@@ -521,9 +502,7 @@ final class SkillInventory extends Command
             $examples = array_slice($descDiffs, 0, 5);
 
             foreach ($examples as $ex) {
-                $filePreview = $ex['file'] ?? '(null)';
-                $tablePreview = $ex['table'] ?? '(null)';
-                $this->warn("  key={$ex['key']} file=\"{$filePreview}\" table=\"{$tablePreview}\"");
+                $this->warn("  key={$ex['key']} file=\"{$ex['file']}\" table=\"{$ex['table']}\"");
             }
         }
 
@@ -541,10 +520,8 @@ final class SkillInventory extends Command
     }
 
     /**
-     * @param  array{export_id: int, name: string, name_ja: string|null, name_is_client: bool,
-     *                   release_status: string, rarity: int|null, is_unique: bool, sp_cost: int|null, type: string|null,
-     *                   condition_groups: list<array<string, mixed>>, description: string|null, description_match_key: string|null, distance_type: int|null}  $fileRow
-     * @param  list<array{key: int, col: string, file: string, table: string}>  $colDiffs
+     * @param  FileRow  $fileRow
+     * @param  list<ColDiff>  $colDiffs
      */
     private function compareRow(int $id, array $fileRow, Skill $tableRow, array &$colDiffs): void
     {
