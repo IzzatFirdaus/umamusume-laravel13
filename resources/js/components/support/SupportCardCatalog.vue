@@ -99,6 +99,25 @@ const type = ref(props.type ?? '');
 const status = ref(props.status ?? '');
 const sort = ref(props.sort ?? '');
 const pageSize = ref(String((props as any).pageSize ?? 25));
+
+/*
+ * The selector's four values are the ones a Trainer is offered, and ADR-0018 lets any value 1..100
+ * through the URL. Those two are not the same set, so a hand-edited or pasted `?pageSize=37` would
+ * otherwise leave the native `<select>` with no matching option — it renders blank and the control
+ * then states nothing about the page it is actually showing. Appending the effective value keeps the
+ * control honest about the current state while offering the same four choices.
+ *
+ * Read from the prop rather than from `pageSize`: the prop is the server's post-clamp answer, so
+ * `?pageSize=1000` shows 100 (the ceiling), not the 1000 that was typed.
+ */
+const pageSizeOptions = computed<{ value: string; label: string }[]>(() => {
+    const offered = ['5', '25', '50', '100'].map((value) => ({ value, label: value }));
+    const effective = String((props as any).pageSize ?? 25);
+
+    return offered.some((option) => option.value === effective)
+        ? offered
+        : [...offered, { value: effective, label: effective }].sort((a, b) => Number(a.value) - Number(b.value));
+});
 const trainee = ref(props.trainee ?? '');
 const effects = ref<number[]>((props.effects as number[]) ?? []);
 const usedInDeck = ref(props.usedInDeck ?? false);
@@ -266,7 +285,7 @@ function goToPage(page: number): void {
                 id="support-card-page-size"
                 name="pageSize"
                 label="Per page"
-                :options="[{ value: '5', label: '5' }, { value: '25', label: '25' }, { value: '50', label: '50' }, { value: '100', label: '100' }]"
+                :options="pageSizeOptions"
                 :error="(errors as any).pageSize"
             />
             <BaseCheckbox

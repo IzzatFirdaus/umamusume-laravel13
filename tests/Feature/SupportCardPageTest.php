@@ -174,30 +174,56 @@ it('paginates at twenty-five cards by default, supports pageSize selector, and c
         ->assertInertia(fn (Assert $page) => $page
             ->has('cards.data', 26));
 
+    // A non-numeric value is not refused either: it casts to 0 and lands on the floor, same as `0`
+    // and a negative. That is the ADR's "never refused" measured, not assumed.
     test()->get('/support-cards?pageSize=abc')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('cards.data', 25));
+            ->has('cards.data', 1)
+            ->where('cards.per_page', 1));
 
-    // Option-set narrowing (C22, v9): in-range non-options resolve to nearest option,
-    // tie-break toward smaller option. Garbage/parsed-to-≤0 → 25.
-    // With 26 fixtures: effective 25 → 25 on page 1; effective 5 → 5 on page 1; effective 50/100 → 26 (all).
+    // ADR-0018's rule on this surface, after the 2026-11-05 ruling that removed the C22 option-set
+    // narrowing: `pageSize` is honoured and clamped to 1..100, never refused and never snapped to the
+    // selector's {5, 25, 50, 100}. Reads below each assert `/cards.data` count against 26 fixtures, so
+    // an ask of `n` shows `n` rows (or all 26), which is the only way to prove the value was *honoured*
+    // rather than quietly moved to an option.
+    //
+    // The floor and ceiling are `PageSize::MIN`/`MAX`, and the floor is where a nonsense value lands:
+    // `PageSize::clamp()` reads "absent is the default, `?pageSize=` still lands on the floor", and a
+    // non-numeric string casts to 0 before the clamp. That is the ADR's "never refused" half: a pasted
+    // URL yields a small page, not a 422.
     test()->get('/support-cards?pageSize=0')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('cards.data', 25));
+            ->has('cards.data', 1)
+            ->where('cards.per_page', 1));
     test()->get('/support-cards?pageSize=-5')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('cards.data', 25));
+            ->has('cards.data', 1)
+            ->where('cards.per_page', 1));
+
+    // Honour, not narrowing: the values the old snap used to collapse are now distinct page sizes.
+    // `1`, `4` and `15` returned 5 and `30` returned 25 before the ruling; each now answers its own ask.
     test()->get('/support-cards?pageSize=1')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('cards.data', 5));
+            ->has('cards.data', 1)
+            ->where('cards.per_page', 1));
     test()->get('/support-cards?pageSize=4')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('cards.data', 5));
+            ->has('cards.data', 4)
+            ->where('cards.per_page', 4));
+
+    // An arbitrary in-range value is the clause the ADR names and the one the snap violated: 37 is not
+    // an option in the selector, and it is a legal page size.
+    test()->get('/support-cards?pageSize=37')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('cards.data', 26)
+            ->where('cards.per_page', 37));
+
     test()->get('/support-cards?pageSize=5')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
@@ -205,7 +231,8 @@ it('paginates at twenty-five cards by default, supports pageSize selector, and c
     test()->get('/support-cards?pageSize=15')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('cards.data', 25));
+            ->has('cards.data', 15)
+            ->where('cards.per_page', 15));
     test()->get('/support-cards?pageSize=25')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
@@ -213,7 +240,8 @@ it('paginates at twenty-five cards by default, supports pageSize selector, and c
     test()->get('/support-cards?pageSize=30')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('cards.data', 25));
+            ->has('cards.data', 26)
+            ->where('cards.per_page', 30));
     test()->get('/support-cards?pageSize=50')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
@@ -226,10 +254,14 @@ it('paginates at twenty-five cards by default, supports pageSize selector, and c
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->has('cards.data', 26));
+
+    // Above the ceiling: clamped to 100, not refused. 26 fixtures fit either way, so `per_page` is the
+    // assertion that distinguishes a clamp from a snap (the snap also yielded 100 here).
     test()->get('/support-cards?pageSize=1000')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('cards.data', 26));
+            ->has('cards.data', 26)
+            ->where('cards.per_page', 100));
 
     test()->get('/support-cards?page=2&rarity=1')
         ->assertOk()

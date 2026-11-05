@@ -17,7 +17,7 @@ Trainer", this file says the same and does not invent an individual.
 | OQ-4 | Do aptitude grades and stat caps enter the product as engine-owned facts?                                                                     | **CLOSED 2026-09-27**: yes, as engine-owned facts with provenance.           | The owner                                    | `ADR-0004`; `PRD.md` FR-A-5                                                                       |
 | OQ-5 | Should the skill screen surface a skill's running-style eligibility ("this skill can only fire for style X"), and is that a feature at all?    | **OPEN 2026-10-01**, verdict recorded: do not ship a skill recommendation.  | The owner (a product question, not a defect) | Nothing yet; the only defensible shape is recorded for the day it is answered yes.                 |
 | OQ-6 | Which artwork families does the mirror display, and on which screens?                                                                         | **OPEN 2026-10-05**, four of five surfaces answered.                        | The owner placed the four answered slots     | `ADR-0021` (layer and mechanism); per-screen answers go to `SCREEN_SPEC.md` §7 item 16; behaviour is `DESIGN.md` §4.7 |
-| OQ-7 | Does `?pageSize=` mean "any value 1..100" (`ADR-0018`) or "the nearest of {5,25,50,100}" (C22 option-set narrowing)?                          | **OPEN 2026-11-05**: both behaviours exist and are each pinned by a green test. | The owner (ADR amendment, not a defect)      | `ADR-0018` §Decision vs `SupportCardController::indexProps()`; see the note below |
+| OQ-7 | Does `?pageSize=` mean "any value 1..100" (`ADR-0018`) or "the nearest of {5,25,50,100}" (C22 option-set narrowing)?                          | **ANSWERED 2026-11-05**: any value 1..100, per `ADR-0018`. The C22 narrowing is removed. | The owner ruled in favour of the ADR     | `ADR-0018` §Decision; `PageSize::clamp()`; see the note below |
 
 ## What each open question still holds
 
@@ -111,7 +111,27 @@ controller prop, not a Blade partial. Nothing is authorized here beyond what `AD
   source. Growth rates and base stats stay out: nothing in `PRD.md` requires them yet, and `ADR-0004` leaves them
   unimplemented rather than seeding them by hand.
 
-### OQ-7, what the two behaviours are
+### OQ-7, answered 2026-11-05: the ADR wins, and the narrowing is removed
+
+The owner ruled in favour of `ADR-0018`. The reasoning this repository already carries decides it
+without a new judgement call: the only places that defined "C22 option-set narrowing" are the
+gitignored `.kilo/plans/` working notes, and `AGENTS.md` §2 ranks an accepted ADR above a slice plan,
+with slice plans explicitly unable to override a gate or an accepted decision. C22 was never a second
+accepted decision; it was a local note that outlived the pass which wrote it.
+
+What changed: `SupportCardController::indexProps()` no longer narrows the clamped value to
+`{5, 25, 50, 100}`, so `?pageSize=37` answers 37 rows and `?pageSize=3` answers three. The floor and
+ceiling are unchanged at `PageSize::MIN`/`MAX`, and a nonsense value still lands on the floor rather
+than being refused, which is the ADR's "never refused" half. `SupportCardPageTest` and
+`FilterContractTest` both assert the ADR's rule now, and `cards.per_page` carries the assertion that
+distinguishes a clamp from a snap.
+
+One consequence worth recording: the page-size `<select>` offers four values, and a URL may now carry
+one outside that set. `SupportCardCatalog.vue` appends the effective value to the option list when it
+is not one of the four, so the control shows the size it is actually displaying instead of rendering
+blank. That is a display accommodation, not a second page-size rule.
+
+### OQ-7, what the two behaviours were
 
 **`ADR-0018` (accepted, 2026-10-04)** pins `?pageSize=` as "honoured and clamped on all three [surfaces],
 never refused", with `App\Services\PageSize::clamp()` and `MIN` 1 / `MAX` 100. Under that rule

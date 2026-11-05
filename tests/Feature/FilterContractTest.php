@@ -115,25 +115,24 @@ it('honours a page size on the surface that used to ignore it', function (): voi
     SupportCard::factory()->count(4)->create();
 
     /*
-     * This surface snaps `pageSize` to its selector's option set {5, 25, 50, 100}
-     * (`SupportCardController::indexProps()`, "Option-set narrowing (C22)"), so `3` resolves to `5`
-     * and all four fixtures fit on one page.
+     * ADR-0018's rule, now actually implemented on this surface: `pageSize` is honoured and clamped to
+     * 1..100, never refused and never snapped to the selector's {5, 25, 50, 100}.
      *
-     * That narrowing contradicts `ADR-0018` ("pageSize is honoured and clamped on all three, never
-     * refused", MIN 1 / MAX 100), and `SupportCardPageTest` pins the narrowing in eight assertions.
-     * Two accepted behaviours cannot both hold, so this case asserts the one the tree implements and
-     * the conflict is recorded rather than silently settled here: changing the controller to the ADR
-     * would red `SupportCardPageTest`, and changing this expectation to the ADR's rule without
-     * changing the controller would assert something untrue.
+     * This case previously asserted the option-set narrowing — `3` resolving to `5` — and recorded in
+     * its own comment that the narrowing contradicted the ADR, that `SupportCardPageTest` pinned it in
+     * eight assertions, and that the conflict was filed rather than settled. It was settled on
+     * 2026-11-05 in the ADR's favour: the only definitions of that narrowing were the gitignored
+     * `.kilo/plans/` working notes, and `AGENTS.md` §2 ranks an accepted ADR above a slice plan.
      *
-     * Filed as an open question against ADR-0018. The neighbouring `keeps the catalog and skills page
-     * sizes on the same rule they already used` case is unaffected: those two surfaces do not narrow.
+     * With four fixtures an ask of `3` and an ask of `5` are both satisfied by one page, so the size
+     * itself is read off `cards.per_page` rather than the row count — otherwise this case would pass
+     * under the narrowing it exists to exclude.
      */
     $this->get('/support-cards?pageSize=3')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('cards.data', 4)
-            ->where('cards.per_page', 5));
+            ->has('cards.data', 3)
+            ->where('cards.per_page', 3));
 
     // The default stays where the deleted constant had it, so a filter nobody touched does not
     // change shape underneath SupportCardPageTest's own pagination case.

@@ -101,40 +101,17 @@ class SupportCardController extends Controller
         // the same question, which is the N+1 the deck panel avoids the same way.
         $dictionary = SupportCardEffects::dictionary();
 
-        // §7-9 chose one page-size rule for all three surfaces over this screen's fixed constant,
-        // so `?pageSize=` honours and clamps here as it does on the catalog.
+        // ADR-0018 (accepted 2026-10-04): `pageSize` is honoured and clamped on all three filter
+        // surfaces, 1..100, never refused. `PageSize::clamp()` is the one owner of that rule, and this
+        // surface passes its own default rather than a second constant.
+        //
+        // A "C22 option-set narrowing" used to run here, snapping the clamped value to the selector's
+        // {5, 25, 50, 100}. It was ruled out on 2026-11-05: the only places that defined C22 are the
+        // gitignored `.kilo/plans/` working notes, and `AGENTS.md` §2 puts an accepted ADR above a
+        // slice plan, so C22 could not override this decision. Filed as OQ-7 and settled by the owner
+        // in favour of the ADR. `?pageSize=3` now answers three rows, which is what the ADR's
+        // "honoured" half means.
         $pageSize = PageSize::clamp($request->query('pageSize'), $perPage);
-
-        // Option-set narrowing (C22) — support-cards surface only: narrow the clamped value
-        // to the selector's option set {5, 25, 50, 100}. Garbage (non-numeric, parses to ≤ 0)
-        // → default 25; everything that parses to ≥ 1 → clamp (1–100) then nearest option.
-        // Tie-break: equidistant options pick the one closer to the default (25).
-        // 15 → 25 (equidistant from 5/25; 25 closer to default), 75 → 50 (equidistant from 50/100; 50 closer to default).
-        $options = [5, 25, 50, 100];
-        if (! in_array($pageSize, $options, true)) {
-            $raw = $request->query('pageSize');
-            $parsed = (int) $raw;
-            if (! is_numeric($raw) || $parsed <= 0) {
-                $pageSize = 25;
-            } else {
-                // Nearest option; tie-break toward the option closer to the default (25).
-                $target = $pageSize;
-                $pageSize = $options[0];
-                $minDiff = abs($options[0] - $target);
-                foreach ($options as $option) {
-                    $diff = abs($option - $target);
-                    if ($diff < $minDiff) {
-                        $minDiff = $diff;
-                        $pageSize = $option;
-                    } elseif ($diff === $minDiff) {
-                        // Tie-break: pick the option closer to the default (25)
-                        if (abs($option - 25) < abs($pageSize - 25)) {
-                            $pageSize = $option;
-                        }
-                    }
-                }
-            }
-        }
 
         // Derived sorts (friendship_bonus, initial_friendship_gauge) require in-memory sort
         // because they depend on computed effect values from the dictionary.
@@ -177,7 +154,7 @@ class SupportCardController extends Controller
             // narrowing does not change the number that says how big the server's catalogue is.
             'serverCount' => $this->serverCount($server),
             'sort' => $sort,
-            'pageSize' => (int) $request->query('pageSize', $perPage),
+            'pageSize' => $pageSize,
             'rarityWords' => $this->rarityWords(),
             'typeWords' => $this->typeWords(),
             'availabilities' => SupportCard::AVAILABILITIES,
