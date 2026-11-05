@@ -33,7 +33,7 @@ import AbsenceValue from '../AbsenceValue.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import type { ProvenanceState } from '../../types';
 
-type Badge = Badge | null;
+type Badge = ProvenanceState | null;
 
 interface PlanningPeriod {
     index: number;
@@ -220,7 +220,7 @@ const currentMark = '◉';
 
                 <dt class="text-xs text-ink-muted">Fans needed</dt>
                 <dd class="flex flex-wrap items-baseline gap-x-2">
-                    <ProvenanceBadge :state="props.planning.year_end.fans_needed_badge" :title="props.planning.year_end.fans_needed_title" />
+                    <ProvenanceBadge v-if="props.planning.year_end.fans_needed_badge !== null" :state="props.planning.year_end.fans_needed_badge" :title="props.planning.year_end.fans_needed_title" />
                     <span class="font-mono text-sm tabular-nums text-ink">{{ props.planning.year_end.fans_needed }}</span>
                 </dd>
 

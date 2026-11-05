@@ -25,7 +25,7 @@ import CapsuleHeader from '../CapsuleHeader.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import type { ProvenanceState } from '../../types';
 
-type Badge = Badge;
+type Badge = ProvenanceState;
 
 const props = defineProps<{
     tournament: {

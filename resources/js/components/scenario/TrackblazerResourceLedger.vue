@@ -26,7 +26,7 @@
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import type { ProvenanceState } from '../../types';
 
-type Badge = Badge | null;
+type Badge = ProvenanceState | null;
 
 interface LedgerItem {
     name: string;
@@ -118,7 +118,7 @@ const heldTitle = 'Counted from this run\'s recorded purchases, against the cap 
                 <dt class="text-xs text-ink-muted">Summer reserve</dt>
                 <dd class="flex flex-col gap-1">
                     <span class="flex flex-wrap items-baseline gap-x-2">
-                        <ProvenanceBadge :state="props.ledger.reserve.badge" :title="props.ledger.reserve.title" />
+                        <ProvenanceBadge v-if="props.ledger.reserve.badge !== null" :state="props.ledger.reserve.badge" :title="props.ledger.reserve.title" />
                         <span class="text-sm text-ink">{{ props.ledger.reserve.label }}</span>
                     </span>
                     <span class="text-xs text-ink-muted">{{ props.ledger.reserve.title }}</span>

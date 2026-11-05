@@ -203,7 +203,7 @@ const fieldLabel = 'text-xs font-semibold text-ink-muted';
              rejected facet both stay readable on the field that caused them. -->
         <form
             class="mt-3 flex flex-wrap items-end gap-3"
-            :aria-busy="loading ? 'true' : null"
+            :aria-busy="loading"
             @submit.prevent="applyFilters"
         >
             <label class="flex min-w-0 flex-1 basis-64 flex-col gap-1" :class="fieldLabel">

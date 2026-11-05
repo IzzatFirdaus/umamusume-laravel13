@@ -31,7 +31,6 @@ const props = defineProps<{
         status_labels: Record<string, string>;
         scenarios: Record<string, string>;
         umamusume_id: number;
-        scenario: string | null;
         current_objective_index: number | null;
         run_url: string;
         update_url: string;

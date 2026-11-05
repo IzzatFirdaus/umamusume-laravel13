@@ -154,7 +154,7 @@ defineExpose({ chooseRecord });
             ? 'mt-3 flex flex-col gap-3'
             : 'mt-3 grid grid-cols-1 items-start gap-x-3 gap-y-1 sm:grid-cols-[11rem_11rem_11rem_auto]'"
         data-testid="review-form-row"
-        :aria-busy="form.processing ? 'true' : null"
+        :aria-busy="form.processing"
         @submit.prevent="submit"
     >
         <div>

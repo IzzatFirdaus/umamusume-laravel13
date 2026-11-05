@@ -177,7 +177,7 @@ const isPal = (card: Card): boolean => card.type === 'friend';
         <form
             data-region="filters"
             class="flex flex-wrap items-end gap-3"
-            :aria-busy="loading ? 'true' : null"
+            :aria-busy="loading"
             @submit.prevent="applyFilters"
         >
             <div data-region="field">

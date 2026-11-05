@@ -119,7 +119,7 @@ const getStage = (card: { stages: { effect_id: number }[] }, effectId: number): 
                             </th>
                             <th v-for="card in props.cards" :key="card.id" class="border-b border-rule px-2 py-2 text-center text-xs font-semibold text-ink-strong">
                                 <div class="flex items-center justify-center gap-1">
-                                    <ArtworkSlot :url="card.artworkURL" alt="" size="size-8" />
+                                    <ArtworkSlot :url="card.artworkURL" alt="" size="size-10" />
                                     <span class="font-semibold text-ink-strong truncate">{{ card.name }}</span>
                                     <RarityChip :label="card.rarity_label" :stars="card.rarity_stars" />
                                     <SupportTypeMark :type="card.type" :label="card.type_label" />

@@ -24,7 +24,7 @@ import { computed } from 'vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import type { ProvenanceState } from '../../types';
 
-type Badge = Badge | null;
+type Badge = ProvenanceState | null;
 
 interface CalendarRow {
     title: string;
@@ -136,7 +136,7 @@ const groups = computed((): { label: string; rows: CalendarRow[] }[] => {
                         </p>
 
                         <p class="mt-1 text-xs text-ink-muted">
-                            <ProvenanceBadge :state="row.skip_badge" :title="row.skip_title" />
+                            <ProvenanceBadge v-if="row.skip_badge !== null" :state="row.skip_badge" :title="row.skip_title" />
                             {{ row.skip_consequence }}
                         </p>
 

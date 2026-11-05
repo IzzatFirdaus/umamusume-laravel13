@@ -26,7 +26,7 @@ import CapsuleHeader from '../CapsuleHeader.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import type { ProvenanceState } from '../../types';
 
-type Badge = Badge;
+type Badge = ProvenanceState;
 
 interface CoverageRow {
     category: string;

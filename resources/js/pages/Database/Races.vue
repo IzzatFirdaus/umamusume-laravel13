@@ -169,7 +169,7 @@ function goToPage(page: number): void {
         <form
             v-if="props.totalCount > 0"
             class="mt-4 flex flex-wrap items-end gap-3"
-            :aria-busy="loading ? 'true' : null"
+            :aria-busy="loading"
             @submit.prevent="apply"
         >
             <label class="flex min-w-0 flex-1 basis-56 flex-col gap-1 text-xs font-semibold text-ink-muted">

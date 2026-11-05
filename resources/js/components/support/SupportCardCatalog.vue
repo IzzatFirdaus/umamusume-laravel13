@@ -194,7 +194,7 @@ function goToPage(page: number): void {
     <div class="card mt-4">
         <form
             class="flex flex-wrap items-end gap-3 text-sm"
-            :aria-busy="loading ? 'true' : null"
+            :aria-busy="loading"
             @submit.prevent="applyFilters"
         >
             <BaseSelect
