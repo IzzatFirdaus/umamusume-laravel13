@@ -1121,7 +1121,15 @@ class TrainingRunController extends Controller
                 'energy' => $turn->energy,
                 // A turn that recorded no state reads as `unknown`, which is the enum's own word for
                 // "no reading", never a fabricated `exact` with an invented figure.
-                'energy_state' => $turn->energy_state?->value ?? EnergyState::Unknown->value,
+                //
+                // Written as an explicit null test rather than `?->value ?? ...`. PHPStan's
+                // `nullsafe.neverNull` fires on the coalesce-after-nullsafe shape, and obeying it by
+                // dropping the `?` would fatal on the 10 dev-database rows whose `energy_state` is
+                // NULL (a column the migration makes nullable). The property is `EnergyState|null`
+                // (verified by `dumpType`), so the null is real and the test is what states it.
+                'energy_state' => $turn->energy_state === null
+                    ? EnergyState::Unknown->value
+                    : $turn->energy_state->value,
                 'energy_band' => $turn->energy_band,
                 'fans' => $turn->fans,
                 'mood' => $turn->mood?->value,

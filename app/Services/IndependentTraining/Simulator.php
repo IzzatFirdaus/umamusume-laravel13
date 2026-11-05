@@ -57,7 +57,7 @@ final class Simulator
         $policy = $itr->policy->value;
 
         return [
-            'stat_gains' => self::STAT_GAINS[$policy] ?? self::STAT_GAINS['balanced'],
+            'stat_gains' => self::STAT_GAINS[$policy],
             'fans' => self::FANS,
             'sashes' => self::SASHES,
             'skill_hints' => $itr->priority_skills ?? [],

@@ -204,7 +204,7 @@ class DashboardController extends Controller
 
         return [
             'in_progress' => $itr->isInProgress(),
-            'completes_at' => $itr->completes_at?->toIso8601String(),
+            'completes_at' => $itr->completes_at->toIso8601String(),
             'policy_label' => $itr->policy->label(),
             'abandon_url' => route('runs.indep.abandon', $run),
         ];
