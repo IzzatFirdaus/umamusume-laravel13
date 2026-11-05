@@ -24,6 +24,8 @@ const props = defineProps<{
     totalCount: number;
     askedFor: string;
     rangeOpCount: number;
+    /** Full-table counts by release status, for the catalogue header. Scope-invariant by design. */
+    release_status_counts: { global: number; japan_only: number; other: number };
 }>();
 </script>
 
@@ -54,6 +56,7 @@ const props = defineProps<{
             :total-count="props.totalCount"
             :asked-for="props.askedFor"
             :range-op-count="props.rangeOpCount"
+            :release_status_counts="props.release_status_counts"
             filter-path="/skills"
         />
     </AppLayout>

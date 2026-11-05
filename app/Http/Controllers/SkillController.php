@@ -177,6 +177,49 @@ class SkillController extends Controller
             'scope' => $scope,
             'scopes' => self::SCOPES,
             'rangeOpCount' => $rangeOpCount,
+            // The header's provenance counts describe the whole table at every scope. A scoped count
+            // would read `{629, 0, 0}` at the default scope, where a Trainer cannot tell whether
+            // Japan-only is empty or merely filtered out; the current scope's own row count is the
+            // paginator's "N of M" line, not this. Unscoped by construction, so no facet can move it.
+            'release_status_counts' => $this->releaseStatusCounts(),
+        ];
+    }
+
+    /**
+     * How many rows the table holds per release status, for the catalogue header.
+     *
+     * The three buckets the header names, zero-filled so a missing status is a `0` rather than an
+     * absent key the template would render as nothing. `other` is the remainder of the enum
+     * (`GlobalAnnounced` today), not a placeholder: the header prints it as a real count.
+     *
+     * Deliberately not the same query as `availableCount()`: that one narrows through
+     * `availableOnGlobal()`, which requires `name_is_client` as well as `release_status`. The two
+     * agree on this tree (both 629, measured; zero rows carry `GlobalReleased` with
+     * `name_is_client` false), but they agree by data rather than by construction, so the header
+     * states the column it counts in its footnote and the browser case cross-checks it against
+     * `uma:skill-inventory`, which reads the same column through its own code path.
+     *
+     * @return array{global: int, japan_only: int, other: int}
+     */
+    private function releaseStatusCounts(): array
+    {
+        /** @var array<string, int> $counts */
+        $counts = Skill::query()
+            ->selectRaw('release_status, COUNT(*) as n')
+            ->groupBy('release_status')
+            ->pluck('n', 'release_status')
+            ->all();
+
+        $global = (int) ($counts[ReleaseStatus::GlobalReleased->value] ?? 0);
+        $japanOnly = (int) ($counts[ReleaseStatus::JapanOnly->value] ?? 0);
+        $total = (int) array_sum($counts);
+
+        return [
+            'global' => $global,
+            'japan_only' => $japanOnly,
+            // The remainder rather than a named third status, so a status added to the enum later is
+            // counted instead of silently dropped out of the total.
+            'other' => $total - $global - $japanOnly,
         ];
     }
 

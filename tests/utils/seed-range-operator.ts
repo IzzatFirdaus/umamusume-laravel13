@@ -128,6 +128,48 @@ export function inventoryRangeOpCount(): number {
     return Number(match[1]);
 }
 
+/**
+ * The independent per-status counts `uma:skill-inventory` computes for this scratch DB, keyed by the
+ * three buckets the catalogue header names.
+ *
+ * Same cross-check D6 uses for the range-operator footer, and for the same reason: the header's
+ * figures come through `SkillController::releaseStatusCounts()`, so asserting them against that
+ * method would only prove the value was passed through. The inventory command groups the same
+ * `release_status` column through its own code path.
+ *
+ * `other` is derived rather than read: the command prints one line per enum case
+ * (`table.release_status.<Case>=N`), and only the two named cases have a line of their own. The
+ * remainder is what the header calls `other`, computed here from the same lines so the two sides
+ * still rest on independent code.
+ */
+export function inventoryReleaseStatusCounts(): { global: number; japan_only: number; other: number } {
+    const db = resolvedScratchDatabase();
+    const output = execSync('php artisan uma:skill-inventory', {
+        cwd: repoRoot,
+        encoding: 'utf8',
+        env: {
+            ...process.env,
+            DB_DATABASE: db,
+            UMA_DATABASE_ROLE: 'browser',
+            UMA_EXPECTED_DATABASE: db,
+        },
+    });
+
+    const total = output.match(/^table\.total=(\d+)$/m);
+    const global = output.match(/^table\.release_status\.GlobalReleased=(\d+)$/m);
+    const japanOnly = output.match(/^table\.release_status\.JapanOnly=(\d+)$/m);
+
+    if (total === null || global === null || japanOnly === null) {
+        throw new Error(`uma:skill-inventory printed no table.release_status lines:\n${output}`);
+    }
+
+    return {
+        global: Number(global[1]),
+        japan_only: Number(japanOnly[1]),
+        other: Number(total[1]) - Number(global[1]) - Number(japanOnly[1]),
+    };
+}
+
 const JAPAN_ONLY_EXPORT_ID = 990010;
 
 /** Seeds one JapanOnly skill that the Global-scoped picker must never offer. */

@@ -188,3 +188,128 @@ it('keeps the scope across pages', function (): void {
     // The pager's own links carry the query, so page 2 is not page 2 of a different set.
     expect($pages->inertiaProps('skills')['last_page'])->toBe(2);
 });
+
+/*
+ * The header's provenance counts (G2, B1/B4).
+ *
+ * The rule these four cases pin is that the figures describe the WHOLE table at every scope. The
+ * rejected alternative was a scoped count, which reads `{629, 0, 0}` at the default scope where a
+ * Trainer cannot tell whether Japan-only is empty or merely filtered out. The current scope's own row
+ * count is the paginator's "N of M" line, so nothing is lost by counting the table here.
+ *
+ * Three Global and two JapanOnly, so the expected triple differs from the row counts at every scope
+ * below: at `scope=global` the page shows three rows against a header saying three and two, and at
+ * `scope=japan_only` it shows two against the same header. A scoped implementation would answer
+ * `{3, 0, 0}` and `{0, 2, 0}` and fail all four.
+ */
+it('counts the full table by release status at the default scope', function (): void {
+    foreach (range(1, 3) as $i) {
+        globalSkillRow("Global Row {$i}");
+    }
+    foreach (range(1, 2) as $i) {
+        japanOnlySkill("Japan Row {$i}");
+    }
+
+    $this->get(route('skills.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Skills/Index')
+            ->where('release_status_counts', [
+                'global' => 3,
+                'japan_only' => 2,
+                'other' => 0,
+            ])
+            // The page itself is still narrowed, so the two figures are answering different questions.
+            ->has('skills.data', 3)
+        );
+});
+
+it('counts the full table unchanged by the scope filter', function (): void {
+    foreach (range(1, 3) as $i) {
+        globalSkillRow("Global Row {$i}");
+    }
+    foreach (range(1, 2) as $i) {
+        japanOnlySkill("Japan Row {$i}");
+    }
+
+    // The narrow scope shows only the two JapanOnly rows; the header still names all five.
+    $this->get(route('skills.index', ['scope' => 'japan_only']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scope', 'japan_only')
+            ->has('skills.data', 2)
+            ->where('release_status_counts', [
+                'global' => 3,
+                'japan_only' => 2,
+                'other' => 0,
+            ])
+        );
+});
+
+it('counts the full table unchanged by the search query', function (): void {
+    foreach (range(1, 3) as $i) {
+        globalSkillRow("Global Row {$i}");
+    }
+    foreach (range(1, 2) as $i) {
+        japanOnlySkill("Japan Row {$i}");
+    }
+
+    // A query that matches one row must not narrow the header to one row.
+    $this->get(route('skills.index', ['scope' => 'all', 'search' => 'Global Row 1']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('skills.data', 1)
+            ->where('release_status_counts', [
+                'global' => 3,
+                'japan_only' => 2,
+                'other' => 0,
+            ])
+        );
+});
+
+it('counts the full table unchanged by the distance filter', function (): void {
+    globalSkillRow('Global Mile', ['distance_type' => 2]);
+    globalSkillRow('Global Sprint', ['distance_type' => 1]);
+    globalSkillRow('Global Unrecorded', ['distance_type' => null]);
+    japanOnlySkill('Japan Mile', ['distance_type' => 2]);
+    japanOnlySkill('Japan Long', ['distance_type' => 4]);
+
+    // Two rows reach `distance=2`; the header still names five across the table.
+    $this->get(route('skills.index', ['scope' => 'all', 'distance' => '2']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('distance', 2)
+            ->has('skills.data', 2)
+            ->where('release_status_counts', [
+                'global' => 3,
+                'japan_only' => 2,
+                'other' => 0,
+            ])
+        );
+});
+
+/*
+ * The `other` bucket is a remainder, not a placeholder (B1). `GlobalAnnounced` is the third enum case
+ * and the only one that lands there today, so a status this app grows later is counted rather than
+ * silently dropped out of the total. A row with a null `release_status` counts here too, which is the
+ * honest answer: the column says nothing, so it is not a Global row and not a JapanOnly one.
+ */
+it('counts every status outside the two named buckets as other', function (): void {
+    globalSkillRow('Global Row');
+    japanOnlySkill('Japan Row');
+    Skill::factory()->create([
+        'name' => 'Announced Row',
+        'release_status' => ReleaseStatus::GlobalAnnounced->value,
+        'name_is_client' => false,
+    ]);
+
+    $this->get(route('skills.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('release_status_counts', [
+                'global' => 1,
+                'japan_only' => 1,
+                'other' => 1,
+            ])
+        );
+});

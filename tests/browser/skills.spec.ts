@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { PAGE_MARKERS, assertStructurallyEqual, capture } from './fixtures/hfw-structure';
 import { buildAxe, openAllDisclosures } from '../utils/accessibility';
-import { removeNoDescriptionSkill, removeScopeFixtures, seedNoDescriptionSkill, seedScopeFixtures } from '../utils/seed-range-operator';
+import { inventoryReleaseStatusCounts, removeNoDescriptionSkill, removeScopeFixtures, seedNoDescriptionSkill, seedScopeFixtures } from '../utils/seed-range-operator';
 
 const WIREFRAME = pathToFileURL(
     resolve('docs/design-research/frontend-v2-wireframes/skills.html'),
@@ -261,14 +261,16 @@ test('orders the filters as the HFW draws them and keeps the condition note insi
     await expect(distance.locator('option')).toHaveText(['Any', 'Sprint', 'Mile', 'Medium', 'Long', 'Unspecified']);
     await expect(distance.locator('option[value="0"]')).toHaveText('Unspecified');
 
-    // The table scrolls inside its own labelled, focusable region; the note and pager stay in the card
-    // outside it, so neither scrolls sideways with the columns.
+    // The table scrolls inside its own labelled, focusable region; the condition note and pager stay
+    // in the card outside it, so neither scrolls sideways with the columns. The card now holds two
+    // `p.note` blocks (the provenance footnote above the region, the condition note below it), so the
+    // locator names the condition note by its own text rather than taking the first one.
     const card = page.locator('div.card').filter({ has: page.locator('#skill-results') });
     const region = card.locator('div[role="region"]');
     await expect(region).toHaveAttribute('aria-label', 'Skill catalog, scrollable');
     await expect(region).toHaveAttribute('tabindex', '0');
 
-    const note = card.locator('p.note');
+    const note = card.locator('p.note').filter({ hasText: "The condition column prints the export's own tokens" });
     await expect(note).toContainText("The condition column prints the export's own tokens");
     expect(
         await note.evaluate((node) => node.closest('[role="region"]') === null),
@@ -675,4 +677,73 @@ test('a misspelled scope is refused rather than answered with a wider catalogue'
 
     // And the catalogue did not answer with every row: the default scope is still what painted.
     await expect(page.getByLabel('Scope')).toHaveValue('global');
+});
+
+/*
+ * B5 — the header's provenance counts, read off the DOM and cross-checked against the inventory.
+ *
+ * `SkillScopeFilterTest` proves the controller answers full-table figures at four scopes. This proves
+ * the four numbers a Trainer actually reads are those figures, which is a different failure: the prop
+ * can carry `{629, 1325, 0}` and the header can paint placeholder zeroes over it. The
+ * `release_status_counts` prop is declared in `SkillCatalog.vue`'s `defineProps` for exactly that
+ * reason, and `npm run typecheck` cannot see a missing declaration because `tsc --noEmit` does not
+ * read `.vue`.
+ *
+ * The expected values are not hardcoded. `uma:skill-inventory` groups the same `release_status`
+ * column through its own code path, so a controller that counted the wrong column would disagree
+ * with it. This is the D6 pattern (`inventoryRangeOpCount`) applied to the header.
+ */
+test('the header states the full-table provenance counts, unchanged by scope', async ({ page }) => {
+    const expected = inventoryReleaseStatusCounts();
+
+    // Guard the cross-check itself: an empty or one-sided scratch table would make every assertion
+    // below vacuously true.
+    expect(expected.global, 'the scratch catalogue holds Global rows').toBeGreaterThan(0);
+    expect(expected.japan_only, 'the scratch catalogue holds JapanOnly rows').toBeGreaterThan(0);
+
+    const readHeader = async (): Promise<{ global: string; japan_only: string; other: string }> => {
+        const header = page.getByTestId('provenance-counts');
+        await expect(header).toBeVisible();
+
+        return {
+            global: (await header.locator('[data-count-kind="global"]').innerText()).trim(),
+            japan_only: (await header.locator('[data-count-kind="japan_only"]').innerText()).trim(),
+            other: (await header.locator('[data-count-kind="other"]').innerText()).trim(),
+        };
+    };
+
+    // Default scope: the narrow one. The header still describes the table.
+    await page.goto('/skills');
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.getByLabel('Scope')).toHaveValue('global');
+
+    const atGlobal = await readHeader();
+    expect(atGlobal.global).toBe(String(expected.global));
+    expect(atGlobal.japan_only).toBe(String(expected.japan_only));
+    expect(atGlobal.other).toBe(String(expected.other));
+
+    // The paginator states the CURRENT scope's row count, which is why the header does not have to.
+    // Two different questions, two different surfaces: the total below is the Global subset, the
+    // header's Global figure is every GlobalReleased row in the table.
+    await expect(page.locator('nav[aria-label="Pagination"] [role="status"]')).toContainText(
+        new RegExp(`of ${expected.global} skills`),
+    );
+
+    // Every scope: the same header.
+    await page.goto('/skills?scope=all');
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.getByLabel('Scope')).toHaveValue('all');
+
+    const atAll = await readHeader();
+    expect(atAll).toEqual(atGlobal);
+
+    // The label and its footnote: `Calculated` is not a bare word. The note states the column and
+    // that the figures are scope-invariant, and the label points at it.
+    const label = page.locator('[data-testid="provenance-counts"] [data-footnote-id="provenance-source"]');
+    await expect(label).toHaveText('Calculated');
+    await expect(label).toHaveAttribute('aria-describedby', 'provenance-source');
+
+    const footnote = page.locator('#provenance-source');
+    await expect(footnote).toContainText('release_status');
+    await expect(footnote).toContainText('do not change with the scope filter');
 });

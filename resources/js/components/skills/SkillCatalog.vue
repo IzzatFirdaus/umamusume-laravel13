@@ -76,6 +76,12 @@ const props = defineProps<{
     heading?: string | null;
     /** Count of skills with range operators on distance_type (<= or >=) that cannot be filtered. */
     rangeOpCount: number;
+    /**
+     * Full-table counts by release status, for the header. Deliberately not scoped: this is the
+     * figure that lets a Trainer tell "Japan-only is empty" from "Japan-only is filtered out",
+     * while the paginator states the current scope's own row count.
+     */
+    release_status_counts: { global: number; japan_only: number; other: number };
 }>();
 
 const page = usePage();
@@ -286,7 +292,45 @@ const secondaryName = (skill: Skill): string | null =>
         </div>
 
         <template v-else>
+            <!-- The provenance counts describe the WHOLE table, at every scope (B1). The current
+                 scope's own row count is the paginator's "N of M" line below, so a Trainer can tell
+                 "Japan-only is empty" from "Japan-only is filtered out" without leaving the page.
+                 They live inside the card rather than in the empty state: with no rows there is no
+                 table for a header to head, and the full-table figures are still true but unread. -->
             <div class="card mt-4">
+                <div
+                    class="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-rule px-3 py-2 text-sm"
+                    data-testid="provenance-counts"
+                >
+                    <!-- `Calculated` is the established label for this tool's own arithmetic over the
+                         source's readings (DESIGN.md §provenance; the pill form used at
+                         `CardPicker.vue:212`). `aria-describedby` points at the footnote stating the
+                         arithmetic, so the label is not a bare word to a screen reader. -->
+                    <span
+                        class="pill pill-neutral text-xs"
+                        data-footnote-id="provenance-source"
+                        aria-describedby="provenance-source"
+                    >Calculated</span>
+                    <span class="text-ink-muted">
+                        Global <span data-count-kind="global" class="font-mono tabular-nums text-ink-strong">{{ props.release_status_counts.global }}</span>
+                    </span>
+                    <span class="text-ink-muted">
+                        Japan only <span data-count-kind="japan_only" class="font-mono tabular-nums text-ink-strong">{{ props.release_status_counts.japan_only }}</span>
+                    </span>
+                    <span class="text-ink-muted">
+                        Other <span data-count-kind="other" class="font-mono tabular-nums text-ink-strong">{{ props.release_status_counts.other }}</span>
+                    </span>
+                </div>
+                <p id="provenance-source" class="note m-3">
+                    <span class="g" aria-hidden="true">○</span>
+                    <span class="flex-1">
+                        Source: the <code class="font-mono">release_status</code> column from the client
+                        export, counted over the whole table. These figures do not change with the scope
+                        filter: the scope narrows the rows below, and the paginator states how many of
+                        them it is showing. A row the client has not shipped is counted under Japan only
+                        and is never reachable at the default scope.
+                    </span>
+                </p>
                 <div
                     class="relative overflow-x-auto"
                     role="region"
