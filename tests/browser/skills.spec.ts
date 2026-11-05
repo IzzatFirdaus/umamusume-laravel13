@@ -747,3 +747,88 @@ test('the header states the full-table provenance counts, unchanged by scope', a
     await expect(footnote).toContainText('release_status');
     await expect(footnote).toContainText('do not change with the scope filter');
 });
+
+/*
+ * C1 — a JapanOnly row never prints client prose on the catalogue, in any scope.
+ *
+ * Ruling 1 is symmetric: `desc_en` on a JapanOnly row carries the same third-party status as
+ * `name_en`, because both fields are present on exactly the same rows and the Air Messiah test
+ * (`UMAMUSUME_REFERENCE.md` §2.7) is about the STRING, not the field. So the description column
+ * prints the named absence for those rows whichever URL reached them.
+ *
+ * Two scopes, two different questions:
+ *
+ *  - `scope=japan_only` needs no row classification at all: every visible row is JapanOnly by
+ *    construction, so "every row says the absence" is the whole rule. That is stronger than
+ *    identifying JP rows by `lang="ja"`, which would be wrong as well as weaker: 71 of the 1,287
+ *    JapanOnly rows carry a Latin-script `name_ja` (`Ding Dong Boo`, `BLAZING WOLF`) because the
+ *    client itself set those names in Latin script, and `langOf()` correctly gives them no `lang`.
+ *
+ *  - `scope=all` mixes the two, so the decisive fixture is the JP row that HAS an English
+ *    description: `seedScopeFixtures()` writes `The source states an English sentence for this row.`
+ *    onto a JapanOnly row. The string exists, so the assertion is about the display path refusing it
+ *    rather than about the data lacking it. A page that printed whatever the row held would fail
+ *    here and pass a null-description test.
+ */
+test('Japan-only rows never show client prose on the catalogue, in any scope', async ({ page }) => {
+    // The Effect column is the second value cell: the row header holds the name, then type, effect,
+    // condition, cost, open.
+    const effectCells = (): ReturnType<typeof page.locator> => page.locator('#skill-results tr').locator('td').nth(1);
+
+    // Every row at `japan_only`, page 1 (25 rows).
+    await page.goto('/skills?scope=japan_only');
+    await page.locator('#app > *').first().waitFor();
+
+    const japanOnlyRows = page.locator('#skill-results tr');
+    const rowCount = await japanOnlyRows.count();
+    expect(rowCount, 'the JapanOnly scope answers a full page').toBeGreaterThan(0);
+
+    for (let index = 0; index < rowCount; index++) {
+        const cell = japanOnlyRows.nth(index).locator('td').nth(1);
+        // Byte-for-byte: no localization variant, no trailing space, no substituted sentence.
+        expect(await cell.innerText(), `row ${index} at scope=japan_only`).toBe('No client string.');
+    }
+
+    // The prose-terminator guard, kept separate from the exact-text one: a cell that showed
+    // "No client string. Recover stamina." would satisfy neither a `toContainText` nor this.
+    for (let index = 0; index < rowCount; index++) {
+        const text = await japanOnlyRows.nth(index).locator('td').nth(1).innerText();
+        expect(text, `row ${index} carries no prose terminator`).not.toMatch(/[.!?]\s/);
+    }
+
+    seedScopeFixtures();
+
+    try {
+        // The JP fixture at `scope=all`. Its `desc_en` is set, so the absence here is the display
+        // path's decision rather than the source's silence.
+        await page.goto('/skills?scope=all&search=' + encodeURIComponent('an english sentence'));
+        await page.locator('#app > *').first().waitFor();
+
+        const jpRow = page.locator('#skill-results tr').filter({ hasText: '掲げよ、己が魂の剣を！' });
+        await expect(jpRow).toBeVisible();
+        await expect(jpRow.locator('td').nth(1)).toHaveText('No client string.');
+        // The stored sentence exists and is reachable through search, which is what makes the
+        // assertion above a refusal rather than an absence.
+        await expect(page.locator('#skill-results')).not.toContainText('The source states an English sentence');
+
+        // The same JP row at `scope=japan_only`: identical cell. The rule is row-scoped, not
+        // scope-scoped, and this is the pair that proves it.
+        await page.goto('/skills?scope=japan_only&search=' + encodeURIComponent('an english sentence'));
+        await page.locator('#app > *').first().waitFor();
+
+        const jpRowNarrow = page.locator('#skill-results tr').filter({ hasText: '掲げよ、己が魂の剣を！' });
+        await expect(jpRowNarrow).toBeVisible();
+        await expect(jpRowNarrow.locator('td').nth(1)).toHaveText('No client string.');
+
+        // The Global fixture in the same table: a row whose description IS client copy prints it.
+        // Without this the case would pass on a page that printed the absence for everything.
+        await page.goto('/skills?scope=all&search=' + encodeURIComponent('a client sentence'));
+        await page.locator('#app > *').first().waitFor();
+
+        const globalRow = page.locator('#skill-results tr').filter({ hasText: 'Client Named Row' });
+        await expect(globalRow).toBeVisible();
+        await expect(globalRow.locator('td').nth(1)).toHaveText('A client sentence for the Global row.');
+    } finally {
+        removeScopeFixtures();
+    }
+});

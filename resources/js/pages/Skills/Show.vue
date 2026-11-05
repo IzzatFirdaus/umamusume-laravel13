@@ -220,13 +220,26 @@ function hintLadderRows(skill: Skill): { key: string; label: string; discount: n
     ];
 }
 
-function relatedCount(type: 'sameCondition' | 'sameClassCode' | 'sameClassCodeAndType', skill: Skill): string | number {
-    const val = type === 'sameCondition'
-        ? skill.sameCondition
-        : type === 'sameClassCode'
-            ? skill.sameClassCode
-            : skill.sameClassCodeAndType;
-    return val ?? 'N/A';
+/**
+ * The related-skill counts a compare column reads.
+ *
+ * The counts are computed server-side per skill (`SkillController::countSharingConditionString()` and
+ * its two siblings), and only the primary skill's arrive in `related`. Reading them off the `Skill`
+ * object was the bug: `Skill` has no such properties, so the compare column silently rendered the
+ * primary row's counts under the compare skill's name. The primary column keeps `related`; the compare
+ * column states `N/A`, because those two figures were never measured for it and inventing them from
+ * the primary row is the fabricated fact the Floor forbids.
+ *
+ * ponytail: the compare column reads `N/A` for all three counts rather than the server computing a
+ * second set. Upgrade path is `related` becoming a map keyed by skill id, sent for both skills; that
+ * costs two extra aggregate queries per compare view, so it waits until someone reads the column.
+ */
+function relatedCount(type: 'sameCondition' | 'sameClassCode' | 'sameClassCodeAndType', which: 'primary' | 'compare'): string | number {
+    if (which === 'compare') {
+        return 'N/A';
+    }
+
+    return props.related[type] ?? 'N/A';
 }
 </script>
 
@@ -400,7 +413,13 @@ function relatedCount(type: 'sameCondition' | 'sameClassCode' | 'sameClassCodeAn
                     <p class="note mt-3">
                         <span class="g" aria-hidden="true">○</span>
                         <span class="flex-1">
-                            <template v-if="props.skill.description">
+                            <!-- The note's condition is the panel's own, not the raw field. It was
+                                 `v-if="props.skill.description"`, which is truthy on a JapanOnly row
+                                 (the payload sends the stored string; only `indexProps()` nulls it),
+                                 so a panel printing `No client string.` still claimed
+                                 "From GameTora export, desc_en field." — a source line for a field it
+                                 did not print. Found by the C2 browser case; fixed here. -->
+                            <template v-if="displayDescription({ description: props.skill.description, releaseStatus: props.skill.release_status }) !== NO_CLIENT_STRING">
                                 From GameTora export, <code>desc_en</code> field.
                             </template>
                             <template v-else>
@@ -574,7 +593,7 @@ function relatedCount(type: 'sameCondition' | 'sameClassCode' | 'sameClassCodeAn
                     <div class="flex items-center justify-between mb-3">
                         <h2 id="compare" class="text-lg font-semibold text-ink-strong">Compare with {{ props.compareSkill.name }}</h2>
                         <a
-                            :href="`/skills/${props.compareSkill.id}?from=${encodeURIComponent(props.backHref ?? '/skills')}`"
+                            :href="`/skills/${props.compareSkill.id}?from=${encodeURIComponent(backHref ?? '/skills')}`"
                             class="text-sm text-brand-chrome hover:underline"
                         >
                             View {{ props.compareSkill.name }} alone →
@@ -647,18 +666,18 @@ function relatedCount(type: 'sameCondition' | 'sameClassCode' | 'sameClassCodeAn
                                 </tr>
                                 <tr class="border-b border-rule-soft">
                                     <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Same condition</th>
-                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameCondition', props.skill) }}</td>
-                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameCondition', props.compareSkill) }}</td>
+                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameCondition', 'primary') }}</td>
+                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameCondition', 'compare') }}</td>
                                 </tr>
                                 <tr class="border-b border-rule-soft">
                                     <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Same class code</th>
-                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameClassCode', props.skill) }}</td>
-                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameClassCode', props.compareSkill) }}</td>
+                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameClassCode', 'primary') }}</td>
+                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameClassCode', 'compare') }}</td>
                                 </tr>
                                 <tr>
                                     <th scope="row" class="w-1/3 py-2 px-3 font-normal text-ink-muted">Same class code + type</th>
-                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameClassCodeAndType', props.skill) }}</td>
-                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameClassCodeAndType', props.compareSkill) }}</td>
+                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameClassCodeAndType', 'primary') }}</td>
+                                    <td class="py-2 px-3 text-center font-mono">{{ relatedCount('sameClassCodeAndType', 'compare') }}</td>
                                 </tr>
                             </tbody>
                         </table>
