@@ -51,7 +51,7 @@ const listId = `${inputId}-list`;
 const hintId = `${inputId}-hint`;
 const errorId = `${inputId}-error`;
 const describedBy = computed(() =>
-    [props.hint === undefined ? null : hintId, props.error === undefined ? null : errorId]
+    [props.hint === undefined ? null : hintId]
         .filter((id): id is string => id !== null)
         .join(' ') || undefined,
 );
@@ -198,6 +198,7 @@ function handleClickOutside(event: MouseEvent): void {
                 :aria-expanded="isOpen && filteredOptions.length > 0"
                 :aria-activedescendant="highlightedIndex >= 0 ? `${listId}-option-${highlightedIndex}` : undefined"
                 :aria-describedby="describedBy"
+                :error="error"
                 class="min-h-11 pr-10"
             />
 
@@ -273,6 +274,5 @@ function handleClickOutside(event: MouseEvent): void {
         </div>
 
         <p v-if="hint" class="text-xs text-ink-muted" :id="hintId">{{ hint }}</p>
-        <p v-if="error" class="text-xs text-risk" :id="errorId" role="alert">{{ error }}</p>
     </label>
 </template>
