@@ -7132,3 +7132,90 @@ The following slices are `BLOCKED BY EVIDENCE` per `docs/proposals/Our-Grand-Con
 **Recommendation:** (b) for S16 (Promo Concert has a structural gap that needs schema work), (a) for S8/S11/S14 (evidence can be provisioned from the JP client without schema changes).
 
 **Status:** blocked on evidence (owner or Data Engineer to provision)
+
+## kilo-plans-audit-2026-11-05.md
+
+**Provenance.** `.kilo/plans/` on 2026-11-05, 41 files, read-only; the directory is gitignored
+(`.gitignore:72` → `/.kilo/`) and no file in it is tracked, so this section is the only durable record
+of what it holds. Written during the pass that settled OQ-7, which asked whether the
+`C22 option-set narrowing` in `.kilo/plans/` could override `ADR-0018`.
+
+**Why the audit exists.** OQ-7 was settled on a location argument: an accepted ADR outranks a slice
+plan (`AGENTS.md` §2), and C22's only definitions were in a gitignored working directory, so C22
+could not bind. That argument is sound but fragile — a genuine decision that happened to be written
+into `.kilo/plans/` would have been discarded by it. This section checks whether any such decision
+was discarded, and records the answer file by file.
+
+**Result: no promotion is owed.** All 41 files are dispatch plans, audit-fix task lists, or session
+scaffolding — documents whose job is to instruct a pass, not to record a ruling. Four reference an
+ADR and all four cite it descriptively, as a constraint they are working inside. Each was read in full
+for override language against an ADR and none was found. No file is unaccounted for.
+
+### The four files that name an ADR
+
+| File | ADR | How the reference reads |
+| --- | --- | --- |
+| `1793545886150-database-ui-ux-audit.md` | ADR-0021 | `gametora-artwork` "writes no `data_sources` row by design (ADR-0021)" — working inside the decision |
+| `1793613768595-update-scenario-verification-date.md` | ADR-0007 | "Empty/loading/error states per ADR-0007" — a checklist item citing the rule it satisfies |
+| `1793620000004-legacy-builder-audit-fixes.md` | ADR-0010 | "The whole-column replace (ADR-0010) and one-blue-per-parent note are separate" — a scope note |
+| `1793626948192-trainee-profile-null-release-date.md` | ADR-0030 | "Storage shape: keyed objects … Documented in ADR-0030" — a description of the schema |
+
+### The file OQ-7 actually turned on
+
+`.kilo/plans/1793722281167-support-cards-improvements-v2.md` defines C22 and pins its bands
+(`1–14 → 5 · 15–37 → 25 · 38–75 → 50 · 76–100 → 100`). Measured: it mentions `C22` nine times and
+mentions **no ADR at all** — not `ADR-0018`, not any other. It never cited the decision it conflicted
+with, so it could not have been read as amending it even by a reader who took its rules as binding.
+The narrowing was a plan's own invention, recorded nowhere outside this directory and then pinned by
+two test files as though it were a decision.
+
+**The lesson is not "promote decisions out of `.kilo/plans/`".** It is that a plan which invents a
+rule contradicting an accepted ADR should say so in its own text, because a later pass cannot tell
+an invented rule from a recorded one once the tests pin it. The four ADR-citing files above are
+exactly the pattern to follow; this one is the pattern that cost a pass a full investigation.
+
+### All 41 files, accounted
+
+| File | What it is | ADR |
+| --- | --- | --- |
+| `1793534600251-cockpit-audit-fixes.md` | Cockpit audit fixes (AUD-20261101-001) | none |
+| `1793534600255-cockpit-audit-fixes.md` | Cockpit audit fixes (AUD-20261102-001) | none |
+| `1793534600256-racedecision-audit-fixes.md` | Race Decision audit fixes (AUD-20261102-002) | none |
+| `1793534600257-raceplanner-audit-fixes.md` | Race Planner audit fixes (AUD-20261102-003) | none |
+| `1793540000000-dashboard-audit-fixes.md` | Dashboard audit fixes (AUD-dashboard-2026-11-01) | none |
+| `1793545886150-database-ui-ux-audit.md` | UI/UX audit of all database/catalog screens | ADR-0021 |
+| `1793546000000-career-surfaces-audit-fixes.md` | Career surfaces audit fixes (AUD-career-surfaces-2026-11-01) | none |
+| `1793548000000-preferences-audit-fixes.md` | Preferences audit fixes (AUD-preferences-2026-11-01) | none |
+| `1793592819070-career-setup-audit-fixes.md` | Career setup audit fixes (AUD-20261102-005) | none |
+| `1793600000000-catalog-index-audit.md` | Resolve AUD-20261102-010 findings  Umamusume catalog index | none |
+| `1793600000001-catalog-show-audit.md` | Resolve AUD-20261102-011 findings  Umamusume catalog detail | none |
+| `1793600000002-skills-index-audit.md` | Resolve AUD-20261102-012 findings  Skill search index | none |
+| `1793600000003-skills-show-audit.md` | Resolve AUD-20261102-013 findings  Skill detail | none |
+| `1793600000004-support-cards-index-audit.md` | Close AUD-20261102-014  Support-card catalog index (no findings) | none |
+| `1793600000005-support-cards-show-audit.md` | Close AUD-20261102-015  Support-card detail (no findings) | none |
+| `1793600000006-veterans-index-audit.md` | Resolve AUD-20261102-026 findings  Veterans library index | none |
+| `1793600000007-veterans-compare-audit.md` | Resolve AUD-20261102-027 findings  Veteran comparison | none |
+| `1793600000008-veterans-show-audit.md` | Resolve AUD-20261102-028 findings  Veteran detail | none |
+| `1793600000009-help-audit.md` | Close AUD-20261102-019 — Help and documentation | none |
+| `1793600000010-runs-index-audit.md` | Close AUD-20261102-016 - Runs index (training-runs index) | none |
+| `1793600000011-runs-create-audit.md` | Close AUD-20261102-017 - Runs create (training-runs create) | none |
+| `1793600000012-runs-import-audit.md` | Close AUD-20261102-018 - Runs import (training-runs import) | none |
+| `1793613768595-update-scenario-verification-date.md` | Enrich race catalog with track names, fan payouts, race master data, and rewards | ADR-0007 |
+| `1793620000000-review-queue-audit-fixes.md` | Review queue audit fixes (AUD-20261102-021) | none |
+| `1793620000001-review-detail-audit-fixes.md` | Review detail audit fixes (AUD-20261102-022) | none |
+| `1793620000002-legacy-index-audit-fixes.md` | Legacy index audit fixes (AUD-20261102-023) | none |
+| `1793620000003-legacy-compare-audit-fixes.md` | Legacy compare audit fixes (AUD-20261102-024) | none |
+| `1793620000004-legacy-builder-audit-fixes.md` | Legacy builder audit fixes (AUD-20261102-025) | ADR-0010 |
+| `1793626948192-trainee-profile-null-release-date.md` | Fix `/career/setup/trainee/{id}` missing/empty data | ADR-0030 |
+| `1793694007320-remaining-code-uiux-plan.md` | Implementation dispatch — remaining code and UI/UX work (refined) | none |
+| `1793706645194-round5-reconciliation-completion.md` | Round 5 Reconciliation — Completion Plan | none |
+| `1793718326235-skill-functions-improvement-plan.md` | Improve Skill Functions in Trainer Desk | none |
+| `1793718326235-skill-functions-test-coverage.md` | Improve Skill Functions in Trainer Desk | none |
+| `1793718326235-skill-functions-v10.md` | Skill Functions Improvement v10 (P1–P5) | none |
+| `1793718326235-unique-skill-hint-selector.md` | Handle hint selector for unique skills in Skills Planner | none |
+| `1793722281167-support-cards-improvements-v2.md` | Support cards improvements (v2/v3/v6/v7/v8/v9/v12) | none |
+| `plan-audit-career-saveveteran.md` | Audit Save Veteran (AUD-20261102-004) | none |
+| `plan-audit-career-snapshot-entry.md` | Audit Career Snapshot Entry (AUD-20261102-007) | none |
+| `plan-audit-career-snapshot-review.md` | Audit Career Snapshot Review (AUD-20261102-009) | none |
+| `plan-audit-career-snapshot-setup.md` | Audit Career Snapshot Setup (AUD-20261102-008) | none |
+| `plan-audit-career-turnedit.md` | Audit Turn Edit (AUD-20261102-006) | none |
