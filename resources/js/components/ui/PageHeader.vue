@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { langOf } from '../../domain/skillDisplay';
 /*
  * The page's own name (plan 1.3). One `h1`, drawn on the page background at the owner-signed
  * Critical tier (`text-3xl font-semibold text-ink-strong`, DESIGN.md §2.2's 2026-10-14 amendment).
@@ -65,7 +66,7 @@ withDefaults(
                      `focus:outline-none` keeps a non-operable heading from drawing a control ring
                      (NRM-1); the layout's focus move still announces the new page to assistive tech. -->
                 <h1 tabindex="-1" class="mt-[7px] min-w-0 text-3xl font-semibold leading-[1.12] tracking-[-0.01em] text-ink-strong focus:outline-none">
-                    {{ title }}<span v-if="titleJa" lang="ja" class="ml-2 text-ink-muted">{{ titleJa }}</span>
+                    {{ title }}<span v-if="titleJa" :lang="langOf(titleJa) ?? undefined" class="ml-2 text-ink-muted">{{ titleJa }}</span>
                 </h1>
                 <p v-if="description" data-region="lede" class="mt-[5px] text-sm text-ink-muted">
                     {{ description }}
