@@ -4538,10 +4538,12 @@ Slice A-G dispatch explicitly scoped it out.
 re-measures the thirteen screens the 15->16px change touched, and records the before/after on
 the Dashboard and the two composing components.
 
-## KI-152 — A `.vue` edit round trip can silently convert a file to CRLF, and PCRE `$` then fails tests that never touched it
+## KI-153 — A `.vue` edit round trip can silently convert a file to CRLF, and PCRE `$` then fails tests that never touched it
 
 **State:** CLOSED 2026-11-05 in the same pass that found it. The guard is
 `tests/Feature/LineEndingGuardTest.php`.
+
+**Renumbered from KI-152.** This entry was filed as `KI-152` and a peer session filed a different `KI-152` (the catalog `base_stats`/`growth_rates` render gap) the same day; the register never reuses an existing number, so the later of the two moves. This one is the later.
 
 **Defect.** `.gitattributes` declares `* text=auto eol=lf`, and `core.autocrlf` is `true` on this host. A pass
 that rewrites a `.vue`/`.ts`/`.json` file — a scripted `read_text`/`write_text` round trip, or a patch anchored on
