@@ -102,7 +102,7 @@ const hasTraineeIdentity = computed(
         <h2
             id="career-header-heading"
             class="text-lg font-semibold text-ink-strong"
-            :title="props.header.widgets.length === 0 ? 'No scenario resource on this screen. Mood, Fans and Skill Points are what every scenario carries, and they read in Stats and state.' : null"
+            :title="props.header.widgets.length === 0 ? 'No scenario resource on this screen. Mood, Fans and Skill Points are what every scenario carries, and they read in Stats and state.' : undefined"
         >
             <span v-if="props.traineeJa" lang="ja">{{ props.traineeJa }}</span>
             <!-- The card form beside the trainee's name, where the Trainer named one. -->

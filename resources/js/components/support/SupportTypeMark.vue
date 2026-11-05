@@ -26,10 +26,20 @@ const props = defineProps<{
     label: string;
 }>();
 
-/** One drawing primitive of a glyph. Flat and typed so the template renders it without `v-html`. */
+/**
+ * One drawing primitive of a glyph. Flat and typed so the template renders it without `v-html`.
+ *
+ * Every primitive carries the three paint modifiers, not just `path`: the group mark outlines its
+ * circles with `paintOrder: 'stroke'` so the stroke sits under the fill, which is a circle's
+ * requirement as much as a path's. The three literal unions are written out because that is what the
+ * SVG attributes accept: `string` compiles but would let `cap: 'round-ish'` through to the DOM, where
+ * the browser silently ignores it.
+ */
+type PaintOrder = 'normal' | 'stroke' | 'fill' | 'markers';
+
 type Prim =
-    | { kind: 'path'; d: string; fill?: string; stroke?: string; width?: number; cap?: string; join?: string; opacity?: number; paintOrder?: string }
-    | { kind: 'circle'; cx: number; cy: number; r: number; fill?: string; stroke?: string; width?: number; opacity?: number }
+    | { kind: 'path'; d: string; fill?: string; stroke?: string; width?: number; cap?: 'butt' | 'round' | 'square'; join?: 'bevel' | 'miter' | 'round'; opacity?: number; paintOrder?: PaintOrder }
+    | { kind: 'circle'; cx: number; cy: number; r: number; fill?: string; stroke?: string; width?: number; opacity?: number; paintOrder?: PaintOrder }
     | { kind: 'rect'; x: number; y: number; w: number; h: number; rx: number; fill?: string; stroke?: string; width?: number; opacity?: number };
 
 interface Mark {

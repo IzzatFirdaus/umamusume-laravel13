@@ -20,8 +20,20 @@ it('keeps the Legacy builder helpers once per group, not once per field', functi
     // the same two sentences, so one group read its own rule six times. The group's sentence now
     // sits once under its heading.
     expect(substr_count($source, 'hint="'))->toBe(0)
-        ->and(substr_count($source, 'Own rank is unbounded and blank stays not recorded'))->toBe(1)
-        ->and(substr_count($source, 'Stored by name; leave blank if you have not recorded one'))->toBe(1);
+        ->and(substr_count($source, 'Own rank is unbounded and blank stays not recorded'))->toBe(1);
+
+    /*
+     * The second sentence this case used to pin — "Stored by name; leave blank if you have not
+     * recorded one" — is retired, not duplicated. `229a3a08` extracted the ancestor editor and moved
+     * manual name entry onto the wizard step (`Career/LegacySelect.vue`, which this file exempts at
+     * `$skipped`), taking the sentence with it; `grep -rn 'Stored by name' resources/js` returns
+     * nothing, so requiring it here would demand copy that no longer ships on any surface.
+     *
+     * What survives on this screen is asserted instead: the one helper sentence the builder still
+     * prints, and the absence of the duplicated rank hint above. The density rule is unchanged — it
+     * is the sentence that moved.
+     */
+    expect(substr_count($source, 'Picking one blue per parent is the maximum this pair offers'))->toBe(1);
 });
 
 it('shows the distance-band note once, above the race list', function (): void {

@@ -20,6 +20,15 @@ use App\Models\TrainingRun;
  * other config-reading domain class, `ScenarioCaps`, is tested in Feature for the same reason.
  */
 
+/**
+ * A complete target, as the payload writes it.
+ *
+ * `hint_levels` is part of the contract, not an optional extra: `36f66bb0` (Slice 1.2) added the
+ * field and `BuildTargetPayload::toArray()` emits it on every payload (`:96`), while this fixture
+ * predates it. The round-trip case below is right to require symmetry — a payload that reads a key
+ * and cannot write it back is the defect the assertion exists for — so the fixture carries the
+ * field rather than the assertion dropping it.
+ */
 function buildTarget(array $overrides = []): array
 {
     return array_merge([
@@ -29,6 +38,7 @@ function buildTarget(array $overrides = []): array
         'style' => 'Pace Chaser',
         'targets' => ['Speed' => 900, 'Stamina' => 800, 'Power' => 700, 'Guts' => 600, 'Wit' => 500],
         'skill_priorities' => ['Corner Adept', 'Swinging Maestro'],
+        'hint_levels' => [],
     ], $overrides);
 }
 

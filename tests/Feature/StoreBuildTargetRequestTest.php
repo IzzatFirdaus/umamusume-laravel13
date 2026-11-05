@@ -22,6 +22,10 @@ function targetPayload(array $overrides = []): array
         'style' => 'Pace Chaser',
         'targets' => ['Speed' => 900, 'Stamina' => 800, 'Power' => 700, 'Guts' => 600, 'Wit' => 500],
         'skill_priorities' => ['Corner Adept'],
+        // The payload owns the key (`BuildTargetPayload::toArray():96`) and the read-back below
+        // compares against this same fixture, so an absent key asserts an asymmetry the model does
+        // not have. Same correction as `BuildTargetPayloadTest`'s fixture.
+        'hint_levels' => [],
     ], $overrides);
 }
 

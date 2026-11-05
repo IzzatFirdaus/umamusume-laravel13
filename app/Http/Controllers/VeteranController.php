@@ -279,7 +279,7 @@ final class VeteranController extends Controller
                 // entered; it does not derive an outcome." A per-factor grade is derived from stored
                 // sparks, so it is that derivation. `Legacy\VeteranRow` says the same in its own
                 // docblock ("It reads; it derives nothing") and carries only counts.
-                'reason' => 'A factor grade would be derived from the stored sparks, and ADR-0020 §3 keeps derivation out of this library: it records and searches what the Trainer entered. The record carries spark counts, not a graded inventory.',
+                'reason' => 'A factor grade would be derived from the stored sparks, and this library only records and searches what the Trainer entered: it does not derive an outcome. The record carries spark counts, not a graded inventory.',
             ],
             // The fourth absence this list carried — comparison and "find parents for this build" — is built
             // as of this slice's write half: `veterans.compare` lines careers up and `find_parents_url` runs

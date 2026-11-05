@@ -49,15 +49,28 @@ it('round-trips a letter rank through the stored payload', function (): void {
         ->and(LegacySelectionPayload::fromArray($payload->toArray())->legacies[0]['rank_letter'])->toBe('B+');
 });
 
-it('renders the letter rank on the setup ancestry step', function (): void {
+it('keeps the letter rank in the payload the setup step stores, and reads it back', function (): void {
+    /*
+     * `career.legacy` stopped rendering a letter rank in Phase D (`74163b34`): the step became the
+     * wireframe's two parent cards rather than the six-node graph, and the controller no longer
+     * builds `graph` at all — `grep -n "'graph' =>" app/Http/Controllers/Career/LegacySelectController.php`
+     * returns nothing. The card carries the star count (`parentA.stars`), and the letter is what the
+     * step STORES for the graph surfaces that remain.
+     *
+     * So this case asserts the round trip through the step's own draft rather than a prop the step
+     * no longer sends. The rendering rules for the letter are the three cases above, which exercise
+     * `AncestryGraph::build()` directly and still hold.
+     */
     SetupDraft::write(['legacy_selection' => rankPayload('B+')->toArray()]);
 
     $this->get(route('career.legacy'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Career/LegacySelect')
-            ->where('graph.parents.0.rank_label', 'Rank B+')
-            ->where('graph.parents.0.rank_letter', 'B+')
+            ->where('payload.legacies.0.rank_letter', 'B+')
+            // `parentA` is null for this fixture: the slot resolves from the veteran library, and
+            // this payload names no `veteran_id`, so there is no card to carry a star count. That
+            // resolution is `LegacySelectController::slots()`'s subject, not this case's.
             ->has('rankLetters'));
 });
 

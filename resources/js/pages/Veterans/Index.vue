@@ -8,11 +8,11 @@
  * the Legacy builder and the compare picker. Two cards under the table carry the published factor
  * grades and the team arithmetic; the "not in this build" disclosure stays as the last section.
  *
- * HFW-OVERRIDE (filters: factor grades) - CORRECTED at R3. The previous text claimed "the
+ * HFW-OVERRIDE (filters: spark grades) - CORRECTED at R3. The previous text claimed "the
  * wireframe's own filter row has no grade facet" and cited `veterans.html:124-138`, which is the
- * factor-grade reference CARD. Both halves were wrong about the wireframe: `veterans.html:73`, inside
+ * spark-grade reference CARD. Both halves were wrong about the wireframe: `veterans.html:73`, inside
  * the `.filters` row at `:70-75`, draws exactly this control -
- * `<select>` with `Any / ★3 / ★2 / ★1` under the label "Factor grade".
+ * `<select>` with `Any / ★3 / ★2 / ★1` under the label "Spark grade".
  *
  * The facet is still not built, and now for a reason that is true and binding rather than a
  * misreading. `ADR-0020` §3 ("A Veteran library is authorized as recording ... Explicitly unchanged,
@@ -250,9 +250,9 @@ const factorGrades: { family: string; note: string }[] = [
             two narrow facets, then the quiet end of the row.
 
             HFW-OVERRIDE (filters: tag, order and submit) — the wireframe draws four items because it is a
-            static mock: `Search`, `Scenario`, `Factor grade`, `Clear`. Three of this row's controls are
+            static mock: `Search`, `Scenario`, `Spark grade`, `Clear`. Three of this row's controls are
             real capabilities the mock does not draw and the product will not remove:
-              - `Tag` occupies the third slot. That slot is the Factor grade facet, which is unbuilt by
+              - `Tag` occupies the third slot. That slot is the Spark grade facet, which is unbuilt by
                 ruling (`ADR-0020` §3 / FR-G-4: a grade is derived from stored sparks), and a dead select
                 is not an option (DESIGN.md §5).
               - the order pair is a shipped capability with its own stored-order caveat (`SCREEN-021`).
@@ -488,8 +488,8 @@ const factorGrades: { family: string; note: string }[] = [
         </Card>
 
         <div class="mt-3.5 grid grid-cols-1 gap-3.5 min-[821px]:grid-cols-2">
-            <Card as="section" aria-labelledby="veteran-factor-grades" class="min-w-0">
-                <h2 id="veteran-factor-grades">Factor grades</h2>
+            <Card as="section" aria-labelledby="veteran-spark-grades" class="min-w-0">
+                <h2 id="veteran-spark-grades">Spark grades</h2>
                 <div class="min-w-0 overflow-x-auto">
                 <table class="t">
                     <thead>
@@ -506,7 +506,7 @@ const factorGrades: { family: string; note: string }[] = [
                 <p class="note mt-2.5">
                     <span class="g" aria-hidden="true">○</span>
                     <span>
-                        Three stars is the ceiling on Global. The ★4 cap is the JP-only factor-research item,
+                        Three stars is the ceiling on Global. The ★4 cap is the JP-only spark-research item,
                         which cannot push past ★4 and does not exist here.
                     </span>
                 </p>

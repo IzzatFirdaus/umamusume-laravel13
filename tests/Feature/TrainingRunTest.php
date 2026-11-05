@@ -153,10 +153,32 @@ it('deletes a run with its turns', function (): void {
     $run = TrainingRun::factory()->create();
     TurnEntry::factory()->create(['training_run_id' => $run->id]);
 
-    test()->delete("/training-runs/{$run->id}")->assertRedirect('/training-runs');
+    /*
+     * `C6b.3` made deletion irreversible-by-confirmation: `TrainingRunController::destroy()` refuses a
+     * request without `confirmed` and redirects to the confirmation door with an error, which is
+     * exactly what this case saw when it posted bare. The docblock there names this test ("the test
+     * teardown sends it too"); the handler was built and the call site was not updated.
+     */
+    test()->delete("/training-runs/{$run->id}", ['confirmed' => true])->assertRedirect('/training-runs');
 
     expect(TrainingRun::count())->toBe(0)
         ->and(TurnEntry::count())->toBe(0);
+});
+
+/*
+ * And the refusal is asserted beside it, because a confirmation flag nobody exercises is a flag that
+ * can be deleted without a test noticing: a bare DELETE must not remove the career.
+ */
+it('refuses a delete that was not confirmed, and keeps the career', function (): void {
+    $run = TrainingRun::factory()->create();
+    TurnEntry::factory()->create(['training_run_id' => $run->id]);
+
+    test()->delete("/training-runs/{$run->id}")
+        ->assertRedirect(route('runs.confirm-delete', $run))
+        ->assertSessionHasErrors('confirmed');
+
+    expect(TrainingRun::count())->toBe(1)
+        ->and(TurnEntry::count())->toBe(1);
 });
 
 it('edits a logged turn in place, keeping its number', function (): void {

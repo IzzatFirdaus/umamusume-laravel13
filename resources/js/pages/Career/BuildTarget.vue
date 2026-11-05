@@ -653,7 +653,7 @@ function onSkillPrioritySelect(payload: { id: number; name: string }): void {
                     <tbody>
                         <tr v-for="(floor, band) in props.finaleTargets.staminaByDistance" :key="band" class="border-b border-rule">
                             <td class="py-2 pr-3 text-ink">{{ band }}</td>
-                            <td class="font-mono text-ink tabular-nums">{{ floor.min }}–{{ floor.max }}</td>
+                            <td class="font-mono text-ink tabular-nums">{{ floor.min }}-{{ floor.max }}</td>
                         </tr>
                     </tbody>
                 </table>

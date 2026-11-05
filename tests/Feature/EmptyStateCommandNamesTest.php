@@ -135,7 +135,7 @@ it('backs any source count the README prints with the config that declares them'
         ->toBe($declaredCount, "the README states {$stated[1]} declared sources; config/uma.php declares {$declaredCount}");
 });
 
-it('lists no route in the README Web surface table that the app does not have', function (): void {
+it('lists no route in the README Web surface section that the app does not have', function (): void {
     // Normalised because this file is checked out with CRLF on a Windows host and the
     // heading's casing is the prose's choice, not a contract.
     $readme = str_replace("\r\n", "\n", (string) file_get_contents(base_path('README.md')));
@@ -143,22 +143,36 @@ it('lists no route in the README Web surface table that the app does not have', 
     expect(preg_match("/\n## web surface\b(.*?)\n## /is", $readme, $section))
         ->toBe(1, 'the Web surface section must exist for this guard to read');
 
-    // Only the first backticked path of each row: the table abbreviates, and a cell like
-    // "`/training-runs` (+ `/create`, `/{run}`, PUT, DELETE)" names suffixes of the route above
-    // it, not routes of their own. A stale entry is still stale in the first position, which is
-    // where §7-1's `/design-preview` sat.
+    /*
+     * The section is prose with grouped bullet lists, not a one-route-per-row table. `fb48c7ac`
+     * consolidated the overlapping command tables and replaced the route table with "Main areas,
+     * grouped by feature" — an editorial decision about the README, not a route change — and this
+     * guard was not updated with it, so it read zero paths and asserted a table had gone missing.
+     *
+     * What it checks is unchanged: every `/path` the section names must correspond to a real route.
+     * The reader now takes each backticked path inside the section, strips the `{param}` and `*`
+     * placeholders the prose uses, and compares against `route:list`. Bullets and tables are both
+     * just text naming paths; the check is about the paths.
+     */
+    preg_match_all('/`(\/[^`]*)`/', $section[1], $cells);
+
     $listed = [];
 
-    foreach (explode("\n", $section[1]) as $line) {
-        if (preg_match('/^\|\s*`(\/[^`]*)`/', $line, $cell) === 1) {
-            $listed[] = $cell[1];
+    foreach ($cells[1] as $cell) {
+        // A cell like `/training-runs/{run}/export/{format}` names a real route pattern; the
+        // comparison below matches on the literal segments before the first placeholder, which is
+        // what a stale entry (like the retired `/design-preview`) would fail.
+        $path = '/'.ltrim(preg_split('/\{/', $cell)[0], '/');
+
+        if ($path !== '/' && $path !== '') {
+            $listed[] = rtrim($path, '/');
         }
     }
 
     $listed = array_values(array_unique($listed));
 
-    expect($listed)->not->toBe([], 'the Web surface table must list at least one path')
-        ->and(count($listed))->toBeGreaterThanOrEqual(6, 'the table rows this guard reads have gone missing');
+    expect($listed)->not->toBe([], 'the Web surface section must name at least one path')
+        ->and(count($listed))->toBeGreaterThanOrEqual(6, 'the paths this guard reads have gone missing');
 
     $routes = array_map(
         fn ($route): string => '/'.ltrim($route->uri(), '/'),

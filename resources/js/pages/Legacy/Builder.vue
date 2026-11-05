@@ -292,7 +292,13 @@ function assignParent(index: number, id: string): void {
 const assignedSparks = (index: number): SparkRow[] => form.legacies[index].sparks as unknown as SparkRow[];
 
 function addSpark(index: number): void {
-    form.legacies[index].sparks.push({ kind: 'blue', category: 'Stat', target: '', stars: 1 });
+    /*
+     * `stars` is the draft's own string field, not a number: every seeded spark above writes
+     * `stars: spark.stars === null ? '' : String(spark.stars)`, and the editor's select binds a string
+     * value. Pushing `1` here put a number into a string-typed list, which the select then rendered as
+     * a value no option carried.
+     */
+    form.legacies[index].sparks.push({ kind: 'blue', category: 'Stat', target: '', stars: '1' });
 }
 
 function removeSpark(index: number, sparkIndex: number): void {
@@ -388,7 +394,12 @@ const isDirty = computed((): boolean => JSON.stringify(form.data()) !== pristine
  * the page, so re-seeding from it is both cheaper and safer than reloading and losing the run context.
  */
 function discard(): void {
-    form.defaults(JSON.parse(pristineSnapshot) as typeof form.data);
+    /*
+     * `form.data` is a method, and `defaults()` wants the value. The cast names the payload's own type
+     * rather than `typeof form.data`, which is the function: the previous form passed the getter and
+     * the checker correctly refused it, leaving Discard writing nothing.
+     */
+    form.defaults(JSON.parse(pristineSnapshot) as ReturnType<typeof form.data>);
     form.reset();
     form.clearErrors();
 }

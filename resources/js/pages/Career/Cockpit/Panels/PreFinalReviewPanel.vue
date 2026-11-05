@@ -6,6 +6,7 @@
  * `UraPreFinalReview.vue`, which owns the finale readiness check rendering.
  */
 import UraPreFinalReview from '@/components/scenario/UraPreFinalReview.vue';
+import type { ProvenanceState } from '../../../../types';
 
 const props = defineProps<{
     scenario: {
@@ -17,23 +18,30 @@ const props = defineProps<{
                 turns_ahead: number;
                 title: string;
             };
+            /*
+             * `badge` is a provenance state, not free text: `CockpitController::preFinalSection()` writes
+             * `'confirmed'` or null, and `UraPreFinalReview`'s `StatRow` types it `ProvenanceState | null`
+             * because it feeds it to `ProvenanceBadge`. Declaring `string | null` here made the two
+             * shapes disagree at the one prop this panel exists to forward.
+             */
             recorded: Array<{
                 label: string;
                 value: string | null;
                 cap: string | null;
-                badge: string | null;
+                badge: ProvenanceState | null;
                 title: string;
             }>;
             speed_target: {
                 phrasing: string;
                 value: string | null;
                 short_by: string | null;
-                badge: string | null;
+                /** `'calculated'` or null, from `preFinalSection()`; `ProvenanceBadge` reads it. */
+                badge: ProvenanceState | null;
                 title: string;
             };
             stamina_floors: {
                 rows: Array<{ distance: string; floor: string }>;
-                badge: string;
+                badge: ProvenanceState;
                 title: string;
             };
             distance: { value: string | null; title: string };

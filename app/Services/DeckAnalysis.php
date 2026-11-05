@@ -53,9 +53,9 @@ class DeckAnalysis
         'training_power' => [1, 2, 8, 19, 3, 4, 5, 6, 7, 30],
         'early_run' => [9, 10, 11, 12, 13, 14],
         'race_bonus' => [15, 16],
-        'safety' => [27, 28, 31],
-        'events' => [25, 26],
         'skills' => [17, 18, 32],
+        'events' => [25, 26],
+        'safety' => [27, 28, 31],
     ];
 
     /**
@@ -67,9 +67,9 @@ class DeckAnalysis
         'training_power' => 'Training power',
         'early_run' => 'Early run',
         'race_bonus' => 'Race bonus',
-        'safety' => 'Safety',
-        'events' => 'Events',
         'skills' => 'Skills',
+        'events' => 'Events',
+        'safety' => 'Safety',
     ];
 
     /**

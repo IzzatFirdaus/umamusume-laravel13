@@ -5,7 +5,15 @@ interface Props {
     modelValue: string | number | File | null;
     type?: 'text' | 'number' | 'email' | 'password' | 'search' | 'file';
     id: string;
-    name: string;
+    /**
+     * `name`-or-`id`, matching the shape `BaseSelect` already documents: a field that carries an
+     * `id` and no `name` is a real call site in this tree (the turn-edit form's eleven inputs, for
+     * one), and the template renders `:name="name"`, so omitting it yields no `name` attribute.
+     * The `name` attribute is what a native form submit would read, and no in-tree form relies on
+     * it (every write goes through Inertia's `useForm`, which posts the JS object), so requiring it
+     * here was a type stricter than the component's own behaviour.
+     */
+    name?: string;
     label?: string;
     placeholder?: string;
     hint?: string;

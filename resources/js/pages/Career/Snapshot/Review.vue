@@ -42,7 +42,15 @@ const steps = [
     { key: 'review', label: 'Review', href: '#' },
 ];
 
-const form = useForm(props.payload);
+/*
+ * The confirm button re-posts what it was handed, so the form is the payload itself.
+ *
+ * `useForm` needs a `TForm` it can map through `FormDataType`, and `Record<string, unknown>` is not
+ * one (`unknown` is not a convertible value). `Record<string, string | number | boolean | null>` is:
+ * it is what this page holds — the read-back setup values, all scalars or empty — and it is what
+ * `SnapshotController` accepts as `payload`.
+ */
+const form = useForm(props.payload as Record<string, string | number | boolean | null>);
 
 /*
  * A refused confirm comes back to this page with the error bag populated, and until this block the

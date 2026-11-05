@@ -428,7 +428,11 @@ it('computes the six categories from the anchors the source states and labels th
             ->component('Support/Builder')
             ->where('analysis.covered', 1)
             ->where('analysis.categories', fn (Collection $categories): bool => $categories->keys()->all() === [
-                'training_power', 'early_run', 'race_bonus', 'safety', 'events', 'skills',
+                // `skills`, `events`, `safety` in that order: `DeckAnalysis::CATEGORIES` was reordered
+                // so the two "nothing here" groups fall after the two that carry cards, and
+                // `DeckAnalysisTest` was updated with it. This case pinned the previous order and was
+                // missed. The order is the server's to choose; the test follows it.
+                'training_power', 'early_run', 'race_bonus', 'skills', 'events', 'safety',
             ])
             ->where('analysis.categories.training_power.label', 'Training power')
             // The number is the card's own highest stated anchor, and the total is the integer this

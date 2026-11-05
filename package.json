@@ -5,8 +5,9 @@
     "scripts": {
         "build": "vite build",
         "dev": "vite",
-        "typecheck": "tsc --noEmit",
+        "typecheck": "vue-tsgo -p tsconfig.vue.json && tsc --noEmit",
         "typecheck:vue": "vue-tsgo -p tsconfig.vue.json",
+        "typecheck:ts": "tsc --noEmit",
         "lint:ui": "node tools/ui-framework-check.mjs",
         "test:a11y": "playwright test accessibility.spec.ts",
         "test:browser": "playwright test"

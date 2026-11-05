@@ -76,7 +76,7 @@ test.describe('Veteran library structural parity', () => {
 
         // The lower band is two cards above 820 and one below: the wireframe's `g-2` band, on the app's
         // own breakpoint (§2.3: desktop first, one column under the small tablet).
-        const grid = page.locator('.grid').filter({ has: page.getByRole('heading', { name: 'Factor grades' }) });
+        const grid = page.locator('.grid').filter({ has: page.getByRole('heading', { name: 'Spark grades' }) });
         const columns = await grid.evaluate((el) => getComputedStyle(el).gridTemplateColumns.split(' ').length);
         expect(columns, 'the lower band must be one column at 390').toBe(1);
 

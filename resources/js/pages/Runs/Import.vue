@@ -57,9 +57,18 @@ const form = useForm({
 // errors after a refused write redirects back here — the commit posts with `router`, so its refusal
 // lands in the page props rather than in `form.errors`, and without them a refused import rendered
 // no message at all (KI-64).
-const errors = computed(() => ({
+/*
+ * The merged bag is typed as a plain string map rather than inferred.
+ *
+ * Its two sources disagree: the shared page errors are `Record<string, string | undefined>`, while
+ * `form.errors` is Inertia's typed bag whose values may be `string[]` for a nested field. Spreading
+ * both lets the compiler infer the union, and then `errors[key]` for a `turns.<n>.<field>` key is not
+ * assignable to the `string | undefined` every `:error` prop takes. The keys this page reads, and the
+ * ones the server keys, are all single messages.
+ */
+const errors = computed<Record<string, string | undefined>>(() => ({
     ...((usePage().props.errors ?? {}) as Record<string, string | undefined>),
-    ...form.errors,
+    ...(form.errors as Record<string, string | undefined>),
 }));
 const statNames = ['speed', 'stamina', 'power', 'guts', 'wit'];
 
@@ -369,10 +378,17 @@ function confirmImport(): void {
     // on the preview is the value the second validation reads.
     submitting.value = true;
 
+    /*
+     * `router.post`'s payload is `Record<string, FormDataConvertible>`, and `PreviewRow` is not one: its
+     * fields are `string | null`, which converts, but Inertia's type for a visit body only admits
+     * objects whose values it can serialise, and a named interface is not accepted through that check
+     * even when every member is. The cast is at the boundary where the value is already the preview's
+     * own JSON (it came from the server), so nothing is being asserted that this page does not hold.
+     */
     router.post('/training-runs/import', {
         ...runEdits.value,
         csv: props.preview.csv,
-        turns: props.preview.turns,
+        turns: props.preview.turns as unknown as Record<string, string | null>[],
         // The preview's own payload carries the mapping it was read with, so a remapped file commits
         // under the same reading the preview showed instead of failing the strict header check.
         mapping: props.preview.mapping,

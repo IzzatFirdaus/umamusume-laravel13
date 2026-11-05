@@ -85,11 +85,11 @@ const flags = computed(() => [
 ]);
 
 /*
- * Factor effects are the source's own values: the five stat keys when the effect lands on a stat,
+ * Spark effects are the source's own values: the five stat keys when the effect lands on a stat,
  * and a skill or venue name verbatim otherwise. The stat keys are printed with the client's own
  * capitalisation; anything this page does not recognise is left as the source wrote it.
  */
-const FACTOR_LABELS: Record<string, string> = {
+const SPARK_LABELS: Record<string, string> = {
     speed: 'Speed',
     stamina: 'Stamina',
     power: 'Power',
@@ -97,12 +97,12 @@ const FACTOR_LABELS: Record<string, string> = {
     wit: 'Wit',
 };
 
-const factorLabel = (value: string): string => FACTOR_LABELS[value] ?? value;
+const sparkLabel = (value: string): string => SPARK_LABELS[value] ?? value;
 
-const factorText = computed<string>(() =>
+const sparkText = computed<string>(() =>
     [props.slot.factor_effect_1, props.slot.factor_effect_2]
         .filter((value): value is string => value !== null)
-        .map(factorLabel)
+        .map(sparkLabel)
         .join(', '),
 );
 
@@ -215,12 +215,12 @@ const visibleFacts = computed<Fact[]>(() => props.facts.filter((fact) => fact.la
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th scope="row" class="w-1/3 px-2 py-2 align-top text-sm text-ink-muted">Factor effects</th>
-                                    <td class="px-2 py-2 align-top text-sm text-ink">
-                                        <span v-if="factorText !== ''">{{ factorText }}</span>
-                                        <AbsenceValue v-else compact reason="No factor effects recorded for this slot." />
-                                    </td>
-                                </tr>
+                                                                    <th scope="row" class="w-1/3 px-2 py-2 align-top text-sm text-ink-muted">Spark effects</th>
+                                                                    <td class="px-2 py-2 align-top text-sm text-ink">
+                                                                        <span v-if="sparkText !== ''">{{ sparkText }}</span>
+                                                                        <AbsenceValue v-else compact reason="No spark effects recorded for this slot." />
+                                                                    </td>
+                                                                </tr>
                             </tbody>
                         </table>
                     </div>

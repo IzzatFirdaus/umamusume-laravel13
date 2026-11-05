@@ -335,7 +335,7 @@ const bankable = [
                     <div v-for="stat in props.build.stats" :key="stat.key" class="rounded-md border border-rule bg-raised p-3">
                         <dt class="text-xs text-ink-muted">{{ stat.label }}</dt>
                         <dd class="mt-0.5 font-mono text-lg tabular-nums text-ink-strong">
-                            <span :title="stat.current === null ? 'No turn was logged, so this stat has no recorded value.' : null">
+                            <span :title="stat.current === null ? 'No turn was logged, so this stat has no recorded value.' : undefined">
                                 {{ statValue(stat.current) }}
                             </span>
                             <s class="ml-1 text-xs font-normal text-ink-muted">/ {{ stat.cap ?? 'N/A' }}</s>
@@ -345,7 +345,7 @@ const bankable = [
                             Target
                             <span
                                 class="font-mono tabular-nums"
-                                :title="stat.target === null ? 'No build target was set for this run.' : null"
+                                :title="stat.target === null ? 'No build target was set for this run.' : undefined"
                             >{{ statValue(stat.target) }}</span>
                         </p>
                         <p class="mt-0.5 flex items-baseline gap-1.5 text-xs text-ink-muted">
@@ -365,7 +365,7 @@ const bankable = [
                     {{ props.build.target.style }}.
                 </p>
                 <p v-else class="mt-3 text-sm text-ink-muted">
-                    <span>N/A</span>.
+                    <span title="No build target was set for this run, so the stats above are read against no target.">N/A</span>.
                     No build target was set for this run, so the stats above are read against no target.
                 </p>
 
@@ -395,7 +395,7 @@ const bankable = [
                     records an aptitude being altered.
                 </p>
                 <p v-if="props.build.aptitudes.length === 0" class="mt-2 text-sm text-ink-muted">
-                    <span>N/A</span>.
+                    <span title="No aptitude letters are published for this trainee.">N/A</span>.
                     No aptitude letters are published for this trainee.
                 </p>
                 <ul v-else class="mt-2 flex flex-wrap gap-2">
@@ -432,7 +432,7 @@ const bankable = [
                 <section class="card" aria-labelledby="result-bank-heading">
                     <h2 id="result-bank-heading">What can be banked</h2>
                     <table class="t mt-1 w-full border-collapse text-sm">
-                        <thead><tr><th class="text-left">Factor</th><th class="text-left">Grade</th><th class="text-right"></th></tr></thead>
+                        <thead><tr><th class="text-left">Spark</th><th class="text-left">Grade</th><th class="text-right"></th></tr></thead>
                         <tbody>
                             <tr v-for="row in bankable" :key="row.factor" class="border-b border-rule-soft">
                                 <td class="py-2 pr-3">{{ row.factor }}</td>
@@ -442,8 +442,8 @@ const bankable = [
                         </tbody>
                     </table>
                     <p class="mt-2 text-xs text-ink-muted">
-                        Banking saves a Veteran Umamusume record later runs can inherit from. Factor grades are held
-                        on ADR-0020 §3, so this screen prints "Not computed" rather than a star it cannot source.
+                        Banking saves a Veteran Umamusume record later runs can inherit from. Spark grades are held
+                        as a held computation, so this screen prints "Not computed" rather than a star it cannot source.
                     </p>
                 </section>
                 <section class="card" aria-labelledby="result-export-heading">
@@ -512,7 +512,7 @@ const bankable = [
                                 </td>
                                 <td class="py-2 text-ink-muted">
                                     <span v-if="race.turn !== null" class="font-mono tabular-nums">{{ race.turn }}</span>
-                                    <span v-else>N/A <span class="text-xs">· turn not recorded</span></span>
+                                    <span v-else title="No turn is recorded for this race.">N/A <span class="text-xs">· turn not recorded</span></span>
                                 </td>
                             </tr>
                         </tbody>
@@ -548,7 +548,7 @@ const bankable = [
                 </template>
 
                 <p class="mt-3 text-sm text-ink-muted">
-                    <span>N/A</span>.
+                    <span title="The scenario publishes no rewards for this run.">N/A</span>.
                     {{ props.scenario.rewards }}
                 </p>
 

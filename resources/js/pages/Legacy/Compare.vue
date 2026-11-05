@@ -490,7 +490,7 @@ const verdictPill = (verdict: string): string =>
                                 <span
                                     v-else
                                     class="text-ink-muted"
-                                >N/A <span class="text-xs">· no Parent B</span></span>
+                                title="This comparison has no second parent recorded." >N/A <span class="text-xs">· no Parent B</span></span>
                             </td>
                             <td class="px-3 py-2">
                                 <span :class="verdictPill(verdictBy['Parent B'])">{{ verdictBy['Parent B'] }}</span>
@@ -534,7 +534,7 @@ const verdictPill = (verdict: string): string =>
                                 <span
                                     v-else
                                     class="text-ink-muted"
-                                >N/A <span class="text-xs">· none recorded for Parent B</span></span>
+                                title="No ancestors are recorded for Parent B." >N/A <span class="text-xs">· none recorded for Parent B</span></span>
                             </td>
                             <td class="px-3 py-2">
                                 <span :class="verdictPill(verdictBy['Parent B ancestors'])">{{ verdictBy['Parent B ancestors'] }}</span>

@@ -191,7 +191,7 @@ function continueStep(): void {
             class="mt-8 rounded-lg border border-dashed border-rule bg-raised p-4 text-sm text-ink-muted"
         >
             No scenario is composed. The scenario settings hold none, so there is nothing to choose
-            and no career can be started until one is added. URA Finale is the baseline — a first run
+            and no career can be started until one is added. URA Finale is the baseline: a first run
             is usually built on it.
         </p>
 
@@ -311,7 +311,7 @@ function continueStep(): void {
         <p class="note mt-2">
             The panel tags are the composition matrix, not a marketing list: a scenario that leaves a
             panel off cannot draw it, and a fifth scenario reaches the same shell for one config entry.
-            The caps quoted are the published scenario caps from config/scenarios.php, verified
+            The caps quoted are the published scenario caps, verified
             {{ props.verified_at }}.
         </p>
 

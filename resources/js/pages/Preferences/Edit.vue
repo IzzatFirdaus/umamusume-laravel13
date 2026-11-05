@@ -213,7 +213,9 @@ const backupForm = useForm({});
 
 // Each control carries its own error key, so the lookup is exact: the map-level refusal arrives as
 // `settings.stat_target_defaults` and a single stat's bound as `settings.stat_target_defaults.Speed`.
-const errorOf = (key: string): string | undefined => form.errors[key];
+// The bag is read as a record because those dotted keys are what the server keys: Inertia types
+// `errors` from the form's own nested shape, which cannot express `settings.stat_target_defaults.<stat>`.
+const errorOf = (key: string): string | undefined => (form.errors as Record<string, string | undefined>)[key];
 
 const controlId = (key: string): string => `field-${key.replace(/\./g, '_')}`;
 const errorId = (key: string): string => `error-${key.replace(/\./g, '_')}`;

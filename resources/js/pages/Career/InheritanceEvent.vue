@@ -157,11 +157,21 @@ const skip = (): void => {
 };
 
 
+/*
+ * `deltas` is part of the stored event but not of this form: the savebar records the keying fields,
+ * and no control writes a delta here. It is declared as bare `null` rather than
+ * `null as Record<string, unknown> | null` because Inertia's `FormDataType<TForm>` maps every field
+ * through `FormDataConvertible`, and a `Record<string, unknown>` union is not convertible: `unknown`
+ * is not a convertible value, so the mapped type collapses and `useForm` cannot infer `TForm` at all.
+ * When it cannot, every `form.errors.x` below degrades to an error on `FormDataErrors<unknown>` — one
+ * bad cast, fifteen diagnostics. A delta shape that this form actually submits would be declared as
+ * `Record<string, string | number | boolean | null>`, which is convertible.
+ */
 const form = useForm({
     turn: '',
     source_name: '',
     choice_label: '',
-    deltas: null as Record<string, unknown> | null,
+    deltas: null,
     origin_note: '',
 });
 

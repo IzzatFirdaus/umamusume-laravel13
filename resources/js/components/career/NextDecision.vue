@@ -104,7 +104,25 @@ interface Decision {
         expected: RecordedRow[];
         actual: RecordedRow[] | null;
         reconciliation: { match: boolean; note: string } | null;
-        recorded_forecast: Record<string, unknown>;
+        /**
+         * The source quote stored on the row when the action was taken.
+         *
+         * Declared as the shape `NextDecision::recordedForecast()` actually builds (a `label`, a `kind`
+         * of `reference` or `absence`, and the branch/statement/reason that kind carries) rather than
+         * `Record<string, unknown>`, because this value is handed straight to `RecordedActionCard`,
+         * whose `forecast` prop is that discriminated shape. The two disagreed, so the forecast section
+         * of the recorded-action card could not be type-checked at all.
+         */
+        recorded_forecast: {
+            label: string;
+            kind: 'reference' | 'absence';
+            branches?: { name: string; value: string; note: string | null }[];
+            statement?: string;
+            server?: string;
+            source?: string;
+            disagreement?: string;
+            reason?: string;
+        };
         recorded_at: string | null;
         corrected_from: number | null;
     } | null;
@@ -301,7 +319,7 @@ const incompleteData = computed(
                             <span v-if="row.consequence !== null" class="mt-0.5 block text-xs text-ink-muted">{{ row.consequence }}</span>
                         </td>
                         <td class="py-2 pr-3"><span class="pill" :class="statePill(row.state).cls">{{ statePill(row.state).word }}</span></td>
-                        <td class="py-2 text-right font-mono" :title="row.due_turn === null ? 'The calendar does not date this obligation.' : null">{{ row.due_label ?? 'no date' }}</td>
+                        <td class="py-2 text-right font-mono" :title="row.due_turn === null ? 'The calendar does not date this obligation.' : undefined">{{ row.due_label ?? 'no date' }}</td>
                     </tr>
                 </tbody>
             </table>

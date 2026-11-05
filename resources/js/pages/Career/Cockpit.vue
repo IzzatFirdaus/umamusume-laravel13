@@ -49,10 +49,10 @@ import CareerStatePanel from '../../components/career/CareerStatePanel.vue';
 import AdvisorRail from '../../components/career/AdvisorRail.vue';
 import Section from '../../components/ui/Section.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
-import BaseInput from '@/Components/Form/BaseInput.vue';
-import BaseSelect from '@/Components/Form/BaseSelect.vue';
-import BaseRadio from '@/Components/Form/BaseRadio.vue';
-import { LinkButton } from '@/Components/Form';
+import BaseInput from '@/components/Form/BaseInput.vue';
+import BaseSelect from '@/components/Form/BaseSelect.vue';
+import BaseRadio from '@/components/Form/BaseRadio.vue';
+import { LinkButton } from '@/components/Form';
 import { Head, router } from '@inertiajs/vue3';
 import { TURN_ENTRY_ENERGY_BANDS as energyBands, TURN_ENTRY_ENERGY_STATES as energyStates, TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
 import { computed } from 'vue';
@@ -145,7 +145,9 @@ interface Performance {
 }
 
 const props = defineProps<{
-    run: { id: number; trainee: string; trainee_ja: string | null; umamusume_id: number; scenario: string | null; status: string; status_label: string; scenario_label: string; run_url: string; skills_url: string; index_url: string; timeline_url: string; result_url: string; training_url: string; deck_url: string; status_labels: Record<string, string>; scenarios: Record<string, string>; update_url: string; destroy_url: string; export_csv_url: string; export_json_url: string; current_objective_index: number | null };
+    run: { id: number; trainee: string; trainee_ja: string | null; umamusume_id: number; scenario: string | null; status: string; status_label: string; scenario_label: string; run_url: string; skills_url: string; index_url: string; timeline_url: string; result_url: string; training_url: string; deck_url: string; status_labels: Record<string, string>; scenarios: Record<string, string>; update_url: string; destroy_url: string; export_csv_url: string; export_json_url: string; current_objective_index: number | null;
+        /** The run-identity door and the delete door, both rendered by this page (`C6b.1`, `C6b.3`). */
+        settings_url: string; confirm_delete_url: string };
     header: Header;
     /**
      * Where the career stands, as `CareerPosition::toArray()` carries it. The header's Year, Month and
@@ -929,7 +931,13 @@ const jumpToShop = (): void => {
                             </tr>
                             <tr v-if="composesTeamPanel && teamBurstCountdown !== null">
                                 <td>Spirit Burst Countdown</td>
-                                <td class="text-amber-600 font-mono">{{ teamBurstCountdown }}</td>
+                                <!-- A warning is carried by the caution ink token, never a raw palette
+                                     class: `DesignTokensTest` sweeps both source trees for
+                                     `amber|red|blue|…-<n>` because a hardcoded palette value cannot
+                                     follow the theme, which forks by flipping custom properties only
+                                     (D-101). `status-caution-ink` is the sanctioned text half of the
+                                     caution pair and its contrast is a G-18 contract row. -->
+                                <td class="text-status-caution-ink font-mono">{{ teamBurstCountdown }}</td>
                             </tr>
                             <tr v-if="composesTeamPanel">
                                 <td>Team rank</td>

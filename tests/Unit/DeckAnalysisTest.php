@@ -187,9 +187,9 @@ it('writes the strengths and weaknesses as counts over the cards equipped', func
     ])
         ->and($analysis['weaknesses'])->toBe([
             'Early run: no card in the deck carries an effect here.',
-            'Safety: no card in the deck carries an effect here.',
-            'Events: no card in the deck carries an effect here.',
             'Skills: no card in the deck carries an effect here.',
+            'Events: no card in the deck carries an effect here.',
+            'Safety: no card in the deck carries an effect here.',
         ]);
 });
 

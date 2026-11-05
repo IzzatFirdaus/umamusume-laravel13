@@ -11,7 +11,7 @@
  * tag list and a note, and that is the whole of the write. The name is not a field: the library row is a
  * pointer to the career (`ADR-0010`), so her name prints read-only through the run.
  *
- * **Three figures the brief asks for are not here, and the page says why.** Factor analysis, a legacy value
+ * **Three figures the brief asks for are not here, and the page says why.** Spark analysis, a legacy value
  * and a best use are `ADR-0020` §3's held computation and no table in this repository prices them, so each
  * prints `N/A` with the ruling as its disclosure rather than a score, a star rating or a sentence beginning
  * with advice. Nothing on this page recommends anything.
@@ -84,6 +84,22 @@ const { visiting, visitFailed } = useVisitState();
 const form = useForm<{ tags: string[]; notes: string }>({
     tags: props.saved?.tags ?? [],
     notes: props.saved?.notes ?? '',
+});
+
+/**
+ * The refusal that is not about a field of this form.
+ *
+ * `StoreVeteranRequest::withValidator()` adds its `run` error after validation (the run is not
+ * `Completed`, so it cannot be filed as a Veteran), and `run` is deliberately not a key of this
+ * form: the page writes tags and notes, and the run arrives in the URL. Inertia types `errors` from
+ * the form's own shape, so reading `form.errors.run` is a type error by construction, not a typo.
+ * The bag is read as a record here for exactly the keys the server may add that this form does not
+ * own, which keeps the typed access for the fields it does own (`form.errors.notes`).
+ */
+const runError = computed<string | null>(() => {
+    const errors = form.errors as Record<string, string | undefined>;
+
+    return errors.run ?? null;
 });
 
 /** Every tag the screen offers, in the server's order. Used to tell a suggestion from the Trainer's own word. */
@@ -307,7 +323,7 @@ function save(): void {
                 <h2 id="held-heading" class="text-lg font-semibold text-ink-strong">Not computed</h2>
                 <dl class="mt-2 grid gap-3 text-sm min-[761px]:grid-cols-3">
                     <div v-for="(figure, name) in props.held" :key="name">
-                        <dt class="text-xs text-ink-muted">{{ name === 'factor_analysis' ? 'Factor analysis' : name === 'legacy_value' ? 'Legacy value' : 'Best use' }}</dt>
+                        <dt class="text-xs text-ink-muted">{{ name === 'factor_analysis' ? 'Spark analysis' : name === 'legacy_value' ? 'Legacy value' : 'Best use' }}</dt>
                         <dd class="text-ink-strong">
                             <AbsenceValue :reason="figure.title" compact />
                         </dd>
@@ -323,8 +339,8 @@ function save(): void {
                         Suggestions, not a fixed list. Choose any of these, or add a word of your own below.
                     </p>
 
-                    <p v-if="form.errors.run" id="tag-run-error" role="alert" class="mt-2 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
-                        {{ form.errors.run }}
+                    <p v-if="runError !== null" id="tag-run-error" role="alert" class="mt-2 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
+                        {{ runError }}
                     </p>
 
                     <div v-for="(groupTags, group) in props.suggested_tags" :key="group" class="mt-3">

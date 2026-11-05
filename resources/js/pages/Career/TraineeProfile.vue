@@ -419,7 +419,7 @@ function remainingLetters(group: AptitudeGroup): string {
                                             <b class="text-ink-strong">{{ card.title }}</b>
                                             <span class="block text-xs text-ink-muted">
                                                 <template v-if="card.is_debut_form">Debut form · </template>
-                                                <time :datetime="card.global_release_date">{{ card.global_release_date_display }}</time>
+                                                <time :datetime="card.global_release_date ?? undefined">{{ card.global_release_date_display }}</time>
                                             </span>
                                         </span>
                                     </span>

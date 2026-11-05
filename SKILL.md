@@ -22,6 +22,8 @@ local copy is the one that applies here and the global install is marked in the 
   path names the store that holds the copy.
 - Plugin skills (the `plugin:`-prefixed entries in the session skill list) come from the Qoder
   plugin registry, not from these stores, and are not indexed here.
+- Hermes stores: `~/.hermes/skills` (user scope) and `.hermes/skills` (project scope). These are
+  indexed in the Hermes section without deduplication against other stores.
 - `.agents/` is gitignored (`.gitignore:50`), so the local set is local to this checkout and is
   not committed. That is deliberate: the repository contract stays in tracked files, the
   tooling stays disposable.
@@ -247,6 +249,29 @@ trigger; the path names the store.
 | `unfreeze` | `~/.claude/skills/unfreeze/SKILL.md` |
 | `verify-and-stop` | `~/.agents/skills/verify-and-stop/SKILL.md` |
 | `write-swift` | `~/.agents/skills/write-swift/SKILL.md` |
+
+## Hermes
+
+Hermes Agent skills (`~/.hermes/skills` user store and `.hermes/skills` project store). Listed
+without deduplication: names that also appear in other stores keep one row per location.
+
+| Skill | Use when | Path |
+| --- | --- | --- |
+| `antislop` | Anti-slop rules for coding agents | `~/.hermes/skills/antislop/SKILL.md` |
+| `antislop-code` | Code comment hygiene | `~/.hermes/skills/antislop-code/SKILL.md` |
+| `antislop-copywriting` | Copy and text hygiene | `~/.hermes/skills/antislop-copywriting/SKILL.md` |
+| `antislop-human` | Human/accessibility checks | `~/.hermes/skills/antislop-human/SKILL.md` |
+| `antislop-layoutmobile` | Mobile layout checks | `~/.hermes/skills/antislop-layoutmobile/SKILL.md` |
+| `antislop-ui` | UI visual checks | `~/.hermes/skills/antislop-ui/SKILL.md` |
+| `impeccable` | Frontend design improvement | `~/.hermes/skills/impeccable/SKILL.md` |
+| `mnemon` | Persistent memory CLI | `~/.hermes/skills/mnemon/SKILL.md` |
+| `antislop` | Anti-slop rules for coding agents | `.hermes/skills/antislop/SKILL.md` |
+| `antislop-code` | Code comment hygiene | `.hermes/skills/antislop-code/SKILL.md` |
+| `antislop-copywriting` | Copy and text hygiene | `.hermes/skills/antislop-copywriting/SKILL.md` |
+| `antislop-human` | Human/accessibility checks | `.hermes/skills/antislop-human/SKILL.md` |
+| `antislop-layoutmobile` | Mobile layout checks | `.hermes/skills/antislop-layoutmobile/SKILL.md` |
+| `antislop-ui` | UI visual checks | `.hermes/skills/antislop-ui/SKILL.md` |
+| `impeccable` | Frontend design improvement | `.hermes/skills/impeccable/SKILL.md` |
 
 ## Keeping this index current
 

@@ -247,7 +247,7 @@ const finaleTargetLine = computed((): string | null => {
         return `Speed to win: ${speed}.`;
     }
 
-    return `Speed to win: ${speed}. Stamina by distance: ${distance} ${stamina.min}–${stamina.max}.`;
+    return `Speed to win: ${speed}. Stamina by distance: ${distance} ${stamina.min}-${stamina.max}.`;
 });
 
 const legacySummary = computed((): string => {
@@ -663,7 +663,7 @@ const CAREER_TURNS = 72;
                             <!--
                                 The four RULES the wireframe asks for (`career-preflight.html:152-155`).
 
-                                These are not facts about the draft — which is why the four rows above print
+                                These are not facts about the draft, which is why the four rows above print
                                 the draft's Scenario/Focus/Purpose/Course and these print the scenario's own
                                 configuration. Each is read by `PreflightController::scenarioSection()` from
                                 `config/scenarios.php` and travels as `contract.build.scenario.asks`, so the

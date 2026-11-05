@@ -57,6 +57,13 @@ interface Paginator<T> {
     total: number;
     current_page: number;
     last_page: number;
+    /*
+     * `LengthAwarePaginator::toArray()` always carries these two, and the pager below reads them
+     * directly rather than walking `links` for the arrow entry: `links[0].url` is null on the first
+     * page, which is the same signal, but the named keys state the intent.
+     */
+    prev_page_url: string | null;
+    next_page_url: string | null;
 }
 
 interface Facet {

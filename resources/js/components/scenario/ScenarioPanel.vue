@@ -49,8 +49,8 @@ import WidgetFallback from './WidgetFallback.vue';
 import { registerPanel, resolvePanel, resolveWidget } from './registry';
 
 // Phase 7A.1: Cockpit panel components — registered against matrix flag keys
-import TeamRaceFacilityPanel from '@/Pages/Career/Cockpit/Panels/TeamRaceFacilityPanel.vue';
-import CareerGoalsPanel from '@/Pages/Career/Cockpit/Panels/CareerGoalsPanel.vue';
+import TeamRaceFacilityPanel from '@/pages/Career/Cockpit/Panels/TeamRaceFacilityPanel.vue';
+import CareerGoalsPanel from '@/pages/Career/Cockpit/Panels/CareerGoalsPanel.vue';
 
 /**
  * The renderers this build carries, registered against the matrix's own flag keys. A panel is

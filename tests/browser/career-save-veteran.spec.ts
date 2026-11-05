@@ -119,11 +119,11 @@ test('names the held figures as held, and prints no recommendation anywhere', as
     // rather than a `title` only a mouse could read. Each figure is located by its own reason, not by a
     // register identifier.
     const reasons: Record<string, RegExp> = {
-        'Factor analysis': /held computation/,
+        'Spark analysis': /held computation/,
         'Legacy value': /does not compute/,
         'Best use': /recommendation/,
     };
-    for (const label of ['Factor analysis', 'Legacy value', 'Best use']) {
+    for (const label of ['Spark analysis', 'Legacy value', 'Best use']) {
         const cell = page.locator('dt', { hasText: label }).locator('xpath=following-sibling::dd[1]');
         const ruling = cell.locator('summary');
         await expect(ruling).toContainText('N/A');

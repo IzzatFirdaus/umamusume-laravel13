@@ -8,14 +8,28 @@ interface Option {
 }
 
 interface Props {
-    modelValue: string | number | null;
+    /**
+     * An array is a real value here: the control declares `multiple` and its `update:modelValue` emits
+     * `string[]`, so a multi-select bound to a `number[]` filter (the support-card effect picker) is
+     * the shape this component already supports. Excluding it from the input type rejected the very
+     * binding the `multiple` prop exists for.
+     */
+    modelValue: string | number | string[] | number[] | null;
     /**
      * Optional because most call sites pass only `name`, and the two are the same value. A select
      * that omits both still needs a stable id for its label, so `name` is the fallback and `id` is
      * the override. Required-when-present: an `id` that is passed is used verbatim.
+     *
+     * `id`-or-`name`, not `id`-and-`name`: `selectId` below already falls back from one to the
+     * other, and the template renders `:name="name"`, so a call site that passes only `id` renders
+     * correctly today (no `name` attribute). Requiring `name` therefore rejected twenty-seven call
+     * sites the component already supports, which is a type that is stricter than the component it
+     * describes. At least one of the two is still required at the call site, because `labelId`
+     * needs an anchor; that invariant is documented rather than enforced, since a union prop type
+     * is not expressible in `defineProps<Props>()` without changing how Vue resolves the prop list.
      */
     id?: string;
-    name: string;
+    name?: string;
     label?: string;
     options: Option[];
     placeholder?: string;

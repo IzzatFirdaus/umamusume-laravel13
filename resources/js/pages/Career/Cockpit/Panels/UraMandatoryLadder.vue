@@ -7,7 +7,7 @@
  */
 
 import AlertRow from '../../../../components/scenario/AlertRow.vue';
-import type { ProvenanceState } from '../../types';
+import type { ProvenanceState } from '../../../../types';
 
 type Badge = ProvenanceState;
 

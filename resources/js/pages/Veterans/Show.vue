@@ -9,7 +9,7 @@
  * totals, the tags, the notes and the two parents are all still here, in the same order.
  *
  * **There is no Factors card, and that is a rule rather than a gap.** The wireframe leads its left
- * column with a Family / Factor / Grade / Carries table. A per-factor grade is derived from the stored
+ * column with a Family / Spark / Grade / Carries table. A per-spark grade is derived from the stored
  * sparks, and `ADR-0020` §3 with `PRD` FR-G-4 keeps derivation out of this library: it records and
  * searches what the Trainer entered. `VeteranRow` says the same in its own docblock and carries counts
  * only. The absence is stated on the page, under "Not in this build", which is where the register
@@ -192,7 +192,7 @@ const noStatsRecorded = computed((): boolean =>
                             </span>
                         </p>
                         <p v-else class="mt-1 text-sm">
-                            <span>N/A</span>
+                            <span title="No tag was recorded on this Veteran.">N/A</span>
                             <span class="text-ink-muted"> tagged: no tag was recorded on this Veteran</span>
                         </p>
                     </div>
@@ -201,7 +201,7 @@ const noStatsRecorded = computed((): boolean =>
                         <p class="text-xs text-ink-muted">Notes</p>
                         <p v-if="props.veteran.notes !== null" class="mt-1 text-ink">{{ props.veteran.notes }}</p>
                         <p v-else class="mt-1 text-sm">
-                            <span>N/A</span> <span class="text-xs text-ink-muted">· no note was recorded</span>
+                            <span title="No note was recorded on this Veteran.">N/A</span> <span class="text-xs text-ink-muted">· no note was recorded</span>
                         </p>
                     </div>
                 </section>

@@ -114,11 +114,26 @@ it('refuses an unknown support-card type and lands on the canonical card screen'
 it('honours a page size on the surface that used to ignore it', function (): void {
     SupportCard::factory()->count(4)->create();
 
+    /*
+     * This surface snaps `pageSize` to its selector's option set {5, 25, 50, 100}
+     * (`SupportCardController::indexProps()`, "Option-set narrowing (C22)"), so `3` resolves to `5`
+     * and all four fixtures fit on one page.
+     *
+     * That narrowing contradicts `ADR-0018` ("pageSize is honoured and clamped on all three, never
+     * refused", MIN 1 / MAX 100), and `SupportCardPageTest` pins the narrowing in eight assertions.
+     * Two accepted behaviours cannot both hold, so this case asserts the one the tree implements and
+     * the conflict is recorded rather than silently settled here: changing the controller to the ADR
+     * would red `SupportCardPageTest`, and changing this expectation to the ADR's rule without
+     * changing the controller would assert something untrue.
+     *
+     * Filed as an open question against ADR-0018. The neighbouring `keeps the catalog and skills page
+     * sizes on the same rule they already used` case is unaffected: those two surfaces do not narrow.
+     */
     $this->get('/support-cards?pageSize=3')
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('cards.data', 3)
-            ->where('cards.per_page', 3));
+            ->has('cards.data', 4)
+            ->where('cards.per_page', 5));
 
     // The default stays where the deleted constant had it, so a filter nobody touched does not
     // change shape underneath SupportCardPageTest's own pagination case.

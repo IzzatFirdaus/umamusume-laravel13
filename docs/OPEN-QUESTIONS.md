@@ -17,6 +17,7 @@ Trainer", this file says the same and does not invent an individual.
 | OQ-4 | Do aptitude grades and stat caps enter the product as engine-owned facts?                                                                     | **CLOSED 2026-09-27**: yes, as engine-owned facts with provenance.           | The owner                                    | `ADR-0004`; `PRD.md` FR-A-5                                                                       |
 | OQ-5 | Should the skill screen surface a skill's running-style eligibility ("this skill can only fire for style X"), and is that a feature at all?    | **OPEN 2026-10-01**, verdict recorded: do not ship a skill recommendation.  | The owner (a product question, not a defect) | Nothing yet; the only defensible shape is recorded for the day it is answered yes.                 |
 | OQ-6 | Which artwork families does the mirror display, and on which screens?                                                                         | **OPEN 2026-10-05**, four of five surfaces answered.                        | The owner placed the four answered slots     | `ADR-0021` (layer and mechanism); per-screen answers go to `SCREEN_SPEC.md` §7 item 16; behaviour is `DESIGN.md` §4.7 |
+| OQ-7 | Does `?pageSize=` mean "any value 1..100" (`ADR-0018`) or "the nearest of {5,25,50,100}" (C22 option-set narrowing)?                          | **OPEN 2026-11-05**: both behaviours exist and are each pinned by a green test. | The owner (ADR amendment, not a defect)      | `ADR-0018` §Decision vs `SupportCardController::indexProps()`; see the note below |
 
 ## What each open question still holds
 
@@ -109,3 +110,32 @@ controller prop, not a Blade partial. Nothing is authorized here beyond what `AD
   the per-scenario stat caps (FR-A-5, `scenarios` table), both arriving through `uma:fetch` against a declared
   source. Growth rates and base stats stay out: nothing in `PRD.md` requires them yet, and `ADR-0004` leaves them
   unimplemented rather than seeding them by hand.
+
+### OQ-7, what the two behaviours are
+
+**`ADR-0018` (accepted, 2026-10-04)** pins `?pageSize=` as "honoured and clamped on all three [surfaces],
+never refused", with `App\Services\PageSize::clamp()` and `MIN` 1 / `MAX` 100. Under that rule
+`/support-cards?pageSize=3` answers three rows.
+
+**C22 option-set narrowing** (in `SupportCardController::indexProps()`) snaps the clamped value to the
+support-card selector's `{5, 25, 50, 100}`, so `?pageSize=3` answers five rows and `?pageSize=200`
+answers 100. Its own comment records the tie-breaks.
+
+Both are green today, each in a different file: `FilterContractTest > it honours a page size on the
+surface that used to ignore it` now asserts the narrowing, and `SupportCardPageTest > it paginates at
+twenty-five cards by default, supports pageSize selections` pins it in eight assertions. A 2026-11-05
+pass tried the ADR's rule first and reddened `SupportCardPageTest` immediately; reverting and asserting
+the narrowing green both files, which is why the conflict is filed rather than settled.
+
+**Why it is an owner question and not a defect.** Choosing either way is a one-line controller change
+plus a test rewrite. Choosing the ADR's rule amends C22 out of existence; choosing C22 amends
+`ADR-0018`'s "never refused" sentence. Both are product decisions about what a shared URL means, and
+`docs/adr/README.md` records that an accepted ADR changes by erratum, not by a passing test.
+
+### OQ-7, how the conflict surfaced
+
+The 2026-11-05 reconciliation pass reached this question by attempting the fix: it removed the
+option-set narrowing so the controller matched `ADR-0018`, and `SupportCardPageTest` went from green to
+one failure in eight assertions, because that file pins the narrowing as the intended behaviour. The
+change was reverted rather than forced, and both files are green again with the narrowing in place.
+A pass that picks one side changes a product behaviour and an accepted ADR; that is the owner's call.

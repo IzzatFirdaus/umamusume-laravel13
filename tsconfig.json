@@ -10,7 +10,10 @@
         "esModuleInterop": true,
         "skipLibCheck": true,
         "forceConsistentCasingInFileNames": true,
-        "types": ["vite/client", "node"]
+        "types": ["vite/client", "node"],
+        "paths": {
+            "@/*": ["./resources/js/*"]
+        }
     },
     "include": ["resources/js/**/*.ts", "tests/browser/**/*.ts", "tests/utils/**/*.ts"]
 }

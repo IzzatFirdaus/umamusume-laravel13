@@ -628,7 +628,7 @@ class CockpitController extends Controller
             'caps' => $caps,
             'sparks' => $sparks,
             'note' => 'The blue sparks the tree carries and the caps the run states are shown together. '
-                .'The source records that they do not reconcile (§1.2): the six blue sparks account for '
+                .'The source records that they do not reconcile: the six blue sparks account for '
                 .'the Guts extra and nothing else, so this panel shows the inputs without claiming one '
                 .'derives the other.',
         ];

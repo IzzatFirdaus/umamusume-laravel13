@@ -382,8 +382,8 @@ class DeckSelectController extends Controller
                 'perk_unlock_level' => $level >= $perkUnlockLevel ? $perkUnlockLevel : null,
                 'effects' => SupportCardEffects::atLevel($card, $level, $dictionary),
                 'perk_note' => $level >= $perkUnlockLevel
-                    ? 'Unique Perk unlocks at Lv'.$perkUnlockLevel.' (§1.4.7).'
-                    : 'Unique Perk not yet unlocked at this level (unlocks at Lv'.$perkUnlockLevel.', §1.4.7).',
+                    ? 'Unique Perk unlocks at Lv'.$perkUnlockLevel.'.'
+                    : 'Unique Perk not yet unlocked at this level (unlocks at Lv'.$perkUnlockLevel.').',
             ];
         }
 

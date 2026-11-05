@@ -79,13 +79,28 @@ interface Slot {
     card: SlotCard | null;
 }
 
+/*
+ * The picker row, declared to match `CardPicker`'s own `Option`, which is the component this page
+ * feeds (`:options="props.picker.options"` below).
+ *
+ * This copy listed six members where the picker's lists twelve: the Slice 4 extensions
+ * (`ownership_group`, `in_deck_position`, `type_match`, `slot_type`, `name_ja`, `artworkURL`) were
+ * added to the component and to `DeckSelectController`, but not here, so the two `Option` types were
+ * unrelated and the picker's own extension columns could not be type-checked from this page.
+ */
 interface Option {
     id: number;
     name: string;
+    name_ja: string | null;
     label: string;
+    artworkURL: string | null;
     type: string;
     type_label: string;
     rarity_word: string;
+    ownership_group: 'OWNED' | 'RENTED' | 'NOT_RECORDED';
+    in_deck_position: number | null;
+    type_match: boolean;
+    slot_type: string | null;
 }
 
 const props = defineProps<{

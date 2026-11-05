@@ -102,8 +102,13 @@ it('carries the publisher ratings as estimated, with the source in the title', f
         ->assertInertia(fn (Assert $page) => $page
             ->where('scenario.shop.ledger.items.0.worth', 'Must Buy')
             ->where('scenario.shop.ledger.items.0.worth_badge', 'estimated')
-            ->where('scenario.shop.ledger.items.0.worth_title', fn (string $title): bool => str_contains($title, 'SCENARIO-PUBLISHER-REFERENCES.md')
-                && str_contains($title, '199-222')));
+            // `ef8e2754` moved decision-record citations out of display strings and into the
+            // docblocks that hold them (its subject was `UiHygieneTest`, which forbids an ADR, a
+            // `§`, or a docs path in Trainer-facing copy). The title now names the publisher and the
+            // date, which is the provenance a Trainer can act on; the file and line range live in
+            // `config/scenarios.php`'s comment. This asserts what ships, not the retired citation.
+            ->where('scenario.shop.ledger.items.0.worth_title', fn (string $title): bool => str_contains($title, 'One publisher')
+                && str_contains($title, 'uma.guide')));
 });
 
 it('rates every catalogue item today, and names the branch that cannot be reached', function (): void {
@@ -146,7 +151,10 @@ it('carries the Summer reserve as the publisher tip, never as a rule', function 
             ->where('scenario.shop.ledger.reserve.badge', 'estimated')
             ->where('scenario.shop.ledger.reserve.value', '100')
             ->where('scenario.shop.ledger.reserve.label', fn (string $label): bool => str_contains($label, 'Summer'))
-            ->where('scenario.shop.ledger.reserve.title', fn (string $title): bool => str_contains($title, 'line 273')));
+            // Same correction: the reserve title now carries the publisher's own attribution
+            // instead of the line number it was transcribed from.
+            ->where('scenario.shop.ledger.reserve.title', fn (string $title): bool => str_contains($title, 'publisher')
+                && str_contains($title, 'uma.guide')));
 });
 
 it('projects an inflow from the entered races at the published payout', function (): void {

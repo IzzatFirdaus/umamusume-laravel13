@@ -202,7 +202,13 @@ it('applies an entered ceiling on the target step before any scenario is chosen'
         'Power' => 700,
         'Guts' => 600,
         'Wit' => 500,
-    ]]), ['cap_speed' => 1250]))->assertRedirect(route('career.target'));
+    ]]), ['cap_speed' => 1250]))
+        // `309d4c49` made the build-target primary advance to the next wizard step rather than
+        // reload itself ("the build-target primary advances to the legacy step", flow walkthrough).
+        // The redirect is step 3 -> 4, which is why the read-back below is a fresh GET of
+        // `career.target` rather than the response to this PUT: the assertion is about what the step
+        // then renders, not about where the write landed.
+        ->assertRedirect(route('career.legacy'));
 
     $this->get(route('career.target'))
         ->assertInertia(fn (Assert $page) => $page

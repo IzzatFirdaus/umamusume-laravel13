@@ -94,8 +94,13 @@ it('labels the Cockpit strip with the word cap and keeps the no-target sentence'
     // and the per-row phrase is not. The word is `cap` since the HFW parity ruling moved the Cockpit's bars
     // to the ceiling the run carries; the panel still prints whichever word its caller names, so the
     // event screen's own label keeps working.
+    //
+    // The sentence gained a clause in `530d62b9` ("so bars are drawn against the scenario ceiling"),
+    // which states what the caption does about the absence — the assertion below matches the sentence
+    // it now ships rather than the shorter form it replaced. The subject is unchanged: the absence is
+    // named once, above the rows.
     expect($panel)->toContain('denominatorLabel')
-        ->and($panel)->toContain("'No build target was set for this run.'")
+        ->and($panel)->toContain('No build target was set for this run, so bars are drawn against the scenario ceiling.')
         ->and($panel)->not->toContain('no {{ props.denominatorLabel }} set')
         ->and($page)->toContain('denominator-label="cap"');
 });
@@ -103,7 +108,15 @@ it('labels the Cockpit strip with the word cap and keeps the no-target sentence'
 it('labels the event strip with the word cap', function (): void {
     $page = (string) file_get_contents(resource_path('js/pages/Career/EventDecision.vue'));
 
-    expect($page)->toContain('/{{ stat.cap }} cap');
+    /*
+     * The cap moved from an inline template suffix (`{{ stat.cap }} cap`) into `statTitle()`, which
+     * states it as part of the value's `title` disclosure on both branches: `Target ..., Scenario cap
+     * N.` and `Target not recorded for this trainee. Scenario cap N.` That is the stronger shape —
+     * `AGENTS.md` §5 requires an unrecorded value to carry a disclosure rather than stand bare — so
+     * the assertion follows the cap to where it is written instead of pinning the retired suffix.
+     */
+    expect($page)->toContain('Scenario cap ${stat.cap}.')
+        ->and($page)->toContain('Target not recorded for this trainee. Scenario cap');
 });
 
 it('leaves the target slot honest when no target is entered', function (): void {

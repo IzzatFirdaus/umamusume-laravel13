@@ -4537,3 +4537,31 @@ Slice A-G dispatch explicitly scoped it out.
 **Closure.** One pass that sets the KPI/timeline/planner step against DESIGN.md's four tiers,
 re-measures the thirteen screens the 15->16px change touched, and records the before/after on
 the Dashboard and the two composing components.
+
+## KI-152 — A `.vue` edit round trip can silently convert a file to CRLF, and PCRE `$` then fails tests that never touched it
+
+**State:** CLOSED 2026-11-05 in the same pass that found it. The guard is
+`tests/Feature/LineEndingGuardTest.php`.
+
+**Defect.** `.gitattributes` declares `* text=auto eol=lf`, and `core.autocrlf` is `true` on this host. A pass
+that rewrites a `.vue`/`.ts`/`.json` file — a scripted `read_text`/`write_text` round trip, or a patch anchored on
+a CRLF-matching line — can leave the working copy on CRLF while the index normalises to LF. `git` then emits only
+`warning: in the working copy of '<file>', CRLF will be replaced by LF the next time Git touches it`, which reads
+as cosmetic and appears on files the pass did not intend to change at all.
+
+It is not cosmetic. Tests that read a source file and match an anchored pattern are sensitive to it: PCRE `$`
+without `/D` matches before a final newline but **not** before `\r`, so `/^\s*Ruleset version:$/m` passes against
+LF bytes and fails against CRLF bytes of the same content. Measured on 2026-11-05: twenty-one files were converted
+by one pass, and `RulesetVersionVocabularyTest` plus `ScenarioMetadataTest` went red against a change that had not
+touched either subject. Both were misread as peer-owned regressions before the line endings were checked.
+
+**Why it went unnoticed.** `git status` reports the file clean, because the index normalisation means the CRLF in
+the working copy produces no diff. The failure appears only in a test that reads the working copy — which is
+exactly the class of test this repository uses heavily for copy and vocabulary gates.
+
+**Closure.** Normalise the working copy (`replace "\r\n" -> "\n"`) and keep
+`tests/Feature/LineEndingGuardTest.php`, which walks `resources/js`, `resources/views`, `tests`, `app`, `config`,
+`database` and `routes` for `.php`/`.vue`/`.ts`/`.json`/`.css`, fails on any `\r\n`, and asserts a `>500` file floor
+so a sweep that reads nothing cannot pass. The eleven files it additionally found were pre-existing
+`core.autocrlf` checkout artefacts with no diff against `HEAD`; normalising them was a git no-op, proven by an
+unchanged `git diff --stat HEAD`.

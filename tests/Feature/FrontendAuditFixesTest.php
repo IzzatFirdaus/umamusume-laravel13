@@ -65,15 +65,25 @@ it('exports the energy, mood and fans it logs and displays (F-9)', function (): 
 
 it('renders a missing page inside the product rather than as framework output (F-10)', function (): void {
     // The record route still binds `{run}`, so a missing id 404s before the redirect runs.
+    //
+    // `fe2fa850` (S11.3, "rebuild the three error documents on the HFW shapes") replaced this page's
+    // copy: the `Nothing to show here` heading became `That page does not exist`, and the destinations
+    // are now the three named routes rather than a `Training runs` line. The claims this case exists
+    // for are unchanged and are what it asserts below: the response is the product's own shell (a
+    // skip link, the design tokens, real navigation) rather than framework output, and it lands the
+    // Trainer somewhere they can act. Asserting the retired heading pinned the wording, not the fix.
     test()->get('/training-runs/424242')
         ->assertStatus(404)
-        ->assertSee('Nothing to show here')
+        ->assertSee('That page does not exist')
         ->assertSee('Skip to content')
-        ->assertSee('Training runs');
+        ->assertSee('Where would you like to go?')
+        // The three ways back into the product, by their labels.
+        ->assertSee('Careers')
+        ->assertSee('Database');
 
     test()->get('/umamusume/there-is-no-such-trainee')
         ->assertStatus(404)
-        ->assertSee('Nothing to show here');
+        ->assertSee('That page does not exist');
 });
 
 it('lands inside the product and honors the stored theme (F-1)', function (): void {

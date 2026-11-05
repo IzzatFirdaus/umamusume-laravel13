@@ -40,6 +40,8 @@ const props = defineProps<{
             label: string;
             turns_away: number | null;
             turns_ahead: number;
+            /** Why the window reads as it does; rendered as the line's title and badge disclosure. */
+            title: string;
         };
         recorded: StatRow[];
         speed_target: {

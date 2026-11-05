@@ -144,7 +144,7 @@ const tdNum = 'border-b border-rule px-2 py-3 text-right align-top font-mono tex
                         <span class="g" aria-hidden="true">○</span>
                         <span>
                             <b>Blue is the stat spark and Pink is the aptitude spark</b>
-                            (<code>UMAMUSUME_REFERENCE.md</code> §1.5.2). Blue pays a flat stat at career start;
+                            Blue pays a flat stat at career start;
                             Pink lifts an aptitude grade by the star count. Green and White are hint and skill
                             sparks, which trigger at inspiration events rather than at the start. The
                             +16-per-★3 cap raise is the breakthrough, a different mechanic that moves the

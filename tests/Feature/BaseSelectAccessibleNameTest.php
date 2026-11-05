@@ -21,7 +21,7 @@ it('passes the label in as a prop at every fixed site, with no outer label left 
 
     $raceCard = $read('resources/js/components/career/RaceCard.vue');
     $snapshot = $read('resources/js/pages/Career/Snapshot/Setup.vue');
-    $cockpit = $read('resources/js/pages/Career/Cockpit.vue');
+    $runSettings = $read('resources/js/pages/Career/RunSettings.vue');
     $training = $read('resources/js/pages/Career/TrainingDetail.vue');
 
     // RaceCard: the turn picker carried an implicit wrapper label.
@@ -39,14 +39,17 @@ it('passes the label in as a prop at every fixed site, with no outer label left 
         ->and($snapshot)->toContain('label="Anything worth remembering about this career"')
         ->and(substr_count($snapshot, '<label'))->toBe(0);
 
-    // Cockpit: Rarity and the correction-turn picker each carried an explicit `for`.
-    expect($cockpit)->toContain('label="Rarity"')
-        ->and($cockpit)->toContain('label="Correct turn"')
-        ->and($cockpit)->not->toContain('<label for="trainee_rarity"')
-        ->and($cockpit)->not->toContain('<label class="flex items-center gap-2 text-sm" for="correction-turn-select"');
+    // RunSettings: the run-identity door (`C6b.1`) is where the rarity control lives now. The
+    // Cockpit carried it until the `Career tools` disclosure retired; the control moved, the rule did
+    // not, so this reads the door that owns it. `trainee_rarity` is guarded for the same reason the
+    // Cockpit's was: a `<label for>` beside the component would take the name back off the select.
+    expect($runSettings)->toContain('label="Rarity"')
+        ->and($runSettings)->not->toContain('<label for="trainee_rarity"');
 
-    // TrainingDetail: the Performance type picker.
+    // TrainingDetail: the Performance pair. Both controls name themselves through `label`; the
+    // wrapping `<label>` each used to carry was the last of its kind in the tree.
     expect($training)->toContain('label="Performance type"')
+        ->and($training)->toContain('label="Performance delta"')
         ->and($training)->not->toContain('>Performance type</span>');
 });
 
@@ -61,13 +64,19 @@ it('declares maxlength on BaseTextarea so the label branch keeps enforcing it', 
         ->and(substr_count($source, ':maxlength="maxlength"'))->toBe(2);
 });
 
-it('records the peer-held sites as still carrying the wrapper, so a later slice flips this', function (): void {
-    // `Career/LegacySelect.vue` is held dirty by a peer, so the pass skipped its sites (the two
-    // "Kind" pickers the site list named). This case is a tripwire, not an endorsement: it pins the
-    // deferred defect so the sweep's incompleteness is visible, and it reds the day the file is
-    // fixed, which forces that slice to update this guard rather than leave a stale claim behind.
+/*
+ * `Career/LegacySelect.vue` used to be held dirty by a peer, so the 2026-10-19 pass skipped its two
+ * "Kind" pickers and left a tripwire pinning the deferred defect — a case that reds the day the file
+ * is fixed, forcing this guard to be updated rather than left stale.
+ *
+ * It fired in `9c6bbcaa`: both Kind pickers now pass `label="Kind"` and the `<label>` wrapper is gone,
+ * so the file joins the sites above instead of being excused from them. The tripwire is deleted
+ * because its subject no longer exists; asserting `label="Kind"` in its place means a regression at
+ * this file reds the same way a regression anywhere else does.
+ */
+it('names the two Legacy Kind pickers through the component, with no outer label left behind', function (): void {
     $legacySelect = (string) file_get_contents(base_path('resources/js/pages/Career/LegacySelect.vue'));
 
-    expect(substr_count($legacySelect, '<label class="flex flex-col gap-1 text-xs text-ink">'))->toBeGreaterThan(0)
-        ->and($legacySelect)->not->toContain('label="Kind"');
+    expect(substr_count($legacySelect, 'label="Kind"'))->toBe(1)
+        ->and($legacySelect)->not->toContain('<label class="flex flex-col gap-1 text-xs text-ink">');
 });

@@ -79,18 +79,21 @@ it('writes the pair when it is posted, but no 2.0 surface rehydrates it after th
     $this->post(route('runs.turns.store', $run), recordSubmit(['type' => 'Dance', 'delta' => '12']))
         ->assertRedirect(route('runs.cockpit', $run));
 
-    // The pair is stored as a `Scenario` event keyed on the turn, and the write's redirect target
-    // rehydrates nothing: the Cockpit carries no `performance` payload, so the pair is not read back
-    // there after the redirect. The capability now rides on this screen's own write payload, but a
-    // stored observation has no renderer yet — reading history back is the model's
-    // (`PerformanceReadPathTest`), and a display surface for it is a later, separately-specified
-    // decision rather than something this overturn invents.
+    // The pair is stored as a `Scenario` event keyed on the turn. The Cockpit DOES now carry a
+    // `performance` payload: it became a first-class cockpit prop, gated on the capability flag
+    // (`CockpitController::performanceSection()`, `enabled` false for a scenario the matrix gives no
+    // Performance field). This run is Our Grand Concert, so `enabled` is true and the section names
+    // the five types — which is what the page draws the card from.
     expect(TurnEvent::query()->where('training_run_id', $run->id)->where('event_type', 'Scenario')->count())->toBe(1);
 
     $this->get(route('runs.cockpit', $run))->assertInertia(fn (Assert $page) => $page
         ->component('Career/Cockpit')
         ->where('run.scenario_label', 'Our Grand Concert')
-        ->missing('performance'));
+        ->where('performance.enabled', true)
+        // The reading posted above is on the Training Decision screen's own turn, not on the cockpit's
+        // section: this prop reports what the run recorded, and the assertion below is that the write
+        // reached storage rather than that the cockpit rehydrated the form.
+        ->has('performance.types', 5));
 });
 
 it('refuses a turn the pair fails on, rather than discarding half the submission', function (): void {
@@ -101,11 +104,15 @@ it('refuses a turn the pair fails on, rather than discarding half the submission
 
     expect($run->turnEntries()->count())->toBe(0);
 
-    // The refusal writes nothing, and neither surface carries a `performance` payload to rehydrate the
-    // refused pair (reported). A subsequent GET of the Cockpit therefore shows no partial state.
+    // The refusal writes nothing. The Cockpit's `performance` section now always exists (gated on the
+    // capability flag rather than on a stored reading), so "no partial state" is asserted where it is
+    // measurable: no observation was recorded, and no `Scenario` event was written.
+    expect(TurnEvent::query()->where('training_run_id', $run->id)->where('event_type', 'Scenario')->count())->toBe(0);
+
     $this->get(route('runs.cockpit', $run))->assertInertia(fn (Assert $page) => $page
         ->component('Career/Cockpit')
-        ->missing('performance'));
+        ->where('performance.enabled', true)
+        ->has('performance.observations', 0));
 });
 
 it('carries the pair behind the capability flag in its own copy, and no borrowed word', function (): void {
@@ -119,9 +126,15 @@ it('carries the pair behind the capability flag in its own copy, and no borrowed
         ->and($source)->not->toContain('previewed:')
         // The pair is drawn exactly as the spec row names it, and the GameTora rendering stays out:
         // the five words come from the enum through the controller, never as literals in this file.
-        ->and($source)->toContain('performance[type]')
-        ->and($source)->toContain('performance[delta]')
-        ->and($source)->toContain('none, nothing to record')
+        //
+        // `2b44b45b` (Task C, "the decision screen is the wireframe's discipline list") replaced the
+        // `form.performance[...]` object with two refs and the `none, nothing to record` option prose
+        // with `Not recorded`, which is the client's own word. The pair is still drawn, still behind
+        // the capability flag, and still posts only when a reading was entered — what changed is where
+        // it is held. These assertions follow it there rather than pinning the retired shape.
+        ->and($source)->toContain('performanceType')
+        ->and($source)->toContain('performanceDelta')
+        ->and($source)->toContain('Not recorded')
         ->and($source)->not->toContain('Mental');
 });
 

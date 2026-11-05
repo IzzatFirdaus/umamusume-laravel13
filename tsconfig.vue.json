@@ -5,9 +5,7 @@
     },
     "include": [
         "resources/js/**/*.ts",
-        "resources/js/**/*.vue",
-        "tests/browser/**/*.ts",
-        "tests/utils/**/*.ts"
+        "resources/js/**/*.vue"
     ],
     "exclude": ["node_modules"]
 }

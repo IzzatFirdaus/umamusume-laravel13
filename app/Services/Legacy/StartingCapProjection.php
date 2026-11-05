@@ -81,6 +81,6 @@ final class StartingCapProjection
      */
     public static function label(): string
     {
-        return 'This tool\'s arithmetic on a JP-sourced cap-raise table (Game8, 2025-11-21, marked stale), not a client reading. Only the ★3 tier is stated in the reference (§1.3.4, +16 per ★3 Blue factor), so a ★1 or ★2 factor adds nothing to this ceiling.';
+        return 'This tool\'s arithmetic on a JP-sourced cap-raise table (Game8, 2025-11-21, marked stale), not a client reading. Only the ★3 tier is stated in the reference (+16 per ★3 Blue factor), so a ★1 or ★2 factor adds nothing to this ceiling.';
     }
 }

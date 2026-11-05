@@ -195,6 +195,7 @@ def dead_links(skipped=None, ref=DEFAULT_REF):
     skip = set(catalogues(texts))
     listing = set(subject_paths(ref))
     tracked_md_names = {os.path.basename(p) for p in listing if p.endswith(".md")}
+    folded = folded_sections(texts)
     for f in files:
         if f in skip:
             continue
@@ -204,11 +205,41 @@ def dead_links(skipped=None, ref=DEFAULT_REF):
             unreadable.append(f)
             continue
         bad.extend(dead_refs_in_text(f, text, near, listing, tracked_md_names, skipped,
-                                     disk=not ref))
+                                     disk=not ref, folded=folded))
     return bad, unreadable
 
 
-def dead_refs_in_text(f, text, near, listing, names, skipped=None, disk=True):
+def folded_sections(texts):
+    """Bare `.md` names that a master absorbed as a `## <name>` heading.
+
+    Several root documents were folded into the masters by `1e84b0c6` (2026-10-17, "fold root stubs
+    and spent plans into the corpora"): `CONSTRAINTS.md` and `PLAN.md` are gone as files, and each
+    survives as a section heading inside `docs/research-scratch/GOVERNANCE.md` and
+    `PROCESS-PLANS.md`. Every document written before that fold still cites the old bare name, and
+    it is still a correct instruction to a reader: open the master and read the section.
+
+    Counting those as dead is a resolver gap of the same kind the 2026-10-12 note closed, and it is
+    the largest single contributor to the ratchet: 150 citations to `CONSTRAINTS.md` and 51 to
+    `PLAN.md` out of 878 measured, against a 708 baseline recorded on 2026-10-02, before the fold.
+    The gate is right that the count must not RISE; the count was never this high for rot.
+
+    A heading is a section, not a file, so the membership is read from the masters' own text rather
+    than guessed from a list kept here. `GOVERNANCE.md:1496` carries
+    `## CONSTRAINTS.md (root quality bar, C-1 to C-9)` and `:1498` carries the bare
+    `## CONSTRAINTS.md`; both count, so the pattern allows a parenthetical tail.
+
+    @return set[str] the absorbed bare names, e.g. {"CONSTRAINTS.md", "PLAN.md"}
+    """
+    found = set()
+    for text in texts.values():
+        for line in text.split("\n"):
+            m = re.match(r"^#{1,3}\s+([\w.-]+\.md)\b", line)
+            if m:
+                found.add(m.group(1))
+    return found
+
+
+def dead_refs_in_text(f, text, near, listing, names, skipped=None, disk=True, folded=None):
     """The dead references in one file's text.
 
     A line carrying `QUOTED_ORIGINAL_FLAG` is not scanned: it quotes the text it corrects, so
@@ -238,6 +269,10 @@ def dead_refs_in_text(f, text, near, listing, names, skipped=None, disk=True):
             if any(t in listing for t in tries):
                 continue
             if "/" not in cand and cand in names:
+                continue
+            # A bare name a master absorbed as a section heading: the file is gone, the destination is
+            # not. See `folded_sections()`.
+            if "/" not in cand and folded and cand in folded:
                 continue
             kind = "GONE"
             if disk:

@@ -46,8 +46,17 @@ const props = defineProps<{
     gradeObjectives: { index: number; name: string }[];
 }>();
 
-/** The request's own column name for an entered ceiling, so this page spells none of them. */
-const capColumn = (stat: string): string => `cap_${stat.toLowerCase()}`;
+/**
+ * The request's own column name for an entered ceiling, so this page spells none of them.
+ *
+ * The return is the template-literal type rather than `string`: the result is used to index
+ * `identityForm` (twice: the `Object.fromEntries` above and the `v-model` below), and a bare `string`
+ * makes both an implicit `any`. The keys are exactly the ones `runAttributes()`/`StoreRunRequest`
+ * accept, spelled `cap_<lowercased stat>`, so the template literal states the same rule the server does.
+ */
+type CapColumn = `cap_${string}`;
+
+const capColumn = (stat: string): CapColumn => `cap_${stat.toLowerCase()}`;
 
 /** What this page is for, in one line, under the one `h1`. */
 const lede = computed(() => `The identity fields the Cockpit used to hold. Everything here writes through ${props.run.update_url}.`);
@@ -81,7 +90,24 @@ const savePeriod = (): void => {
     periodForm.put(props.run.update_url, { preserveScroll: true });
 };
 
-const identityForm = useForm({
+/*
+ * The identity form's own key set, stated rather than inferred.
+ *
+ * The ceiling columns are spread in from `props.identity.caps` (`...Object.fromEntries(...)`), so an
+ * inferred type knows only the four literal keys above the spread and the `cap_*` columns arrive
+ * through an index signature that the inference drops. The template and `transform()` below both
+ * index this object by `capColumn(stat)`, so the shape is written out: the four identity fields as
+ * `string`, one `cap_<stat>` per stat, and `growth_rate` as a stat-keyed map.
+ */
+type IdentityForm = {
+    umamusume_id: string;
+    status: string;
+    trainee_rarity: string;
+    potential_level: string;
+    growth_rate: Record<string, string>;
+} & Record<CapColumn, string>;
+
+const identityForm = useForm<IdentityForm>({
     umamusume_id: String(props.run.umamusume_id),
     status: props.run.status,
     trainee_rarity: props.identity.trainee_rarity === null ? '' : String(props.identity.trainee_rarity),

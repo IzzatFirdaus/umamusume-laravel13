@@ -9,7 +9,7 @@
 import AlertRow from '../../../../components/scenario/AlertRow.vue';
 import ProvenanceBadge from '../../../../components/ProvenanceBadge.vue';
 import SubCell from '../../../../components/SubCell.vue';
-import type { ProvenanceState } from '../../types';
+import type { ProvenanceState } from '../../../../types';
 
 type Badge = ProvenanceState;
 

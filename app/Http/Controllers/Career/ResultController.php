@@ -155,7 +155,7 @@ class ResultController extends Controller
             return [
                 'text' => "Won the finale with {$stamina} Stamina. No published Stamina figure applies here: "
                     .'this run set no build-target distance, so there is no distance to read one for.',
-                'source' => 'docs/UMAMUSUME_REFERENCE.md §2.2.1',
+                'source' => 'The reference corpus\'s own distance rule.',
             ];
         }
 
@@ -171,7 +171,7 @@ class ResultController extends Controller
             'text' => "Won the finale with {$stamina} Stamina, {$side} the {$band} band the published guide names "
                 ."for {$distance} courses. That band is a recommendation, not a gate: the game did not "
                 .'enforce it, and this screen will not imply that it did.',
-            'source' => 'docs/UMAMUSUME_REFERENCE.md §2.2.1',
+            'source' => 'The reference corpus\'s own distance rule.',
         ];
     }
 

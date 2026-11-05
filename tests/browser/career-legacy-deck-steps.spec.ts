@@ -443,24 +443,36 @@ test.describe('Setup step 5 — Support deck', () => {
         await expect(scenarioAbsence).toBeVisible();
         await expect(scenarioAbsence).toContainText('N/A');
 
-        // Six named positions, the friend role on position six whatever card may sit there
+        // Six named positions, the pal role on position six whatever card may sit there
         // (`ADR-0014` correction 1), and an empty slot stated as a statement rather than a blank.
         const slots = page.locator('ul > li[id^="deck-slot-"]');
         await expect(slots).toHaveCount(6);
         await expect(page.locator('#deck-slot-6')).toContainText('Slot 6 · Friends');
-        await expect(page.locator('#deck-slot-6')).toContainText('Friend slot');
+        await expect(page.locator('#deck-slot-6')).toContainText('Pal slot');
         await expect(page.locator('#deck-slot-1')).toContainText('Not equipped');
 
         // The flag is `N/A` with a reason before any write. A default of "Owned" would be the
         // invented fact the Floor forbids.
         await expect(page.getByText('No ownership has been recorded for this slot yet.')).toHaveCount(6);
 
-        // The seven-types legend and the ownership-prose block are cut (Phase E): `career-deck.html`
+        // The seven-types legend and the ownership-prose *block* are cut (Phase E): `career-deck.html`
         // draws neither. The type words still render inside the picker's dialog legend
         // (`CardPicker.vue`), and the ownership destination is stated on the run-scoped builder
         // (`resources/js/pages/Support/Builder.vue`), which the page's own header comment records.
-        await expect(page.getByText(/Preflight writes it onto the run\s+as one value per slot/)).toHaveCount(0);
+        //
+        // What is asserted here is the absence of the standalone disclosure *paragraph* those two
+        // sentences belonged to. The step's intro line still says, in five words, that the flag lives in
+        // this draft and that Preflight writes it onto the run — and that statement is true
+        // (`PreflightController:141,148` writes `deck_slots.ownership` from
+        // `ownershipByPosition()`), so this case pins the cut without demanding the page stop saying
+        // where the value goes. The original assertion matched the longer sentence that
+        // `3a4459ca` replaced; it was never updated, so it had been red against intended copy.
+        await expect(page.getByText(/Preflight writes it onto the run's deck row when/)).toHaveCount(0);
         await expect(page.getByText(/reads\s+as N\/A rather than as Owned/)).toHaveCount(0);
+        // The shorter statement that remains, asserted so the pair cannot drift silently.
+        await expect(page.locator('#draft-slots-heading').locator('..')).toContainText(
+            'Preflight writes it onto the run',
+        );
     });
 
     test('equips from the picker, marks the flag, and reads each write back from the session', async ({ page }) => {
@@ -588,7 +600,14 @@ test.describe('Setup step 5 — Support deck', () => {
         // Step 5 through the page's own primary action: one equipped card. The card is whichever the
         // deterministic picker order puts first, so the test lifts its name off the rendered slot
         // rather than hardcoding today's first row.
-        await page.getByRole('link', { name: 'Continue to deck' }).click();
+        //
+        // `Continue to deck` is a **button**, not a link (`LegacySelect.vue` head band): it is this
+        // step's submit, because the write endpoint redirects back here to report the save and a plain
+        // navigation would strand an unsaved level. `wizard-actions.spec.ts:38` and
+        // `wizard-flow.spec.ts:85` already drive it as the primary button; these two locators were the
+        // remaining call sites written against the older link form, which is why this case timed out
+        // waiting on a role that has not existed since `97ff808a`.
+        await page.getByRole('button', { name: 'Continue to deck' }).click();
         await page.locator('#app > *').first().waitFor();
         await expect(page).toHaveURL(/\/career\/setup\/deck/);
         await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
@@ -616,8 +635,8 @@ test.describe('Setup step 5 — Support deck', () => {
         await expect(page.locator('#affinity')).toHaveValue('◎');
         await expect(page.getByText(/This setup already holds a Legacy/)).toBeVisible();
 
-        // And forward again: the deck survived the round trip too.
-        await page.getByRole('link', { name: 'Continue to deck' }).click();
+        // And forward again: the deck survived the round trip too. Same writing button as above.
+        await page.getByRole('button', { name: 'Continue to deck' }).click();
         await page.locator('#app > *').first().waitFor();
         await expect(page).toHaveURL(/\/career\/setup\/deck/);
         await expect(page.locator('#deck-slot-1')).toContainText(cardName);

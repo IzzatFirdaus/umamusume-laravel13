@@ -44,6 +44,20 @@ truth for mechanics; the two ADRs that contradicted it were amended rather than 
 
 - Colour-token pin reconciled 94 → 95 (`DesignTokensTest`, `DESIGN.md`), measured against the
   stylesheet rather than carried forward.
+- **`npm run typecheck` now checks `.vue`, and it is blocking.** The script was `tsc --noEmit` against a
+  `tsconfig.json` whose `include` list never named `*.vue`, so no single-file component was ever
+  type-checked; 96 in-tree diagnostics had accumulated behind that blind spot. The script is now
+  `vue-tsgo -p tsconfig.vue.json && tsc --noEmit` (a new `typecheck:ts` keeps the plain-`tsc` half
+  invocable on its own), and `tsconfig.vue.json` checks `resources/js` both ways. Most of the 96 were
+  declarations that disagreed with a payload the server already sends — not annotation gaps — so the
+  fix was usually to correct the type rather than to cast the value.
+- **`tsconfig.json` gained the `@/*` paths mapping.** `laravel-vite-plugin` registers `@` →
+  `resources/js` at build time (`defaultAliases`, `node_modules/laravel-vite-plugin/dist/index.js:31-33`),
+  so a component importing `@/components/Form` built and rendered while `vue-tsgo` reported TS2307 and
+  skipped the import entirely: the type gate was checking a different program from the one that ships.
+  Adding the mapping unmasked thirteen further type errors the missing alias had been hiding.
+- **`npm audit` is clean.** `follow-redirects` 1.16.0 → 1.16.2 (high, via `axios`) and `qs`
+  6.16.0 → 6.17.1 (moderate, via `@inertiajs/vue3`).
 
 ## [3.0.0] - unreleased
 

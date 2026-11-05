@@ -176,7 +176,7 @@ const panelState = (scenario: Scenario, label: string): boolean =>
                                 class="n font-mono tabular-nums"
                                 :title="capText(scenario, stat) === 'N/A'
                                     ? 'This scenario publishes no cap for that stat.'
-                                    : null"
+                                    : undefined"
                             >
                                 <b v-if="outlier(scenario) === stat">{{ capText(scenario, stat) }}</b>
                                 <template v-else>{{ capText(scenario, stat) }}</template>
@@ -263,7 +263,7 @@ const panelState = (scenario: Scenario, label: string): boolean =>
                 <span class="g" aria-hidden="true">○</span>
                 <span>
                     A rework date is <b>not</b> an app ruleset version. No source defines a Global
-                    ruleset version, so the version line elsewhere reads <code>N/A</code> and the two
+                    ruleset version, so the version line elsewhere reads <code title="That line states the fact is not recorded.">N/A</code> and the two
                     facts are never merged into one label.
                 </span>
             </p>

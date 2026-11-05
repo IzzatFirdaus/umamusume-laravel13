@@ -55,6 +55,17 @@ interface PublishedRow {
     notes: string[];
 }
 
+/**
+ * The published Energy row. Same frame as `PublishedRow` plus the signed figure the server also sends
+ * (`TrainingDecisionController::publishedFor()`), which the option energy cell reads. It was declared
+ * as a plain `PublishedRow`, so `cost.value` was invisible to the checker while the server shipped it
+ * on every option that has an Energy cost.
+ */
+interface PublishedCostRow extends PublishedRow {
+    /** Signed Energy: negative spends, positive refunds (Wit returns Energy). */
+    value: number;
+}
+
 interface Option {
     key: string;
     choice: string;
@@ -73,7 +84,7 @@ interface Option {
     published: {
         gains: PublishedRow | null;
         gains_absence: string | null;
-        cost: PublishedRow | null;
+        cost: PublishedCostRow | null;
         risk_reason: string | null;
     };
 }
@@ -92,7 +103,19 @@ const props = defineProps<{
     };
     options: Option[];
     deck: { recorded: boolean; slots: number };
-    advisor: { action: string | null; band: string | null; absence: string | null };
+    /*
+     * `band` is the two-value advisory pair, not free text: `BANDS` below is keyed by it, and
+     * `Advice::$band` only ever holds `AtOrAboveAdvisory` or `BelowAdvisory`. `reason` is the
+     * recommendation's own source line, sent by `TrainingDecisionController::advisorSection()` and
+     * rendered in the "Why rest" list; it was missing from this type while the server was already
+     * sending it, so the `v-if` that guards it could never be true.
+     */
+    advisor: {
+        action: string | null;
+        band: 'AtOrAboveAdvisory' | 'BelowAdvisory' | null;
+        absence: string | null;
+        reason: string | null;
+    };
     careerPosition: { year: number; month: number; phase: string; turn_index: number; scenario_countdown: number | null } | null;
     currentStats: Record<string, number | null>;
     energy: { state: string | null; band: string | null; value: number | null; label: string };
@@ -222,11 +245,21 @@ const energyBands = TURN_ENTRY_ENERGY_BANDS;
 
 // The five facility inputs, from the shared source. The names are listed on the form below rather than
 // spread in, so TypeScript checks each `form[field.name]` binding against a key the form actually has.
-const facilityFields = TURN_ENTRY_FACILITY_FIELDS;
+/*
+ * The two field lists are `as const` tuples, so `field.name` is a literal union rather than `string`.
+ * That matters at the `v-model` below: `form` is a typed object, and indexing it with a bare `string`
+ * is an implicit `any`. The casts keep the literal keys the list already proves.
+ */
+type FacilityFieldName = `facility_${(typeof statFields)[number]['name']}`;
+type PreviewFieldName = (typeof TURN_ENTRY_PREVIEW_FIELDS)[number]['name'];
+
+const facilityFields = TURN_ENTRY_FACILITY_FIELDS as ReadonlyArray<{ name: FacilityFieldName; label: string }>;
 
 // The client's preview row, from the shared source. Read as one object on the form and posted as one,
 // because `preview_gains` is stored as a single payload rather than six columns.
-const previewFields = TURN_ENTRY_PREVIEW_FIELDS;
+type PreviewGainsKey = 'speed' | 'stamina' | 'power' | 'guts' | 'wit' | 'sp';
+
+const previewFields = TURN_ENTRY_PREVIEW_FIELDS as ReadonlyArray<{ name: PreviewGainsKey; label: string }>;
 
 const form = useForm({
     turn: String(props.write.turn),
@@ -759,14 +792,26 @@ const energyBandNote = computed(() =>
                         <BaseSelect id="turn-penalty" v-model="form.penalty_kind" name="penalty_kind" :options="[{ value: '', label: 'None recorded' }, { value: 'energy', label: 'Energy' }, { value: 'mood', label: 'Mood' }, { value: 'both', label: 'Both' }]" :error="errorOf('penalty_kind')" />
                     </label>
                     <template v-if="props.write.performance.enabled">
-                        <label class="flex flex-col gap-1">
-                            <span class="text-ink-muted">Performance type</span>
-                            <BaseSelect id="turn-performance-type" v-model="performanceType" name="performance_type" :options="[{ value: '', label: 'Not recorded' }, ...props.write.performance.types.map((type) => ({ value: type, label: type }))]" />
-                        </label>
-                        <label class="flex flex-col gap-1">
-                            <span class="text-ink-muted">Performance delta</span>
-                            <BaseInput id="turn-performance-delta" v-model="performanceDelta" type="number" name="performance_delta" />
-                        </label>
+                        <!--
+                          Both controls name themselves through `label`, not through a wrapping
+                          `<label>`: a wrapper owns the text and leaves the inner select/input with no
+                          accessible name, which is the defect `BaseSelectAccessibleNameTest` exists
+                          for. These two sites were the last ones still carrying the wrapper.
+                        -->
+                        <BaseSelect
+                            id="turn-performance-type"
+                            v-model="performanceType"
+                            name="performance_type"
+                            label="Performance type"
+                            :options="[{ value: '', label: 'Not recorded' }, ...props.write.performance.types.map((type) => ({ value: type, label: type }))]"
+                        />
+                        <BaseInput
+                            id="turn-performance-delta"
+                            v-model="performanceDelta"
+                            name="performance_delta"
+                            type="number"
+                            label="Performance delta"
+                        />
                     </template>
                 </div>
                 <p class="mt-2 text-xs text-ink-muted">

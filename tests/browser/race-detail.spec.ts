@@ -42,7 +42,7 @@ test('answers 200 and renders the enriched race', async ({ page }) => {
     await expect(conditions.getByRole('row', { name: /Direction\s+Right-Handed/ })).toBeVisible();
     await expect(conditions.getByRole('row', { name: /Season\s+Winter \(early\)/ })).toBeVisible();
     await expect(conditions.getByRole('row', { name: /Entries\s+18/ })).toBeVisible();
-    await expect(conditions.getByRole('row', { name: /Factor effects\s+Speed, Guts/ })).toBeVisible();
+    await expect(conditions.getByRole('row', { name: /Spark effects\s+Speed, Guts/ })).toBeVisible();
 
     // A source code with no label is disclosed as a code, never printed bare.
     await expect(conditions.getByRole('row', { name: /Course\s+Code 3/ })).toBeVisible();
@@ -66,10 +66,10 @@ test('renders a partial race with an absence note for the column the source lack
     await expect(conditions.getByRole('row', { name: /Entries\s+16/ })).toBeVisible();
     // The absence is a disclosure: the summary states N/A and names the reason, and opening it
     // prints the same sentence beside the value it annotates.
-    const factorAbsence = conditions.locator('summary').filter({ hasText: 'No factor effects recorded for this slot.' });
-    await expect(factorAbsence).toBeVisible();
-    await factorAbsence.click();
-    await expect(conditions.getByText('No factor effects recorded for this slot.', { exact: true })).toBeVisible();
+    const sparkAbsence = conditions.locator('summary').filter({ hasText: 'No spark effects recorded for this slot.' });
+    await expect(sparkAbsence).toBeVisible();
+    await sparkAbsence.click();
+    await expect(conditions.getByText('No spark effects recorded for this slot.', { exact: true })).toBeVisible();
 
     // Rewards are null on this row: the absence is stated and the id disclosure is not drawn.
     const rewards = page.locator('.card').filter({ has: page.getByRole('heading', { name: 'Rewards' }) });
@@ -94,7 +94,7 @@ test('renders the empty join as absence notes rather than a crash', async ({ pag
         'No track name recorded for this slot.',
         'No direction recorded for this slot.',
         'No entry count recorded for this slot.',
-        'No factor effects recorded for this slot.',
+        'No spark effects recorded for this slot.',
     ];
 
     for (const reason of reasons) {

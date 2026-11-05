@@ -65,11 +65,20 @@ interface Paginator<T> {
     total: number;
 }
 
+/**
+ * One effect line in the deck analysis, declared to match `DeckAnalysis.vue`'s own `EffectLine`.
+ *
+ * The card line carries `basis` ('catalog' for an unequipped card's cap figure, 'level' for a card at
+ * an entered level) and that `level`, both from `App\Services\DeckAnalysis` (`:110`, `:217-220`). This
+ * file's copy listed only `card_name` and `display`, so passing `analysis.categories` into the
+ * component compared two unrelated `EffectLine` types even though the payload was correct — and the
+ * basis/level the component renders could not be checked from here.
+ */
 interface EffectLine {
     effect_id: number;
     name: string | null;
     mode: 'flat' | 'additive' | 'multiplicative';
-    cards: { card_name: string; display: string }[];
+    cards: { card_name: string; display: string; basis: 'catalog' | 'level'; level: number | null }[];
     total: { value: number; display: string; basis: string } | null;
 }
 
