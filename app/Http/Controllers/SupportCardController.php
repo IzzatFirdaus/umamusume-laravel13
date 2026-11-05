@@ -210,7 +210,7 @@ class SupportCardController extends Controller
         ];
     }
 
-/**
+    /**
      * The export's own id for Friendship Bonus, the effect the deck-slot comparison turns on.
      *
      * An id and not a label: `support_effects` is the join target for `support_cards.effects`, so the
@@ -301,6 +301,7 @@ class SupportCardController extends Controller
                 if ($nameCmp !== 0) {
                     return $nameCmp;
                 }
+
                 return strcmp($a['title_en'], $b['title_en']);
             }
             if ($an) {
@@ -319,6 +320,7 @@ class SupportCardController extends Controller
             if ($nameCmp !== 0) {
                 return $nameCmp;
             }
+
             return strcmp($a['title_en'], $b['title_en']);
         });
 
@@ -328,7 +330,7 @@ class SupportCardController extends Controller
         $offset = ($page - 1) * $perPage;
         $pageItems = $cardsWithSort->slice($offset, $perPage)->values();
 
-        return new \Illuminate\Pagination\LengthAwarePaginator(
+        return new LengthAwarePaginator(
             $pageItems->map(function (array $item): array {
                 return $this->mapCardForIndex($item['card'], $item['effects']);
             })->all(),
@@ -644,16 +646,8 @@ class SupportCardController extends Controller
     /**
      * @return Builder<SupportCard>
      */
-        /**
-     * @param  ?string  $q
-     * @param  ?string  $rarity
-     * @param  ?string  $type
-     * @param  ?string  $status
-     * @param  ?string  $server
-     * @param  ?string  $trainee
+    /**
      * @param  ?array<int>  $effects
-     * @param  ?bool  $usedInDeck
-     * @param  ?bool  $owned
      * @return Builder<SupportCard>
      */
     private function filtered(?string $q, ?string $rarity, ?string $type, ?string $status, ?string $server = null, ?string $trainee = null, ?array $effects = null, ?bool $usedInDeck = null, ?bool $owned = null): Builder
@@ -684,7 +678,7 @@ class SupportCardController extends Controller
         if ($trainee !== null) {
             $query->join('umamusume', function (JoinClause $join) use ($trainee): void {
                 $join->on('umamusume.external_ref', '=', DB::raw("CONCAT('gametora:char:', support_cards.char_id)"))
-                     ->where('umamusume.external_ref', $trainee);
+                    ->where('umamusume.external_ref', $trainee);
             });
         }
 
@@ -777,7 +771,7 @@ class SupportCardController extends Controller
      * Join via `umamusume.external_ref = 'gametora:char:{char_id}'` - no new FK, no migration.
      * Cards whose `char_id` does not resolve simply never match a trainee filter.
      *
-     * @return array<string, string>  [external_ref => display_name]
+     * @return array<string, string> [external_ref => display_name]
      */
     private function traineeOptions(string $server): array
     {
@@ -799,7 +793,7 @@ class SupportCardController extends Controller
      * Returns dictionary effects that have at least one card with a stated anchor under the server filter.
      *
      * @param  array<int, array{name: string, symbol: string|null, calc: string|null}>  $dictionary
-     * @return array<int, string>  [effect_id => name]
+     * @return array<int, string> [effect_id => name]
      */
     private function effectOptions(string $server, array $dictionary): array
     {
@@ -858,7 +852,7 @@ class SupportCardController extends Controller
         );
     }
 
-/**
+    /**
      * The chosen ordering, with the label a Trainer reads as the tiebreaker in every case.
      *
      * A tiebreaker is not cosmetic: two cards of the same rarity have no defined order without one, and
@@ -893,12 +887,12 @@ class SupportCardController extends Controller
         return (match ($sort) {
             'name' => $query,
             'type' => $query->orderByRaw(
-                'CASE ' .
+                'CASE '.
                 implode(' ', array_map(
                     static fn (string $t, int $o): string => "WHEN type = ? THEN $o",
                     array_keys($typeOrder),
                     array_values($typeOrder)
-                )) .
+                )).
                 ' ELSE 99 END',
                 array_keys($typeOrder)
             ),

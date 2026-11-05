@@ -19,7 +19,6 @@ declare(strict_types=1);
  * operators leave `distance_type` NULL in the parser, so they are counted here
  * as the parser counts them (zero on the current export).
  */
-
 $file = 'database/seeders/data/skills.609afe88.json';
 $dbPath = 'database/database.sqlite';
 $limit = 20;
@@ -175,7 +174,7 @@ $fileMissingFromTable = []; // file ids not in the table
 $perRelease = [];
 
 if ($dbAvailable) {
-    $pdo = new PDO('sqlite:' . $dbPath);
+    $pdo = new PDO('sqlite:'.$dbPath);
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     foreach ($pdo->query('SELECT id, name, export_id, release_status, description, distance_type FROM skills') as $row) {
@@ -257,8 +256,8 @@ if ($dbAvailable) {
     echo "  description non-null (table)              : {$descTable}\n";
     echo "  description non-blank (table)             : {$descTableNonBlank}\n";
     echo "  distance_type set (table)                 : {$distanceTable}\n";
-    echo "  table rows not in file                    : " . count($missingFromFile) . "\n";
-    echo "  file rows not in table                    : " . count($fileMissingFromTable) . "\n";
+    echo '  table rows not in file                    : '.count($missingFromFile)."\n";
+    echo '  file rows not in table                    : '.count($fileMissingFromTable)."\n";
 
     if ($missingFromFile !== []) {
         echo "\n  Table rows not in file (first {$limit}):\n";
@@ -274,12 +273,12 @@ if ($dbAvailable) {
         }
 
         if (count($missingFromFile) > $limit) {
-            echo "    ... " . (count($missingFromFile) - $limit) . " more\n";
+            echo '    ... '.(count($missingFromFile) - $limit)." more\n";
         }
     }
 
     if ($fileMissingFromTable !== []) {
-        echo "\n  File rows not in table (first {$limit}): " . implode(', ', array_slice($fileMissingFromTable, 0, $limit)) . "\n";
+        echo "\n  File rows not in table (first {$limit}): ".implode(', ', array_slice($fileMissingFromTable, 0, $limit))."\n";
     }
 } else {
     echo "\nDatabase: (not found or --no-db) — join skipped\n";
@@ -289,7 +288,7 @@ echo "{$line}\n";
 
 // Machine-readable tail, one line, for commit-message citation.
 echo "SUMMARY rows={$total} unique_keys={$uniqueKeys} desc_nonnull={$descNonNull} desc_nonblank={$descNonBlank} "
-    . "exact_rows={$rowsWithExact} exact_occurrences={$exactOccurrences} multi_token_rows={$rowsWithTwoOrMore} "
-    . "range_occurrences={$rangeOccurrences} range_rows={$rowsWithRange} "
-    . "table_rows={$tableRows} table_not_in_file=" . count($missingFromFile)
-    . " file_not_in_table=" . count($fileMissingFromTable) . "\n";
+    ."exact_rows={$rowsWithExact} exact_occurrences={$exactOccurrences} multi_token_rows={$rowsWithTwoOrMore} "
+    ."range_occurrences={$rangeOccurrences} range_rows={$rowsWithRange} "
+    ."table_rows={$tableRows} table_not_in_file=".count($missingFromFile)
+    .' file_not_in_table='.count($fileMissingFromTable)."\n";

@@ -197,6 +197,7 @@ class ReviewController extends Controller
 
         return redirect()->route('review.index')->with('status', 'Candidate returned to Pending.');
     }
+
     public function resolve(ResolveMatchCandidateRequest $request, MatchCandidate $candidate, ResolveMatchCandidate $action): RedirectResponse
     {
         $action->handle($candidate, $request->verdict());

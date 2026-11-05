@@ -2,15 +2,11 @@
 
 declare(strict_types=1);
 
-use App\Enums\CardRarity;
-use App\Enums\ReleaseStatus;
-use App\Enums\RunStatus;
 use App\Models\DeckSlot;
-use App\Models\Skill;
 use App\Models\SupportCard;
-use App\Models\SupportEffect;
 use App\Models\TrainingRun;
-use App\Models\Umamusume;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Log;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\NoTransactionTestCase;
 
@@ -26,21 +22,21 @@ uses(NoTransactionTestCase::class)
     });
 
 it('filters by recorded as owned', function (): void {
-    $ownedCard = \App\Models\SupportCard::factory()->create(['char_name' => 'Owned', 'title_en' => '[Tracen Academy]']);
-    $rentedCard = \App\Models\SupportCard::factory()->create(['char_name' => 'Rented', 'title_en' => '[Tracen Academy]']);
-    
+    $ownedCard = SupportCard::factory()->create(['char_name' => 'Owned', 'title_en' => '[Tracen Academy]']);
+    $rentedCard = SupportCard::factory()->create(['char_name' => 'Rented', 'title_en' => '[Tracen Academy]']);
+
     // Create a saved run with owned card
-    $run = \App\Models\TrainingRun::factory()->create();
-    \App\Models\DeckSlot::factory()->create([
+    $run = TrainingRun::factory()->create();
+    DeckSlot::factory()->create([
         'training_run_id' => $run->id,
         'support_card_id' => $ownedCard->id,
         'slot_position' => 1,
         'ownership' => 'OWNED',
     ]);
-    
+
     // Create a saved run with rented card
-    $run2 = \App\Models\TrainingRun::factory()->create();
-    \App\Models\DeckSlot::factory()->create([
+    $run2 = TrainingRun::factory()->create();
+    DeckSlot::factory()->create([
         'training_run_id' => $run2->id,
         'support_card_id' => $rentedCard->id,
         'slot_position' => 1,
@@ -48,33 +44,33 @@ it('filters by recorded as owned', function (): void {
     ]);
 
     // Debug: check the data directly
-    $ownedCards = \App\Models\SupportCard::query()
-        ->whereHas('deckSlots', function (\Illuminate\Database\Eloquent\Builder $q): void {
+    $ownedCards = SupportCard::query()
+        ->whereHas('deckSlots', function (Builder $q): void {
             $q->where('ownership', 'OWNED')
-                ->whereHas('trainingRun', function (\Illuminate\Database\Eloquent\Builder $rq): void {
+                ->whereHas('trainingRun', function (Builder $rq): void {
                     $rq->whereNotNull('id');
                 });
         })
         ->get();
-    \Illuminate\Support\Facades\Log::info('Direct query owned cards: ' . $ownedCards->count());
+    Log::info('Direct query owned cards: '.$ownedCards->count());
     foreach ($ownedCards as $c) {
-        \Illuminate\Support\Facades\Log::info("  Card: {$c->char_name} {$c->title_en}");
+        Log::info("  Card: {$c->char_name} {$c->title_en}");
     }
 
     // Debug: check the HTTP request directly
     $response = $this->get('/support-cards?owned=1');
-    \Illuminate\Support\Facades\Log::info('HTTP response status: ' . $response->getStatusCode());
+    Log::info('HTTP response status: '.$response->getStatusCode());
     $content = $response->getContent();
-    \Illuminate\Support\Facades\Log::info('HTTP response content length: ' . strlen($content));
+    Log::info('HTTP response content length: '.strlen($content));
     // Parse the Inertia response
     $data = json_decode($content, true);
     if (isset($data['page']['props']['cards']['data'])) {
-        \Illuminate\Support\Facades\Log::info('HTTP response cards count: ' . count($data['page']['props']['cards']['data']));
+        Log::info('HTTP response cards count: '.count($data['page']['props']['cards']['data']));
         foreach ($data['page']['props']['cards']['data'] as $card) {
-            \Illuminate\Support\Facades\Log::info("  HTTP Card: {$card['name']}");
+            Log::info("  HTTP Card: {$card['name']}");
         }
     } else {
-        \Illuminate\Support\Facades\Log::info('No cards data in response');
+        Log::info('No cards data in response');
     }
 
     // Filter by owned

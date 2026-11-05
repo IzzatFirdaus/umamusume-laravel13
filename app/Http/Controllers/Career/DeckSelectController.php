@@ -118,7 +118,6 @@ class DeckSelectController extends Controller
      * - Our Grand Concert: Speed cap is 1600, Lessons/Songs mechanic active
      * - URA Finale: Standard scenario, no extra systems
      *
-     * @param  string|null  $scenarioKey
      * @return list<string>
      */
     private function scenarioHints(?string $scenarioKey): array

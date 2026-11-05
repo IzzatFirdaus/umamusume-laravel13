@@ -13,6 +13,7 @@ use Tests\TestCase;
 class SpiritBurstCountdownTest extends TestCase
 {
     use RefreshDatabase;
+
     private TeamPanelBuilder $builder;
 
     protected function setUp(): void

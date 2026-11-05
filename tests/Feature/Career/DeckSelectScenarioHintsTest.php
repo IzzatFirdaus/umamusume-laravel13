@@ -6,7 +6,6 @@ namespace Tests\Feature\Career;
 
 use App\Models\DeckSlot;
 use App\Models\SupportCard;
-use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Models\Veteran;
 use App\Services\Career\SetupDraft;
@@ -25,6 +24,7 @@ use Tests\TestCase;
 final class DeckSelectScenarioHintsTest extends TestCase
 {
     use RefreshDatabase;
+
     public function test_unity_cup_hint_highlights_wit(): void
     {
         $this->seedDraft('unity_cup');

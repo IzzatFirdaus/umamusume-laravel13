@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Tests\Feature;
 
-use App\Enums\RunStatus;
 use App\Models\CharacterCard;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;

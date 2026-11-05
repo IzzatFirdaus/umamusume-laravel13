@@ -7,7 +7,6 @@ use App\Models\SupportCard;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Services\Career\SetupDraft;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Session;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -160,8 +159,9 @@ it('card in draft deck but not in saved runs shows in-deck position and NOT_RECO
             fn (Assert $page) => $page
                 ->component('Career/DeckSelect')
                 ->where('picker.options', function ($options) use ($card) {
-    // @phpstan-ignore-next-line argument.templateType - collect() template types not resolvable in closure
+                    // @phpstan-ignore-next-line argument.templateType - collect() template types not resolvable in closure
                     $opt = collect($options)->where('id', $card->id)->first();
+
                     return $opt['in_deck_position'] === 2
                         && $opt['ownership_group'] === 'NOT_RECORDED';
                 })
@@ -224,10 +224,11 @@ it('picker payload includes type match marker for current slot', function (): vo
             fn (Assert $page) => $page
                 ->component('Career/DeckSelect')
                 ->where('picker.options', function ($options) use ($speedCard, $staminaCard) {
-    // @phpstan-ignore-next-line argument.templateType - collect() template types not resolvable in closure
+                    // @phpstan-ignore-next-line argument.templateType - collect() template types not resolvable in closure
                     $speed = collect($options)->where('id', $speedCard->id)->first();
-    // @phpstan-ignore-next-line argument.templateType - collect() template types not resolvable in closure
+                    // @phpstan-ignore-next-line argument.templateType - collect() template types not resolvable in closure
                     $stamina = collect($options)->where('id', $staminaCard->id)->first();
+
                     return $speed['type_match'] === true
                         && $speed['slot_type'] === 'speed'
                         && $stamina['type_match'] === false
@@ -287,8 +288,9 @@ it('not-recorded card has explicit NOT_RECORDED ownership group', function (): v
             fn (Assert $page) => $page
                 ->component('Career/DeckSelect')
                 ->where('picker.options', function ($options) use ($card) {
-    // @phpstan-ignore-next-line argument.templateType - collect() template types not resolvable in closure
+                    // @phpstan-ignore-next-line argument.templateType - collect() template types not resolvable in closure
                     $opt = collect($options)->where('id', $card->id)->first();
+
                     return $opt['ownership_group'] === 'NOT_RECORDED'
                         && $opt['in_deck_position'] === null;
                 })
@@ -312,11 +314,12 @@ it('picker filters options by slot type', function (): void {
                 ->component('Career/DeckSelect')
                 ->where('picker.type', 'stamina')
                 ->where('picker.options', function ($options) use ($speedCard, $staminaCard, $powerCard) {
-    // @phpstan-ignore-next-line argument.templateType - collect() template types not resolvable in closure
+                    // @phpstan-ignore-next-line argument.templateType - collect() template types not resolvable in closure
                     $ids = collect($options)->pluck('id')->all();
+
                     return in_array($staminaCard->id, $ids)
-                        && !in_array($speedCard->id, $ids)
-                        && !in_array($powerCard->id, $ids);
+                        && ! in_array($speedCard->id, $ids)
+                        && ! in_array($powerCard->id, $ids);
                 })
         );
 });
@@ -337,10 +340,11 @@ it('picker filters options by search query', function (): void {
             ->component('Career/DeckSelect')
             ->where('picker.query', 'Tokai')
             ->where('picker.options', function ($options) {
-    // @phpstan-ignore-next-line argument.templateType - collect() template types not resolvable in closure
+                // @phpstan-ignore-next-line argument.templateType - collect() template types not resolvable in closure
                 $names = collect($options)->pluck('name')->all();
+
                 return in_array('Tokai Dream', $names)
-                    && !in_array('Agnes Tachyon', $names);
+                    && ! in_array('Agnes Tachyon', $names);
             })
     );
 });

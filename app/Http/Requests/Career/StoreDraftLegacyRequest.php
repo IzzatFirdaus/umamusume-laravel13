@@ -43,6 +43,7 @@ class StoreDraftLegacyRequest extends StoreLegacySelectionRequest
             'next' => ['nullable', 'in:deck'],
         ]);
     }
+
     public function authorize(): bool
     {
         return true; // local-only tool, and no run exists at this step yet (ARCHITECTURE §8)

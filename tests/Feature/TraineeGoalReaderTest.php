@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Enums\TraineeGoalType;
 use App\Models\TraineeGoal;
-use App\Models\Umamusume;
 
 test('every goal_type has a factory state or path', function (): void {
     // Placement - default

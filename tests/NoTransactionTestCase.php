@@ -4,9 +4,11 @@ namespace Tests;
 
 use Illuminate\Contracts\Console\Kernel;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Testing\TestResponse;
 use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 /**
@@ -21,7 +23,7 @@ abstract class NoTransactionTestCase extends PHPUnitTestCase
     {
         parent::setUp();
 
-        $this->app = require_once __DIR__ . '/../bootstrap/app.php';
+        $this->app = require_once __DIR__.'/../bootstrap/app.php';
         $this->app->make(Kernel::class)->bootstrap();
 
         // Run migrations
@@ -45,12 +47,12 @@ abstract class NoTransactionTestCase extends PHPUnitTestCase
         return Artisan::call($command, $parameters);
     }
 
-    public function get(string $uri, array $headers = []): \Illuminate\Testing\TestResponse
+    public function get(string $uri, array $headers = []): TestResponse
     {
         return $this->call('GET', $uri, [], [], [], $headers);
     }
 
-    public function call(string $method, string $uri, array $parameters = [], array $cookies = [], array $files = [], array $server = []): \Illuminate\Testing\TestResponse
+    public function call(string $method, string $uri, array $parameters = [], array $cookies = [], array $files = [], array $server = []): TestResponse
     {
         $server = array_merge([
             'HTTP_HOST' => 'localhost',
@@ -58,7 +60,7 @@ abstract class NoTransactionTestCase extends PHPUnitTestCase
         ], $server);
 
         return $this->app->handle(
-            $request = \Illuminate\Http\Request::create($uri, $method, $parameters, $cookies, $files, $server)
+            $request = Request::create($uri, $method, $parameters, $cookies, $files, $server)
         );
     }
 
