@@ -77,6 +77,14 @@ const props = defineProps<{
      * mood readout; null when a caller does not carry the figure, so no percentage is invented.
      */
     moodEffect?: { training: number; running: number } | null;
+    /**
+     * D11: the full five-tier Mood Effect table — training and running at GREAT, GOOD, NORMAL, BAD and
+     * AWFUL — shipped from `config('uma.mood_effect')`. The pill prints the current tier's training
+     * figure and the disclosure below prints all ten cells, so the arithmetic is on the screen and this
+     * component carries no second copy of it. Null when a caller sends none, and then the disclosure is
+     * not drawn rather than drawn empty.
+     */
+    moodEffectTable?: Record<string, { training: number; running: number }> | null;
 }>();
 
 const group = (n: number): string => n.toLocaleString('en-US');
@@ -90,29 +98,54 @@ const growthFor = (stat: Stat): number | null => {
 const currentHint = (stat: Stat): string => (stat.current === null ? 'No turn has recorded this stat yet.' : `Entered: ${group(stat.current)}.`);
 
 /**
- * The tier's headline percentage (`UMAMUSUME_REFERENCE.md` §1.1.6's training column: +20% at GREAT
- * down to −20% at AWFUL). DM-5 makes the mood reading word + arrow + percentage, and every cockpit
- * HFW draws `GREAT ↑ +20%`, so this is the one column the pill carries. The reference's second
- * column (pre-race attributes) is not drawn on this screen.
+ * A percentage with its sign, the form §1.1.6 prints its ten cells in.
+ *
+ * Zero prints as `0%`, not `+0%`: the NORMAL tier is an exact zero, and a plus beside it reads as "a
+ * bonus whose size is zero" — a claim the reference does not make. The ladder then reads
+ * `+20 / +10 / 0 / -10 / -20`, which is the progression a Trainer scans for.
  */
-const MOOD_TRAINING_PCT: Record<string, number> = {
-    GREAT: 20,
-    GOOD: 10,
-    NORMAL: 0,
-    BAD: -10,
-    AWFUL: -20,
-};
+const signed = (value: number): string => `${value > 0 ? '+' : ''}${value}%`;
 
-/** The tier's percentage, signed, or null for a tier nobody recorded. */
+/**
+ * The tier this run's latest turn recorded, read off the `meta` rows the caller already sends rather
+ * than asked for a second time. Null when no turn has recorded a mood, and then nothing is claimed.
+ */
+const currentMood = computed((): string | null => {
+    const row = props.meta.find((entry) => entry.key === 'mood');
+
+    return typeof row?.value === 'string' ? row.value : null;
+});
+
+/**
+ * The tier's training percentage, signed — `UMAMUSUME_REFERENCE.md` §1.1.6's training column, +20% at
+ * GREAT down to −20% at AWFUL. DM-5 makes the mood reading word + arrow + percentage, and every cockpit
+ * HFW draws `GREAT ↑ +20%`, so this is the one column the pill carries.
+ *
+ * Read off the shipped table when a caller sends one, so the five cells have a single owner
+ * (`config('uma.mood_effect')`) and this component keeps no second copy. Null for a tier nobody
+ * recorded, which is what makes the pill print `N/A` rather than an invented 0%.
+ */
 const moodPercent = (tier: string | null): string | null => {
-    if (tier === null || MOOD_TRAINING_PCT[tier] === undefined) {
+    if (tier === null) {
         return null;
     }
 
-    const value = MOOD_TRAINING_PCT[tier];
+    const value = props.moodEffectTable?.[tier]?.training;
 
-    return `${value >= 0 ? '+' : ''}${value}%`;
+    return value === undefined ? null : signed(value);
 };
+
+/**
+ * The current tier's own row, so the sentence under the table prints both of its figures without
+ * defaulting a tier the table does not carry to a zero nobody recorded.
+ */
+const currentMoodEffect = computed((): { training: number; running: number } | null => {
+    if (currentMood.value === null) {
+        return null;
+    }
+
+    return props.moodEffectTable?.[currentMood.value] ?? null;
+});
 
 /**
  * The bars' own caption. The Cockpit draws them against the run's ceiling (HFW annotation 3): the
@@ -236,5 +269,46 @@ function percent(stat: Stat): number {
                 </div>
             </li>
         </ul>
+
+        <!-- D11 (2026-11-04): the current tier's two figures written out, then every cell §1.1.6 states.
+             The sentence sits OUTSIDE the disclosure on purpose: `career-cockpit.spec.ts` asserts it is
+             visible without a click, and content inside a closed `<details>` is not. The table stays in
+             the disclosure because it is reference detail, not the moment's reading, and a five-row
+             table inside the four-tile grid would undo the HFW-OVERRIDE recorded above. -->
+        <p v-if="props.moodEffectTable && currentMood !== null && currentMoodEffect !== null" class="mt-4 text-sm">
+            This run is at {{ currentMood }}: training {{ signed(currentMoodEffect.training) }},
+            running {{ signed(currentMoodEffect.running) }}.
+        </p>
+
+        <details v-if="props.moodEffectTable" class="mt-2">
+            <summary class="min-h-11 cursor-pointer text-sm font-semibold text-ink-strong">
+                Mood effect at every tier
+            </summary>
+
+            <div class="mt-2 overflow-x-auto">
+                <table class="w-full text-sm">
+                    <caption class="sr-only">The training and pre-race bonus at each of the five mood tiers</caption>
+                    <thead>
+                        <tr class="text-left text-xs text-ink-muted">
+                            <th scope="col" class="pb-1 pr-4 font-semibold">Mood</th>
+                            <th scope="col" class="pb-1 pr-4 font-semibold">Training</th>
+                            <th scope="col" class="pb-1 font-semibold">Running</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-rule">
+                        <tr
+                            v-for="(cell, tier) in props.moodEffectTable"
+                            :key="tier"
+                            :aria-current="currentMood === tier ? 'true' : undefined"
+                            :class="currentMood === tier ? 'font-semibold text-ink-strong' : ''"
+                        >
+                            <th scope="row" class="py-1 pr-4 text-left font-normal">{{ tier }}</th>
+                            <td class="py-1 pr-4 font-mono tabular-nums">{{ signed(cell.training) }}</td>
+                            <td class="py-1 font-mono tabular-nums">{{ signed(cell.running) }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </details>
     </section>
 </template>

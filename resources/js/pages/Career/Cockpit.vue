@@ -209,6 +209,8 @@ const props = defineProps<{
     };
     /** A-0.11: the client's Mood Effect headline (great tier: +20% training, +4% running). */
     moodEffect: { training: number; running: number };
+    /** D11: the same five tiers the headline is read from, so the panel prints every cell. */
+    moodEffectTable: Record<string, { training: number; running: number }>;
     actions: { key: string; label: string; href: string; recommended: boolean; note: string }[];
     /** The team-setup door (`v3.0.0`), null where the scenario records no team. */
     team_url: string | null;
@@ -819,6 +821,7 @@ const jumpToShop = (): void => {
                     :growth-rate="props.identity.growth_rate"
                     :fan-ladder="props.identity.fan_ladder"
                     :mood-effect="props.moodEffect"
+                    :mood-effect-table="props.moodEffectTable"
                     denominator-label="cap"
                     :title="isActive ? 'Stats and state' : 'Final stats'"
                 />

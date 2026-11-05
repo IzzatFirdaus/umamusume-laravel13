@@ -290,9 +290,12 @@ class CockpitController extends Controller
             // A-0.11: the client's Mood Effect headline (great tier: +20% training, +4% running),
             // sourced from `UMAMUSUME_REFERENCE.md` §1.1.6 into `config('uma.mood_effect')`.
             'moodEffect' => [
-                'training' => (int) config('uma.mood_effect.training'),
-                'running' => (int) config('uma.mood_effect.running'),
+                'training' => (int) config('uma.mood_effect.GREAT.training'),
+                'running' => (int) config('uma.mood_effect.GREAT.running'),
             ],
+            // D11 (2026-11-04): the full five-tier table, so the panel reads both columns off config
+            // instead of carrying a hardcoded training column and dropping the running one.
+            'moodEffectTable' => config('uma.mood_effect'),
             'actions' => $this->actionSection($run, $advice),
             'advisor' => $this->advisorSection($advice, $run),
             // Our Grand Concert's five Performance types and what this run's turns recorded against

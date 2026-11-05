@@ -45,7 +45,7 @@ interface Props {
     cards: CompareCard[];
 }
 
-defineProps<Props>();
+const props = defineProps<Props>();
 defineEmits<{ close: [] }>();
 
 /**

@@ -577,17 +577,28 @@ return [
     ],
 
     /*
-     * The client's Mood Effect panel (UMAMUSUME_REFERENCE.md §1.1.6, client capture 2026-09-27): the
-     * `GREAT` tier's training bonus is +20% and its pre-race bonus is +4%. The full ten-cell per-tier
-     * table (training +20/+10/0/−10/−20 and running +4/+2/0/−2/−4) is the panel's own and lives in
-     * `CareerStatePanel.vue` beside the mood readout; this entry stays the one sourced `GREAT` headline
-     * the older A-0.11 ruling kept, and is superseded where a per-tier figure is needed.
+     * The client's Mood Effect table (UMAMUSUME_REFERENCE.md §1.1.6, client capture 2026-09-27): the
+     * training bonus and the pre-race bonus at every tier, +20%/+4% at GREAT down to −20%/−4% at AWFUL.
      *
-     * @var array{training: int, running: int}
+     * This array is the one owner of all ten cells. The cockpit ships the whole table to the page as
+     * `moodEffectTable`, and `CareerStatePanel.vue` reads both columns off it rather than carrying a
+     * second copy — the previous arrangement hardcoded the training column in the component and left
+     * the running column off the screen entirely while this comment claimed otherwise.
+     *
+     * `moodEffect` on the payload keeps the one `GREAT` headline the older A-0.11 ruling pinned, so
+     * that reading is unchanged; the table supersedes it wherever a per-tier figure is needed.
+     *
+     * The key is `running`, not `race`: `UMAMUSUME_REFERENCE.md` §1.1.6 words the second column as the
+     * pre-race bonus, and the shipped payload, the tile copy and the browser spec all say "running".
+     *
+     * @var array<string, array{training: int, running: int}>
      */
     'mood_effect' => [
-        'training' => 20,
-        'running' => 4,
+        'GREAT' => ['training' => 20, 'running' => 4],
+        'GOOD' => ['training' => 10, 'running' => 2],
+        'NORMAL' => ['training' => 0, 'running' => 0],
+        'BAD' => ['training' => -10, 'running' => -2],
+        'AWFUL' => ['training' => -20, 'running' => -4],
     ],
 
     /*

@@ -38,7 +38,7 @@ interface Option {
     slot_type: string | null;
 }
 
-defineProps<{
+const props = defineProps<{
     /** The slot's own name, e.g. "Slot 3 · Power". */
     slotLabel: string;
     /** The catalog rows the server returned for the current filter. */
