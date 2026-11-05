@@ -14,6 +14,7 @@
  * No-cost pool skills keep the selector with the "no published cost" caption; no "hints do not apply" copy.
  */
 import { computed, nextTick, ref } from 'vue';
+import { langOf } from '../../domain/skillDisplay';
 
 interface FitCell {
     key: string;
@@ -87,7 +88,7 @@ async function move(delta: number): Promise<void> {
         <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
             <h4 class="text-lg font-semibold text-ink-strong">
                 {{ props.row.name }}
-                <span v-if="props.row.name_ja !== null" lang="ja" class="ml-1 font-normal text-ink-muted">{{ props.row.name_ja }}</span>
+                <span v-if="props.row.name_ja !== null" :lang="langOf(props.row.name_ja) ?? undefined" class="ml-1 font-normal text-ink-muted">{{ props.row.name_ja }}</span>
                 <span
                     v-if="props.row.is_unique"
                     class="ml-1 rounded-full bg-sunken px-2 py-0.5 text-xs font-normal text-ink-strong"
