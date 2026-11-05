@@ -1,0 +1,190 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Enums\ReleaseStatus;
+use App\Models\Skill;
+use Inertia\Testing\AssertableInertia as Assert;
+
+/*
+ * The catalogue's scope filter (`R1`, `R2`; ADR-0011 §2; PRD FR-D-3).
+ *
+ * Three scopes, and the default is the narrow one. `global` keeps `availableOnGlobal()`, which is the
+ * read-path commitment `ADR-0011` §2 states and the reason `SkillController`'s class docblock exists;
+ * `all` and `japan_only` are reference overrides a caller asks for by name. A filter that changed the
+ * default surface would reverse that decision without saying so, which is why the default is asserted
+ * here rather than assumed.
+ *
+ * **Every seeded row sets both `release_status` and `name_is_client`.** `Skill::scopeAvailableOnGlobal()`
+ * (`app/Models/Skill.php:108-112`) filters on both, and `SkillFactory` sets neither, so a row missing
+ * either column is invisible to the default scope and every assertion below would read green against an
+ * empty catalogue. A JapanOnly row sets `name_is_client` false because that is what the column means by
+ * construction (`GametoraSkillsParser:194`: `$clientName !== null && $onGlobal`), not because this file
+ * wants it false.
+ *
+ * `skillScreenImport()` is not used: its fixture carries no `distance_type` (asserted in
+ * `SkillSearchScreenTest`), so it cannot reach the composition cases.
+ */
+
+/**
+ * A Global row: released, and named by the client. Both columns, or it is invisible.
+ *
+ * Named `globalSkillRow`, not `globalSkill`: `tests/Feature/SupportCardPageTest.php:46` already
+ * declares a `globalSkillRow()` and Pest loads every test file into one process, so a second function
+ * of that name is a fatal redeclaration that stops the whole suite before the first assertion.
+ * The suffix also states what this one returns (a factory row) rather than how it is scoped.
+ */
+function globalSkillRow(string $name, array $attributes = []): Skill
+{
+    return Skill::factory()->create([
+        'name' => $name,
+        'release_status' => ReleaseStatus::GlobalReleased->value,
+        'name_is_client' => true,
+        ...$attributes,
+    ]);
+}
+
+/** A JapanOnly row: the client has not shipped it, so no client string exists for it. */
+function japanOnlySkill(string $name, array $attributes = []): Skill
+{
+    return Skill::factory()->create([
+        'name' => $name,
+        'name_ja' => '掲げよ、己が魂の剣を！',
+        'release_status' => ReleaseStatus::JapanOnly->value,
+        'name_is_client' => false,
+        ...$attributes,
+    ]);
+}
+
+it('answers with the Global subset when no scope is asked for', function (): void {
+    globalSkillRow('Global Row');
+    japanOnlySkill('Japan Row');
+
+    $this->get(route('skills.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Skills/Index')
+            // The prop states the default rather than leaving it implied, so a URL can be read back.
+            ->where('scope', 'global')
+            ->has('skills.data', 1)
+            ->where('skills.data.0.name', 'Global Row')
+            // The select is built from this map, so an option the controller cannot answer would show up
+            // as a choice that returns nothing.
+            ->where('scopes', [
+                'global' => 'Global only',
+                'all' => 'Every skill',
+                'japan_only' => 'Japan only',
+            ])
+        );
+});
+
+it('includes both release statuses at scope=all', function (): void {
+    globalSkillRow('Global Row');
+    japanOnlySkill('Japan Row');
+
+    $this->get(route('skills.index', ['scope' => 'all']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scope', 'all')
+            ->has('skills.data', 2)
+        );
+});
+
+it('answers only JapanOnly rows at scope=japan_only, named by the source string', function (): void {
+    globalSkillRow('Global Row');
+    japanOnlySkill('Japan Row');
+
+    $this->get(route('skills.index', ['scope' => 'japan_only']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scope', 'japan_only')
+            ->has('skills.data', 1)
+            // `R1`/ruling A: the row's `name` column holds the export's `enname`, a rendering of the
+            // Japanese, which the Air Messiah ruling bars from UI copy. It is nulled at the payload edge
+            // so no surface can print it, and the source's own string is what the row shows.
+            ->where('skills.data.0.name', null)
+            ->where('skills.data.0.name_ja', '掲げよ、己が魂の剣を！')
+            // Ruling 1 (symmetric): `desc_en` on a JapanOnly row is third-party on the same test.
+            ->where('skills.data.0.description', null)
+        );
+});
+
+it('refuses an unknown scope rather than answering with a different one', function (): void {
+    globalSkillRow('Global Row');
+
+    // `R2`: an unknown facet value is refused, per this request class's own docblock. A typo dropped
+    // silently answers a question nobody asked, and at `all` that is 3x the rows.
+    //
+    // The refusal is a redirect carrying a field error, not a 422: `SkillSearchRequest` is a FormRequest
+    // on a browser GET, and Laravel answers a failed FormRequest with `redirect()->back()` plus the
+    // error bag. The existing precedent (`SkillSearchScreenTest`, "refuses a facet value the data has no
+    // such column for") asserts exactly this shape, and its target was pinned to the canonical route by
+    // ADR-0018 so the refusal cannot land on the referer.
+    $this->get(route('skills.index', ['scope' => 'glboal']))
+        ->assertRedirect(route('skills.index'))
+        ->assertSessionHasErrors('scope');
+});
+
+it('composes the scope with the distance facet, sentinel intact', function (): void {
+    globalSkillRow('Global Mile', ['distance_type' => 2]);
+    globalSkillRow('Global Sprint', ['distance_type' => 1]);
+    japanOnlySkill('Japan Mile', ['distance_type' => 2]);
+    japanOnlySkill('Japan Unrecorded', ['distance_type' => null]);
+
+    // Both facets narrow. A scope that widened the set, or a distance that was dropped once a scope was
+    // present, would show more than one row here.
+    $this->get(route('skills.index', ['scope' => 'all', 'distance' => '2']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scope', 'all')
+            ->where('distance', 2)
+            ->has('skills.data', 2)
+        );
+
+    // `0` is the Unspecified sentinel, not "no filter" (D6). Composed with a scope it must still select
+    // the rows that store no distance, which is one Global row and one JapanOnly row here.
+    $this->get(route('skills.index', ['scope' => 'all', 'distance' => '0']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('distance', 0)
+            ->has('skills.data', 1)
+            ->where('skills.data.0.name', null)
+        );
+});
+
+it('composes the scope with the search query', function (): void {
+    globalSkillRow('Corner Adept');
+    globalSkillRow('Straightaway');
+    japanOnlySkill('Corner Something');
+
+    $this->get(route('skills.index', ['scope' => 'all', 'search' => 'corner']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scope', 'all')
+            ->has('skills.data', 2)
+        );
+
+    // The same query at the default scope answers one row, so the scope is doing work rather than
+    // riding along.
+    $this->get(route('skills.index', ['search' => 'corner']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->has('skills.data', 1));
+});
+
+it('keeps the scope across pages', function (): void {
+    // Two pages at ten per page, so the pager has somewhere to go.
+    foreach (range(1, 12) as $i) {
+        globalSkillRow("Global Row {$i}");
+    }
+    japanOnlySkill('Japan Row');
+
+    $pages = $this->get(route('skills.index', ['scope' => 'all', 'pageSize' => '10', 'page' => '2']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scope', 'all')
+            ->has('skills.data', 3)
+        );
+
+    // The pager's own links carry the query, so page 2 is not page 2 of a different set.
+    expect($pages->inertiaProps('skills')['last_page'])->toBe(2);
+});

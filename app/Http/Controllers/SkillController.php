@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Enums\ReleaseStatus;
 use App\Http\Requests\SkillSearchRequest;
 use App\Models\CharacterCard;
 use App\Models\Skill;
@@ -24,9 +25,18 @@ use Inertia\Response;
 /**
  * Screen D, the skill search surface (PRD FR-D-2; DESIGN.md §8.4; CONSTRAINTS.md D-62 to D-65).
  *
- * Read path only. The engine writes `skills` and the Trainer writes `run_skills`; nothing here writes, and
- * no row can reach this screen that `Skill::availableOnGlobal()` rejects — a JP-only or third-party-named
- * skill on a Trainer-facing surface is a defect under `ADR-0011` §2 and PRD FR-D-3.
+ * Read path only. The engine writes `skills` and the Trainer writes `run_skills`; nothing here writes.
+ * No row can reach this screen at the default scope that `Skill::availableOnGlobal()` rejects. The
+ * catalogue exposes two explicit overrides — `?scope=all` (the full catalogue) and `?scope=japan_only`
+ * (JapanOnly rows) — for reference; the planning workflow's scoping is unaffected, and `SkillPoolNonLeakageTest`
+ * is the guard that keeps it so (`R1`, `ADR-0011` §2).
+ *
+ * **A JapanOnly row prints its own source string and nothing English.** `name_is_client` is
+ * `$clientName !== null && $onGlobal` (`GametoraSkillsParser:194`), so it is false on every JapanOnly row
+ * by construction; `name` there is the export's `enname`, a rendering of the Japanese. The Air Messiah
+ * ruling (`UMAMUSUME_REFERENCE.md` §2.7) bars that class of string from UI copy, and `desc_en` on the
+ * same rows is the same string class (present on exactly the same 355 rows), so both are nulled at the
+ * payload edge.
  *
  * **The rows print exactly the field set D-30 names for `Skill`** — name, name_ja, sp_cost, type, is_unique.
  * Two of §6.11's elements are not here because the data cannot honour them: the icon (`iconid` is on all
@@ -45,6 +55,19 @@ class SkillController extends Controller
 {
     /** The detail card's run list is capped; the total is stated beside it. */
     private const RUN_CARD_LIMIT = 20;
+
+    /** The default scope: the `[Global]` subset, per ADR-0011 §2. */
+    private const SCOPE_GLOBAL = 'global';
+
+    /** The scope that shows only rows the Global client has not received. */
+    private const SCOPE_JAPAN_ONLY = 'japan_only';
+
+    /** Every scope the catalogue answers, in the order the select offers them. */
+    public const SCOPES = [
+        self::SCOPE_GLOBAL => 'Global only',
+        'all' => 'Every skill',
+        self::SCOPE_JAPAN_ONLY => 'Japan only',
+    ];
 
     public function __construct(private readonly NameNormalizer $normalizer) {}
 
@@ -93,29 +116,52 @@ class SkillController extends Controller
         $rawDistance = $request->validated('distance');
         $distance = $rawDistance === null ? null : (int) $rawDistance;
 
-        $skills = $this->query($search, $type, $request->boolean('unique'), $distance)
+        // R1: `global` by default. `availableOnGlobal()` is the read-path commitment ADR-0011 §2 states,
+        // so the default surface keeps it; `all` and `japan_only` are explicit overrides a caller asks for
+        // by name.
+        $scope = $request->validated('scope') ?? self::SCOPE_GLOBAL;
+
+        $skills = $this->query($search, $type, $request->boolean('unique'), $distance, $scope)
             ->orderBy('name')
             ->paginate($perPage)
             ->withQueryString()
-            ->through(static fn (Skill $skill): array => [
-                'id' => $skill->id,
-                'name' => $skill->name,
-                'name_ja' => $skill->name_ja,
-                'is_unique' => $skill->is_unique,
-                'type' => $skill->type,
-                'sp_cost' => $skill->sp_cost,
-                // The activation predicate the source states, one entry per condition group, printed
-                // verbatim in monospace beside the readable name (`skills.html` annotation 1). Null is
-                // a group with no predicate, so the list carries only the strings the source wrote and
-                // the page states the absence once rather than inventing "none".
-                'conditions' => array_map(
-                    static fn (array $group): ?string => $group['condition'] ?? null,
-                    $skill->condition_groups ?? [],
-                ),
-            ]);
+            ->through(static function (Skill $skill): array {
+                // Ruling A: at `japan_only` the catalogue prints the source's own string and no English
+                // column. `name` on these rows is `enname`, the literal rendering of the Japanese, which
+                // the parser docblock and the Air Messiah ruling both call a third-party label rather than
+                // client copy. The prop is still sent as null so the page can state the absence instead of
+                // printing a string it must not print.
+                $japanOnly = $skill->release_status === ReleaseStatus::JapanOnly;
+
+                return [
+                    'id' => $skill->id,
+                    'name' => $japanOnly ? null : $skill->name,
+                    'name_ja' => $skill->name_ja,
+                    // Ruling 1 (symmetric): `desc_en` on a JapanOnly row carries the same third-party
+                    // status as `name_en`, because both are present on exactly the same 355 rows and the
+                    // Air Messiah test is about the string, not the field. Nulled here rather than hidden
+                    // in the template so no surface can leak it.
+                    'description' => $japanOnly ? null : $skill->description,
+                    // The catalogue's description gate is `displayDescription()`, which takes the row's
+                    // own availability. Sending it keeps the rule in one predicate; the null above is the
+                    // second guard, so a surface that forgets the predicate still cannot print the string.
+                    'release_status' => $skill->release_status?->value,
+                    'is_unique' => $skill->is_unique,
+                    'type' => $skill->type,
+                    'sp_cost' => $skill->sp_cost,
+                    // The activation predicate the source states, one entry per condition group, printed
+                    // verbatim in monospace beside the readable name (`skills.html` annotation 1). Null is
+                    // a group with no predicate, so the list carries only the strings the source wrote and
+                    // the page states the absence once rather than inventing "none".
+                    'conditions' => array_map(
+                        static fn (array $group): ?string => $group['condition'] ?? null,
+                        $skill->condition_groups ?? [],
+                    ),
+                ];
+            });
 
         // P3: count skills with range operators on distance_type (<= or >=) for the footer note
-        $rangeOpCount = $this->rangeOperatorCount();
+        $rangeOpCount = $this->rangeOperatorCount($scope);
 
         return [
             'skills' => $skills,
@@ -125,9 +171,11 @@ class SkillController extends Controller
             'types' => GametoraSkillsParser::CATEGORIES,
             'unspecifiedType' => SkillSearchRequest::UNSPECIFIED,
             'unique' => $request->boolean('unique'),
-            'totalCount' => $this->availableCount(),
+            'totalCount' => $this->availableCount($scope),
             'askedFor' => $this->describeAsk($search, $type, $request->boolean('unique')),
             'distance' => $distance,
+            'scope' => $scope,
+            'scopes' => self::SCOPES,
             'rangeOpCount' => $rangeOpCount,
         ];
     }
@@ -136,10 +184,10 @@ class SkillController extends Controller
      * Count of skills whose condition tokens contain range operators on distance_type (<= or >=).
      * Computed from the stored condition_groups JSON at query time.
      */
-    public function rangeOperatorCount(): int
+    public function rangeOperatorCount(string $scope = self::SCOPE_GLOBAL): int
     {
         $count = 0;
-        $skills = Skill::query()->availableOnGlobal()->get(['condition_groups']);
+        $skills = $this->scoped(Skill::query(), $scope)->get(['condition_groups']);
         foreach ($skills as $skill) {
             foreach ($skill->condition_groups ?? [] as $group) {
                 $condition = $group['condition'] ?? '';
@@ -168,7 +216,11 @@ class SkillController extends Controller
      */
     public function show(string $skill, Request $request): Response
     {
-        $model = Skill::query()->availableOnGlobal()->findOrFail((int) $skill);
+        // Widened from `availableOnGlobal()` by `R1`: the catalogue's `japan_only` and `all` scopes make
+        // these rows reachable, so the detail must answer them. A row the catalogue links to that the
+        // detail 404s is a dead end a Trainer cannot tell from a deleted row. The name and description
+        // are still gated separately (`skillPayload`), because reachability and display are two rules.
+        $model = Skill::query()->findOrFail((int) $skill);
 
         $compareSkill = null;
         $compareDiff = null;
@@ -361,12 +413,11 @@ class SkillController extends Controller
      * @param  ?int  $distance  exact distance_type value (1..4) or null for Unspecified
      * @return Builder<Skill>
      */
-    private function query(?string $search, ?string $type, bool $unique, ?int $distance = null): Builder
+    private function query(?string $search, ?string $type, bool $unique, ?int $distance = null, string $scope = self::SCOPE_GLOBAL): Builder
     {
         $key = $search === null ? null : $this->normalizer->normalize($search);
 
-        return Skill::query()
-            ->availableOnGlobal()
+        return $this->scoped(Skill::query(), $scope)
             // D-62: skill search matches on `match_key` OR `description_match_key`, never on a display string.
             // The query goes through the same normalizer that wrote the key, so `Corner  Adept` reaches
             // `corneradept×` and a query differing only in case or spacing is the same query.
@@ -400,9 +451,28 @@ class SkillController extends Controller
      * How many rows this screen can show before any query, for the empty state to state a fact rather than
      * a silence (D-65: the invitation names what a Trainer can search on).
      */
-    private function availableCount(): int
+    private function availableCount(string $scope = self::SCOPE_GLOBAL): int
     {
-        return Skill::query()->availableOnGlobal()->count();
+        return $this->scoped(Skill::query(), $scope)->count();
+    }
+
+    /**
+     * The read-path filter for one scope.
+     *
+     * `global` is `availableOnGlobal()` unchanged — the default surface, and ADR-0011 §2's commitment
+     * that the `[Global]` subset is what a Trainer-facing surface selects. The two overrides are
+     * reference reads a caller asks for by name (`R1`), and neither is reachable without saying so.
+     *
+     * @param  Builder<Skill>  $query
+     * @return Builder<Skill>
+     */
+    private function scoped(Builder $query, string $scope): Builder
+    {
+        return match ($scope) {
+            self::SCOPE_JAPAN_ONLY => $query->where('release_status', ReleaseStatus::JapanOnly->value),
+            'all' => $query,
+            default => $query->availableOnGlobal(),
+        };
     }
 
     /**
@@ -473,9 +543,13 @@ class SkillController extends Controller
      */
     private function skillPayload(Skill $skill): array
     {
+        // Ruling A, extended to the detail: a JapanOnly row's `name` is the export's `enname`, so the
+        // panel prints the source's own string instead. Same gate as the catalogue, one rule.
+        $japanOnly = $skill->release_status === ReleaseStatus::JapanOnly;
+
         return [
             'id' => $skill->id,
-            'name' => $skill->name,
+            'name' => $japanOnly ? null : $skill->name,
             'name_ja' => $skill->name_ja,
             'type' => $skill->type,
             'sp_cost' => $skill->sp_cost,
@@ -485,6 +559,10 @@ class SkillController extends Controller
             'source_url' => $skill->source_url,
             'fetched_at_display' => $skill->fetched_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
             'description' => $skill->description,
+            // The description panel's gate is the row's own availability, not the scope it was opened
+            // from (`R1`, ruling 1): a JapanOnly row's `desc_en` is third-party on the same test that
+            // bars its `name_en`, whichever URL reached it.
+            'release_status' => $skill->release_status?->value,
         ];
     }
 

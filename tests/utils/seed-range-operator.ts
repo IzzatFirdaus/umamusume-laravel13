@@ -196,3 +196,61 @@ export function removeNoDescriptionSkill(): void {
         db.close();
     }
 }
+
+const SCOPE_JAPAN_EXPORT_ID = 990021;
+const SCOPE_GLOBAL_EXPORT_ID = 990022;
+
+/**
+ * Seeds the scope filter's two fixtures: one JapanOnly row whose only name is the source's Japanese
+ * string, and one Global row the client named.
+ *
+ * The shapest thing here is `name_ja` on the JP row. `seedJapanOnlySkill()` above sets it NULL and
+ * leaves `name_is_client` at 1 — wrong for these assertions twice over: ruling A shows `name_ja` on a
+ * JP row, and `name_is_client` is `$clientName !== null && $onGlobal` by construction, so it cannot be
+ * true on a row the client has not shipped. These rows are therefore separate from that fixture rather
+ * than a change to it, because D6's range-operator test depends on the older shape.
+ */
+export function seedScopeFixtures(): void {
+    const db = new DatabaseSync(resolvedScratchDatabase());
+
+    try {
+        const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
+
+        db.prepare(
+            `INSERT INTO skills
+                (name, name_ja, match_key, sp_cost, type, is_unique, created_at, updated_at,
+                 export_id, rarity, release_status, name_is_client, source_url, snapshot_path,
+                 fetched_at, source_timezone, is_manual, condition_groups, description,
+                 description_match_key, distance_type)
+             VALUES ('Raise My Soul''s Blade!', '掲げよ、己が魂の剣を！', 'raisemysoulsblade', 180, 'Speed', 0,
+                     ?, ?, ?, 1, 'JapanOnly', 0, 'https://gametora.test/skills.json', NULL,
+                     ?, 'Asia/Tokyo', 0, NULL, 'The source states an English sentence for this row.',
+                     'thesourcestatesanenglishsentenceforthisrow', NULL)`,
+        ).run(now, now, SCOPE_JAPAN_EXPORT_ID, now);
+
+        db.prepare(
+            `INSERT INTO skills
+                (name, name_ja, match_key, sp_cost, type, is_unique, created_at, updated_at,
+                 export_id, rarity, release_status, name_is_client, source_url, snapshot_path,
+                 fetched_at, source_timezone, is_manual, condition_groups, description,
+                 description_match_key, distance_type)
+             VALUES ('Client Named Row', NULL, 'clientnamedrow', 160, 'Speed', 0,
+                     ?, ?, ?, 1, 'GlobalReleased', 1, 'https://gametora.test/skills.json', NULL,
+                     ?, 'Asia/Tokyo', 0, NULL, 'A client sentence for the Global row.',
+                     'aclientsentencefortheglobalrow', NULL)`,
+        ).run(now, now, SCOPE_GLOBAL_EXPORT_ID, now);
+    } finally {
+        db.close();
+    }
+}
+
+/** Removes both fixtures inserted by `seedScopeFixtures()`. */
+export function removeScopeFixtures(): void {
+    const db = new DatabaseSync(resolvedScratchDatabase());
+
+    try {
+        db.prepare('DELETE FROM skills WHERE export_id IN (?, ?)').run(SCOPE_JAPAN_EXPORT_ID, SCOPE_GLOBAL_EXPORT_ID);
+    } finally {
+        db.close();
+    }
+}

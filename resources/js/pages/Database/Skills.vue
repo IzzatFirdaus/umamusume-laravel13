@@ -8,27 +8,8 @@
  */
 import AppLayout from '../../layouts/AppLayout.vue';
 import DatabaseNav from '../../components/database/DatabaseNav.vue';
-import SkillCatalog from '../../components/skills/SkillCatalog.vue';
+import SkillCatalog, { type Paginator, type Skill } from '../../components/skills/SkillCatalog.vue';
 import { Head } from '@inertiajs/vue3';
-
-interface Skill {
-    id: number;
-    name: string;
-    name_ja: string | null;
-    is_unique: boolean;
-    type: string | null;
-    sp_cost: number | null;
-    conditions: (string | null)[];
-}
-
-interface Paginator<T> {
-    data: T[];
-    current_page: number;
-    last_page: number;
-    from: number | null;
-    to: number | null;
-    total: number;
-}
 
 const props = defineProps<{
     skills: Paginator<Skill>;
@@ -38,6 +19,8 @@ const props = defineProps<{
     types: string[];
     unspecifiedType: string;
     distance: number | null;
+    scope: string;
+    scopes: Record<string, string>;
     unique: boolean;
     totalCount: number;
     askedFor: string;
@@ -61,6 +44,8 @@ const props = defineProps<{
             :types="props.types"
             :unspecified-type="props.unspecifiedType"
             :distance="props.distance"
+            :scope="props.scope"
+            :scopes="props.scopes"
             :unique="props.unique"
             :total-count="props.totalCount"
             :asked-for="props.askedFor"

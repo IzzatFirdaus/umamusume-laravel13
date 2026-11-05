@@ -22,6 +22,7 @@ import AbsenceValue from '../../components/AbsenceValue.vue';
 import { LinkButton } from '../../components/Form';
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import { computed } from 'vue';
+import { displayDescription, NO_CLIENT_STRING } from '../../domain/skillDisplay';
 
 interface Effect {
     type: number;
@@ -37,7 +38,8 @@ interface ConditionGroup {
 
 interface Skill {
     id: number;
-    name: string;
+    /** Null on a JapanOnly row: the column holds the export's enname, not client copy (R1). */
+    name: string | null;
     name_ja: string | null;
     type: string | null;
     sp_cost: number | null;
@@ -49,6 +51,8 @@ interface Skill {
     fetched_at_display: string | null;
     /** P3: description from export's desc_en, or null when not recorded. */
     description: string | null;
+    /** The row's availability. A JapanOnly row's desc_en is third-party, so the panel gates on this. */
+    release_status: string | null;
 }
 
 interface Holder {
@@ -126,6 +130,19 @@ const holderGroups = computed(() => [
 const hasAnyHolder = computed(() => holderGroups.value.some((group) => group.holders.length > 0));
 
 const conditions = computed<ConditionGroup[]>(() => props.skill.condition_groups ?? []);
+
+/**
+ * The name the panel prints. A JapanOnly row arrives with `name: null` because the column holds the
+ * export's `enname` rather than client copy, so the source's own `name_ja` is the name (`R1`, ruling A).
+ */
+const displayName = computed<string>(() => props.skill.name ?? props.skill.name_ja ?? '');
+
+/** The second line, printed only when the panel already showed a different string. */
+const secondaryName = computed<string | null>(() =>
+    props.skill.name !== null && props.skill.name_ja !== null && props.skill.name_ja !== props.skill.name
+        ? props.skill.name_ja
+        : null,
+);
 
 /** Whether the stored predicate names a running style, read from the conditions rather than assumed. */
 const styleClause = computed<string>(() => {
@@ -217,17 +234,15 @@ function relatedCount(type: 'sameCondition' | 'sameClassCode' | 'sameClassCodeAn
     <AppLayout
         :breadcrumb="[
             { label: 'Skills', href: backHref },
-            { label: props.skill.name },
+            { label: displayName },
         ]"
     >
-        <Head :title="props.skill.name" />
+        <Head :title="displayName" />
         <template #head>
             <PageHeader
                 eyebrow="Skill"
-                :title="props.skill.name"
-                :title-ja="props.skill.name_ja !== null && props.skill.name_ja !== props.skill.name
-                    ? props.skill.name_ja
-                    : undefined"
+                :title="displayName"
+                :title-ja="secondaryName ?? undefined"
                 :description="lede"
             >
                 <template #actions>
@@ -375,10 +390,13 @@ function relatedCount(type: 'sameCondition' | 'sameClassCode' | 'sameClassCodeAn
             <div>
                 <section aria-labelledby="description" class="card">
                     <h2 id="description">Readable description</h2>
-                    <div v-if="props.skill.description" class="text-sm text-ink whitespace-pre-wrap">
-                        {{ props.skill.description }}
+                    <div
+                        v-if="displayDescription({ description: props.skill.description, releaseStatus: props.skill.release_status }) !== NO_CLIENT_STRING"
+                        class="text-sm text-ink whitespace-pre-wrap"
+                    >
+                        {{ displayDescription({ description: props.skill.description, releaseStatus: props.skill.release_status }) }}
                     </div>
-                    <p v-else class="text-sm text-ink">No client string.</p>
+                    <p v-else class="text-sm text-ink">{{ NO_CLIENT_STRING }}</p>
                     <p class="note mt-3">
                         <span class="g" aria-hidden="true">○</span>
                         <span class="flex-1">
@@ -567,7 +585,7 @@ function relatedCount(type: 'sameCondition' | 'sameClassCode' | 'sameClassCodeAn
                             <thead>
                                 <tr class="border-b border-rule">
                                     <th class="w-1/3 py-2 px-3 text-left font-semibold text-ink-muted">Property</th>
-                                    <th class="py-2 px-3 text-center font-semibold text-ink-strong">{{ props.skill.name }}</th>
+                                    <th class="py-2 px-3 text-center font-semibold text-ink-strong">{{ displayName }}</th>
                                     <th class="py-2 px-3 text-center font-semibold text-ink-strong">{{ props.compareSkill.name }}</th>
                                 </tr>
                             </thead>

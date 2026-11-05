@@ -25,19 +25,24 @@ import BaseInput from '../Form/BaseInput.vue';
 import BaseSelect from '../Form/BaseSelect.vue';
 import { LinkButton } from '../Form';
 import Pagination from '../ui/Pagination.vue';
+import { displayDescription, langOf, NO_CLIENT_STRING } from '../../domain/skillDisplay';
 
-interface Skill {
+export interface Skill {
     id: number;
-    name: string;
+    /** Null on a JapanOnly row: `name` there is the export's `enname`, not client copy (`R1`). */
+    name: string | null;
     name_ja: string | null;
     is_unique: boolean;
     type: string | null;
     sp_cost: number | null;
+    description: string | null;
+    /** The row's availability, so the description gate is the shared predicate rather than a second rule. */
+    release_status: string | null;
     /** The source's activation predicate, one entry per condition group. Nulls are groups with none. */
     conditions: (string | null)[];
 }
 
-interface Paginator<T> {
+export interface Paginator<T> {
     data: T[];
     current_page: number;
     last_page: number;
@@ -60,6 +65,10 @@ const props = defineProps<{
      * rows while the control said "Any".
      */
     distance: number | null;
+    /** The scope the catalogue answers with: `global` (default), `all`, or `japan_only`. */
+    scope: string;
+    /** The scope select's options, keyed by URL token. */
+    scopes: Record<string, string>;
     unique: boolean;
     totalCount: number;
     askedFor: string;
@@ -101,6 +110,7 @@ const search = ref(props.search ?? '');
 const type = ref(props.type ?? '');
 const unique = ref(props.unique ? '1' : '');
 const distance = ref(props.distance ?? '');
+const scope = ref(props.scope);
 const loading = ref(false);
 
 /**
@@ -115,6 +125,9 @@ function params(): Record<string, string | number | undefined> {
         type: type.value || undefined,
         unique: unique.value === '1' ? 1 : undefined,
         distance: distance.value || undefined,
+        // `global` is the server default, so it is omitted rather than carried: a URL saying the same
+        // thing as no URL keeps a Trainer's address bar honest about what they chose.
+        scope: scope.value === 'global' ? undefined : scope.value || undefined,
     };
 }
 
@@ -140,6 +153,19 @@ function goToPage(page: number): void {
 
 const engineCondition = (skill: Skill): string =>
     skill.conditions.filter((condition): condition is string => condition !== null && condition !== '').join(' · ');
+
+/**
+ * The name a row prints, and the language it prints it in.
+ *
+ * At `japan_only` the server sends `name: null` (its `name` column is the export's `enname`, which the
+ * Air Messiah ruling bars from UI copy), so the source's own `name_ja` is the name. At the other scopes
+ * `name` is client copy and `name_ja` is the second line, printed only when it says something new.
+ */
+const displayName = (skill: Skill): string => skill.name ?? skill.name_ja ?? '';
+
+/** The second line: the Japanese name, when the row already printed a different one. */
+const secondaryName = (skill: Skill): string | null =>
+    skill.name !== null && skill.name_ja !== null && skill.name_ja !== skill.name ? skill.name_ja : null;
 </script>
 
 <template>
@@ -152,9 +178,20 @@ const engineCondition = (skill: Skill): string =>
             data-region="filters"
             class="flex flex-wrap items-end gap-3"
             :class="props.heading ? 'mt-3' : ''"
-            :aria-busy="loading ? 'true' : null"
+            :aria-busy="loading"
             @submit.prevent="applyFilters"
         >
+            <label data-region="field" class="flex flex-col gap-1 text-xs font-semibold text-ink-muted">
+                Scope
+                <BaseSelect
+                    id="skill-scope"
+                    :model-value="scope"
+                    name="scope"
+                    :options="Object.entries(props.scopes).map(([value, label]) => ({ value, label }))"
+                    :error="errors.scope"
+                    @update:model-value="scope = facet($event)"
+                />
+            </label>
             <label data-region="field" class="flex min-w-0 flex-1 basis-64 flex-col gap-1 text-xs font-semibold text-ink-muted">
                 Search
                 <BaseInput
@@ -266,6 +303,7 @@ const engineCondition = (skill: Skill): string =>
                             <tr>
                                 <th scope="col" class="w-1/3">Skill</th>
                                 <th scope="col">Type</th>
+                                <th scope="col">Effect</th>
                                 <th scope="col">Condition (engine)</th>
                                 <th scope="col" class="n whitespace-nowrap">Base cost</th>
                                 <th scope="col" class="n"><span class="sr-only">Open the skill</span></th>
@@ -280,8 +318,9 @@ const engineCondition = (skill: Skill): string =>
                                              the house 44px bar without touching the type. -->
                                         <Link
                                             :href="detailHref(skill.id)"
+                                            :lang="langOf(displayName(skill)) ?? undefined"
                                             class="inline-flex min-h-11 items-center font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out"
-                                        >{{ skill.name }}</Link>
+                                        >{{ displayName(skill) }}</Link>
                                         <!-- The badge is a claim about the source's class code, and the title
                                              says whose derivation it is (D-256). -->
                                         <span
@@ -291,16 +330,30 @@ const engineCondition = (skill: Skill): string =>
                                         >✦ Unique<span class="sr-only">, from the source's skill class code, not a rarity word</span></span>
                                     </span>
                                     <!-- 18 of the 623 Global rows store the same string in both name columns,
-                                         so the second line only appears when it carries something new. -->
+                                         so the second line only appears when it carries something new. At
+                                         `japan_only` the name column already printed `name_ja`, so this
+                                         line is suppressed there by `secondaryName` returning null. -->
                                     <span
-                                        v-if="skill.name_ja !== null && skill.name_ja !== skill.name"
-                                        lang="ja"
+                                        v-if="secondaryName(skill) !== null"
+                                        :lang="langOf(secondaryName(skill)) ?? undefined"
                                         class="block text-xs font-normal text-ink-muted"
-                                    >{{ skill.name_ja }}</span>
+                                    >{{ secondaryName(skill) }}</span>
                                 </th>
                                 <td>
                                     <span v-if="skill.type" class="pill pill-outline">{{ skill.type }}</span>
                                     <AbsenceValue v-else compact reason="The source's effect codes give this skill no type word." />
+                                </td>
+                                <!-- Ruling 1 (symmetric): `desc_en` on a JapanOnly row is third-party on the
+                                     same test that bars `name_en`, so this cell prints the named absence for
+                                     every such row rather than the source's English sentence. The row carries
+                                     its own `release_status` so this surface and `Show.vue` reach the rule
+                                     through the same predicate rather than each deciding for itself. -->
+                                <td class="max-w-prose text-sm">
+                                    <span
+                                        v-if="displayDescription({ description: skill.description, releaseStatus: skill.release_status }) === NO_CLIENT_STRING"
+                                        class="text-ink-muted"
+                                    >{{ NO_CLIENT_STRING }}</span>
+                                    <span v-else class="text-ink">{{ skill.description }}</span>
                                 </td>
                                 <!-- Engine tokens have no break opportunities, so a long predicate would
                                      otherwise set the whole table's min-content width and scroll it at
@@ -346,6 +399,9 @@ const engineCondition = (skill: Skill): string =>
         </template>
 
         <p class="mt-6 max-w-3xl text-xs text-ink-muted" data-testid="catalogue-footer">
+            <span v-if="props.scope === 'japan_only'">The Global client has not received these skills. Each name shown is
+            the source's own string; no client-copy English name exists for this row, so none is printed.
+            </span>
             The type word is this tool's reading of the source's effect codes, not a client label. The
             reading refuses a negative value and refuses a skill carrying two kinds of effect, so some
             rows show no word at all; the Type filter's “{{ props.unspecifiedType }}” choice finds those

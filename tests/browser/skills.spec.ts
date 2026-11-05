@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { PAGE_MARKERS, assertStructurallyEqual, capture } from './fixtures/hfw-structure';
 import { buildAxe, openAllDisclosures } from '../utils/accessibility';
-import { removeNoDescriptionSkill, seedNoDescriptionSkill } from '../utils/seed-range-operator';
+import { removeNoDescriptionSkill, removeScopeFixtures, seedNoDescriptionSkill, seedScopeFixtures } from '../utils/seed-range-operator';
 
 const WIREFRAME = pathToFileURL(
     resolve('docs/design-research/frontend-v2-wireframes/skills.html'),
@@ -229,18 +229,21 @@ test('the skill detail passes an axe scan at WCAG A and AA', async ({ page }) =>
 
 /*
  * The filter row's order and the condition note's home, both read off the HFW
- * (`skills.html:72-78`, `:132-137`). Two deliberate absences ride with them, recorded in the page's
- * own HFW-OVERRIDE blocks: no Distance facet (no column answers it) and name-only search (no readable
- * effect text is stored).
+ * (`skills.html:72-78`, `:132-137`), with the two deliberate departures recorded in the page's own
+ * HFW-OVERRIDE blocks: name-only search (no readable effect text is stored) and the Distance facet's
+ * sentinel wording (SHR-1). The Scope facet is this slice's own addition and has no HFW counterpart,
+ * so it leads the row (`R1`: the scope narrows what the other four facets narrow).
  */
 test('orders the filters as the HFW draws them and keeps the condition note inside the table card', async ({ page }) => {
     await page.goto('/skills');
     await page.locator('#app > *').first().waitFor();
 
     const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'Filter' }) });
-    await expect(form.locator('label').nth(0)).toContainText('Search');
-    await expect(form.locator('label').nth(1)).toContainText('Unique');
-    await expect(form.locator('label').nth(2)).toContainText('Type');
+    // Scope first (this slice), then the wireframe's own four in its order.
+    await expect(form.locator('label').nth(0)).toContainText('Scope');
+    await expect(form.locator('label').nth(1)).toContainText('Search');
+    await expect(form.locator('label').nth(2)).toContainText('Unique');
+    await expect(form.locator('label').nth(3)).toContainText('Type');
 
     const unique = page.getByLabel('Unique');
     await expect(unique).toHaveValue('');
@@ -438,12 +441,10 @@ test('returns to the filtered list with its query intact', async ({ page }) => {
  * first and the ported class tokens second, so the comparison survives a font metric or a
  * padding change and a missing block does not.
  *
- * The wireframe's filter row carries four `.field` labels; this catalogue carries three. The
- * fourth is the Distance facet, refused at `SkillCatalog.vue:12`: distance exists only inside
- * the condition tokens, so a picker over it would be a control the server cannot answer, and the
- * page footer states the absence. That refusal is asserted as a count of its own rather than
- * folded into a weakened comparison mode, so the day a distance column lands, the fourth field is
- * the failure that says so.
+ * The wireframe's filter row draws four `.field` labels; this catalogue carries five. The extra is the
+ * Scope facet this slice adds (`R1`), which has no wireframe counterpart, so it is counted separately
+ * rather than folded into the comparison. The four the wireframe draws are Search, Unique, Type and
+ * Distance, and the count stays an assertion of its own so a facet that silently disappears fails.
  */
 test('renders the wireframe regions in the wireframe order at 1280', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
@@ -452,7 +453,8 @@ test('renders the wireframe regions in the wireframe order at 1280', async ({ pa
 
     const app = await capture(page, 'main', { markers: PAGE_MARKERS });
 
-    expect(app.regions.filter((marker) => marker === 'field'), 'search, type, unique and distance').toHaveLength(4);
+    // Five: the wireframe's four, plus this slice's Scope facet.
+    expect(app.regions.filter((marker) => marker === 'field'), 'scope, search, type, unique and distance').toHaveLength(5);
 
     await page.goto(WIREFRAME);
     const hfw = await capture(page, '.canvas', { markers: PAGE_MARKERS });
@@ -586,4 +588,91 @@ test('paints the Distance facet from the URL and keeps it through a filter', asy
 
     expect((await response).status(), 'the filtered request answered').toBe(200);
     await expect(distance).toHaveValue('2');
+});
+
+/*
+ * A2 — the scope selector, at the surface a Trainer reads.
+ *
+ * The feature test (`SkillScopeFilterTest`) proves the controller answers three scopes. This proves the
+ * control that selects one is wired to that answer, which is a different failure: the props can carry
+ * `scope` and the select can still paint its first option over filtered rows — the exact shape of the
+ * `distance` defect in `53bf93c3`.
+ *
+ * The JP row is seeded with a Japanese `name_ja` and no client name, because ruling A shows the source
+ * string on that scope. A fixture with a Latin `name_ja` would pass the count assertion while proving
+ * nothing about which column the row prints.
+ */
+test('the scope selector narrows the catalogue and survives a reload', async ({ page }) => {
+    seedScopeFixtures();
+
+    try {
+        // Default scope: the Global subset. The select states it, and the JapanOnly fixture is absent.
+        await page.goto('/skills?search=row');
+        await page.locator('#app > *').first().waitFor();
+
+        const scope = page.getByLabel('Scope');
+        await expect(scope).toHaveValue('global');
+        await expect(scope.locator('option')).toHaveText(['Global only', 'Every skill', 'Japan only']);
+
+        const results = page.locator('#skill-results');
+        await expect(results.getByRole('link', { name: 'Client Named Row' })).toBeVisible();
+        // The JP fixture's source string is not reachable at this scope, which is what "narrowed" means.
+        await expect(results.getByRole('link', { name: '掲げよ、己が魂の剣を！' })).toHaveCount(0);
+
+        // Japan only: the row appears, printed as the source's own string, with `lang="ja"` because the
+        // string is Japanese (ruling 2 — the attribute describes the content, not the field).
+        //
+        // Narrowed by a phrase from the fixture's own description rather than by its name, and that is
+        // the search gap this slice records rather than a test convenience: `match_key` is built from
+        // `name`, so a name search cannot reach a JP row whose only printed name is Japanese. The
+        // description key is reachable at any scope (`query()` matches `match_key` OR
+        // `description_match_key`), so this narrows to one row without asserting a path that does not
+        // exist. Without a narrowing the fixture sits among 1,287 JapanOnly rows ordered by `name` and
+        // never appears on page 1.
+        await page.goto('/skills?scope=japan_only&search=' + encodeURIComponent('an english sentence'));
+        await page.locator('#app > *').first().waitFor();
+
+        await expect(page.getByLabel('Scope')).toHaveValue('japan_only');
+
+        const jpName = results.getByRole('link', { name: '掲げよ、己が魂の剣を！' });
+        await expect(jpName).toBeVisible();
+        await expect(jpName).toHaveAttribute('lang', 'ja');
+
+        // The client name is not printed at this scope: it is the export's `enname`, which the Air
+        // Messiah ruling bars from UI copy.
+        await expect(results).not.toContainText("Raise My Soul's Blade!");
+
+        // The footnote says why the row has no English name, so the absence reads as a fact.
+        const footer = page.getByTestId('catalogue-footer');
+        await expect(footer).toContainText('The Global client has not received these skills.');
+
+        // The Global fixture is out of this scope entirely, so it supplies no row to inspect for `lang`.
+        await expect(results.getByRole('link', { name: 'Client Named Row' })).toHaveCount(0);
+
+        // Reload: the scope is the URL's, not component state that a fresh load would reset.
+        await page.reload();
+        await page.locator('#app > *').first().waitFor();
+        await expect(page.getByLabel('Scope')).toHaveValue('japan_only');
+        expect(page.url()).toContain('scope=japan_only');
+    } finally {
+        removeScopeFixtures();
+    }
+});
+
+test('a misspelled scope is refused rather than answered with a wider catalogue', async ({ page }) => {
+    // R2: a typo must not silently widen. The refusal is the form request's redirect with a field error
+    // (`SkillSearchRequest`, and the precedent in `SkillSearchScreenTest`), so the browser lands back on
+    // the catalogue with the Scope field naming the problem rather than on a 3x-larger list.
+    const response = await page.goto('/skills?scope=glboal');
+    await page.locator('#app > *').first().waitFor();
+
+    expect(response?.status(), 'a refused scope still renders a page, not an error').toBe(200);
+
+    // The refusal reaches the control that caused it: `BaseSelect` sets `aria-invalid` from its `error`
+    // prop, and `SkillSearchRequest` names the field. Asserting the error state rather than the word
+    // "scope" is the difference between proving the refusal landed and matching the select's own label.
+    await expect(page.getByLabel('Scope')).toHaveAttribute('aria-invalid', 'true');
+
+    // And the catalogue did not answer with every row: the default scope is still what painted.
+    await expect(page.getByLabel('Scope')).toHaveValue('global');
 });

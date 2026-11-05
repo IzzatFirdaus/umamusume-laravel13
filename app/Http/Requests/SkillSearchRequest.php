@@ -64,6 +64,11 @@ class SkillSearchRequest extends FormRequest
             'type' => ['nullable', Rule::in([...GametoraSkillsParser::CATEGORIES, self::UNSPECIFIED])],
             'unique' => ['nullable', 'boolean'],
             'distance' => ['nullable', 'integer', Rule::in([0, 1, 2, 3, 4])],
+            // R1/R2: three named scopes, `global` by default so ADR-0011 §2's "the [Global] subset is
+            // what every Trainer-facing surface selects" survives Gate 2. An unknown value is refused
+            // rather than coerced, for the reason this class's docblock states: a typo dropped silently
+            // answers with 3x the rows the caller asked for.
+            'scope' => ['nullable', Rule::in(['global', 'all', 'japan_only'])],
         ];
     }
 
@@ -76,6 +81,7 @@ class SkillSearchRequest extends FormRequest
             'type' => $this->input('type') === '' ? null : $this->input('type'),
             'unique' => $this->input('unique') === '' ? null : $this->input('unique'),
             'distance' => $this->input('distance') === '' ? null : $this->input('distance'),
+            'scope' => $this->input('scope') === '' ? null : $this->input('scope'),
         ]);
     }
 }
