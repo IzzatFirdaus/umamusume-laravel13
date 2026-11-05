@@ -25,11 +25,12 @@ use Illuminate\Database\Seeder;
  *
  * **Scope is the document's own answer, not this class's.** `gametora-characters`
  * publishes `release_status` per trainee and this is a Global-client tool (PRD
- * FR-A-1), so `GlobalReleased` rows are promoted and `JapanOnly` rows are filed as
- * pending candidates — which is exactly what a Trainer running `uma:fetch` against
- * a populated roster would end up with. Measured on the committed body: 68 of 135
- * promoted, 67 queued. Promoting all 135 instead is a one-line change to
- * `inScope()` below, and is the only thing that would need to change.
+ * FR-A-1), so rows carrying a recognised release status (`GlobalReleased`,
+ * `GlobalAnnounced`, `JapanOnly`) are promoted and rows with no recognised
+ * status are filed as pending candidates — which is exactly what a Trainer
+ * running `uma:fetch` against a populated roster would end up with. Promoting
+ * only the Global-released subset instead is a one-line change to `inScope()`
+ * below, and is the only thing that would need to change.
  *
  * **Provenance is unchanged.** Rows land through `PromoteMatchedRecord`, so every
  * trainee still gets its `data_sources` row — the detail page's Provenance panel
@@ -116,14 +117,16 @@ class UmamusumeRosterSeeder extends Seeder
             }
         }
 
-        $this->command?->info(sprintf(
-            '  %s: %d promoted, %d updated, %d queued for review, %d skipped',
-            self::SOURCE_KEY,
-            $counts['promoted'],
-            $counts['updated'],
-            $counts['queued'],
-            $counts['skipped'],
-        ));
+        if ($this->command !== null) {
+            $this->command->info(sprintf(
+                '  %s: %d promoted, %d updated, %d queued for review, %d skipped',
+                self::SOURCE_KEY,
+                $counts['promoted'],
+                $counts['updated'],
+                $counts['queued'],
+                $counts['skipped'],
+            ));
+        }
     }
 
     /**

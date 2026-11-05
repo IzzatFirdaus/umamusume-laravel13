@@ -49,8 +49,6 @@ class TraineeGoalFactory extends Factory
 
     /**
      * A fan-count objective: a threshold and a deadline, and no race to attach to.
-     *
-     * @return $this
      */
     public function fan(int $threshold = 5000, int $turn = 37): static
     {
@@ -68,8 +66,6 @@ class TraineeGoalFactory extends Factory
 
     /**
      * The debut form of an objective: run the race, no placing asked.
-     *
-     * @return $this
      */
     public function participate(): static
     {
@@ -84,8 +80,6 @@ class TraineeGoalFactory extends Factory
 
     /**
      * A row whose kind the export does not explain (`cond_type` 2 or 12).
-     *
-     * @return $this
      */
     public function undecoded(): static
     {
@@ -101,8 +95,6 @@ class TraineeGoalFactory extends Factory
 
     /**
      * A goal on a race the source itself marks unreleased on Global.
-     *
-     * @return $this
      */
     public function notOnGlobal(): static
     {

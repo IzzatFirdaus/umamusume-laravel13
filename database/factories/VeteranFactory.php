@@ -27,6 +27,7 @@ class VeteranFactory extends Factory
         return [
             'training_run_id' => TrainingRun::factory()->state(['status' => RunStatus::Completed]),
             'tags' => [],
+            'tags_normalized' => [],
             'notes' => null,
         ];
     }

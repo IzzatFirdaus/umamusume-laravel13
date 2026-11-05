@@ -87,21 +87,25 @@ class SourceDocumentSeeder extends Seeder
                     .$e->getMessage(),
                     ['exception' => $e],
                 );
-                $this->command?->warn(sprintf('  %s: FAILED (%s) — skipped', $sourceKey, $e->getMessage()));
+                if ($this->command !== null) {
+                    $this->command->warn(sprintf('  %s: FAILED (%s) — skipped', $sourceKey, $e->getMessage()));
+                }
 
                 $failed[$sourceKey] = $e->getMessage();
 
                 continue;
             }
 
-            $this->command?->info(sprintf(
-                '  %s: %d created, %d updated, %d skipped, %d to review',
-                $sourceKey,
-                $counts['created'],
-                $counts['updated'],
-                $counts['skipped'],
-                $counts['review'],
-            ));
+            if ($this->command !== null) {
+                $this->command->info(sprintf(
+                    '  %s: %d created, %d updated, %d skipped, %d to review',
+                    $sourceKey,
+                    $counts['created'],
+                    $counts['updated'],
+                    $counts['skipped'],
+                    $counts['review'],
+                ));
+            }
         }
 
         /*

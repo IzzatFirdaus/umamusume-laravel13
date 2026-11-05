@@ -32,6 +32,7 @@ class IndependentTrainingRunFactory extends Factory
             'completes_at' => now()->addMinutes(IndependentTrainingRun::DURATION_MINUTES),
             'completed_at' => null,
             'abandoned_at' => null,
+            'result' => null,
         ];
     }
 

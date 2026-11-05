@@ -212,7 +212,6 @@ class TrackerVeteransSeeder extends Seeder
         $merged = [];
 
         foreach (self::VETERAN_LABELS as $label) {
-            /** @var array{umamusume_id: int, character_card_id: int, turn: int, stats: array{speed: int, stamina: int, power: int, guts: int, wit: int}, sp: int|null, energy: int|null, condition: string|null, mood: string|null, status: RunStatus, skills: list<array{0: int, 1: SkillAcquisition}>, races: list<array{slot: int, status: RaceEntryStatus, placement: int|null}>, notes: string} $definition */
             $definition = self::CAREER_END_RUNS[$label] ?? UraFinaleRunsSeeder::RUNS[$label];
 
             $merged[$label] = $definition;

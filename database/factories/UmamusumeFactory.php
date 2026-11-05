@@ -34,6 +34,19 @@ class UmamusumeFactory extends Factory
             'jp_debut_date' => null,
             'global_debut_date' => null,
             'is_manual' => false,
+            // Aptitudes are recorded per trainee by the roster import. Null means the
+            // source did not publish that aptitude, not a default grade.
+            'aptitude_turf' => null,
+            'aptitude_dirt' => null,
+            'aptitude_sprint' => null,
+            'aptitude_mile' => null,
+            'aptitude_medium' => null,
+            'aptitude_long' => null,
+            'aptitude_front_runner' => null,
+            'aptitude_pace_chaser' => null,
+            'aptitude_late_surger' => null,
+            'aptitude_end_closer' => null,
+            'external_ref' => null,
         ];
     }
 

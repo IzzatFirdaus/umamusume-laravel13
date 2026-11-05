@@ -27,16 +27,22 @@ class RaceEntryFactory extends Factory
             // race entry does not belong to one unless a test names it, and a
             // Trackblazer race has no calendar row to name.
             'scenario_race_id' => null,
+            // The later race-entry columns are nullable and each names a different link:
+            // the scenario slot, the catalog slot, and the turn the entry belongs to.
+            'scenario_slot_id' => null,
+            'race_catalog_slot_id' => null,
+            'turn_entry_id' => null,
             'status' => RaceEntryStatus::Entered,
             'placement' => null,
             'fans_gain' => null,
+            'objective_index' => null,
+            'circles' => null,
+            'grade_points_earned' => null,
         ];
     }
 
     /**
      * A declined race: a stored row, not an absent one (ADR-0003).
-     *
-     * @return $this
      */
     public function skipped(): static
     {

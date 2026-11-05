@@ -10,6 +10,7 @@ use App\Enums\CareerPhase;
 use App\Enums\CareerYear;
 use App\Enums\MoodTier;
 use App\Enums\RaceEntryStatus;
+use App\Enums\RunMode;
 use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
 use App\Models\TrainingRun;
@@ -198,6 +199,7 @@ class RosyDreamsRiceShowerSeeder extends Seeder
             'unity_trainings_count' => 55,
             'spirit_bursts_count' => 6,
             'extreme_bursts_count' => 5,
+            'mode' => RunMode::Snapshot->value,
         ]);
 
         foreach (self::RACES as $race) {

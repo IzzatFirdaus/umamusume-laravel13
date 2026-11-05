@@ -58,6 +58,7 @@ class ScenarioSlotSeeder extends Seeder
      */
     private function tierLabels(): array
     {
+        /** @var array{rows?: list<array<string, mixed>>, fetched_at?: string} $doc */
         $doc = $this->loadJson(self::TIER_LABELS_FILE);
 
         if ($doc === []) {
@@ -114,6 +115,7 @@ class ScenarioSlotSeeder extends Seeder
         $races = $this->indexByIntId($this->loadJson('races.json'));
         $labels = $this->tierLabels();
 
+        /** @var array{fetched_at?: string} $labelDoc */
         $labelDoc = $this->loadJson(self::TIER_LABELS_FILE);
         $fetchedAt = now();
         $evidenceFetchedAt = isset($labelDoc['fetched_at'])

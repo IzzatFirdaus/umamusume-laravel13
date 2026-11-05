@@ -37,6 +37,16 @@ class CharacterCardFactory extends Factory
             'fetched_at' => now(),
             'source_timezone' => 'Asia/Tokyo',
             'is_manual' => false,
+            // Card-grain skill lists and stat panels are nullable on the schema: null means
+            // "the source did not publish this", not an empty list. Tests that need a
+            // populated card name the lists explicitly.
+            'skills_innate' => null,
+            'skills_unique' => null,
+            'skills_awakening' => null,
+            'skills_event' => null,
+            'skills_evo' => null,
+            'base_stats' => null,
+            'growth_rates' => null,
         ];
     }
 

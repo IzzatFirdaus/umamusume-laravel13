@@ -33,6 +33,20 @@ class SkillFactory extends Factory
             'sp_cost' => fake()->numberBetween(10, 400),
             'type' => null,
             'is_unique' => false,
+            'export_id' => null,
+            'rarity' => null,
+            'release_status' => null,
+            'name_is_client' => false,
+            'source_url' => null,
+            'snapshot_path' => null,
+            'fetched_at' => null,
+            'source_timezone' => null,
+            'is_manual' => false,
+            'condition_groups' => null,
+            'description' => null,
+            'description_match_key' => null,
+            'distance_type' => null,
+            'match_key_ja' => null,
         ];
     }
 }

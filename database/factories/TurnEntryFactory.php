@@ -32,6 +32,22 @@ class TurnEntryFactory extends Factory
             'wit' => fake()->numberBetween(0, $hardCap),
             'sp' => fake()->numberBetween(0, 300),
             'condition' => null,
+            'energy' => null,
+            'energy_state' => null,
+            'energy_band' => null,
+            'mood' => null,
+            'fans' => null,
+            'facility_speed' => null,
+            'facility_stamina' => null,
+            'facility_power' => null,
+            'facility_guts' => null,
+            'facility_wit' => null,
+            'failure_rate' => null,
+            'preview_gains' => null,
+            'choice' => null,
+            'decision_snapshot' => null,
+            'corrected_from' => null,
+            'superseded_by' => null,
         ];
     }
 }

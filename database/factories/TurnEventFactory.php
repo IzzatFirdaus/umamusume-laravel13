@@ -35,9 +35,6 @@ class TurnEventFactory extends Factory
         ];
     }
 
-    /**
-     * @return $this
-     */
     public function supportCard(): static
     {
         return $this->state(fn (): array => [

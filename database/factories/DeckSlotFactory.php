@@ -30,7 +30,26 @@ class DeckSlotFactory extends Factory
             'training_run_id' => TrainingRun::factory(),
             'support_card_id' => SupportCard::factory(),
             'slot_position' => DeckSlot::MIN_POSITION,
+            // Null means the Trainer never recorded ownership or the card's level for this
+            // slot; the current schema keeps both nullable rather than defaulting them.
+            'ownership' => null,
+            'card_level' => null,
         ];
+    }
+
+    public function owned(): static
+    {
+        return $this->state(fn (): array => ['ownership' => 'OWNED']);
+    }
+
+    public function rented(): static
+    {
+        return $this->state(fn (): array => ['ownership' => 'RENTED']);
+    }
+
+    public function atLevel(int $level): static
+    {
+        return $this->state(fn (): array => ['card_level' => $level]);
     }
 
     /**
