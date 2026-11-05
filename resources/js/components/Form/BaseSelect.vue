@@ -41,7 +41,7 @@ interface Props {
 const props = defineProps<Props>();
 
 const emit = defineEmits<{
-    'update:modelValue': [value: string | number | null];
+    'update:modelValue': [value: string | number | string[] | null];
     blur: [event: FocusEvent];
     focus: [event: FocusEvent];
 }>();
@@ -68,7 +68,7 @@ function onChange(event: Event): void {
     const target = event.target as HTMLSelectElement;
     if (props.multiple) {
         const values = Array.from(target.selectedOptions).map((opt) => opt.value);
-        emit('update:modelValue', values as string | number | null);
+        emit('update:modelValue', values);
     } else {
         emit('update:modelValue', target.value || null);
     }

@@ -10,7 +10,11 @@
  * life of the document, and the specs only call them after navigating to one of those two pages. An
  * optional declaration would push a non-null assertion onto every call site to say the same thing.
  */
-interface Window {
-    __setModel: (next: string) => void;
-    __setBadgeState: (next: string) => void;
+import type { ProvenanceState } from '../../../resources/js/types';
+
+declare global {
+    interface Window {
+        __setModel: (next: string) => void;
+        __setBadgeState: (next: ProvenanceState) => void;
+    }
 }

@@ -31,7 +31,6 @@ export type { ProvenanceState };
  * never in a page-level legend, and a figure with no mark is a confirmed figure rather than a bug.
  */
 import { computed, ref } from 'vue';
-import type { ProvenanceState } from '../types';
 
 const props = defineProps<{
     state: 'confirmed' | 'calculated' | 'estimated' | 'unknown';

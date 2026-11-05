@@ -133,8 +133,8 @@
      * #E2770B / #19A772 / #CA8417 / #23A85B. Idle/disabled/muted/faint keep their validated
      * values because the mockups supply no distinct tier for them.
      */
-    --color-page: #F4F5F9;
-    --color-panel: #FFFFFF;
+    --color-page: #F4F4FF;
+    --color-panel: #FBFBFD;
     --color-raised: #FFFFFF;
     --color-sunken: #EDEDF1;
     --color-idle: #E2E4F0;
@@ -161,11 +161,15 @@
        colour, sampled from HLF_reference/screencapture-...-22_38_43.png at (602,2191).
        2026-10-24 (Umamusume brand palette): the brand hairline #D1D3E0 measures 1.41:1 on the new
        page and cannot clear the 3:1 card boundary, so `rule` uses the brand's own muted step
-       #8C8A9A (3.19:1 on page, 3.36:1 on panel). */
+       #8C8A9A — measured 3.19:1 on page, 3.36:1 on panel at the time.
+       2026-11-05 (theme parity): `page` moved to #F4F4FF, so this pair was re-measured rather than
+       assumed: 3.09:1 on page, which still clears G-18's 3:1 non-text floor. The move also
+       corrected the figure above — #8C8A9A on the old page #F4F5F9 measured 3.10:1, not 3.19:1. */
     --color-rule: #8C8A9A;
 /* The HFW's second hairline, `--rule-soft`, for in-card dividers (table rows, the page head's
 closing rule): present only as a quiet separation, never as a boundary a reader must see.
-Light #D7D8E0 measures 1.25:1 on page, which is why it never carries a card edge. */
+Light #D7D8E0 measures 1.25:1 on page, which is why it never carries a card edge.
+2026-11-05 (theme parity): re-measured against the new page #F4F4FF — 1.30:1, unchanged. */
 --color-rule-soft: #D7D8E0;
 
     /* Semantic roles. Amended 2026-10-15: green is a STATUS colour only — the positive status pill,
