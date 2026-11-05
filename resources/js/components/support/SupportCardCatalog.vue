@@ -25,9 +25,27 @@ interface Effect {
     display: string;
 }
 
+/** One card's anchors for one effect, as `SupportCardEffects::stages()` emits them. */
+interface EffectStage {
+    effect_id: number;
+    name: string | null;
+    anchors: { level: number; display: string }[];
+    cap: { level: number; display: string };
+}
+
 interface Card {
     id: number;
     name: string;
+    /**
+     * The card's identity parts and its stage table, all sent by `SupportCardController::mapCardForIndex()`
+     * and consumed by the compare modal below. They were absent from this interface while the server was
+     * already shipping them, so `getSelectedCards` handed `CardCompare` a `Card[]` that did not type as its
+     * `CompareCard[]` and the modal's per-effect cells could not be checked at all.
+     */
+    char_name: string;
+    title: string | null;
+    type: string;
+    stages: EffectStage[];
     url: string;
     /** The row thumbnail's loopback URL, keyed on the publisher's `support_id`. Null when unmirrored. */
     artworkURL: string | null;
@@ -287,7 +305,7 @@ function goToPage(page: number): void {
                 select at least 2
             </p>
             <p v-if="selectedCards.length === 3" class="text-xs text-ink-muted">
-                3 maximum — deselect one to add another
+                3 maximum, deselect one to add another
             </p>
         </div>
     </div>
@@ -330,7 +348,8 @@ function goToPage(page: number): void {
                     v-model="selectedCards"
                     :value="card.id"
                     :disabled="!isCardSelected(card.id) && selectedCards.length >= 3"
-                    :aria-label="`Compare ${card.name}`"
+                    :label="`Compare ${card.name}`"
+                    sr-only-label
                     class="min-h-11"
                 />
 
@@ -338,7 +357,7 @@ function goToPage(page: number): void {
                  row"): a `size-12` leading cell before the card's name link.
 
                  Clickable, because §45a gives this slot the click action *navigates to
-                 support-card detail*. The destination is the row's own `url` — the local primary
+                 support-card detail*. The destination is the row's own `url`, the local primary
                  key, not the `support_id` the frame is keyed on — so the frame and the name beside
                  it lead to the same place, which is what makes WCAG 2.5.3 satisfiable at all: the
                  link's accessible name has to contain the visible label, so `linkLabel` is the

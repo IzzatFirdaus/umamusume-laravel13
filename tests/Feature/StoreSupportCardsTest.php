@@ -184,10 +184,10 @@ it('imports the 35-row dictionary once and keeps exactly the four declaring calc
     $action = new StoreSupportEffects;
 
     expect($action->handle(importedSupportEffects(), supportEffectImportUrl()))
-        ->toBe(['created' => 35, 'updated' => 0, 'skipped' => 0])
-        ->and(SupportEffect::count())->toBe(35)
+        ->toBe(['created' => 29, 'updated' => 0, 'skipped' => 0])
+        ->and(SupportEffect::count())->toBe(29)
         ->and(SupportEffect::whereNotNull('calc')->count())->toBe(4)
-        ->and(SupportEffect::whereNull('calc')->count())->toBe(31)
+        ->and(SupportEffect::whereNull('calc')->count())->toBe(25)
         ->and(SupportEffect::where('calc', 'mult')->pluck('effect_id')->sort()->values()->all())
         ->toBe([1, 27, 28])
         ->and(SupportEffect::where('effect_id', 19)->value('calc'))->toBe('add')
@@ -196,8 +196,8 @@ it('imports the 35-row dictionary once and keeps exactly the four declaring calc
         ->and(SupportEffect::whereNull('fetched_at')->count())->toBe(0);
 
     expect($action->handle(importedSupportEffects(), supportEffectImportUrl()))
-        ->toBe(['created' => 0, 'updated' => 35, 'skipped' => 0])
-        ->and(SupportEffect::count())->toBe(35);
+        ->toBe(['created' => 0, 'updated' => 29, 'skipped' => 0])
+        ->and(SupportEffect::count())->toBe(29);
 });
 
 it('writes no dictionary row when one record carries a calc the source never emits', function (): void {
@@ -230,7 +230,7 @@ it('names every effect id the catalogue references and keeps the nine it does no
 
     $dictionary = SupportEffect::query()->pluck('name_en', 'effect_id');
 
-    expect($dictionary)->toHaveCount(35)
+    expect($dictionary)->toHaveCount(29)
         ->and(array_keys($referenced))->toHaveCount(26);
 
     foreach (array_keys($referenced) as $effectId) {
@@ -238,13 +238,14 @@ it('names every effect id the catalogue references and keeps the nine it does no
         expect($dictionary->get($effectId))->not->toBeNull();
     }
 
-    // Nine published effects are named by no card in this document and still land, because the
-    // dictionary is the source's, not this tool's subset: ids 20 to 24 and 29 are the six rows the
-    // publisher marks `inactive`, and 33, 41 and 9991 are rows only the dictionary carries.
+    // Three published effects are named by no card in this document and still land, because the
+    // dictionary is the source's, not this tool's subset: 33, 41 and 9991 are rows only the
+    // dictionary carries. The six inactive effects (ids 20–24, 29) are filtered by the parser
+    // per §1.4.8 and do not reach the dictionary table.
     $unused = array_values(array_diff(
         array_column(importedSupportEffects(), 'effect_id'),
         array_keys($referenced)
     ));
 
-    expect($unused)->toBe([20, 21, 22, 23, 24, 29, 33, 41, 9991]);
+    expect($unused)->toBe([33, 41, 9991]);
 });

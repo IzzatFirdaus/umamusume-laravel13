@@ -133,7 +133,7 @@ function focusRow(): void {
             <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <span class="font-semibold text-ink-strong">{{ label }}</span>
                 <span v-if="is_friend" class="pill pill-neutral">
-                    Friend slot
+                    Pal slot
                 </span>
             </div>
 
@@ -169,7 +169,9 @@ function focusRow(): void {
                         v-else
                         class="text-ink-muted"
                     >
-                        Scenario Link: N/A
+                        <span
+                            title="The Scenario Link badge cannot be derived for this card."
+                        >Scenario Link: N/A</span>
                         <span v-if="card.scenario_link_note" class="sr-only">: {{ card.scenario_link_note }}</span>
                         <span v-else class="sr-only">: The Scenario Link badge cannot be derived for this card.</span>
                     </span>
@@ -235,6 +237,7 @@ function focusRow(): void {
                 <span
                     v-if="ownership === null"
                     class="text-xs text-ink-muted"
+                    title="No ownership has been recorded for this slot yet."
                 >N/A<span class="sr-only">: No ownership has been recorded for this slot yet.</span></span>
                 <div class="flex gap-1">
                     <button

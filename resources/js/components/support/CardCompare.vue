@@ -91,16 +91,33 @@ const capDisplay = (stage: { cap: { display: string; level: number } }): string 
 /**
  * Get the stage for a given card and effect ID.
  */
-const getStage = (card: { stages: { effect_id: number }[] }, effectId: number): { effect_id: number; name: string | null; anchors: { level: number; display: string }[]; cap: { display: string; level: number } } | null => {
+/*
+ * The return type is `EffectStage`, the interface this file already declares and the shape
+ * `SupportCardEffects::stages()` emits. It was written out inline with `cap`'s two members in the
+ * opposite order (`{ display, level }`), which is structurally the same type but was compared against
+ * the catalog's `EffectStage` as a different one, so `card.stages` did not narrow to it.
+ */
+const getStage = (card: { stages: EffectStage[] }, effectId: number): EffectStage | null => {
     return card.stages.find((s) => s.effect_id === effectId) ?? null;
 };
 </script>
 
 <template>
-    <div class="card">
-        <h2 class="text-lg font-semibold text-ink-strong mb-4">
-            Compare {{ props.cards.length }} cards
-        </h2>
+    <div class="card" tabindex="-1" role="dialog" aria-labelledby="compare-heading" @keydown.escape="$emit('close')">
+        <div class="flex items-center justify-between gap-3 mb-4">
+            <h2 id="compare-heading" class="text-lg font-semibold text-ink-strong">
+                Compare {{ props.cards.length }} cards
+            </h2>
+            <button
+                type="button"
+                autofocus
+                class="min-h-11 min-w-11 rounded-md border border-rule bg-raised px-3 text-sm font-semibold text-ink hover:bg-panel focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                aria-label="Close comparison"
+                @click="$emit('close')"
+            >
+                Close
+            </button>
+        </div>
 
         <template v-if="props.cards.length < 2">
             <p class="text-sm text-ink-muted">
@@ -133,9 +150,9 @@ const getStage = (card: { stages: { effect_id: number }[] }, effectId: number): 
                                 {{ getStage(props.cards[0], effectId)?.name ?? `Effect ${effectId}` }}
                             </td>
                             <td v-for="card in props.cards" :key="card.id" class="border-b border-rule px-2 py-2 align-top text-center">
-                                <template v-if="getStage(card, effectId) as stage">
-                                    <div class="font-mono text-xs text-ink">{{ statedAt(stage) }}</div>
-                                    <div class="mt-1 font-bold text-ink-strong">{{ capDisplay(stage) }}</div>
+                                <template v-if="getStage(card, effectId) !== null">
+                                    <div class="font-mono text-xs text-ink">{{ statedAt(getStage(card, effectId)!) }}</div>
+                                    <div class="mt-1 font-bold text-ink-strong">{{ capDisplay(getStage(card, effectId)!) }}</div>
                                 </template>
                                 <template v-else>
                                     <span class="text-xs text-ink-muted">Not recorded</span>

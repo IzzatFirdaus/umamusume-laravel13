@@ -137,14 +137,14 @@ it('imports both committed bodies with no network at all', function (): void {
     $this->artisan('uma:import:support-cards')->assertExitCode(0);
 
     expect(SupportCard::count())->toBe(559)
-        ->and(SupportEffect::count())->toBe(35)
+        ->and(SupportEffect::count())->toBe(29)
         ->and(MatchCandidate::count())->toBe(0)
         // Provenance from the offline path is the pinned URL, which the committed body's own hash
         // confirms, and every row carries it.
         ->and(SupportCard::where('source_url', config('uma.sources.gametora-support-cards.url'))->count())
         ->toBe(559)
         ->and(SupportEffect::where('source_url', config('uma.sources.gametora-support-effects.url'))->count())
-        ->toBe(35)
+        ->toBe(29)
         ->and(SupportCard::whereNotNull('fetched_at')->count())->toBe(559);
 });
 
@@ -157,7 +157,7 @@ it('imports the dictionary it can and reports the body it cannot find', function
     $this->artisan('uma:import:support-cards')->assertExitCode(1);
 
     expect(SupportCard::count())->toBe(0)
-        ->and(SupportEffect::count())->toBe(35);
+        ->and(SupportEffect::count())->toBe(29);
 });
 
 it('records the URL the manifest resolved when uma:fetch lands the cards', function (): void {

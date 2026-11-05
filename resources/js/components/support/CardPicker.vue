@@ -45,9 +45,15 @@ const props = defineProps<{
     options: Option[];
     /** The seven support types, for the legend and the type filter. */
     types: { key: string; label: string }[];
-    /** The current filter values, echoed back by the server after a filter round trip. */
-    type: string;
-    query: string;
+    /**
+     * The current filter values, echoed back by the server after a filter round trip.
+     *
+     * Nullable because the server's own echo is: `DeckSelectController` sends the parsed filter or null
+     * when the URL names none (`DeckSelect.vue` declares `type: string | null`). The refs below hold
+     * `''` for "no filter", so the null is normalised once on read rather than rejected here.
+     */
+    type: string | null;
+    query: string | null;
 }>();
 
 const emit = defineEmits<{
@@ -119,7 +125,7 @@ const groupLabels: Record<'OWNED' | 'RENTED' | 'NOT_RECORDED', { label: string; 
 /** Derivation clause for the "Owned only" checkbox. */
 const ownedOnlyClause = 'show only cards marked owned in a saved run\'s deck';
 
-function open(event: Event, filters: { type: string; query: string }): void {
+function open(event: Event, filters: { type: string | null; query: string | null }): void {
     openAt(event.currentTarget as HTMLElement, filters);
 }
 
@@ -128,10 +134,12 @@ function open(event: Event, filters: { type: string; query: string }): void {
  * the dialog reopens over the refined list rather than closing on the visit (R4-21). The opener is the
  * slot row itself so the focus return has somewhere to land.
  */
-function openAt(element: HTMLElement | null, filters: { type: string; query: string }): void {
+function openAt(element: HTMLElement | null, filters: { type: string | null; query: string | null }): void {
     opener.value = element;
-    type.value = filters.type;
-    query.value = filters.query;
+    // A null filter and an empty one are the same state on this control, and the selects below are
+    // bound to `''` for it: coercing here keeps one representation inside the dialog.
+    type.value = filters.type ?? '';
+    query.value = filters.query ?? '';
     dialog.value?.showModal();
 }
 
@@ -210,10 +218,10 @@ defineExpose({ open, openAt });
                         {{ groupLabels[groupData.group].label }}
                     </span>
                     <span class="pill pill-neutral text-xs">Calculated</span>
-                    <span class="text-xs text-ink-muted">— {{ groupLabels[groupData.group].clause }}</span>
+                    <span class="text-xs text-ink-muted">({{ groupLabels[groupData.group].clause }})</span>
                 </div>
 
-                <ul role="list" class="max-h-[50vh] space-y-2 overflow-y-auto">
+                <ul role="list" tabindex="0" aria-label="Support cards, scrollable" class="max-h-[50vh] space-y-2 overflow-y-auto focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
                     <li
                         v-for="option in groupData.options"
                         :key="option.id"
@@ -226,12 +234,16 @@ defineExpose({ open, openAt });
                         </div>
                         <SupportTypeMark :type="option.type" :label="option.type_label" />
 
-                        <!-- Type-match marker (Slice 4, C18) -->
+                        <!-- Type-match marker (Slice 4, C18). The glyph and its word are the card's own
+                             `type`/`type_label`, not `slot_type`: `type_match` is true only when the two
+                             are equal, so the card's type is the same value and is the non-nullable one.
+                             The previous `slot_type` binding was also the reason this mark vanished when
+                             the slot named no type, and it passed a `:size` the component never declared. -->
                         <span
                             v-if="option.type_match"
                             class="flex items-center gap-1 text-xs font-medium text-ink bg-panel px-2 py-0.5 rounded"
                         >
-                            <SupportTypeMark :type="option.slot_type" :label="option.slot_type" :size="10" />
+                            <SupportTypeMark :type="option.type" :label="option.type_label" />
                             <span>fits this slot</span>
                         </span>
 

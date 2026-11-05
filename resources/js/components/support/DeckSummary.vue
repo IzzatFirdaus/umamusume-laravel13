@@ -30,6 +30,8 @@
 import AbsenceValue from '../AbsenceValue.vue';
 import SupportTypeMark from './SupportTypeMark.vue';
 import { computed, ref } from 'vue';
+import { breakTier, BREAK_TIER_LABELS } from '../../services/career/breakTier';
+import BaseSelect from '../Form/BaseSelect.vue';
 
 interface LadderEffect {
     effect_id: number;
@@ -87,30 +89,21 @@ const entries = computed(() => props.slots.flatMap((slot) => {
     const parsed = raw === '' ? Number.NaN : Number(raw);
     const level = Number.isInteger(parsed) && parsed > 0 ? parsed : null;
     const top = slot.card.ladder[slot.card.ladder.length - 1];
+    const tierResult = breakTier(level, slot.card.ladder);
 
     return [{
         position: slot.position,
         slot,
         card: slot.card,
         level,
-        tier: level === null ? null : slot.card.ladder.find((tier: Tier) => level <= tier.level) ?? null,
+        tier: tierResult.tier !== null ? slot.card.ladder[tierResult.tier] : null,
+        tierLabel: tierResult.label,
+        tierIsMaximum: tierResult.isMaximum,
+        tierLevel: tierResult.level,
         top,
         above: level !== null && top !== undefined && level > top.level,
     }];
 }));
-
-/** The words a tier answers to, with the client's own ceiling named. */
-function tierWord(tier: Tier): string {
-    if (tier.is_maximum) {
-        return 'Max Limit Break';
-    }
-
-    if (tier.breaks === 0) {
-        return 'Unbroken';
-    }
-
-    return `${tier.breaks} break${tier.breaks === 1 ? '' : 's'}`;
-}
 
 /**
  * The client's four diamonds, one filled per completed break (`UMAMUSUME_REFERENCE.md` §1.4.2). Drawn
@@ -141,6 +134,19 @@ function ladderRows(card: SlotCard): { key: number; name: string; cells: (string
         cells: card.ladder.map((tier) => tier.effects[index]?.display),
     }));
 }
+
+/** Per-card selected tier index for the tier toggle filter. Empty string = show all tiers. */
+const selectedTier = ref<Record<number, string>>({});
+
+/** Expand/collapse all state for the card sections. */
+const expandSignal = ref<'expanded' | 'collapsed' | null>(null);
+
+/** Get the tier index implied by the card's current level. */
+function impliedTierIndex(entry: { level: number | null; card: SlotCard }): number | null {
+    if (entry.level === null) return null;
+    const found = entry.card.ladder.find((t) => entry.level! <= t.level);
+    return found ? entry.card.ladder.indexOf(found) : null;
+}
 </script>
 
 <template>
@@ -165,6 +171,26 @@ function ladderRows(card: SlotCard): { key: number; name: string; cells: (string
                 Deck summary
                 <span class="text-xs font-semibold text-ink-muted">{{ entries.length }} assigned</span>
             </h2>
+            <div class="flex items-center gap-2 ml-auto">
+                <button
+                    type="button"
+                    class="text-xs text-ink-muted hover:text-ink underline"
+                    @click="expandSignal = 'expanded'"
+                    :disabled="expandSignal === 'expanded'"
+                    aria-label="Expand all card sections"
+                >
+                    Expand all
+                </button>
+                <button
+                    type="button"
+                    class="text-xs text-ink-muted hover:text-ink underline"
+                    @click="expandSignal = 'collapsed'"
+                    :disabled="expandSignal === 'collapsed'"
+                    aria-label="Collapse all card sections"
+                >
+                    Collapse all
+                </button>
+            </div>
         </summary>
 
         <p class="mt-1 text-xs text-ink-muted">
@@ -249,8 +275,8 @@ function ladderRows(card: SlotCard): { key: number; name: string; cells: (string
                         <td class="py-2 align-top">
                             <template v-if="entry.tier !== null">
                                 <span aria-hidden="true" class="font-mono text-ink-faint">{{ diamonds(entry.card, entry.tier.breaks) }}</span>
-                                <span class="ml-1">{{ tierWord(entry.tier) }}</span>
-                                <span class="text-ink-muted"> · cap Lvl {{ entry.tier.level }}</span>
+                                <span class="ml-1">{{ entry.tierLabel }}</span>
+                                <span class="text-ink-muted"> · cap Lvl {{ entry.tierLevel }}</span>
                             </template>
                             <!-- The ceiling is a published fact, not a danger, so it prints in ink: this
                                  sat in the risk hue, spending the system's one risk colour on a rarity cap
@@ -280,22 +306,34 @@ function ladderRows(card: SlotCard): { key: number; name: string; cells: (string
                 v-for="entry in entries"
                 :key="`ladder-${entry.position}`"
                 class="mt-4"
-                :aria-labelledby="`deck-ladder-${entry.position}`"
             >
-                <h3 :id="`deck-ladder-${entry.position}`" class="text-sm font-semibold text-ink-strong">
-                    {{ entry.card.name }}
-                    <span class="font-mono text-xs text-ink-muted">{{ entry.card.rarity_word }}</span>
-                </h3>
-
-                <!-- Six columns escape a 320 px page the same way the seven-column one above does, so the
-                     ladder scrolls inside its own named region rather than widening the document. The
-                     region carries the same `contain-paint` for the same measured reason. -->
-                <div
-                    role="region"
-                    tabindex="0"
-                    :aria-label="`${entry.card.name} values by level, scrollable`"
-                    class="mt-1 contain-paint overflow-x-auto p-2 scroll-p-2 focus:outline-2 focus:outline-offset-2"
+                <details
+                    :open="expandSignal === 'expanded'"
+                    class="card"
+                    :aria-labelledby="`deck-ladder-${entry.position}`"
                 >
+                    <summary class="min-h-11 cursor-pointer flex items-center justify-between gap-2">
+                        <h3 :id="`deck-ladder-${entry.position}`" class="text-sm font-semibold text-ink-strong">
+                            {{ entry.card.name }}
+                            <span class="font-mono text-xs text-ink-muted">{{ entry.card.rarity_word }}</span>
+                        </h3>
+                        <!-- Tier toggle: filters the ladder to one tier's row (D9, C20) -->
+                        <div class="flex items-center gap-2">
+                            <BaseSelect
+                                v-model="selectedTier[entry.position]"
+                                :options="[
+                                    { value: '', label: 'All tiers' },
+                                    ...entry.card.ladder.map((tier, idx) => ({ value: String(idx), label: BREAK_TIER_LABELS[tier.breaks] ?? (tier.is_maximum ? 'Max Limit Break' : `${tier.breaks} break${tier.breaks === 1 ? '' : 's'}`) }))
+                                ]"
+                                :disabled="entry.level === null"
+                                aria-label="Filter ladder to tier"
+                                class="w-40"
+                            />
+                            <span v-if="entry.level === null" class="text-xs text-ink-muted">Not recorded</span>
+                        </div>
+                    </summary>
+
+                    <div class="mt-2">
                 <table class="w-full text-sm">
                     <caption class="sr-only">
                         {{ entry.card.name }} at each level from unbroken to Max Limit Break
@@ -308,16 +346,26 @@ function ladderRows(card: SlotCard): { key: number; name: string; cells: (string
                                 :key="tier.breaks"
                                 scope="col"
                                 class="pb-1 pr-4 font-semibold"
+                                :style="{ display: (selectedTier[entry.position] ?? '') !== '' && (selectedTier[entry.position] ?? '') !== String(entry.card.ladder.indexOf(tier)) ? 'none' : '' }"
                             >
-                                {{ tierWord(tier) }}
+                                {{ BREAK_TIER_LABELS[tier.breaks] ?? (tier.is_maximum ? 'Max Limit Break' : `${tier.breaks} break${tier.breaks === 1 ? '' : 's'}`) }}
                                 <span class="block font-mono font-normal">Lvl {{ tier.level }}</span>
                             </th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-rule">
-                        <tr v-for="row in ladderRows(entry.card)" :key="row.key">
+                        <tr
+                            v-for="row in ladderRows(entry.card)"
+                            :key="row.key"
+                            :style="{ display: (selectedTier[entry.position] ?? '') !== '' && row.cells[Number(selectedTier[entry.position])] === undefined ? 'none' : '' }"
+                        >
                             <th scope="row" class="py-1.5 pr-4 text-left font-normal text-ink-muted">{{ row.name }}</th>
-                            <td v-for="(cell, index) in row.cells" :key="index" class="py-1.5 pr-4 font-mono">
+                            <td
+                                v-for="(cell, index) in row.cells"
+                                :key="index"
+                                class="py-1.5 pr-4 font-mono"
+                                :style="{ display: (selectedTier[entry.position] ?? '') !== '' && index !== Number(selectedTier[entry.position]) ? 'none' : '' }"
+                            >
                                 {{ cell }}
                             </td>
                         </tr>
@@ -328,7 +376,11 @@ function ladderRows(card: SlotCard): { key: number; name: string; cells: (string
                 <p v-if="ladderRows(entry.card).length === 0" class="mt-1 text-xs text-ink-muted">
                     The source states no effect anchor for this card, so there is no ladder to print.
                 </p>
-            </section>
+                <p v-else-if="(selectedTier[entry.position] ?? '') !== '' && ladderRows(entry.card).every(row => row.cells[Number(selectedTier[entry.position])] === undefined)" class="mt-1 text-xs text-ink-muted">
+                                    No effect values stated for the selected tier.
+                                </p>
+                </details>
+        </section>
         </template>
 
         <!-- The figures come from the published ladder and the stated anchors:
