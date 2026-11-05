@@ -689,7 +689,7 @@ const coverageConstants = computed(() =>
                         <!-- P4: Budget-aware recommendation panel -->
                         <section aria-labelledby="skills-recommended-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
                             <h2 id="skills-recommended-heading" class="flex items-center gap-2 text-lg font-semibold text-ink-strong">
-                                Recommended <span class="pill pill-neutral">Calculated</span>
+                                Recommended <span class="pill pill-neutral" aria-describedby="recommended-source">Calculated</span>
                             </h2>
                             <p class="sub mt-1">
                                 Covers required priorities first at their hint-adjusted costs, then fills remaining SP
@@ -715,7 +715,7 @@ const coverageConstants = computed(() =>
                                         </template>
                                     </template>.
                                 </p>
-                                <p class="mt-1 text-xs text-ink-muted">
+                                <p class="mt-1 text-xs text-ink-muted" id="recommended-source">
                                     (a) The rule is this tool's own heuristic, not a client mechanic. (b) The fill reuses the cheapest-first ordering. (c) The pool is the run's form's skill list — the trainee profile's "Skills on this form" (unique + innate + awakening, plus acquired event skills). (d) When the budget outlasts the pool, the residual is printed.
                                 </p>
                                 <ol tabindex="0" aria-label="Recommended skills for this run" class="mt-2 max-h-72 space-y-1 overflow-y-auto text-sm">
