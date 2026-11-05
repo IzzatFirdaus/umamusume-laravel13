@@ -147,7 +147,7 @@ async function move(delta: number): Promise<void> {
             </select>
         </label>
         <p
-            v-else-if="props.row.recorded !== null && props.row.in_pool && props.row.sp_cost === null"
+            v-if="props.row.recorded !== null && props.row.in_pool && props.row.sp_cost === null"
             class="mt-1 text-xs text-ink-muted"
         >
             Hint level: N/A <span class="text-ink-muted">· no published cost</span>
