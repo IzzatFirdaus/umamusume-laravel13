@@ -626,7 +626,7 @@ function onSkillPrioritySelect(payload: { id: number; name: string }): void {
                             type="button"
                             class="text-ink-muted hover:text-risk"
                             @click="form.skill_priorities.splice(idx, 1)"
-                            aria-label="Remove {{ name }}"
+                            :aria-label="`Remove ${name}`"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
