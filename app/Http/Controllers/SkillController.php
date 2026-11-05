@@ -10,6 +10,7 @@ use App\Models\CharacterCard;
 use App\Models\Skill;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
+use App\Services\DataPipeline\JapaneseNameNormalizer;
 use App\Services\DataPipeline\NameNormalizer;
 use App\Services\DataPipeline\Parsers\GametoraSkillsParser;
 use App\Services\HintDiscount;
@@ -55,6 +56,20 @@ class SkillController extends Controller
 {
     /** The detail card's run list is capped; the total is stated beside it. */
     private const RUN_CARD_LIMIT = 20;
+
+    /**
+     * The current request's search needle, folded once per channel (Phase 7).
+     *
+     * Properties rather than `whereSearchMatches()` parameters because `whereKeyLike()` builds its
+     * patterns per column and threading three needles through two nested closures reads worse than
+     * three assignments in one place. They are set at the top of `whereSearchMatches()` and read only
+     * from there, so a request never sees a stale value.
+     */
+    private string $nameKey = '';
+
+    private string $descriptionKey = '';
+
+    private string $japaneseKey = '';
 
     /** The default scope: the `[Global]` subset, per ADR-0011 §2. */
     private const SCOPE_GLOBAL = 'global';
@@ -473,19 +488,10 @@ class SkillController extends Controller
      */
     private function query(?string $search, ?string $type, bool $unique, ?int $distance = null, string $scope = self::SCOPE_GLOBAL): Builder
     {
-        $key = $search === null ? null : $this->normalizer->normalize($search);
-
         return $this->scoped(Skill::query(), $scope)
-            // D-62: skill search matches on `match_key` OR `description_match_key`, never on a display string.
-            // The query goes through the same normalizer that wrote the key, so `Corner  Adept` reaches
-            // `corneradept×` and a query differing only in case or spacing is the same query.
             ->when(
-                $key !== null && $key !== '',
-                fn (Builder $q): Builder => $q->where(function (Builder $q2) use ($key): void {
-                    $escaped = '%'.addcslashes($key, '\\%_').'%';
-                    $q2->whereRaw("match_key LIKE ? ESCAPE '\\'", [$escaped])
-                        ->orWhereRaw("description_match_key LIKE ? ESCAPE '\\'", [$escaped]);
-                }),
+                $search !== null,
+                fn (Builder $q): Builder => $this->whereSearchMatches($q, $search, $scope),
             )
             ->when(
                 $type !== null,
@@ -503,6 +509,97 @@ class SkillController extends Controller
                     ? $q->whereNull('distance_type')
                     : $q->where('distance_type', $distance),
             );
+    }
+
+    /**
+     * Which key a search reads, decided by the scope the Trainer is looking at (Phase 7, `R1`).
+     *
+     * The rule is **search matches what the user can see**. Each scope therefore reads only the
+     * channels whose text it actually renders, and the two things that are refused here would
+     * otherwise be a match with no visible cause: a Trainer types a phrase, a row appears, and
+     * nothing on the row contains the phrase.
+     *
+     * - `japan_only` reads `match_key_ja` only. Not `description_match_key`: `desc_en` on these rows
+     *   is refused at the payload edge (ruling 1, symmetric) and every cell prints `No client
+     *   string.`, so a description match would be invisible. Not `match_key` either: `name` on these
+     *   rows is the export's `enname`, which the Air Messiah ruling bars from UI copy, so it is a
+     *   string the scope never prints.
+     * - `global` reads `match_key` and `description_match_key`, unchanged since P3. No JapanOnly row
+     *   can appear here, so `match_key_ja` would be dead weight.
+     * - `all` reads all three, each on the row class where its text is visible: `match_key_ja` for
+     *   JapanOnly rows, and `match_key` + `description_match_key` for GlobalReleased ones. The
+     *   `release_status` test on each channel is the same rule as `japan_only`'s refusal, read the
+     *   other way: `all` still prints `name` and `description` only on a Global row.
+     *
+     * **The needle is folded per scope, in the same branch as the column.** Two normalizers exist
+     * and they lose different things, so folding the query with the wrong one answers a different
+     * question: `JapaneseNameNormalizer` on a Latin term would run it through NFKC and collapse
+     * full-width Latin, while `NameNormalizer` on a Japanese term destroys voiced kana. The needle
+     * therefore goes through the same fold that wrote the column it is about to be compared with.
+     *
+     * @param  Builder<Skill>  $query
+     * @return Builder<Skill>
+     */
+    private function whereSearchMatches(Builder $query, string $search, string $scope): Builder
+    {
+        // The three folds, computed once for this request. Each channel compares against the column
+        // whose fold wrote it, which is the point the docblock above makes the long way.
+        $this->nameKey = $this->normalizer->normalize($search);
+        $this->descriptionKey = $this->nameKey;
+        $this->japaneseKey = JapaneseNameNormalizer::normalize($search);
+
+        return match ($scope) {
+            self::SCOPE_JAPAN_ONLY => $this->whereKeyLike($query, [$this->japaneseKey], []),
+            'all' => $this->whereKeyLike($query, [$this->japaneseKey], [
+                'match' => ReleaseStatus::GlobalReleased->value,
+                'description' => ReleaseStatus::GlobalReleased->value,
+            ]),
+            // The default scope. `availableOnGlobal()` has already excluded every non-Global row in
+            // `scoped()`, so neither channel needs its own availability test here.
+            default => $this->whereKeyLike($query, [], ['match' => null, 'description' => null]),
+        };
+    }
+
+    /**
+     * One OR-group of `LIKE` tests, each optionally gated on `release_status`.
+     *
+     * `$ja` keys are tested against `match_key_ja` and are not status-gated: the column is non-null
+     * only where the row carries a Japanese name, which is the JapanOnly population this channel
+     * exists for.
+     *
+     * @param  list<string>  $ja  normalized Japanese needles
+     * @param  array<string, string|null>  $latin  `match`/`description` keys, null status meaning "ungated"
+     * @param  Builder<Skill>  $query
+     * @return Builder<Skill>
+     */
+    private function whereKeyLike(Builder $query, array $ja, array $latin): Builder
+    {
+        return $query->where(function (Builder $group) use ($ja, $latin): void {
+            foreach ($ja as $needle) {
+                $group->orWhereRaw("match_key_ja LIKE ? ESCAPE '\\'", [$this->like($needle)]);
+            }
+
+            foreach ($latin as $column => $status) {
+                $field = $column === 'description' ? 'description_match_key' : 'match_key';
+                $pattern = $this->like($column === 'description' ? $this->descriptionKey : $this->nameKey);
+
+                $group->orWhere(function (Builder $sub) use ($field, $pattern, $status): void {
+                    $sub->whereRaw("{$field} LIKE ? ESCAPE '\\'", [$pattern]);
+
+                    if ($status !== null) {
+                        $sub->where('release_status', $status);
+                    }
+                });
+            }
+        });
+    }
+
+    /**
+     * The `LIKE` pattern for one already-folded key: substring, with the escape set honoured.
+     */
+    private function like(string $key): string
+    {
+        return '%'.addcslashes($key, '\\%_').'%';
     }
 
     /**

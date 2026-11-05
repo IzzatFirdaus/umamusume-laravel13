@@ -293,6 +293,7 @@ final class SkillInventory extends Command
         $tableTotal = Skill::count();
         $tableDescriptionNotNull = Skill::whereNotNull('description')->count();
         $tableDistanceNotNull = Skill::whereNotNull('distance_type')->count();
+        $tableMatchKeyJaNotNull = Skill::whereNotNull('match_key_ja')->count();
 
         $releaseStatusCounts = Skill::query()
             ->selectRaw('release_status, count(*) as c')
@@ -352,6 +353,10 @@ final class SkillInventory extends Command
         $this->line("table.total={$tableTotal}");
         $this->line("table.description_notnull={$tableDescriptionNotNull}");
         $this->line("table.distance_notnull={$tableDistanceNotNull}");
+        // The `name_ja` subset. Non-null here means the row carries a searchable Japanese key, so a
+        // `japan_only` search can reach it; a row with `name_ja` but no key is an import that has not
+        // run since the column landed, which is what the zero-check in the Phase 7 commit asserts.
+        $this->line("table.match_key_ja_notnull={$tableMatchKeyJaNotNull}");
 
         foreach (ReleaseStatus::cases() as $status) {
             $count = $releaseStatusCounts[$status->value] ?? 0;

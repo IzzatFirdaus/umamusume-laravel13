@@ -43,11 +43,11 @@ function insertSkill(
 
     db.prepare(
         `INSERT INTO skills
-            (name, name_ja, match_key, sp_cost, type, is_unique, created_at, updated_at,
+            (name, name_ja, match_key, match_key_ja, sp_cost, type, is_unique, created_at, updated_at,
              export_id, rarity, release_status, name_is_client, source_url, snapshot_path,
              fetched_at, source_timezone, is_manual, condition_groups, description,
              description_match_key, distance_type)
-         VALUES (?, NULL, ?, 100, 'Speed', 0, ?, ?, ?, 1, 'GlobalReleased', 1,
+         VALUES (?, NULL, ?, NULL, 100, 'Speed', 0, ?, ?, ?, 1, 'GlobalReleased', 1,
                  'https://gametora.test/skills.json', NULL, ?, 'Asia/Tokyo', 0, ?, NULL, NULL, ?)`,
     ).run(
         name,
@@ -181,11 +181,11 @@ export function seedJapanOnlySkill(name = 'Japan Only Fixture'): void {
 
         db.prepare(
             `INSERT INTO skills
-                (name, name_ja, match_key, sp_cost, type, is_unique, created_at, updated_at,
+                (name, name_ja, match_key, match_key_ja, sp_cost, type, is_unique, created_at, updated_at,
                  export_id, rarity, release_status, name_is_client, source_url, snapshot_path,
                  fetched_at, source_timezone, is_manual, condition_groups, description,
                  description_match_key, distance_type)
-             VALUES (?, NULL, ?, 120, 'Speed', 0, ?, ?, ?, 1, 'JapanOnly', 1,
+             VALUES (?, NULL, ?, NULL, 120, 'Speed', 0, ?, ?, ?, 1, 'JapanOnly', 1,
                      'https://gametora.test/skills.json', NULL, ?, 'Asia/Tokyo', 0, NULL, NULL, NULL, NULL)`,
         ).run(name, name.toLowerCase().replace(/\s+/g, ''), now, now, JAPAN_ONLY_EXPORT_ID, now);
     } finally {
@@ -260,11 +260,12 @@ export function seedScopeFixtures(): void {
 
         db.prepare(
             `INSERT INTO skills
-                (name, name_ja, match_key, sp_cost, type, is_unique, created_at, updated_at,
+                (name, name_ja, match_key, match_key_ja, sp_cost, type, is_unique, created_at, updated_at,
                  export_id, rarity, release_status, name_is_client, source_url, snapshot_path,
                  fetched_at, source_timezone, is_manual, condition_groups, description,
                  description_match_key, distance_type)
-             VALUES ('Raise My Soul''s Blade!', '掲げよ、己が魂の剣を！', 'raisemysoulsblade', 180, 'Speed', 0,
+             VALUES ('Raise My Soul''s Blade!', '掲げよ、己が魂の剣譜！', 'raisemysoulsblade',
+                     '掲げよ、己が魂の剣譜!', 180, 'Speed', 0,
                      ?, ?, ?, 1, 'JapanOnly', 0, 'https://gametora.test/skills.json', NULL,
                      ?, 'Asia/Tokyo', 0, NULL, 'The source states an English sentence for this row.',
                      'thesourcestatesanenglishsentenceforthisrow', NULL)`,
@@ -272,11 +273,11 @@ export function seedScopeFixtures(): void {
 
         db.prepare(
             `INSERT INTO skills
-                (name, name_ja, match_key, sp_cost, type, is_unique, created_at, updated_at,
+                (name, name_ja, match_key, match_key_ja, sp_cost, type, is_unique, created_at, updated_at,
                  export_id, rarity, release_status, name_is_client, source_url, snapshot_path,
                  fetched_at, source_timezone, is_manual, condition_groups, description,
                  description_match_key, distance_type)
-             VALUES ('Client Named Row', NULL, 'clientnamedrow', 160, 'Speed', 0,
+             VALUES ('Client Named Row', NULL, 'clientnamedrow', NULL, 160, 'Speed', 0,
                      ?, ?, ?, 1, 'GlobalReleased', 1, 'https://gametora.test/skills.json', NULL,
                      ?, 'Asia/Tokyo', 0, NULL, 'A client sentence for the Global row.',
                      'aclientsentencefortheglobalrow', NULL)`,

@@ -549,3 +549,146 @@ it('reports no distance filter as null rather than the sentinel', function (): v
             ->where('distance', null)
         );
 });
+
+/*
+ * Phase 7 — the Japan-only search key.
+ *
+ * Before this, `?scope=japan_only&search=` could only reach a row through `description_match_key`, a
+ * channel whose text that scope refuses to render: a Trainer typed a phrase, a row appeared, and
+ * every cell on it said `No client string.` The gap was that `match_key` is built from `name`, which
+ * on a JapanOnly row is the export's `enname`, so the ONE string such a row prints (`name_ja`) had no
+ * key. `match_key_ja` is that key.
+ *
+ * The rule the cases below hold is "search matches what the user can see", tested from both sides: a
+ * scope finds what it prints, and refuses what it does not.
+ */
+
+/** A JapanOnly row whose printed name is Japanese, with the key the import would write. */
+function japanOnlySearchRow(string $nameJa, array $attributes = []): Skill
+{
+    return Skill::factory()->create([
+        'name' => 'Export Enname Rendering',
+        'name_ja' => $nameJa,
+        'release_status' => ReleaseStatus::JapanOnly->value,
+        'name_is_client' => false,
+        'description' => 'A third-party English sentence about this skill.',
+        'export_id' => 880100 + crc32($nameJa) % 1000,
+        ...$attributes,
+    ]);
+}
+
+it('finds a JapanOnly row by its Japanese name at scope=japan_only', function (): void {
+    japanOnlySearchRow('掲げよ、己が魂の剣を！');
+
+    // A mid-string substring, because that is how a Trainer searches a name they half-remember.
+    $this->get(route('skills.index', ['scope' => 'japan_only', 'search' => '魂']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('skills.data', 1)
+            ->where('skills.data.0.name_ja', '掲げよ、己が魂の剣を！')
+            // The row still prints no English name, which is why the key it matched on is the only
+            // searchable thing about it.
+            ->where('skills.data.0.name', null)
+        );
+
+    // The leading substring too, so this is not an anchored match that happens to work.
+    $this->get(route('skills.index', ['scope' => 'japan_only', 'search' => '掲げよ']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->has('skills.data', 1));
+});
+
+it('finds a JapanOnly row by a full-width variant of its name', function (): void {
+    // 71 of the real JapanOnly rows carry a Latin-script `name_ja` (`BLAZING WOLF`, `Ding Dong Boo`)
+    // because the client itself set those names in Latin script. A Japanese input method produces
+    // full-width Latin, so a Trainer typing this name would otherwise miss it.
+    japanOnlySearchRow('BLAZING WOLF');
+
+    $this->get(route('skills.index', ['scope' => 'japan_only', 'search' => 'ＢＬＡＺＩＮＧ']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('skills.data', 1)
+            ->where('skills.data.0.name_ja', 'BLAZING WOLF')
+        );
+
+    // And the half-width spelling, which is what an ASCII keyboard produces.
+    $this->get(route('skills.index', ['scope' => 'japan_only', 'search' => 'blazing']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->has('skills.data', 1));
+});
+
+it('refuses a description match at scope=japan_only, where the description is never printed', function (): void {
+    $row = japanOnlySearchRow('掲げよ、己が魂の剣を！');
+
+    // The fixture's `desc_en` is set — this is a refusal, not an absence. Every cell on a JapanOnly
+    // row prints `No client string.`, so a description match would produce a row containing nothing
+    // the Trainer typed.
+    expect($row->description)->toBe('A third-party English sentence about this skill.');
+
+    $this->get(route('skills.index', ['scope' => 'japan_only', 'search' => 'third-party']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->has('skills.data', 0));
+});
+
+it('refuses the export enname at scope=japan_only, which is the string the ruling bars', function (): void {
+    // `name` on this row is `Export Enname Rendering`. The catalogue never prints it at this scope
+    // (ruling A), so matching on it would be a hit with no visible cause.
+    japanOnlySearchRow('掲げよ、己が魂の剣を！');
+
+    $this->get(route('skills.index', ['scope' => 'japan_only', 'search' => 'Enname']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->has('skills.data', 0));
+});
+
+it('refuses the enname at scope=all too, where the row IS visible under its Japanese name', function (): void {
+    japanOnlySearchRow('掲げよ、己が魂の剣を！');
+
+    // The row is on screen at `all`, so this is the sharper half of the rule: visibility of the ROW
+    // does not entitle a search channel to a string the row does not print. `match_key` is gated to
+    // GlobalReleased so the barred enname cannot match.
+    $this->get(route('skills.index', ['scope' => 'all', 'search' => 'Enname']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->has('skills.data', 0));
+
+    // The row itself is still reachable — by the string it prints.
+    $this->get(route('skills.index', ['scope' => 'all', 'search' => '魂']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->has('skills.data', 1));
+});
+
+it('refuses a JapanOnly row description match at scope=all, and still answers a Global one', function (): void {
+    japanOnlySearchRow('掲げよ、己が魂の剣を！', ['description' => 'The japanonly descriptive phrase here.']);
+    Skill::factory()->create([
+        'name' => 'Global Row',
+        'release_status' => ReleaseStatus::GlobalReleased->value,
+        'name_is_client' => true,
+        'description' => 'The global descriptive phrase here.',
+        'export_id' => 880999,
+    ]);
+
+    // A phrase that appears only in the JP row's refused description: zero results even at `all`,
+    // because `all` prints `No client string.` on that row.
+    $this->get(route('skills.index', ['scope' => 'all', 'search' => 'japanonly descriptive']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->has('skills.data', 0));
+
+    // The same phrase shape on a Global row does match, so the channel is scoped and not removed.
+    $this->get(route('skills.index', ['scope' => 'all', 'search' => 'global descriptive']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('skills.data', 1)
+            ->where('skills.data.0.name', 'Global Row')
+        );
+});
+
+it('keeps the Japanese name search out of the default scope', function (): void {
+    japanOnlySearchRow('掲げよ、己が魂の剣を！');
+
+    // `global` is the `[Global]` subset (ADR-0011 §2), so a JapanOnly row cannot appear however it was
+    // searched. Asserted because a scope-aware needle that leaked across scopes would show up here.
+    $this->get(route('skills.index', ['search' => '魂']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scope', 'global')
+            ->has('skills.data', 0)
+        );
+});

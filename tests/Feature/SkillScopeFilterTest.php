@@ -49,7 +49,7 @@ function japanOnlySkill(string $name, array $attributes = []): Skill
 {
     return Skill::factory()->create([
         'name' => $name,
-        'name_ja' => '掲げよ、己が魂の剣を！',
+        'name_ja' => '掲げよ、己が魂の剣譜！',
         'release_status' => ReleaseStatus::JapanOnly->value,
         'name_is_client' => false,
         ...$attributes,
@@ -103,7 +103,7 @@ it('answers only JapanOnly rows at scope=japan_only, named by the source string'
             // Japanese, which the Air Messiah ruling bars from UI copy. It is nulled at the payload edge
             // so no surface can print it, and the source's own string is what the row shows.
             ->where('skills.data.0.name', null)
-            ->where('skills.data.0.name_ja', '掲げよ、己が魂の剣を！')
+            ->where('skills.data.0.name_ja', '掲げよ、己が魂の剣譜！')
             // Ruling 1 (symmetric): `desc_en` on a JapanOnly row is third-party on the same test.
             ->where('skills.data.0.description', null)
         );
@@ -157,11 +157,28 @@ it('composes the scope with the search query', function (): void {
     globalSkillRow('Straightaway');
     japanOnlySkill('Corner Something');
 
+    // Phase 7 changed this number from 2 to 1, and the change is the rule rather than a repair. The JP
+    // row's `match_key` is built from `name`, which on a JapanOnly row is the export's `enname` — a
+    // string no cell in the catalogue prints. At `all` the row IS visible, but under its `name_ja`, so
+    // matching it on an invisible English string is the "answered a question nobody asked" shape the
+    // scope rule refuses. `match_key` is now gated to GlobalReleased rows, so `corner` reaches the one
+    // Global row whose printed name contains it.
     $this->get(route('skills.index', ['scope' => 'all', 'search' => 'corner']))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('scope', 'all')
-            ->has('skills.data', 2)
+            ->has('skills.data', 1)
+            ->where('skills.data.0.name', 'Corner Adept')
+        );
+
+    // The JP row is still reachable at `all` — through the string it prints. That is the gap Phase 7
+    // closed, and it is asserted here so the number above cannot be mistaken for the row being lost.
+    $this->get(route('skills.index', ['scope' => 'all', 'search' => '掲げよ']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scope', 'all')
+            ->has('skills.data', 1)
+            ->where('skills.data.0.name_ja', '掲げよ、己が魂の剣譜！')
         );
 
     // The same query at the default scope answers one row, so the scope is doing work rather than

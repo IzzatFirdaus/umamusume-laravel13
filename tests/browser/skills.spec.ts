@@ -619,24 +619,23 @@ test('the scope selector narrows the catalogue and survives a reload', async ({ 
         const results = page.locator('#skill-results');
         await expect(results.getByRole('link', { name: 'Client Named Row' })).toBeVisible();
         // The JP fixture's source string is not reachable at this scope, which is what "narrowed" means.
-        await expect(results.getByRole('link', { name: '掲げよ、己が魂の剣を！' })).toHaveCount(0);
+        await expect(results.getByRole('link', { name: '掲げよ、己が魂の剣譜！' })).toHaveCount(0);
 
         // Japan only: the row appears, printed as the source's own string, with `lang="ja"` because the
         // string is Japanese (ruling 2 — the attribute describes the content, not the field).
         //
-        // Narrowed by a phrase from the fixture's own description rather than by its name, and that is
-        // the search gap this slice records rather than a test convenience: `match_key` is built from
-        // `name`, so a name search cannot reach a JP row whose only printed name is Japanese. The
-        // description key is reachable at any scope (`query()` matches `match_key` OR
-        // `description_match_key`), so this narrows to one row without asserting a path that does not
-        // exist. Without a narrowing the fixture sits among 1,287 JapanOnly rows ordered by `name` and
-        // never appears on page 1.
-        await page.goto('/skills?scope=japan_only&search=' + encodeURIComponent('an english sentence'));
+        // Narrowed by a substring of the fixture's own `name_ja` — the string this scope prints, and
+        // (since Phase 7) the string this scope searches. The description channel is deliberately NOT
+        // usable here: a JapanOnly row renders `No client string.`, so `?scope=japan_only&search=`
+        // refuses `description_match_key` by design, and this case would be asserting a match the
+        // surface cannot explain. Without a narrowing the fixture sits among 1,287 JapanOnly rows
+        // ordered by `name` and never appears on page 1.
+        await page.goto('/skills?scope=japan_only&search=' + encodeURIComponent('掲げよ'));
         await page.locator('#app > *').first().waitFor();
 
         await expect(page.getByLabel('Scope')).toHaveValue('japan_only');
 
-        const jpName = results.getByRole('link', { name: '掲げよ、己が魂の剣を！' });
+        const jpName = results.getByRole('link', { name: '掲げよ、己が魂の剣譜！' });
         await expect(jpName).toBeVisible();
         await expect(jpName).toHaveAttribute('lang', 'ja');
 
@@ -799,24 +798,29 @@ test('Japan-only rows never show client prose on the catalogue, in any scope', a
     seedScopeFixtures();
 
     try {
-        // The JP fixture at `scope=all`. Its `desc_en` is set, so the absence here is the display
-        // path's decision rather than the source's silence.
-        await page.goto('/skills?scope=all&search=' + encodeURIComponent('an english sentence'));
+        // The JP fixture at `scope=all`, reached by its `name_ja`. Narrowing by its description would
+        // now assert a channel Phase 7 refuses at every scope for this row class, so the case would be
+        // testing the wrong thing: the point here is the description CELL's text, and the row has to be
+        // found by the string it prints. Its `desc_en` is still set, which is what makes the absence
+        // below the display path's decision rather than the source's silence.
+        await page.goto('/skills?scope=all&search=' + encodeURIComponent('剣譜'));
         await page.locator('#app > *').first().waitFor();
 
-        const jpRow = page.locator('#skill-results tr').filter({ hasText: '掲げよ、己が魂の剣を！' });
+        const jpRow = page.locator('#skill-results tr').filter({ hasText: '掲げよ、己が魂の剣譜！' });
         await expect(jpRow).toBeVisible();
         await expect(jpRow.locator('td').nth(1)).toHaveText('No client string.');
-        // The stored sentence exists and is reachable through search, which is what makes the
-        // assertion above a refusal rather than an absence.
+        // The stored sentence exists and is refused, which is what makes the assertion above a refusal
+        // rather than an absence.
         await expect(page.locator('#skill-results')).not.toContainText('The source states an English sentence');
 
         // The same JP row at `scope=japan_only`: identical cell. The rule is row-scoped, not
-        // scope-scoped, and this is the pair that proves it.
-        await page.goto('/skills?scope=japan_only&search=' + encodeURIComponent('an english sentence'));
+        // scope-scoped, and this is the pair that proves it. Narrowed by its `name_ja`, which is the
+        // only searchable channel this scope has (Phase 7): the row's `desc_en` is refused here, so
+        // reaching it by that phrase would be asking the scope to match on text it does not print.
+        await page.goto('/skills?scope=japan_only&search=' + encodeURIComponent('掲げよ'));
         await page.locator('#app > *').first().waitFor();
 
-        const jpRowNarrow = page.locator('#skill-results tr').filter({ hasText: '掲げよ、己が魂の剣を！' });
+        const jpRowNarrow = page.locator('#skill-results tr').filter({ hasText: '掲げよ、己が魂の剣譜！' });
         await expect(jpRowNarrow).toBeVisible();
         await expect(jpRowNarrow.locator('td').nth(1)).toHaveText('No client string.');
 
@@ -828,6 +832,66 @@ test('Japan-only rows never show client prose on the catalogue, in any scope', a
         const globalRow = page.locator('#skill-results tr').filter({ hasText: 'Client Named Row' });
         await expect(globalRow).toBeVisible();
         await expect(globalRow.locator('td').nth(1)).toHaveText('A client sentence for the Global row.');
+    } finally {
+        removeScopeFixtures();
+    }
+});
+
+/*
+ * Phase 7 — the Japan-only search gap, proven at the surface.
+ *
+ * `SkillSearchScreenTest` proves the query returns the rows it was asked for. This proves the surface
+ * SHOWS them, which is a different failure: the query can answer correctly and the table paint
+ * something else, the shape `53bf93c3` recorded for the `distance` prop.
+ *
+ * The rule under test is "search matches what the user can see", and it is read from both sides:
+ * the string the scope prints is searchable, and the string it refuses is not. The second half is the
+ * one that would silently rot, because a refused match still renders a row — it just renders a row
+ * with `No client string.` and no visible cause.
+ */
+test('Japan-only rows are searchable by the name they print, and only by that', async ({ page }) => {
+    seedScopeFixtures();
+
+    try {
+        // --- the positive half: name_ja is searchable at japan_only ---
+        await page.goto('/skills?scope=japan_only&search=' + encodeURIComponent('剣譜'));
+        await page.locator('#app > *').first().waitFor();
+
+        const jpRow = page.locator('#skill-results tr').filter({ hasText: '掲げよ、己が魂の剣譜！' });
+        await expect(jpRow).toBeVisible();
+
+        // The row prints `name_ja`, not the export's enname rendering, which is the whole reason a key
+        // built from `name` was useless here. The name link is the row's own, not the "Open" button
+        // beside it, so it is addressed by its accessible name rather than by position.
+        await expect(jpRow.getByRole('link', { name: '掲げよ、己が魂の剣譜！' })).toHaveText('掲げよ、己が魂の剣譜！');
+        await expect(page.locator('#skill-results')).not.toContainText("Raise My Soul's Blade!");
+
+        // --- the negative half: its desc_en is NOT searchable at japan_only ---
+        // The fixture's description IS stored; this is a refusal, not an absence.
+        await page.goto('/skills?scope=japan_only&search=' + encodeURIComponent('an english sentence'));
+        await page.locator('#app > *').first().waitFor();
+
+        // Zero results, and the empty state is the catalogue's own — not a "not found" apology, and
+        // not a row that appeared with nothing on it matching the query.
+        await expect(page.locator('#skill-results tr')).toHaveCount(0);
+        await expect(page.getByText(/Nothing matches/)).toBeVisible();
+
+        // --- the same row at `all`, still found by its name ---
+        await page.goto('/skills?scope=all&search=' + encodeURIComponent('剣譜'));
+        await page.locator('#app > *').first().waitFor();
+        await expect(
+            page.locator('#skill-results tr').filter({ hasText: '掲げよ、己が魂の剣譜！' }),
+        ).toBeVisible();
+
+        // --- and at `all` a description phrase finds NOTHING, including this row: a JapanOnly row
+        //     renders `No client string.` at every scope, so a description match would be a hit with
+        //     no visible cause. Asserted as the empty state rather than as "the row lacks the text",
+        //     because the row is not returned at all — `#skill-results` does not exist when the
+        //     catalogue answers zero rows.
+        await page.goto('/skills?scope=all&search=' + encodeURIComponent('an english sentence'));
+        await page.locator('#app > *').first().waitFor();
+        await expect(page.locator('#skill-results')).toHaveCount(0);
+        await expect(page.getByText(/Nothing matches/)).toBeVisible();
     } finally {
         removeScopeFixtures();
     }

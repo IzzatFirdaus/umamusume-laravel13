@@ -94,12 +94,14 @@ test('the description panel refuses client prose on a Japan-only row, at any sco
         // than hardcoded: the fixture's id is assigned by SQLite and a recycled scratch file could
         // shift it.
         await test.step('at scope=japan_only', async () => {
-            await page.goto('/skills?scope=japan_only&search=' + encodeURIComponent('an english sentence'));
+            // Reached by its `name_ja`, the string this scope prints and searches (Phase 7). The
+            // fixture's `desc_en` is deliberately not a reachable channel here.
+            await page.goto('/skills?scope=japan_only&search=' + encodeURIComponent('掲げよ'));
             await page.locator('#app > *').first().waitFor();
 
             const href = await page
                 .locator('#skill-results')
-                .getByRole('link', { name: '掲げよ、己が魂の剣を！' })
+                .getByRole('link', { name: '掲げよ、己が魂の剣譜！' })
                 .getAttribute('href');
             expect(href, 'the JP fixture is reachable from the catalogue').toBeTruthy();
 
@@ -117,12 +119,15 @@ test('the description panel refuses client prose on a Japan-only row, at any sco
         // The same row reached at `scope=all`. The rule is the ROW's availability, not the scope the
         // URL carried: gating on scope would let `?scope=all` leak what `?scope=japan_only` refuses.
         await test.step('at scope=all', async () => {
-            await page.goto('/skills?scope=all&search=' + encodeURIComponent('an english sentence'));
+            // Reached by its `name_ja`, as at `japan_only` (Phase 7): the row's description phrase is
+            // refused at every scope for a JapanOnly row, so searching it would be the very leak this
+            // case exists to deny.
+            await page.goto('/skills?scope=all&search=' + encodeURIComponent('剣譜'));
             await page.locator('#app > *').first().waitFor();
 
             const href = await page
                 .locator('#skill-results')
-                .getByRole('link', { name: '掲げよ、己が魂の剣を！' })
+                .getByRole('link', { name: '掲げよ、己が魂の剣譜！' })
                 .getAttribute('href');
             expect(href, 'the JP fixture is reachable at scope=all too').toBeTruthy();
             expect(href, 'the scope survives into the detail URL').toContain('scope=all');

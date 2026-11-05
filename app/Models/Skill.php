@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Models;
 
 use App\Enums\ReleaseStatus;
+use App\Services\DataPipeline\JapaneseNameNormalizer;
 use App\Services\DataPipeline\NameNormalizer;
 use Database\Factories\SkillFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -48,6 +49,7 @@ use Illuminate\Support\Carbon;
  * @property bool $is_manual
  * @property string|null $description The export's `desc_en` field, or null when absent.
  * @property string|null $description_match_key Normalized key for case/spacing-insensitive description search.
+ * @property string|null $match_key_ja Normalized key for the Japanese name, so `japan_only` search reaches the string that scope prints.
  * @property int|null $distance_type Parsed from `distance_type==N` in condition tokens (1=Sprint..4=Long).
  * @property-read RunSkill $pivot Present only when loaded through the run_skills relation.
  */
@@ -55,6 +57,7 @@ use Illuminate\Support\Carbon;
     'name',
     'name_ja',
     'match_key',
+    'match_key_ja',
     'sp_cost',
     'type',
     'condition_groups',
@@ -84,6 +87,11 @@ class Skill extends Model
      * the overrides into a state that runs *after* the definition, so a fixture that states a name and
      * no key would keep the faker's key. A fixture that states its own key keeps it, which is how the
      * alias and lookalike tiers are tested (`CatalogRosterTreeTest.php:23`).
+     *
+     * `match_key_ja` is filled the same way and one rule tighter: only when the row actually carries a
+     * `name_ja`, so "not recorded" stays null instead of becoming the key of a null, and a fixture that
+     * states its own `match_key_ja` keeps it. It uses `JapaneseNameNormalizer` because that is what
+     * writes the column (`StoreSkills`), and the two folds are not interchangeable — see that class.
      */
     protected static function newFactory(): SkillFactory
     {
@@ -91,6 +99,16 @@ class Skill extends Model
 
         return SkillFactory::new()->afterMaking(static function (Skill $skill) use ($normalizer): void {
             $skill->match_key ??= $normalizer->normalize($skill->name);
+
+            if ($skill->name_ja !== null) {
+                $skill->match_key_ja ??= JapaneseNameNormalizer::normalize($skill->name_ja);
+            }
+
+            // Same rule as the parser (`GametoraSkillsParser:180`), so a fixture that states a
+            // description is searchable by it the way an imported row is.
+            if ($skill->description !== null) {
+                $skill->description_match_key ??= $normalizer->normalize($skill->description);
+            }
         });
     }
 

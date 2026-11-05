@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Models\Skill;
+use App\Services\DataPipeline\JapaneseNameNormalizer;
 use App\Services\DataPipeline\NameNormalizer;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -67,6 +68,15 @@ final class StoreSkills
                     // renders it. Derived here rather than in the parser, because a parser takes a body
                     // and nothing else, and the normalizer is an application service.
                     'match_key' => $this->normalizer->normalize($record['name']),
+                    // Phase 7: the key for the ONE string a JapanOnly row prints. `match_key` above is
+                    // built from `name`, which on those rows is the export's `enname` — a rendering the
+                    // Air Messiah ruling bars from UI copy — so the catalogue was searching a column no
+                    // JapanOnly cell displays. A different normalizer, deliberately: see
+                    // `JapaneseNameNormalizer` for why NFKC rather than this file's NFKD-plus-strip.
+                    //
+                    // No conditional on null: the normalizer answers null for a row the source records no
+                    // `name_ja` for, and the column is nullable for exactly that state.
+                    'match_key_ja' => JapaneseNameNormalizer::normalize($record['name_ja'] ?? null),
                     ...$this->provenance($url, $snapshotPath, $timezone),
                 ];
 
