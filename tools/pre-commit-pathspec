@@ -1,25 +1,79 @@
 #!/bin/sh
-# Pre-commit pathspec enforcement (CQ-10).
-# Compares staged files against the declared COMMIT_PATHS env var.
-# If any staged file is outside COMMIT_PATHS, the commit is refused.
-# When COMMIT_PATHS is unset, the hook is a no-op.
-if [ -z "$COMMIT_PATHS" ]; then
+#
+# Pre-commit guard, two checks in one place (CQ-10 and the 2026-11-05 sweep-in guard).
+#
+# CHECK 1 — declared pathspec (CQ-10, pre-existing). Refuses a commit whose staged files fall outside
+# `COMMIT_PATHS`. This only runs when the caller sets that variable, so it protects a session that
+# opted in and does nothing for one that did not: both recorded sweep-ins (`5927ca1b`, `80025efe`) ran
+# with it unset.
+#
+# CHECK 2 — staged-set size (added 2026-11-05). Because check 1 is opt-in, the failure it exists to
+# catch went unguarded twice. This check cannot tell whose work is staged — git records no session
+# identity, so any "belongs to another session" test would be a guess dressed as a check — but it can
+# make an accidentally broad commit cost one more command, which is the window in which a human reads
+# the file list and notices it is not theirs.
+#
+# Deliberately NOT a prompt. `read -p` blocks any commit with no attached terminal — every agent run,
+# every scripted commit, every CI job — so it would hang instead of refusing. This refuses outright and
+# names the override.
+#
+# Threshold: 20 files, overridable by UMA_COMMIT_FILE_LIMIT. Measured context: routine slice commits in
+# this repository run 1-12 files; the two sweep-ins carried 81 and 42. A legitimate broad commit (a
+# formatter pass, a lockfile refresh, a tree-wide rename) is what the override is for.
+
+# ---- CHECK 1: declared pathspec (CQ-10) ----------------------------------------------------------
+if [ -n "$COMMIT_PATHS" ]; then
+    offending=""
+    for f in $(git diff --cached --name-only); do
+        allowed=0
+        for p in $COMMIT_PATHS; do
+            case "$f" in
+                "$p"|"$p"/*) allowed=1; break ;;
+            esac
+        done
+        if [ "$allowed" -eq 0 ]; then
+            offending="$offending $f"
+        fi
+    done
+    if [ -n "$offending" ]; then
+        echo "pre-commit: staged files outside COMMIT_PATHS ($COMMIT_PATHS):$offending"
+        exit 1
+    fi
+fi
+
+# ---- CHECK 2: staged-set size (sweep-in guard) ---------------------------------------------------
+limit="${UMA_COMMIT_FILE_LIMIT:-20}"
+
+# Deletions are excluded: removing forty files in one commit is a normal cleanup, not a sweep-in.
+staged="$(git diff --cached --name-only --diff-filter=d 2>/dev/null || true)"
+[ -z "$staged" ] && exit 0
+
+count="$(printf '%s\n' "$staged" | wc -l | tr -d ' ')"
+[ "$count" -le "$limit" ] && exit 0
+
+# A merge stages a whole tree by definition.
+[ -f "$(git rev-parse --git-dir)/MERGE_HEAD" ] && exit 0
+
+if [ "${UMA_ALLOW_BROAD_COMMIT:-0}" = "1" ]; then
+    echo "pre-commit: $count files staged; proceeding because UMA_ALLOW_BROAD_COMMIT=1."
     exit 0
 fi
-offending=""
-for f in $(git diff --cached --name-only); do
-    allowed=0
-    for p in $COMMIT_PATHS; do
-        case "$f" in
-            "$p"|"$p"/*) allowed=1; break ;;
-        esac
-    done
-    if [ "$allowed" -eq 0 ]; then
-        offending="$offending $f"
-    fi
-done
-if [ -n "$offending" ]; then
-    echo "pre-commit: staged files outside COMMIT_PATHS ($COMMIT_PATHS):$offending"
-    exit 1
-fi
-exit 0
+
+echo "pre-commit: refusing a commit of $count staged files (limit $limit)."
+echo ""
+echo "Two sessions share this worktree, and twice a broad commit has landed another session's"
+echo "work under a message that did not describe it (5927ca1b, 80025efe). Check the list:"
+echo ""
+echo "    git diff --cached --stat"
+echo ""
+echo "Then scope the commit to the paths that are yours:"
+echo ""
+echo "    git commit -m \"<message>\" -- <path> [<path> ...]"
+echo ""
+echo "or state that the breadth is intended:"
+echo ""
+echo "    UMA_ALLOW_BROAD_COMMIT=1 git commit -m \"<message>\""
+echo ""
+echo "Staged files:"
+printf '%s\n' "$staged" | sed 's/^/  /'
+exit 1
