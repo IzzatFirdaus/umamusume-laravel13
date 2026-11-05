@@ -30,7 +30,7 @@ final class Lifecycle
      */
     public function start(TrainingRun $run, array $config): IndependentTrainingRun
     {
-        $policy = IndependentTrainingPolicy::tryFrom((string) ($config['policy'] ?? ''));
+        $policy = IndependentTrainingPolicy::tryFrom($config['policy']);
 
         if ($policy === null) {
             throw new InvalidArgumentException('Unknown Independent Training policy.');
@@ -45,7 +45,7 @@ final class Lifecycle
         return IndependentTrainingRun::create([
             'training_run_id' => $run->id,
             'policy' => $policy,
-            'priority_skills' => $priority === [] ? null : array_values($priority),
+            'priority_skills' => $priority === [] ? null : $priority,
             'rotation' => $config['rotation'] ?? null,
             'started_at' => now(),
             'completes_at' => now()->addMinutes(self::DURATION_MINUTES),

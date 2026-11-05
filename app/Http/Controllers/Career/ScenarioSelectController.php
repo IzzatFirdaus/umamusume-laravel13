@@ -183,10 +183,10 @@ class ScenarioSelectController extends Controller
                 // The two composition tags the card prints, resolved through the same label map the
                 // systems list uses. `panels` still travels whole, because other consumers read the
                 // full matrix; only the card face is curated (see `card_tags` in config).
-                'card_tags' => array_values(array_map(
+                'card_tags' => array_map(
                     static fn (mixed $panel): string => $panelLabels[(string) $panel] ?? (string) $panel,
-                    array_values((array) ($def['card_tags'] ?? [])),
-                )),
+                    (array) ($def['card_tags'] ?? []),
+                ),
                 'systems' => $this->systems((array) ($def['panels'] ?? []), $panelLabels),
                 'resources' => array_values(array_filter(
                     array_map(
