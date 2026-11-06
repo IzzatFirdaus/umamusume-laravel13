@@ -370,12 +370,17 @@ Proposed only. No slice opens in this deliverable, and nothing here is an approv
 7. **R6-24** — reconcile the two counts in copy, or paginate the picker.
 
 **Phase 3 — copy, one assertion each.** R6-15, R6-19, R6-09, R6-10, R6-20, R6-21, R6-22,
-R6-27, R6-30, R6-23 (label), R6-48 (the sentence), R6-17 (whichever sentence is wrong).
+R6-27, R6-30, R6-23 (label), R6-48 (the sentence), R6-17 (whichever sentence is wrong), and
+the two import doors named in §11.2 (`Confirmed defect (copy/IA)`; rule ID `IA-1` primary,
+`IA-5` and `H1` secondary, per §11.4).
 
 **Phase 4 — a11y and structure.** R6-07, R6-18, R6-25, R6-08, R6-28.
 
 **Phase 5 — held, with the reason stated.** R6-13, R6-26, R6-31, R6-14, R6-43, R6-32, R6-34,
-R6-39, R6-41, R6-42, R6-46, R6-47, R6-50, R6-51, R6-53, R6-52, R6-01's residual. Each is a
+R6-39, R6-41, R6-42, R6-46, R6-47, R6-50, R6-51, R6-53, R6-52, R6-01's residual, and the
+per-turn facility aggregate named in §11.2 (`Unrepresented source data`; the fix needs an owner
+ruling on whether the run-level ladder should read the team-rank letter it reads today or the
+per-turn columns, per §11.4). Each is a
 schema change, a design project, a dead pipe to reconnect, or a question the corpus leaves
 open; §11 of `AGENTS.md` sends any new column through an ADR, a digest line and a PRD
 citation, and none of them has one.
@@ -509,6 +514,47 @@ should read.
   `ancestors_rank_letters[ancestorIndex]` and `LegacySelect.vue:153` preserves them on read, so
   the field works, and no row says so or says what it does not cover.
 
+### 11.4 Framework rule IDs for the two §11.2 findings
+
+Rule IDs only for the two facts in §11.2, because a framework change audit (M1) cannot cite a
+row without one. **No rule ID is added to the 54 landed rows**: their classification stands, and
+when a slice opens one, the slice's audit cites the rule, not the register.
+
+| §11.2 finding | Rule ID | Framework file | Why this one |
+| --- | --- | --- | --- |
+| Two import doors, difference unstated | **`IA-1`** primary; `IA-5` and `H1` secondary | `information-architecture-principles-2026-10-21.md:142`; `:146`; `usability-heuristics-2026-10-21.md:214` | `IA-1` is "every screen is directly reachable and carries its own crumb and way back", which is the front-door question this finding asks. `IA-5` is the empty-state exemplar — relevant only because one of the two doors sits inside the Active Career empty state. `H1` is the status question: the screen never says what the second door is for. |
+| Per-turn facility levels, no aggregate | **`GP-1`** primary; `GP-3` and `SHR-7` secondary | `gerhardt-powals-principles-2026-10-21.md:117`; `:119`; `shneiderman-golden-rules-2026-10-21.md:141` | `GP-1` is "the product computes a figure the user would otherwise compute" — the run-level facility level is exactly that figure. `GP-3` is the labelled-summation rule, which applies once five per-turn readings must become one run-level number. `SHR-7` ("the value a decision needs is on the decision screen", sourced from Shneiderman rule 8) is the cross-display half. |
+
+**Two corrections to the rule IDs proposed for this section, both measured against the
+framework files and recorded here rather than silently applied:**
+
+1. **`SHR-8` does not exist.** The Shneiderman file defines `SHR-1` through `SHR-7`
+   (`shneiderman-golden-rules-2026-10-21.md:135-141`) and stops; there is no row for rule 7
+   (locus of control) either. `SHR-8` appears five times in `_audit-prompt.md` — the routing
+   table, the dimension table, the example list and twice in prose — but **never in the file
+   that would define it**. Its intended meaning ("nothing requires carrying a figure from one
+   display to another") is the one the file assigns to `SHR-7` at `:141`. Any audit citing
+   `SHR-8` is citing an ID with no definition; the correct citation is `SHR-7`, and the corpus
+   defect is recorded in `KNOWN-ISSUES.md`-style form by whatever pass owns the framework
+   corpus, not by this register.
+2. **`IA-5` means "an empty state shows an example of what would fill it"**
+   (`information-architecture-principles-2026-10-21.md:146`), not "front doors". The
+   `_audit-prompt.md:123` routing row labels the question "IA 5 (front doors)" while pointing
+   `IA-1` at it; the label and the rule ID disagree, and the rule's own file settles it. So the
+   primary ID for the import-door finding is `IA-1`, with `IA-5` secondary for the empty-state
+   placement only.
+
+Two further notes on scope for the slice audits that follow this plan:
+
+- **`RENDERED_EVIDENCE` is not `FALSE` on this host.** Measured 2026-11-06:
+  `chromium.launch()` succeeds under the current sandbox and a page renders
+  (`RENDERED_EVIDENCE=TRUE`). The plan's §6 and §8 tables assume `spawn EPERM`; that assumption
+  is stale, so a slice audit must **re-probe** rather than inherit the FALSE default, and the
+  unmeasured register should not be pre-filled with "no browser" rows that no longer hold.
+- **The framework file set is `docs/framework-ui-ux/`, not the repository root.** The plan
+  cites `_audit-prompt.md` and `design-framework-index-2026-10-21.md` bare; both live under
+  `docs/framework-ui-ux/`, alongside the ten framework files.
+
 ## 12. Definition of done
 
 - [x] 54 `R6-NN` rows, 1:1 with `F-01..F-17`, `E-01..E-14`, `U-01..U-23`; each walk ID appears
@@ -525,6 +571,12 @@ should read.
 - [x] §11 records the ten additions the walk noted without a row: four facets bound to their
       existing `R6-NN`, two facts with no row, four fence items, and the prior-resolution
       continuity note. No landed status changed; the row count stays 54.
+- [x] §11.4 carries rule IDs for §11.2's two findings, and the two framework-corpus defects it
+      found (`SHR-8` undefined; `IA-5` mislabelled in the routing table) are recorded rather
+      than worked around.
+- [x] Section numbering is self-consistent: §11 is the addendum, §12 the definition of done,
+      and the one surviving "§11 of `AGENTS.md`" reference (§8) points at that document, not
+      at this one.
 
 **Self-test, run before each commit:**
 
