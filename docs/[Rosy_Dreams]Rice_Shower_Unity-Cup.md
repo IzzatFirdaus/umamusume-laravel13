@@ -85,8 +85,8 @@ members'** caps is documented with no magnitude
 ([kamigame, ⚠️ STALE: 2024-04-10](https://kamigame.jp/umamusume/page/172795448925364187.html)). The gap
 stays open, now as a measured shortfall rather than an unexamined number.
 
-Aptitudes (`1dde6b2f`): Turf A, Dirt G. Sprint E, Mile B, Medium A, Long A. Front A, Pace A, Late B,
-End G. A Medium/Long build with the pace half available, and Guts is the designed carry stat at +20%.
+Aptitudes (`1dde6b2f`): Turf A, Dirt C. Sprint E, Mile B, Medium A, Long A. Front A, Pace A, Late B,
+End C. A Medium/Long build with the pace half available, and Guts is the designed carry stat at +20%.
 
 *Dated erratum 2026-10-09 (D8 of the UX walk remediation). The sentence above stands as written, and
 three of its letters do not agree with the tool's committed catalogue source. The GameTora export the
@@ -102,7 +102,7 @@ the two should treat the difference as open, not as a bug in the tool.*
 
 ### 1.3 Skills owned
 
-The trainee's own Details screen, Skills tab (`1dde6b2f`), shows ten chips and the list scrolls:
+The trainee's own **Umamusume Details → Skills tab** (`1dde6b2f`) — not the Perks panel's Skills tab, which carries a different list (see §1.12) — shows ten chips and the list scrolls:
 Blue Rose Closer **Lvl 3** (her unique, gradient chip), Red Shift/LP1211-M, Corner Adept ○, Swinging
 Maestro, Nimble Navigator, Steadfast, Deep Breaths, Extra Tank, Pace Chaser Straightaways ○, Shrewd
 Step. The Learn screen additionally marks **Corner Recovery ○** as Obtained (`09e754d6`), so the set
@@ -181,7 +181,7 @@ Rice Shower
 │     ├── Daiwa Scarlet [Peak Blue]            rank B+
 │     └── Seiun Sky [Reeling in the Big One]   rank A
 └── Legacy 2  Maruzensky [Formula R]  rank UG, flagged Guest
-      ├── Daiwa Scarlet [Peak Blue]   rank UG
+      ├── Daiwa Scarlet [Peak Blue]   rank S+
       └── Taiki Shuttle [Wild Frontier]  rank UG
 ```
 
@@ -226,7 +226,7 @@ client marks the first one Recommended:
 | Option                      | Grade | Course                                                  | Fans on a win | Her fit          |  |
 | --------------------------- | ----- | ------------------------------------------------------- | ------------- | ---------------- |  |
 | Kyoto Daishoten             | G2    | Kyoto Turf 2400m (Medium) Right / Outer, Fall, **Soft** | 6,700         | Turf A, Medium A |  |
-| Mile Championship Nambu Hai | G1    | Morioka **Dirt** 1600m (Mile) Left                      | 6,000         | Dirt G, Mile B   |  |
+| Mile Championship Nambu Hai | G1    | Morioka **Dirt** 1600m (Mile) Left                      | 6,000         | Dirt C, Mile B   |  |
 
 The Daishoten card: Full Gate 18, held in Classic Year / Senior Year Oct, entry criteria "2,000 fans or
 more" met at 209,245, and fan rewards of 6,700 / 2,680 / 1,675 / 1,005 / 670 for first through fifth,
@@ -235,7 +235,7 @@ Predictions dialog shows five target rings across the stats and the trainer's ve
 seems pumped up and ready for a challenge. I'd say she could be a **top contender**."
 
 Three consequences, each of which changes a line in §2.3. The higher-grade alternative is a Dirt race
-and she is Dirt G, so the G1 is the worse ride. The going is **Soft**, so a Firm Conditions skill does
+and she is Dirt C, so the G1 is the worse ride. The going is **Soft**, so a Firm Conditions skill does
 not fire this turn while the sun icon makes a Sunny Days skill the one that would. And "top contender"
 argues against Long Shot ○, whose condition is 4th favourite or below; the Log is still empty, so that
 is the client's own estimate rather than a starting-grid reading.
@@ -382,6 +382,105 @@ Proficiency ○, Wait-and-See, Cloudy Days ○, Corner Recovery ○, Gap Closer)
 
 Note the caps: teammates top out between 700 and 1140, not at the trainee's 1300/1800, so a team Guts
 grade of S is being carried by Haru Urara's 1068 rather than spread evenly.
+
+### 1.10 The in-career `Career` screen (the application's Cockpit equivalent)
+
+Frame observations: the career screen carries "5 turn(s) until the Unity Cup" (`297b931b`); the stat strip and `Skill Pts 173` are the same run (`09e754d6`); the goal bar and team emblem are `885d4671` and `eccdc650`. The layout itself is a frame observation for which no eight-character reference is pinned here — recorded as awaiting a frame reference.
+
+Layout, left pane:
+
+- Header `Career` with an `i` button.
+- A calendar tile reading `5 turn(s) left` with a blue tab `Senior Year Early Oct`.
+- A goal bar reading `Place 1st in Arima Kinen` with `Entry criteria met!` in orange and a `Details` button.
+- A second badge `5 Turn(s) Until the Unity Cup`.
+- An `Energy` bar; a pink mood chip `↑ GREAT`; a laurel emblem `Blue Bloom` with a large `S` and five stars and the motto `Dreaming Big`.
+- A `HINT` bubble from Tazuna reading *"Your trainee's energy is getting low, so she's more susceptible to injury. Rest is important too."*
+- The trainee's own bubble *"...I'm okay. I'm not tired... or anything... I'm just fine..."*
+- A class badge `Star`.
+- The stat strip printing grade letter and in-force cap together (Speed `B` 607/1325, Stamina `C+` 577/1322, Power `C+` 549/1368, Guts `B+` 736/1308, Wit `D+` 397/1800) and `Skill Pts 173`.
+- Action buttons `Rest`, `Training`, `Skills`, `Infirmary`, `Recreation`, `Races` with a pink `Scheduled Race` tag on `Races`; and `Skip ▶▶`, `Quick`, a menu button.
+
+The three counters are distinct widgets and must be recorded as three: the goal countdown, the Unity Cup countdown, and `Entry criteria met!`.
+
+### 1.11 The in-career `Sparks` screen
+
+Green `1st Legacy` and `2nd Legacy` tabs, single vertical column, each ancestor shown as a portrait with its rank badge followed by its spark rows, each row carrying star counts and an `i` button (frame observation; layout awaiting a frame reference). The chains are read from the Sparks panels already recorded in §1.5 (`fd78e996`, `31fd26c4`, `f7a6952f`, `e771563c`, `24f5b5d0`, `eea37f2a`).
+
+**1st Legacy** — Vodka `[Wild Top Gear]` (B+): Power to Soft Step. Daiwa Scarlet `[Peak Blue]` (B+): Guts to Resplendent Red Ace to Osaka Hai until Pace Chaser Straightaways O. Seiun Sky `[Reeling in the Big One]` (A): Stamina to URA Finale.
+
+**2nd Legacy** — Maruzensky `[Formula R]` (UG, Guest): Speed to Turf to Red Shift/LP1211-M to Ignited Spirit: Guts +. Daiwa Scarlet `[Peak Blue]` (S+): Speed to NHK Mile C. to Japan C. to Front Runner Savvy O. Taiki Shuttle `[Wild Frontier]` (UG): Power to Corner Acceleration O to Shooting for Victory! to Glittering Star.
+
+Each chain runs blue to pink to green to the white rows. The existing row-by-row table in §1.5 is kept alongside; the chains and the rows are two views of the same data.
+
+### 1.12 The `Perks` panel
+
+Tabs `Support Effects` and `Skills` (frame observation; awaiting a frame reference). The `Skills` tab is grouped into `Trainee Skills` (no source chip) and `Card Skills` (one or more source portraits); a skill name can appear in both groups, and one skill carries two chips. The `○` marks the corner variant of a skill. The icon tile is a skill-type taxonomy: orange for running and positioning, blue for recovery and endurance, green for condition and venue — with `Long Shot ○`, `Firm Conditions ○`, `Sunny Days ○`, `Inner Post Proficiency ○`, `Kyoto Racecourse ○` and `Hakodate Racecourse ○` all green.
+
+### 1.13 The `Learn` screen
+
+Structure (frame `09e754d6` for the screen; prices from `c1ee4d11`, `c8b2dcad`): header `Learn` with an `i` button; the trainee portrait, a `Full Stats` button and `Skill Points 173`; a scrollable list whose rows carry a coloured icon tile, the skill name with `○` where it is the corner variant, the effect text with the applicable style or distance in parentheses, an orange hint badge, then a `-` button, a price box and a green `+` button; a skill already owned shows a pink `Obtained` tag instead of the price and the two buttons, on a greyed row; `Confirm` and `Reset` below the list; `Back`, `Skip ▶▶`, `Quick` and a menu button along the bottom.
+
+Hint badge values as printed: `Hint Lvl 1` + `10% OFF!`, `Hint Lvl 2` + `20% OFF!`, `Hint Lvl 3` + `30% OFF!`, `Hint Lvl 4` + `35% OFF!`, `Hint Lvl Max` + `40% OFF!`.
+
+The printed price is the hint-discounted price, floored rather than rounded. Recorded as the client's own numbers, each with the hint level it is shown at (Pace Chaser Corners ○ settles the rounding rule: a base of 130 at 35% off is 84.5 and the client prints 84):
+
+| Skill | Hint shown | Price printed |
+| --- | --- | --- |
+| Ignited Spirit SPD | Lv 1, 10% | 180 |
+| Ignited Spirit STA | Lv 3, 30% | 140 |
+| Ignited Spirit PWR | Lv 1, 10% | 180 |
+| Ignited Spirit GUTS | Lv 4, 35% | 130 |
+| Straight Descent | none shown | 120 |
+| Highlander | none shown | 160 |
+| Front Runner Corners ○ | Lv 3, 30% | 91 |
+| Pace Chaser Straightaways ○ | Lv 4, 35% | 91 |
+| Pace Chaser Corners ○ | Lv 4, 35% | 84 |
+| Plan X | Lv 1, 10% | 272 |
+| Countermeasure | Lv 2, 20% | 128 |
+| Soft Step | Lv Max, 40% | 96 |
+| Subdued Front Runners | Lv 1, 10% | 117 |
+| Subdued Pace Chasers | Lv 1, 10% | 130 |
+| Hesitant Pace Chasers | Lv 2, 20% | 104 |
+| Outer Swell | Lv 1, 10% | 162 |
+| Gap Closer | Lv 1, 10% | 144 |
+| Productive Plan | Lv 3, 30% | 112 |
+| Calm in a Crowd | none shown | 170 |
+| Ramp Up | none shown | 170 |
+| Straightaway Acceleration | none shown | 170 |
+| It's On! | Lv 3, 30% | 289 |
+| Unruffled | Lv 4, 35% | 280 |
+| Rushing Gale! | Lv 1, 10% | 323 |
+| Long Shot ○ | Lv 1, 10% | 81 |
+| Firm Conditions ○ | Lv 1, 10% | 81 |
+| Sunny Days ○ | Lv 1, 10% | 81 |
+| Inner Post Proficiency ○ | Lv 1, 10% | 81 |
+| Kyoto Racecourse ○ | Lv 1, 10% | 81 |
+| Hakodate Racecourse ○ | Lv 2, 20% | 56 |
+| Cut and Drive! | Lv 2, 20% | 160 |
+| Resplendent Red Ace | Lv 1, 10% | 180 |
+
+Also record: the shop sells skills that originate in the **ancestry tree**, not only the trainee's cards (`Cut and Drive!` is Vodka's unique skill, `Resplendent Red Ace` is one of Daiwa Scarlet's green sparks); rows are tinted — plain, an olive-gold band on rows including `It's On!`, `Unruffled`, `Rushing Gale!` and `Swinging Maestro`, and a green-to-pink rainbow gradient on `Blue Rose Closer`, the trainee's own max-level unique skill — and the client does not explain the tint (open item, §6); and the same tints appear on the `Umamusume Details` skill chips, so the tint travels with the skill rather than belonging to a screen.
+
+### 1.14 The `Log` screen and the in-career rail
+
+The `Log` panel reads `There is no log.` (frame observation; awaiting a frame reference). The vertical rail beside it is the client's in-career navigation: **Jukebox, Sparks, Log, Career Profile, Agenda, Item Request, Menu**. On the PC client the active screen sits on the left with the rail and a secondary pane on the right. One frame carries the Steam overlay, so the captures are of the Steam PC client (frame observation; awaiting a frame reference).
+
+### 1.15 The `Career Profile` panels
+
+**Featured Cards**, for Nishino Flower `[Even the Littlest Bud]`, SSR (frame `85e4c75a` for the Featured Cards panel; values from §1.4): a small blue hat icon on the card frame whose meaning the panel does not state; `Lv 30 / 30`; `0 SP to next level` with a progress bar; a `Unique Perk` section naming `Even the Littlest Bud` at `Lv 30` with the effect *Mood Effect and Initial Friendship Gauge*; a `Unity Cup Exclusive` badge; a laurel-wreathed grade badge reading `B`; the stat line with a letter and a cap per stat (Speed `A` 806/1080, Stamina `C+` 591/860, Power `B` 680/960, Guts `B` 625/880, Wit `B` 610/850); aptitude rows (Track Turf `A`, Dirt `F`; Distance Sprint `A`, Mile `A`, Medium `D`, Long `C`; Style Front `F`, Pace `A`, Late `A`, End `C`); and four tabs `Support Effects`, `Skills`, `Career Events`, `Flavor Text`. The `Support Effects` tab lists `Friendship Bonus 15%` (*Increases the effectiveness of Friendship Training*), `Mood Effect 20%` (*Amplifies the effect of mood when training together*) and `Training Effectiveness 5%` (*Increases the effectiveness of training performed together*).
+
+**Unity Cup Available**: the scenario emblem, then a header row with a laurel `S`, `Blue Bloom`, the motto `Dreaming Big` and the placement `8th`; then one row per round, each carrying whether it was held, the date it falls on and its result — Round 1 `Held` / After Junior Year Late Dec / `WIN`, Round 2 after Classic Year Late Jun, Round 3 after Classic Year Late Dec, Round 4 after Senior Year Late Jun, and `Unity Cup Finals` with a `NEXT` tag, `Held`, After Senior Year Late Dec and `5 turn(s)` (frame observation; awaiting a frame reference).
+
+**Umamusume Class**: a nine-step fan pyramid with a `←Current` marker and the trainee's chibi on her tier — Legend 320,000, Top Star 240,000, Star 160,000 (current), Platinum 100,000, Gold 50,000, Silver 20,000, Bronze 5,000, Beginner 1st place, Debut / Maiden — with `Fans 209,245` beneath, which places her in `Star` and leaves 30,755 to `Top Star` (frame observation; awaiting a frame reference; fans figure from `7a68aedc`).
+
+**Goals**: the scenario logo, a sub-header with `Class Star` and `Fans 209,245`, then one row per goal carrying title, race day, a **fan criterion** and a state — `Place top 3 in Nikkei Sho`, Senior Year Late Mar, `2,000 or above`, `CLEAR!`; `Place 1st in Tenno Sho (Spring)`, Senior Year Late Apr, `20,000 or above`, `CLEAR!`; `Place top 3 in Takarazuka Kinen`, Senior Year Late Jun, `20,000 or above`, `CLEAR!`; and `Place 1st in Arima Kinen`, Senior Year Late Dec, `Entry criteria met!`, `In progress`, `Turns left: 5`. Record that a goal in the client carries a fan criterion as well as a placement (frame observation, `885d4671`).
+
+**Umamusume Details**: card art with three gold rarity stars, `[Rosy Dreams] Rice Shower`, `Potential Lvl 2`, the stat row with grade letter and in-force cap per stat, the aptitude rows as corrected in C-01 and C-02, the `Growth Rate` row at +0% / +10% / +0% / +20% / +0%, and `Conditions` and `Skills` tabs. The `Skills` tab holds the ten skills as chips, with `Blue Rose Closer` at `Lv 3` on a pink gradient and `Swinging Maestro` on gold (frame observation, `1dde6b2f`).
+
+---
+
+## 2. The skill pool, and what 173 SP buys
+
 
 ---
 
@@ -778,7 +877,7 @@ Bloom (`02-unity-cup.md:183`, `:156`). Picking the name is not enough; the win i
    how many training turns the rest buys back does, so the figure is left open here rather than picked.
 2. **Run the Kyoto Daishoten rather than training into the risk.** It is scheduled Early Oct, it costs
    no Energy, and Race Bonus effects on the deck pay stats and fans from finishing: 6,700 fans on a win,
-   which is 22% of the gap to Top Star. The G1 on the same card is Morioka Dirt 1600m and she is Dirt G,
+   which is 22% of the gap to Top Star. The G1 on the same card is Morioka Dirt 1600m and she is Dirt C,
    so the higher grade is the worse ride.
 3. **Then committed training turns on the best tiles.** Guts is Lv5 and holds both Guts cards, so it is
    the highest-value facility, and the multi-flame curve rewards crowding: the trainee gains nothing
@@ -863,6 +962,23 @@ hand from 16:27.
    counter is the same widget the publishers describe, and where it sits relative to the energy bar, is
    established by no frame. §8.6's request for a capture of the career screen's header region would
    answer this and the Energy number at once.
+
+10. **Vodka's `Power` spark discrepancy.** The in-career `Sparks` screen (§1.11) reads Vodka `[Wild Top
+    Gear]`'s Power spark as **★★☆**, where the post-career Legacy tree crop (§1.5, panel `2161e855`) reads
+    it as **★☆☆**. Two screens may be showing two different facts — what the ancestor held, and what was
+    transferred — and the frames do not settle which. Recorded as open; closes on a higher-resolution
+    capture of both screens or a publisher statement of the transfer rule.
+
+11. **Maruzensky's rank badge.** The frames read `UG`; the trainer's reading is `UG1`. One character apart,
+    and the rank is the ancestor's own end-of-run class, not a spark grade (§1.5). Recorded as unresolved
+    and marked for a higher-resolution capture.
+
+12. **The olive-gold and rainbow row tints.** The `Learn` screen tints rows — plain, an olive-gold band on
+    rows including `It's On!`, `Unruffled`, `Rushing Gale!` and `Swinging Maestro`, and a green-to-pink
+    rainbow gradient on `Blue Rose Closer` — and the client does not explain the tint. The same tints
+    appear on the `Umamusume Details` skill chips, so the tint travels with the skill rather than
+    belonging to a screen (§1.13). Recorded as observed and unexplained; closes on a publisher note or a
+    tooltip capture.
 
 ---
 
@@ -1453,11 +1569,7 @@ from the Team tab, and no arithmetic in this document produces them.
 
 ## 10. This run's position in the career flow
 
-Added 2026-11-06. The 67 frames cover **one end** of a Unity Cup career: the last five turns of Senior year.
-Everything after the finals is unobserved, and everything before Senior Early October is unobserved too. The
-flow map this report was cross-checked against covers the opposite end, and read together they describe one
-state machine from both sides. This section states which stages this capture set covers, because until now
-the file recorded what the frames **show** (§9's column) without ever recording what they **reach**.
+Added 2026-11-06. The 67 frames cover **one end** of a Unity Cup career — the last five turns of Senior year — and more of it than the earlier wording implied. The pre-career setup flow (scenario, trainee, two legacies, six-card deck, Start Career) and turn 0 (Junior Early January, 11 turns to the debut) are **unfilmed**, as are the preseason rounds' own screens, the finals' race cards, and the post-finals state. But the in-career screens **are** captured and are recorded in §§1.10–1.15: the in-career `Career` screen (the Cockpit equivalent), the in-career `Sparks` screen, the `Perks` panel, the `Learn` screen, the `Log` screen and the in-career rail, and the five `Career Profile` panels (Featured Cards, Unity Cup Available, Umamusume Class, Goals, Umamusume Details). The flow map this report was cross-checked against covers the opposite end, and read together they describe one state machine from both sides. This section states which stages this capture set covers, because until now the file recorded what the frames **show** (§9's column) without ever recording what they **reach**.
 
 | Flow stage | Covered by a frame here? | What this report knows about it |
 | --- | --- | --- |
@@ -1481,3 +1593,60 @@ venue and exact distance per category remain ❌ UNVERIFIED (§6 item 8, §8.3, 
 finals' own race cards. The pre-debut phase, including the Tazuna tutorial and whether it can be skipped,
 has no evidence in this file in either direction — a Junior-year capture would be a second corpus, not an
 extension of this one, and this report does not claim to cover it.
+
+
+## 11. Revision table — 2026-11-06 frame re-read
+
+Dated revision of this document against the reviewed frame set. Every change below is either a correction
+of a value already in the file (C-01 … C-05) or an addition of a screen the file had not described
+(A … F). Evidence convention is unchanged: a frame observation carries the first eight characters of the
+capture filename; a publisher fact carries publisher, tier, date and `⚠️ STALE` where it applies; an
+unmapped observation is marked `awaiting frame reference`. Nothing in §§1–10 was rewritten to accommodate
+the new material beyond the edits listed here, and the unresolved contradictions named in §6 and §1.2
+(cap arithmetic, inheritance attribution, Vodka's Power spark, Maruzensky's rank, the row tints) remain
+open.
+
+### Corrections
+
+| # | Where | Old value | New value | Evidence |
+| --- | --- | --- | --- | --- |
+| C-01 | §1.2 aptitude list for the `[Rosy Dreams]` card | `Dirt G` | `Dirt C` | Frame `1dde6b2f`, `Umamusume Details` panel. Downstream race-fit references (§1.6, §5) updated to match. |
+| C-02 | §1.2 aptitude list for the `[Rosy Dreams]` card | `End G` | `End C` | Frame `1dde6b2f`, same panel. |
+| C-03 | §1.5 inheritance tree, second `[Peak Blue]` Daiwa Scarlet (Legacy 2) | rank `UG` | rank `S+` | In-career `Sparks` screen shows `S+`; the earlier post-career tree crop read `UG`. |
+| C-04 | §1.3 attribution of the ten-skill list | "the Skills tab" (ambiguous) | "`Umamusume Details` → `Skills` tab" | Frame `1dde6b2f`. It is **not** the `Perks` panel's `Skills` tab, which holds a different list — which is why the two lists in this file disagree. |
+| C-05 | §10 coverage statement | frames cover the endgame only | qualified: pre-career setup flow and turn 0 unfilmed, but the in-career `Career`, `Sparks`, `Perks`, `Learn`, `Log` and `Career Profile` screens are captured (§§1.10–1.15) | Frame `297b931b` and the set's other in-career captures. |
+
+`Mile B`, `Front A` and `Late B` are **not** changed. The file's erratum of 2026-10-09 already records
+that the client prints those and that the application's catalogue export is the deviating side; the
+frames confirm the client, so the erratum stands and needs no edit.
+
+### Additions
+
+| # | What | Where | Evidence |
+| --- | --- | --- | --- |
+| A | In-career `Career` screen (Cockpit equivalent): header, calendar tile `5 turn(s) left` / `Senior Year Early Oct`, goal bar `Place 1st in Arima Kinen` with `Entry criteria met!`, second badge `5 Turn(s) Until the Unity Cup`, `Energy` bar, mood chip `↑ GREAT`, team emblem `Blue Bloom` / `S` / five stars / `Dreaming Big`, Tazuna hint bubble, trainee bubble, class badge `Star`, stat strip with grade letter and in-force cap, action buttons, `Skip ▶▶` / `Quick` / menu; three counters recorded as three distinct widgets | §1.10 | `297b931b`, `09e754d6`, `885d4671`, `eccdc650`; layout awaiting a frame reference |
+| B | In-career `Sparks` screen: green `1st Legacy` / `2nd Legacy` tabs, single column, portrait with rank badge, spark rows with star counts and `i` button; chains in the trainer's own form (1st Legacy: Vodka → Daiwa Scarlet → Seiun Sky; 2nd Legacy: Maruzensky → Daiwa Scarlet → Taiki Shuttle) kept alongside the existing row-by-row table | §1.11 | `fd78e996`, `31fd26c4`, `f7a6952f`, `e771563c`, `24f5b5d0`, `eea37f2a`; layout awaiting a frame reference |
+| C | `Perks` panel: tabs `Support Effects` / `Skills`; grouping into `Trainee Skills` (no chip) and `Card Skills` (source portraits); skill name in both groups possible, one skill with two chips; `○` corner variant; icon-tile taxonomy (orange running/positioning, blue recovery/endurance, green condition/venue) | §1.12 | awaiting a frame reference |
+| D | `Learn` screen: header `Learn` with `i`, trainee portrait, `Full Stats`, `Skill Points 173`, scrollable list with coloured icon tile, skill name with `○`, effect text, orange hint badge, `-` / price / `+`, `Obtained` tag on greyed rows, `Confirm` / `Reset`, bottom rail; hint badges `Hint Lvl 1` … `Hint Lvl Max` at 10/20/30/35/40% off; thirty-three printed price rows; shop sells ancestry-tree skills; row tints recorded; tints travel with the skill | §1.13 | `09e754d6`, `c1ee4d11`, `c8b2dcad` |
+| E | `Log` screen and in-career rail: `Log` reads `There is no log.`; rail is Jukebox, Sparks, Log, Career Profile, Agenda, Item Request, Menu; PC layout with active screen left, rail and secondary pane right; Steam overlay present in one frame | §1.14 | awaiting a frame reference |
+| F | `Career Profile` panels: Featured Cards (Nishino Flower SSR, unique perk, four tabs), Unity Cup Available (round-by-round with results and `NEXT`), Umamusume Class (nine-step fan pyramid, `Fans 209,245`, `Star`, 30,755 to Top Star), Goals (title, race day, fan criterion, state), Umamusume Details (card art, three stars, potential level, stats, aptitudes, growth rate, tabs, ten chips) | §1.15 | `85e4c75a`, `885d4671`, `7a68aedc`, `1dde6b2f`; several panels awaiting a frame reference |
+
+### Open items recorded, not closed
+
+| # | Item | Status | What would close it |
+| --- | --- | --- | --- |
+| 10 | Vodka's `Power` spark: ★★☆ on the in-career `Sparks` screen, ★☆☆ on the post-career tree crop | Open | Higher-resolution capture of both screens, or a publisher statement of the transfer rule |
+| 11 | Maruzensky's rank badge: frames read `UG`, trainer reads `UG1` | Open | Higher-resolution capture |
+| 12 | Olive-gold and rainbow row tints on the `Learn` screen and the `Umamusume Details` skill chips | Open (observed, unexplained) | A publisher note or a tooltip capture |
+
+The cap arithmetic (§1.2: +25 / +22 / +68 / +8 over the 1300 floor) and the inheritance attribution
+(§1.2, §8.5) remain open exactly as they were: the six blue sparks account for the Guts +8 and
+nothing else, and the green (unique-skill) factors remain the named candidate. The new findings
+narrow them; they do not resolve them. In particular, the Guts +8 is not attributed to the tree's
+blue sparks beyond the +4 × 2 already stated, and the +16 inheritance-breakthrough figure is not
+restated as the source of the extras.
+
+### Files touched
+
+Only `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md`. No application code, config, migration, test,
+walk audit or register was written to.
