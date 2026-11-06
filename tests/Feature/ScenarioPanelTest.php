@@ -9,6 +9,7 @@ use App\Enums\TurnEventType;
 use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\TrainingRun;
+use App\Models\TurnEntry;
 use App\Models\TurnEvent;
 use App\Models\TurnEvents\SpiritBurstPayload;
 use App\Models\TurnEvents\TeamRankPayload;
@@ -639,6 +640,71 @@ it('puts the base cap in the strip when the run names no scenario', function ():
             ->where('scenario.caps.rows', fn (Collection $rows): bool => $rows->every(
                 fn (array $row): bool => $row['cap'] === 1200
             )));
+});
+
+it('derives the facility level from the recorded turn under a repetition scenario (§13.4)', function (): void {
+    // §13.4: `config/scenarios.php` carries `facility_level_source` per scenario — `repetition` for URA
+    // Finale (:191) and Our Grand Concert (:1061), `team_rank` for Unity Cup (:407),
+    // `repetition_plus_purchases` for Trackblazer (:624). Nothing read that key: `facilityLevel()`
+    // walked `team_rank_ladder` in every scenario.
+    //
+    // Measured correction to §13.4's framing, recorded here rather than repeated: under URA and
+    // Trackblazer the method answered `null`, not a wrong level, because both call sites gate on
+    // `latestTeamRank()`, which itself refuses unless `composesPanel('team_rank_ladder')`. So the run
+    // printed no facility level at all where its own recorded turns held one. That is the defect.
+    //
+    // The repetition rule, from the reference (§2.2.1): the level rises from using the same discipline
+    // repeatedly. The per-turn columns are where that is recorded.
+    $run = scenarioPanelRun('ura_finale');
+
+    TurnEntry::factory()->create([
+        'training_run_id' => $run->id,
+        'turn' => 5,
+        'facility_speed' => 3,
+    ]);
+
+    expect($run->fresh()->facilityLevel('speed'))->toBe(3);
+});
+
+it('adds a recorded shop purchase to the repetition level under Trackblazer (§13.4)', function (): void {
+    // `repetition_plus_purchases`: the repetition base, plus what the Pro Shop's recorded increment
+    // adds. The catalogue's own wording for the one facility item is `Speed facility level +1 for the
+    // run` (`config/scenarios.php:758`), so the purchase contributes one rung.
+    $run = scenarioPanelRun('trackblazer');
+
+    TurnEntry::factory()->create([
+        'training_run_id' => $run->id,
+        'turn' => 4,
+        'facility_speed' => 2,
+    ]);
+
+    TurnEvent::create([
+        'training_run_id' => $run->id,
+        'turn' => 6,
+        'event_type' => TurnEventType::Scenario,
+        'source_name' => 'Shop',
+        'deltas' => ['item' => 'Speed Training Application', 'cost' => 150, 'effect' => 'Speed facility level +1 for the run'],
+    ]);
+
+    expect($run->fresh()->facilityLevel('speed'))->toBe(3);
+});
+
+it('keeps the team-rank ladder for Unity Cup, unchanged (§13.4 regression half)', function (): void {
+    // Unity Cup is the one scenario whose `facility_level_source` is `team_rank`, so it is correct by
+    // configuration and not by accident. This case guards that the branch did not move it.
+    $run = scenarioPanelRun('unity_cup');
+    scenarioPanelRecorded($run, 6, TeamRankPayload::make('S')->toArray());
+
+    expect($run->fresh()->facilityLevel('S'))->toBe(5);
+});
+
+it('claims no facility level under a repetition scenario with no logged turn (§13.4)', function (): void {
+    // The no-logged-turn policy, chosen to match `burstCountdown`'s own answer for the analogous
+    // question (`TeamPanelBuilder.php:721-724`): null, so the panel prints its named absence rather
+    // than a 1 or a 0 the run never recorded.
+    $run = scenarioPanelRun('ura_finale');
+
+    expect($run->fresh()->facilityLevel('speed'))->toBeNull();
 });
 
 it('holds both forms to the same ceilings the validator uses', function (): void {

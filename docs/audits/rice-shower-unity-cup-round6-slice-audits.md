@@ -562,6 +562,161 @@ vendor/bin/phpstan analyse --no-progress --memory-limit=1G app/Services/Advisor/
 `SCREEN_SPEC.md` was checked for the `+30` figure and does not name it, so no screen-spec update was
 required.
 
+## S2.2 — facility ladder keyed on facility_level_source
+
+### Identity
+
+| Item | Value |
+| --- | --- |
+| Audit ID | `RS-UC-R6-SLICE-AUDITS-S2.2` |
+| Mode | M1 change audit |
+| Row | **§13.4, not an `R6-NN` row** |
+| Scope | `app/Models/TrainingRun.php` (`facilityLevel()` and three new private readers), `tests/Feature/ScenarioPanelTest.php` |
+| Out of scope | The burst countdown, the counters, `TeamPanelBuilder::teamSection()`'s ladder assembly, `TrainingDecisionController::facilityLevels()` (which already answered the repetition question correctly — see the measured correction below) |
+
+### Pre-flight, with a measured correction to §13.4
+
+| Item | Value |
+| --- | --- |
+| HEAD at open | `fdd2e722` |
+| Dirty set on the touched paths | Empty |
+| `facility_level_source` per scenario, located by grep | `repetition` at `config/scenarios.php:191` (URA Finale) and `:1061` (Our Grand Concert); `team_rank` at `:407` (Unity Cup); `repetition_plus_purchases` at `:624` (Trackblazer) |
+| Suite gate | `vendor/bin/pest tests/Feature/ScenarioMetadataTest.php` → 3 passed |
+| `RENDERED_EVIDENCE` | **TRUE**, re-probed |
+
+**Correction 1 — the defect's shape is not what §13.4 described.** §13.4 says a URA run "printed a
+team-rank-derived level". Measured: it printed **no level at all**. Both call sites obtain their rank
+from `TrainingRun::latestTeamRank()`, which returns `null` unless
+`composesPanel('team_rank_ladder')` (`TrainingRun.php:1328-1339`), and that panel is `false` for
+URA Finale, Our Grand Concert and Trackblazer (`config/scenarios.php`). So `facilityLevel(null)`
+answered `null` before this slice. The harm is an **absence over recorded data**, not a wrong
+number. Severity unchanged: a Trainer's own entered facility levels reached no run-level surface.
+
+**Correction 2 — one surface already did the repetition read.** §13.4's claim that "no screen derives
+a current facility level from the recorded turn columns" is refuted at
+`TrainingDecisionController::facilityLevels()` (`:495-513`), which walks `turnEntries` newest-first
+and fills five per-stat levels from the `facility_*` columns. So the training screen's published-figure
+keying already worked. The gap was the **run-level** figure on the team panel and the advisor, which
+is what this slice fixes. The two now read the same columns through one method instead of one of them
+reading a rank letter.
+
+**Correction 3 — a Shop purchase is not a per-stat delta.** §13.4 and the instruction describe
+"sum of `source_name = 'Shop'` Scenario `TurnEvent` deltas for that stat". Measured: `deltas` is
+`{item, cost, effect}` (`ShopPurchasePayload::KEYS`), and `effect` is prose. There is no numeric
+per-stat delta to sum. The only catalogue item that raises a facility level states its own magnitude
+in that prose (`config/scenarios.php:758`, `Speed Training Application` → `Speed facility level +1 for
+the run`), so the increment is read from the item's **configuration** and never parsed from a
+Trainer-typed string. A purchase naming an item the catalogue does not carry contributes `0`.
+
+### RED evidence (captured before GREEN)
+
+`vendor/bin/pest tests/Feature/ScenarioPanelTest.php --filter='§13.4'` → `2 failed, 2 passed
+(4 assertions)`:
+
+```
+Failed asserting that null is identical to 3.
+at tests\Feature\ScenarioPanelTest.php:662   (URA Finale, repetition)
+Failed asserting that null is identical to 3.
+at tests\Feature\ScenarioPanelTest.php:685   (Trackblazer, repetition_plus_purchases)
+```
+
+The two guards passed at RED, which is the asymmetry that proves the branch: Unity Cup's team-rank
+ladder answered `5` before and after, and the no-logged-turn case answered `null` before and after.
+
+### GREEN
+
+| Change | Detail |
+| --- | --- |
+| `facilityLevel(?string $rank, ?string $stat = null)` | Branches on `facility_level_source`. `team_rank` → the old ladder walk, unchanged and extracted to `facilityLevelFromRank()`. `repetition` → the latest turn that recorded that stat. `repetition_plus_purchases` → that plus the catalogue-backed purchase increments |
+| `$stat ??= $rank` | Under a repetition family there is no rank letter, so the first argument is read as the stat name there. The signature stays compatible: both existing call sites pass a rank and are unaffected |
+| `latestRecordedFacility()` | Newest turn first, skipping a turn that recorded nothing for that stat. `loadMissing('turnEntries')` first, because a `fresh()` model holds an empty collection rather than a pending query — found during the RED and proven by a probe |
+| `facilityPurchases()` | Reads the catalogue's `shop_items` for the one facility item, sums the recorded `Shop` events whose `item` matches, and ignores an unrecognised item |
+| No-logged-turn policy | **`null`**, matching `burstCountdown`'s own answer for its missing input (`TeamPanelBuilder.php:721-724`). Not `1` (would claim the client's floor) and not `0` (not a level the client has) |
+
+Neither call site changed: `TeamPanelBuilder.php:509` and `NextDecision.php:409` still pass a rank
+letter, and `NextDecision`'s own gate (`latestTeamRank()`) means it only asks under Unity Cup, where
+the `team_rank` branch answers exactly as before.
+
+### Rule sweep (dimensions A-H)
+
+| Dimension | Result |
+| --- | --- |
+| A. Status and feedback | **finding** — F1. The absence read as "no data" when the data existed |
+| B. Control and target | `no finding`. No control |
+| C. Error prevention and recovery | `no finding` |
+| D. Consistency and signifiers | **finding** — F2. One method behaved as though every scenario were Unity Cup |
+| E. Cognitive load and memory | **finding** — F3. The Trainer had to hold the repetition rule in their head |
+| F. Visual grouping and hierarchy | `no finding` |
+| G. Accessibility semantics and contrast | `no finding` |
+| H. Content and language | `no finding` |
+
+### Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F1 | `H4` | Usability heuristics | Team panel / advisor, a repetition scenario with logged turns | `facilityLevel()` answered `null` under URA Finale and Trackblazer over turns that recorded `facility_speed`. One component served one scenario's role for all four | OBSERVED_SOURCE | `TrainingRun.php:1346-1359` (pre-fix); `TrainingRun.php:1328-1339` for the gate that produced the null | 3 | High | Done: branch on the declared rule family |
+| F2 | `H4` | Usability heuristics | Same | `config/scenarios.php` carried `facility_level_source` and nothing read it, so the config's own distinction was decorative | OBSERVED_SOURCE | `grep -rn facility_level_source app/` returned no read before this slice | 2 | High | Done |
+| F3 | `GP-1` | Gerhardt-Powals | Same | The product holds the five per-turn levels and left the run-level figure for the Trainer to reconstruct from the Timeline | OBSERVED_SOURCE | `TimelineController.php:378-397` renders them per turn; no run-level reader existed | 3 | High | Done: `facilityLevel()` computes the figure |
+
+### Unmeasured register
+
+Empty. No visual claim is made: this slice's evidence is the runner's assertions on
+`facilityLevel()`, plus the 14-case `career-cockpit-forms.spec.ts` run confirming the Unity Cup panel
+is unaffected. The panel does **not** compose the ladder under a repetition scenario, so there is no
+rendered repetition level to assert; that is a composition-matrix fact, not a gap in this slice.
+
+### Gap register delta
+
+**One new gap, recorded not fixed:** no scenario with `facility_level_source = repetition` composes
+`team_rank_ladder`, so `facilityLevel()`'s repetition branch currently has no rendered caller. The
+method is correct and the next surface that needs a run-level facility figure for URA, Grand Concert
+or Trackblazer gets it; wiring one is a composition-matrix decision (which panel shows it), not part
+of this row.
+
+### Commit body basis
+
+| # | Question | Result | Basis |
+| --- | --- | --- | --- |
+| 1 | Add, remove or move a control? | `N/A` | No control |
+| 2 | Change what is on screen at once? | `N/A` | No payload key added or removed |
+| 3 | Change a colour, tint or state? | `N/A` | No class change |
+| 4 | Change a type size or weight? | `N/A` | No type change |
+| 5 | Change what the user can undo, or where the action is? | `N/A` | No action |
+| 6 | Change where a thing lives, or what it is called? | `N/A` | Nothing moved |
+| 7 | Change a progress, an incomplete state or a boundary? | `PASS` | A repetition scenario's no-logged-turn answer is `null` rather than a floor value; the boundary is asserted |
+| 8 | Change what the user has to read or remember? | `PASS` | Removes the reconstruction from the Timeline |
+| 9 | Add a new destination, a landmark or a control type? | `N/A` | None |
+| 10 | Change the words? | `N/A` | No copy changed |
+
+`RENDERED_EVIDENCE = TRUE`; the only rendered run in this slice is `career-cockpit-forms.spec.ts`, 14
+passed (1.9m), asserting the Unity Cup panel is unchanged.
+
+### Verification output
+
+```
+vendor/bin/pest tests/Feature/ScenarioPanelTest.php --filter='§13.4'
+  Tests:    4 passed (4 assertions)
+
+vendor/bin/pest tests/Feature/ScenarioPanelTest.php tests/Feature/CockpitTeamPanelTest.php \
+  tests/Feature/NextDecisionTest.php tests/Feature/UnityCupCountersTest.php tests/Feature/TurnFacilityLevelsTest.php
+  Tests:    60 passed (847 assertions)
+```
+
+```
+npx playwright test tests/browser/career-cockpit-forms.spec.ts
+  14 passed (1.9m)
+```
+
+**Non-vacuity proof by negation.** With the branch replaced by the unconditional
+`return $this->facilityLevelFromRank($rank);` and nothing else changed, the same filter produced
+`2 failed, 2 passed` — the two repetition cases failed and both guards passed. Restored
+byte-identically (`git diff --stat` back to 139 insertions / 4 deletions; the filter green again).
+
+`pint` initially reported three fixers on the test file (`unary_operator_spaces`,
+`not_operator_with_successor_space`, `ordered_imports`); the file was formatted with the explicit path
+and re-verified `passed`. PHPStan: `[OK] No errors`.
+
+
 
 
 

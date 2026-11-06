@@ -1339,11 +1339,63 @@ class TrainingRun extends Model
     }
 
     /**
-     * The facility level the reported rank grants, derived through the config mapping
-     * and never stored. `S+` sits above S and grants no higher facility (the config
-     * notes say so), so it has no level and the panel must not hand it one.
+     * The run's facility level for one stat, derived by the rule its scenario declares.
+     *
+     * `config/scenarios.php` carries `facility_level_source` per scenario, and this method used to
+     * ignore it: it walked `team_rank_ladder` in every scenario, so a URA Finale or Grand Concert run
+     * printed a level derived from a team rank it cannot have (§13.4). Three rule families exist:
+     *
+     * - `team_rank` (Unity Cup): the reported rank letter through the config ladder. `S+` sits above S
+     *   and grants no higher facility, so it has no rung and the panel must not hand it one.
+     * - `repetition` (URA Finale, Our Grand Concert): the latest logged turn's own level for that stat.
+     * - `repetition_plus_purchases` (Trackblazer): that, plus the recorded Pro Shop increments.
+     *
+     * **No logged turn answers `null`, never `1`.** A facility nobody has reported is a named absence,
+     * which is the same answer `TeamPanelBuilder::burstCountdown()` gives for its own missing input. A
+     * `1` would claim the client's floor, and a `0` is a level the client does not have.
+     *
+     * `$rank` stays in the signature because both call sites pass it and it is the only input the
+     * `team_rank` family reads. It is ignored by the other two, which read the run's own rows.
      */
-    public function facilityLevel(?string $rank): ?int
+    public function facilityLevel(?string $rank, ?string $stat = null): ?int
+    {
+        $source = (string) config('scenarios.scenarios.'.$this->scenarioKey().'.facility_level_source', 'team_rank');
+
+        if ($source === 'team_rank') {
+            return $this->facilityLevelFromRank($rank);
+        }
+
+        // A repetition scenario has no rank at all, so the first argument is read as the stat name
+        // there. Two call styles reach this method: the panel and the advisor pass a rank letter (the
+        // only input the `team_rank` family reads), and a per-stat caller passes the column's own name.
+        // Under a repetition family the rank letter is meaningless, so the second argument wins when
+        // given and the first is used as the stat otherwise.
+        $stat ??= $rank;
+
+        $level = $this->latestRecordedFacility($stat);
+
+        if ($source !== 'repetition_plus_purchases') {
+            return $level;
+        }
+
+        $purchases = $this->facilityPurchases($stat);
+
+        if ($level === null) {
+            // A purchase with no logged turn still records an increment, so the run has a level the
+            // purchase alone states. With neither, the answer stays the absence.
+            return $purchases === 0 ? null : $purchases;
+        }
+
+        return $level + $purchases;
+    }
+
+    /**
+     * The team-rank family: the reported letter through the scenario's own ladder.
+     *
+     * Unity Cup is the only scenario configured for this, and it is what the method did for every
+     * scenario before §13.4 split the rules apart.
+     */
+    private function facilityLevelFromRank(?string $rank): ?int
     {
         if ($rank === null) {
             return null;
@@ -1356,6 +1408,89 @@ class TrainingRun extends Model
         }
 
         return null;
+    }
+
+    /**
+     * The latest logged turn's own level for one stat, or null when no turn recorded it.
+     *
+     * Per-turn rather than a maximum over the run: the client's facility level is a current state, so
+     * the newest reading is the current one. A later turn that recorded nothing leaves the earlier
+     * reading standing, which is why the walk skips a null column rather than stopping at it.
+     */
+    private function latestRecordedFacility(?string $stat): ?int
+    {
+        if ($stat === null) {
+            return null;
+        }
+
+        // The relation is loaded rather than read directly: a model reached through `fresh()` has an
+        // empty collection, not a pending query, and reading it would silently answer null.
+        $this->loadMissing('turnEntries');
+
+        $column = 'facility_'.$stat;
+
+        foreach ($this->turnEntries->sortByDesc('turn') as $entry) {
+            if ($entry->{$column} !== null) {
+                return (int) $entry->{$column};
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * What the recorded Pro Shop purchases add to one stat's facility level.
+     *
+     * The shop stores `{item, cost, effect}` and the effect is prose (`config/scenarios.php`'s
+     * catalogue). The only item whose effect raises a facility level states its own magnitude in that
+     * string (`Speed facility level +1 for the run`), so the increment is read from the item's
+     * configuration rather than parsed out of the sentence a Trainer typed.
+     *
+     * A purchase whose item the catalogue does not carry contributes nothing: a hand-made event must
+     * not be able to invent a facility level.
+     */
+    private function facilityPurchases(?string $stat): int
+    {
+        if ($stat === null) {
+            return 0;
+        }
+
+        $catalogue = (array) config('scenarios.scenarios.'.$this->scenarioKey().'.shop_items', []);
+        $increments = [];
+
+        if ($catalogue === []) {
+            return 0;
+        }
+
+        // Same reason as `latestRecordedFacility()`: a fresh model holds an empty collection, so the
+        // relation has to be loaded before it can answer.
+        $this->loadMissing('turnEvents');
+
+        foreach ($catalogue as $item) {
+            $name = (string) ($item['name'] ?? '');
+            $effect = (string) ($item['effect'] ?? '');
+
+            // The catalogue's own sentence names the stat and the amount: `<Stat> facility level +N`.
+            if ($name !== '' && preg_match('/^'.ucfirst($stat).' facility level \+(\d+)/', $effect, $matches) === 1) {
+                $increments[$name] = (int) $matches[1];
+            }
+        }
+
+        $total = 0;
+
+        foreach ($this->turnEvents as $event) {
+            $deltas = $event->deltas;
+
+            if ($event->source_name !== 'Shop' || ! is_array($deltas)) {
+                continue;
+            }
+
+            $item = (string) ($deltas['item'] ?? '');
+
+            $total += $increments[$item] ?? 0;
+        }
+
+        return $total;
     }
 
     /**
