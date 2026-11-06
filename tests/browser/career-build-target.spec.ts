@@ -41,7 +41,9 @@ test.describe('Build Target and the provenance badge', () => {
         // absence is an AbsenceValue disclosure now (DESIGN.md §5.6) - the summary is the marker
         // and carries the reason as its accessible name, so the old title-attribute probe is
         // replaced by the disclosure located by its own reason.
-        await expect(page.getByText('/ 1200 cap')).toHaveCount(5);
+        // Dated 2026-11-06 (R6-04): the label said `cap` while the number printed was the run's own
+        // ceiling. It reads `ceiling` now, so the assertion follows the deliberate copy change.
+        await expect(page.getByText('/ 1200 ceiling')).toHaveCount(5);
 
         // No stored target: the absence is stated and no stat input carries a pre-filled zero.
         await expect(page.getByText('No target is recorded yet.')).toBeVisible();
@@ -62,7 +64,7 @@ test.describe('Build Target and the provenance badge', () => {
         // What the wireframe's fields print before anything is entered: the denominator, and the
         // named absence of a share of the cap rather than a zero standing in for one.
         const speedField = page.locator('[data-stat="Speed"]');
-        await expect(speedField.locator('[data-field="denominator"]')).toContainText('/ 1200 cap');
+        await expect(speedField.locator('[data-field="denominator"]')).toContainText('/ 1200 ceiling');
         await expect(speedField.locator('[data-field="percent-of-cap"]')).toContainText('not entered');
     });
 
@@ -84,8 +86,8 @@ test.describe('Build Target and the provenance badge', () => {
         // The wireframe's field prints the number, its denominator and its share of the cap
         // (`career-target.html:101-125`). The bar and the second copy of the figure are gone.
         const speed = page.locator('[data-stat="Speed"]');
-        await expect(speed.locator('[data-field="denominator"]')).toContainText('1200 / 1200 cap');
-        await expect(speed.locator('[data-field="percent-of-cap"]')).toContainText('100% of cap');
+        await expect(speed.locator('[data-field="denominator"]')).toContainText('1200 / 1200 ceiling');
+        await expect(speed.locator('[data-field="percent-of-cap"]')).toContainText('100% of the ceiling');
 
 
         await page.getByRole('button', { name: 'Continue to legacy' }).click();
@@ -101,7 +103,28 @@ test.describe('Build Target and the provenance badge', () => {
         await page.locator('#app > *').first().waitFor();
         await expect(page.getByLabel('Purpose')).toHaveValue('StoryClear');
         await expect(page.getByLabel('Speed', { exact: true })).toHaveValue('1200');
-        await expect(page.locator('[data-stat="Speed"] [data-field="denominator"]')).toContainText('1200 / 1200 cap');
+        await expect(page.locator('[data-stat="Speed"] [data-field="denominator"]')).toContainText('1200 / 1200 ceiling');
+    });
+
+    test('names the ceiling each figure belongs to, so no caption claims the scenario for an entered figure (R6-04)', async ({ page }) => {
+        // R6-04 facet (a), rendered: `BuildTarget.vue:446` prints `entered(stat) ?? '-'` over
+        // `cap(stat)`, and `cap()` reads `ScenarioCaps::forRun()` — the run's ceiling, the entered one
+        // where the draft carries it. The helper then called that number `cap` and the total row called
+        // its sum `Sum of the five scenario caps`, which names the scenario's published figure while
+        // printing the Trainer's own.
+        await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
+
+        // With no scenario and no entered ceiling the two figures coincide, so the page must say which
+        // one it is printing rather than leaving the reader to infer it.
+        const speed = page.locator('[data-stat="Speed"]');
+        await expect(speed.locator('[data-field="denominator"]')).toContainText(/ceiling/i);
+        await expect(speed.locator('[data-field="denominator"]')).not.toContainText(/\bcap\b/i);
+
+        // The total row names the figures it sums. It must not claim the scenario's published caps
+        // unless it is genuinely printing them.
+        await expect(page.getByText(/Sum of the five scenario caps/)).toHaveCount(0);
+        await expect(page.getByText(/Sum of the five entered ceilings/)).toBeVisible();
     });
 
     test('refuses a stat above the cap, ties the message to its input and moves focus there', async ({ page }) => {
@@ -162,12 +185,12 @@ test.describe('Build Target and the provenance badge', () => {
         await page.locator('#app > *').first().waitFor();
         await expect(page.getByLabel('Speed ceiling')).toHaveValue('1250');
         await expect(page.getByLabel('Speed', { exact: true })).toHaveValue('1250');
-        await expect(page.getByText('1250 cap')).toHaveCount(1);
+        await expect(page.getByText('1250 ceiling')).toHaveCount(1);
 
-        // The ceiling is printed once, as the field's own denominator: "N / 1200 cap". A second copy
+        // The ceiling is printed once, as the field's own denominator: "N / 1200 ceiling". A second copy
         // of the same figure was cut in the 2026-10-27 parity audit because the HFW prints one.
         await expect(page.locator('[data-field="denominator"]')).toHaveCount(5);
-        await expect(page.locator('[data-field="denominator"]').first()).toHaveText(/—?\s*\d*\s*\/\s*\d+ cap/);
+        await expect(page.locator('[data-field="denominator"]').first()).toHaveText(/—?\s*\d*\s*\/\s*\d+ ceiling/);
     });
 
     test('sizes every step-3 control to the 44px contract', async ({ page }) => {

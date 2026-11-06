@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\BuildPurpose;
+use App\Enums\RunStatus;
 use App\Models\Advisor\BuildTargetPayload;
 use App\Models\TrainingRun;
 use App\Services\Career\SetupDraft;
@@ -33,6 +34,40 @@ function draftTargetPayload(array $overrides = []): array
         'skill_priorities' => ['Corner Adept'],
         'hint_levels' => [],
     ], $overrides);
+}
+
+/**
+ * A draft carrying URA Finale, so the scenario's own published caps differ from the entered ones.
+ */
+function buildTargetScenarioDraft(): void
+{
+    SetupDraft::write(['scenario' => 'ura_finale']);
+}
+
+/**
+ * A run carrying its own entered ceilings, so `ScenarioCaps::forRun()` and
+ * `ScenarioCaps::scenarioCaps()` answer different numbers.
+ *
+ * @param  array<string, int>  $caps
+ */
+function buildTargetCockpitRun(array $caps): TrainingRun
+{
+    return TrainingRun::factory()->create([
+        'scenario' => 'ura_finale',
+        'status' => RunStatus::Active,
+        'build_target' => BuildTargetPayload::fromArray([
+            'purpose' => 'StoryClear',
+            'distance' => 'Medium',
+            'surface' => 'Turf',
+            'style' => 'Pace Chaser',
+            'targets' => ['Speed' => 1200, 'Stamina' => 1100, 'Power' => 1000, 'Guts' => 900, 'Wit' => 800],
+            'skill_priorities' => [],
+        ])->toArray(),
+        'cap_speed' => $caps['cap_speed'] ?? null,
+        'cap_stamina' => $caps['cap_stamina'] ?? null,
+        'cap_power' => $caps['cap_power'] ?? null,
+        'cap_guts' => $caps['cap_guts'] ?? null,
+    ]);
 }
 
 it('renders the target step with the base caps, the four purposes and nothing pre-filled', function (): void {
@@ -115,6 +150,66 @@ it('keeps the stored target when an earlier step writes the draft again', functi
 
     expect(SetupDraft::buildTarget())->toBe(draftTargetPayload());
     expect(SetupDraft::read())->toBe(['scenario' => 'trackblazer', 'umamusume_id' => null]);
+});
+
+it('labels the total and the helper by the ceiling they actually print (R6-04)', function (): void {
+    // R6-04 facet (a): `BuildTarget.vue:446` prints `entered(stat) ?? '-'` over `cap(stat)`, and
+    // `cap()` is `props.caps[stat]`, fed by `ScenarioCaps::forRun()` — the RUN's ceiling, which is the
+    // entered one where the draft carries it. The total row then labelled that sum `Sum of the five
+    // scenario caps`. The prop that would be the scenario's own figure, `scenarioCaps`, was declared
+    // and never read.
+    $fixture = buildTargetScenarioDraft();
+
+    $this->put(route('career.target.store'), draftTargetPayload([
+        // `postedCaps()` reads the four `cap_*` fields as TOP-LEVEL request keys, not a nested bag.
+        'cap_speed' => 1325,
+        'cap_stamina' => 1322,
+        'cap_power' => 1368,
+        'cap_guts' => 1308,
+        'targets' => ['Speed' => 1200, 'Stamina' => 1200, 'Power' => 1200, 'Guts' => 1200, 'Wit' => 1200],
+    ]))->assertRedirect(route('career.legacy'));
+
+    $props = [];
+    $this->get(route('career.target'))
+        ->assertOk()
+        ->assertInertia(function (Assert $page) use (&$props): void {
+            $props = $page->toArray()['props'];
+        });
+
+    // The entered caps and the scenario's own figures are different numbers, so a label naming the
+    // wrong one is visible rather than academic.
+    expect($props['caps']['Speed'])->toBe(1325)
+        ->and($props['scenarioCaps']['Speed'])->not->toBe(1325)
+        // The entered sum the page prints, and the scenario sum it does not.
+        ->and($props['caps'])->not->toBe($props['scenarioCaps']);
+
+    // The page must carry the distinction the copy needs: which figures are the run's own, and which
+    // are the scenario's published floor. `enteredCaps` is the draft's own `cap_*` key set.
+    expect($props['enteredCaps'])->toHaveKeys(['cap_speed', 'cap_stamina', 'cap_power', 'cap_guts'])
+        ->and($props['enteredCaps']['cap_speed'])->toBe(1325);
+});
+
+it('draws the cockpit bars against the ceiling its caption names (R6-04 facet b)', function (): void {
+    // R6-04 facet (b): the Cockpit asserted `Bars are drawn against the scenario ceiling` while the
+    // bars were bounded by `ScenarioCaps::forRun()` — the entered ceiling, where the run carries one.
+    // §13.7's guard is the same point from the reference side: a run's own observed ceilings are "not
+    // the scenario cap", and the tool must not print them as one.
+    $run = buildTargetCockpitRun([
+        'cap_speed' => 1325,
+        'cap_stamina' => 1322,
+        'cap_power' => 1368,
+        'cap_guts' => 1308,
+    ]);
+
+    $props = [];
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(function (Assert $page) use (&$props): void {
+            $props = $page->toArray()['props'];
+        });
+
+    // The bars' own cap is the entered one.
+    expect($props['state']['stats'][0]['cap'])->toBe(1325);
 });
 
 it('accepts a wholly unset target and records no target at all (D4)', function (): void {

@@ -158,13 +158,15 @@ const barCaption = computed((): string | null => {
         return null;
     }
 
-    // The HFW's own sentence, verbatim. It was two sentences that said the same thing twice: the
-    // first restated the mechanic and the second restated the absence, so the card carried a
-    // paragraph where the wireframe carries a line.
-    const caption = 'Bars are drawn against the scenario ceiling.';
+    // R6-04 facet (b): the bars are drawn against `ScenarioCaps::forRun()`, which is the run's own
+    // entered ceiling where it has one and the scenario's published figure where it does not. The
+    // caption used to claim `the scenario ceiling` unconditionally, so a run with entered ceilings read
+    // a source it was not printing. The two sentences below name the bound each state actually uses.
+    const bounds = 'the ceilings you entered where you entered one, the scenario\'s own figure where you did not';
+    const caption = `Bars are drawn against this run's ceilings: ${bounds}.`;
 
     return props.stats.some((stat: Stat): boolean => stat.target === null)
-        ? 'No build target was set for this run, so bars are drawn against the scenario ceiling.'
+        ? `No build target was set for this run, so bars are drawn against this run's ceilings: ${bounds}.`
         : caption;
 });
 

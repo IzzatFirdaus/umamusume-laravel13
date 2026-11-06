@@ -716,6 +716,134 @@ byte-identically (`git diff --stat` back to 139 insertions / 4 deletions; the fi
 `not_operator_with_successor_space`, `ordered_imports`); the file was formatted with the explicit path
 and re-verified `passed`. PHPStan: `[OK] No errors`.
 
+## S2.3 — R6-04, cap labels name the wrong source
+
+### Identity
+
+| Item | Value |
+| --- | --- |
+| Audit ID | `RS-UC-R6-SLICE-AUDITS-S2.3` |
+| Mode | M1 change audit |
+| Row | R6-04 (register §4.1), facets (a) and (b) |
+| Scope | `resources/js/pages/Career/BuildTarget.vue`, `resources/js/components/career/CareerStatePanel.vue`, `tests/browser/career-build-target.spec.ts`, `tests/Feature/CareerBuildTargetTest.php` |
+| Out of scope | `CockpitController.php`'s numbers (the bars were already faithful — §13.7's "labels only" confirmed by measurement), `ScenarioCaps`'s arithmetic, the server payload |
+
+### Pre-flight
+
+| Item | Value |
+| --- | --- |
+| HEAD at open | `f83fcfdd` |
+| Dirty set on the touched paths | Empty |
+| `ScenarioCaps` separates both numbers already | `forRun()` (`:131-141`) overlays the entered caps on `scenarioCaps()` (`:178`); `enteredCaps()` (`:151`) reads the four columns. Nothing needed computing |
+| `caps` vs `scenarioCaps` measured distinct | With entered `cap_speed = 1325` on a URA draft, `caps.Speed` is `1325` and `scenarioCaps.Speed` is `1400`; the sums differ, so a label naming the wrong one is visible rather than academic |
+| Suite gate | `vendor/bin/pest tests/Feature/ScenarioMetadataTest.php` → 3 passed |
+| `RENDERED_EVIDENCE` | **TRUE**, re-probed |
+
+### RED evidence (captured before GREEN)
+
+Browser, which is where the defect lives:
+
+```
+npx playwright test tests/browser/career-build-target.spec.ts --grep 'R6-04'
+  Error: expect(locator).toContainText(expected) failed
+  Expected pattern: /ceiling/i
+  Received string:  "- / 1200 cap "
+```
+
+The feature-level assertions I first wrote **passed at RED**, and that is the register's own finding
+restated: the numbers were already correct and only the words were wrong. Asserting the payload could
+never fail. The rendered label is the assertion that matters, so the browser case is the primary RED
+and the feature cases are the payload-shape guards that accompany it.
+
+### GREEN
+
+| File | Change |
+| --- | --- |
+| `BuildTarget.vue` denominator | `{{ entered(stat) ?? '-' }} / {{ cap(stat) }} cap` → `... ceiling`. The number is `ScenarioCaps::forRun()`, the run's own ceiling |
+| `BuildTarget.vue` share line | `{{ percent(stat) }}% of cap` → `% of the ceiling`; the absence sentence likewise |
+| `BuildTarget.vue` total row | `Sum of the five scenario caps` → `Sum of the five entered ceilings`. The sum is `totalCap`, which sums `caps` (the run's), so the old label named the scenario's published figure while printing the Trainer's |
+| `BuildTarget.vue` props | Removed the declared-and-never-read `scenarioCaps`, with a comment recording why and noting the server still sends it |
+| `CareerStatePanel.vue` caption | `Bars are drawn against the scenario ceiling.` → names both bounds: `the ceilings you entered where you entered one, the scenario's own figure where you did not`. The bars draw against `forRun()`, so the old sentence named one source for a figure that can be the other |
+
+No number changed. `totalCap`, `cap()`, `entered()`, `percent()` and `ScenarioCaps` are untouched.
+
+### Rule sweep (dimensions A-H)
+
+| Dimension | Result |
+| --- | --- |
+| A. Status and feedback | `no finding`. No state word |
+| B. Control and target | `no finding`. No control |
+| C. Error prevention and recovery | `no finding` |
+| D. Consistency and signifiers | **finding** — F1. Two labels named a source the figure did not come from |
+| E. Cognitive load and memory | `no finding` |
+| F. Visual grouping and hierarchy | `no finding` |
+| G. Accessibility semantics and contrast | `no finding` |
+| H. Content and language | **finding** — F2. `scenario cap` is the matrix's word for a figure the page was not printing |
+
+### Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F1 | `GP-2` | Gerhardt-Powals | Build target, denominator and total row, populated | The helper printed `ScenarioCaps::forRun()` — the run's ceiling — and called it `cap`; the total row summed that same figure and called the sum `Sum of the five scenario caps`. A derived figure named a rule it was not using | OBSERVED_SOURCE | `BuildTarget.vue:446,525-526` (pre-fix) | 3 | High | Done: both labels name the ceiling they print |
+| F2 | `H2` | Usability heuristics | Cockpit, state panel caption | `Bars are drawn against the scenario ceiling.` while the bars draw against `forRun()` — the entered ceiling where the run has one. The reference's own guard (`:444`) says a run's observed ceilings are "not the URA scenario cap" | OBSERVED_SOURCE | `CareerStatePanel.vue:164` (pre-fix) | 3 | High | Done: the caption names both bounds |
+
+`GP-2` cited per register §11.5 (defined at `gerhardt-powals-principles-2026-10-21.md:118`, no
+routing-table row).
+
+### Unmeasured register
+
+Empty. The primary assertion is rendered, not inferred.
+
+### Gap register delta
+
+None.
+
+### Commit body basis
+
+| # | Question | Result | Basis |
+| --- | --- | --- | --- |
+| 1 | Add, remove or move a control? | `N/A` | No control |
+| 2 | Change what is on screen at once? | `N/A` | Same rows |
+| 3 | Change a colour, tint or state? | `N/A` | No class change |
+| 4 | Change a type size or weight? | `N/A` | No type change |
+| 5 | Change what the user can undo, or where the action is? | `N/A` | No action |
+| 6 | Change where a thing lives, or what it is called? | `PASS` | Four strings renamed; the figures keep their places |
+| 7 | Change a progress, an incomplete state or a boundary? | `N/A` | No boundary moved |
+| 8 | Change what the user has to read or remember? | `PASS` | The label now states which ceiling it prints instead of leaving the reader to infer it |
+| 9 | Add a new destination, a landmark or a control type? | `N/A` | None |
+| 10 | Change the words? | `PASS` | This slice is copy only, and the seven existing browser assertions that pinned `cap` were updated with a dated comment rather than deleted |
+
+`RENDERED_EVIDENCE = TRUE`, declared from this slice's own probe: `career-build-target.spec.ts` 10
+passed, including the new R6-04 case asserting the rendered denominator and total row.
+
+### Verification output
+
+```
+npx playwright test tests/browser/career-build-target.spec.ts
+  10 passed (24.2s)
+
+vendor/bin/pest tests/Feature/CareerBuildTargetTest.php
+  Tests:    15 passed (136 assertions)
+
+vendor/bin/pest tests/Feature/CareerBuildTargetTest.php tests/Feature/CareerCockpitTest.php
+  Tests:    60 passed (664 assertions)
+
+vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+ [OK] No errors
+```
+
+**`career-cockpit.spec.ts` classified, not fixed:** `6 failed, 23 passed (3.9m)`. Measured
+pre-existing and unrelated by stashing all four slice files, rebuilding, and re-running the same spec:
+byte-identical `6 failed, 23 passed (3.9m)`. The failures are `[data-field="turn"]` and
+`Open the Career Result` locators, not the caption this slice changed. Recorded per §9's
+failure-attribution rule.
+
+**Seven existing browser assertions updated, none deleted.** Each `cap` → `ceiling` change carries the
+dated comment `Dated 2026-11-06 (R6-04)` on the first one and follows the deliberate copy change. The
+`props.scenarioCaps` declaration was removed rather than left dangling; the server still sends the
+prop, so a later reader can re-declare it without a payload change — recorded in the component.
+
+
 
 
 

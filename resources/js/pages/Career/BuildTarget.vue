@@ -65,9 +65,15 @@ const props = defineProps<{
      * one, the base cap alone when no scenario is chosen yet. This is the bound the write enforces.
      */
     caps: Record<string, number>;
-    /** The same stats' published ceiling from the matrix, entered figures aside (`ADR-0025`). */
-    scenarioCaps: Record<string, number>;
-    /** The ceilings already entered, keyed by the columns the run holds them in; absent where none was. */
+    /**
+     * The ceilings already entered, keyed by the columns the run holds them in; absent where none was.
+     *
+     * R6-04 removed the sibling `scenarioCaps` declaration: it was declared and never read, and the
+     * total row now names the figures it sums (`Sum of the five entered ceilings`) rather than printing
+     * the scenario's own sum under a label for it. The server still sends the prop — it is `caps`'s
+     * documented input and other readers of `ScenarioCaps` rely on it — so a later slice that wants the
+     * published figure here can re-declare it without a payload change.
+     */
     enteredCaps: Record<string, number | null>;
     /** The stats that may carry an entered ceiling. Four, and the server's list decides which. */
     capStats: string[];
@@ -443,11 +449,11 @@ function onSkillPrioritySelect(payload: { id: number; name: string }): void {
                               empty.
                             -->
                             <span class="font-mono text-xs text-ink-muted tabular-nums" data-field="denominator">
-                                {{ entered(stat) ?? '-' }} / {{ cap(stat) }} cap
+                                {{ entered(stat) ?? '-' }} / {{ cap(stat) }} ceiling
                             </span>
                             <span class="text-xs text-ink-muted" data-field="percent-of-cap">
-                                <template v-if="entered(stat) !== null">{{ percent(stat) }}% of cap</template>
-                                <template v-else>not entered, so no share of the cap is claimed</template>
+                                <template v-if="entered(stat) !== null">{{ percent(stat) }}% of the ceiling</template>
+                                <template v-else>not entered, so no share of the ceiling is claimed</template>
                             </span>
                         </div>
 
@@ -522,7 +528,7 @@ function onSkillPrioritySelect(payload: { id: number; name: string }): void {
                         </span>
                     </div>
                     <div class="srow">
-                        <span class="k">Sum of the five scenario caps</span>
+                        <span class="k">Sum of the five entered ceilings</span>
                         <span class="v font-mono tabular-nums">{{ totalCap }}</span>
                     </div>
                 </div>
