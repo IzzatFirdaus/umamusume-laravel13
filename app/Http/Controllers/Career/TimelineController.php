@@ -236,6 +236,12 @@ class TimelineController extends Controller
             'action_label' => 'Turn recorded',
             'before' => $previous === null ? null : $this->stats($previous),
             'actual' => $this->stats($turn),
+            // R6-12: this row's own Energy reading, resolved by the model's single owner
+            // (`TurnEntry::energyReading()`) rather than re-derived here. The page read a key the
+            // server never sent, so every Energy cell printed N/A over a reading the turn carried.
+            // The band logic is not recomputed in the controller; the model already resolves
+            // `band` / `exact` / `none` and `text` is what a screen prints.
+            'energy_reading' => $turn->energyReading(),
             'mood' => $turn->mood?->value,
             'facilities' => $this->facilities($turn),
             'failure_rate' => $turn->failure_rate,
@@ -267,6 +273,10 @@ class TimelineController extends Controller
             'action_label' => $race->tierKey() !== null ? "Race: {$title} ({$race->tierKey()})" : "Race: {$title}",
             'before' => null,
             'actual' => null,
+            // R6-12: a race row carries no reading of its own, and borrowing a neighbour's would put a
+            // turn's figure on a row that recorded nothing. Null travels so the page prints one named
+            // absence rather than a figure from the row above.
+            'energy_reading' => null,
             'mood' => null,
             // The separator is the plain hyphen `EventCard.vue` spells the same state with: the em
             // dash is banned from shipped copy (AGENTS.md §5, R-02), and this string reaches the rail
@@ -296,6 +306,10 @@ class TimelineController extends Controller
             'action_label' => $this->eventActionLabel($event),
             'before' => null,
             'actual' => null,
+            // R6-12: an event row carries no reading of its own, and borrowing a neighbour's would put a
+            // turn's figure on a row that recorded nothing. Null travels so the page prints one named
+            // absence rather than a figure from the row above.
+            'energy_reading' => null,
             'mood' => null,
             'result' => $recorded
                 ? ($outcome ?? 'Outcome recorded')

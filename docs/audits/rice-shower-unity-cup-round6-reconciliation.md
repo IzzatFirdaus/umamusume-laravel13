@@ -913,3 +913,13 @@ right:
    widgets with two conventions, and R6-13 compared quantities that were never meant to agree
    (13.2).
 
+
+## 14. Slice landing record
+
+Append-only. One row per landed slice. §4's status cells stay at `3f295e80`; this section records
+what landed after the register's own read. A row's slice-audits link names the section carrying the
+RED evidence, the rule sweep and the ten-question re-check.
+
+| R6 | Slice | Commit | Status | Audit | RED / GREEN |
+| --- | --- | --- | --- | --- | --- |
+| R6-12 | S1.1 | `<filled at close-out>` | Confirmed defect -> Confirmed fixed | `rice-shower-unity-cup-round6-slice-audits.md#s11--r6-12-timeline-reads-the-record-it-was-given` | RED: `EnergyReadingConsistencyTest` -> `3 failed, 5 passed (219 assertions)`, band projection reads `N/A` on both rows while `actual.sp` already carried `173`/`0`; GREEN: 21 passed (438 assertions) across the four related feature files, and `career-timeline.spec.ts` 8 passed with its new R6-12 case asserting `Low band`/`173` and `Mid band`/`0`, then a correction to row 1 leaving row 2 unchanged |

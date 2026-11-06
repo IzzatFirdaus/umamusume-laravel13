@@ -46,6 +46,67 @@ async function openTimeline(page: import('@playwright/test').Page): Promise<stri
     return runUrl;
 }
 
+/**
+ * `R6-12`: a run whose two turns record distinct Energy bands and distinct SP totals, so a rendered
+ * row cannot borrow its neighbour's reading and a latest-turn substitution cannot pass.
+ */
+async function openTimelineWithReadings(page: import('@playwright/test').Page): Promise<string> {
+    const runUrl = await createRun(page);
+    const runId = runUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+
+    await recordTurns(page, runId, 1, { energy_state: 'band', energy_band: 'low', sp: '173' });
+    await recordTurns(page, runId, 1, { turn: '2', energy_state: 'band', energy_band: 'mid', sp: '0' });
+
+    await page.goto(`${runUrl}/timeline`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    return runUrl;
+}
+
+/** The Energy and SP cell texts of one record row, by turn. */
+async function readingCells(page: import('@playwright/test').Page, turn: number): Promise<{ energy: string; sp: string }> {
+    const row = page.locator('main table tbody tr').filter({ has: page.locator('td:first-child', { hasText: new RegExp(`^${turn}$`) }) }).first();
+
+    return {
+        energy: ((await row.locator('td:nth-child(5)').textContent()) ?? '').trim(),
+        sp: ((await row.locator('td:nth-child(6)').textContent()) ?? '').trim(),
+    };
+}
+
+test('prints each row its own Energy band and its own SP, and a correction moves only its row (R6-12)', async ({ page }) => {
+    // The page read `entry.after?.energy` / `entry.after?.sp`, keys the server never sent, so both
+    // cells printed N/A on every row. Two turns with distinct bands and SP totals: a latest-turn
+    // substitution, a constant, or one-facet repair cannot pass.
+    const runUrl = await openTimelineWithReadings(page);
+
+    const first = await readingCells(page, 1);
+    const second = await readingCells(page, 2);
+
+    expect(first.energy, 'turn 1 prints the band it recorded').toBe('Low band');
+    expect(first.sp, 'turn 1 prints the SP it recorded').toBe('173');
+    expect(second.energy, 'turn 2 prints its own band, not turn 1\u2019s').toBe('Mid band');
+    expect(second.sp, 'turn 2 prints its own SP, not turn 1\u2019s').toBe('0');
+
+    // A correction to turn 1 changes turn 1's rendered reading and leaves turn 2 untouched. This is
+    // the half a "read the latest turn for every row" fix would fail.
+    await page.getByRole('link', { name: 'Edit turn 1' }).first().click();
+    await page.waitForURL(/\/training-runs\/\d+\/turns\/\d+\/edit$/, WRITE);
+    await page.selectOption('#energy_state', { label: 'band' });
+    await page.locator('#energy_band').fill('high');
+    await page.getByRole('button', { name: 'Save correction' }).click();
+    await expect(page.getByText('Saved.')).toBeVisible();
+
+    await page.goto(`${runUrl}/timeline`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const corrected = await readingCells(page, 1);
+    const untouched = await readingCells(page, 2);
+
+    expect(corrected.energy, 'the corrected row prints its new band').toBe('High band');
+    expect(untouched.energy, 'the neighbour row is unchanged').toBe('Mid band');
+    expect(untouched.sp, 'the neighbour row is unchanged').toBe('0');
+});
+
 test('renders the empty state when no turns have been logged', async ({ page }) => {
     const runUrl = await createRun(page);
 

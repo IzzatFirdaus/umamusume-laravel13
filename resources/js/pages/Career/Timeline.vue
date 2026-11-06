@@ -29,7 +29,11 @@ const props = defineProps<{
         turn: number;
         action_label: string;
         before: Record<string, number | null> | null;
-        after: Record<string, number | null> | null;
+        /**
+         * `R6-12`: this row's own Energy reading, resolved by `TurnEntry::energyReading()`. Null on an
+         * event or race row, which records no reading; never borrowed from a neighbouring turn.
+         */
+        energy_reading: { kind: 'exact' | 'band' | 'none'; value: number | null; band: string | null; text: string | null } | null;
         expected: Record<string, number | null> | null;
         actual: Record<string, number | null> | null;
         mood: string | null;
@@ -114,8 +118,16 @@ const clearFilters = (): void => {
     page.value = 1;
 };
 
-const energyOf = (entry: { after: Record<string, number | null> | null }): number | null => entry.after?.energy ?? null;
-const spOf = (entry: { after: Record<string, number | null> | null }): number | null => entry.after?.sp ?? null;
+/**
+ * `R6-12`: the row's own reading, not a key the server never sends.
+ *
+ * The absence rule is the model's (`energyReading()` returns `text: null` when there is nothing to
+ * print). A recorded `exact` zero is a reading, so the absence `title` keys on this returning null,
+ * never on `kind === 'none'`.
+ */
+const energyText = (entry: { energy_reading: { text: string | null } | null }): string | null =>
+    entry.energy_reading?.text ?? null;
+const spOf = (entry: { actual: Record<string, number | null> | null }): number | null => entry.actual?.sp ?? null;
 
 const lastTurn = computed(() => Math.max(0, ...props.entries.map((entry) => entry.turn)));
 const resultUrl = computed(() => props.run.cockpit_url.replace(/\/cockpit$/, '/result'));
@@ -212,8 +224,14 @@ const finaleText = computed(() => {
                                         class="ml-2 whitespace-nowrap text-xs text-ink-strong underline"
                                     >Edit turn {{ entry.turn }}</a>
                                 </td>
-                                <td class="py-2 pr-3 text-right font-mono" title="This turn recorded no energy figure.">{{ energyOf(entry) ?? 'N/A' }}</td>
-                                <td class="py-2 pr-3 text-right font-mono" title="This turn recorded no skill-point figure.">{{ spOf(entry) ?? 'N/A' }}</td>
+                                <td
+                                    class="py-2 pr-3 text-right font-mono"
+                                    :title="energyText(entry) === null ? 'This turn recorded no energy reading.' : undefined"
+                                >{{ energyText(entry) ?? 'N/A' }}</td>
+                                <td
+                                    class="py-2 pr-3 text-right font-mono"
+                                    :title="spOf(entry) === null ? 'This turn recorded no skill-point figure.' : undefined"
+                                >{{ spOf(entry) ?? 'N/A' }}</td>
                             </tr>
                         </tbody>
                     </table>
@@ -227,8 +245,9 @@ const finaleText = computed(() => {
                 </div>
             </template>
             <Note class="mt-2.5">
-                Turn numbers are the run's own; the position is the calendar's label for that turn. Energy and SP print
-                N/A where the import did not capture them: an N/A is "not recorded", never zero.
+                Turn numbers are the run's own; the position is the calendar's label for that turn. A turn row prints
+                the Energy reading and the Skill Points that turn recorded. Race and event rows record neither, so they
+                print N/A: an N/A is "not recorded", never zero.
             </Note>
         </section>
 
