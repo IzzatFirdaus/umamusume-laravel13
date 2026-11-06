@@ -139,6 +139,9 @@ class PreflightController extends Controller
             $run = TrainingRun::create($request->runAttributes());
 
             $ownership = $request->ownershipByPosition();
+            // R6-11: the level the deck step recorded, read beside the flag for the same positions, and
+            // written inside the same transaction so a run and its levels are never half-created.
+            $levels = $request->cardLevelByPosition();
 
             foreach ($request->deckByPosition() as $position => $cardId) {
                 $run->deckSlots()->create([
@@ -146,6 +149,9 @@ class PreflightController extends Controller
                     'slot_position' => $position,
                     // The flag the deck step recorded, carried onto the run (ADR-0023, D3).
                     'ownership' => $ownership[$position] ?? null,
+                    // Absent for a card whose level the Trainer did not record: null is the stored
+                    // "not recorded", never a 0 that would claim a level the client does not have.
+                    'card_level' => $levels[$position] ?? null,
                 ]);
             }
 

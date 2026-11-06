@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\CardRarity;
 use App\Enums\RunStatus;
 use App\Models\DeckSlot;
 use App\Models\SupportCard;
@@ -76,7 +77,9 @@ function preflightFixture(string $distanceAptitude = 'A'): array
     $cards = [];
 
     for ($i = 0; $i < 6; $i++) {
-        $cards[] = SupportCard::factory()->create(['char_name' => 'Card '.$i, 'title_en' => null, 'type' => 'speed'])->id;
+        // Three-star (SSR, ceiling 50) so a level of 35 or 50 is legal for the card that holds it. The
+        // factory's default is a one-star, whose 40 ceiling would refuse 50 — a different case.
+        $cards[] = SupportCard::factory()->ssr()->create(['char_name' => 'Card '.$i, 'title_en' => null, 'type' => 'speed'])->id;
     }
 
     return [
@@ -252,6 +255,72 @@ it('warns about a half-filled deck, an empty parent slot and a skill priority no
             ->where('contract.warnings.3.key', 'skill_priority_unsourced.Nihon Ichi no Uma')
             ->where('contract.warnings.3.href', route('career.target'))
         );
+});
+
+it('carries the deck step\'s card levels through creation, by position (R6-11)', function (): void {
+    // The wizard's deck step stores each card's level (`StoreDraftDeckRequest::payload()`), and Preflight
+    // wrote three keys only: `support_card_id`, `slot_position`, `ownership`. `grep -c card_level` on
+    // `PreflightController` returned 0, so the level was lost at the step that creates the run and the
+    // run's deck ladder printed "Not recorded" over a level the draft had held for two steps.
+    //
+    // Asserted by position key, never by array order: the create loop iterates a map, and an order-based
+    // assertion would pass with the levels on the wrong slots.
+    $fixture = preflightFixture();
+
+    session([SetupDraft::SESSION_KEY => preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents'], [
+        'deck' => [
+            ['position' => 1, 'support_card_id' => $fixture['cards'][0], 'ownership' => 'OWNED', 'card_level' => 35],
+            ['position' => 2, 'support_card_id' => $fixture['cards'][1], 'ownership' => 'OWNED', 'card_level' => null],
+            ['position' => 3, 'support_card_id' => null, 'ownership' => null, 'card_level' => null],
+            ['position' => 4, 'support_card_id' => null, 'ownership' => null, 'card_level' => null],
+            ['position' => 5, 'support_card_id' => null, 'ownership' => null, 'card_level' => null],
+            ['position' => 6, 'support_card_id' => $fixture['cards'][2], 'ownership' => 'RENTED', 'card_level' => 50],
+        ],
+    ])]);
+
+    test()->put(route('career.preflight.store'))->assertRedirect();
+
+    $slots = TrainingRun::query()->where('umamusume_id', $fixture['trainee']->id)->sole()->deckSlots->keyBy('slot_position');
+
+    expect($slots)->toHaveCount(3)
+        ->and($slots[1]->card_level)->toBe(35)
+        ->and($slots[2]->card_level)->toBeNull()
+        ->and($slots[6]->card_level)->toBe(50)
+        // The level and the flag travel together: a rented card keeps both.
+        ->and($slots[6]->ownership)->toBe('RENTED');
+});
+
+it('refuses a level that passed at draft time but exceeds the card return ceiling at commit (R6-11)', function (): void {
+    // A level valid for the card's rarity when it was typed, and invalid by the time the run starts. The
+    // draft step's own rarity check cannot see this: the draft was saved before the card changed. The
+    // child re-run at Preflight has to apply the same ceiling, or the run is created holding a level the
+    // client cannot represent.
+    $fixture = preflightFixture();
+    $card = SupportCard::query()->findOrFail($fixture['cards'][0]);
+
+    session([SetupDraft::SESSION_KEY => preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents'], [
+        'deck' => [
+            ['position' => 1, 'support_card_id' => $card->id, 'ownership' => 'OWNED', 'card_level' => 45],
+            ['position' => 2, 'support_card_id' => null, 'ownership' => null, 'card_level' => null],
+            ['position' => 3, 'support_card_id' => null, 'ownership' => null, 'card_level' => null],
+            ['position' => 4, 'support_card_id' => null, 'ownership' => null, 'card_level' => null],
+            ['position' => 5, 'support_card_id' => null, 'ownership' => null, 'card_level' => null],
+            ['position' => 6, 'support_card_id' => null, 'ownership' => null, 'card_level' => null],
+        ],
+    ])]);
+
+    // The card's rarity drops under the recorded level. Lvl 45 is legal for a three-star card (ceiling
+    // 50) and illegal for a one-star (ceiling 40), so the same draft is now stale rather than malformed.
+    $card->forceFill(['rarity' => CardRarity::OneStar])->save();
+
+    $runsBefore = TrainingRun::count();
+
+    test()->put(route('career.preflight.store'))->assertSessionHasErrors('deck');
+
+    expect(TrainingRun::count())->toBe($runsBefore)
+        ->and(DeckSlot::query()->where('support_card_id', $card->id)->exists())->toBeFalse()
+        // The draft is intact: a refused write leaves state as it was (SHR-5).
+        ->and(SetupDraft::deck()[0]['card_level'])->toBe(45);
 });
 
 it('carries the deck step\'s owned-or-rented flag onto the run it creates', function (): void {

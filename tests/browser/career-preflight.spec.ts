@@ -33,6 +33,9 @@ import { verifyPage } from './fixtures/wizard-verify';
  */
 const createdRunUrls: string[] = [];
 
+/** The write ceiling this spec's multi-step flows use, matching the other wizard specs. */
+const WRITE = { timeout: 60_000 } as const;
+
 test.afterEach(async ({ page }) => {
     for (const url of createdRunUrls.splice(0)) {
         await deleteRun(page, url);
@@ -47,6 +50,85 @@ async function openPreflight(page: import('@playwright/test').Page): Promise<voi
     await page.goto('/career/setup/preflight', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 }
+
+test('keeps a card level and a rented flag through creation and a cold reload of the run deck (R6-11)', async ({ page }) => {
+    // The wizard's deck step writes both facts to the draft. Preflight wrote three keys only, so the
+    // level was gone the moment the run existed and the run's own deck ladder printed "Not recorded"
+    // over a level the Trainer had entered two steps earlier. This walks it end to end: enter, create,
+    // then reload the run deck cold.
+    await page.goto('/career/setup/scenario', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await page.locator('#scenario-radio-unity_cup').click();
+    await expect(page.locator('#scenario-radio-unity_cup')).toHaveAttribute('aria-checked', 'true', WRITE);
+
+    await page.goto('/career/setup/trainee', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await page.locator('button[id^="trainee-"]').first().click();
+
+    await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await page.selectOption('select[name="purpose"]', 'StoryClear');
+    await page.locator('input[name="distance"][value="Medium"]').check();
+    await page.selectOption('select[name="surface"]', 'Turf');
+    await page.selectOption('select[name="style"]', 'Pace Chaser');
+    for (const stat of ['Speed', 'Stamina', 'Power', 'Guts', 'Wit']) {
+        await page.locator(`input[name="targets[${stat}]"]`).fill('800');
+    }
+    await page.getByRole('button', { name: 'Continue to legacy' }).click();
+    await page.locator('#app > *').first().waitFor();
+
+    await page.goto('/career/setup/deck', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // Slot 1: a three-star card at level 35, owned. The picker's search box matches the printed row
+    // ("Char [Title]"), so the filter term is a substring of that text, not of the char name alone.
+    await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
+    const slotOne = page.getByRole('dialog', { name: 'Choose a card for Slot 1' });
+    await slotOne.locator('input[name="q"]').fill('Admire Vega');
+    await slotOne.getByRole('button', { name: 'Filter' }).click();
+    await slotOne.locator('ul > li').filter({ hasText: 'Admire Vega' }).first().getByRole('button', { name: 'Equip', exact: true }).click();
+    await expect(page.locator('#deck-slot-1')).not.toContainText('Empty.', WRITE);
+    await page.locator('#deck-slot-1').getByRole('button', { name: 'Owned' }).click();
+    await page.getByLabel('Level for Slot 1').fill('35');
+
+    // Slot 6: the Friends slot, a second three-star card at level 50, rented. Both the level and the
+    // flag have to cross. A different card from slot 1's, because the duplicate refusal would reject
+    // the same one twice. Both are three-star so a level of 50 is inside each card's own ceiling:
+    // the factory's default one-star tops out at 40 and would refuse it.
+    await page.getByRole('button', { name: 'Choose a card for Slot 6' }).click();
+    const slotSix = page.getByRole('dialog', { name: 'Choose a card for Slot 6' });
+    await slotSix.locator('input[name="q"]').fill('Agnes Digital');
+    await slotSix.getByRole('button', { name: 'Filter' }).click();
+    await slotSix.locator('ul > li').filter({ hasText: 'Agnes Digital' }).first().getByRole('button', { name: 'Equip', exact: true }).click();
+    await expect(page.locator('#deck-slot-6')).not.toContainText('Empty.', WRITE);
+    await page.locator('#deck-slot-6').getByRole('button', { name: 'Rented' }).click();
+    await page.getByLabel('Level for Slot 6').fill('50');
+
+    await Promise.all([
+        page.waitForResponse(
+            (response) => response.url().includes('/career/setup/deck') && response.request().method() === 'PUT',
+        ),
+        page.getByRole('button', { name: 'Continue to preflight' }).click(),
+    ]);
+
+    await page.goto('/career/setup/preflight', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await page.locator('#confirmed').check();
+    await page.getByRole('button', { name: 'Create the run' }).click();
+    await page.waitForURL(/\/cockpit$/, WRITE);
+
+    const runUrl = page.url().replace(/\/cockpit$/, '');
+    createdRunUrls.push(runUrl);
+
+    // A COLD load of the run's own deck builder, not the cockpit and not the draft.
+    await page.goto(`${runUrl}/deck`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.getByLabel('Level for Slot 1')).toHaveValue('35');
+    await expect(page.getByLabel('Level for Slot 6')).toHaveValue('50');
+    await expect(page.locator('#deck-slot-6')).toContainText(/Friends/);
+    await expect(page.locator('#deck-slot-6').getByRole('button', { name: 'Rented' })).toHaveAttribute('aria-pressed', 'true');
+});
 
 test('reviews the five entered steps as one checklist row each', async ({ page }) => {
     await walkWizard(page, 'ura_finale');

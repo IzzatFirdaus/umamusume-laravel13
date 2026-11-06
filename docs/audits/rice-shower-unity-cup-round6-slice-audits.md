@@ -189,3 +189,127 @@ re-running the single case at `78eb093b`: `Expected: 0, Received: 2`, byte-ident
 44px house rule over every `main a, button, select, summary` on the page and is not touched by this
 slice. Recorded here rather than fixed, per §9's failure-attribution rule.
 
+## S1.2 — R6-11, deck card levels cross Preflight
+
+### Identity
+
+| Item | Value |
+| --- | --- |
+| Audit ID | `RS-UC-R6-SLICE-AUDITS-S1.2` |
+| Mode | M1 change audit |
+| Row | R6-11 (register §4.1), facets (a) and (b) |
+| Scope | `app/Http/Requests/Career/StartCareerRequest.php`, `app/Http/Controllers/Career/PreflightController.php`, `tests/Feature/CareerPreflightTest.php`, `tests/browser/career-preflight.spec.ts`, `database/factories/SupportCardFactory.php` (read only, not changed) |
+| Out of scope | `rerun()`'s JSON/header isolation, the deck step's own write, the run-scoped deck path (`TrainingRunController::syncDeck`, which already persists the level) |
+
+### Pre-flight
+
+| Item | Value |
+| --- | --- |
+| HEAD at open | `698d0fe4` |
+| Dirty set on the touched paths | Empty |
+| Transaction claim verified | `PreflightController::store()` `:139-156`: `TrainingRun::create()` and every `deckSlots()->create()` sit inside one `DB::transaction(function () use ($request) { ... })`. The card-level write was added inside that same closure, so a refusal leaves no run and no slot behind |
+| Suite gate | `vendor/bin/pest tests/Feature/ScenarioMetadataTest.php` → 3 passed (52 assertions) |
+| `RENDERED_EVIDENCE` | **TRUE**, re-probed for this slice |
+
+### RED evidence (captured before GREEN)
+
+`vendor/bin/pest tests/Feature/CareerPreflightTest.php --filter='R6-11'` → `2 failed (4 assertions)`,
+verbatim:
+
+```
+Failed asserting that null is identical to 35.
+at tests\Feature\CareerPreflightTest.php:284
+```
+
+```
+Session is missing expected key [errors].
+Failed asserting that false is true.
+at tests\Feature\CareerPreflightTest.php:316
+```
+
+The first is facet (a): the level was dropped at creation. The second is facet (b): the stale-level
+refusal never fired because the child re-run had no level to check.
+
+### GREEN
+
+| File | Change |
+| --- | --- |
+| `StartCareerRequest::rules()` | Added `'deck.*.card_level' => ['nullable', 'integer', 'min:1', 'max:50']`. The field bound matches `StoreDeckRequest`'s; the per-rarity ceiling comes from the child re-run |
+| `StartCareerRequest::rerunStepRules()` | Forwarded `'card_level' => $slot['card_level'] ?? null` into the deck slice handed to `StoreDraftDeckRequest`, so its rarity-ceiling after-hook runs at Preflight |
+| `StartCareerRequest::cardLevelByPosition()` | New accessor mirroring `ownershipByPosition()`: skips a cleared position, and answers `null` (never `0`) for a card whose level was not recorded |
+| `PreflightController::store()` | Reads `$levels` beside `$ownership` and writes `'card_level' => $levels[$position] ?? null` on the slot create, inside the existing transaction |
+
+`DeckSlotCardLevelTest`'s `->not->toContain('card_cap')->not->toContain('limit_break')` still passes:
+no collection column was added.
+
+### Rule sweep (dimensions A-H)
+
+| Dimension | Result |
+| --- | --- |
+| A. Status and feedback | `no finding`. The refusal already reports against `deck`, and this slice makes it reachable |
+| B. Control and target | `no finding`. No control changed |
+| C. Error prevention and recovery | **finding** — F1. The stale-level state was accepted because nothing revalidated it |
+| D. Consistency and signifiers | **finding** — F2. The wizard recorded a level the run then did not hold |
+| E. Cognitive load and memory | `no finding`. This slice removes a re-entry, it does not add one |
+| F. Visual grouping and hierarchy | `no finding`. No layout change |
+| G. Accessibility semantics and contrast | `no finding`. The refusal's message is the child request's own, already asserted by `DeckSlotCardLevelTest` |
+| H. Content and language | `no finding`. No new copy |
+
+### Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F1 | `H5` | Usability heuristics | Preflight, Start career, a stale level | A level valid when the deck step wrote it and invalid by commit was accepted: `StartCareerRequest` had no `deck.*.card_level` rule and `rerunStepRules()` dropped the key, so the child's rarity-ceiling after-hook never saw a value. The run was created holding a level the client cannot represent | OBSERVED_SOURCE | `StartCareerRequest.php:98-101,182-198` (pre-fix); `StoreDeckRequest.php:105-149` | 3 | High | Done: rule plus forwarded key, so the ceiling applies at commit |
+| F2 | `SHR-7` | Shneiderman | Deck step → Preflight → run deck | The deck step stored the level (`DeckSelectController.php:87`, `SetupDraft.php:212`, `StoreDraftDeckRequest.php:85-87`), and `deck_slots.card_level` is fillable and cast (`DeckSlot.php:33,76-80`). Preflight wrote three keys only, so the run deck printed "Not recorded" over a level entered two steps earlier | OBSERVED_SOURCE | `PreflightController.php:143-149` (pre-fix) | 3 | High | Done: `cardLevelByPosition()` plus the transactional write |
+
+`SHR-7` is cited per register §11.4's ruling: `SHR-8` is undefined and must not be cited.
+
+### Unmeasured register
+
+Empty.
+
+### Gap register delta
+
+None.
+
+### Commit body basis
+
+| # | Question | Result | Basis |
+| --- | --- | --- | --- |
+| 1 | Add, remove or move a control? | `N/A` | No control changed |
+| 2 | Change what is on screen at once? | `N/A` | Same screen and steps |
+| 3 | Change a colour, tint or state? | `N/A` | No class change |
+| 4 | Change a type size or weight? | `N/A` | No type change |
+| 5 | Change what the user can undo, or where the action is? | `PASS` | A refused start now leaves the draft intact rather than creating a run; `DeckSlotCardLevelTest`'s both-writers case still passes |
+| 6 | Change where a thing lives, or what it is called? | `N/A` | Nothing renamed or moved |
+| 7 | Change a progress, an incomplete state or a boundary? | `PASS` | A level of `null` stays "not recorded" and never becomes `0`; a level past the rarity ceiling is now refused at commit |
+| 8 | Change what the user has to read or remember? | `PASS` | Removes a re-entry: the level entered at the deck step reaches the run deck |
+| 9 | Add a new destination, a landmark or a control type? | `N/A` | None |
+| 10 | Change the words? | `N/A` | No copy added or changed |
+
+`RENDERED_EVIDENCE = TRUE`, declared from this slice's own probe: the new
+`career-preflight.spec.ts` case passed in 26.7s, asserting level 35 on slot 1 and level 50 plus a
+pressed `Rented` on slot 6 after a cold reload of the run's own deck builder.
+
+**Non-vacuity proof by negation.** With the controller's `'card_level' => ...` line removed and
+nothing else changed, the same case failed at
+`expect(page.getByLabel('Level for Slot 1')).toHaveValue('35')` with `Expected: "35", Received: ""`.
+The line was then restored byte-identically (`git diff --stat` back to 6 insertions, `grep -c
+card_level` = 1).
+
+### Verification output
+
+```
+vendor/bin/pest tests/Feature/CareerPreflightTest.php
+  Tests:    21 passed (290 assertions)
+
+vendor/bin/pest tests/Feature/DeckSlotCardLevelTest.php
+  Tests:    5 passed (21 assertions)
+```
+
+```
+npx playwright test tests/browser/career-preflight.spec.ts --grep 'R6-11'
+  1 passed (26.7s)
+```
+
+

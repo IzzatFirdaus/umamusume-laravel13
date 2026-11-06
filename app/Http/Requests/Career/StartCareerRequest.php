@@ -99,6 +99,12 @@ class StartCareerRequest extends FormRequest
             'deck.*.position' => ['required', 'integer', Rule::in(DeckSlot::POSITIONS)],
             'deck.*.support_card_id' => ['nullable', 'integer', Rule::exists('support_cards', 'id')],
             'deck.*.ownership' => ['nullable', 'string', Rule::in(DeckSlot::OWNERSHIP)],
+            // R6-11: the level the deck step recorded. `max:50` is the highest ceiling any rarity has,
+            // so the field bound is the same one `StoreDeckRequest` applies; the per-rarity ceiling is
+            // enforced by the child re-run in `rerunStepRules()`, which is the gate this request was
+            // missing. Without this rule the key reached `StartCareerRequest` and was dropped, and
+            // without the forwarded key the child never saw a level to check.
+            'deck.*.card_level' => ['nullable', 'integer', 'min:1', 'max:50'],
             // The ceilings the target step entered, checked against the engine hard cap again rather than
             // trusted from the draft: a cap that left the matrix since it was typed is refused here, and
             // the warning names the step that owns it. There is nothing recorded to sit above them,
@@ -221,6 +227,34 @@ class StartCareerRequest extends FormRequest
     }
 
     /**
+     * The card level per position, from the composed draft, for the slots that carry a card (R6-11).
+     *
+     * Mirrors `ownershipByPosition()`'s identity and its skip: a cleared position is a gap with no card
+     * to describe, and a card with no level recorded contributes nothing here rather than a `0` that
+     * would claim a level the client does not have. An absent position therefore answers null at the
+     * call site, which is what `deck_slots.card_level` stores for "not recorded".
+     *
+     * @return array<int, int|null>
+     */
+    public function cardLevelByPosition(): array
+    {
+        $slots = (array) $this->input('deck');
+        $levels = [];
+
+        foreach ($slots as $slot) {
+            if (! is_array($slot) || ($slot['support_card_id'] ?? null) === null) {
+                continue;
+            }
+
+            $level = $slot['card_level'] ?? null;
+
+            $levels[(int) $slot['position']] = $level === null || $level === '' ? null : (int) $level;
+        }
+
+        return $levels;
+    }
+
+    /**
      * The Independent Training config (§1.1.7), or null when the page did not post the flag. The three
      * inputs are the page's own — the draft holds the trainee, deck and scenario, but not the idle-mode
      * policy, rotation or priority skills. Absent `rotation` and `priority_skills` are the client's own
@@ -262,6 +296,10 @@ class StartCareerRequest extends FormRequest
             $deck[(int) $slot['position']] = [
                 'support_card_id' => $slot['support_card_id'],
                 'ownership' => $slot['ownership'],
+                // R6-11: forwarded so `StoreDraftDeckRequest`'s rarity-ceiling after-hook runs here
+                // rather than only at draft time. A level that left its card's ceiling between the two
+                // steps is refused at commit, and the child's own message names the position.
+                'card_level' => $slot['card_level'] ?? null,
             ];
         }
 
