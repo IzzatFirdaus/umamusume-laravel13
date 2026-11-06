@@ -843,6 +843,123 @@ dated comment `Dated 2026-11-06 (R6-04)` on the first one and follows the delibe
 `props.scenarioCaps` declaration was removed rather than left dangling; the server still sends the
 prop, so a later reader can re-declare it without a payload change — recorded in the component.
 
+## S2.4 — counter copy: neither line named what it counts to
+
+### Identity
+
+| Item | Value |
+| --- | --- |
+| Audit ID | `RS-UC-R6-SLICE-AUDITS-S2.4` |
+| Mode | M1 change audit |
+| Row | **§13.2, not an `R6-NN` row** |
+| Scope | `app/Services/Advisor/TrainerAdvisor.php` (`finaleContext()`), `app/Services/Career/TeamPanelBuilder.php` (`burstCountdown()`), `tests/Feature/NextDecisionTest.php` |
+| Out of scope | The arithmetic of either counter, `FINALE_TURNS_AHEAD`, `FinaleReader`, the payout turn |
+
+### Pre-flight
+
+| Item | Value |
+| --- | --- |
+| HEAD at open | `e55f5458` |
+| Dirty set on the touched paths | Empty |
+| §13.2's settlement confirmed | Two widgets, two bases: the finale is `(3 × 24) + 1 − nextTurnNumber()`, suppressed beyond 5 turns; the burst countdown is `70 − latestLoggedTurn`, null with no logged turn. Different events, so the numbers were never meant to agree |
+| Label source | `TrainerAdvisor::finaleContext()` reads `FinaleReader::forRun()['label']`, which is `config("scenarios.scenarios.<key>.label")` — the scenario's own name, so the widget was structurally unable to distinguish the finals from the scenario |
+| Suite gate | `vendor/bin/pest tests/Feature/ScenarioMetadataTest.php` → 3 passed |
+| `RENDERED_EVIDENCE` | **TRUE**, re-probed |
+
+### RED evidence (captured before GREEN)
+
+```
+Expected: Need 2 more bursts in 69 turns for Gold Lv3 (Senior November payout).
+To contain: Spirit Burst
+at tests\Feature\NextDecisionTest.php:266
+```
+
+The finale case failed at its own assertion too: the row was absent until the fixture seeded a finale
+calendar row, and once present it read `Unity Cup is 5 turns away.` — no `finals`. Both records are in
+the slice's run log; the burst string is quoted verbatim above because it is the copy the finding is
+about.
+
+### GREEN
+
+| File | Change |
+| --- | --- |
+| `TrainerAdvisor::finaleContext()` | `'label' => $finale['label'].' finals'` on both the `passed` and the `upcoming`/`next` branches, so `Unity Cup finals is 5 turns away.` The word is composed **here**, not appended to the config label: `FinaleReader`'s label reaches other screens, and changing it would have reworded them all |
+| `TeamPanelBuilder::burstCountdown()` | `... for Gold Lv3 (Senior November payout).` → `... to the Spirit Burst payout (Gold Lv3, Senior November).` The tier and the season stay, and the event is now named |
+
+Copy only. The two derivations, `FINALE_TURNS_AHEAD`, the payout turn and `FinaleReader` are untouched.
+
+### Rule sweep (dimensions A-H)
+
+| Dimension | Result |
+| --- | --- |
+| A. Status and feedback | **finding** — F1. A figure was present but did not say what it was for |
+| B. Control and target | `no finding`. No control |
+| C. Error prevention and recovery | `no finding` |
+| D. Consistency and signifiers | `no finding`. The two widgets use different words for different events, which is now honest |
+| E. Cognitive load and memory | `no finding` |
+| F. Visual grouping and hierarchy | `no finding` |
+| G. Accessibility semantics and contrast | `no finding` |
+| H. Content and language | **finding** — F2. `Gold Lv3` is a payout tier, not an event |
+
+### Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F1 | `H1` | Usability heuristics | Cockpit, advisor `why` rows, a run 5 turns from the finale | `Unity Cup is 5 turns away.` — the scenario's own name. A reader cannot tell whether the count reaches the finals or the scenario's end, and the run's own name is already on the screen | OBSERVED_SOURCE | `TrainerAdvisor.php:246` (pre-fix) | 2 | High | Done: the line names the finals |
+| F2 | `GP-2` | Gerhardt-Powals | Cockpit, burst countdown | `Need 2 more bursts in 69 turns for Gold Lv3 (Senior November payout).` names a tier and a season, so `69 turns` reads as time to the finals rather than to the payout — a different event, 70 vs 73 in this run's terms | OBSERVED_SOURCE | `TeamPanelBuilder.php:738` (pre-fix) | 2 | High | Done: the line names the Spirit Burst payout |
+
+`GP-2` cited per register §11.5.
+
+### Unmeasured register
+
+Empty for this slice's own claims. The only rendered run was `scenario-panel.spec.ts` and
+`career-cockpit-forms.spec.ts`, and no spec pins either string, so **no rendered assertion covers the
+new copy**. That is stated rather than implied: the evidence is the payload, and a future browser case
+asserting `Spirit Burst` on the panel would close it.
+
+### Gap register delta
+
+None.
+
+### Commit body basis
+
+| # | Question | Result | Basis |
+| --- | --- | --- | --- |
+| 1 | Add, remove or move a control? | `N/A` | No control |
+| 2 | Change what is on screen at once? | `N/A` | Same rows |
+| 3 | Change a colour, tint or state? | `N/A` | No class change |
+| 4 | Change a type size or weight? | `N/A` | No type change |
+| 5 | Change what the user can undo, or where the action is? | `N/A` | No action |
+| 6 | Change where a thing lives, or what it is called? | `N/A` | Nothing moved |
+| 7 | Change a progress, an incomplete state or a boundary? | `N/A` | Both counts unchanged |
+| 8 | Change what the user has to read or remember? | `PASS` | Both lines name their event, so the reader no longer has to hold the two bases in mind |
+| 9 | Add a new destination, a landmark or a control type? | `N/A` | None |
+| 10 | Change the words? | `PASS` | Copy only; two sentences |
+
+`RENDERED_EVIDENCE = TRUE`, but **no rendered assertion is made and none is claimed** — no browser
+spec pins either string, so the verification is the payload.
+
+### Verification output
+
+```
+vendor/bin/pest tests/Feature/NextDecisionTest.php --filter='§13.2'
+  Tests:    2 passed (19 assertions)
+
+vendor/bin/pest tests/Feature/NextDecisionTest.php tests/Feature/ScenarioPanelTest.php \
+  tests/Feature/CockpitUnityCupCountersTest.php tests/Feature/UnityCupCountersTest.php \
+  tests/Feature/CockpitFinaleStripTest.php
+  Tests:    62 passed (978 assertions)
+
+vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+ [OK] No errors
+```
+
+**`scenario-panel.spec.ts` classified, not fixed:** `3 failed, 5 passed (1.2m)`. Measured pre-existing
+by stashing both source files and the test file, rebuilding, and re-running: byte-identical
+`3 failed, 5 passed`. The failures are `Team Rank: not recorded`, `Documented`, and
+`Partially documented` locators — documentation labels and a gauge, not the counter copy.
+
+
 
 
 

@@ -736,7 +736,10 @@ final class TeamPanelBuilder
 
         $warningMessage = null;
         if ($burstsNeeded > 0) {
-            $warningMessage = "Need {$burstsNeeded} more burst".($burstsNeeded === 1 ? '' : 's')." in {$turnsLeft} turn".($turnsLeft === 1 ? '' : 's').' for Gold Lv3 (Senior November payout).';
+            // §13.2: the copy named a payout TIER (`Gold Lv3`) and a season, not the event, so a reader
+            // holding the scenario's name could take the count as time to the finals — a different
+            // event. The arithmetic is untouched; only the sentence names what it counts to.
+            $warningMessage = "Need {$burstsNeeded} more burst".($burstsNeeded === 1 ? '' : 's')." in {$turnsLeft} turn".($turnsLeft === 1 ? '' : 's').' to the Spirit Burst payout (Gold Lv3, Senior November).';
         }
 
         return [

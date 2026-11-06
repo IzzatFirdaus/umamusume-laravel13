@@ -243,7 +243,7 @@ final class TrainerAdvisor
 
         if ($away <= 0) {
             return $finale['outcome'] === null
-                ? ['label' => $finale['label'], 'state' => 'passed', 'turns_away' => null]
+                ? ['label' => $finale['label'].' finals', 'state' => 'passed', 'turns_away' => null]
                 : null;
         }
 
@@ -252,7 +252,11 @@ final class TrainerAdvisor
         }
 
         return [
-            'label' => $finale['label'],
+            // §13.2: the label was the scenario's own name, so the line read `Unity Cup is 5 turns
+            // away` — the scenario, not the event at the end of it. `FinaleReader` reads
+            // `config('scenarios...label')`, and appending `finals` there would have changed every
+            // other screen that prints the label. The word belongs on this line's own composition.
+            'label' => $finale['label'].' finals',
             'state' => $away === 1 ? 'next' : 'upcoming',
             'turns_away' => $away,
         ];

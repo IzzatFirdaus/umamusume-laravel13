@@ -223,6 +223,61 @@ it('presents the rest modal figure rather than the failure tier (§13.3)', funct
         ->and($constant['tiers'])->toBe(['modal' => 50, 'big_success' => 70, 'failure' => 30]);
 });
 
+it('names the event each turn-counter counts to (§13.2)', function (): void {
+    // §13.2 settled that both counters were numerically right and only their targets were unnamed.
+    // The finale widget read `Unity Cup is 5 turns away` — the scenario's own name, so a reader could
+    // not tell the finals from the scenario. `finaleContext()`'s label comes straight from
+    // `FinaleReader::forRun()`'s `config('scenarios...label')`.
+    //
+    // Walk 5's `Unity Cup is 5 turns away` was the FINALE widget at turn 67 (73 - 68 = 5) and it was
+    // correct; the finding is the missing word, not the arithmetic.
+    // A finale calendar row is what `FinaleReader::forRun()` reads; without one the widget is absent by
+    // design, so the fixture seeds it the way the existing finale case does.
+    RaceCatalogSlot::factory()->create([
+        'scenario_key' => 'unity_cup',
+        'year' => RaceCatalogSlot::YEAR_FINALE,
+        'month' => null,
+        'turn' => null,
+        'slot_label' => 'Finale block',
+        'title' => 'Catalogue finale row',
+        'is_mandatory' => true,
+    ]);
+
+    $run = nextDecisionRun('unity_cup', 67, 80, DECISION_SHORT_TARGETS);
+
+    /** @var array{why: list<array{text: string, badge: string}> $decision */
+    $decision = $this->get(route('runs.cockpit', $run))->assertOk()->inertiaProps('advisor.decision');
+
+    $finaleRow = collect($decision['why'])
+        ->first(fn (array $row): bool => str_contains($row['text'], 'turns away') || str_contains($row['text'], 'is the next turn'));
+
+    expect($finaleRow)->not->toBeNull();
+
+    // The line names what it counts to. Before the fix it said `<scenario> is N turns away`, which is
+    // the scenario, not the event at the end of it.
+    expect($finaleRow['text'])->toContain('finals')
+        ->and($finaleRow['text'])->not->toBe('Unity Cup is 5 turns away.');
+});
+
+it('names the Spirit Burst payout in the burst countdown (§13.2)', function (): void {
+    // The burst widget at turn 1 read `Need 2 more bursts in 69 turns for Gold Lv3 (Senior November
+    // payout)`. It names a payout TIER, not the event, so a reader with the scenario's name in mind
+    // could take `69 turns` as time to the finals — a different event, 70 vs 73 in this run's terms.
+    $run = nextDecisionRun('unity_cup', 1, 80, DECISION_SHORT_TARGETS);
+
+    // The combined tally is only answered when both counters are recorded; an unrecorded one is not a
+    // zero (D-220). 11 combined leaves 2 short of the Gold Lv3 threshold of 13.
+    $run->update(['spirit_bursts_count' => 8, 'extreme_bursts_count' => 3]);
+
+    /** @var array{scenario: array{team: array{burst_countdown: array{warning_message: string}|null}}} $props */
+    $props = $this->get(route('runs.cockpit', $run))->assertOk()->inertiaProps();
+
+    $countdown = $props['scenario']['team']['burst_countdown'] ?? null;
+
+    expect($countdown)->not->toBeNull()
+        ->and($countdown['warning_message'])->toContain('Spirit Burst');
+});
+
 it('marks an arithmetic row Calculated and a row taken as read Confirmed, and never the other two states', function (): void {
     $run = nextDecisionRun('unity_cup', 12, 80, DECISION_SHORT_TARGETS);
 
