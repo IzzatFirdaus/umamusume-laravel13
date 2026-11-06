@@ -407,8 +407,109 @@ opens the next cleanup pass.
 | A stale browser assertion | `tests/browser/career-cockpit.spec.ts:829` asserts `/30,755 to 240,000/`, text the renderer stopped printing at `530d62b9` | Pre-existing red, unrelated to any R6 row. `530d62b9`'s own message records that the suite still pins the stripped regions |
 | `UnityCupEditor` renders no `form.errors` | `grep -n 'errors' resources/js/components/career/UnityCupEditor.vue` → 0 | A refused save is silent here, which is why R6-29's observation was possible even though the success path exists |
 | `Saved.` without a live region | `UnityCupEditor.vue:217` has no `role="status"`, unlike `RunSettings.vue`, `TurnEdit.vue` and `Support/Builder.vue` | Assistive technology is not told the save succeeded |
+| Trainee-picker filter labels name a family, not a letter | `TraineeSelectController.php:125-131` sends `facets` with `'label' => 'Surface'` / `'Distance'` / `'Running style'` over `letters => TraineeSearchRequest::LETTERS` (`:40`, `S…G`). The predicate is exact-letter equality per column group (`applyFacets()`, `:376-392`), not "at least this grade" | A Trainer looking for a Dirt trainee sees no `Dirt` option, and the letters' meaning is unstated on screen. §4.2's R6-21 records the same controller's style labels on the roster card; this is the filter bar, a separate vocabulary |
+| `Preseason wins` ceiling is unexplained | `UnityCupEditor.vue:136` renders the counter with no cap copy; `2026_10_10_150000:31` sets `0..4`, which is this scenario's round count (source `:199-201`) | A run in another scenario has nowhere to go, and the screen does not say why 4 is the ceiling |
+| `Extreme Bursts` shortens the reference vocabulary | `UnityCupEditor.vue:167` prints `Extreme Bursts`; §1.8's own field name is `Extreme Spirit Bursts`, and `config/scenarios.php:384` uses the long form | Copy drift against the corpus, not a schema gap: the column is `extreme_bursts_count` and the value persists |
+| Scenario card date reads as a run date | `ScenarioSelect.vue:249-252` prints `Global · {{ card.live_on_global }}`; the value is the scenario's Global release date (`config/scenarios.php:377`), never a career date | On the walk's own date the card read `Global · 2025-11-06` and the label gives no clue which date it is |
 
-## 11. Definition of done
+## 11. Addendum, 2026-11-06: facets the landed rows do not cover
+
+Append-only. Each item below names an existing `R6-NN` and a facet its landed row does not
+carry, or a fact the walk recorded with no row at all. **No landed primary status changes**,
+and no row is renumbered. The 1:1 with `F-01..F-17` / `E-01..E-14` / `U-01..U-23` is preserved:
+items with a home are facets, and items without one are recorded here rather than as a
+fifty-fifth row.
+
+### 11.1 Facets to carry when a row's slice opens
+
+**R6-05, facet (c) — the parent headings never react to typing.** Walk 6 records that both
+blocks stayed `Parent A Not chosen` / `Parent B Not chosen` after the names were typed, while
+the inputs visibly held the values (`walk-6:479-481`). The landed row's two facets are
+pre-commit and post-commit; neither is *during typing*. Measured cause: the pill and heading
+read `props.parentA` / `props.parentB` (`LegacySelect.vue:85-86`, `:300`), which are server
+props built from the Veteran library (`LegacySelectController.php:158-159`), not from
+`form.legacies[index].name`. So fixing facets (a) and (b) leaves this live: a typed manual name
+produces no `Chosen` state until the step is saved and reloaded. The heading should read the
+form when the slot is in manual mode, and the server only on a cold load.
+
+**R6-08, facet (c) — `Projected start` never sees a grandparent spark.** Walk 6 verified it
+live: after saving with a grandparent's `Stamina ★★★` recorded, all five rows still read `-`
+under both parent columns (`walk-6:492-493`). Measured: the table's parent cells read
+`form.legacies[0].sparks` and `form.legacies[1].sparks` only (`LegacySelect.vue:625-645`), and
+`legacies[].sparks` is the parent's own set; the grandparent sets are `ancestors_sparks`, keyed
+by ancestor index (`LegacySelectionPayload.php:305-341`). The section's own description scopes
+it to *the two parents* (`LegacySelect.vue:601-606`), and §1.5.4 `:688` puts all six nodes in
+the tree at the same moment, so the scope is a deliberate narrowing the screen never states.
+Note the interaction: the `Projected` column is a named absence by `ADR-0020` §3 (no inheritance
+outcome is computed), so the fix is the scope sentence and the grandparent columns, not a sum.
+
+**R6-23, facet (b) — the `N/A` → `Owned` auto-fill is a different mechanism.** Walk 6 records
+that the Ownership flag flips to `Owned` on equip, so a borrowed card silently reads as owned
+until the second button is noticed (`walk-6:591-592`). Measured: `DeckSelect.vue:296-298` seeds
+`const ownership = form.deck[filling.value]?.ownership || 'OWNED'` on equip. This is **not a
+facet of R6-23's label question** — it is the mechanism round 4 already registered as **R4-20**
+(`Confirmed defect (ergonomics)`, `rice-shower-unity-cup-round4-reconciliation.md:129`), which
+proposed naming the default in the picker copy or pre-selecting `Owned` visually. Renaming the
+slot to `Friends` would leave it live. Recorded here so R6-23's slice does not claim it; the fix
+belongs to R4-20's still-open row.
+
+**R6-51, facet (b) — the goal list opens on a Junior-year item.** Walk 6 records
+`Participate in Junior Make Debut · Upcoming · Junior year, turn 12 · Record this race` on a
+Senior-year run (`walk-6:1180`, `:1193`). Measured: `TeamPanelBuilder.php:210-218` orders by
+`career_year`, `turn`, `source_order`, `source_race_choice` over every goal the trainee owns,
+with no filter on the run's position, so the list always starts at the run's first career year
+regardless of where the run is. Every row reads `Upcoming` because `objectiveMet()` reads
+`race_entries` and this run has none (`:249-262`). The landed row names the derivation; this
+facet names the ordering, which is a separate fix.
+
+### 11.2 Two facts the walk recorded with no row
+
+**Two import doors on the landing screen.** Walk 6's S01 friction records `Import an existing
+career` → `/career/snapshot` and `Import a historical career` → `/training-runs/import`, whose
+difference is not stated on that screen (`walk-6:137-139`, repeated at `:645`). Measured: both
+exist at HEAD and from the same screen — the first as an inline `Link` in the Active Career empty
+state (`Dashboard.vue:397-403`), the second from the quick-actions list
+(`DashboardController.php:373`). **`Confirmed defect (copy/IA)`.** No `R6-NN` row names it
+because walk 6 filed it as friction rather than as an `F-`/`E-`/`U-` finding, and this register
+does not invent walk IDs it was not given. Had the walk numbered it, `E-15` would have been its
+home; the next pass that re-reads walk 6 should decide whether to add it.
+
+**Per-turn facility levels are stored and never aggregated.** Walk 6 records the five levels
+entered per turn at S10 and observes at S19 that they `appear nowhere on this ladder. So the rule
+is documented and disconnected` (`walk-6:1204-1205`, `:1206`; S08's absence sentence at `:626`).
+Measured: the columns exist per turn (`2026_10_09_170000:32-36`), written through
+`StoreTurnEntryRequest.php:97-101` (`min:1 max:5`) and read back only per turn
+(`TimelineController.php:381-385`). The run-level ladder is a **different source entirely**:
+`TrainingRun::facilityLevel()` (`:1346-1359`) maps a **team-rank letter** through
+`config('scenarios.scenarios.<key>.team_rank_ladder')`, and `TeamPanelBuilder.php:509` feeds it
+the rank — so no screen derives a current facility level from the recorded turn columns.
+**Unrepresented source data (stored per-turn, no aggregate).** Two mechanisms share one word; the
+row that would carry this does not exist, and a fix needs a decision about which one the ladder
+should read.
+
+### 11.3 Prior-resolution continuity
+
+- **D2 (the blank trailing Spark row, `a4b2b26`)** is not re-verified by any walk since walk 2.
+  Measured at HEAD: the request discards a blank row
+  (`StoreLegacySelectionRequest.php`, `a4b2b26`'s 18-line change) and `LegacySelect.vue:558`
+  pushes a prefilled row rather than an empty one (`kind: 'blue'`, `category: 'Stat'`,
+  `stars: 1`). The fix appears intact, but no walk has exercised it since; whichever pass opens
+  R6-05 should assert it rather than assume it.
+- **D4's optional-target contract** holds and is asserted by
+  `CareerBuildTargetTest.php:120-142`; R6-01's `Does not reproduce` rests on that plus
+  `isEmptyTarget()` (`:164-179`). No slice currently exercises it end to end, so a RED-first
+  assertion for D4 belongs in whichever slice next touches the target step, as its own test
+  rather than as a rider on R6-01.
+- **The resolutions doc's "what remains unsupported" list** is largely still accurate at HEAD.
+  The items the walk-6 rows now cover: rarity (R6-36), potential (R6-35), growth rate (R6-37),
+  limit breaks (R6-40), fan class and gap (R6-43), finals fixture (R6-50). Two it does not:
+  **card levels** — R6-11 records the loss and `DeckSlot::card_level` the storage, but no row
+  states what the field's reach is across the wizard, the run deck and the collection; and
+  **grandparent letter ranks** — `AncestorEditor.vue:130-135` binds
+  `ancestors_rank_letters[ancestorIndex]` and `LegacySelect.vue:153` preserves them on read, so
+  the field works, and no row says so or says what it does not cover.
+
+## 12. Definition of done
 
 - [x] 54 `R6-NN` rows, 1:1 with `F-01..F-17`, `E-01..E-14`, `U-01..U-23`; each walk ID appears
       exactly once; no row merges another.
@@ -421,12 +522,17 @@ opens the next cleanup pass.
 - [x] The cross-register mapping is complete and the two docs-only commits are recorded.
 - [x] Fence findings are separated and unnumbered.
 - [x] Gates run and not run are stated in §1, with the suite gate's output.
+- [x] §11 records the ten additions the walk noted without a row: four facets bound to their
+      existing `R6-NN`, two facts with no row, four fence items, and the prior-resolution
+      continuity note. No landed status changed; the row count stays 54.
 
-**Self-test, run before the commit:**
+**Self-test, run before each commit:**
 
 ```
-grep -cE '^\| R6-[0-9]{2} ' register → 54
-grep -oE 'R6-[0-9]{2}' register | sort -u | wc -l → 54
-status-cell tally → 26 + 13 + 8 + 6 + 1 + 0 = 54
+grep -cE '^\| R6-[0-9]{2} ' register → 54      (§4 only; §5's mapping table also matches the pattern)
+grep -oE '^\| R6-[0-9]{2} ' §4 | sort -u | wc -l → 54
+status-cell tally over §4 → 26 + 13 + 8 + 6 + 1 + 0 = 54
+walk-ID coverage over §4 col 3 → 17 F + 14 E + 23 U, each exactly once
 placeholder scan → 0
+python tools/md_fence_check.py → 0 invalid closing fences
 ```
