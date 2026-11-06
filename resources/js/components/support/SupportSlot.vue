@@ -133,7 +133,7 @@ function focusRow(): void {
             <div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <span class="font-semibold text-ink-strong">{{ label }}</span>
                 <span v-if="is_friend" class="pill pill-neutral">
-                    Pal slot
+                    Friends slot
                 </span>
             </div>
 

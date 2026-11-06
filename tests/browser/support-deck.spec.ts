@@ -66,7 +66,10 @@ test('renders six slots, each with a labelled ownership toggle, and the seventh-
     const slots = page.locator('ul > li[id^="deck-slot-"]');
     await expect(slots).toHaveCount(6);
     await expect(page.locator('#deck-slot-6')).toContainText('Slot 6 · Friends');
-    await expect(page.locator('#deck-slot-6')).toContainText('Pal slot');
+    // R6-23: `Friends` is the position's word; `Pal` is a card type. The line above already asserts
+    // the server's own label, so the pill beneath it must agree with it.
+    await expect(page.locator('#deck-slot-6')).toContainText('Friends slot');
+    await expect(page.locator('#deck-slot-6')).not.toContainText('Pal slot');
 
     // A slot with no card states the gap and offers the way to fill it, rather than showing a blank.
     await expect(page.locator('#deck-slot-1')).toContainText('Not equipped');

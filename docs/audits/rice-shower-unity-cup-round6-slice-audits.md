@@ -1068,6 +1068,116 @@ vendor/bin/pest tests/Feature/SkillSpendCoverageTest.php tests/Feature/CareerSki
   Tests:    53 passed (735 assertions)
 ```
 
+## S3.2 — R6-23, `Pal slot` names a card type on a position
+
+### Identity
+
+| Item | Value |
+| --- | --- |
+| Audit ID | `RS-UC-R6-SLICE-AUDITS-S3.2` |
+| Mode | M1 change audit |
+| Row | R6-23 (register §4.1) |
+| Scope | `resources/js/components/support/SupportSlot.vue`, `tests/browser/career-legacy-deck-steps.spec.ts`, `tests/browser/support-deck.spec.ts` |
+| Out of scope | **R4-20's auto-fill defect** (`DeckSelect.vue:296-298` seeds `ownership \|\| 'OWNED'` on equip) — a different mechanism on the same screen, still open, not closed by this slice. Also out: the `Card types` table's `Pal` row, which is correct card-type vocabulary |
+
+### Pre-flight
+
+| Item | Value |
+| --- | --- |
+| HEAD at open | `847e4cdb` |
+| Dirty set on the touched paths | Empty |
+| The contradiction measured in one rendered string | Before the fix, `#deck-slot-6` read: `Slot 6 · Friends Pal slot  Not equipped. …` — the server's label said `Friends` and the pill under it said `Pal` |
+| Server's own word | `DeckSlot::positionLabel(6)` returns `Slot 6 · Friends`. `ADR-0014:72-74` (quoted in register §6, C6) ratifies `Friends` for the slot and never mentions `Pal` |
+| `Pal` is a card type | `SupportCard.php:127` maps the export's `friend` key to `Pal` as one of the seven types. Correct there, wrong as a position label |
+| Suite gate | `vendor/bin/pest tests/Feature/ScenarioMetadataTest.php` → 3 passed |
+| `RENDERED_EVIDENCE` | **TRUE**, re-probed |
+
+### RED evidence (captured before GREEN)
+
+```
+Error: expect(locator).toContainText(expected) failed
+Expected substring: "Friends slot"
+Received string:    "Slot 6 · Friends Pal slot  Not equipped. OwnershipN/A: No ownership has been
+recorded for this slot yet.OwnedRentedChoose a card  in Slot 6 · Friends"
+```
+
+Both existing specs asserted `Slot 6 · Friends` and `Pal slot` **in adjacent lines**, so the suite was
+pinning the contradiction. Both assertions were corrected rather than added to.
+
+### GREEN
+
+`SupportSlot.vue`: `Pal slot` → `Friends slot`, agreeing with `DeckSlot::positionLabel()`. The
+component is shared by `DeckSelect.vue:40` (the wizard step) and `Support/Builder.vue:7` (the
+run-scoped deck), so one string fixes both surfaces.
+
+The `Card types` table's `Pal` row is untouched: `Pal` is the correct word for the card type, and only
+its use as a *position* label was wrong.
+
+### Rule sweep (dimensions A-H)
+
+| Dimension | Result |
+| --- | --- |
+| A. Status and feedback | `no finding` |
+| B. Control and target | `no finding` |
+| C. Error prevention and recovery | `no finding` |
+| D. Consistency and signifiers | **finding** — F1. Two labels for one slot, disagreeing |
+| E. Cognitive load and memory | `no finding` |
+| F. Visual grouping and hierarchy | `no finding` |
+| G. Accessibility semantics and contrast | `no finding` |
+| H. Content and language | **finding** — F2. A card type's word used as a position's |
+
+### Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F1 | `GT-4` | Gestalt | Deck step and run deck, slot six, empty and equipped | The slot printed `Slot 6 · Friends` and then `Pal slot` beside it. Two look-alike labels for one thing, one of them using the word for a different thing | OBSERVED_RENDERED | `SupportSlot.vue:136` (pre-fix); the rendered string is quoted verbatim above | 2 | High | Done: one word, `Friends` |
+| F2 | `H2` | Usability heuristics | Same | `Pal` is the client's word for a **card type** (`SupportCard.php:127`), not for a position. `ADR-0014:72-74` ratifies `Friends` for the slot and never mentions `Pal`; the swap landed in `0c3fc35c` with no comment and no ruling (register §6, C6) | OBSERVED_SOURCE | `DeckSlot.php:73` for the correct word; `SupportCard.php:127` for the type | 2 | High | Done |
+
+### Unmeasured register
+
+Empty.
+
+### Gap register delta
+
+None. **R4-20 remains open and is explicitly not closed here**: `DeckSelect.vue:296-298` still seeds
+`ownership || 'OWNED'` on equip, so a borrowed card silently reads as owned until the second button is
+noticed. Register §11.1 facet (b) assigns that to R4-20's row; renaming the slot does not touch it.
+
+### Commit body basis
+
+| # | Question | Result | Basis |
+| --- | --- | --- | --- |
+| 1 | Add, remove or move a control? | `N/A` | No control |
+| 2 | Change what is on screen at once? | `N/A` | Same pill, same place |
+| 3 | Change a colour, tint or state? | `N/A` | Pill class unchanged |
+| 4 | Change a type size or weight? | `N/A` | No type change |
+| 5 | Change what the user can undo, or where the action is? | `N/A` | No action |
+| 6 | Change where a thing lives, or what it is called? | `PASS` | The position's label now uses the position's word |
+| 7 | Change a progress, an incomplete state or a boundary? | `N/A` | No boundary |
+| 8 | Change what the user has to read or remember? | `PASS` | Removes a second name for one slot |
+| 9 | Add a new destination, a landmark or a control type? | `N/A` | None |
+| 10 | Change the words? | `PASS` | One word, two surfaces |
+
+`RENDERED_EVIDENCE = TRUE`, declared from this slice's own probe: `support-deck.spec.ts` and
+`career-legacy-deck-steps.spec.ts` now assert `Friends slot` and the absence of `Pal slot`, on the
+rendered pill.
+
+### Verification output
+
+```
+npx playwright test tests/browser/support-deck.spec.ts tests/browser/career-legacy-deck-steps.spec.ts \
+  tests/browser/career-deck-select.spec.ts
+  45 passed (1.6m), 2 failed
+
+vendor/bin/pest tests/Feature/SupportDeckBuilderTest.php tests/Feature/CareerLegacyDeckStepsTest.php
+  Tests:    43 passed (709 assertions)
+```
+
+**`career-deck-select.spec.ts`'s two failures classified, not fixed:** `2 failed, 16 passed (58.2s)`,
+and byte-identical with all three slice files stashed. The failures are a `Preflight writes it onto
+the run as one value per slot` prose assertion and the HFW three-diff — neither is the slot label.
+
+
 
 
 

@@ -478,7 +478,11 @@ test.describe('Setup step 5 — Support deck', () => {
         const slots = page.locator('ul > li[id^="deck-slot-"]');
         await expect(slots).toHaveCount(6);
         await expect(page.locator('#deck-slot-6')).toContainText('Slot 6 · Friends');
-        await expect(page.locator('#deck-slot-6')).toContainText('Pal slot');
+        // R6-23: the position's word is `Friends` (`DeckSlot::positionLabel()` returns
+        // `Slot 6 · Friends`), and `Pal` is a CARD TYPE. The assertion above already names the position
+        // correctly, so the pill beneath it contradicted the label it sits under.
+        await expect(page.locator('#deck-slot-6')).toContainText('Friends slot');
+        await expect(page.locator('#deck-slot-6')).not.toContainText('Pal slot');
         await expect(page.locator('#deck-slot-1')).toContainText('Not equipped');
 
         // The flag is `N/A` with a reason before any write. A default of "Owned" would be the
