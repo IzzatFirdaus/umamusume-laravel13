@@ -27,6 +27,19 @@ team-race guide** ("How to Win Unity Cup Team Races"). A question about team rac
 page; a question about the scenario's own numbers belongs to the first. §2.5, §2.6, §6, §7, §8.3 and §9
 carry what that pass settled, including one item that did not settle and the reason.
 
+**Cross-check pass, 2026-11-06.** A third-party document read this report against a published career-flow
+map — title screen to Unity Cup turn 0 — and reported the two side by side. It is recorded here because it
+is the first read of this file that came from *outside* the frame set, and its verdict is that this report
+is the better source for the half of the flow it covers. Three of its claims confirm material already here
+and are noted rather than restated: the training-level ladder surviving its strongest test (grade to level,
+five for five — §2.6), the team-name mapping including the "the win pays it, not the pick" condition (§4),
+and the round schedule (§1.6). **Its three corrections all land on the flow map rather than on this file:**
+two of them are things §§1.6 and 4 and §7 finding 11 had already recorded, and the third is a stronger claim
+than §1.2 and §8.5 support, which §7 finding 13 declines to adopt. **One artefact is new** and is taken in
+full: a stage table placing this run against the whole career flow, in §10, which is also the first section
+of this file to state which stages have *no* client capture at all. It corrects nothing in §§1–9 and
+re-opens nothing in §6.
+
 ---
 
 ## 1. What the screenshots establish
@@ -979,6 +992,49 @@ way round, and two are sets of readings the publishers have since settled.
     Ace's mood raised one step — and **TP is two currencies, not one**: it buys an Independent Training
     run (uma.guide) and a 30 TP spark re-roll (game8.co 545572), with RP a separate currency again.
 
+13. **A cross-check pass read this report against a published career-flow map, and three of its four
+    "corrections" resolve differently — one lands here, two do not, and one is a real gap in the flow map
+    that this file already had right.** The pass is dated 2026-11-06 and its four claims are treated in
+    turn, because "the flow map was wrong" and "this report was wrong" are different findings that the
+    source document does not always keep apart.
+
+    *The league bonus: this report was already right and the flow map was late.* The pass reports that the
+    bonus is a **banded ladder** — 2nd–5th +50, 6th–10th +30, 11th–15th +20, 16th–20th +10 — rather than a
+    flat reward above a threshold, and it cites this run's **+30 at 8th** as the evidence. That is exactly
+    what §7 finding 11 already established on 2026-10-21, which recorded the ladder from game8.jp
+    (`:395608`, 「2〜5位 全ステータス+50、6〜10位 +30、11〜15位 +20、16〜20位 +10、20〜30位 ボーナス無し」),
+    confirmed the **+30 tooltip is bound to league standing rather than to Team Rank S**, and recorded the
+    band-edge conflict (`2〜5位` in game8.jp against `1~5位` in gamewith and "ranking 5th or above" on
+    game8.co's Global page). **So the ladder is not a correction to this file, and no edit follows from it.**
+    What the pass adds is a corroboration and one useful framing: the flat "+50 at rank 5 or better" is the
+    ladder's *top band* read without the rest of the bands, which is how the flow map came to state it flat.
+    The disputed edge is the top band's only, and this run's 8th place sits inside the +30 band under every
+    printed variant, so nothing about this run is affected.
+    *The Elite Team condition at Round 4: correct, and already recorded here as past its window.* The pass
+    argues the condition must be judged at Round 4 rather than in hindsight and that the floor-sign wording
+    inverts the verdict for an 8th-place run. §4 and §8.4 had already settled this: the condition is checked
+    during the **4th Team Race** (`02-unity-cup.md:159`), which this run had already won, and the 8th-place
+    standing **satisfies** the gate once 「10位以上」 is read as "10th or better" (§8.4). Both readings of the
+    floor sign agree that the window closed at Round 4 and no frame shows whether an Elite team appeared, so
+    the practical question is unanswerable from this capture set either way.
+    *Cap composition: the pass's finding is the same measured shortfall this file already carries, and its
+    "inheritance does not raise the caps" is one step further than §8.5 goes.* §1.2 and §8.5 rule inheritance
+    **out as a sufficient cause** — six blue sparks account for the Guts +8 and nothing else — but they do
+    **not** rule it out as a contributing layer, and §8.5 records the green factors as the remaining named
+    candidate. The pass's stronger statement, that inheritance does not raise caps at all, is not adopted:
+    the start-of-run inheritance is published as cap-raising (§1.2's ★1/+4, ★2/+9, ★3/+16 table, which
+    `docs/UMAMUSUME_REFERENCE.md` §1.3.4 carries), so what the frames falsify is inheritance as the
+    *explanation for these four numbers*, not the mechanism. The +25 / +22 / +68 remain unidentified, which
+    is what §6 item 3 says.
+    *The bar's colour is a readout and Energy prints no number: already §1.7.* No change.
+
+    Two of the pass's claims are worth carrying because they are framed better than here. It states the
+    **"the win pays it, not the pick"** condition for the team-name gold more sharply than §4 does — §4 says
+    the same thing but buries it — and it separates the **Dashboard readout** (team name, motto, placement,
+    bonus, five grades, two burst counters, member count) from what the panel deliberately withholds (team
+    average, per-member skills, implied training levels), which is the same list §1.8 has in prose. Neither
+    needs an edit; both are why §10's stage table reads the way it does.
+
 Verification run on those edits: retired literals grep to zero, each new marker greps to one, the
 concurrent thread's two uncommitted hunks in `docs/UMAMUSUME_REFERENCE.md` are still present in the
 diff, added lines are clean against the banned-vocabulary pattern, and `composer lore` reports its
@@ -1392,3 +1448,36 @@ from the Team tab, and no arithmetic in this document produces them.
     the **mapping** carried by four publishers, but the four numeric cut-points stay single-source `[B]` —
     and this run's own capture does not show the team average (§1.7), so "observable in the client" is a
     claim, not a fact for this build (§2.6). The eight-part report above is unchanged.
+
+---
+
+## 10. This run's position in the career flow
+
+Added 2026-11-06. The 67 frames cover **one end** of a Unity Cup career: the last five turns of Senior year.
+Everything after the finals is unobserved, and everything before Senior Early October is unobserved too. The
+flow map this report was cross-checked against covers the opposite end, and read together they describe one
+state machine from both sides. This section states which stages this capture set covers, because until now
+the file recorded what the frames **show** (§9's column) without ever recording what they **reach**.
+
+| Flow stage | Covered by a frame here? | What this report knows about it |
+| --- | --- | --- |
+| Career setup: scenario, trainee, two legacies, six-card deck, Start Career | **No** | §1.4 and §1.5 reconstruct the deck and the ancestry tree from in-run panels; the setup screens themselves are not in the set |
+| Turn 0, Junior Early January, 11 turns to the debut | **No** | §1.1 covers the far end of the same counter ("5 turns until the Unity Cup"); the pre-debut window is unobserved |
+| Tazuna tutorial, team formation, team-name selection | **No** | §1.6 records the name as **already fixed and paid for** — Blue Bloom is chosen, and the finals are yet to run |
+| Preseason rounds 1–4 | **No** (result only) | §1.6 records all four as won, with their dates, but no round's own screen is in the set |
+| Senior-year endgame, Arima Kinen pending | **Yes** — §1.6, §1.7 | The richest part of the set: race card, training tile, Team Info panel, Learn screen, roster, Sparks |
+| Finals against Team Zenith | **No** (programme only) | §1.8's five-column Team tab is the programme; §8.3 establishes the shape and §9 marks the venue and distance ❌ UNVERIFIED |
+
+**The consequence worth carrying: the setup screens and turn 0 have no client capture at all.** They are also
+the parts of the flow that published documentation covers in the most detail, which is why they read as
+well-sourced — and it is worth stating plainly that no frame in this corpus has ever been compared against
+them. The endgame is the reverse case: densely captured here and thinly documented by publishers, which is
+exactly the half where this report, not the flow map, is the better source. §9's tier table and this one are
+complementary — §9 asks *is this a frame or a publisher*, and this asks *which end of the run the frame set
+reaches*.
+
+**Two stage-level items this pass did not close, each with the capture that would close it.** The finals'
+venue and exact distance per category remain ❌ UNVERIFIED (§6 item 8, §8.3, §9) and would close on the
+finals' own race cards. The pre-debut phase, including the Tazuna tutorial and whether it can be skipped,
+has no evidence in this file in either direction — a Junior-year capture would be a second corpus, not an
+extension of this one, and this report does not claim to cover it.
