@@ -533,13 +533,17 @@ framework files and recorded here rather than silently applied:**
    at `shneiderman-golden-rules-2026-10-21.md:83` and rule 8 "Reduce short-term memory load" at
    `:94` — but the derived table's six rows cite rules 1, 2, 3, 4, 5, 6 and then **`rule 8`**
    (`:141`). Rule 7 has no derived row at all. So the file defines only seven IDs for eight
-   rules, and `SHR-7`'s own text, "the value a decision needs is on the decision screen", is
-   rule 7's content carrying rule 8's label. `SHR-8` is cited five times in `_audit-prompt.md`
+   rules. **`SHR-7`'s text is rule 8's clause compressed to one screen** — "the value a decision
+   needs is on the decision screen" is the within-screen form of "not from one display, used on
+   another" — so the row is internally consistent with its own `rule 8` source cell. What is
+   missing is rule 7's derived row, not rule 8's. (This corrects `89a4b60d`'s wording, which
+   called the text rule 7's content.) `SHR-8` is cited five times in `_audit-prompt.md`
    (`:117`, `:165`, `:182`, `:405`, `:432`) and defined in no file. Two consequences for the
-   slices: cite **`SHR-7`** for the cross-display clause, because it is the ID the file's own
-   row assigns to rule 8, or cite in prose; do **not** cite `SHR-8`, because Phase 6 gate 1
-   (`_audit-prompt.md:211`) drops any finding whose rule ID is not in the framework file. The
-   corpus defect is recorded here, not fixed here.
+   slices: cite **`SHR-7`**, whose text does describe a value that must reach the screen where
+   it is used, and quote rule 8's prose (`shneiderman-golden-rules-2026-10-21.md:98-103`) when
+   the cross-display clause itself is the authority; do **not** cite `SHR-8`, because Phase 6
+   gate 1 (`_audit-prompt.md:211`) drops any finding whose rule ID is not in the framework file.
+   The corpus defect is recorded here, not fixed here.
 2. **`IA-5`'s routing label is correct, and this register's earlier note was wrong.**
    `_audit-prompt.md:123` writes "IA 5 (front doors)" and cites `IA-1`. Read against the IA file
    that is coherent: **principle 5 is named Front doors**
@@ -559,6 +563,40 @@ Two further notes on scope for the slice audits that follow this plan:
 - **The framework file set is `docs/framework-ui-ux/`, not the repository root.** The plan
   cites `_audit-prompt.md` and `design-framework-index-2026-10-21.md` bare; both live under
   `docs/framework-ui-ux/`, alongside the ten framework files.
+
+### 11.5 Derived-rule sweep (2026-11-06)
+
+The `SHR-7`/`SHR-8` off-by-one prompted a full mechanical sweep: every derived-rule table in
+every framework file, comparing each row's **text** against its own **Source** column. Result:
+**the Shneiderman table is the only file with a numbering defect.** The other nine are
+internally consistent, and three of them have no Source column at all because their IDs are
+their own numbering.
+
+| File | Rows | Text-vs-Source check |
+| --- | --- | --- |
+| `shneiderman-golden-rules-2026-10-21.md:135-141` | `SHR-1..SHR-7` | **Defect.** Eight prose rules, seven derived rows. `SHR-7`'s cell reads `rule 8` and its text is that rule compressed; rule 7 has no row |
+| `laws-of-ux-2026-10-21.md:164-173` | `UX-1..UX-10` | Consistent; no Source column |
+| `uilaws-2026-10-21.md:94-100` | `UI-1..UI-7` | Consistent; no Source column |
+| `gerhardt-powals-principles-2026-10-21.md:117-121` | `GP-1..GP-5` | Consistent: `GP-1→1`, `GP-2→2`, `GP-3→3`, `GP-4→9`, `GP-5→10` |
+| `information-architecture-principles-2026-10-21.md:142-147` | `IA-1..IA-6` | Consistent: `1→5, 2→7, 3→6, 4→3, 5→4, 6→8` |
+| `norman-interaction-principles-2026-10-21.md:143-148` | `NRM-1..NRM-6` | Consistent; named concepts, not numbers |
+| `tognazzini-first-principles-2026-10-21.md:251-258` | `TOG-1..TOG-8` | Consistent; named concepts |
+| `gestalt-principles-2026-10-21.md:175-180` | `GT-1..GT-6` | Consistent; named concepts |
+| `wcag-2.2-accessibility-2026-10-21.md:205-212` | `WCAG-1..WCAG-8` | Consistent; success criteria |
+| `usability-heuristics-2026-10-21.md` | `H1..H10` | No derived-rule table; the IDs are the section headings (`:26` onward) and the map table at `:214-223` |
+
+Two consequences for the slices, both now settled:
+
+- **`GP-2` has rule-file support but no routing-table row.** `_audit-prompt.md`'s routing table
+  (`:104-131`) cites `GP-1` and `GP-3` only. A finding grounded in `GP-2` — "a derived figure
+  states the rule that produced it and whether the rule is the client's or ours"
+  (`gerhardt-powals:118`) — is legitimate and must be filed under `GP-2`, but it will not appear
+  in the routing table. S3's plan cites `GP-2` for the band projection; that citation stands, and
+  the routing gap is recorded rather than worked around.
+- **No other phantom IDs.** `IA-7`, `IA-8`, `UI-8`, `UI-9` and `UI-10` are named in older
+  records, but `grep` finds none of them in `_audit-prompt.md` at this tree, and the IA and UI
+  files stop at `IA-6` and `UI-7`. The prompt's own `SHR-8` references are the only live
+  phantom in it.
 
 ## 12. Definition of done
 
@@ -582,6 +620,8 @@ Two further notes on scope for the slice audits that follow this plan:
 - [x] Section numbering is self-consistent: §11 is the addendum, §12 the definition of done,
       and the one surviving "§11 of `AGENTS.md`" reference (§8) points at that document, not
       at this one.
+- [x] §11.5 records the derived-rule sweep across all ten framework files, so the slices know
+      `SHR-7` is the only mis-numbered row and `GP-2` has no routing-table entry.
 
 **Self-test, run before each commit:**
 
