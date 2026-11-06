@@ -192,6 +192,67 @@ it('round-trips the six-node payload through the draft and reads it back on the 
     expect(TrainingRun::count())->toBe(Veteran::count());
 });
 
+it('keeps the manual parent name on a cold reload and carries it into the run (R6-05)', function (): void {
+    // The rule accepted `legacies.*.name` and every reader already supported it, but the record rebuilt
+    // in `StoreLegacySelectionRequest::payload()` listed nine keys and not `name`, so the typed name was
+    // gone before Preflight existed. Facets (a) and (b) fail together: the cold GET cannot re-enter
+    // manual mode, and the created run stores no parent name.
+    $fixture = wizardFixture();
+    SetupDraft::write(['umamusume_id' => $fixture['trainee']->id]);
+
+    $payload = draftLegacyPayload([
+        'legacies' => [
+            [
+                'legacy_id' => null,
+                'name' => 'Vodka',
+                'rank' => 3,
+                'rank_letter' => 'A',
+                'is_guest' => true,
+                'ancestors' => ['Grass Wonder', 'Mill Raptor'],
+                'sparks' => [['kind' => 'blue', 'target' => 'Speed', 'stars' => 2]],
+            ],
+            [
+                'legacy_id' => null,
+                'name' => 'Daiwa Scarlet',
+                'rank' => 2,
+                'rank_letter' => 'B',
+                'is_guest' => false,
+                'ancestors' => ['Mayano Top Gun', ''],
+                'sparks' => [],
+            ],
+        ],
+    ]);
+
+    $this->put(route('career.legacy.store'), $payload)->assertRedirect(route('career.legacy'));
+
+    // (1) The stored payload carries both names.
+    $stored = SetupDraft::legacySelection();
+    expect($stored['legacies'][0]['name'])->toBe('Vodka')
+        ->and($stored['legacies'][1]['name'])->toBe('Daiwa Scarlet')
+        // The rest of the record survives with it: the name is an addition, not a replacement.
+        ->and($stored['legacies'][0]['rank'])->toBe(3)
+        ->and($stored['legacies'][0]['rank_letter'])->toBe('A')
+        ->and($stored['legacies'][0]['is_guest'])->toBeTrue()
+        ->and($stored['legacies'][0]['sparks'])->toHaveCount(1);
+
+    // (2) A COLD GET of the step, re-read from the stored draft, still names the parent. This is the
+    //     half `legacy.legacy_id === null` broke: a manual parent has no id at all, so the reader has
+    //     to derive manual mode from the slot plus a non-empty name. `parents` carries the library ids
+    //     (both null here), and `parentA`/`parentB` are the resolved cards the slot renders.
+    $this->get(route('career.legacy'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('parents', 2)
+            ->where('parents.0', null)
+            ->where('parents.1', null)
+            ->where('parentA.name', 'Vodka')
+            ->where('parentA.veteranId', null)
+            ->where('parentA.stars', 3)
+            ->where('parentB.name', 'Daiwa Scarlet')
+            ->where('payload.legacies.0.name', 'Vodka')
+            ->where('payload.legacies.1.name', 'Daiwa Scarlet'));
+});
+
 it('discards only the semantically empty Spark rows and keeps every real one (D2)', function (): void {
     // The editor appends an empty trailing row on `Add Spark` (kind only, no target, no stars). Posted
     // as-is it used to be stored as a real Spark: the audit found a bare `Blue` with no target and no

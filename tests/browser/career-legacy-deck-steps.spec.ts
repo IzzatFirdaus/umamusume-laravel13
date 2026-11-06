@@ -286,6 +286,36 @@ test.describe('Setup step 4 — Legacy', () => {
         await expect(page.locator('#legacy-rank-letter-0')).toHaveValue('A');
     });
 
+    test('names the parent and shows Chosen as soon as a manual name is typed, before any save (R6-05)', async ({ page }) => {
+        // The pill and the name block read `props.parentA` / `props.parentB`, which the server builds
+        // from the Veteran library. A typed parent therefore had no name and no `Chosen` state until the
+        // step was saved and reloaded, over an input visibly holding the value. The heading now reads the
+        // form in manual mode, so it reacts on the keystroke.
+        await hydrate(page, '/career/setup/legacy');
+
+        const parentA = page.locator('article').first();
+        // The pill, not the picker's own `Not chosen` option (both live inside the article).
+        const pill = parentA.locator('span.pill');
+        await expect(pill).toHaveText('Not chosen');
+
+        await page.locator('#legacy-pick-0').selectOption('__manual__');
+        await page.locator('#legacy-name-0').fill('Vodka');
+
+        // Before any save: the pill flips and the name renders.
+        await expect(pill).toHaveText('Chosen');
+        await expect(parentA.locator('div.font-extrabold').first()).toContainText('Vodka');
+
+        // And it survives a save and a cold reload, now from the server payload rather than the form.
+        await page.getByRole('button', { name: 'Save Legacy' }).click();
+        await expect(page.getByText('Legacy recorded.')).toBeVisible();
+
+        await hydrate(page, '/career/setup/legacy');
+        await expect(page.locator('#legacy-name-0')).toHaveValue('Vodka');
+        await expect(page.locator('#legacy-pick-0')).toHaveValue('__manual__');
+        await expect(page.locator('article').first().locator('span.pill')).toHaveText('Chosen');
+        await expect(page.locator('article').first().locator('div.font-extrabold').first()).toContainText('Vodka');
+    });
+
     test('prints the reason a Spark write was refused, beside the field it refused', async ({ page }) => {
         await hydrate(page, '/career/setup/legacy');
 

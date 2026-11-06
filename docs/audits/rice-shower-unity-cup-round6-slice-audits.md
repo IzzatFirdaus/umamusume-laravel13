@@ -312,4 +312,132 @@ npx playwright test tests/browser/career-preflight.spec.ts --grep 'R6-11'
   1 passed (26.7s)
 ```
 
+## S1.3 — R6-05, manual parent names survive the commit
+
+### Identity
+
+| Item | Value |
+| --- | --- |
+| Audit ID | `RS-UC-R6-SLICE-AUDITS-S1.3` |
+| Mode | M1 change audit |
+| Row | R6-05 (register §4.1), facets (a), (b) and (c) |
+| Scope | `app/Http/Requests/StoreLegacySelectionRequest.php`, `resources/js/pages/Career/LegacySelect.vue`, `tests/Feature/CareerLegacyDeckStepsTest.php`, `tests/Feature/CareerPreflightTest.php`, `tests/browser/career-legacy-deck-steps.spec.ts` |
+| Out of scope | The JSON contract, the schema, the `legacies.*.name` allowlist, ancestor indexing, `is_guest`, ranks, sparks, `pick` — all preserved byte-for-byte |
+
+### Pre-flight
+
+| Item | Value |
+| --- | --- |
+| HEAD at open | `417315d6` |
+| Dirty set on the touched paths | Empty |
+| `StartCareerRequest` reads `legacySelection()`, not `legacyParents()` | Confirmed at `:67`: `'legacy_selection' => SetupDraft::legacySelection()`. So the draft payload is the only path to the run, not the parent ids |
+| `LegacySelectionPayload::fromArray()` preserves `name` | Confirmed at `:189-193,240-244`: `legacy()` calls `manualName()` and stores the key only when non-null, so the reader already supported it |
+| Suite gate | `vendor/bin/pest tests/Feature/ScenarioMetadataTest.php` → 3 passed (52 assertions) |
+| `RENDERED_EVIDENCE` | **TRUE**, re-probed |
+
+### RED evidence (captured before GREEN)
+
+`vendor/bin/pest tests/Feature/CareerLegacyDeckStepsTest.php --filter='R6-05'` → `1 failed (2 assertions)`,
+verbatim:
+
+```
+ErrorException
+Undefined array key "name"
+at tests\Feature\CareerLegacyDeckStepsTest.php:230
+```
+
+The stored draft carried no `name` at all, which is facet (a). Facets (b) and (c) are client-side and
+`career-legacy-deck-steps.spec.ts` is what pinned them: with only the request fixed, the cold-reload
+case still failed at `expect(page.locator('#legacy-name-0')).toHaveValue('Vodka')` with
+`element(s) not found` — manual mode never reopened because `manualFor()` tested
+`legacy.legacy_id === null` against a key the stored payload does not carry.
+
+### GREEN
+
+| File | Change |
+| --- | --- |
+| `StoreLegacySelectionRequest::payload()` | Added `'name'` to the rebuilt record: a trimmed non-empty string, else `null` so `LegacySelectionPayload` omits the key and a names-only record keeps its old shape |
+| `LegacySelect.vue` `manualFor()` | Facet (b): test `props.parents[index] === null && name !== ''` instead of `legacy.legacy_id === null`, which was always `undefined`. A banked parent stays banked; an unnamed slot stays unselected |
+| `LegacySelect.vue` `cardFor()` | Facet (c): in manual mode the form's typed name is the card's name, so the pill and the heading react on the keystroke. A non-manual slot keeps the server card untouched, and the cold-load fallback is the same server card |
+| `LegacySelect.vue` `ParentCard` | `veteranId` and `runId` widened to `number \| null`. The server genuinely sends null for a manual parent, so the narrow type was a lie the page worked around |
+
+### Rule sweep (dimensions A-H)
+
+| Dimension | Result |
+| --- | --- |
+| A. Status and feedback | **finding** — F2. The pill read `Not chosen` over a field holding a name |
+| B. Control and target | `no finding`. No control resized or moved |
+| C. Error prevention and recovery | **finding** — F3. A cold reload lost the entry |
+| D. Consistency and signifiers | **finding** — F1. The step recorded a name the next screen did not see |
+| E. Cognitive load and memory | `no finding` after the fix; before it, the Trainer had to retype the parent at every step |
+| F. Visual grouping and hierarchy | `no finding`. Same two cards, same layout |
+| G. Accessibility semantics and contrast | `no finding`. The pill keeps its word-plus-class pair; a live region was not added and was not needed for a synchronous input echo |
+| H. Content and language | `no finding`. No new copy |
+
+### Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F1 | `SHR-7` | Shneiderman | Legacy step → Preflight → Inheritance | The rule accepted `legacies.*.name` and four readers already supported it, but `payload()` rebuilt the record with nine keys and not `name`. A typed parent reached Preflight and the created run with no name | OBSERVED_SOURCE | `StoreLegacySelectionRequest.php:335-347` (pre-fix) | 3 | High | Done: copy the validated name into the rebuilt record |
+| F2 | `H1` | Usability heuristics | Legacy step, parent card header, typing | The pill and the heading read `props.parentA` / `props.parentB`, built from the Veteran library, so a typed name produced no `Chosen` state until the step was saved and reloaded | OBSERVED_SOURCE | `LegacySelect.vue:300,392` (pre-fix) | 3 | High | Done: read the form in manual mode |
+| F3 | `SHR-5` | Shneiderman | Legacy step, cold reload | Manual mode tested `legacy.legacy_id === null`, and a stored payload carries no such key, so the branch was compared against `undefined` and could not reopen even after the name was stored | OBSERVED_SOURCE | `LegacySelect.vue:130-148` (pre-fix) | 3 | High | Done: derive manual mode from the slot plus a non-empty name |
+
+Facet (c) is reported explicitly because without it the fix would pass the feature test and fail the
+browser case: the feature test asserts the stored payload and the rendered props, not the pill's
+reaction to a keystroke.
+
+### Unmeasured register
+
+Empty.
+
+### Gap register delta
+
+None.
+
+### Commit body basis
+
+| # | Question | Result | Basis |
+| --- | --- | --- | --- |
+| 1 | Add, remove or move a control? | `N/A` | No control added or moved |
+| 2 | Change what is on screen at once? | `N/A` | Same two cards |
+| 3 | Change a colour, tint or state? | `PASS` | The pill flips between `Chosen` and `Not chosen` on a keystroke rather than only after a save; both keep a word, so no colour-only channel |
+| 4 | Change a type size or weight? | `N/A` | No type change |
+| 5 | Change what the user can undo, or where the action is? | `N/A` | The save is unchanged |
+| 6 | Change where a thing lives, or what it is called? | `N/A` | Nothing renamed |
+| 7 | Change a progress, an incomplete state or a boundary? | `PASS` | Manual mode now reopens from the stored record, which is the boundary that was broken |
+| 8 | Change what the user has to read or remember? | `PASS` | Removes a retype at every later step |
+| 9 | Add a new destination, a landmark or a control type? | `N/A` | None |
+| 10 | Change the words? | `PASS` | `Chosen` / `Not chosen` are unchanged words; only when they appear changed |
+
+`RENDERED_EVIDENCE = TRUE`, declared from this slice's own probe: `career-legacy-deck-steps.spec.ts`
+ran 17 cases and all passed (43.9s), including the new R6-05 case asserting the pill and the name
+before any save and the same state after a cold reload.
+
+### Verification output
+
+```
+vendor/bin/pest tests/Feature/CareerLegacyDeckStepsTest.php   → 16 passed (309 assertions)
+vendor/bin/pest tests/Feature/LegacySelectionSchemaTest.php tests/Feature/GrandparentRanksTest.php tests/Feature/CareerPreflightTest.php tests/Feature/CareerLegacyDeckStepsTest.php
+  Tests:    60 passed (677 assertions)
+```
+
+```
+npx playwright test tests/browser/career-legacy-deck-steps.spec.ts
+  17 passed (43.9s)
+```
+
+**D2 re-verified green**, as register §11.3 requires: `it('discards only the semantically empty Spark
+rows and keeps every real one (D2)')` passed inside the 16-case `CareerLegacyDeckStepsTest` run above
+(its own assertions: 3 Sparks kept, targets `['Power', 'Late Surger', null]`, stars `[1, null, 2]`).
+
+### Lore ruling
+
+`lore-code` moved 313 → 314. `diff` of the normalised hit sets shows the one added line is
+`tests/Feature/CareerLegacyDeckStepsTest.php` carrying `'ancestors' => ['Grass Wonder', 'Mill
+Raptor']`. **Ruling: class 2, a substring inside a proper noun.** `Mill Raptor` is the name of an
+existing corpus Umamusume already present five times in that same file (`:39`, `:138`, `:156`,
+`:186`), used here as the fixture's ancestor name. It is not a violation and no marker is added;
+the term stays in the count with this ruling, per `AGENTS.md` §5 and §9.
+
+
 

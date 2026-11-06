@@ -44,8 +44,9 @@ interface SparkDraft {
 }
 
 interface ParentCard {
-    veteranId: number;
-    runId: number;
+    /** The library row behind this slot, or null for a parent typed in from outside it. */
+    veteranId: number | null;
+    runId: number | null;
     name: string;
     japanese: string | null;
     scenario: string | null;
@@ -123,14 +124,16 @@ const props = defineProps<{
  * pick never erases the record behind it.
  */
 /**
- * A slot is in manual-name mode when the payload carries a name and no library id: the picker then
- * shows the sentinel and the editors render, so a saved manual parent reads back as what it is
- * rather than as "Not chosen".
+ * A slot is in manual-name mode when it has no library pick and the payload carries a name (R6-05
+ * facet b). The previous test was `legacy.legacy_id === null`, but a stored payload has no
+ * `legacy_id` key at all — the record rebuild never wrote one — so the comparison was against
+ * `undefined` and manual mode could not reopen even once the name was stored. The parent slot plus
+ * a non-empty name is the state the payload actually holds.
  */
 function manualFor(index: number): boolean {
     const legacy = props.payload?.legacies?.[index];
 
-    return legacy !== undefined && legacy.legacy_id === null && (legacy.name ?? '') !== '';
+    return (props.parents[index] ?? null) === null && (legacy?.name ?? '') !== '';
 }
 
 /** True while a slot is in manual-name mode; the picker then shows the name input instead of a row. */
@@ -297,7 +300,38 @@ const errorFor = (index: number, field = 'legacy_id'): string | undefined =>
 const ancestorError = (index: number, ancestor: number): string | undefined =>
     (form.errors as Record<string, string | undefined>)[`legacies.${index}.ancestors.${ancestor}`];
 
-const parents = (): (ParentCard | null)[] => [props.parentA, props.parentB];
+/**
+ * The card a slot renders, with the form's typed name taking precedence in manual mode (R6-05 facet c).
+ *
+ * The server props are built from the Veteran library, so a typed parent had no `Chosen` state and no
+ * name until the step was saved and reloaded: the pill read `Not chosen` over a field visibly holding
+ * a name. In manual mode the form is the source, and the server card is the fallback for a cold load
+ * where the form holds the same stored value. A non-manual slot keeps the server card untouched.
+ */
+const cardFor = (index: number): ParentCard | null => {
+    const card = (index === 0 ? props.parentA : props.parentB) ?? null;
+
+    if (!manual.value[index]) {
+        return card;
+    }
+
+    const typed = (form.legacies[index]?.name ?? '').trim();
+
+    if (typed === '') {
+        return card;
+    }
+
+    return {
+        veteranId: card?.veteranId ?? null,
+        runId: card?.runId ?? null,
+        name: typed,
+        japanese: card?.japanese ?? null,
+        scenario: card?.scenario ?? null,
+        stars: card?.stars ?? null,
+        savedAt: card?.savedAt ?? null,
+        sparks: card?.sparks ?? [],
+    };
+};
 
 const pickOptions = (): { value: string; label: string }[] => [
     { value: '', label: 'Not chosen' },
@@ -374,7 +408,7 @@ const pickOptions = (): { value: string; label: string }[] => [
              takes the pick border and the positive pill; the empty slot stays neutral. -->
         <div class="mt-4 grid grid-cols-1 gap-4 min-[1081px]:grid-cols-2">
             <article
-                v-for="(card, index) in parents()"
+                v-for="(card, index) in [cardFor(0), cardFor(1)]"
                 :key="index"
                 class="card"
                 :class="card !== null ? 'is-picked' : ''"

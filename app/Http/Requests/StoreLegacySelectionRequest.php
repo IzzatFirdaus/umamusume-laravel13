@@ -344,6 +344,14 @@ class StoreLegacySelectionRequest extends FormRequest
                 'ancestors_rank' => $ancestorRanks,
                 'sparks' => $sparks,
                 'pick' => isset($legacy['pick']) && $legacy['pick'] !== '' ? (int) $legacy['pick'] : null,
+                // R6-05: the manual parent's own name. The rule accepted `legacies.*.name` and every
+                // reader already supported it, but this rebuild listed nine keys and not this one, so a
+                // typed parent was nameless before Preflight existed. A present-but-blank name is the
+                // absence `LegacySelectionPayload` already omits, so it is dropped here rather than
+                // stored as an empty string that would print as a chosen parent.
+                'name' => isset($legacy['name']) && is_string($legacy['name']) && trim($legacy['name']) !== ''
+                    ? trim($legacy['name'])
+                    : null,
             ];
         }
 

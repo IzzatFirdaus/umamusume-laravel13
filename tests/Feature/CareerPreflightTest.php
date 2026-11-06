@@ -575,4 +575,16 @@ it('counts a manual parent pair as two recorded parents', function (): void {
             ->where('contract.build.legacy.members.0.name', 'Silence Suzuka')
             ->where('contract.build.legacy.members.1.name', 'Tokai Teio')
         );
+
+    // R6-05: the name now survives the commit too. Before the fix the payload reaching this draft had
+    // no `name` at all, so the contract's members printed the slot's absence and the created run stored
+    // a nameless parent. The run's column is asserted, not the draft's, because the run is what the
+    // Inheritance page reads afterwards.
+    $this->put(route('career.preflight.store'))->assertRedirect();
+
+    $run = TrainingRun::query()->where('umamusume_id', $fixture['trainee']->id)->sole();
+    $selection = $run->legacySelection();
+
+    expect($selection->legacies[0]['name'])->toBe('Silence Suzuka')
+        ->and($selection->legacies[1]['name'])->toBe('Tokai Teio');
 });
