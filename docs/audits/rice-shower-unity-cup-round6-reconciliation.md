@@ -633,3 +633,283 @@ walk-ID coverage over §4 col 3 → 17 F + 14 E + 23 U, each exactly once
 placeholder scan → 0
 python tools/md_fence_check.py → 0 invalid closing fences
 ```
+
+
+## 13. Revision, 2026-11-06: re-base on the re-read evidence
+
+Append-only. This section carries the dated corrections a round-7 planning read produced
+against a later state of the two reference documents. **The 54 rows in §4, their IDs, their
+statuses and their counts are untouched**; R6-34, R6-13 and R6-14 gain named facets below
+without changing their primary status. Nothing in §1–§12 is edited.
+
+### 13.0 What changed underneath this register
+
+Two documents were revised after §1–§12 were written. Measured this pass:
+
+| Document | At §1's baseline | At this revision | Effect on the register |
+| --- | --- | --- | --- |
+| `docs/UMAMUSUME_REFERENCE.md` | 2,786 lines | **2,932** (+146) | Settles A3 (countdown vocabulary), reverses A5, widens A6, softens A7, strengthens A4 |
+| `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md` | 1,394 lines | **1,483** (+89), new §10 | Adds the capture-coverage constraint quoted in 13.9 |
+
+The framework files under `docs/framework-ui-ux/`, the walk-6 audit and rounds 2–5 are
+unchanged (Oct 21–Nov 3). HEAD is `67a48308`; the register's own reads at `3f295e80` stand,
+and every new read below is at HEAD with the commit named.
+
+### 13.1 A1 — the round 2–4 re-measurement is withdrawn as a task
+
+The round-7 brief asked for rounds 2, 3 and 4's claimed fixes to be re-measured, because §6's
+C1 proved round 5's landing record misattributed its seven slices to a docs-only commit. That
+inference does not generalise. Measured:
+
+| Register | Claimed commit | Subject | Code files changed |
+| --- | --- | --- | --- |
+| R2-01 / R2-04 | `65d7068` | snapshot door outside both career branches | 2 |
+| R2 phases 4–5 | `0025f37` | the second career entry point | 9 |
+| R2 cockpit position | `3b6f3cc` | read career position and countdown | 5 |
+| R3-16 | `2470a4c` | count grandparent Sparks | 2 |
+| R3-02 | `d7f41dc` | deck_slot query in step with the picker | 2 |
+| R3-01/03/04 | `3a1ba9b` | correction save and recorded Energy band | 12 |
+
+Every one is a code commit with real paths under `app/`, `resources/` or `tests/`, and every
+fix survives at HEAD with its test: the snapshot door renders at `Dashboard.vue:397-403`,
+`hasImportedPosition()` still gates the cockpit (`CockpitController.php:276`),
+`energyReading()` is still called by `CockpitController`, `EventDecisionController` and
+`TrainingDecisionController`, and `AncestorRankTest`, `GrandparentSparksTest`,
+`LegacyDisambiguationTest`, `CockpitEnergyBandDisplayTest`, `DeckSlotCardLevelTest` and
+`EnergyReadingConsistencyTest` all exist.
+
+**Only round 5 was misattributed.** Rounds 2–4 need no rescue, and the re-measurement is
+downgraded from four slices of work to this note. A future pass that wants to re-measure them
+should do it as a read, not as a plan item.
+
+### 13.2 A3 — two widgets, two targets, two conventions; and the convention is the finding
+
+§4's R6-13 recorded `payoutTurn = 70` minus the current turn as the sole derivation. Measured
+at HEAD, there are two derivations of "turns to a Unity Cup event", and they answer different
+questions from different bases:
+
+| Widget | Source | Formula | Convention | At turn 67 logged | At turn 1 logged |
+| --- | --- | --- | --- | --- | --- |
+| Finale proximity | `TrainerAdvisor::finaleContext` (`app/Services/Advisor/TrainerAdvisor.php:241-247`), rendered by `NextDecision.php:495-506` | `(3 × 24) + 1 − nextTurnNumber()` | **next turn to play**, inclusive of the turn being decided (documented `:219-221`) | `73 − 68 = **5**` | `73 − 2 = **71**, suppressed` |
+| Spirit Burst payout | `TeamPanelBuilder::burstCountdown` (`app/Services/Career/TeamPanelBuilder.php:720-727`), rendered `Cockpit.vue:540-542` | `70 − latestLoggedTurn` | **latest logged turn** | `70 − 67 = **3**` | `70 − 1 = **69**` |
+
+Two further constraints make the finale widget reachable only at short range:
+`FINALE_TURNS_AHEAD = 5` (`TrainerAdvisor.php:70`) suppresses it beyond five turns, so a
+turn-1 run shows no finale line at all; and the burst widget returns `null` until at least one
+turn is logged (`TeamPanelBuilder.php:721-724`).
+
+**Settlement.** Walk 5's `Unity Cup is 5 turns away` is the **finale** widget at turn 67
+(`73 − 68 = 5`), and it is correct. Walk 6's `Need 2 more bursts in 69 turns` is the **burst**
+widget at turn 1 (`70 − 1 = 69`), measuring to the Spirit Burst payout at turn 70 — a
+different event from the finals. So R6-13's "derives 69 where the source states 5" compares two
+different quantities from two different widgets; the numbers were never meant to agree.
+
+**The finding that survives** is a copy defect, not an arithmetic one: neither string names the
+event it counts to. `Unity Cup is 5 turns away` does not say *the finals*; `… in 69 turns for
+Gold Lv3 (Senior November payout)` names a payout but not that it is the Spirit Burst payout
+rather than the career's end. `finaleContext`'s label is
+`config("scenarios.scenarios.<key>.label")` (`app/Services/Scenario/FinaleReader.php:75`), which
+is the scenario's own name — so the widget is structurally unable to distinguish the finals
+from the scenario.
+
+**Provenance boundary, stated because §6's method requires one:**
+`ad8dc777` (2026-10-09) introduced `FINALE_TURNS_AHEAD` and `finaleContext` and **is an
+ancestor of `34fd3c9e`**, walk 5's tree — so the widget walk 5 read existed then.
+`388e98fd` (2026-11-04) added the Spirit Burst countdown and is **not** an ancestor of
+`34fd3c9e` — it did not exist at walk 5's tree. These are two features, not one regressed one.
+
+**R6-34's status stands for the field and its framing is corrected.** `CareerPosition`'s
+`scenarioCountdown` is still a dead pipe (no writer, no renderer, its one component unimported —
+§4.3's read). But "no renderer" is false as a statement about the *quantity*: it renders twice,
+by derivation, in two widgets. The facet is therefore **field is a dead pipe; the quantity
+renders by two unnamed derivations**. Primary status unchanged.
+
+### 13.3 A5 — reversed: the reference is right and the application contradicts it
+
+The round-7 brief proposed that the reference document and the screen agree against the client.
+Measured, the reference was already corrected:
+
+`docs/UMAMUSUME_REFERENCE.md:190` — `| Rest (お休み) | … | +50 Energy modal, +70 (big success),
++30 (failure, sometimes with 夜ふかし気味 / Late-Night Feeling) | [GameWith 257617 (n=3833) and
+Kamigame …] |`
+
+The application disagrees with it in two places **on the same screen**:
+
+- `config/advisor.php:32-37` declares `rest_recovery => 30`, `source => 'GameWith, 2026-09-25'`,
+  `confidence => 'current'` — the **failure tier** carrying a current-confidence label.
+- `NextDecision.php:485` prints `Rest recovers +30 Energy. Source: GameWith, 2026-09-25, read
+  2026-11-02.` from that constant.
+- The same file's `recorded_forecast` branches (`NextDecision.php:238-243`) print
+  `Success +50 (modal) / Big success +70 / Poor Rest +30 (may carry a stayed-up-late penalty)`
+  — the correct tiers.
+
+The file's own comment block (`NextDecision.php:220-235`) already records the disagreement and
+says a single number "would be a guess wearing the tool's voice" — which is what the constant
+then does.
+
+**Classification: `Confirmed defect` on `config/advisor.php:32`.** The corpus is not at fault
+and needs no correction; the constant presents the failure tier as the recovery figure and
+labels it current. No new row is needed — this is an application defect the walk did not have
+the reading to find, recorded here rather than as an `R6-NN` row because no walk-6 finding
+covers it.
+
+### 13.4 A6 — widened to three scenarios, and the repetition half is a read, not a ruling
+
+§11.2 recorded the facility aggregate as needing an owner decision. Measured against the
+revised reference and the config, only one small question actually needs an owner.
+
+The reference is scenario-scoped: §2.2.2 says of Unity Cup **"Team ranks drive facilities.
+Team stat rank raises Training Facility levels"**; §2.2.1 says of URA Finale **"Facility
+progression by repetition. Training facility level rises from using the same discipline
+repeatedly, rather than from a team rank or a parallel meter"**; §2.2.3 gives Trackblazer the
+purchases variant.
+
+`config/scenarios.php` already carries the distinction as a key: `facility_level_source` is
+`team_rank` for `unity_cup` (`:407`), `repetition` for the URA entry (`:191`) and for Our Grand
+Concert (`:1061`), `repetition_plus_purchases` for Trackblazer (`:624`).
+
+**Nothing reads that key.** `TrainingRun::facilityLevel()` (`:1346-1359`) walks
+`team_rank_ladder` in every scenario, and both call sites pass a rank letter
+(`NextDecision.php:409`, `TeamPanelBuilder.php:509`). So Unity Cup is correct **by accident**,
+and the URA, Our Grand Concert and Trackblazer surfaces print a team-rank-derived level where
+the client uses repetition. That is a defect in three of four scenarios, not a design question.
+
+The correct rule per key, all from data the application already stores:
+
+| `facility_level_source` | Scenarios | Run-level figure | Source in the data model |
+| --- | --- | --- | --- |
+| `team_rank` | Unity Cup | The team-rank letter mapped through `team_rank_ladder` — current behaviour | `TeamRankPayload` → `facilityLevel()` (`TrainingRun.php:1346`) |
+| `repetition` | URA Finale, Our Grand Concert | The latest logged turn's own level for that stat | `turn_entries.facility_speed` … `facility_wit`, validated `min:1 max:5` (`StoreTurnEntryRequest.php:97-101`), read per turn at `TimelineController.php:379-386` |
+| `repetition_plus_purchases` | Trackblazer | The same, plus the Pro Shop's recorded increments | The above, plus `TurnEventType::Scenario` / `source_name = 'Shop'` events written by `storePurchase` (`TrainingRunController.php:866-882`) |
+
+**The one owner question left:** whether a run with no logged turns should show a facility level
+at all. `burstCountdown` already answers the analogous question by returning `null`
+(`TeamPanelBuilder.php:721-724`); the repetition ladder should decide the same way explicitly
+rather than by whatever `max()` on an empty collection happens to return. That is a display
+policy, not a mechanic, and it is the only part of this that the corpus does not settle.
+
+### 13.5 A7 — softened: a convention the tool must state, not a number to correct
+
+The revised reference states all three totals and rules on them (`:396`):
+"the player is given a total of 72 turns, excluding the 6-turn finale … Adding that finale gives
+78 … Community automation models 75 as 72 plus three finale races … **a tool must state which
+convention it stores rather than treat 78 as a correction of 75.**"
+
+`CareerCalendar::TURNS_PER_CAREER` is 72 (`:30`) and `CockpitController.php:493` comments that
+"a career is exactly 72 turns and the finale is a separate phase outside them" — so the
+application stores the 72 convention deliberately, which the reference permits.
+
+**The defect is narrower than the round-7 brief assumed:** nothing to correct, but R6-14's three
+URA Finals obligations render inside a grid that excludes the phase they belong to. The
+reachability fact belongs on R6-14 as a facet; the extent itself is a schema-grade item for an
+ADR (per-scenario career extent), not a slice, and not a "78 is right" change.
+
+### 13.6 A4 — holds, with a carrier obligation the reference now makes explicit
+
+`config/scenarios.php:476-480` carries the four bands and the derived payload
+`'10–12' => 'Gold hint Lv1, +30 matching stat, +30 SP'` is read at `TeamPanelBuilder.php:504,675`
+and rendered. So §4.3's R6-48 facet (c) — "`+30` has no key" — is true of storage and silent
+about display.
+
+The revised reference strengthens the copy obligation. Conflict row 57 (`:2745`) records
+GameTora printing `"4 to 9"` and `"7 to 9"` as its first two bands — an overlap that "cannot
+both be" right — states that the file adopts `config/scenarios.php`'s `4–6 / 7–9 / 10–12 / 13+`
+boundaries, and rules: **"No tool should print a band the run cannot be placed in, which is why
+`config/scenarios.php` renders the caveat rather than a placement."**
+
+Two obligations for whichever slice touches this surface: the screen must name its carrier the
+way the rest of the copy names sources, and it must carry the low-band caveat rather than
+printing band edges as settled. Plus the visual collision already recorded: the band's `+30`
+and the eighth-place league bonus's `+30` sit on one panel and mean unrelated things.
+
+### 13.7 A8 — unchanged, and now explicitly guarded by the reference
+
+§4.1's R6-04 separates the scenario floor from the in-force cap. The revised reference adds the
+guard directly (`:444`): observed URA ceilings of `1327/1322/1404/1306/1802` are "**observed
+ceilings for those two runs, not … the URA scenario cap**", and "a tool must not print
+1327/1322/1404/1306/1802 as 'the URA cap'."
+
+`ScenarioCaps` already computes both numbers and keeps them apart: `scenarioCaps()` (`:178`) is
+the published floor, `enteredCaps()` (`:151`) the run's own, and `forRun()` (`:131-133`)
+overlays the second on the first. So the fix R6-04 needs is **labels only** — the total row and
+the Cockpit caption must name which of the two they print. The bars are already faithful.
+
+### 13.8 A2 — confirmed, unchanged
+
+`R2-01`'s verdict at `round2:23` reads "Clarify in docs: the walkthrough should use the snapshot
+import path, not the wizard… **Verdict, 2026-10-10:** held." Passes 3–6 took the wizard anyway.
+This stands as written in §4 and needs no correction.
+
+### 13.9 The capture-coverage constraint, from source §10
+
+The source document gained §10 in this revision, and it changes what a next walk can claim:
+
+> "The setup screens and turn 0 have no client capture at all. They are also the parts of the
+> flow that published documentation covers in the most detail, which is why they read as
+> well-sourced — and it is worth stating plainly that no frame in this corpus has ever been
+> compared against them."
+
+Its coverage table marks career setup, turn 0 / pre-debut, the Tazuna tutorial, team formation,
+the four preseason rounds and the finals programme as **not covered** by any frame; only the
+Senior-year endgame is.
+
+Consequence for any round-7 walk brief: every setup-path and turn-0 claim must be labelled
+publisher-derived rather than observed, or the pass must capture those screens from the client
+first. A brief that routes the next walk through the snapshot door and then reports setup-screen
+findings from it would be claiming frame evidence it does not have.
+
+### 13.10 Framework citations for these corrections
+
+All rule IDs below exist in `docs/framework-ui-ux/`, re-verified this pass:
+
+| Correction | Rule ID | Where it is defined |
+| --- | --- | --- |
+| 13.2's unnamed counter targets | `H1` status; `GP-2` derived figure states its rule | `usability-heuristics…:214`; `gerhardt-powals…:118` |
+| 13.4's scenario-keyed ladder | `H4` one component per role; `GP-1` product computes | `usability-heuristics…:217`; `gerhardt-powals…:117` |
+| 13.5's stated convention | `GP-2` again, plus `SHR-7` | `gerhardt-powals…:118`; `shneiderman…:141` |
+| 13.6's carrier and caveat | `GP-2`, `GP-3` summation labelled | `gerhardt-powals…:118-119` |
+| 13.7's two cap numbers | `GP-3`; `H2` client vocabulary | `gerhardt-powals…:119`; `usability-heuristics…:215` |
+
+Two corpus defects stand as recorded in §11.4 and §11.5 and are **not** repaired here:
+`SHR-8` is undefined (cite `SHR-7`), and `GP-2` has no routing-table row (cite it anyway; the
+routing gap is the prompt's, not the finding's). `docs/audit-corrections.md`, named in
+`PROCESS-PLANS.md:15941` as the home for these five framework defects, does not exist; this
+register does not create it, and the defects stay homed in §11.4, §11.5 and here.
+
+### 13.11 Revised slice order
+
+Supersedes §8. Rows and statuses do not move; only the order and grouping do.
+
+| Pass | Contents | Shape |
+| --- | --- | --- |
+| **S1** | The lost-data trio: R6-05 parent name (payload builder + cold-load manual mode), R6-11 deck card level (rule + accessor + transactional write), R6-12 Timeline key and band projection | Three facts, one failure class; each with a RED assertion, then GREEN |
+| **S2** | The self-contradicting constants and labels: `config/advisor.php:32` rest tier; the scenario-keyed facility ladder (`facility_level_source`, three scenarios); R6-04's two cap labels; the counter copy from 13.2 | Config and copy; no schema |
+| **S3** | The copy batch: R6-15 hint prefix, R6-23 `Pal slot`, R6-09 placeholder, R6-10 `Pass`, R6-08 literal "six", 13.6's carrier and caveat, the two unrelated thirties | One assertion per item |
+| **Held** | R6-13, R6-14's extent, R6-17, R6-26, R6-28, R6-31, R6-43, R6-52, and every §11.2 field item | Owner or ADR; unchanged from §8/§9 |
+
+### 13.12 Revised owner decisions
+
+§9 listed nine. This revision answers four from the evidence and leaves five open:
+
+| Row | Was | Now |
+| --- | --- | --- |
+| R6-14 extent | owner call on wizard vs snapshot | **answered**: the tool stores the 72 convention, which the reference permits; the ADR item is a per-scenario extent, not a correction |
+| R6-43 fans | owner call on restoring the ladder | **unchanged**, still the wireframe corpus owner's |
+| §11.2 facility aggregate | owner call on which mechanism reads | **answered**: `facility_level_source` decides, and three scenarios are currently wrong. The only owner question left is the no-logged-turn display policy (13.4) |
+| R6-48 `+30` | unrepresented source data | **reclassified**: derived and displayed; the obligation is copy (carrier + caveat), not a column |
+| R6-13 counter | mid-career entry | **narrowed**: entry is unchanged, and the counter's two unnamed targets are S2 copy |
+| R6-26, R6-28, R6-31, R6-17, R6-52, R6-53 | open | **unchanged** |
+
+### 13.13 Three corrections to the round-7 brief
+
+Recorded so this register shows what was revised rather than implying the brief was always
+right:
+
+1. **A1 was wrong** to instruct a re-measurement of rounds 2–4; those commits are real and their
+   fixes hold (13.1).
+2. **A5 was wrong** to expect a corpus correction; the reference carried the correct tiers and
+   the application's constant is the defect (13.3).
+3. **A3's framing was incomplete** — it posited one formula and two readings; there are two
+   widgets with two conventions, and R6-13 compared quantities that were never meant to agree
+   (13.2).
+
