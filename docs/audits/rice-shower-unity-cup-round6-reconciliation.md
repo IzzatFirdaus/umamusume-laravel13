@@ -528,21 +528,26 @@ when a slice opens one, the slice's audit cites the rule, not the register.
 **Two corrections to the rule IDs proposed for this section, both measured against the
 framework files and recorded here rather than silently applied:**
 
-1. **`SHR-8` does not exist.** The Shneiderman file defines `SHR-1` through `SHR-7`
-   (`shneiderman-golden-rules-2026-10-21.md:135-141`) and stops; there is no row for rule 7
-   (locus of control) either. `SHR-8` appears five times in `_audit-prompt.md` — the routing
-   table, the dimension table, the example list and twice in prose — but **never in the file
-   that would define it**. Its intended meaning ("nothing requires carrying a figure from one
-   display to another") is the one the file assigns to `SHR-7` at `:141`. Any audit citing
-   `SHR-8` is citing an ID with no definition; the correct citation is `SHR-7`, and the corpus
-   defect is recorded in `KNOWN-ISSUES.md`-style form by whatever pass owns the framework
-   corpus, not by this register.
-2. **`IA-5` means "an empty state shows an example of what would fill it"**
-   (`information-architecture-principles-2026-10-21.md:146`), not "front doors". The
-   `_audit-prompt.md:123` routing row labels the question "IA 5 (front doors)" while pointing
-   `IA-1` at it; the label and the rule ID disagree, and the rule's own file settles it. So the
-   primary ID for the import-door finding is `IA-1`, with `IA-5` secondary for the empty-state
-   placement only.
+1. **`SHR-8` does not exist, and the cause is an off-by-one in the derived-rule table, not a
+   missing rule.** The prose carries all eight Shneiderman rules — rule 7 "Keep users in control"
+   at `shneiderman-golden-rules-2026-10-21.md:83` and rule 8 "Reduce short-term memory load" at
+   `:94` — but the derived table's six rows cite rules 1, 2, 3, 4, 5, 6 and then **`rule 8`**
+   (`:141`). Rule 7 has no derived row at all. So the file defines only seven IDs for eight
+   rules, and `SHR-7`'s own text, "the value a decision needs is on the decision screen", is
+   rule 7's content carrying rule 8's label. `SHR-8` is cited five times in `_audit-prompt.md`
+   (`:117`, `:165`, `:182`, `:405`, `:432`) and defined in no file. Two consequences for the
+   slices: cite **`SHR-7`** for the cross-display clause, because it is the ID the file's own
+   row assigns to rule 8, or cite in prose; do **not** cite `SHR-8`, because Phase 6 gate 1
+   (`_audit-prompt.md:211`) drops any finding whose rule ID is not in the framework file. The
+   corpus defect is recorded here, not fixed here.
+2. **`IA-5`'s routing label is correct, and this register's earlier note was wrong.**
+   `_audit-prompt.md:123` writes "IA 5 (front doors)" and cites `IA-1`. Read against the IA file
+   that is coherent: **principle 5 is named Front doors**
+   (`information-architecture-principles-2026-10-21.md:116`) and its derived rule is `IA-1`,
+   whose own Source column reads `5` (`:142`). The label names the principle; the ID column
+   names the rule. So `IA-1` is the right citation for the import-door finding and `IA-5`
+   (the empty-state exemplar, `:146`, derived from principle 4) is secondary only for the
+   empty-state placement. There is no defect in the prompt's IA row.
 
 Two further notes on scope for the slice audits that follow this plan:
 
