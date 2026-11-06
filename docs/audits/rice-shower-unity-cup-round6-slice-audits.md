@@ -959,6 +959,116 @@ by stashing both source files and the test file, rebuilding, and re-running: byt
 `3 failed, 5 passed`. The failures are `Team Rank: not recorded`, `Documented`, and
 `Partially documented` locators — documentation labels and a gauge, not the counter copy.
 
+## S3.1 — R6-15, the duplicated `Hint Lvl` prefix
+
+### Identity
+
+| Item | Value |
+| --- | --- |
+| Audit ID | `RS-UC-R6-SLICE-AUDITS-S3.1` |
+| Mode | M1 change audit |
+| Row | R6-15 (register §4.1) |
+| Scope | `resources/js/pages/Career/SkillsPlanner.vue`, `tests/browser/career-skills-planner.spec.ts`, `tests/Feature/SkillSpendCoverageTest.php` |
+| Out of scope | `HintDiscount::priceLadder()` and its consumers (`SkillDetail`, compare) — a different ladder with the SHORT labels the prefix was written for |
+
+### Pre-flight
+
+| Item | Value |
+| --- | --- |
+| HEAD at open | `49a90c3a` |
+| Dirty set on the touched paths | Empty |
+| Source confirmed | `SkillsPlanner.vue:590` read `{{ 'Hint Lvl ' + step.label }}`; `HintDiscount::ladder()` already returns `'label' => $labels[$key]` → `Hint Lvl 1` … `Hint Lvl Max` |
+| Two ladders, not one | `ladder()` (planner, long labels) and `priceLadder()` (`:58`, `Lv1` … `Lv Max`) are separate. The prefix was written for the short form and applied to the long one |
+| Suite gate | `vendor/bin/pest tests/Feature/ScenarioMetadataTest.php` → 3 passed |
+| `RENDERED_EVIDENCE` | **TRUE**, re-probed |
+
+**A stale comment corrected by measurement.** `tests/Feature/CareerSkillsPlannerTest.php:24-27` says
+"the hint-discount ladder was removed on the owner's ruling (A5)" and that "no ladder survives on the
+props". Measured: `SkillsPlannerController.php:54` still sends `'hint_discount' => HintDiscount::ladder()`,
+the prop is still declared at `SkillsPlanner.vue:109`, the table still renders at `:585-590`, and
+`SkillSpendCoverageTest.php:112` asserts the prop key exists. The comment is stale; the code wins
+(`.ai/rules/index.md`). The case that owns the ladder is `SkillSpendCoverageTest`, so the RED assertion
+went there.
+
+### RED evidence (captured before GREEN)
+
+```
+- Expected  - 5
++ Received  + 5
+  Array [
+-   "Hint Lvl 1",
++   "Hint Lvl Hint Lvl 1",
+    ...
++   "Hint Lvl Hint Lvl Max",
+```
+
+All five rows duplicated the prefix. The feature-level assertion on the payload label passed at RED —
+the label was always correct at source, so the duplication could only be seen rendered.
+
+### GREEN
+
+`SkillsPlanner.vue:590`: `{{ 'Hint Lvl ' + step.label }}` → `{{ step.label }}`. One line, and the
+`priceLadder()` path is untouched because it is a different function with its own call sites.
+
+### Rule sweep (dimensions A-H)
+
+| Dimension | Result |
+| --- | --- |
+| A. Status and feedback | `no finding` |
+| B. Control and target | `no finding` |
+| C. Error prevention and recovery | `no finding` |
+| D. Consistency and signifiers | **finding** — F1. One caption had two owners |
+| E. Cognitive load and memory | `no finding` |
+| F. Visual grouping and hierarchy | `no finding` |
+| G. Accessibility semantics and contrast | `no finding` |
+| H. Content and language | **finding** — F2. `Hint Lvl Hint Lvl 1` is not a client caption |
+
+### Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F1 | `H4` | Usability heuristics | Skills planner, the hint-ladder card's Client caption column | Every row doubled its prefix: `Hint Lvl Hint Lvl 1` … `Hint Lvl Hint Lvl Max`. The server returns the full caption and the template prefixed it again | OBSERVED_RENDERED | `SkillsPlanner.vue:590` (pre-fix) | 1 | High | Done: render the server's label |
+| F2 | `H2` | Usability heuristics | Same | The ladder's short form (`Lv1` … `Lv Max`) is what the prefix was written for; applying it to the long form produced a string no client prints | OBSERVED_SOURCE | `HintDiscount.php:60-66` for the short form, `:24-31` for the long one | 1 | High | Done |
+
+### Unmeasured register
+
+Empty.
+
+### Gap register delta
+
+None.
+
+### Commit body basis
+
+| # | Question | Result | Basis |
+| --- | --- | --- | --- |
+| 1 | Add, remove or move a control? | `N/A` | No control |
+| 2 | Change what is on screen at once? | `N/A` | Same table |
+| 3 | Change a colour, tint or state? | `N/A` | No class change |
+| 4 | Change a type size or weight? | `N/A` | No type change |
+| 5 | Change what the user can undo, or where the action is? | `N/A` | No action |
+| 6 | Change where a thing lives, or what it is called? | `N/A` | The caption now matches its own source |
+| 7 | Change a progress, an incomplete state or a boundary? | `N/A` | No boundary |
+| 8 | Change what the user has to read or remember? | `PASS` | Removes a stutter, not a memory load |
+| 9 | Add a new destination, a landmark or a control type? | `N/A` | None |
+| 10 | Change the words? | `PASS` | Five captions, one deleted prefix |
+
+`RENDERED_EVIDENCE = TRUE`, declared from this slice's own probe: `career-skills-planner.spec.ts` 13
+passed (34.7s), including the new case asserting all five captions and the absence of
+`Hint Lvl Hint Lvl`.
+
+### Verification output
+
+```
+npx playwright test tests/browser/career-skills-planner.spec.ts
+  13 passed (34.7s)
+
+vendor/bin/pest tests/Feature/SkillSpendCoverageTest.php tests/Feature/CareerSkillsPlannerTest.php \
+  tests/Feature/SkillHintLevelTest.php tests/Feature/SkillDetailTest.php
+  Tests:    53 passed (735 assertions)
+```
+
+
 
 
 

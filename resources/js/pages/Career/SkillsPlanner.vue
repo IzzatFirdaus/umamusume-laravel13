@@ -587,7 +587,7 @@ const coverageConstants = computed(() =>
                     <tr v-for="step in props.hint_discount" :key="step.key" class="border-b border-rule-soft">
                         <td class="py-2 pr-3">{{ step.label }}</td>
                         <td class="py-2 pr-3 text-right font-mono">{{ step.discount }}%</td>
-                        <td class="py-2 font-mono">{{ 'Hint Lvl ' + step.label }}</td>
+                        <td class="py-2 font-mono">{{ step.label }}</td>
                     </tr>
                 </tbody>
             </table>

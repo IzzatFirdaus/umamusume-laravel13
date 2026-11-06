@@ -124,6 +124,29 @@ test('prints the five-step hint ladder with its sourced discounts', async ({ pag
     }
 });
 
+test('prints each hint caption once, never "Hint Lvl Hint Lvl 1" (R6-15)', async ({ page }) => {
+    // R6-15: the payload's labels are already `Hint Lvl 1` … `Hint Lvl Max`
+    // (`HintDiscount::ladder()`), and the template prefixed each with `'Hint Lvl ' +` again, so the
+    // Client caption column read `Hint Lvl Hint Lvl 1`. The prefix was written for the SHORT form
+    // `priceLadder()` returns (`Lv1` … `Lv Max`), which is a different consumer.
+    await openPlanner(page);
+
+    const ladder = page.getByRole('heading', { name: 'Why the hint ladder is not linear' }).locator('xpath=ancestor::section[1]');
+    const rows = ladder.locator('tbody tr');
+
+    await expect(rows).toHaveCount(5);
+
+    const captions = await rows.evaluateAll((nodes) =>
+        nodes.map((node) => (node.lastElementChild?.textContent ?? '').trim()),
+    );
+
+    expect(captions).toEqual(['Hint Lvl 1', 'Hint Lvl 2', 'Hint Lvl 3', 'Hint Lvl 4', 'Hint Lvl Max']);
+
+    // The duplication is what the walk saw, so it is asserted as an absence too rather than only as
+    // a positive shape: a future prefix would satisfy neither assertion.
+    await expect(ladder.getByText(/Hint Lvl Hint Lvl/)).toHaveCount(0);
+});
+
 test('keeps the build target and add-skill writers reachable in one disclosure', async ({ page }) => {
     await openPlanner(page);
 

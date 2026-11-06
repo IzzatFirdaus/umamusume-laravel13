@@ -113,6 +113,13 @@ final class SkillSpendCoverageTest extends TestCase
             ->and($encoded)->toContain('Hint Lvl 1')
             ->and($encoded)->toContain('Hint Lvl Max')
             ->and($props['hint_discount'])->toHaveCount(5)
+            // R6-15: the payload's own labels are already the full caption (`HintDiscount::ladder()`
+            // returns `Hint Lvl 1` … `Hint Lvl Max`), and the page used to prefix each one again with
+            // `'Hint Lvl ' +`, rendering `Hint Lvl Hint Lvl 1`. The assertion is on the payload's label
+            // because the duplication lived in the template, so the rendered proof is the browser
+            // spec's; what this pins is that the label carries the prefix exactly once at source.
+            ->and(array_column($props['hint_discount'], 'label'))
+            ->toBe(['Hint Lvl 1', 'Hint Lvl 2', 'Hint Lvl 3', 'Hint Lvl 4', 'Hint Lvl Max'])
             // A row with no recorded hint level stays at its base cost: the ladder exists, but no
             // column holds a hint level, so nothing re-prices the row (G-SK-3).
             ->and($props['groups'][0]['rows'][0]['sp_cost'])->toBe(200);
