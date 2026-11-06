@@ -439,5 +439,129 @@ existing corpus Umamusume already present five times in that same file (`:39`, `
 `:186`), used here as the fixture's ancestor name. It is not a violation and no marker is added;
 the term stays in the count with this ruling, per `AGENTS.md` §5 and §9.
 
+## S2.1 — §13.3, the advisor presents the rest failure tier as current
+
+### Identity
+
+| Item | Value |
+| --- | --- |
+| Audit ID | `RS-UC-R6-SLICE-AUDITS-S2.1` |
+| Mode | M1 change audit |
+| Row | **§13.3, not an `R6-NN` row.** The walk had no reading that could find it; the register's re-base pass recorded it as an application defect against a corpus that was already correct |
+| Scope | `config/advisor.php`, `app/Services/Advisor/NextDecision.php`, `app/Services/Advisor/TrainerAdvisor.php`, `tests/Feature/NextDecisionTest.php`, `tests/Feature/TrainerAdvisorTest.php` |
+| Out of scope | The `recorded_forecast` branches (already correct), the other three constants, `energyAfter()`'s arithmetic |
+
+### Pre-flight
+
+| Item | Value |
+| --- | --- |
+| HEAD at open | `279381b5` |
+| Dirty set on the touched paths | Empty |
+| Reference is already correct | `UMAMUSUME_REFERENCE.md:190`: `+50 Energy modal, +70 (big success), +30 (failure, sometimes with 夜ふかし気味 / Late-Night Feeling)`. §13.3's reversal confirmed: the corpus needs no correction |
+| Suite gate | `vendor/bin/pest tests/Feature/ScenarioMetadataTest.php` → 3 passed |
+| `RENDERED_EVIDENCE` | **TRUE**, re-probed. This slice renders (the advisor is on the Cockpit), but the assertion is payload-level and no browser case was needed or added |
+
+### RED evidence (captured before GREEN)
+
+`vendor/bin/pest tests/Feature/NextDecisionTest.php --filter='§13.3'` → `1 failed (9 assertions)`,
+verbatim:
+
+```
+Expected: Rest recovers +30 Energy. Source: GameWith, 2026-09-25, read 2026-11-02.
+
+To contain: +50
+at tests\Feature\NextDecisionTest.php:213
+```
+
+The rendered row quoted the failure tier, with a `current` confidence label and a read date, as the
+recovery figure.
+
+### GREEN
+
+| File | Change |
+| --- | --- |
+| `config/advisor.php` | `rest_recovery.value` 30 → **50**, with a new `tiers` map holding all three (`modal` 50, `big_success` 70, `failure` 30). Source corrected to the two named tables (`GameWith 257617 (n=3833), Kamigame 147307607101602682 (n=100)`), matching the reference's own citation |
+| `NextDecision::restRecoveryRow()` | New row builder: prints the modal figure, then the big-success and failure tiers in the same sentence, so the copy cannot quote one tier as if it were the whole story |
+| `NextDecision::explain()` | The Rest branch calls `restRecoveryRow()` instead of `constantRow('rest_recovery', ...)` |
+| `TrainerAdvisor::restFailure()` | Reads the failure tier from the same constant's `tiers` map, so the copy's two numbers and the config cannot drift |
+| `TrainerAdvisor::reason()` | The Rest sentence names the modal figure **and** the failure figure. This was the same defect one layer down: the reason string said only `Rest recovers +NN Energy` |
+| `TrainerAdvisor::constants()` | Return shape widened to `tiers?: array<string, int>` — the honest type now that one constant carries a map |
+
+### Rule sweep (dimensions A-H)
+
+| Dimension | Result |
+| --- | --- |
+| A. Status and feedback | `no finding`. The row keeps its `confirmed` badge, which is still correct: it is a declared constant printed as read |
+| B. Control and target | `no finding`. No control |
+| C. Error prevention and recovery | `no finding` |
+| D. Consistency and signifiers | **finding** — F1. Two surfaces on one screen printed different numbers for the same mechanic |
+| E. Cognitive load and memory | `no finding` |
+| F. Visual grouping and hierarchy | `no finding` |
+| G. Accessibility semantics and contrast | `no finding` |
+| H. Content and language | **finding** — F2. The copy presented the worst case as the figure, with a `current` label behind it |
+
+### Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F1 | `H4` | Usability heuristics | Cockpit, advisor `why` rows, Rest recommended | The Rest row said `Rest recovers +30 Energy` while the same screen's `recorded_forecast` block printed `Success +50 (modal) / Big success +70 / Poor Rest +30`. One mechanic, two numbers, one screen | OBSERVED_SOURCE | `config/advisor.php:32-37`, `NextDecision.php:485` vs `:238-243` (pre-fix) | 3 | High | Done: one constant carries all three tiers and both surfaces read it |
+| F2 | `GP-2` | Gerhardt-Powals | Cockpit, advisor Rest row | The quoted figure carried a `current` confidence and a read date, so the copy presented the failure tier as the sourced recovery rather than naming it as one tier of three | OBSERVED_SOURCE | `config/advisor.php:36` (pre-fix) | 3 | High | Done: the copy names which tier is which |
+
+`GP-2` is cited per register §11.5 (defined at `gerhardt-powals-principles-2026-10-21.md:118`, no
+routing-table row).
+
+### The one derived-behaviour change, stated plainly
+
+`TrainerAdvisor::energyAfter()` computes `min(100, energy + restRecovery())`. With the modal figure
+the forecast now reads `+50` where it read `+30`. That is the correct projection: the modal recovery
+is what a forecast should use. `TrainerAdvisorTest`'s own `min`/`max` assertions for `session_cost`
+were unaffected (28 passed), and no test pinned the old `energyAfter` figure for Rest.
+
+### Unmeasured register
+
+Empty.
+
+### Gap register delta
+
+None.
+
+### Commit body basis
+
+| # | Question | Result | Basis |
+| --- | --- | --- | --- |
+| 1 | Add, remove or move a control? | `N/A` | No control |
+| 2 | Change what is on screen at once? | `N/A` | Same rows, same count |
+| 3 | Change a colour, tint or state? | `N/A` | Badge unchanged |
+| 4 | Change a type size or weight? | `N/A` | No type change |
+| 5 | Change what the user can undo, or where the action is? | `N/A` | No action |
+| 6 | Change where a thing lives, or what it is called? | `N/A` | Nothing moved |
+| 7 | Change a progress, an incomplete state or a boundary? | `PASS` | The forecast's projected Energy after Rest moves from `+30` to `+50`, which is the corrected boundary |
+| 8 | Change what the user has to read or remember? | `PASS` | The two tiers are on one row instead of two |
+| 9 | Add a new destination, a landmark or a control type? | `N/A` | None |
+| 10 | Change the words? | `PASS` | The Rest row's sentence names all three tiers; `TrainerAdvisorTest`'s case carries the dated correction |
+
+`RENDERED_EVIDENCE = TRUE`, but no rendered assertion was made and none is claimed: the evidence for
+this slice is the payload (`inertiaProps('advisor.decision')`) plus `config()`, both read in the
+runner.
+
+### Verification output
+
+```
+vendor/bin/pest tests/Feature/TrainerAdvisorTest.php tests/Feature/NextDecisionTest.php
+  Tests:    28 passed (309 assertions)
+```
+
+```
+vendor/bin/pint --test --format agent config/advisor.php app/Services/Advisor/NextDecision.php app/Services/Advisor/TrainerAdvisor.php tests/Feature/NextDecisionTest.php tests/Feature/TrainerAdvisorTest.php
+{"tool":"pint","result":"passed"}
+
+vendor/bin/phpstan analyse --no-progress --memory-limit=1G app/Services/Advisor/NextDecision.php app/Services/Advisor/TrainerAdvisor.php
+ [OK] No errors
+```
+
+`SCREEN_SPEC.md` was checked for the `+30` figure and does not name it, so no screen-spec update was
+required.
+
+
 
 

@@ -77,11 +77,11 @@ final class TrainerAdvisor
      * Exposed so a surface can print the date behind a suggestion without a second lookup
      * (`ADR-0001` §7), and so the engine's inputs are inspectable without reading this class.
      *
-     * @return array<string, array{value: mixed, source: string, verified_at: string, confidence: string}>
+     * @return array<string, array{value: mixed, tiers?: array<string, int>, source: string, verified_at: string, confidence: string}>
      */
     public function constants(): array
     {
-        /** @var array<string, array{value: mixed, source: string, verified_at: string, confidence: string}> $constants */
+        /** @var array<string, array{value: mixed, tiers?: array<string, int>, source: string, verified_at: string, confidence: string}> $constants */
         $constants = config('advisor.constants');
 
         return $constants;
@@ -358,14 +358,20 @@ final class TrainerAdvisor
     ): ?string {
         if ($action === self::REST) {
             $recovery = $this->restRecovery();
+            // §13.3: the modal figure alone is not the whole story, and printing it alone is how the
+            // advisor came to quote the failure tier as the recovery. The sentence names the modal case
+            // and the failure case together, so a Trainer planning on it sees both ends.
+            $failure = $this->restFailure();
 
             if ($energy === null) {
-                return "Rest recovers +{$recovery} Energy, but this run has recorded none to recover.";
+                return "Rest recovers +{$recovery} Energy in the common case and +{$failure} on failure, "
+                    .'but this run has recorded none to recover.';
             }
 
             return $energy < $this->threshold()
-                ? "Energy {$energy} is below the {$this->threshold()} advisory line; Rest recovers +{$recovery}."
-                : "Rest recovers +{$recovery} Energy and you are at {$energy}.";
+                ? "Energy {$energy} is below the {$this->threshold()} advisory line; Rest recovers +{$recovery} "
+                    ."and +{$failure} on failure."
+                : "Rest recovers +{$recovery} Energy and +{$failure} on failure, and you are at {$energy}.";
         }
 
         if ($action === self::WIT) {
@@ -530,6 +536,17 @@ final class TrainerAdvisor
     private function restRecovery(): int
     {
         return (int) $this->constants()['rest_recovery']['value'];
+    }
+
+    /**
+     * The Rest failure tier's own figure (§13.3), from the same constant as the modal one.
+     *
+     * Read from the constant's `tiers` map rather than a second literal, so the copy's two numbers and
+     * the config cannot drift.
+     */
+    private function restFailure(): int
+    {
+        return (int) $this->constants()['rest_recovery']['tiers']['failure'];
     }
 
     private function witCost(): int

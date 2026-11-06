@@ -190,6 +190,39 @@ it('prints the constant a figure rests on with its source, its read date and its
         ->and(implode("\n", $titles))->toContain('advisor.constants.session_cost');
 });
 
+it('presents the rest modal figure rather than the failure tier (§13.3)', function (): void {
+    // §13.3: `config/advisor.php:32` declared `rest_recovery => 30` with `confidence => 'current'`, and
+    // `NextDecision.php:485` printed it as "Rest recovers +30 Energy". The reference is explicit
+    // (`UMAMUSUME_REFERENCE.md:190`): +50 is the modal recovery, +70 the big success, and +30 is the
+    // FAILURE tier, sometimes with a stayed-up-late penalty. The same file's own `recorded_forecast`
+    // branches (:238-243) already print all three. So the surface quoted the worst case as the figure.
+    //
+    // A Rest-eligible turn: Energy at 8, below the advisory line, so the advisor ranks Rest.
+    $run = nextDecisionRun('unity_cup', 12, 8, DECISION_SHORT_TARGETS);
+
+    /** @var array{why: list<array{text: string, badge: string}> $decision */
+    $decision = $this->get(route('runs.cockpit', $run))->assertOk()->inertiaProps('advisor.decision');
+
+    $restRow = collect($decision['why'])
+        ->first(fn (array $row): bool => str_contains($row['text'], 'Rest recovers'));
+
+    expect($restRow)->not->toBeNull();
+
+    // The modal figure is the one that prints, and the failure tier is named as the exception rather
+    // than presented as the recovery.
+    expect($restRow['text'])->toContain('+50')
+        ->and($restRow['text'])->toContain('+30')
+        // The failure tier must not read as the figure: the copy has to say which is which.
+        ->and($restRow['text'])->toContain('failure');
+
+    // And the constant no longer presents the failure tier as its value: it carries all three tiers, so
+    // a reader can tell the modal figure from the exception.
+    $constant = config('advisor.constants.rest_recovery');
+
+    expect($constant['value'])->toBe(50)
+        ->and($constant['tiers'])->toBe(['modal' => 50, 'big_success' => 70, 'failure' => 30]);
+});
+
 it('marks an arithmetic row Calculated and a row taken as read Confirmed, and never the other two states', function (): void {
     $run = nextDecisionRun('unity_cup', 12, 80, DECISION_SHORT_TARGETS);
 

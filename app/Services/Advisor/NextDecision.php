@@ -482,7 +482,7 @@ final class NextDecision
             }
 
             $rows[] = $option->action === TrainerAdvisor::REST
-                ? $this->constantRow('rest_recovery', "Rest recovers +{$this->constant('rest_recovery')} Energy.")
+                ? $this->restRecoveryRow()
                 : $this->sessionCostRow();
         }
 
@@ -547,6 +547,29 @@ final class NextDecision
             'session_cost',
             "A training session costs {$cost[0]} to {$cost[1]} Energy — declared as a range because it "
             .'scales with a facility level this tool does not track.',
+        );
+    }
+
+    /**
+     * The Rest recovery row: the modal figure first, with the two exception tiers named beside it.
+     *
+     * §13.3: this used to print `Rest recovers +30 Energy` — the failure tier, wearing a `current`
+     * confidence label. A Trainer reading it treated the worst case as the norm, and the same file's
+     * `recorded_forecast` branches already printed all three tiers correctly, so the two surfaces on one
+     * screen disagreed.
+     *
+     * @return array{text: string, badge: string, title: string}
+     */
+    private function restRecoveryRow(): array
+    {
+        /** @var array{value: int, tiers: array{modal: int, big_success: int, failure: int}} $constant */
+        $constant = $this->constants()['rest_recovery'];
+        $tiers = $constant['tiers'];
+
+        return $this->constantRow(
+            'rest_recovery',
+            "Rest recovers +{$tiers['modal']} Energy in the common case, +{$tiers['big_success']} on a big "
+            ."success, and +{$tiers['failure']} on failure. ",
         );
     }
 

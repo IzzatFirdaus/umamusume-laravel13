@@ -30,8 +30,18 @@ return [
 
     'constants' => [
         'rest_recovery' => [
-            'value' => 30,
-            'source' => 'GameWith, 2026-09-25',
+            // §13.3: this constant used to hold `30` with `confidence => 'current'`, so the advisor
+            // printed the FAILURE tier as the recovery figure. `UMAMUSUME_REFERENCE.md:190` states the
+            // three tiers: +50 modal, +70 big success, +30 failure (sometimes carrying a stayed-up-late
+            // penalty). The modal figure is the one a forecast uses; the other two are named beside it
+            // so the copy can say which is which instead of quoting the worst case as the norm.
+            'value' => 50,
+            'tiers' => [
+                'modal' => 50,
+                'big_success' => 70,
+                'failure' => 30,
+            ],
+            'source' => 'GameWith 257617 (n=3833), Kamigame 147307607101602682 (n=100)',
             'verified_at' => '2026-11-02',
             'confidence' => 'current',
         ],
