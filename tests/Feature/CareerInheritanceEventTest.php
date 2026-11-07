@@ -499,3 +499,37 @@ it('carries the run position for the turn prefill on a snapshot that has logged 
             ->where('run.career_position.turn_index', 67)
             ->has('write.turns', 0));
 });
+
+it('carries the entered letter rank for each parent and grandparent (R7-33, R7-80)', function (): void {
+    // The Legacy step records a letter rank per node (`StoreLegacySelectionRequest` validates
+    // `legacies.*.rank_letter` and `legacies.*.ancestors_rank_letters.*` against
+    // `LegacySelectionPayload::RANK_LETTERS`), and `AncestryGraph` sends both back as `rank_label`. The
+    // Inheritance screen never drew either, so a Trainer who entered `Pace Chaser · B+` on the Legacy
+    // step read only stars here. Round 7 R7-33 / R7-80.
+    $run = inheritanceRun(['scenario' => 'unity_cup'], turns: 18);
+    $run->update(['legacy_selection' => [
+        'legacies' => [
+            [
+                'rank' => 3,
+                'rank_letter' => 'B+',
+                'is_guest' => false,
+                'ancestors' => ['Daiwa Scarlet', 'Seiun Sky'],
+                'ancestors_rank_letters' => ['S+', 'A'],
+                'sparks' => [],
+            ],
+            ['rank' => null, 'rank_letter' => null, 'is_guest' => false, 'ancestors' => [], 'sparks' => []],
+        ],
+        'affinity' => null,
+    ]]);
+
+    $this->get(route('runs.inheritance', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            // The parent's own letter, as `AncestryGraph` composes it.
+            ->where('legacy.parents.0.rank_label', 'Rank B+')
+            // And the per-ancestor letters, aligned by index with `ancestors`.
+            ->where('legacy.parents.0.ancestors_rank_letters.0', 'S+')
+            ->where('legacy.parents.0.ancestors_rank_letters.1', 'A')
+            // The absence is the payload's own sentence, never a blank.
+            ->where('legacy.parents.1.rank_label', 'Rank not recorded'));
+});

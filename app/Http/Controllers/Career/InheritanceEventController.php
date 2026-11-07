@@ -230,6 +230,14 @@ class InheritanceEventController extends Controller
                 'label' => $label,
                 'name' => $name,
                 'rank' => $legacyData['rank'] ?? null,
+                // R7-33 / R7-80: the letter rank the Legacy step recorded. `AncestryGraph` composes the
+                // same sentence for the Legacy Lab and the wizard; this page builds its own parent rows,
+                // so it composes the same sentence here rather than sending two vocabularies for one
+                // fact. The absence is named, never blank (AGENTS.md §5).
+                'rank_label' => isset($legacyData['rank_letter'])
+                    ? 'Rank '.(string) $legacyData['rank_letter']
+                    : 'Rank not recorded',
+                'ancestors_rank_letters' => $legacyData['ancestors_rank_letters'] ?? [],
                 'is_guest' => $legacyData['is_guest'],
                 // `ancestors` is a list of names, not slot records (`ADR-0010` Consequences §2): the
                 // position is the slot, and the wizard writes names (`StoreLegacySelectionRequest`).

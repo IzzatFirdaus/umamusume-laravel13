@@ -56,6 +56,8 @@ async function openInheritanceEvent(page: import('@playwright/test').Page): Prom
     const addSpark = (parent: number) => page.getByRole('button', { name: 'Add Spark' }).nth(parent);
 
     await page.locator('#rank-parent_a').fill('3');
+    // R7-33: a letter rank is recorded alongside the stars, so the screen has something to render.
+    await page.locator('#rank-letter-parent_a').fill('B+');
     await page.locator('#ancestor-parent_a-0').fill('Symboli Rudolf');
     await page.locator('#ancestor-parent_a-1').fill('Mejiro McQueen');
     await addSpark(0).click();
@@ -128,6 +130,19 @@ test('offers Skip this moment and returns to the cockpit', async ({ page }) => {
 
     await page.getByRole('button', { name: 'Skip this moment' }).click();
     await page.waitForURL(`/training-runs/${runId}/cockpit`, WRITE);
+});
+
+test('renders the entered letter rank beside the star grade (R7-33, R7-80)', async ({ page }) => {
+    // The Legacy step records a letter per node; `AncestryGraph` and this page's own payload both carry
+    // it as `rank_label`. The screen drew only stars, so a Trainer who entered `B+` read `★★★` and no
+    // letter. The stars stay — they render a value the entry form genuinely recorded (R7-34) — and the
+    // letter now prints beside them.
+    await openInheritanceEvent(page);
+
+    await expect(page.getByText(/Rank B\+/).first()).toBeVisible();
+
+    // And the parent's own row carries the star grade it recorded, unchanged.
+    await expect(page.getByText(/★{2,}/).first()).toBeVisible();
 });
 
 test('sizes the inheritance controls to the 44px contract', async ({ page }) => {

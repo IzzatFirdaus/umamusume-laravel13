@@ -54,6 +54,9 @@ interface LegacyParent {
     is_guest: boolean;
     /** A list of names, not slot records: the position is the slot (`ADR-0010` Consequences §2). */
     ancestors: (string | null)[];
+    /** R7-33/R7-80: the letter rank each node was entered with, or the payload's own absence sentence. */
+    rank_label: string | null;
+    ancestors_rank_letters: (string | null)[];
     sparks: { kind: string; kind_label: string; target: string | null; stars: number | null }[];
     /** Grandparent sparks, one list per ancestor slot (R6-08 facet b). */
     ancestors_sparks: { kind: string; kind_label: string; target: string | null; stars: number | null }[][];
@@ -129,6 +132,15 @@ const parentB = computed<LegacyParent | null>(() => props.legacy?.parents[1] ?? 
 
 const grandparent = (parent: LegacyParent | null, index: number): string | null =>
     parent?.ancestors[index] ?? null;
+
+/**
+ * R7-80: the letter rank recorded for one grandparent, or null when the payload carries none.
+ *
+ * `ancestors_rank_letters` is aligned by ancestor index, the same alignment `ancestors_sparks` uses,
+ * so the marker and the spark panel cannot disagree about which node they describe.
+ */
+const grandparentRank = (parent: LegacyParent | null, index: number): string | null =>
+    parent?.ancestors_rank_letters?.[index] ?? null;
 
 const sparkCarries = (spark: LegacyParent['sparks'][number]): string => {
     if (spark.kind === 'blue') {
@@ -321,12 +333,12 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                         <div class="lin-node" :class="grandparent(parentA, 0) === null ? 'is-off' : ''">
                             <span class="k">Grandparent</span>
                             <span class="v">{{ grandparent(parentA, 0) ?? 'Not set' }}</span>
-                            <span class="m">{{ grandparent(parentA, 0) === null ? 'slot open' : 'recorded ancestor' }}</span>
+                            <span class="m">{{ grandparent(parentA, 0) === null ? 'slot open' : 'recorded ancestor' }}<template v-if="grandparentRank(parentA, 0) !== null"> · {{ grandparentRank(parentA, 0) }}</template></span>
                         </div>
                         <div class="lin-node" :class="grandparent(parentA, 1) === null ? 'is-off' : ''">
                             <span class="k">Grandparent</span>
                             <span class="v">{{ grandparent(parentA, 1) ?? 'Not set' }}</span>
-                            <span class="m">{{ grandparent(parentA, 1) === null ? 'slot open' : 'recorded ancestor' }}</span>
+                            <span class="m">{{ grandparent(parentA, 1) === null ? 'slot open' : 'recorded ancestor' }}<template v-if="grandparentRank(parentA, 1) !== null"> · {{ grandparentRank(parentA, 1) }}</template></span>
                         </div>
                     </div>
                     <div class="lin-gen">
@@ -350,12 +362,12 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                         <div class="lin-node" :class="grandparent(parentB, 0) === null ? 'is-off' : ''">
                             <span class="k">Grandparent</span>
                             <span class="v">{{ grandparent(parentB, 0) ?? 'Not set' }}</span>
-                            <span class="m">{{ grandparent(parentB, 0) === null ? 'slot open' : 'recorded ancestor' }}</span>
+                            <span class="m">{{ grandparent(parentB, 0) === null ? 'slot open' : 'recorded ancestor' }}<template v-if="grandparentRank(parentB, 0) !== null"> · {{ grandparentRank(parentB, 0) }}</template></span>
                         </div>
                         <div class="lin-node" :class="grandparent(parentB, 1) === null ? 'is-off' : ''">
                             <span class="k">Grandparent</span>
                             <span class="v">{{ grandparent(parentB, 1) ?? 'Not set' }}</span>
-                            <span class="m">{{ grandparent(parentB, 1) === null ? 'slot open' : 'recorded ancestor' }}</span>
+                            <span class="m">{{ grandparent(parentB, 1) === null ? 'slot open' : 'recorded ancestor' }}<template v-if="grandparentRank(parentB, 1) !== null"> · {{ grandparentRank(parentB, 1) }}</template></span>
                         </div>
                     </div>
                     <div class="lin-gen">
@@ -384,7 +396,10 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                     <h2 :id="'parent-' + (parent?.slot ?? 'none') + '-heading'">
                         {{ parent === null ? 'Parent' : (parent.slot.endsWith('a') ? 'Parent A · ' : 'Parent B · ') + (parent.name ?? 'Not set') }}
                     </h2>
-                    <p class="sub">{{ parent === null ? 'No parent recorded for this slot' : (parent.is_guest ? 'Guest · ' : '') + '★'.repeat(parent.rank ?? 0) + ' · ' + props.run.scenario_label }}</p>
+                    <!-- R7-33: the letter the Trainer entered on the Legacy step prints beside the star
+                         grade. The stars are honest — they render `Rank (stars)`, a value the entry form
+                         genuinely recorded (R7-34) — but the letter was stored, sent, and never drawn. -->
+                    <p class="sub">{{ parent === null ? 'No parent recorded for this slot' : (parent.is_guest ? 'Guest · ' : '') + (parent.rank_label ?? '') + ' · ' + '★'.repeat(parent.rank ?? 0) + ' · ' + props.run.scenario_label }}</p>
 
                     <p v-if="parent === null || parent.sparks.length === 0" class="text-sm text-ink">
                         {{ parent === null ? 'No parent is recorded in this slot.' : 'This parent carries no recorded spark.' }}
