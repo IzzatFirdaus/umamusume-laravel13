@@ -301,7 +301,12 @@ class PreflightController extends Controller
             return null;
         }
 
-        return SupportCard::query()->find($cardId)?->displayName();
+        // R7-03/R7-13: a form id is a `character_cards` id. `training_runs.character_card_id` names a
+        // costume form, and the picker's `Form` select writes one. This looked the id up in
+        // `SupportCard` — the deck's table — so the lookup could only ever miss and the screen printed
+        // `FORM · N/A` while the select above showed a form. The two id spaces are unrelated, so a
+        // wrong-table query here cannot coincidentally succeed.
+        return CharacterCard::query()->find($cardId)?->title;
     }
 
     /**

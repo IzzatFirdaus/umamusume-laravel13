@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\CardRarity;
 use App\Enums\RunStatus;
+use App\Models\CharacterCard;
 use App\Models\DeckSlot;
 use App\Models\SupportCard;
 use App\Models\TrainingRun;
@@ -479,15 +480,28 @@ it('refuses a draft with no trainee, creating nothing', function (): void {
     expect(TrainingRun::count())->toBe($before);
 });
 
-it('resolves the chosen form onto the trainee it belongs to (R6-09)', function (): void {
+it('resolves the chosen form onto the trainee it belongs to (R6-09, R7-03, R7-13)', function (): void {
     // R6-09: the Form tile printed `as chosen above` because no prop could name the form. The label now
     // travels inside `trainee` -- not beside it -- because `contract.build` is pinned to four keys by the
     // case below, and a fifth sibling would break that structural invariant.
+    //
+    // R7-03/R7-13: this case used to seed `character_card_id` with a SUPPORT card, because
+    // `preflightFixture()`'s `cards` array is the six-card deck. A form id is a `character_cards` id —
+    // `TrainingRun.character_card_id` names a costume form, and the picker's `Form` select writes one —
+    // so the old fixture proved the label resolver against a table it never queries at runtime.
+    // `PreflightController::formLabel()` looked the id up in `SupportCard`, which is why the walk read
+    // `FORM · N/A` while the picker's select showed a form.
     $fixture = preflightFixture();
-    $card = SupportCard::query()->findOrFail($fixture['cards'][0]);
+    $trainee = $fixture['trainee'];
 
-    session([SetupDraft::SESSION_KEY => preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents'], [
-        'character_card_id' => $card->id,
+    $form = CharacterCard::factory()->for($trainee)->create([
+        'title' => '[Rosy Dreams]',
+        'rarity' => CardRarity::ThreeStar,
+        'is_debut_form' => false,
+    ]);
+
+    session([SetupDraft::SESSION_KEY => preflightDraft($trainee, $fixture['cards'], $fixture['parents'], [
+        'character_card_id' => $form->id,
     ])]);
 
     $this->get(route('career.preflight'))
@@ -495,7 +509,7 @@ it('resolves the chosen form onto the trainee it belongs to (R6-09)', function (
         ->assertInertia(fn (Assert $page) => $page
             ->component('Career/Preflight')
             ->has('contract.build.trainee.form_label')
-            ->where('contract.build.trainee.form_label', $card->displayName()));
+            ->where('contract.build.trainee.form_label', '[Rosy Dreams]'));
 });
 
 it('marks the Legacy row by how many parents were actually named (R6-10)', function (): void {

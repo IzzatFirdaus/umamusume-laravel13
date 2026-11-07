@@ -144,6 +144,13 @@ test('names the chosen form rather than printing a placeholder (R6-09)', async (
 
     // Either the tile names the form, or it states its own absence with a disclosure. What it must
     // never do is print a sentence where a value belongs.
+    //
+    // MEASURED under R7-03/R7-13: on this walk the tile states the absence — `No costume form was chosen
+    // in this draft` — because the wizard's Trainee step does not write `character_card_id` to the draft
+    // at all. That is R7-03's remaining half (the picker's `Form` select posts the id, but the wizard
+    // path this case walks does not reach that control for a single-form trainee), and it is why the
+    // assertion stays shape-only. The wrong-table lookup in `PreflightController::formLabel()` is fixed
+    // and pinned by `CareerPreflightTest`, which seeds a real `character_cards` id.
     const text = ((await formTile.textContent()) ?? '').trim();
 
     expect(text).not.toContain('as chosen above');
