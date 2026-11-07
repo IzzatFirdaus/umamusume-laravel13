@@ -854,4 +854,5 @@ renumbered.*
 | R7-26 | S2 | `4efa0876` | `Confirmed defect` → `Confirmed fixed` | `#s2--r7-26` | RED: turn-67 run reported `hasClearedMaidenLock() === false`; GREEN: `true`, turn-5 still `false` |
 | — | S0 | `58bb98a7` | housekeeping | `#s0--housekeeping` | three pre-existing test reds cleared; no R7 row |
 | R7-20 | S1 | `e5cdc971` | `Confirmed defect` → `Confirmed fixed` | `#s1--r7-20` | RED: no `Turn to play` label; GREEN: label + helper present |
+| R7-02 | S17b | `1d6a39af` | `Source conflict / open` → `Confirmed defect (copy)` → `Confirmed fixed` | `#s17b--r7-02` | RED: no `form_count_label`; GREEN: `2 released forms` / `3 forms (2 released, 1 undated)` |
 | R7-19, R7-66 | S6 | `c6ac05e7` | `Confirmed defect` → `Confirmed fixed` | `#s6--r7-19-r7-66` | RED: five stat rows labelled `cap` on a run with four null cap columns; GREEN: `floor` |

@@ -64,7 +64,8 @@ $ git status --short
 | S2 | R7-26 | `4efa0876` | **landed** — `#s2--r7-26` |
 | S0 | — (housekeeping) | `58bb98a7` | **landed** — `#s0--housekeeping` |
 | S6 | R7-19, R7-66 | `c6ac05e7` | **landed** — `#s6--r7-19-r7-66` |
-| S17 | R7-02 | — (verification-only) | **settled, Outcome B** — `#s17--r7-02`; opens `S17b` for an owner ruling |
+| S17 | R7-02 | — (verification-only) | **settled, Outcome B** — `#s17--r7-02` |
+| S17b | R7-02 | `1d6a39af` | **landed** — `#s17b--r7-02` |
 
 ---
 
@@ -888,3 +889,114 @@ $ npx playwright test career-training-detail.spec.ts → 9 passed
 - **`R7-32`** — the turn-convention split (Events/Inheritance prefill 68, Timeline labels 67). S13's.
 - **The field stays unbounded.** `min=1`, no `max` — a Trainer can type 999. The ruling is about legibility, not
   bounds; bounding it is not in any register row this slice owns.
+
+---
+
+## §s17b — S17b: each form count names its scope
+
+### 1. Slice, rows, register reference
+**S17b.** Row `R7-02`, register §4.1, `Source conflict / open` at `8a3cf21c`. Settled by S17 to Outcome **B**; ruled
+**(b3)** in `round7-owner-calls.md` §5 — label each count, change neither filter.
+
+### 2. Pre-flight
+```
+$ git status --short -- <the seven touched paths>
+(empty — CLEAN)
+
+$ vendor/bin/pest tests/Feature/ScenarioMetadataTest.php → 3 passed (52 assertions)
+```
+
+### 3. RED
+New case `it('labels the form count each surface reports, so a scope cannot be read as a total')` in
+`tests/Feature/TraineeCardFormTest.php`:
+
+```
+Property [trainees.data.0.form_count_label] does not exist.
+Failed asserting that false is true.
+  at tests\Feature\TraineeCardFormTest.php:127
+```
+
+The case seeds a third card with `global_release_date => null` on the same character, so the picker's 2 and the
+profile's 3 are both facts about the same trainee.
+
+### 4. GREEN
+- **`app/Support/FormCount.php`** (new) — `releasedLabel()` for a pre-filtered list, `splitLabel()` for a full one,
+  and `label()` as the short alias. One owner, so the two sentences cannot drift.
+- **`TraineeSelectController`** — payload gains `form_count_label` beside the unchanged `form_count`.
+- **`TraineeProfileController`** — payload gains `form_count_label`.
+- **`TraineeSelect.vue`** — the local `formPillLabel()` function is replaced by the server's string; the type widens.
+- **`TraineeProfile.vue`** — the "Costume forms" heading gains the split count.
+
+```
+$ vendor/bin/pest TraineeCardFormTest → 5 passed (47 assertions)
+$ vendor/bin/pest TraineeCardFormTest CareerTraineeSelectTest CareerPreflightTest → 52 passed (856 assertions)
+```
+
+### 5. Non-vacuity
+```
+$ git diff <the four code files> > S17b.patch    # 105 lines
+$ git checkout -- <the four code files>
+$ vendor/bin/pest --filter='labels the form count'
+  Property [trainees.data.0.form_count_label] does not exist. — 1 failed
+$ git apply S17b.patch ; git diff | diff - S17b.patch → DIFF MATCHES
+$ npm run build ; vendor/bin/pest --filter → 1 passed (22 assertions)
+```
+
+### 6. Regression
+```
+$ vendor/bin/pest TraineeCardFormTest CareerTraineeSelectTest CareerPreflightTest → 52 passed (856 assertions)
+$ npx playwright test career-trainee-select.spec.ts → 18 passed, 1 failed
+```
+
+**The one failure is pre-existing and classified, not fixed.** `renders the profile at card grain, with the Basic
+facts card gone` fails on a **clean HEAD build** with the four code files reverted:
+
+```
+Error: expect(locator).toBeVisible() failed
+Locator: getByText('Unique')
+strict mode violation: getByText('Unique') resolved to 3 elements:
+  1) <h2 id="unique-skill">Unique skill</h2>
+  2) <span class="pill pill-neutral">✦ Unique · from the source's …</span>
+  …
+```
+
+Three elements now carry the word; the locator predates one of them. Test staleness from an earlier round, in a
+region S17b does not touch. **Left alone** per the round's discipline; recorded as UNMEASURED for that case in the
+commit body.
+
+### 7. Gates
+| Gate | Result |
+| --- | --- |
+| Focused test | `TraineeCardFormTest` → **5 passed (47 assertions)** |
+| Feature regression | three suites → **52 passed (856 assertions)** |
+| Browser | `career-trainee-select.spec.ts` → **18 passed, 1 pre-existing failure** (classified above) |
+| Typecheck | clean |
+| Build | ✓ |
+| Pint | `passed` after `pint` fixed 3 files (import order, unary spacing, EOF blank line) |
+| PHPStan | `[OK] No errors` on the three PHP files |
+| Lore docs / code | **556 / 75**, delta 0 |
+| Fence | 0 invalid |
+
+### 8. Lore delta
+`Lore docs: 556 (was 556); code: 556 (was 556)`. **Delta 0.**
+
+### 9. Commit
+`1d6a39af` — `fix(trainee): label each surface's form count with its scope (R7-02)`
+
+```
+app/Support/FormCount.php                                  (new)
+app/Http/Controllers/Career/TraineeSelectController.php
+app/Http/Controllers/Career/TraineeProfileController.php
+resources/js/pages/Career/TraineeProfile.vue
+resources/js/pages/Career/TraineeSelect.vue
+tests/Feature/TraineeCardFormTest.php
+tests/browser/career-trainee-select.spec.ts
+```
+
+### 10. What this slice did not close
+- **Both filters are unchanged, deliberately.** The picker still excludes undated forms and the profile still lists
+  them. (b3) states the difference rather than resolving it.
+- **The falsifier stands open.** If `Yummy Dreamy Fairy` is verifiably released on the Global client, the date is a
+  data gap and the fix is a backfill in `database/seeders/`, after which both labels read `3 released`. The verifier
+  could not confirm the release.
+- **The pre-existing `getByText('Unique')` red** in `career-trainee-select.spec.ts` — classified, not fixed.

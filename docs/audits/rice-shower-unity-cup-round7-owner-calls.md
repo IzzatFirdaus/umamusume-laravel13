@@ -122,6 +122,38 @@ duplicate the sort, filters and phase grouping. **`R7-99` needs no ruling** and 
 | S11 | **(t)** six per-node spark editors | 2026-11-07 | `#s11--r7-36-r7-68` |
 | S18b | **(i)** the timeline row set joins `race_entries` as `kind: 'race'` | 2026-11-07 | `#s18b--r7-83` |
 | S18a | no ruling required — `R7-99` is a settled defect with a named file | 2026-11-07 | `#s18a--r7-99` |
+| S17b | **(b3)** both filters correct for their purpose; fix the count **labels**, leave both filters unchanged | 2026-11-07 | `#s17b--r7-02` |
+
+### S17b — the three-way scope split on `R7-02`
+
+Measured at `c6193993`: three surfaces, two predicates.
+
+| Surface | Release predicate | Purpose |
+| --- | --- | --- |
+| Picker (`TraineeSelectController:457-466`) | `unconfirmed=false` **+ `whereNotNull('global_release_date')`** | offers forms a run can use |
+| Profile (`TraineeProfileController:275-284`) | `unconfirmed=false` | informs: shows the character's forms |
+| Catalog (`CatalogController:800-810`) | `unconfirmed=false`, no release predicate | browse: the canonical unfiltered record |
+
+Card 170 (`Yummy Dreamy Fairy`, `umamusume_id = 30`) has `global_release_date = NULL`, so the picker shows 2 and the
+profile 3.
+
+**Ruling (b3):** each filter is right for its own surface; the defect is that neither count says what it counts.
+The picker's badge reads `2 released forms`; the profile's reads `3 forms (2 released, 1 undated)`. **Both filters stay
+unchanged.**
+
+Why the alternatives fail:
+- **(b2)**, propagating the picker's predicate to the profile and catalog, hides a real form from the read screen —
+  a new defect in the making, and it contradicts the profile docblock's own claim that it follows the catalog's rule.
+- **(b1)**, dropping the picker's predicate, would offer a form the run cannot use — reintroducing walk 5's E2-01
+  class.
+
+**Falsifier:** `Yummy Dreamy Fairy` verifiably released on the Global client today. Then `global_release_date = NULL`
+is a data gap, the picker over-filters on missing data, and the correct fix is a **backfill** (`database/seeders/`,
+not a runtime write), after which the picker shows 3 and both labels read `3 released`. The verifier cannot confirm
+the release, so (b3) stands.
+
+**The falsifier's failure mode is not silent:** if the form is released-but-undated, the profile reads
+`1 undated` to a Trainer whose client shows the form, and the next walk catches it.
 
 **All four held slices are unblocked.** The dispatch's recommendations were accepted for S1 and S11; S2 was ruled an
 option the dispatch did not carry (derive from position, not from a new column); S18 was split so the unblocked half
