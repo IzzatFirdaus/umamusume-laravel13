@@ -66,7 +66,7 @@ class TraineeSelectController extends Controller
         ['value' => 'medium', 'label' => 'Medium', 'axis' => 'distance'],
         ['value' => 'long', 'label' => 'Long', 'axis' => 'distance'],
         ['value' => 'front_runner', 'label' => 'Front runner', 'axis' => 'style'],
-        ['value' => 'pace_chaser', 'label' => 'Pace chaser', 'axis' => 'style'],
+        ['value' => 'pace_chaser', 'label' => 'Pace Chaser', 'axis' => 'style'],
         ['value' => 'late_surger', 'label' => 'Late surger', 'axis' => 'style'],
         ['value' => 'end_closer', 'label' => 'End closer', 'axis' => 'style'],
     ];

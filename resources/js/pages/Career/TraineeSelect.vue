@@ -459,7 +459,7 @@ const sortLabel = computed(
              mock's number: `career-trainee.html:75` prints "71 trainees are catalogued", and this roster
              prints however many rows the catalog holds today (the same rule the pager line follows). -->
         <template #lede>
-            {{ props.trainees.total }} trainee{{ props.trainees.total === 1 ? '' : 's' }} are catalogued.
+            {{ props.trainees.total }} {{ props.trainees.total === 1 ? 'trainee is' : 'trainees are' }} catalogued.
             Filter by aptitude if you are building toward a specific race, then pick the card you are
             running.
         </template>

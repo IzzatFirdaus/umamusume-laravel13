@@ -449,7 +449,7 @@ function remainingLetters(group: AptitudeGroup): string {
                 </section>
 
                 <section class="card" aria-labelledby="scenarios">
-                    <h2 id="scenarios">Scenarios this trainee is linked to</h2>
+                    <h2 id="scenarios">Scenarios you can run this trainee in</h2>
 
                     <p class="sub mt-2">
                         A scenario link decides which scenario cards name this trainee. It does not lock the choice.
@@ -462,8 +462,9 @@ function remainingLetters(group: AptitudeGroup): string {
                     <p class="note mt-2">
                         <span class="g" aria-hidden="true">○</span>
                         <span class="flex-1">
-                            No per-trainee link list is carried on this payload, so the scenarios are shown as
-                            available rather than as links. The scenario step is where the run's choice is made.
+                            Every scenario is listed as available; this page does not carry a per-trainee link
+                            list, so it cannot say which ones name this trainee. The scenario step is where the
+                            run's choice is made.
                         </span>
                     </p>
                 </section>

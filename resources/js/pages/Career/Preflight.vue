@@ -625,7 +625,13 @@ const CAREER_TURNS = 72;
                                 </td>
                                 <td class="py-2 text-ink">
                                     <span>{{ row.summary }}</span>
-                                    <span v-if="row.ja" lang="ja" class="ml-2 text-ink-muted">{{ row.ja }}</span>
+                                    <!-- R7-54: a margin is not a separator. `ml-2` spaced the two names visually while the
+                                     accessible name and any copied text read `Rice Showerライスシャワー` as one
+                                     word. The parens belong to the markup, not to the value, so a `<span>`
+                                     around the pair keeps them together in the a11y tree. -->
+                                <span v-if="row.ja" class="text-ink-muted">
+                                    (<span lang="ja">{{ row.ja }}</span>)
+                                </span>
                                     <!-- Exactly one fix link, on the row that is the one warning. A link on
                                          every row would be five ways to leave a screen whose point is the
                                          single thing left to do. -->
