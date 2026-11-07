@@ -849,3 +849,4 @@ renumbered.*
 
 | R7 | Slice | Commit | Status | Audit | RED / GREEN |
 | --- | --- | --- | --- | --- | --- |
+| R7-82, R7-22, R7-25, R7-61 | S3 | `27a3d374` | `Confirmed defect` → `Confirmed fixed` | `#s3--r7-82-r7-22-r7-25-r7-61` | RED: past goal returned `'missed'`; GREEN: `'not_reached'` |

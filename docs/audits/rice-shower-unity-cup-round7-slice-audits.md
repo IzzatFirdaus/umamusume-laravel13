@@ -58,7 +58,7 @@ $ git status --short
 
 | Slice | Rows | Commit | Result |
 | --- | --- | --- | --- |
-| _(none landed yet)_ | | | |
+| S3 | R7-82, R7-22, R7-25, R7-61 | `27a3d374` | **landed** — `#s3--r7-82-r7-22-r7-25-r7-61` |
 
 ---
 
@@ -76,3 +76,124 @@ Each landed slice appends a section with exactly these ten sub-sections:
 8. **Lore delta** — `Lore docs: N (was M); code: P (was Q)`, with a ruling if either moved.
 9. **Commit** — the SHA and the exact pathspec.
 10. **What this slice did not close** — every facet the register's row left open, named.
+
+---
+
+## §s3 — S3: a past objective with no record reads `not_reached`, not `missed`
+
+### 1. Slice, rows, register reference
+**S3.** Rows `R7-82` (blocking, the dropped cleared-objectives finding), `R7-22`, `R7-25`, `R7-61`. Filed in the
+register's §4.1 (`R7-22`, `R7-25`, `R7-61`) and §4.4 (`R7-82`), all `Confirmed defect` at `8a3cf21c`.
+
+### 2. Pre-flight
+```
+$ git status --short -- app/Services/Career/TeamPanelBuilder.php tests/Feature/ScenarioPanelTest.php tests/Feature/CareerCockpitTest.php tests/browser/scenario-panel.spec.ts
+(empty — CLEAN)
+
+$ vendor/bin/pest tests/Feature/ScenarioMetadataTest.php
+  Tests:    3 passed (52 assertions)
+  Duration: 1.90s
+```
+
+### 3. RED
+New case in `tests/Feature/TraineeGoalsPanelTest.php:263-279`:
+`it('reads a past objective the run never played as not reached, not as missed')`.
+Run: `vendor/bin/pest tests/Feature/TraineeGoalsPanelTest.php --filter='not reached'`
+
+```
+-'not_reached'
++'missed'
+  at tests\Feature\TraineeGoalsPanelTest.php:277
+  Tests:    1 failed (8 assertions)
+```
+
+The message is the walk's own harm: a Junior debut objective at turn 12 and a Senior goal at turn 54, on a run whose
+position has passed both, with no `race_entries` — the panel reported `missed`.
+
+**Test-home correction:** the dispatch named `tests/Feature/TeamPanelBuilderTest.php`, which does not exist. The
+builder's objective states are asserted in `TraineeGoalsPanelTest.php` (via the cockpit's `scenario.objectives`
+payload), and `CockpitObjectivesTest.php` contains no `TeamPanelBuilder` reference. Recorded in
+`round7-path-corrections.md` §2.2.
+
+### 4. GREEN
+`app/Services/Career/TeamPanelBuilder.php`:
+- new `objectiveHasRecord()` helper beside `objectiveMet()`
+- objectives arm, `:255-268` — `$reached` now splits on whether a race entry exists
+- mandatory-race arm, `:109-118` — `$reached` yields `not_reached`
+
+```
+$ vendor/bin/pest tests/Feature/TraineeGoalsPanelTest.php
+  ✓ it reads a past objective the run never played as not reached, not as missed
+  Tests:    20 passed (208 assertions)
+```
+
+**Renderer half, found while running the slice:** four cockpit panels mapped `missed` and nothing else, so a
+`not_reached` state fell through `words[state] ?? state` and would have printed the raw token. All four now carry
+`not_reached: '–'` (glyph) and `not_reached: 'Not reached'` (word): `CareerGoalsPanel.vue`, `CareerMilestonesPanel.vue`,
+`TeamRankLadderPanel.vue`, `UraMandatoryLadder.vue`. Without this the fix would have been server-correct and
+screen-wrong.
+
+### 5. Non-vacuity
+```
+$ git diff app/Services/Career/TeamPanelBuilder.php > .scratch-uma/r7-slices/S3.patch   # 51 lines
+$ git checkout -- app/Services/Career/TeamPanelBuilder.php
+$ vendor/bin/pest ... --filter='not reached'
+  ⨯ it reads a past objective the run never played as not reached, not as missed
+  -'not_reached'
+  +'missed'
+$ git apply .scratch-uma/r7-slices/S3.patch
+$ vendor/bin/pest ... --filter='not reached'
+  Tests:    1 passed (9 assertions)
+$ git diff app/Services/Career/TeamPanelBuilder.php | diff - .scratch-uma/r7-slices/S3.patch
+  DIFF MATCHES PRE-REVERT
+```
+The fix is doing the work: reverting it restores the exact failure.
+
+### 6. Regression
+```
+$ vendor/bin/pest tests/Feature/TraineeGoalsPanelTest.php tests/Feature/CockpitObjectivesTest.php     tests/Feature/ScenarioPanelTest.php tests/Feature/CareerCockpitTest.php     tests/Feature/Career/SpiritBurstCountdownTest.php tests/Feature/TraineeGoalLadderStateTest.php
+  Tests:    116 passed (1423 assertions)
+  Duration: 12.64s
+```
+
+### 7. Gates
+| Gate | Command | Result |
+| --- | --- | --- |
+| Focused test | `pest TraineeGoalsPanelTest.php` | **20 passed (208 assertions)** |
+| Regression | six adjacent suites | **116 passed (1423 assertions)** |
+| Typecheck | `npm run typecheck` | **clean** (`vue-tsgo` + `tsc`) |
+| Pint | `pint --test --format agent <2 paths>` | `{"tool":"pint","result":"passed"}` |
+| PHPStan | `phpstan analyse --memory-limit=1G app/Services/Career/TeamPanelBuilder.php` | `[OK] No errors` |
+| Lore docs | `php tools/lore.php` | **556 hits, 75 exempt** |
+| Lore code | `php tools/lore.php --code` | **556 hits, 75 exempt** |
+| Fence | `md_fence_check.py <register + slice-audits>` | **0 invalid** |
+| Browser | not run | No browser spec asserts objective states (`grep missed\|not_reached tests/browser/scenario-panel.spec.ts` → no state assertion). The change is a server payload plus four renderer maps; the renderer maps have no spec coverage. **UNMEASURED** — stated, not implied away |
+
+**Environment note:** `node_modules/` was an empty directory at session start, so `npm run typecheck` failed with
+`'vue-tsgo' is not recognized`. Ran `npm ci` (167 packages, 12s) to unblock. `package.json` and `package-lock.json`
+are untouched (`git status --short` on both is empty), so no dependency changed.
+
+### 8. Lore delta
+`Lore docs: 556 (was 556); code: 556 (was 556)`. **Delta 0.**
+
+### 9. Commit
+`27a3d374` — `fix(career): read a past objective with no record as not reached, not missed (R7-82, R7-22, R7-25, R7-61)`
+
+```
+app/Services/Career/TeamPanelBuilder.php
+resources/js/pages/Career/Cockpit/Panels/CareerGoalsPanel.vue
+resources/js/pages/Career/Cockpit/Panels/CareerMilestonesPanel.vue
+resources/js/pages/Career/Cockpit/Panels/TeamRankLadderPanel.vue
+resources/js/pages/Career/Cockpit/Panels/UraMandatoryLadder.vue
+tests/Feature/TraineeGoalsPanelTest.php
+```
+`git diff HEAD~1 HEAD --name-only` returned exactly these six. Peer set unchanged.
+
+### 10. What this slice did not close
+- **`R7-81`** (`U-19`, `Entry criteria met!` with no `entry criteria` state) — same root, different surface, still
+  `Unrepresented source data`.
+- **`R7-22`'s alert half.** The row's `current` verdict on the *alert* path (`:291-293`) is unchanged: a past
+  objective in the run's current year can still alert. Only the row `state` moved.
+- **`R7-61`** (phase copy calling `Junior Make Debut` "the one dated obligation") — a copy consequence outside this
+  file; untouched.
+- **Browser coverage** of the four renderer maps. No spec asserts them; UNMEASURED above.
