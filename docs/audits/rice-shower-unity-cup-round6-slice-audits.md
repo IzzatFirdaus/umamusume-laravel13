@@ -240,8 +240,8 @@ the response are recorded below.**
 
 | Commit unit | Pre-commit gate | SHA |
 | --- | --- | --- |
-| Phase 0 (incident + process changes) | pending | pending |
-| S3.3 (R6-09, R6-10) | pending | pending |
+| Phase 0 (incident + process changes) | passed — one file, additions only | `663cce3e` |
+| S3.3 (R6-09, R6-10) | passed — four exceptions named in the body, none staged | `b4731784` |
 | S3.4 (R6-08 facet a) | pending | pending |
 | S3.5 (§13.6) | pending | pending |
 | §15 (held items) | pending | pending |
@@ -1431,7 +1431,7 @@ Received string: "LegacyPassNo Affinity grade read · 0 of two parents recorded"
 
 Both strings reproduce the pre-incident capture **exactly**: `Formas chosen above` and
 `LegacyPassNo Affinity grade read · 0 of two parents recorded`. The second is the walk's own
-pairing — a green `Pass` beside a summary that says no parent is recorded.
+contradiction — a green `Pass` beside a summary that says no parent has been named.
 
 ### GREEN
 
@@ -1521,3 +1521,132 @@ md_fence_check.py <both audit files>   0 invalid closing fences
 
 The browser count is **11**, matching the pre-incident capture exactly. A different number would
 have meant a case moved or was lost in re-application.
+
+## S3.4 — spark count prose
+
+### Identity
+
+| Item | Value |
+| --- | --- |
+| Audit ID | `RS-UC-R6-SLICE-AUDITS-S3.4` |
+| Mode | M1 change audit |
+| Row | R6-08 facet (a) only |
+| Scope | `app/Http/Controllers/Career/CockpitController.php` (the `capComposition.note` literal), `tests/Feature/CareerCockpitTest.php`, `tests/browser/scenario-panel.spec.ts` |
+| Out of scope | **Facet (b)** — the two counters disagreeing because `capComposition.sparks` includes grandparent sparks while the Inheritance tile counts parents only. A separate mechanism, still open, not closed here |
+
+### Pre-flight
+
+| Item | Value |
+| --- | --- |
+| HEAD at open | `b4731784` (S3.3) |
+| Dirty set on the touched paths | Empty |
+| The literal | `CockpitController.php:629-633` — the sentence names six blue sparks for the Guts extra, assembled from string literals |
+| The derived sibling | `Cockpit.vue:609-617` `capSparkText` reads `props.capComposition.sparks`, which `CockpitController.php:594-627` builds from **parent and grandparent** blue sparks. Already correct; untouched |
+| Pre-existing assertions on the string | **None.** Searching `tests/` and `resources/js/` for the sentence returned nothing, so no test pinned the old prose |
+| Suite gate | `vendor/bin/pest tests/Feature/ScenarioMetadataTest.php` -> 3 passed |
+| `RENDERED_EVIDENCE` | **TRUE**, this slice's own probe (re-run for the browser case below) |
+
+**Fixture check.** The instruction warned the fixture might hold six sparks, which would make the literal
+accidentally correct. Measured: it does not. The case built for this slice stores **one** spark, and the
+literal still said `six`. `capComposition.sparks` counted 1 while the note named 6.
+
+### RED evidence (captured before GREEN)
+
+```
+it does not print a literal spark count its own data can contradict (R6-08)
+  Tests:    1 failed (9 assertions)
+```
+
+The assertion that failed is `expect($composition['note'])->not->toContain('six')` against a run whose
+`capComposition.sparks` has exactly one entry.
+
+### GREEN
+
+The note's own opening sentence was already count-neutral (`The blue sparks the tree carries and the
+caps the run states are shown together`). Only the second clause carried a number, so the fix was
+**option B — count-neutral**: the clause now reads `the blue sparks the tree carries account for the
+Guts extra and nothing else`. The count is named by the derived line directly above it, which is the
+one line that knows it.
+
+The claim itself is unchanged. An earlier attempt inverted it to `do not sum to the Guts extra`,
+which would have contradicted the source; that was caught before commit and reverted.
+
+### Rule sweep (dimensions A-H)
+
+| Dimension | Result |
+| --- | --- |
+| A. Status and feedback | `no finding` |
+| B. Control and target | `no finding` |
+| C. Error prevention and recovery | `no finding` |
+| D. Consistency and signifiers | **finding** — F1 |
+| E. Cognitive load and memory | `no finding` |
+| F. Visual grouping and hierarchy | `no finding` |
+| G. Accessibility semantics and contrast | `no finding` |
+| H. Content and language | **finding** — F2 |
+
+### Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F1 | `H1` | Usability heuristics | Cockpit, cap panel, a run holding one blue spark | The note named `six` beside a derived list of one. A literal describing the source document's tree, rendered as though it described this run's | OBSERVED_SOURCE + OBSERVED_RENDERED | `CockpitController.php:629-633` (pre-fix) | 2 | High | Done: count-neutral |
+| F2 | `GP-2` | Gerhardt-Powals | Same | The panel derives the spark list and then restated a count the derivation already owns. Two sources for one figure, one of them fixed | OBSERVED_SOURCE | Same | 1 | High | Done |
+
+### Unmeasured register
+
+Empty. The feature case asserts the payload; the browser case asserts the rendered note.
+
+### Gap register delta
+
+**Facet (b) remains open** and is named as such in the section-14 row. `InheritanceEvent.vue:413` counts
+parents only while `capComposition.sparks` includes grandparents, so the two counters can still disagree
+on one run. That is the R6-08 facet the register records as a second mechanism, and it is not this
+slice's.
+
+### Commit body basis
+
+| # | Question | Result | Basis |
+| --- | --- | --- | --- |
+| 1 | Add, remove or move a control? | `N/A` | No control |
+| 2 | Change what is on screen at once? | `N/A` | Same paragraph |
+| 3 | Change a colour, tint or state? | `N/A` | No class change |
+| 4 | Change a type size or weight? | `N/A` | No type change |
+| 5 | Change what the user can undo, or where the action is? | `N/A` | No action |
+| 6 | Change where a thing lives, or what it is called? | `N/A` | Same sentence, same place |
+| 7 | Change a progress, an incomplete state or a boundary? | `N/A` | No boundary |
+| 8 | Change what the user has to read or remember? | `PASS` | Removes a number the reader would reconcile against the list beside it |
+| 9 | Add a new destination, a landmark or a control type? | `N/A` | None |
+| 10 | Change the words? | `PASS` | One clause |
+
+### Lore delta (Rule 5)
+
+`Lore docs: 556 (was 556 at S3.3); code: 314 (was 314 at S3.3).` Delta **0**.
+
+Four self-inflicted hits were found and **reworded rather than ruled**: the new comment quoted the old
+sentence's banned-family word in both the controller and the test, and two S3.3 prose lines used words
+from the same family. All four were text an agent had just written, so rewording is the correct
+response; a ruling is for verbatim source data, not for prose this pass introduced.
+
+### Verification output
+
+```
+vendor/bin/pest tests/Feature/CareerCockpitTest.php
+  Tests:    46 passed (537 assertions)
+
+vendor/bin/pest tests/Feature/CareerInheritanceEventTest.php
+  Tests:    15 passed (331 assertions)
+
+npx playwright test tests/browser/scenario-panel.spec.ts --grep 'R6-08'
+  1 passed (16.5s)
+
+npx playwright test tests/browser/scenario-panel.spec.ts
+  5 passed, 3 failed (1.2m)
+```
+
+**The three failures are pre-existing, by name, not by inference:** `draws a resource the matrix labels
+through the meter...` (`:76`), `states the scenario, its documentation and the ruleset absence in the
+baseline strip` (`:128`), and `renders only the baseline strip for a scenario that composes no panel`
+(`:163`) — the same three recorded as pre-existing in S2.4. None handles the cap panel's note.
+
+**Non-vacuity, path-scoped revert (Rule 3):** the diff was saved, the one file reverted, RED confirmed
+at `1 failed (9 assertions)`, the patch re-applied, and GREEN confirmed at `1 passed (9 assertions)`.
+Restored byte-identically: `git diff --stat` reads 8 insertions / 3 deletions both before and after.

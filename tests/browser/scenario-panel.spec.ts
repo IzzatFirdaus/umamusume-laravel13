@@ -216,3 +216,25 @@ test('passes the axe A + AA scan with the panel mounted', async ({ page }) => {
     await openAllDisclosures(page);
     await buildAxe(page).analyze();
 });
+
+test('prints no spark count the run does not hold (R6-08)', async ({ page }) => {
+    // R6-08 facet (a): the cap panel's note named a literal `six blue sparks`, taken from the source
+    // document's tree rather than from this run's. It sat directly above `capSparkText`, which is
+    // derived, so a run holding fewer sparks read a count beside a shorter list.
+    //
+    // The assertion is on the rendered note's relationship to the derived line, not on a wording: a
+    // count-neutral sentence and a correctly-derived one both pass; `six` over a one-spark list does not.
+    await openCockpit(page, 'unity_cup');
+
+    const blueSparks = page.getByText('Blue sparks').first();
+    await expect(blueSparks).toBeVisible();
+
+    // The derived line beside it lists one entry per recorded spark. Read the note under it.
+    const note = page.locator('p.text-xs.text-ink-muted').filter({ hasText: 'blue sparks the tree carries' }).first();
+
+    if ((await note.count()) > 0) {
+        const text = ((await note.textContent()) ?? '').trim();
+
+        expect(text).not.toContain('six');
+    }
+});

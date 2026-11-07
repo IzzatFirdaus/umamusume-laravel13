@@ -627,10 +627,15 @@ class CockpitController extends Controller
         return [
             'caps' => $caps,
             'sparks' => $sparks,
+            // R6-08: this sentence used to name a literal `six blue sparks` for the Guts extra, a count
+            // taken from the source document's tree rather than from this run's. It rendered directly
+            // above `capSparkText`, which IS derived, so a run holding one spark read "six" over a list of
+            // one. The count is named by the derived line beside it, so the note states the relationship
+            // without restating a number it does not own.
             'note' => 'The blue sparks the tree carries and the caps the run states are shown together. '
-                .'The source records that they do not reconcile: the six blue sparks account for '
-                .'the Guts extra and nothing else, so this panel shows the inputs without claiming one '
-                .'derives the other.',
+                .'The source records that they do not reconcile: the blue sparks the tree carries '
+                .'account for the Guts extra and nothing else, so this panel shows the inputs without '
+                .'claiming one derives the other.',
         ];
     }
 

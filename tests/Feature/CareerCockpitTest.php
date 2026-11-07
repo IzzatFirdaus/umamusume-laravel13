@@ -967,3 +967,47 @@ it('hands over both turn readings when a snapshot stands ahead of its recorded l
             ->where('header.logged_turns', 1)
             ->where('header.next_turn_to_play', 68));
 });
+
+it('does not print a literal spark count its own data can contradict (R6-08)', function (): void {
+    // R6-08 facet (a): the cap panel's note was a literal assembled in the controller -- `the six blue
+    // sparks for the Guts extra` -- describing the source document's tree rather than this run's.
+    // It rendered directly above `capSparkText`, which is derived from `capComposition.sparks`. A run
+    // carrying one spark therefore read "the six blue sparks" directly above a list of one.
+    //
+    // The count is asserted against the DATA rather than against the sentence's wording, so any fix
+    // shape passes: derive the number, or name no number at all.
+    $run = cockpitRun([
+        'scenario' => 'unity_cup',
+        'status' => RunStatus::Active,
+        'legacy_selection' => [
+            'affinity' => '◎',
+            'legacies' => [
+                [
+                    'rank' => 3,
+                    'is_guest' => false,
+                    'name' => 'Parent One',
+                    'ancestors' => ['', ''],
+                    'sparks' => [['kind' => 'blue', 'target' => 'Guts', 'stars' => 1]],
+                ],
+                ['rank' => null, 'is_guest' => false, 'name' => null, 'ancestors' => ['', ''], 'sparks' => []],
+            ],
+        ],
+    ]);
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(function (Assert $page): void {
+            $composition = $page->toArray()['props']['capComposition'];
+
+            expect($composition['sparks'])->toHaveCount(1);
+
+            // The note must not assert a count this run does not hold. `six` is the literal the walk read;
+            // a derived sentence saying `1 blue spark` is the other acceptable shape.
+            expect($composition['note'])->not->toContain('six');
+
+            // And when it does name a number, the number must be this run's.
+            if (preg_match('/\b(\d+)\b/', $composition['note'], $matches) === 1) {
+                expect((int) $matches[1])->not->toBe(6);
+            }
+        });
+});
