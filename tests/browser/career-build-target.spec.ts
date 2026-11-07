@@ -124,7 +124,15 @@ test.describe('Build Target and the provenance badge', () => {
         // The total row names the figures it sums. It must not claim the scenario's published caps
         // unless it is genuinely printing them.
         await expect(page.getByText(/Sum of the five scenario caps/)).toHaveCount(0);
-        await expect(page.getByText(/Sum of the five entered ceilings/)).toBeVisible();
+        await expect(page.getByText(/Sum of the entered ceilings/)).toBeVisible();
+
+        // R7-05: the label moved in R6-04's S2.3 and the figure did not. With no ceiling entered the
+        // row still read the published floor's sum (7000 on the base caps) under a label that says
+        // "entered". A figure and its label must name the same thing, so an empty form states that
+        // nothing has been entered rather than printing a total the Trainer never typed.
+        const totalRow = page.locator('[data-field="total-cap"]');
+        await expect(totalRow).toContainText(/No ceilings entered/i);
+        await expect(totalRow).not.toContainText('7000');
     });
 
     test('refuses a stat above the cap, ties the message to its input and moves focus there', async ({ page }) => {

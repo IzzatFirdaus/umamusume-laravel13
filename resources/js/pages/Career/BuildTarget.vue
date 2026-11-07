@@ -69,7 +69,7 @@ const props = defineProps<{
      * The ceilings already entered, keyed by the columns the run holds them in; absent where none was.
      *
      * R6-04 removed the sibling `scenarioCaps` declaration: it was declared and never read, and the
-     * total row now names the figures it sums (`Sum of the five entered ceilings`) rather than printing
+     * total row now names the figures it sums (`Sum of the entered ceilings`) rather than printing
      * the scenario's own sum under a label for it. The server still sends the prop — it is `caps`'s
      * documented input and other readers of `ScenarioCaps` rely on it — so a later slice that wants the
      * published figure here can re-declare it without a payload change.
@@ -248,8 +248,23 @@ const totalTarget = computed((): number | null => {
     return values.some((value) => value === null) ? null : (values as number[]).reduce((sum, value) => sum + value, 0);
 });
 
-/** The sum of the five caps this run is bounded by: the denominator the total is read against. */
-const totalCap = computed((): number => props.statOrder.reduce((sum, stat) => sum + cap(stat), 0));
+/**
+ * The sum of the ceilings the Trainer has actually entered, or null while none of them is filled.
+ *
+ * R7-05: this summed `cap(stat)`, which falls back to the published scenario floor, so an empty form
+ * printed the floor's total under a label that says "entered". A figure and its label must name the
+ * same thing, so the total is what was typed and nothing else. `capStats` is the server's own list of
+ * enterable ceilings (four, not the five stats), so a fifth added there shows up without an edit here.
+ */
+const totalEnteredCap = computed((): number | null => {
+    const values = props.capStats.map((stat) => props.enteredCaps[capColumn(stat)] ?? null);
+
+    if (values.every((value) => value === null)) {
+        return null;
+    }
+
+    return values.reduce((sum: number, value) => sum + (value ?? 0), 0);
+});
 
 
 /**
@@ -527,9 +542,12 @@ function onSkillPrioritySelect(payload: { id: number; name: string }): void {
                             <span title="This repository stores no sample-build column, so the published sample total cannot be sourced.">N/A</span>
                         </span>
                     </div>
-                    <div class="srow">
-                        <span class="k">Sum of the five entered ceilings</span>
-                        <span class="v font-mono tabular-nums">{{ totalCap }}</span>
+                    <div class="srow" data-field="total-cap">
+                        <span class="k">Sum of the entered ceilings</span>
+                        <span class="v font-mono tabular-nums">
+                            <template v-if="totalEnteredCap === null">No ceilings entered</template>
+                            <template v-else>{{ totalEnteredCap }}</template>
+                        </span>
                     </div>
                 </div>
 
