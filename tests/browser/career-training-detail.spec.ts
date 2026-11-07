@@ -198,4 +198,21 @@ test('holds its layout at 320px', async ({ page }) => {
     const overflows = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
 
     expect(overflows).toBe(false);
+
+});
+
+test('renders the undo disabled, matching what it says about itself (R7-21)', async ({ page }) => {
+    // The control's own title reads "The build has no undo; this screen proposes one." and it was
+    // rendered enabled, so it advertised an action that does not exist. `RaceDecision.vue:461` had
+    // it right the whole time: disabled, same sentence. Round 7 R7-21.
+    await openTrainingDetail(page);
+
+    const undo = page.getByRole('button', { name: /Undo turn \d+/ });
+
+    await expect(undo).toBeVisible();
+    await expect(undo).toBeDisabled();
+
+    // The label still names a real turn: an undo would remove the last logged one, so this is not a
+    // placeholder number and must not become one.
+    await expect(undo).toHaveAccessibleName(/Undo turn \d+/);
 });

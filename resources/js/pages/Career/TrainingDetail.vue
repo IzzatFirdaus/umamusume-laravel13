@@ -725,7 +725,19 @@ const energyBandNote = computed(() =>
                             <span class="kbd">Enter</span> records ·
                             <span class="kbd">Esc</span> back
                         </span>
-                        <button type="button" class="btn btn-quiet min-h-11" title="The build has no undo; this screen proposes one.">Undo turn {{ undoableTurn }}</button>
+                        <!-- R7-21: disabled, matching what the title says and matching
+                             `RaceDecision.vue`'s own undo, which had the binding from the start. The
+                             label still names a real turn — the last logged one — because an undo that
+                             arrives later will remove exactly that turn, and the number is not a
+                             placeholder. -->
+                        <button
+                            type="button"
+                            class="btn btn-quiet min-h-11"
+                            disabled
+                            title="The build has no undo; this screen proposes one."
+                        >
+                            Undo turn {{ undoableTurn }}
+                        </button>
                         <button type="button" class="btn min-h-11" @click="discard()">Discard</button>
                         <button type="submit" class="btn btn-primary min-h-11" :disabled="form.processing">
                             {{ form.processing ? 'Recording…' : 'Record turn ' + form.turn }}
