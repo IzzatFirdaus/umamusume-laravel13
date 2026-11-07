@@ -134,7 +134,17 @@ const spOf = (entry: { actual: Record<string, number | null> | null }): number |
 // and Inheritance forms prefill with. The rail used to take its own maximum across every entry, so
 // the label answered "how far does this rail reach" rather than "which turn is the run's last"
 // (R7-27, R7-32).
-const undoableTurn = computed(() => latestLoggedTurn({ turnEntries: props.entries }));
+/**
+ * The turn an undo would remove, from the rail's TURN rows only.
+ *
+ * `props.entries` is every kind the rail carries — turn, race, event, purchase. Feeding the whole list
+ * to `latestLoggedTurn` happens to give the same number today, because every non-turn row borrows a
+ * turn that a turn row already holds; it is still the wrong input, and a race logged against a turn the
+ * run never recorded would move the undo label to a turn that is not in the log.
+ */
+const undoableTurn = computed(() =>
+    latestLoggedTurn({ turnEntries: props.entries.filter((entry) => entry.kind === 'turn') }),
+);
 const resultUrl = computed(() => props.run.cockpit_url.replace(/\/cockpit$/, '/result'));
 
 const phaseCount = (head: string): number => props.entries.filter((entry) => entry.position.startsWith(head)).length;

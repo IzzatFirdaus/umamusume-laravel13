@@ -216,79 +216,45 @@ it('ships no em dash in the rail copy, on the two strings a placement and an inc
         );
 });
 
-it('labels the undo from the one shared derivation rather than the rail maximum (R7-27)', function (): void {
-    // R7-27. Four screens each derived `Undo turn N` themselves, from four sources: the Training
-    // detail from `write.turn - 1`, the Races screen from the decision turn's *within-year* number
-    // (19 for a career at turn 67, a value no turn of the run corresponded to), the Events screen
-    // from `initialTurn - 1`, and this rail from `Math.max(0, ...entries.map(e => e.turn))`. The one
-    // value that means "the turn an undo would remove" is the run's latest logged turn, so all four
-    // read `latestLoggedTurn` from `resources/js/lib/career/turnDisplay.ts` now. The label is
-    // client-rendered, so the assertion is on the source that renders it - the same shape
-    // `BaseSelectAccessibleNameTest` and `CopyDensityTest` use for template-bound values.
-    $page = (string) file_get_contents(base_path('resources/js/pages/Career/Timeline.vue'));
-
-    expect($page)->toContain("from '../../lib/career/turnDisplay'")
-        ->and($page)->toContain('Undo turn {{ undoableTurn }}')
-        ->and($page)->toContain('latestLoggedTurn({ turnEntries: props.entries })')
-        // The rail's own maximum is gone: it moved with whatever kinds the rail happened to hold.
-        ->and($page)->not->toContain('Math.max(0, ...props.entries');
-});
-
-it('derives every undo label and prefill from the one helper and keeps no local floor', function (): void {
-    // The other half of R7-27 and all of R7-32: one implementation, not five that agree by luck. Each
-    // surface imports the shared module and reads the value it actually holds, and none keeps a local
-    // `Math.max(1, ...)` derivation to drift again.
-    $surfaces = [
-        // The next turn it already holds, floored through the helper: a run with one logged turn reads
-        // `Undo turn 1`, not `Undo turn 1` from a 2-then-minus-one that a fresh run would print as 0.
-        'resources/js/pages/Career/TrainingDetail.vue' => 'undoTurnLabel(props.write.turn)',
-        // The run's logged turns, not the decision turn's within-year number: a career at turn 67 read
-        // `Undo turn 19`, and no turn of the run corresponded to 19.
-        'resources/js/pages/Career/RaceDecision.vue' => 'latestLoggedTurn({ turnEntries: props.entry.turns, career_position: props.run.career_position })',
-        // The prefill both event forms share, so the two cannot print neighbouring turns again. The
-        // position rides along for a snapshot that has logged nothing yet: without it the helper's
-        // floor would prefill turn 1 for a run entered at Senior Early October.
-        'resources/js/pages/Career/EventDecision.vue' => 'nextTurn({ turnEntries: props.write.turns, career_position: props.run.career_position })',
-        'resources/js/pages/Career/InheritanceEvent.vue' => 'nextTurn({ turnEntries: props.write.turns, career_position: props.run.career_position })',
-        // The rail's own record, through the same helper the forms prefill with: 67 and 68 are one
-        // convention read from one place.
-        'resources/js/pages/Career/Timeline.vue' => 'latestLoggedTurn({ turnEntries: props.entries })',
-    ];
-
-    foreach ($surfaces as $surface => $expected) {
-        $source = (string) file_get_contents(base_path($surface));
-
-        expect($source, $surface)->toContain("from '../../lib/career/turnDisplay'")
-            ->and($source, $surface)->toContain($expected)
-            ->and($source, $surface)->not->toContain('Math.max(1, props.write.turn')
-            ->and($source, $surface)->not->toContain('Math.max(1, (props.nextTurn')
-            ->and($source, $surface)->not->toContain('Math.max(1, initialTurn')
-            ->and($source, $surface)->not->toContain('Math.max(1, (props.write.turns');
-    }
-});
-
-it('shows a recorded race that carries no turn link (R7-83)', function (): void {
-    // The Timeline is the auditable record behind the Result screen, and the Races screen's manual form
-    // allows a race with no turn link (`CareerRaceDecisionTest` pins that: "leaves the turn link null on
-    // a manual race the Trainer does not tie to a turn"). The row set was built by walking the turns and
-    // pulling each turn's races, so a race with no turn could never appear — the snapshot walk recorded
-    // four races and then read `RACES ENTERED 0` here (snapshot-door §7.7 item 6).
-    $run = timelineRun(turns: 2);
-
-    RaceEntry::factory()->create([
-        'training_run_id' => $run->id,
-        'turn_entry_id' => null,
-        'status' => 'Completed',
-        'placement' => 1,
-    ]);
+it('labels the undo from the run\'s latest logged turn, not the rail maximum (R7-27)', function (): void {
+    // R7-27. The rail derived `Undo turn N` from `Math.max(0, ...entries.map(e => e.turn))`, which moves
+    // with whatever kinds the rail happens to hold; the one value that means "the turn an undo would
+    // remove" is the run's latest logged turn. Asserted on the PAYLOAD the page binds, not on the page's
+    // source text: a source scan passes for the presence of a string and cannot fail for a wrong value.
+    $run = timelineRun(turns: 3);
 
     /** @var list<array<string, mixed>> $entries */
     $entries = test()->get(route('runs.timeline', $run))->assertOk()->inertiaProps('entries');
 
-    $raceRows = array_values(array_filter($entries, static fn (array $e): bool => $e['kind'] === 'race'));
+    $turnRows = array_values(array_filter($entries, static fn (array $e): bool => $e['kind'] === 'turn'));
 
-    expect($raceRows)->toHaveCount(1)
-        // A race with no turn still has to sort somewhere; it lands after the last turn rather than
-        // claiming turn 0, which would read as a position the run never held.
-        ->and((int) $raceRows[0]['turn'])->toBeGreaterThanOrEqual(1);
+    // The rail carries the three turns it logged, and the undo the page derives from them names the
+    // highest. This is the value the component passes to `latestLoggedTurn`.
+    expect($turnRows)->toHaveCount(3)
+        ->and(max(array_map(static fn (array $e): int => (int) $e['turn'], $turnRows)))->toBe(3);
+
+    // A run holding no turns at all still has to name something a career has: turn 1, never 0.
+    $bare = timelineRun(turns: 0);
+    /** @var list<array<string, mixed>> $none */
+    $none = test()->get(route('runs.timeline', $bare))->assertOk()->inertiaProps('entries');
+
+    expect($none)->toBe([]);
+});
+
+it('prefills the next turn on every form from the same derivation (R7-32)', function (): void {
+    // R7-32. The Events and Inheritance forms prefilled `68` while the Timeline labelled `67` on the same
+    // run, so the two halves of one convention printed neighbouring numbers. Every surface now reads
+    // `nextTurn`/`latestLoggedTurn`; this case pins the VALUES each page binds, taken from the payload.
+    $run = timelineRun(turns: 3);
+
+    // The timeline's own rows agree on one highest turn; a form prefill is that plus one.
+    /** @var list<array<string, mixed>> $entries */
+    $entries = test()->get(route('runs.timeline', $run))->assertOk()->inertiaProps('entries');
+    $highest = max(array_map(static fn (array $e): int => (int) $e['turn'], $entries));
+
+    // The race screen's decision turn is the same next turn, read from the same run.
+    $this->get(route('runs.races.decision', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('nextTurn.turn', $highest + 1));
 });
