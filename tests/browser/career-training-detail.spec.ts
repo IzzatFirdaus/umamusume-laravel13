@@ -7,7 +7,8 @@ import { startCareer } from '../utils/start-career';
  * Rendered evidence for SCREEN-010, the Training Decision detail, rebuilt at the HFW's region model
  * after the 2026-10-28 parity audit. The page is now the wireframe's five-discipline pick list, the
  * three other actions, "Why Rest", the four outcome fields and the savebar; the client totals the
- * write boundary requires live in one collapsed disclosure, which is the documented deviation
+ * write boundary requires live in one disclosure that is open by default (round 5's S7 made it open in
+ * response to walk 5's E2-01), which is the documented deviation
  * (HFW OVERRIDE (write fields) in the page).
  *
  * The cases below pin that structure and the contract that has not changed: the write still validates
@@ -25,13 +26,20 @@ test.afterEach(async ({ page }) => {
     }
 });
 
-/** The first turn, recorded through this screen's own collapsed totals and savebar. */
+/** The first turn, recorded through this screen's own totals disclosure and savebar. */
 async function recordFirstTurn(page: import('@playwright/test').Page, runUrl: string): Promise<void> {
     await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
     await page.getByRole('radio', { name: 'Speed training' }).check();
-    await page.getByText('Client totals this turn (required to record)').click();
+    // R7 S0: the disclosure ships `open` (`TrainingDetail.vue:740`, round 5's S7 fix for walk 5's E2-01
+    // "required numbers hide inside a collapsed summary"). Clicking the summary therefore CLOSED it and
+    // hid the very fields this helper fills. Opening conditionally keeps the helper correct whether the
+    // attribute is there or not, so a future flip does not silently break every case again.
+    const totals = page.locator('details').filter({ hasText: 'Client totals this turn (required to record)' });
+    if (!(await totals.evaluate((el) => (el as HTMLDetailsElement).open))) {
+        await totals.locator('summary').click();
+    }
 
     await page.locator('input[name="speed"]').fill('650');
     await page.locator('input[name="stamina"]').fill('600');
@@ -112,7 +120,12 @@ test('Rest is one of the other actions and writes through the same form', async 
     await page.getByRole('radio', { name: 'Rest' }).check();
     await expect(page.locator('.savebar')).toContainText('Rest selected');
 
-    await page.getByText('Client totals this turn (required to record)').click();
+    // S0: only click when the disclosure is closed; it ships open, so an unconditional click hides the
+    // fields this case is about to fill.
+    const totals = page.locator('details').filter({ hasText: 'Client totals this turn (required to record)' });
+    if (!(await totals.evaluate((el) => (el as HTMLDetailsElement).open))) {
+        await totals.locator('summary').click();
+    }
     await page.locator('input[name="speed"]').fill('650');
     await page.locator('input[name="stamina"]').fill('600');
     await page.locator('input[name="power"]').fill('600');
@@ -124,13 +137,17 @@ test('Rest is one of the other actions and writes through the same form', async 
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
 });
 
-test('the client totals stay behind one disclosure, closed by default', async ({ page }) => {
+test('the client totals stay in one disclosure, open by default (S0)', async ({ page }) => {
+    // This case asserted `closed by default` until R7's S0 housekeeping. Walk 5's E2-01 recorded the
+    // closed state as the defect — "the required numbers hide inside a collapsed summary" — and round
+    // 5's S7 fixed it by making the disclosure open (`TrainingDetail.vue:740`). Round 6's C1 dated that
+    // fix to `dcc562b6` (2026-11-04). The assertion was never updated, so it pinned the pre-fix state.
     await openTrainingDetail(page);
 
     const details = page.locator('details').filter({ hasText: 'Client totals this turn (required to record)' });
 
-    await expect(details).not.toHaveAttribute('open', '');
-    await expect(page.locator('input[name="speed"]')).toBeHidden();
+    await expect(details).toHaveAttribute('open', '');
+    await expect(page.locator('input[name="speed"]')).toBeVisible();
 });
 
 test('keeps the tab order and the 44px target floor, and passes axe', async ({ page }) => {

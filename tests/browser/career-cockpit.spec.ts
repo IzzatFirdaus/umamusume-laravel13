@@ -211,6 +211,21 @@ test('names every absent value and refuses to rank until Energy is entered', asy
     await expect(page.getByText(/RECOMMENDED/)).toHaveCount(0);
 });
 
+test('names the stat denominator by the figure it prints, floor or cap (R7-19, R7-66)', async ({ page }) => {
+    await openCockpit(page);
+
+    // A freshly created career has entered no ceilings, so the strip's numbers are the scenario's
+    // published floor. Walk 7 read `1,300/1,300/1,300/1,300/1,800` labelled `cap` on a run whose
+    // `cap_*` columns are all null, which is the reference's own warning (§1.3.4): an observed in-force
+    // cap must not be printed as the scenario cap, and a floor must not be printed as either.
+    // The stat rows are the `srow` list items the panel prints; each carries the denominator word
+    // beside the figure, so the strip is scoped by the row rather than by a region attribute.
+    const rows = page.locator('li.srow').filter({ hasText: /\d/ });
+
+    await expect(rows.filter({ hasText: 'floor' }).first()).toBeVisible();
+    await expect(rows.filter({ hasText: /\bcap\b/ })).toHaveCount(0);
+});
+
 test('lists the career obligations the calendar states, each as a mark and a word', async ({ page }) => {
     // The seeded reference calendar is what this asserts against, so the expected rows are read from the
     // seeder rather than invented: `Junior Make Debut` is a shared mandatory slot at Junior turn 12, and
@@ -596,31 +611,37 @@ test('reads one turn number in the header', async ({ page }) => {
     await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    const header = page.locator('[data-field="turn"]');
-    await expect(header).toHaveCount(1);
-    // DM-1: every position line names the career's own denominator, so the header and the summary
-    // strip cannot disagree about what "turn 1" means.
-    await expect(header).toHaveText('1 of 72');
+    // R7 S0 housekeeping: `[data-field="turn"]` is gone, and the `Turn` summary tile renders only on a
+    // Completed run (`Cockpit.vue:793`). On an active run the phrase is the page lede — measured: one
+    // `p` carrying `Senior Year · Early October · Turn 67 of 72. Energy …`. DM-1 still holds: one
+    // phrase, one denominator. The assertion matches the phrase inside its sentence rather than
+    // demanding the whole element equal it.
+    const position = page.getByText(/\bTurn 1 of 72\b/);
+
+    await expect(position).toHaveCount(1);
 
 });
 
 test('names the run state in the DOM, and only the one that applies', async ({ page }) => {
     await openCockpit(page);
 
-    await expect(page.locator('[data-run-state="active"]')).toHaveCount(1);
-    await expect(page.locator('[data-run-state="completed"]')).toHaveCount(0);
+    // R7 S0: the `data-run-state` attribute is gone; the state is stated in words by the region the
+    // cockpit renders for it, which is what the later half of this case already asserts.
+    await expect(page.getByRole('region', { name: 'No turn recorded yet' })).toHaveCount(1);
 
     const cockpitUrl = await completeCareer(page);
     await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    await expect(page.locator('[data-run-state="completed"]')).toHaveCount(1);
-    await expect(page.locator('[data-run-state="active"]')).toHaveCount(0);
+    await expect(page.getByRole('region', { name: 'This run is complete.' })).toHaveCount(1);
 
     // The finished career states itself and the advisor's refusal is gone. The Result door belongs to the
     // summary card alone: the closed-run region states the fact and does not repeat the door.
     await expect(page.getByRole('region', { name: 'This run is complete.' })).toHaveCount(1);
-    await expect(page.getByRole('link', { name: 'Open the Career Result' })).toHaveCount(1);
+    // R7 S0: measured on a Completed run, the door's accessible name is `Career result` and the
+    // completed cockpit renders no `role="region"` at all — its cards are `<section aria-labelledby>`.
+    // Two links carry that name (the crumb and the card), so the door is scoped to the closed-run card.
+    await expect(page.getByRole('link', { name: 'Career result' }).first()).toBeVisible();
     await expect(page.getByText('Critical:')).toHaveCount(0);
 });
 
@@ -726,39 +747,35 @@ test('keeps every section landmark name after the Section adoption', async ({ pa
     await page.locator('#app > *').first().waitFor();
     await expect(page.locator('[aria-labelledby="cockpit-summary-heading"]')).toHaveCount(1);
     await expect(page.locator('#cockpit-summary-heading')).toHaveCount(1);
-    await expect(page.locator('[aria-labelledby="career-closed-heading"]')).toHaveCount(1);
-    await expect(page.locator('#career-closed-heading')).toHaveCount(1);
+    // R7 S0: `career-closed-heading` is gone. Measured on a Completed run: the closed-run card is a
+    // `<section>` whose heading is `#cockpit-summary-heading` reading "This run is complete.", and the
+    // completed cockpit has no `role="region"` at all.
+    await expect(page.locator('#cockpit-summary-heading')).toHaveCount(1);
+    await expect(page.locator('#cockpit-summary-heading')).toHaveText('This run is complete.');
 });
 
-test('renders the summary strip with the header values, the affordance and no primary', async ({ page }) => {
-    // This case REPLACES a stickiness assertion that could not be made honestly. Measured: the strip
-    // computes `position: sticky` and still drifts with the page by exactly the scroll distance, because
-    // its ancestor `main` carries `container-type: inline-size` and no ancestor is a scroll container, so
-    // the sticky containing block moves with the page. Removing the `sticky` class would not have changed
-    // that, which is what made the assertion worthless - it could not fail for the reason it claimed.
-    // The same ancestry wraps the "On this page" nav, whose docblock has always claimed `md:sticky`.
-    // Stickiness is therefore BLOCKED-ON-CONTAINMENT and recorded in the ledger rather than asserted.
+test('renders no summary strip, because the parity pass cut it (S0)', async ({ page }) => {
+    // This case REPLACED a stickiness assertion that could not be made honestly, and now records the
+    // component's retirement. `530d62b9` cut `StatSummary` from the cockpit because no cockpit HFW draws
+    // a second reading of the header's facts above the canvas, and `Cockpit.vue:41-47` states that the
+    // component "is left in place for the Careers list to adopt or for deletion in a follow-up; nothing
+    // in this tree renders it".
+    //
+    // The former case asserted the strip's facts, `No recommendation. See the advisor.` among them. That
+    // sentence was the component's own copy defect, and it went with the component — so asserting its
+    // absence is the honest successor, not re-pointing the old assertions at whatever element still
+    // carries a similar word.
     await page.goto(`/training-runs/${uraCompletedRun()}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    const strip = page.getByRole('region', { name: 'Run summary' });
-    await expect(strip).toBeVisible();
+    // The closed-run card and the stats card are what a completed cockpit renders.
+    await expect(page.locator('#cockpit-summary-heading')).toBeVisible();
+    await expect(page.locator('#career-state-heading')).toBeVisible();
 
-    // The strip carries the header's own facts and says so in words, including the absences. DM-1:
-    // a career turn prints its 72-turn denominator, and the seeded URA finale run stands at turn 75,
-    // which is the finale phase outside the 72 turns and never "turn 75 of 72".
-    await expect(strip.getByText(/^(Turn \d+ of \d+|Finale phase)$/)).toBeVisible();
-    for (const label of ['Energy:', 'Mood:', 'Fans:', 'Skill Points:']) {
-        await expect(strip.getByText(label)).toBeVisible();
-    }
-
-    // It is NOT a second primary and it renders no filled button of its own.
-    await expect(strip.locator('[class*="bg-primary-action"]')).toHaveCount(0);
-
-    // On a finished career the rail recommends nothing, so the strip states that rather than inventing an
-    // action. The outline affordance appears only where a recommendation exists, which the sibling case
-    // measures.
-    await expect(strip.getByText('No recommendation. See the advisor.')).toBeVisible();
+    // The retired strip's sentences are gone. `No recommendation. See the advisor.` in particular: the
+    // component printed it on a completed run while the advisor was correctly absent.
+    await expect(page.getByText('No recommendation. See the advisor.')).toHaveCount(0);
+    await expect(page.locator('[aria-label="Run summary"]')).toHaveCount(0);
 });
 
 test('keeps one primary where the advisor recommends, and none where it does not', async ({ page }) => {
@@ -766,9 +783,9 @@ test('keeps one primary where the advisor recommends, and none where it does not
     // filled primary at all, and the strip says so rather than inventing one.
     await openCockpit(page);
     expect(await page.locator('[class*="bg-primary-action"]').count(), 'a fresh career rendered a primary').toBe(0);
-    await expect(
-        page.getByRole('region', { name: 'Run summary' }).getByText('No recommendation. See the advisor.'),
-    ).toBeVisible();
+    // R7 S0: the strip that carried `No recommendation. See the advisor.` is retired, so a fresh
+    // career's state is read where the screen states it: the advisor's own card. No filled primary is
+    // the assertion that matters here, and it is measured above.
 
     // State two: a logged turn with Energy, so the rail ranks. The count is MEASURED and reported, then
     // asserted - it is not assumed to be the one the rail's CTA accounts for.
@@ -813,20 +830,26 @@ test('names no component by the retired name its rename replaced', async () => {
     expect(offenders, `the retired name survives in ${offenders.join(', ')}`).toEqual([]);
 });
 
-test('names the fan ladder threshold beside the gap', async ({ page }) => {
-    // A-0.10 (Group A): the fan line names the class and the gap, and the threshold the gap points at.
-    // `FanLadder::fromValue()` already ships `nextThreshold`; this case proves the renderer prints it
-    // rather than leaving the reader to know 240,000 from outside (walk-1 Screen 8, walk-4 S11).
+test('prints the bare fan count, because the ladder is a Dashboard reading (S0)', async ({ page }) => {
+    // A-0.10's case asserted the fan tile printed `30,755 to 240,000`. `CareerStatePanel.vue:267-271`
+    // records the override that removed it: `HFW-OVERRIDE (text: fan-ladder)` — every cockpit HFW prints
+    // the bare count in this tile, the ladder is a Dashboard reading, and `fanLadder` stays a prop "so a
+    // caller that wants it can add it back rather than re-deriving the band". The register's `R7-73`
+    // classifies the same absence as `Known limitation`, citing R6-43's override.
+    //
+    // The successor assertion is the override itself: the count prints, the ladder suffix does not. That
+    // is what the screen is meant to do, and asserting it means a future re-add fails this case loudly
+    // rather than silently changing the surface.
     const cockpitUrl = await newCareer(page);
     const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
     await recordTurns(page, runId, 1, { fans: '209245' });
     await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    const state = page.getByRole('region', { name: 'Stats and state' });
-    // The separator is the middle dot; the assertion matches the two numbers so an encoding
-    // difference in the separator cannot fail a correct render.
-    await expect(state.getByText(/30,755 to 240,000/)).toBeVisible();
+    const state = page.locator('section[aria-labelledby="career-state-heading"]');
+
+    await expect(state.getByText('209,245')).toBeVisible();
+    await expect(state.getByText(/to 240,000/)).toHaveCount(0);
 });
 
 test('prints the cap composition as a footer under Stats and state', async ({ page }) => {

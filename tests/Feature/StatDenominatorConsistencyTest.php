@@ -99,10 +99,17 @@ it('labels the Cockpit strip with the word cap and keeps the no-target sentence'
     // which states what the caption does about the absence — the assertion below matches the sentence
     // it now ships rather than the shorter form it replaced. The subject is unchanged: the absence is
     // named once, above the rows.
+    // R7-19: the Cockpit's word is no longer a literal. A run that entered no ceiling prints the
+    // scenario's published figure, and calling that figure `cap` is the reference's own §1.3.4 warning
+    // — an observed in-force cap must not be printed as the scenario cap, and a floor is neither. The
+    // page now computes the word from `caps.entered`, so this case pins the binding and the three
+    // words the panel accepts rather than a string the page no longer contains.
     expect($panel)->toContain('denominatorLabel')
-        ->and($panel)->toContain('No build target was set for this run, so bars are drawn against the scenario ceiling.')
+        ->and($panel)->toContain("No build target was set for this run, so bars are drawn against this run's ceilings:")
         ->and($panel)->not->toContain('no {{ props.denominatorLabel }} set')
-        ->and($page)->toContain('denominator-label="cap"');
+        ->and($panel)->toContain("'target' | 'cap' | 'floor' | 'in-force'")
+        ->and($page)->toContain(':denominator-label="denominatorLabel"')
+        ->and($page)->toContain("return 'floor';");
 });
 
 it('labels the event strip with the word cap', function (): void {
