@@ -937,3 +937,38 @@ RED evidence, the rule sweep and the ten-question re-check.
 | R6-08 | S3.4 | `<filled at close-out>` | Confirmed defect -> Confirmed fixed (facet a only) | `rice-shower-unity-cup-round6-slice-audits.md#s34--spark-count-prose` | RED: one-spark run, `capComposition.note` contained `six` (`1 failed (9 assertions)`). GREEN: count-neutral clause, 46 passed (537 assertions), browser case 1 passed. **Facet (b) remains open**: `InheritanceEvent.vue:413` counts parents only while `capComposition.sparks` includes grandparent sparks, so the two counters can still disagree. Not closed here |
 
 | §13.6 | S3.5 | `<filled at close-out>` | new finding -> fixed | `rice-shower-unity-cup-round6-slice-audits.md#s35--band-carrier-caveat-and-two-thirties` | Three obligations on one panel. Carrier: `bands_source` = `config/scenarios.php, transcribed there from GameTora`, rendered as a `Source:` line. Caveat: `bands_caveat` names GameTora's overlapping `4 to 9`/`7 to 9` rather than hedging. Two thirties: the four reward labels change `+N matching stat` to `+N to the matching stat`; values unchanged. 54 passed (662 assertions), band browser case 1 passed. **Measured correction:** the board is on Scenario detail, not the cockpit (v3.0.0), and the league `+30` needs `rank === 'S'`, which no trainer form writes (R6-48), so both thirties cannot render together yet — that half is UNMEASURED |
+
+## 15. Held items and owner decisions
+
+Append-only, 2026-11-07. **Not code, not a slice.** Eleven items: ten that need a decision this pass
+cannot make, and one that S2.2 answered and is recorded here so the answer has a home.
+
+Section 9 and Section 13.12 are unchanged. Where this section and those disagree, this section is later
+and governs; where it is silent, they stand.
+
+### 15.1 Held, needing an owner or corpus decision
+
+| Item | Decision needed | What would unblock it |
+| --- | --- | --- |
+| **R6-13** | Wizard versus snapshot as the primary door for a captured run | Owner call. Both paths exist today (`routes/web.php:108-115` for the snapshot door, the wizard for the new-career door) and each is legitimate; the decision is which the flow *recommends*, not which it permits |
+| **R6-14 extent** | Whether to open a per-scenario career-extent ADR | Owner call. Section 13.5 records that the tool stores the 72 convention and that the reference permits it (`UMAMUSUME_REFERENCE.md:396`); the ADR item is a per-scenario extent, not a correction of the number |
+| **R6-17** | Which sentence is wrong: the immutability claim or the change control | Owner call. `ScenarioSelect.vue:155-156` states the scenario cannot change after the first turn, and `StoreTrainingRunRequest.php:56` accepts a change on a started run. Either the copy or the rule must move; both readings are coherent |
+| **R6-26** | Whether a destructive door belongs in the cockpit footer | Owner call against the cockpit wireframe corpus. The placement reproduces (`Cockpit.vue:1032-1039`); "one click" does not, because a confirmation page and a checkbox intervene |
+| **R6-28** | Whether the training form is restructured into separate pages | Design call. Four `h2` regions and 28 field widgets on one page; the information architecture is the decision, not a defect |
+| **R6-31** | Whether spark entry gets a bulk path | Design project. Four fields plus a remove control per spark row, no bulk entry and no cost disclosure |
+| **R6-43** | Whether the fans ladder returns to the cockpit tile | Wireframe corpus owner. The removal is a recorded `HFW-OVERRIDE (text: fan-ladder)` (`CareerStatePanel.vue:263-268`) whose own stated rationale does not hold at HEAD (Section 6 C7), but reversing it needs that corpus's owner |
+| **R6-48 remaining** | Build a rank form, or remove the sentence | Owner call. `UnityCupEditor.vue:203-207` says team rank is recorded through a turn's event, and no trainer form writes one (`TeamRankPayload` is constructed only in tests). Removing the sentence is a copy fix; building the form is schema and UI |
+| **R6-52** | Whether the tool represents a residual cap layer | The corpus leaves the arithmetic open (`docs/[...]Rice_Shower_Unity-Cup.md:60-72`, `:821-823`). A field would encode an unresolved mechanism, so this waits on the corpus, not on the schema |
+| **R6-53** | Whether notes appear on the wizard or only in a run reader | Owner call. The column exists (`2026_09_26_162817:21`), three screens write it, none reads it. The PRD requires the field, not its placement |
+
+### 15.2 Answered by S2.2, recorded rather than left in a commit body
+
+| Item | Answer | Basis |
+| --- | --- | --- |
+| **The no-logged-turn facility policy** (Section 11.2's aggregate, Section 13.4's one owner question) | **`null`** — a run with no logged turns shows no facility level rather than a zero or a team-rank-derived figure | Matches `burstCountdown`'s own behaviour (`TeamPanelBuilder.php:721-724`), which returns `null` until a turn is logged. Recorded as a **copy convention**, not a rule: Section 13.4 left exactly this question to the slice, and `repetition` / `repetition_plus_purchases` scenarios now read the latest logged turn's own column, which does not exist before one is logged |
+
+### 15.3 What this section does not do
+
+- It implements none of the eleven items.
+- It does not reopen Section 9 or Section 13.12; those keep their own text.
+- It does not add an `R6-NN` row. R6-48's remaining half is the same row's facet, not a new finding.
