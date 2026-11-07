@@ -43,7 +43,7 @@ const stateGlyphs: Record<string, string> = {
     current: '◉',
     upcoming: '○',
     missed: '×',
-    not_reached: '–',
+    not_reached: '○',
 };
 
 const stateWords: Record<string, string> = {
