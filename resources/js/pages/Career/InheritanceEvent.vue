@@ -201,6 +201,24 @@ const form = useForm({
     origin_note: '',
 });
 
+/**
+ * R7-35: the primary is inert until the two fields `StoreInheritanceEventRequest` requires are present.
+ *
+ * The request requires `turn` and `source_name`; both are prefilled from the run, so this mostly
+ * guards a Trainer who clears one. The button carried only `:disabled="form.processing"`, so it
+ * invited a submit the server answers with a 422 — the same class as R7-31 on the Events screen.
+ * `choice_label`, `deltas` and `origin_note` are nullable on the request and are deliberately not
+ * gated: a Trainer may legitimately record an inheritance event with no choice named.
+ */
+const requiredFilled = computed(
+    () => String(form.turn).trim() !== '' && form.source_name.trim() !== '',
+);
+
+/** Why the primary is inert, for its `title`. Null when it is available. */
+const blockedReason = computed(() =>
+    requiredFilled.value ? null : 'Fill the turn and the source before this can be recorded.',
+);
+
 // The turn the entry is recorded on, from the one shared derivation: the Events form and this one
 // prefilled different turns for the same run before it landed (R7-32).
 const initialTurn = nextTurn({ turnEntries: props.write.turns, career_position: props.run.career_position });
@@ -456,7 +474,12 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                     {{ props.legacy === null ? 'No legacy selection recorded' : 'Legacy selection recorded' }}
                 </span>
                 <button type="button" class="btn min-h-11" @click="skip()">Skip this moment</button>
-                <button type="submit" class="btn btn-primary min-h-11" :disabled="form.processing">
+                <button
+                    type="submit"
+                    class="btn btn-primary min-h-11"
+                    :disabled="form.processing || !requiredFilled"
+                    :title="blockedReason ?? undefined"
+                >
                     {{ form.processing ? 'Recording…' : 'Record inheritance' }}
                 </button>
             </div>

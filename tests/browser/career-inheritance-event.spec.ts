@@ -167,3 +167,33 @@ test('passes an axe scan at WCAG A and AA', async ({ page }) => {
 
     expect(results.violations).toEqual([]);
 });
+
+test('holds the primary disabled until the required fields are filled (R7-35)', async ({ page }) => {
+    // `StoreInheritanceEventRequest` requires `turn` and `source_name`. The primary carried only
+    // `:disabled="form.processing"`, so it invited a submit the server would reject. `choice_label`,
+    // `deltas` and `origin_note` are nullable and must NOT be gated: a Trainer may record an event
+    // with no choice named, and a gate that demanded one would refuse valid input.
+    await openInheritanceEvent(page);
+
+    const primary = page.getByRole('button', { name: /Record inheritance/ });
+
+    // `turn` is prefilled from the run; `source_name` is not, so the primary starts inert.
+    await expect(primary).toBeDisabled();
+
+    // The required fields live inside the page's own "(required to record)" disclosure, closed by
+    // default — the same shape R7-57 measured on the Training screen.
+    await page.getByText('Record what this moment granted (required to record)').click();
+    await page.locator('input[name="source_name"]').fill('Valentine chocolate');
+
+    // Both required fields now present.
+    await expect(primary).toBeEnabled();
+
+    // Clearing one makes it inert again, proving the gate reads the values.
+    await page.locator('input[name="turn"]').fill('');
+    await expect(primary).toBeDisabled();
+
+    await page.locator('input[name="turn"]').fill('4');
+
+    // `choice_label` is nullable on the request, so an event with no choice named still records.
+    await expect(primary).toBeEnabled();
+});

@@ -104,6 +104,30 @@ const form = useForm({
 // Inheritance form also read; the Undo control names the turn before it (R7-27, R7-32).
 const initialTurn = nextTurn({ turnEntries: props.write.turns, career_position: props.run.career_position });
 const undoableTurn = undoTurnLabel(initialTurn);
+
+/**
+ * R7-31: the primary is inert until the four fields the request makes mandatory are present.
+ *
+ * `StoreTurnEventRequest` requires `turn`, `event_type`, `source_name` and `choice_label`; the page's
+ * own group is labelled "(required to record)". Before this, the button carried only
+ * `:disabled="form.processing"`, so it invited a submit the server answers with a 422 — the Trainer
+ * learned the rule from the error instead of from the form.
+ *
+ * `turn` is prefilled from the run and so is normally present; it is checked all the same, because a
+ * Trainer can clear it and the server rejects that too.
+ */
+const requiredFilled = computed(
+    () =>
+        String(form.turn).trim() !== ''
+        && form.event_type !== ''
+        && form.source_name.trim() !== ''
+        && form.choice_label.trim() !== '',
+);
+
+/** Why the primary is inert, for its `title`. Null when it is available. */
+const blockedReason = computed(() =>
+    requiredFilled.value ? null : 'Fill the event type, the source and the choice before this can be recorded.',
+);
 form.turn = String(initialTurn);
 
 const alert = ref<HTMLElement | null>(null);
@@ -372,7 +396,12 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                         </span>
                         <button type="button" class="btn btn-quiet min-h-11" title="The build has no undo; this screen proposes one.">Undo turn {{ undoableTurn }}</button>
                         <a :href="props.run.run_url" class="btn min-h-11 inline-flex items-center">Skip</a>
-                        <button type="submit" class="btn btn-primary min-h-11" :disabled="form.processing">
+                        <button
+                            type="submit"
+                            class="btn btn-primary min-h-11"
+                            :disabled="form.processing || !requiredFilled"
+                            :title="blockedReason ?? undefined"
+                        >
                             {{ form.processing ? 'Recording…' : 'Record event' }}
                         </button>
                     </div>

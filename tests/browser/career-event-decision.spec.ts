@@ -126,3 +126,28 @@ test('passes an axe scan at WCAG A and AA', async ({ page }) => {
 
     expect(results.violations).toEqual([]);
 });
+
+test('holds the primary disabled until the required fields are filled (R7-31)', async ({ page }) => {
+    // `StoreTurnEventRequest` requires turn, event_type, source_name and choice_label. The primary
+    // carried only `:disabled="form.processing"`, so it invited a submit the server would reject — while
+    // the group holding those fields is labelled "(required to record)" in the page's own copy.
+    await openEventDecision(page);
+
+    const primary = page.getByRole('button', { name: /Record event/ });
+
+    // Nothing filled, and the disclosure that holds three of the four required fields is still shut.
+    await expect(primary).toBeDisabled();
+
+    // Open the disclosure and fill the required set one field at a time, proving the gate reads the
+    // values rather than the disclosure's state.
+    await page.getByText('Where this event came from (required to record)').click();
+    await page.selectOption('select[name="event_type"]', { value: 'SupportCard' });
+    await expect(primary).toBeDisabled();
+
+    await page.locator('input[name="source_name"]').fill('The reporter asks for a quote');
+    await expect(primary).toBeDisabled();
+
+    // The last required field; now the primary is allowed.
+    await page.locator('input[name="choice_label"]').fill('Say something kind.');
+    await expect(primary).toBeEnabled();
+});
