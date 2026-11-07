@@ -54,7 +54,7 @@ const WRITE = { timeout: 60_000 } as const;
 export async function walkWizard(
     page: Page,
     scenario = 'unity_cup',
-    options: { onLegacy?: (page: Page) => Promise<void> } = {},
+    options: { onLegacy?: (page: Page) => Promise<void>; skipTargetDetails?: boolean } = {},
 ): Promise<string> {
     await page.goto('/career/setup/scenario', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
@@ -82,11 +82,18 @@ export async function walkWizard(
     await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     await page.selectOption('select[name="purpose"]', 'StoryClear');
-    // `distance` is a radio group on the Distance card, not a select: the target step's own 2026-10-2x
-    // rebuild moved it there (`BuildTarget.vue`, the wireframe's `career-target.html:141-158`).
-    await page.locator('input[name="distance"][value="Medium"]').check();
-    await page.selectOption('select[name="surface"]', 'Turf');
-    await page.selectOption('select[name="style"]', 'Pace Chaser');
+
+    // R7-14's shape: a target with a purpose and nothing else. Those three fields are optional in
+    // `BuildTarget.vue` (`selectOption` values come from the payload's own vocabularies, and neither
+    // defaults to a real choice), so leaving them alone is what a Trainer who only states a purpose
+    // produces. The other callers need them filled.
+    if (!options.skipTargetDetails) {
+        // `distance` is a radio group on the Distance card, not a select: the target step's own 2026-10-2x
+        // rebuild moved it there (`BuildTarget.vue`, the wireframe's `career-target.html:141-158`).
+        await page.locator('input[name="distance"][value="Medium"]').check();
+        await page.selectOption('select[name="surface"]', 'Turf');
+        await page.selectOption('select[name="style"]', 'Pace Chaser');
+    }
 
     for (const stat of ['Speed', 'Stamina', 'Power', 'Guts', 'Wit']) {
         await page.locator(`input[name="targets[${stat}]"]`).fill('800');

@@ -399,3 +399,23 @@ test('three-diff against career-preflight.html writes the phase evidence', async
     // fail for the reason that ruling already settled.
     expect(report.text, `text drift: ${JSON.stringify(report.text)}`).toEqual([]);
 });
+
+test('says the target step was skipped, not that something is missing (R7-14)', async ({ page }) => {
+    // The walk read the row as `Your target · Missing` with `Not entered` beneath it: two ways of saying
+    // one thing, and `Missing` is the same word the page prints for a step the schema cannot satisfy.
+    // `BuildTarget.vue` makes the whole target step optional -- the wizard's forward door works without
+    // it -- so a Trainer who opens it and records nothing has produced a supported state, and calling
+    // that `Missing` framed a valid choice as a gap. The page already carries the distinction it needs:
+    // `visited` names the steps this session opened, `saved` the steps that wrote something.
+    await walkWizard(page, 'ura_finale', { skipTargetDetails: true });
+    await openPreflight(page);
+
+    const targetRow = page.locator('#preflight-step-target');
+    await expect(targetRow).toBeVisible();
+
+    // The step was opened, so it is not missing: it is skipped.
+    await expect(targetRow).toContainText('Skipped');
+
+    // And the required steps are still named as missing, so the word has not simply been retired.
+    await expect(page.getByText(/Missing/).first()).not.toBeNull();
+});

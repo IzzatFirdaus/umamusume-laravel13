@@ -83,9 +83,12 @@ interface Scenario {
 interface Target {
     purpose: string;
     purpose_label: string;
-    distance: string;
-    surface: string;
-    style: string;
+    /** R7-14: all three are nullable on the server (`SetupDraft` reads them through `is_string`, and a
+     *  skipped target records none of them), so the type states that rather than promising a string the
+     *  payload does not always carry. */
+    distance: string | null;
+    surface: string | null;
+    style: string | null;
     targets: Record<string, number>;
 }
 
@@ -293,7 +296,21 @@ const targetSummary = computed((): string => {
         return 'Not entered';
     }
 
-    return `${target.purpose_label} · ${target.surface} ${target.distance} · ${target.style}`;
+    // R7-14: a skipped target records no surface, distance or style, and the template string printed
+    // them as the literal word `Missing` in the same STATE column that carries `Pass` — so a
+    // supported-by-design choice read as a defect. The summary states what was recorded and names the
+    // absence once, in the row's own voice, rather than leaking a state word into a value.
+    // The existing separator is preserved: `surface distance` reads as one phrase and a middle dot
+    // before the style separates the axes. Only the nulls change behaviour, so a completely entered
+    // target renders byte-identically to before.
+    const lead = [target.surface, target.distance].filter((part): part is string => part !== null && part !== '').join(' ');
+    const style = target.style !== null && target.style !== '' ? target.style : null;
+
+    if (lead === '' && style === null) {
+        return `${target.purpose_label} · no distance, surface or style stated`;
+    }
+
+    return `${target.purpose_label} · ${[lead, style].filter((part): part is string => part !== null && part !== '').join(' · ')}`;
 });
 
 const rows = computed<ChecklistRow[]>(() => [
@@ -439,8 +456,34 @@ const deckState = computed((): 'Pass' | 'Warning' | 'Missing' => {
 });
 
 /** The one word each check row carries, read off the row's own state rather than restated per branch. */
-function checkState(row: ChecklistRow): 'Pass' | 'Warning' | 'Missing' {
+/**
+ * R7-14: the wizard step each checklist row stands for.
+ *
+ * The rows are built in wizard order, and `SetupLayout` numbers the same steps from 1, so this is the
+ * row's own position rather than a second vocabulary. It exists because `checkState` has to ask whether
+ * THIS step was opened and whether it wrote anything, and the payload carries those as step numbers.
+ */
+const STEP_NUMBER: Record<string, number> = { scenario: 1, trainee: 2, target: 3, legacy: 4, deck: 5 };
+
+function checkState(row: ChecklistRow): 'Pass' | 'Warning' | 'Missing' | 'Skipped' {
+    // R7-14: `Your target Missing` sat over a summary that already read `Not entered` -- the same fact
+    // twice, and `Missing` is the word this page also uses for a step the schema cannot satisfy. The
+    // target step is optional (`BuildTarget.vue`'s forward door works without it), so a step the Trainer
+    // opened and deliberately left empty is `Skipped`, not missing. The page already carries the
+    // distinction: `visited` is what was opened, `saved` what wrote something.
     if (!row.entered) {
+        // Scoped to the target row, which is the one `BuildTarget.vue` makes optional: its forward door
+        // works without a target, so a visited-and-empty target step is a supported state. Legacy and
+        // Deck are required for a usable run (`StartCareerRequest`), so an empty one there is a genuine
+        // gap and keeps the word `Missing`.
+        if (row.key === 'target') {
+            const step = STEP_NUMBER[row.key];
+
+            if (step !== undefined && props.visited.includes(step) && !props.saved.includes(step)) {
+                return 'Skipped';
+            }
+        }
+
         return 'Missing';
     }
 
@@ -620,7 +663,9 @@ const CAREER_TURNS = 72;
                                             ? 'border-pick-line bg-raised text-ink'
                                             : checkState(row) === 'Warning'
                                                 ? 'border-status-caution bg-raised text-ink'
-                                                : 'border-risk bg-raised text-ink'"
+                                                : checkState(row) === 'Skipped'
+                                                  ? 'border-rule bg-raised text-ink-muted'
+                                                  : 'border-risk bg-raised text-ink'"
                                     >{{ checkState(row) }}</span>
                                 </td>
                                 <td class="py-2 text-ink">
