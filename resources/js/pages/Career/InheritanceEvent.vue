@@ -104,6 +104,8 @@ interface Milestone {
 
 interface WriteSection {
     action: string;
+    /** The turn this form opens on, from the server's one owner of the number (R7-32). */
+    prefill_turn: number;
     turns: { id: number; turn: number }[];
     sources: string[];
 }
@@ -221,7 +223,8 @@ const blockedReason = computed(() =>
 
 // The turn the entry is recorded on, from the one shared derivation: the Events form and this one
 // prefilled different turns for the same run before it landed (R7-32).
-const initialTurn = nextTurn({ turnEntries: props.write.turns, career_position: props.run.career_position });
+// R7-32 (review finding 4): the server ships the number, the same owner the Events form reads.
+const initialTurn = props.write.prefill_turn;
 form.turn = String(initialTurn);
 
 const alert = ref<HTMLElement | null>(null);

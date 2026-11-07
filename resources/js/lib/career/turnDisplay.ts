@@ -42,9 +42,30 @@ export function latestLoggedTurn(run: TurnRun): number {
     return run.career_position?.turn_index ?? 1;
 }
 
-/** The turn the next entry lands on: one past the last logged, or where the run stands. */
+/**
+ * The turn the next entry lands on: one past whatever the run last knew about itself.
+ *
+ * R7-32. `TrainingRun::nextTurnNumber()` is the server's one owner of this number and it answers
+ * `max(turn) + 1` when anything is logged, else `career_position.turnIndex + 1`, else 1. The `+1` is
+ * not decoration on the logged branch: a snapshot standing at Senior Early October (turn 67) with no
+ * complete turn entry opens the next turn at 68, and answering 67 would prefill the very turn the
+ * snapshot already recorded. An earlier version of this helper dropped the `+1` on the position
+ * branch, which put the Events and Inheritance forms one turn behind TrainingDetail on exactly the
+ * snapshot state the position fallback exists to serve.
+ */
 export function nextTurn(run: TurnRun): number {
-    return (run.turnEntries ?? []).length > 0 ? latestLoggedTurn(run) + 1 : latestLoggedTurn(run);
+    const logged = run.turnEntries ?? [];
+
+    const latest = latestLoggedTurn(run);
+
+    // `latestLoggedTurn` already answers the position (or 1) when nothing is logged, so the position
+    // branch adds the step. Only a run with neither a log nor a position stops at 1, because turn 1 is
+    // the first turn of a career and not one past anything.
+    if (logged.length > 0) {
+        return latest + 1;
+    }
+
+    return run.career_position === null || run.career_position === undefined ? 1 : latest + 1;
 }
 
 /**

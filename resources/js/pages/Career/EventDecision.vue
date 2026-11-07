@@ -23,7 +23,7 @@ import Note from '../../components/ui/Note.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
-import { nextTurn, undoTurnLabel } from '../../lib/career/turnDisplay';
+import { undoTurnLabel } from '../../lib/career/turnDisplay';
 import { BaseInput, BaseRadio, BaseSelect, BaseTextarea } from '../../components/Form';
 
 interface RunSection {
@@ -73,6 +73,8 @@ interface AdvisorSection {
 
 interface WriteSection {
     action: string;
+    /** The turn this form opens on, from the server's one owner of the number (R7-32). */
+    prefill_turn: number;
     turns: { id: number; turn: number }[];
     sources: { value: string; label: string }[];
 }
@@ -102,7 +104,10 @@ const form = useForm({
 
 // The turn the entry is recorded on, from the one shared derivation that the Timeline label and the
 // Inheritance form also read; the Undo control names the turn before it (R7-27, R7-32).
-const initialTurn = nextTurn({ turnEntries: props.write.turns, career_position: props.run.career_position });
+// R7-32 (review finding 4): the server ships the number. Deriving it here was a second implementation
+// of `TrainingRun::nextTurnNumber()` and drifted from it once already, dropping the `+1` on the
+// position branch and prefilling the turn the snapshot had already recorded.
+const initialTurn = props.write.prefill_turn;
 const undoableTurn = undoTurnLabel(initialTurn);
 
 /**

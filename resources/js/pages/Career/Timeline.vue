@@ -20,7 +20,17 @@ import { useVisitState } from '../../composables/useVisitState';
 import { latestLoggedTurn } from '../../lib/career/turnDisplay';
 
 const props = defineProps<{
-    run: { id: number; trainee: string; trainee_ja: string | null; scenario_label: string; status_label: string; run_url: string; cockpit_url: string };
+    run: {
+        id: number;
+        trainee: string;
+        trainee_ja: string | null;
+        scenario_label: string;
+        status_label: string;
+        /** The run's stored position, where it has one: the undo label's fallback (R7-32). */
+        career_position: { turn_index: number } | null;
+        run_url: string;
+        cockpit_url: string;
+    };
     origin: { year_label: string; month_label: string; turn: number; imported: boolean } | null;
     entries: {
         key: string;
@@ -143,7 +153,10 @@ const spOf = (entry: { actual: Record<string, number | null> | null }): number |
  * run never recorded would move the undo label to a turn that is not in the log.
  */
 const undoableTurn = computed(() =>
-    latestLoggedTurn({ turnEntries: props.entries.filter((entry) => entry.kind === 'turn') }),
+    latestLoggedTurn({
+        turnEntries: props.entries.filter((entry) => entry.kind === 'turn'),
+        career_position: props.run.career_position,
+    }),
 );
 const resultUrl = computed(() => props.run.cockpit_url.replace(/\/cockpit$/, '/result'));
 

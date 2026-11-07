@@ -265,6 +265,13 @@ class EventDecisionController extends Controller
     {
         return [
             'action' => route('runs.events.store', $run),
+            // R7-32 (review finding 4): the turn this form opens on, from the server's one owner of the
+            // number. The page derived it in the browser from `turns` plus `career_position`, which is a
+            // second implementation of `TrainingRun::nextTurnNumber()` and drifted from it once already --
+            // it dropped the `+1` on the position branch and put this form a turn behind TrainingDetail
+            // on a snapshot that had logged no complete entry. Shipping the value means the three
+            // screens cannot disagree, and a test can assert it.
+            'prefill_turn' => $run->nextTurnNumber(),
             'turns' => array_values($run->turnEntries
                 ->sortBy('turn')
                 ->map(static fn (TurnEntry $turn): array => ['id' => $turn->id, 'turn' => $turn->turn])

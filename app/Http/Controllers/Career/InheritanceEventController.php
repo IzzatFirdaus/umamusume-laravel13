@@ -423,6 +423,9 @@ class InheritanceEventController extends Controller
 
         return [
             'action' => route('runs.inheritance.store', $run),
+            // R7-32 (review finding 4): the turn this form opens on, from the server's one owner.
+            // Derived in the browser before, which is a second implementation of `nextTurnNumber()`.
+            'prefill_turn' => $run->nextTurnNumber(),
             'turns' => $turns,
             'sources' => ['Inspiration Event', 'Classic April', 'Senior April', 'Golden Event', 'Other'],
         ];

@@ -287,3 +287,31 @@ it('carries the run position for the turn prefill, and prefills the turn after t
             ->where('run.career_position.turn_index', 3)
             ->where('write.turns.2.turn', 3));
 });
+
+it('ships the turn the form opens on, one past the last logged (R7-32)', function (): void {
+    // The prefill is now the server's own number (`TrainingRun::nextTurnNumber()`), not a browser
+    // re-derivation of it. That matters because the browser version was a SECOND implementation and
+    // drifted: it dropped the `+1` on the position branch, so a snapshot standing at turn 67 prefilled
+    // 67 here while TrainingDetail opened at 68. (Review findings 1 and 4 on dba72d62.)
+    $run = eventDecisionRun(turns: 3);
+
+    // The snapshot state the drift broke: a stored position with no complete turn entry.
+    $positioned = eventDecisionRun();
+    $positioned->update(['career_position' => [
+        'year' => 3, 'month' => 10, 'phase' => 'Early', 'turn_index' => 67,
+    ]]);
+
+    $this->get(route('runs.events.decision', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            // Three logged turns, so the next entry lands on four.
+            ->where('write.prefill_turn', 4)
+            // And the same number TrainingDetail sends from the same owner.
+            ->where('write.prefill_turn', $run->nextTurnNumber()));
+
+    // The position branch: 68, not 67. A form that prefilled 67 would name the turn the snapshot
+    // already recorded, and would disagree with TrainingDetail on the same run.
+    $this->get(route('runs.events.decision', $positioned))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('write.prefill_turn', 68));
+});

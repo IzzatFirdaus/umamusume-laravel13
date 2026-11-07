@@ -53,15 +53,20 @@ async function openInheritanceEvent(page: import('@playwright/test').Page): Prom
     await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    const addSpark = (parent: number) => page.getByRole('button', { name: 'Add Spark' }).nth(parent);
+    // Each `Add Spark` names its own parent in an `sr-only` suffix, so the button is addressed by the
+    // parent it belongs to rather than by its index. Index addressing broke as soon as a neighbouring
+    // editor started rendering (R7-36 opened the grandparent sections), because `nth(0)` was then a
+    // grandparent's button rather than Parent A's.
+    const addSpark = (parent: string) =>
+        page.getByRole('button', { name: new RegExp(`Add Spark to ${parent}`) });
 
     await page.locator('#rank-parent_a').fill('3');
     // R7-33: a letter rank is recorded alongside the stars, so the screen has something to render.
     await page.locator('#rank-letter-parent_a').fill('B+');
     await page.locator('#ancestor-parent_a-0').fill('Symboli Rudolf');
     await page.locator('#ancestor-parent_a-1').fill('Mejiro McQueen');
-    await addSpark(0).click();
-    await addSpark(0).click();
+    await addSpark('Parent A').click();
+    await addSpark('Parent A').click();
     await page.getByRole('combobox', { name: 'Kind' }).nth(0).selectOption('blue');
     await page.getByRole('textbox', { name: 'Applies to' }).nth(0).fill('Speed');
     await page.getByRole('spinbutton', { name: 'Stars' }).nth(0).fill('3');
@@ -71,7 +76,7 @@ async function openInheritanceEvent(page: import('@playwright/test').Page): Prom
 
     await page.locator('#rank-parent_b').fill('2');
     await page.locator('#ancestor-parent_b-0').fill('Special Week');
-    await addSpark(1).click();
+    await addSpark('Parent B').click();
     await page.getByRole('combobox', { name: 'Kind' }).nth(2).selectOption('blue');
     await page.getByRole('textbox', { name: 'Applies to' }).nth(2).fill('Stamina');
     await page.getByRole('spinbutton', { name: 'Stars' }).nth(2).fill('2');

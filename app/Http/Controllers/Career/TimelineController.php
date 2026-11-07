@@ -150,6 +150,11 @@ class TimelineController extends Controller
                 ? (string) config('scenarios.scenarios.'.$run->scenarioKey().'.label', $run->scenarioKey())
                 : 'No scenario set',
             'status_label' => $run->status->label(),
+            // R7-32 (review finding 2): the undo label reads `latestLoggedTurn`, which falls back to
+            // this position when a run has logged nothing. A snapshot whose core stats were Unknown
+            // writes no TurnEntry, so without this the Timeline said `Undo turn 1` on a run the Races
+            // screen and TrainingDetail both called turn 67. One run, one answer.
+            'career_position' => $run->careerPosition()?->toArray(),
             'run_url' => route('runs.cockpit', $run),
             'cockpit_url' => route('runs.cockpit', $run),
         ];

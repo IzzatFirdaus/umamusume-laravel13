@@ -258,3 +258,43 @@ it('prefills the next turn on every form from the same derivation (R7-32)', func
         ->assertInertia(fn (Assert $page) => $page
             ->where('nextTurn.turn', $highest + 1));
 });
+
+it('ships the run position the undo label falls back to (R7-32)', function (): void {
+    // The undo label reads `latestLoggedTurn`, which answers the run's stored position when nothing is
+    // logged. A snapshot whose core stats were Unknown writes no TurnEntry at all, and without the
+    // position on this payload the Timeline said `Undo turn 1` on a run the Races screen and the
+    // Training screen both called turn 67 -- one run, two answers, on the row whose whole subject is
+    // that only one answer may exist. (Review finding 2 on dba72d62.)
+    $run = timelineRun(turns: 0);
+    // `career_position` is a JSON cast column, not a relation.
+    $run->update(['career_position' => [
+        'year' => 3,
+        'month' => 10,
+        'phase' => 'Early',
+        'turn_index' => 67,
+    ]]);
+
+    $this->get(route('runs.timeline', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('run.career_position.turn_index', 67)
+            // The rail itself stays empty: the fallback is a fact about the run, not a fabricated row.
+            ->has('entries', 0));
+
+    // A run whose log is ahead of its stored position reports BOTH, and the label reads the log --
+    // a logged turn is a fact, the stored position is where the run stood when it was last written.
+    $logged = timelineRun(turns: 3);
+    $logged->update(['career_position' => [
+        'year' => 1,
+        'month' => 1,
+        'phase' => 'Early',
+        'turn_index' => 1,
+    ]]);
+
+    $this->get(route('runs.timeline', $logged))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('run.career_position.turn_index', 1)
+            // The rail carries the three logged turns, and `latestLoggedTurn` prefers them.
+            ->has('entries', 3));
+});
