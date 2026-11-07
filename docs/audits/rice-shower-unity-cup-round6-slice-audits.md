@@ -242,7 +242,7 @@ the response are recorded below.**
 | --- | --- | --- |
 | Phase 0 (incident + process changes) | passed — one file, additions only | `663cce3e` |
 | S3.3 (R6-09, R6-10) | passed — four exceptions named in the body, none staged | `b4731784` |
-| S3.4 (R6-08 facet a) | pending | pending |
+| S3.4 (R6-08 facet a) | passed — five intended paths, four peer exceptions named, none staged | `c70240cf` |
 | S3.5 (§13.6) | pending | pending |
 | §15 (held items) | pending | pending |
 | Close-out (§14 fills, §16, index) | pending | pending |
@@ -1650,3 +1650,139 @@ baseline strip` (`:128`), and `renders only the baseline strip for a scenario th
 **Non-vacuity, path-scoped revert (Rule 3):** the diff was saved, the one file reverted, RED confirmed
 at `1 failed (9 assertions)`, the patch re-applied, and GREEN confirmed at `1 passed (9 assertions)`.
 Restored byte-identically: `git diff --stat` reads 8 insertions / 3 deletions both before and after.
+
+## S3.5 — band carrier, caveat, and two thirties
+
+### Identity
+
+| Item | Value |
+| --- | --- |
+| Audit ID | `RS-UC-R6-SLICE-AUDITS-S3.5` |
+| Mode | M1 change audit |
+| Row | Section 13.6 — not an `R6-NN` row |
+| Scope | `app/Services/Career/TeamPanelBuilder.php` (the burst-band payload), `config/scenarios.php` (the four reward labels), `resources/js/components/scenario/UnityCupPanel.vue` (the band block), `tests/Feature/CockpitUnityCupCountersTest.php`, `tests/browser/scenario-panel.spec.ts` |
+| Out of scope | The band edges, the band count, the payload structure, and the `+30` values themselves. Copy and payload keys only |
+
+### Pre-flight
+
+| Item | Value |
+| --- | --- |
+| HEAD at open | `c70240cf` (S3.4) |
+| Dirty set on the touched paths | Empty |
+| The band definitions | `config/scenarios.php:476-480` — four rows `4–6 / 7–9 / 10–12 / 13+`, rewards `+10 / +20 / +30 / +40` |
+| The assembler | `TeamPanelBuilder.php:503-506` returns the config rows verbatim as `bands` |
+| The renderer | `UnityCupPanel.vue:326-375` — a table plus a `ProvenanceBadge` and an `AlertRow` |
+| What the panel already had | A provenance badge naming its state (`estimated`) and a three-conflict `AlertRow`. **Neither named the carrier of the figures, and neither stated the low-band overlap** |
+| The two thirties | The band's `+30 matching stat` (a config reward string) and `Team Ranking Bonus: All Attributes +30` (`UnityCupPanel.vue:290`) |
+| Suite gate | `vendor/bin/pest tests/Feature/ScenarioMetadataTest.php` -> 3 passed |
+| `RENDERED_EVIDENCE` | **TRUE**, this slice's own probe |
+
+**A measured correction to the brief's surface attribution.** The brief suggested the band table was
+reachable on the **cockpit**. It is not: as of v3.0.0 the cockpit's own note reads *"Full scenario boards
+are on Scenario detail"*, and a probe of the rendered cockpit body found no `Burst count bands` string at
+all. The board lives on `Scenario detail`, so the browser case opens that page. The brief's second
+suggestion — that the two thirties might share the `UnityCupEditor` around `:203-207` — is also wrong:
+`Team Ranking Bonus: All Attributes +30` is at `UnityCupPanel.vue:290`, inside the same panel as the band
+table, gated on `rank === 'S'`.
+
+**A second measured finding, which bounds the third obligation.** The league `+30` renders only when
+`props.scenario.team.rank === 'S'`, and **no trainer form writes a team rank** — `TeamRankPayload` is
+constructed only in tests (R6-48's known limitation, register §6 C9). So the two thirties cannot be put on
+screen together through the UI at all today. The renderer half of the obligation is therefore satisfied by
+the band's own label becoming unambiguous; the collision itself needs R6-48's missing form before it can
+be observed.
+
+### RED evidence (captured before GREEN)
+
+```
+⨯ the band block names its carrier and its low band caveat
+⨯ the band reward names the stat its thirty applies to
+  Tests:    2 failed, 6 passed
+```
+
+The first failed on `expect($team)->toHaveKey('bands_source')`; the second on
+`expect($band['reward'])->toContain('to the matching stat')`.
+
+### GREEN
+
+Three copy-and-payload changes, no derivation touched:
+
+1. **Carrier.** `bands_source` joins the payload: `config/scenarios.php, transcribed there from GameTora`.
+   It renders as a `Source:` line under the table.
+2. **Caveat.** `bands_caveat` joins the payload and names the actual disagreement rather than hedging:
+   GameTora prints an overlapping `4 to 9` and `7 to 9`, which cannot both hold, so the edges are the
+   tool's own and a boundary run may sit in the neighbouring band on another sheet.
+3. **Two thirties.** The four reward labels in `config/scenarios.php` change `+N matching stat` to
+   `+N to the matching stat`. The values are unchanged; the band's thirty now says what it applies to, so
+   it cannot be mistaken for the league bonus's flat `All Attributes +30`.
+
+Both new keys are `null` when the scenario composes no burst machine, matching the `bands` array's own
+empty-when-absent behaviour.
+
+### Rule sweep (dimensions A-H)
+
+| Dimension | Result |
+| --- | --- |
+| A. Status and feedback | `no finding` |
+| B. Control and target | `no finding` |
+| C. Error prevention and recovery | `no finding` |
+| D. Consistency and signifiers | **finding** — F1 |
+| E. Cognitive load and memory | **finding** — F3 |
+| F. Visual grouping and hierarchy | `no finding` |
+| G. Accessibility semantics and contrast | `no finding` |
+| H. Content and language | **finding** — F2 |
+
+### Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F1 | `GP-2` | Gerhardt-Powals | Scenario detail, burst-count band table | Four derived reward rows were printed with no statement of the rule that produced them or who published it. The panel named its confidence and three conflicts, but not its carrier | OBSERVED_RENDERED | `UnityCupPanel.vue:326-375` (pre-fix) | 2 | High | Done: `bands_source` |
+| F2 | `GP-3` | Gerhardt-Powals | Same | The low bands are a summation the publishers do not agree on, and the table printed the edges as settled. Reference conflict row 57 records GameTora's overlapping `4 to 9` / `7 to 9` and rules the caveat must be rendered | OBSERVED_SOURCE | `config/scenarios.php:476-480`; reference §13.6 | 2 | High | Done: `bands_caveat` |
+| F3 | `H1` | Usability heuristics | Same panel, two `+30` figures | `+30 matching stat` and `All Attributes +30` are unrelated figures whose labels shared the ambiguous word `matching`. A reader scanning for "the +30" finds two | OBSERVED_SOURCE | `UnityCupPanel.vue:290`; the four reward strings | 2 | High | Done for the band's half; the league line needs R6-48's form before both can render together |
+
+### Unmeasured register
+
+**One item, stated rather than claimed:** the two thirties rendering *together* is `UNMEASURED`. The league
+`+30` requires `rank === 'S'`, and no trainer form writes a team rank (R6-48). The browser case therefore
+asserts the band's label is unambiguous on its own and that `All Attributes +30` is absent, rather than
+claiming a side-by-side comparison it cannot reach. A future pass with R6-48's form can close it.
+
+### Gap register delta
+
+None. This slice opens no `R6-NN` row and closes none; it is Section 13.6, and the register records it as
+`new finding -> fixed`.
+
+### Commit body basis
+
+| # | Question | Result | Basis |
+| --- | --- | --- | --- |
+| 1 | Add, remove or move a control? | `N/A` | No control |
+| 2 | Change what is on screen at once? | `PASS` | Two captions join the band card |
+| 3 | Change a colour, tint or state? | `N/A` | No class change |
+| 4 | Change a type size or weight? | `N/A` | Existing `text-xs`/`text-ink-muted` |
+| 5 | Change what the user can undo, or where the action is? | `N/A` | No action |
+| 6 | Change where a thing lives, or what it is called? | `PASS` | Four reward labels name their target |
+| 7 | Change a progress, an incomplete state or a boundary? | `N/A` | Band edges untouched |
+| 8 | Change what the user has to read or remember? | `PASS` | The caveat removes the need to know which publisher disagrees |
+| 9 | Add a new destination, a landmark or a control type? | `N/A` | None |
+| 10 | Change the words? | `PASS` | Two captions, four reward labels |
+
+### Lore delta (Rule 5)
+
+`Lore docs: 556 (was 556 at S3.4); code: 314 (was 314 at S3.4).` Delta **0**.
+
+### Verification output
+
+```
+vendor/bin/pest tests/Feature/CockpitUnityCupCountersTest.php tests/Feature/CareerCockpitTest.php
+  Tests:    54 passed (662 assertions)
+
+npx playwright test tests/browser/scenario-panel.spec.ts --grep 'band carrier'
+  1 passed (17.6s)
+
+npm run typecheck   clean
+```
+
+The three pre-existing failures in the full `scenario-panel.spec.ts` run are the same cases recorded in
+S2.4 and S3.4 — the meter resource case (`:76`), the baseline-strip documentation case (`:128`) and the
+no-panel case (`:163`).

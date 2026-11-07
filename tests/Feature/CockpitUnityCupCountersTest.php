@@ -171,4 +171,62 @@ final class CockpitUnityCupCountersTest extends TestCase
             ...$state,
         ]);
     }
+
+    public function test_the_band_block_names_its_carrier_and_its_low_band_caveat(): void
+    {
+        // The reference (conflict row 57) records GameTora printing overlapping first two bands -- "4 to 9"
+        // and "7 to 9" -- and rules that "no tool should print a band the run cannot be placed in, which is
+        // why config/scenarios.php renders the caveat rather than a placement". The panel carried a
+        // provenance badge about publishing disagreement and an AlertRow about three conflicts, but neither
+        // named the carrier of the figures nor stated the low-band overlap, so a reader could not tell
+        // whose bands these are.
+        $run = $this->unityCupRun([
+            'spirit_bursts_count' => 6,
+            'extreme_bursts_count' => 5,
+        ]);
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(function (Assert $page): void {
+                $team = $page->toArray()['props']['scenario']['team'];
+
+                // The payload carries the carrier, so the renderer never has to invent one.
+                expect($team)->toHaveKey('bands_source');
+                expect($team['bands_source'])->toContain('scenarios.php');
+
+                // And the low-band caveat, which is what makes the table a reference rather than a
+                // placement. It names the overlap rather than saying "may differ".
+                expect($team)->toHaveKey('bands_caveat');
+                expect($team['bands_caveat'])->toContain('4');
+                expect($team['bands_caveat'])->toContain('9');
+            });
+    }
+
+    public function test_the_band_reward_names_the_stat_its_thirty_applies_to(): void
+    {
+        // Two unrelated +30 figures share this panel: the band's "+30 matching stat" and the team ranking
+        // bonus's "All Attributes +30". The band's reward string said "matching stat", which is this
+        // tool's paraphrase; the reward names the matching stat, and the label now says so, so the two
+        // thirties cannot be read as one figure.
+        $run = $this->unityCupRun([
+            'spirit_bursts_count' => 6,
+            'extreme_bursts_count' => 5,
+        ]);
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(function (Assert $page): void {
+                $bands = $page->toArray()['props']['scenario']['team']['bands'];
+
+                expect($bands)->not->toBeEmpty();
+
+                foreach ($bands as $band) {
+                    // The band's own +30 must name its target, and must not read as the league bonus.
+                    if (str_contains((string) $band['reward'], '+30')) {
+                        expect($band['reward'])->toContain('to the matching stat');
+                        expect($band['reward'])->not->toContain('All Attributes');
+                    }
+                }
+            });
+    }
 }

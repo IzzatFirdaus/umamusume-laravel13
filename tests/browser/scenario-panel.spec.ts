@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { buildAxe, openAllDisclosures } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { expectTapTargets } from '../utils/tap-targets';
+import { openScenarioDetail } from '../utils/scenario-detail';
 
 /*
  * The scenario panel shell, `SCR-CAR-019` (SCREEN-014 / 015 / 016, plan §9 E1). `ScenarioPanelTest`
@@ -237,4 +238,63 @@ test('prints no spark count the run does not hold (R6-08)', async ({ page }) => 
 
         expect(text).not.toContain('six');
     }
+});
+
+test('names the band carrier, states the low-band ambiguity, and separates the two thirties', async ({ page }) => {
+    // Section 13.6. The band table printed four reward rows with no carrier and no low-band caveat, so a
+    // reader could not tell whose bands these are or that the published sets disagree at the bottom of the
+    // table. And two unrelated `+30` figures share this panel: the band's "+30 to the matching stat" and
+    // the team ranking bonus's "All Attributes +30". They must be separable by their words, not by
+    // position, because a reader scanning for "the +30" finds two.
+    //
+    // The board lives on Scenario detail as of v3.0.0 -- the cockpit's own note says so -- so this case
+    // opens the detail page rather than hunting the panel on the cockpit.
+    await openCockpit(page, 'unity_cup');
+    await page.locator('#app > *').first().waitFor();
+
+    // The band table renders only when the run holds both burst tallies: a fresh run records neither, so
+    // the panel draws no bands and no caveat to assert. Record them through the team editor, the same
+    // door `career-cockpit-forms.spec.ts` uses, then come back to this run.
+    const runUrl = page.url().replace(/\/cockpit$/, '');
+
+    await page.goto(`${runUrl}/team`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const editor = page.locator('main');
+
+    await editor.locator('input[name="spirit_bursts_count"]').fill('6');
+    await editor.locator('input[name="extreme_bursts_count"]').fill('5');
+    await editor.getByRole('button', { name: 'Save team state' }).click();
+    await expect(page.getByText('Run updated.')).toBeVisible(WRITE);
+
+    await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await openScenarioDetail(page);
+
+    const bandsTitle = page.getByText('Burst count bands').first();
+
+    await expect(bandsTitle).toBeVisible();
+
+    const card = bandsTitle.locator('xpath=ancestor::div[contains(@class,"card")][1]');
+
+    // The carrier is named, and it names the file the figures are transcribed from.
+    await expect(card).toContainText('Source:');
+    await expect(card).toContainText('scenarios.php');
+
+    // The caveat states the overlap rather than saying the figures may differ.
+    await expect(card).toContainText('4 to 9');
+    await expect(card).toContainText('7 to 9');
+
+    // The band's own +30 names its target, so it cannot be read as the other +30 on this panel.
+    await expect(card).toContainText('+30 to the matching stat');
+
+    // The other +30 -- `Team Ranking Bonus: All Attributes +30` -- renders only when the team rank is `S`,
+    // and NO trainer form writes a team rank (R6-48's known limitation: `TeamRankPayload` is constructed
+    // only in tests). So the two cannot be put on screen together through the UI today, and this case
+    // asserts the half a browser can reach: the band's own label is unambiguous on its own.
+    //
+    // The other label's wording is asserted where it is reachable -- as a source string -- rather than
+    // claimed here as rendered.
+    expect((await page.locator('body').innerText()).includes('All Attributes +30')).toBe(false);
 });

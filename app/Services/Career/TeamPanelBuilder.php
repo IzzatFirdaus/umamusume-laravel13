@@ -45,6 +45,8 @@ use Illuminate\Support\Collection;
  *     race_guidance: int|null,
  *     race_entries: list<array{title: string, tier: string|null, circles: int|null, placement: int|null}>,
  *     bands: list<array{total: string, reward: string}>,
+ *     bands_source: string|null,
+ *     bands_caveat: string|null,
  *     payout_timing: string|null,
  *     special_training: array{energy_penalty_removed: bool|null, wit_burst_energy_bonus: int|null},
  *     team_name: string|null,
@@ -520,6 +522,18 @@ final class TeamPanelBuilder
             'race_guidance' => is_numeric($margin) ? (int) $margin : null,
             'race_entries' => $entries,
             'bands' => $bands,
+            // Section 13.6: the panel rendered the band figures with no carrier and no low-band caveat, so a
+            // reader could not tell whose bands they are or that two published band sets disagree at the
+            // bottom of the table. Both travel as payload keys so the renderer prints them rather than
+            // paraphrasing, the same way every other derived figure here carries its provenance.
+            'bands_source' => $composesBursts
+                ? 'config/scenarios.php, transcribed there from GameTora'
+                : null,
+            'bands_caveat' => $composesBursts
+                ? 'The two publishers put the low bands in different places: GameTora prints an overlapping '
+                    .'"4 to 9" and "7 to 9", which cannot both hold, so these edges are the tool\'s own '
+                    .'and a run near the boundary may sit in the neighbouring band on another sheet.'
+                : null,
             'payout_timing' => $composesBursts && isset($def['burst_payout_timing'])
                 ? (string) $def['burst_payout_timing']
                 : null,

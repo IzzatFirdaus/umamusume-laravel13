@@ -54,6 +54,10 @@ interface TeamSection {
     race_guidance: number | null;
     race_entries: { title: string | null; tier: string | null; circles: number | null; placement: number | null }[];
     bands: { total: string; reward: string }[];
+    /** The band figures' carrier, named so the panel never has to invent one. */
+    bands_source: string | null;
+    /** The low-band ambiguity the two publishers disagree on, stated rather than left to "may differ". */
+    bands_caveat: string | null;
     payout_timing: string | null;
     special_training: { energy_penalty_removed: boolean | null; wit_burst_energy_bonus: number | null };
     /**
@@ -366,6 +370,16 @@ const counterSegments = computed((): string[] => {
                     detail="gametora counts the bursts combined and pays 10/20/30/40 SP; umamusu.wiki's criteria never say whether Extremes increment, and two other publishers report 15/15/20/20 with no stat component; the payout is dated late November where those publishers print the first half. The client's own Team Info count is the tiebreaker."
                     tone="note"
                 />
+                <!-- Section 13.6: the carrier and the low-band caveat. The figures were printed with
+                     neither, so a reader could not tell whose bands these are or that the published sets
+                     disagree at the bottom of the table. Both arrive from the payload rather than being
+                     paraphrased here. -->
+                <p v-if="props.scenario.team.bands_source !== null" class="mt-2 text-xs text-ink-muted">
+                    Source: {{ props.scenario.team.bands_source }}
+                </p>
+                <p v-if="props.scenario.team.bands_caveat !== null" class="mt-1 text-xs text-ink-muted">
+                    {{ props.scenario.team.bands_caveat }}
+                </p>
                 <p class="mt-2 text-xs text-ink-muted">
                     <template v-if="props.scenario.team.payout_timing !== null">
                         The gold versions arrive from the scripted event in {{ props.scenario.team.payout_timing }}.

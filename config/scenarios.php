@@ -474,10 +474,10 @@ return [
             | bands read is not recorded here, and D-223 keeps it that way.
             */
             'spirit_burst_bands' => [
-                ['total' => '4–6', 'reward' => 'White hint Lv1, +10 matching stat, +10 SP'],
-                ['total' => '7–9', 'reward' => 'White hint Lv3, +20 matching stat, +20 SP'],
-                ['total' => '10–12', 'reward' => 'Gold hint Lv1, +30 matching stat, +30 SP'],
-                ['total' => '13+', 'reward' => 'Gold hint Lv3, +40 matching stat, +40 SP'],
+                ['total' => '4–6', 'reward' => 'White hint Lv1, +10 to the matching stat, +10 SP'],
+                ['total' => '7–9', 'reward' => 'White hint Lv3, +20 to the matching stat, +20 SP'],
+                ['total' => '10–12', 'reward' => 'Gold hint Lv1, +30 to the matching stat, +30 SP'],
+                ['total' => '13+', 'reward' => 'Gold hint Lv3, +40 to the matching stat, +40 SP'],
             ],
             // 02-unity-cup.md:220 — the gold versions arrive from the scripted event in Senior
             // Year, late November. "Late November" is the calendar vocabulary the run screens use.
