@@ -141,6 +141,7 @@ function removeSpark(sparkIndex: number): void {
             v-model="props.legacy.ancestors_rank[props.ancestorIndex]"
             type="number"
             min="0"
+            max="3"
         />
 
         <!-- The node's own Sparks. The summary carries the node's name because four identical

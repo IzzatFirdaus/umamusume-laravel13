@@ -160,6 +160,10 @@ test.describe('Setup step 4 — Legacy', () => {
                 await expect(page.locator(`input[id="ancestor-${slot}-${index}"]`)).toBeVisible();
                 await expect(page.locator(`input[id="ancestor-rank-letter-${slot}-${index}"]`)).toBeVisible();
                 await expect(page.locator(`input[id="ancestor-rank-${slot}-${index}"]`)).toBeVisible();
+                // R7-06: the star-rank input is bounded to the spark ceiling. Without a `max` the
+                // accessibility tree advertised `valuemax="0"` — a number input whose stated maximum
+                // was zero — while the Spark `Stars` input on the same node carried `min=1 max=3`.
+                await expect(page.locator(`input[id="ancestor-rank-${slot}-${index}"]`)).toHaveAttribute('max', '3');
             }
         }
         // A Spark panel per node, as the same collapsed disclosure the Legacy Lab uses: four

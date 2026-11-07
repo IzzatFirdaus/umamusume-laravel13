@@ -522,6 +522,7 @@ const pickOptions = (): { value: string; label: string }[] => [
                                     :name="`legacies.${index}.rank`"
                                     type="number"
                                     min="0"
+                                    max="3"
                                 />
                             </div>
                         </div>
