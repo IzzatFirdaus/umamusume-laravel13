@@ -66,6 +66,7 @@ $ git status --short
 | S6 | R7-19, R7-66 | `c6ac05e7` | **landed** — `#s6--r7-19-r7-66` |
 | S17 | R7-02 | — (verification-only) | **settled, Outcome B** — `#s17--r7-02` |
 | S17b | R7-02 | `1d6a39af` | **landed** — `#s17b--r7-02` |
+| S4 | R7-03, R7-13 | `bab1b072` | **landed (label half)** — `#s4--r7-03-r7-13` |
 
 ---
 
@@ -1000,3 +1001,111 @@ tests/browser/career-trainee-select.spec.ts
   data gap and the fix is a backfill in `database/seeders/`, after which both labels read `3 released`. The verifier
   could not confirm the release.
 - **The pre-existing `getByText('Unique')` red** in `career-trainee-select.spec.ts` — classified, not fixed.
+
+---
+
+## §s4 — S4: the preflight form label queries the table its id belongs to
+
+### 1. Slice, rows, register reference
+**S4.** Rows `R7-03` and `R7-13`, both `Confirmed defect`, register §4.1. Both name the same root.
+
+### 2. Pre-flight
+```
+$ git status --short -- <the seven touched paths>
+(empty — CLEAN)
+$ vendor/bin/pest tests/Feature/ScenarioMetadataTest.php → 3 passed (52 assertions)
+```
+
+### 3. RED — and the bug was not the one the dispatch named
+
+The dispatch expected `SetupDraft` to lack `form`, and that the fix was persistence plus a read. **Measured: the
+draft already carries `character_card_id`** (`SetupDraft::characterCardId()` `:137`) and **Preflight already calls
+`formLabel()`** (`:298`). The defect is one line further in:
+
+```php
+// app/Http/Controllers/Career/PreflightController.php:296-305, before
+return SupportCard::query()->find($cardId)?->displayName();
+```
+
+**A `character_cards` id looked up in `support_cards`.** The two id spaces are unrelated, so the lookup could only
+ever miss and the tile always printed `FORM · N/A`.
+
+**Why no test caught it:** `CareerPreflightTest`'s R6-09 case built its fixture from `preflightFixture()['cards']` —
+which is the six-card **deck**, i.e. `SupportCard` rows — and passed a support-card id as `character_card_id`. The
+test proved the resolver against a table it never queries at runtime.
+
+RED, with the case seeding a real `CharacterCard`:
+
+```
+$ vendor/bin/pest CareerPreflightTest --filter='resolves the chosen form'
+  ⨯ it resolves the chosen form onto the trainee it belongs to (R6-09, R7-03, R7-13)
+  Failed asserting that two strings are identical. — 1 failed (11 assertions)
+```
+
+### 4. GREEN
+```php
+return CharacterCard::query()->find($cardId)?->title;
+```
+`CareerPreflightTest`'s case now seeds `CharacterCard::factory()->for($trainee)` titled `[Rosy Dreams]` and asserts
+`contract.build.trainee.form_label === '[Rosy Dreams]'`.
+
+```
+$ vendor/bin/pest CareerPreflightTest → 23 passed (317 assertions)
+```
+
+### 5. Non-vacuity
+```
+$ git diff PreflightController.php > S4.patch
+$ git checkout -- PreflightController.php
+$ vendor/bin/pest --filter='resolves the chosen form' → ⨯ 1 failed (11 assertions)
+$ git apply S4.patch ; git diff | diff - S4.patch → DIFF MATCHES
+$ vendor/bin/pest --filter → ✓ 1 passed (11 assertions)
+```
+
+### 6. Regression
+```
+$ vendor/bin/pest CareerPreflightTest CareerTraineeSelectTest TraineeCardFormTest → 52 passed (856 assertions)
+$ npx playwright test career-preflight.spec.ts → 11 passed
+```
+
+**One measurement corrected mid-slice.** The first version of this slice also tightened
+`career-preflight.spec.ts` to assert the tile names a form rather than a disclosure. It failed:
+
+```
+Received string: "Form N/A, No costume form was chosen in this draft, so none is named here.…"
+```
+
+**That failure is a real measurement, and it is R7-03's other half:** on the walked wizard path the Trainee step does
+not write `character_card_id` to the draft, so the tile's absence is honest. The assertion was reverted to
+shape-only with the finding recorded in the case's own comment. **S4 fixes the wrong-table lookup; it does not make
+the wizard persist a form.** `R7-03`'s persistence half stays open.
+
+### 7. Gates
+| Gate | Result |
+| --- | --- |
+| Focused test | `CareerPreflightTest` → **23 passed (317 assertions)** |
+| Feature regression | three suites → **52 passed (856 assertions)** |
+| Browser | `career-preflight.spec.ts` → **11 passed** |
+| Typecheck | clean |
+| Pint | `passed` after fixing the test's import order |
+| PHPStan | `[OK] No errors` on `PreflightController.php` |
+| Lore | 556 / 75, delta 0 |
+| Fence | 0 invalid |
+
+### 8. Lore delta
+`Lore docs: 556 (was 556); code: 556 (was 556)`. **Delta 0.**
+
+### 9. Commit
+`bab1b072` — `fix(career): resolve the chosen form in character_cards, the table its id belongs to (R7-03, R7-13)`
+
+```
+app/Http/Controllers/Career/PreflightController.php
+tests/Feature/CareerPreflightTest.php
+tests/browser/career-preflight.spec.ts
+```
+
+### 10. What this slice did not close
+- **`R7-03`'s persistence half.** The wizard's Trainee step does not write `character_card_id` on the walked path, so
+  a wizard-created run has no form. Measured and recorded; a separate slice if the owner wants it.
+- **`R7-13`'s picker half** — the select's default. Unchanged: the select shows what the draft holds, and the draft
+  holds nothing on that path.

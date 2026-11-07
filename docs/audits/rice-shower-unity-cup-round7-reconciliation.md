@@ -855,4 +855,5 @@ renumbered.*
 | — | S0 | `58bb98a7` | housekeeping | `#s0--housekeeping` | three pre-existing test reds cleared; no R7 row |
 | R7-20 | S1 | `e5cdc971` | `Confirmed defect` → `Confirmed fixed` | `#s1--r7-20` | RED: no `Turn to play` label; GREEN: label + helper present |
 | R7-02 | S17b | `1d6a39af` | `Source conflict / open` → `Confirmed defect (copy)` → `Confirmed fixed` | `#s17b--r7-02` | RED: no `form_count_label`; GREEN: `2 released forms` / `3 forms (2 released, 1 undated)` |
+| R7-03, R7-13 | S4 | `bab1b072` | `Confirmed defect` → `Confirmed fixed` (label half; persistence half open) | `#s4--r7-03-r7-13` | RED: `formLabel()` returned null for a real `character_cards` id; GREEN: the title |
 | R7-19, R7-66 | S6 | `c6ac05e7` | `Confirmed defect` → `Confirmed fixed` | `#s6--r7-19-r7-66` | RED: five stat rows labelled `cap` on a run with four null cap columns; GREEN: `floor` |
