@@ -1949,3 +1949,102 @@ files reverted with `git checkout -- <the two explicit paths>`, RED confirmed at
 `Failed asserting that an array has the key 'ancestors_sparks'` / `1 failed, 15 passed (340
 assertions)`, the patch re-applied, GREEN confirmed at `16 passed (342 assertions)`. `git diff --stat`
 reads 55 insertions / 2 deletions both before and after.
+
+## S3.8 — stale planner comment
+
+### Identity
+
+| Item | Value |
+| --- | --- |
+| Audit ID | `RS-UC-R6-SLICE-AUDITS-S3.8` |
+| Mode | M1 change audit, comment-only |
+| Row | None. A fence finding carried from S3.1, not an `R6-NN` row and not a new one |
+| Scope | `tests/Feature/CareerSkillsPlannerTest.php`, the file docblock only |
+| Out of scope | `SkillsPlanner.vue`, `SkillSpendCoverageTest`, `HintDiscount`, and every assertion in either test file |
+
+### Pre-flight
+
+| Item | Value |
+| --- | --- |
+| HEAD at open | `10576535` (S3.6) |
+| Dirty set on the touched path | Empty |
+| The claim | The docblock said *"The hint-discount ladder was removed on the owner's ruling (A5)"* and *"no ladder survives on the props"* |
+| Measured, 2026-11-07 | **Both false.** `SkillsPlannerController.php:54` sends `'hint_discount' => HintDiscount::ladder()`. `SkillsPlanner.vue:109` declares the prop, `:587` renders a five-row table from it, `:818` renders it again in the detail list. `SkillSpendCoverageTest:112` asserts `toHaveKey('hint_discount')` and `:115` asserts five rows |
+| Suite gate | `vendor/bin/pest tests/Feature/ScenarioMetadataTest.php` -> 3 passed |
+
+### RED
+
+**`N/A`, with the reason stated rather than waived.** A comment cannot fail a test, so there is no
+assertion to watch go red. The divergence is measured by reading instead: the comment names a removal
+that four call sites and one assertion contradict.
+
+### GREEN
+
+The docblock's three-line claim is replaced with what the code does: the ladder is present and is not
+asserted *here* because `SkillSpendCoverageTest` owns its assertions. Nothing was withdrawn from the
+product, and the replacement names the four sites that keep it alive so the next reader can check rather
+than trust.
+
+The tests below the docblock are untouched. `CareerSkillsPlannerTest` 32 passed with
+`SkillSpendCoverageTest`, before and after.
+
+### Rule sweep (dimensions A-H)
+
+Every dimension `no finding`. There is no surface, control, state or copy in the application involved:
+this is a comment in a test file describing code it does not own.
+
+### Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F1 | `N/A` | — | `CareerSkillsPlannerTest`'s file docblock | The comment asserted a product withdrawal that four call sites and one assertion refute. A reader trusting it would look for a ladder that is on screen | OBSERVED_SOURCE | `tests/Feature/CareerSkillsPlannerTest.php:24-27` (pre-fix) | 1 | High | Done |
+
+### Unmeasured register
+
+Empty. No rendered claim is made.
+
+### Gap register delta
+
+None. No `R6-NN` row is opened, closed or changed; the register's §14 row records this as a fence finding,
+per the standing rule that a fence finding does not become an `R6-NN` row.
+
+### Commit body basis
+
+| # | Question | Result | Basis |
+| --- | --- | --- | --- |
+| 1-7, 9 | Add/remove/move a control, change what is on screen, a colour, a type, an undo, a name, a boundary, a destination? | `N/A` | No application file touched |
+| 8 | Change what the user has to read or remember? | `N/A` | The comment is not shipped to the user |
+| 10 | Change the words? | `PASS` | Three lines of a test file's docblock, describing code the file does not own |
+
+### Lore delta (Rule 5)
+
+`Lore docs: 556 (was 556 at S3.6); code: 314 (was 314 at S3.6).` Delta **0**.
+
+### Verification output
+
+```
+vendor/bin/pest tests/Feature/CareerSkillsPlannerTest.php tests/Feature/SkillSpendCoverageTest.php
+  Tests:    32 passed (426 assertions)
+
+vendor/bin/pint --test --format agent tests/Feature/CareerSkillsPlannerTest.php
+  {"tool":"pint","result":"passed"}
+```
+
+**Non-vacuity: `N/A` per Rule 3's own exemption.** There is no revertible behaviour behind a comment.
+
+## Fence findings — 2026-11-07 dispatch
+
+Five items, recorded rather than fixed. Four are permanent state; one may clear when an owner rules.
+
+| # | Finding | State | Evidence |
+| --- | --- | --- | --- |
+| 1 | `CareerSkillsPlannerTest`'s docblock claimed the hint ladder was removed and that no ladder survives on the props | **fixed** in S3.8 (`fence finding -> fixed`); no `R6-NN` row created | Four counter-sites: `SkillsPlannerController.php:54`, `SkillsPlanner.vue:109`, `:587`, `:818`, plus `SkillSpendCoverageTest:112` |
+| 2 | R6-08 facet (b) — the two spark counters disagreeing | **reproduces, and is now fixed** in S3.6. The dispatch asked whether `R3-02` (`2470a4c`) had already closed it: it had not. That commit fixed `predictedSection()`, which sums `ancestors_sparks` today; the Inheritance tile is a different renderer, fed by `legacySection()`, and was never in that patch | `InheritanceEventController.php:171-197` and `InheritanceEvent.vue:147-151` at `7296dc95`; RED at `ancestors_sparks` absent |
+| 3 | `docs/audit-corrections.md` | **still absent, and its absence is the owner's ruling.** `PROCESS-PLANS.md:15941` names it as the home for the framework defects (`SHR-8` undefined, `GP-2` unrouted). Not created by this pass | `test -f docs/audit-corrections.md` -> not created |
+| 4 | The four peer paths in the working tree | **unchanged across the whole pass**: `AUDIT-SUPPORT-CARDS-UIUX-2026-11-05.md` deleted, `PLAN_SLICES_6_7.md` deleted, `AUDIT-AND-VERIFICATION.md` modified, `PROCESS-PLANS.md` modified. A peer session is active in this worktree. None was staged, touched or committed by this pass | `git status --short` at open and at close, identical on these four |
+| 5 | Peer notification reply (incident, `663cce3e`) | **still pending as of 2026-11-07.** No reply received | Incident section, "Peer notification — State: pending" |
+
+**A sixth state change this pass measured and did not cause:** `node_modules` is an **empty directory**
+(0 entries, mtime 2026-11-07 10:20:17) with 19 stale `node` processes. That is a peer session's dead
+install. It blocks `playwright`, `npm run typecheck`, `npm run build` and every browser gate for anything
+landing after it. This pass did not run a competing `npm install` in a shared worktree.

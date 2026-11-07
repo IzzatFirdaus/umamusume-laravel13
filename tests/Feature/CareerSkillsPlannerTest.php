@@ -21,10 +21,15 @@ use Tests\TestCase;
  * write. Rendered copy, keyboard reorder and the 44px sweep are the browser spec's; the reasons a
  * figure is absent are asserted here beside the figure.
  *
- * The hint-discount ladder was removed on the owner's ruling (A5): `SkillSpendCoverageTest` owns
- * both the coverage arithmetic the ladder used to sit beside and the proof that no ladder survives
- * on the props, so the case that priced it is gone from this file rather than kept asserting a
- * feature that no longer ships.
+ * The hint-discount ladder is NOT asserted here, and it was not removed. This comment used to claim that
+ * "the hint-discount ladder was removed on the owner's ruling (A5)" and that "no ladder survives on the
+ * props"; measurement on 2026-11-07 found both claims false. `SkillsPlannerController.php:54` still sends
+ * `'hint_discount' => HintDiscount::ladder()`, `SkillsPlanner.vue:109` still declares the prop and `:587`
+ * and `:818` still render it, and `SkillSpendCoverageTest:112` asserts the key is present with five rows.
+ *
+ * The accurate statement is narrower: `SkillSpendCoverageTest` owns the ladder's own assertions -- the
+ * per-level percentages, the five captions and the absence of pricing on a row with no recorded hint
+ * level -- so this file does not restate them. Nothing was withdrawn from the product.
  *
  * Top-level helpers carry the file's own prefix on purpose: a bare `eventRun()` in another slice's
  * untracked test file collides with the same name in `TurnEventTypePayloadsTest` and aborts the
