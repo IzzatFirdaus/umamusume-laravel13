@@ -1808,6 +1808,12 @@ npx playwright test tests/browser/scenario-panel.spec.ts --grep 'band carrier'
 npm run typecheck   clean
 ```
 
-The three pre-existing failures in the full `scenario-panel.spec.ts` run are the same cases recorded in
-S2.4 and S3.4 — the meter resource case (`:76`), the baseline-strip documentation case (`:128`) and the
-no-panel case (`:163`).
+The full `scenario-panel.spec.ts` run reads **`3 failed, 7 passed (1.4m)`**, and those three are the same
+cases recorded as pre-existing in S2.4 and S3.4 — the meter resource case (`:76`), the baseline-strip
+documentation case (`:128`) and the no-panel case (`:163`). None handles the band table.
+
+An earlier run of the same spec in this slice, before the browser case was pointed at the right page,
+read `4 failed, 6 passed (1.5m)`. The fourth failure was **mine, and it was correct**: the case looked for
+`Burst count bands` on the cockpit, which does not render the board. That run is recorded rather than
+discarded because it is the measurement behind the surface correction above — the brief said the cockpit,
+the browser said no, and the page says *"Full scenario boards are on Scenario detail"*.
