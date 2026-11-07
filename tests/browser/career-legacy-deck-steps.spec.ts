@@ -167,13 +167,21 @@ test.describe('Setup step 4 — Legacy', () => {
             }
         }
         // A Spark panel per node, as the same collapsed disclosure the Legacy Lab uses: four
-        // summaries, each naming its own grandparent, and no Spark fields until a node is opened and
-        // one is added.
+        // summaries, each naming its own grandparent.
         // Scoped by content, never by tag (the idiom the Legacy Lab's own spec records): the
         // disclosure's <summary> is what carries the node's name.
         await expect(page.locator('summary').filter({ hasText: 'Sparks for Grandparent A1' })).toHaveCount(1);
         await expect(page.locator('summary').filter({ hasText: 'Sparks for Grandparent B2' })).toHaveCount(1);
-        await expect(page.locator('input[id^="ancestor-spark-kind-"]')).toHaveCount(0);
+
+        // R7-68 / R7-36: the spark editors are OPEN by default, so their contents render without a click.
+        // This case used to assert `toHaveCount(0)` for the spark inputs, pinning the closed default --
+        // and that closed default is what the walk measured as "no spark input of any kind". The six
+        // ancestor chains are stored, validated and posted; a closed `<details>` rendered none of them.
+        //
+        // The kind/target/star inputs appear once a node HAS a spark, so the reachable control is the
+        // one that adds the first: four `Add Spark` buttons, one per ancestor, visible with no click.
+        await expect(page.getByRole('button', { name: 'Add Spark' })).toHaveCount(4);
+        await expect(page.getByRole('button', { name: 'Add Spark' }).first()).toBeVisible();
     });
 
     test('places the projection beside the affinity card and the save inside it', async ({ page }) => {
@@ -333,7 +341,14 @@ test.describe('Setup step 4 — Legacy', () => {
         await page.locator('#legacy-name-0').fill('Silence Suzuka');
 
         const editor = page.locator('#legacy-pick-0').locator('xpath=ancestor::div[1]').locator('details');
-        await editor.locator('> summary').click();
+
+        // The spark editor is OPEN by default (R7-36), so a summary click would close it. This used to
+        // click unconditionally because the disclosure started shut -- the same bug class as S0's fix to
+        // `career-training-detail.spec.ts`, where a helper clicked an already-open `<details>` and shut it.
+        if (!(await editor.evaluate((el) => (el as HTMLDetailsElement).open))) {
+            await editor.locator('> summary').click();
+        }
+
         await editor.getByRole('button', { name: 'Add Spark' }).click();
 
         const category = page.locator('#legacy-spark-category-0-0');
@@ -383,7 +398,14 @@ test.describe('Setup step 4 — Legacy', () => {
         await page.screenshot({ path: join(shots, 'before-1280.png'), fullPage: true });
 
         // Add the parent's own Blue Speed spark at three stars through its editor.
-        await page.getByText('Sparks for this parent').first().click();
+        // The editor is open by default (R7-36), so a summary click would close it -- guard rather than
+        // assume, the same conditional the sibling case uses.
+        const parentEditor = page.locator('details').filter({ hasText: 'Sparks for this parent' }).first();
+
+        if (!(await parentEditor.evaluate((el) => (el as HTMLDetailsElement).open))) {
+            await page.getByText('Sparks for this parent').first().click();
+        }
+
         await page.getByRole('button', { name: /Add Spark/ }).first().click();
         await page.locator('#legacy-spark-target-0-0').selectOption('Speed');
         await page.locator('#legacy-spark-stars-0-0').fill('3');

@@ -539,8 +539,14 @@ const pickOptions = (): { value: string; label: string }[] => [
 
                         <!-- The parent's own Sparks: kind, category, target, stars. The same boundary the
                              server validates - a Stat category whose target is not a stat is refused
-                             (StoreLegacySelectionRequest::assertTargetMatchesCategory). -->
-                        <details class="mt-2 rounded-md border border-rule bg-panel p-2">
+                             (StoreLegacySelectionRequest::assertTargetMatchesCategory).
+
+                             Open by default (R7-36, R7-68): the editors exist and always have, but a closed
+                             `<details>` renders none of its contents, and the walk that recorded "no spark
+                             input of any kind" was reading this collapsed state. Round 5 answered the
+                             identical shape on `TrainingDetail.vue`'s client-totals group and R7-57 on its
+                             preview readings, both by opening the group rather than moving the fields. -->
+                        <details open class="mt-2 rounded-md border border-rule bg-panel p-2">
                             <summary class="flex min-h-11 cursor-pointer items-center text-xs font-medium text-ink">
                                 Sparks for this parent
                             </summary>

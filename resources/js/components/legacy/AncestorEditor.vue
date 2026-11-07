@@ -145,8 +145,12 @@ function removeSpark(sparkIndex: number): void {
         />
 
         <!-- The node's own Sparks. The summary carries the node's name because four identical
-             "Grandparent Sparks" summaries would be told apart by proximity alone. -->
-        <details class="mt-2 rounded-md border border-rule bg-panel p-2">
+             "Grandparent Sparks" summaries would be told apart by proximity alone.
+
+             Open by default for the same reason the parent editor is (R7-68, R7-36): the six ancestor
+             spark chains the walk recorded as unrepresented are stored, validated and posted -- they
+             were simply behind a closed disclosure, and a closed disclosure renders nothing. -->
+        <details open class="mt-2 rounded-md border border-rule bg-panel p-2">
             <summary class="flex min-h-11 cursor-pointer items-center text-xs font-medium text-ink">
                 Sparks for {{ props.label }}
             </summary>
