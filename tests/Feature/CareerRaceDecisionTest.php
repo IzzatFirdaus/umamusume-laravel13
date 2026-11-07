@@ -182,6 +182,51 @@ it('gates a standard race on the run-level maiden lock and clears it on a debut 
             ->where('races.0.maiden_gated', false));
 });
 
+it('clears the maiden lock from the run position when the run carries no Debut record', function (): void {
+    // R7-26, owner ruling (4). A run imported mid-career holds no `race_entries` for the turns it never
+    // played, so the record-based check can never fire and every standard race stays locked forever.
+    // The gate is absolute in the client — "before the Debut Race you cannot take part in any races",
+    // and the Debut sits at Junior Late June, turn 12 — so a run whose position is past turn 12 has,
+    // by construction, cleared it. The boundary is `> 12`, not `>= 12`: at turn 12 the Debut may not
+    // have resolved; by turn 13 it has.
+    $run = TrainingRun::factory()->create([
+        'scenario' => 'ura_finale',
+        'status' => RunStatus::Active,
+        'umamusume_id' => Umamusume::factory()->state(['name' => 'Rice Shower', 'name_ja' => 'ライスシャワー']),
+        'career_position' => ['year' => 3, 'month' => 10, 'phase' => 'Early', 'turn_index' => 67],
+    ]);
+    // The slot defaults to Junior turn 13, which is the turn the run's own calendar reads; a run at
+    // turn 67 would not be offered a turn-13 race at all, so the gate is asserted on the model and the
+    // payload on a run whose position sits on the slot.
+    raceSlot(['title' => 'Kyoto Daishoten', 'sort_order' => 1]);
+
+    expect($run->hasClearedMaidenLock())->toBeTrue();
+
+    $mid = TrainingRun::factory()->create([
+        'scenario' => 'ura_finale',
+        'status' => RunStatus::Active,
+        'umamusume_id' => Umamusume::factory()->state(['name' => 'Rice Shower', 'name_ja' => 'ライスシャワー']),
+        'career_position' => ['year' => 1, 'month' => 7, 'phase' => 'Early', 'turn_index' => 13],
+    ]);
+    expect($mid->hasClearedMaidenLock())->toBeTrue();
+
+    $this->get(route('runs.races.decision', $mid->fresh()))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('races.0.maiden_gated', false));
+
+    // The other half: a run still in debut preparation must stay gated, or the lock stops meaning
+    // anything. Turn 5 is Junior Early March, months before the Debut.
+    $early = TrainingRun::factory()->create([
+        'scenario' => 'ura_finale',
+        'status' => RunStatus::Active,
+        'umamusume_id' => Umamusume::factory()->state(['name' => 'Rice Shower', 'name_ja' => 'ライスシャワー']),
+        'career_position' => ['year' => 1, 'month' => 3, 'phase' => 'Early', 'turn_index' => 5],
+    ]);
+
+    expect($early->hasClearedMaidenLock())->toBeFalse();
+});
+
 it('refuses to state a readiness or a win figure, and names the ADR-0016 blocker', function (): void {
     $run = raceRun(turns: 12);
     raceSlot();

@@ -887,6 +887,18 @@ class TrainingRun extends Model
      */
     public function hasClearedMaidenLock(): bool
     {
+        // A run imported mid-career holds no entry for the turns it never played, so the record check
+        // below can never fire and every standard race would stay locked for the life of the run. The
+        // gate is absolute in the client — a run cannot enter any other race before its Debut — and the
+        // Debut sits at Junior Late June (turn 12), so a position past turn 12 has cleared it by
+        // construction. Boundary is `> 12`, not `>= 12`: at turn 12 the Debut may not have resolved.
+        //
+        // `nextTurnNumber()` is the run's effective position plus one, for both doors: a wizard run
+        // reads its last logged turn, a snapshot reads its stored position.
+        if ($this->nextTurnNumber() - 1 > 12) {
+            return true;
+        }
+
         // The race surfaces eager-load `raceEntries.raceCatalogSlot`, so when the relation is already
         // loaded the answer is computed in memory and adds no second calendar read (the planner's
         // read-count test pins the calendar to one read). Without the eager load, fall back to a join.
