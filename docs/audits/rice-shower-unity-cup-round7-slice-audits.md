@@ -64,6 +64,7 @@ $ git status --short
 | S2 | R7-26 | `4efa0876` | **landed** — `#s2--r7-26` |
 | S0 | — (housekeeping) | `58bb98a7` | **landed** — `#s0--housekeeping` |
 | S6 | R7-19, R7-66 | `c6ac05e7` | **landed** — `#s6--r7-19-r7-66` |
+| S17 | R7-02 | — (verification-only) | **settled, Outcome B** — `#s17--r7-02`; opens `S17b` for an owner ruling |
 
 ---
 
@@ -740,3 +741,150 @@ resources/js/components/career/CareerStatePanel.vue
 - **`R7-66`'s storage half.** No surface records an in-force ceiling, so `in-force` is reachable only for a run whose
   `cap_*` columns carry values. The label is honest; a recording surface is not this slice.
 - **`R7-73` / `R7-23`** — the fan-ladder and class-badge displays stay removed under R6-43's override.
+
+---
+
+## §s17 — S17: `R7-02` settled. Outcome **B**: the picker's extra predicate is the outlier
+
+**Verification-only. No code change in this slice.** The read is below; `R7-02` is settled as a **confirmed
+inconsistency**, and the register's `Source conflict / open` is answered.
+
+### 1. Three scopes, measured
+
+| File | Predicates |
+| --- | --- |
+| `TraineeSelectController::cardScope()` `:457-466` (the **picker**) | `unconfirmed = false` **+ `whereNotNull('global_release_date')`** |
+| `TraineeProfileController::cardScope()` `:275-284` (the **profile**) | `unconfirmed = false` |
+| `CatalogController::cardScope(bool)` `:800-810` (the **catalog**, which the profile's docblock names as its authority) | `unconfirmed = false` when not showing unconfirmed; **no release predicate** |
+
+**The picker carries a predicate the other two do not.** The profile's docblock at `:269-274` claims it applies
+*"the same rule `CatalogController::cardScope()`"* — and it does; it is the **picker** that deviates from the rule the
+docblock names.
+
+### 2. The rows
+
+```
+$ php artisan tinker --execute="select id,title,unconfirmed,global_release_date,is_debut_form ..."
+31  | [Rosy Dreams]        | unconfirmed=0 | released='2025-06-26' | debut=1
+47  | [Vampire Makeover!]  | unconfirmed=0 | released='2025-11-24' | debut=0
+170 | Yummy Dreamy Fairy   | unconfirmed=0 | released=NULL         | debut=0
+```
+
+Picker 2 (31, 47) · Profile 3 · Catalog 3. The split is exactly the release predicate.
+
+### 3. Outcome — **B**
+
+The picker filters a card the catalog and the profile both show. Walk 7's `2 forms` is a faithful reading of the
+picker; its `three` reading of the profile is equally faithful. **Neither walk misread anything — the two screens
+disagree.**
+
+`R7-02` is therefore a **confirmed inconsistency**, not a stale count, and the register's `Source conflict / open`
+resolves against the picker.
+
+**The honest reading of the underlying fact:** a card with no `global_release_date` is one whose Global release this
+repository does not know. It may be released (the date is simply unrecorded) or not yet released. **Filtering it out
+is a decision the picker makes silently; the catalog and the profile make the opposite one.** Neither is provably
+wrong from the data alone, which is why this is a conflict and not a simple defect — but the picker is the only
+surface that excludes it, and it does so without saying so.
+
+### 4. What this opens — `S17b`, for the owner
+
+A slice scoped to the picker's filter rule. Two shapes, and the choice is a product decision:
+
+- **(b1)** Drop the picker's `whereNotNull('global_release_date')`, so all three surfaces agree on the catalog's rule.
+  A Trainer can then start a career on a card whose release date is unrecorded.
+- **(b2)** Keep the picker's predicate and add it to the profile and the catalog, so an unrecorded release date hides
+  the card everywhere. Strictly safer for correctness, but it hides data the catalog is meant to be the record of.
+
+**Not decided here.** The register's `R7-02` stays `Source conflict / open` until the owner rules; what changes is
+that the *settling read is now done* and the conflict has a named mechanism instead of a hypothesis.
+
+### 5. Falsification attempted
+
+The ruling the dispatch proposed for Outcome A — *"the picker correctly filters selectable forms and `Yummy Dreamy
+Fairy` is not selectable"* — **does not hold**, because the catalog (the surface whose rule the profile's docblock
+cites as authoritative) also lists her. A card the catalog shows as a form is not "not selectable" by any rule this
+tree states; it is filtered by one screen only.
+
+---
+
+## §s1 — S1: the turn field names what it holds
+
+### 1. Slice, rows, register reference
+**S1.** Row `R7-20`, `Confirmed defect`, **blocking**, register §4.1. Owner ruling **(a)** — relabel + helper — in
+`round7-owner-calls.md` §1.
+
+### 2. Pre-flight
+```
+$ git status --short -- resources/js/pages/Career/TrainingDetail.vue tests/browser/career-training-detail.spec.ts tests/Feature/CareerTrainingDetailTest.php
+(empty — CLEAN)
+
+$ vendor/bin/pest tests/Feature/ScenarioMetadataTest.php → 3 passed (52 assertions)
+```
+
+**This slice was unblocked by S0** (`58bb98a7`), which made the training spec's helper stop closing the disclosure.
+
+### 3. RED
+New case `names the turn field as the turn to play and states what the index means (R7-20)`:
+
+```
+Error: expect(locator).toHaveCount(expected) failed
+  Locator: locator('details').filter({ hasText: 'Client totals this turn (required to record)' })
+             .locator('label').filter({ hasText: /Turn to play/ })
+  Expected: 1
+  Received: 0
+```
+
+**No assertion on the field's value.** `TrainingDecisionController.php:574` already sends `nextTurnNumber()`; on a
+fresh run that is `1`, correctly. The walk's `1` was a fresh-run observation, and asserting "opens at 1" would have
+pinned correct behaviour as a defect.
+
+### 4. GREEN
+`resources/js/pages/Career/TrainingDetail.vue`:
+- label `<span>Turn *</span>` → `Turn to play (the run's next turn) *`
+- a helper line below the input: *"The turn this entry records. As the client shows this turn, the calendar name and
+  the index are the same fact: Senior Year Early October is turn 67. A run imported at a later position records that
+  turn here."*
+
+```
+$ npx playwright test career-training-detail.spec.ts → 9 passed (1.2m)
+```
+
+### 5. Non-vacuity
+```
+$ git diff TrainingDetail.vue > S1.patch    # 25 lines
+$ git checkout -- TrainingDetail.vue ; npm run build
+$ npx playwright test -g "turn to play"
+  Expected: 1, Received: 0 — 1 failed
+$ git apply S1.patch ; git diff | diff - S1.patch → DIFF MATCHES
+$ npm run build ; npx playwright test → 9 passed
+```
+
+### 6. Regression
+```
+$ vendor/bin/pest CareerTrainingDetailTest TurnEntryUpdateTest → 39 passed (498 assertions)
+$ npx playwright test career-training-detail.spec.ts → 9 passed
+```
+
+### 7. Gates
+| Gate | Result |
+| --- | --- |
+| Focused browser | **9 passed** |
+| Feature regression | **39 passed (498 assertions)** |
+| Typecheck | clean |
+| Build | ✓ |
+| Pint | passed |
+| PHPStan | not run — no PHP file changed (**UNMEASURED**, stated) |
+| Lore | 556 / 75, delta 0 |
+| Fence | 0 invalid |
+
+### 8. Lore delta
+`Lore docs: 556 (was 556); code: 556 (was 556)`. **Delta 0.**
+
+### 9. Commit
+`e5cdc971` — `fix(training): name the turn field as the turn to play and state what the index means (R7-20)`
+
+### 10. What this slice did not close
+- **`R7-32`** — the turn-convention split (Events/Inheritance prefill 68, Timeline labels 67). S13's.
+- **The field stays unbounded.** `min=1`, no `max` — a Trainer can type 999. The ruling is about legibility, not
+  bounds; bounding it is not in any register row this slice owns.
