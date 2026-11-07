@@ -47,7 +47,10 @@ meaning legible, which is what (a) does.
 **RED under any ruling** is a label/helper assertion in `tests/Feature/CareerTrainingDetailTest.php`, never an
 assertion that the field opens at `1` (it does not).
 
-**Ruling:** _pending_.
+**Ruling:** **(a)** — relabel + helper. Keep `nextTurnNumber()`'s value; the field's label becomes
+`Turn to play (the run's next turn)` and a helper sentence states what the turn index means. Options (b) and (c)
+(renaming the field to `Position this run at turn`) are **refused**: the tool does not position a run, it records a
+turn.
 
 ---
 
@@ -66,7 +69,11 @@ returns true and `maidenGates()` locks every standard race permanently.
 
 The register's §9 records (2) as "the honest fix" and (1) as "the workaround". **The dispatch states no opinion.**
 
-**Ruling:** _pending_.
+**Ruling:** **(4)** — derive the lock from the run's effective position. `hasClearedMaidenLock()` returns true when
+the qualifying `race_entries` row exists **or** the run's effective position is past turn 12. Boundary is `> 12`, not
+`>= 12`: the turn-12 Debut may not have resolved yet; by turn 13 it has. Options (1), (2) and (3) are **refused** as
+larger than the fact requires — position already encodes what they would add a column, a form field, or a screen to
+record.
 
 ---
 
@@ -82,7 +89,9 @@ The register's §9 records (2) as "the honest fix" and (1) as "the workaround". 
 
 **The dispatch recommends (t).**
 
-**Ruling:** _pending_.
+**Ruling:** **(t)** — six per-node editors, because the payload already keys `ancestors_sparks` per ancestor and
+the source describes per-node chains. Option (u) (single table with a `node` column) is **refused**: it is a shape the
+client does not have and it loses the tree the source records.
 
 ---
 
@@ -98,7 +107,9 @@ Scenario and Trainee read-back — needs no ruling and is landable as **S18a** i
 
 **The dispatch defaults to (i) unless the owner rules (ii).**
 
-**Ruling:** _pending_.
+**Ruling:** **(i)** — the timeline's row set joins `race_entries` as `kind: 'race'`, beside the existing turn rows.
+Option (ii) (a parallel race rail) is **refused**: the client has one chronological log, and a second surface would
+duplicate the sort, filters and phase grouping. **`R7-99` needs no ruling** and lands separately as S18a.
 
 ---
 
@@ -106,4 +117,12 @@ Scenario and Trainee read-back — needs no ruling and is landable as **S18a** i
 
 | Slice | Ruling | Received | Recorded in |
 | --- | --- | --- | --- |
-| — | _none yet_ | — | — |
+| S1 | **(a)** relabel + helper | 2026-11-07 | `#s1--r7-20` |
+| S2 | **(4)** derive the lock from the run's effective position (`> 12`) | 2026-11-07 | `#s2--r7-26` |
+| S11 | **(t)** six per-node spark editors | 2026-11-07 | `#s11--r7-36-r7-68` |
+| S18b | **(i)** the timeline row set joins `race_entries` as `kind: 'race'` | 2026-11-07 | `#s18b--r7-83` |
+| S18a | no ruling required — `R7-99` is a settled defect with a named file | 2026-11-07 | `#s18a--r7-99` |
+
+**All four held slices are unblocked.** The dispatch's recommendations were accepted for S1 and S11; S2 was ruled an
+option the dispatch did not carry (derive from position, not from a new column); S18 was split so the unblocked half
+lands without waiting.
