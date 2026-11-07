@@ -261,6 +261,31 @@ previous-slice number is not a measurement.
 | --- | --- | --- | --- |
 | S3.2 (previous) | 556 / 75 exempt | 314 | — |
 
+## Index
+
+Twelve slices, one line each. Written once at close-out rather than grown per slice, so it reads as a
+table of contents: the two dated records above it are chronological, the twelve sections below it are the
+work.
+
+| Slice | Row | Section | Commit | Result |
+| --- | --- | --- | --- | --- |
+| S1.1 | R6-12 | `#s11--r6-12-timeline-reads-the-record-it-was-given` | `698d0fe4` | M1 PASS, 0 unmeasured |
+| S1.2 | R6-11 | `#s12--r6-11-deck-card-levels-cross-preflight` | `417315d6` | M1 PASS, 0 unmeasured |
+| S1.3 | R6-05 | `#s13--r6-05-manual-parent-names-survive-the-commit` | `279381b5` | M1 PASS, 0 unmeasured |
+| S2.1 | Section 13.3 | `#s21--133-the-advisor-presents-the-rest-failure-tier-as-current` | `fdd2e722` | M1 PASS, 0 unmeasured |
+| S2.2 | Section 13.4 | `#s22--facility-ladder-keyed-on-facility_level_source` | `f83fcfdd` | M1 PASS, 0 unmeasured |
+| S2.3 | R6-04 | `#s23--r6-04-cap-labels-name-the-wrong-source` | `e55f5458` | M1 PASS, 0 unmeasured |
+| S2.4 | Section 13.2 | `#s24--counter-copy-neither-line-named-what-it-counts-to` | `49a90c3a` | M1 PASS, 1 unmeasured (no spec pins either counter string) |
+| S3.1 | R6-15 | `#s31--r6-15-the-duplicated-hint-lvl-prefix` | `847e4cdb` | M1 PASS, 0 unmeasured |
+| S3.2 | R6-23 | `#s32--r6-23-pal-slot-names-a-card-type-on-a-position` | `569f47e3` | M1 PASS, 0 unmeasured |
+| S3.3 | R6-09 + R6-10 | `#s33--preflight-placeholders-and-pass-classification` | `b4731784` | M1 PASS, 0 unmeasured |
+| S3.4 | R6-08 (facet a) | `#s34--spark-count-prose` | `c70240cf` | M1 PASS, 0 unmeasured; facet (b) open |
+| S3.5 | Section 13.6 | `#s35--band-carrier-caveat-and-two-thirties` | `5bc07c6c` | M1 PASS, 1 unmeasured (the two thirties cannot render together until R6-48's form exists) |
+
+The `UNMEASURED` entries are the ones the sections themselves declare, not omissions: S2.4 makes no
+rendered claim because no browser spec pins either counter string, and S3.5's second unmeasured item is
+the side-by-side comparison its own gate forbids observing.
+
 ## S1.1 — R6-12, Timeline reads the record it was given
 
 ### Identity
