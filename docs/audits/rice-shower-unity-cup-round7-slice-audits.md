@@ -62,6 +62,7 @@ $ git status --short
 | S5 | R7-05 | `da61a04f` | **landed** — `#s5--r7-05` |
 | S1 | R7-20 | — | **HELD** — pre-existing red in `career-training-detail.spec.ts`, see `#stop--pre-existing-red-training-detail` |
 | S2 | R7-26 | `4efa0876` | **landed** — `#s2--r7-26` |
+| S6 | R7-19, R7-66 | — | **HELD** — implementation proven, two pre-existing reds block the gates, see `#stop--pre-existing-red-denominator-caption` |
 
 ---
 
@@ -496,3 +497,67 @@ tests/Feature/CareerRaceDecisionTest.php
 - **The turn-12 boundary itself** is a source-derived inference (Junior Late June), recorded in the ruling's evidence
   table, not a value the tree states. If a future source contradicts it, the constant moves — it is a literal `12`,
   not a config entry.
+
+---
+
+## §stop--pre-existing-red-denominator-caption — S6 held: two pre-existing reds, neither caused here
+
+**Classified: pre-existing test staleness at `2a04f2b5`, independent of S6's change. Recorded, not fixed.**
+
+### Red 1 — `career-cockpit.spec.ts`, six cases
+
+`tests/browser/career-cockpit.spec.ts` fails six cases on a **clean HEAD build**, with S6's two files reverted to
+`HEAD` and `npm run build` re-run:
+
+| Case | Failure |
+| --- | --- |
+| `reads one turn number in the header` | `[data-field="turn"]` → Expected 1, Received 0 |
+| `names the run state in the DOM, and only the one that applies` | same shape, `[data-run-state]` |
+| `keeps every section landmark name after the Section adoption` | Expected 1, Received 0 |
+| `renders the summary strip with the header values, the affordance and no primary` | `toBeVisible` fails |
+| `keeps one primary where the advisor recommends, and none where it does not` | `toBeVisible` fails |
+| `names the fan ladder threshold beside the gap` | `toBeVisible` fails |
+
+**Proof it is not S6's:** the five independently re-run cases each fail on the clean build, and
+`reads one turn number in the header` was re-run alone against `git checkout --` versions of both touched files
+before S6's patch was restored. The failing selectors (`[data-field="turn"]`, `[data-run-state]`) are in the header
+and run-state regions, which S6 does not touch.
+
+**S6's own case passes** on the same build: `names the stat denominator by the figure it prints, floor or cap` →
+`1 passed (17.9s)`, and fails again when the patch is reverted.
+
+### Red 2 — `StatDenominatorConsistencyTest`, one case
+
+`tests/Feature/StatDenominatorConsistencyTest.php:103` asserts the panel contains
+`No build target was set for this run, so bars are drawn against the scenario ceiling.`
+
+Both `HEAD` copies disagree with it:
+
+```
+$ git show HEAD:resources/js/components/career/CareerStatePanel.vue | grep -c "run's ceilings"
+2
+$ git show HEAD:tests/Feature/StatDenominatorConsistencyTest.php | grep -c "scenario ceiling\.'"
+1
+```
+
+The panel has said `bars are drawn against this run's ceilings:` since the R6-04 caption change; the test was not
+updated with it. **Pre-existing, and my S6 edit did not introduce it** — it was already the first failing assertion
+before the new expectations were added.
+
+### Why this is a stop
+
+The dispatch's §5 is explicit: *"A gate reveals a pre-existing red the slice did not cause — classify and record, do
+not fix."* Both reds are test-versus-source staleness from earlier rounds. Fixing them here would (a) exceed S6's
+scope and (b) silently re-baseline assertions this round did not classify.
+
+**S6's implementation is complete and proven**: the `denominatorLabel` computed, the widened prop, the RED→GREEN→
+non-vacuity chain, typecheck, Pint, PHPStan, lore delta 0. Only its landing is held.
+
+### What is owed
+
+Two one-line test corrections — `career-cockpit.spec.ts`'s six cases need the selectors re-pointed at whatever the
+current header renders, and `StatDenominatorConsistencyTest`'s caption assertion needs the sentence the panel actually
+ships. **Neither is S6's work.** A ruling that they are housekeeping opens a small repair slice; until then S6's patch
+stays uncommitted in the working tree and S6 is held.
+
+**Nothing is committed from S6.** `git status --short` shows the two Vue files and the spec modified.
