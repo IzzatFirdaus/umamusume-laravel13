@@ -72,7 +72,18 @@ class PreflightController extends Controller
         $build = [
             'trainee' => $trainee === null
                 ? null
-                : ['id' => $trainee->id, 'name' => $trainee->name, 'name_ja' => $trainee->name_ja],
+                : [
+                    'id' => $trainee->id,
+                    'name' => $trainee->name,
+                    'name_ja' => $trainee->name_ja,
+                    // R6-09: the Form tile printed the literal `as chosen above`, a placeholder standing
+                    // where a value goes. The page carries no per-trainee form list, so an id would not
+                    // help it resolve one; the label is resolved here from the card the trainee step
+                    // recorded, through the same composed name the deck picker prints. It sits INSIDE
+                    // `trainee` rather than beside it because `contract.build` has a four-key shape that
+                    // `CareerPreflightTest` pins, and a fifth sibling key breaks that invariant.
+                    'form_label' => $this->formLabel(),
+                ],
             'scenario' => $scenario,
             'target' => $target === null ? null : [
                 'purpose' => $target->purpose->value,
@@ -274,6 +285,23 @@ class PreflightController extends Controller
                     : null,
             ],
         ];
+    }
+
+    /**
+     * The chosen costume form's own label, or null when the draft names none (R6-09).
+     *
+     * Read through `SupportCard::displayName()`, which is the same composed name the deck picker
+     * prints, so the Form tile names the thing the Trainer picked rather than describing it.
+     */
+    private function formLabel(): ?string
+    {
+        $cardId = SetupDraft::characterCardId();
+
+        if ($cardId === null) {
+            return null;
+        }
+
+        return SupportCard::query()->find($cardId)?->displayName();
     }
 
     /**

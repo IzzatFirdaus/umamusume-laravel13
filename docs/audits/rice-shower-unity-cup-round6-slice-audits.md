@@ -1394,3 +1394,130 @@ the run as one value per slot` prose assertion and the HFW three-diff — neithe
 
 
 
+
+## S3.3 — Preflight placeholders and Pass classification
+
+### Identity
+
+| Item | Value |
+| --- | --- |
+| Audit ID | `RS-UC-R6-SLICE-AUDITS-S3.3` |
+| Mode | M1 change audit |
+| Rows | R6-09 and R6-10 (register §4.1), both facets |
+| Scope | `app/Http/Controllers/Career/PreflightController.php`, `resources/js/pages/Career/Preflight.vue`, `tests/Feature/CareerPreflightTest.php`, `tests/browser/career-preflight.spec.ts` |
+| Out of scope | The saved payload, the legacy step's own write path (S1.3), and R6-05's three facets |
+
+### Pre-flight
+
+| Item | Value |
+| --- | --- |
+| HEAD at open | `663cce3e` (the Phase 0 incident commit) |
+| Dirty set on the touched paths | Empty. `git status --short` on the four named paths returned nothing |
+| `checkState` shape at open | Unchanged from pre-S3.3: `return row.key === 'deck' ? deckState.value : 'Pass';` — S1.3 did not touch it |
+| Suite gate | `vendor/bin/pest tests/Feature/ScenarioMetadataTest.php` → **3 passed (52 assertions)**, 36.06s |
+| `RENDERED_EVIDENCE` | **TRUE**, re-probed this slice: `chromium.launch()` → `{"launched":true,"version":"153.0.8010.12","rendered":true,"ms":1201}` |
+
+### RED evidence (captured before GREEN)
+
+```
+Error: expect(locator).not.toContainText(expected) failed
+Expected substring: not "as chosen above"
+Received string: "Formas chosen above"
+
+Error: expect(locator).not.toContainText(expected) failed
+Expected substring: not "Pass"
+Received string: "LegacyPassNo Affinity grade read · 0 of two parents recorded"
+```
+
+Both strings reproduce the pre-incident capture **exactly**: `Formas chosen above` and
+`LegacyPassNo Affinity grade read · 0 of two parents recorded`. The second is the walk's own
+pairing — a green `Pass` beside a summary that says no parent is recorded.
+
+### GREEN
+
+**`PreflightController`.** `form_label` resolved server-side through
+`SupportCard::displayName()` — the same composed name the deck picker prints — and carried
+**inside** `contract.build.trainee` (three keys → four). It is not a `build` sibling: `contract.build`
+has a four-key shape that `CareerPreflightTest` pins, and a fifth sibling breaks it. That was
+measured in the pre-incident attempt, which is why the placement is stated here rather than left to
+inference.
+
+**`Preflight.vue`.** The Form tile renders `props.contract.build.trainee?.form_label`, falling back
+to an `AbsenceValue` with a disclosure rather than a placeholder sentence. Two new computeds —
+`legacyNamedCount` and `legacyState` — feed the state builder, which now branches on `row.key`.
+
+### Rule sweep (dimensions A-H)
+
+| Dimension | Result |
+| --- | --- |
+| A. Status and feedback | **finding** — F1, F2 |
+| B. Control and target | `no finding` |
+| C. Error prevention and recovery | `no finding` |
+| D. Consistency and signifiers | `no finding` |
+| E. Cognitive load and memory | `no finding` |
+| F. Visual grouping and hierarchy | `no finding` |
+| G. Accessibility semantics and contrast | `no finding` |
+| H. Content and language | **finding** — F3 |
+
+### Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F1 | `H1` | Usability heuristics | Preflight, Legacy checklist row, a draft with an unnamed selection | The state word read `Pass` while the same row's summary read `0 of two parents recorded` | OBSERVED_RENDERED | `Preflight.vue:424` (pre-fix); rendered string quoted above | 2 | High | Done: the word follows the count |
+| F2 | `H9` | Usability heuristics | Same | A `Pass` over a selection with no recorded parent is a false assurance: it says the step is done when the thing the step is for has not happened | OBSERVED_RENDERED | Same | 2 | High | Done |
+| F3 | `SHR-5` | Shneiderman | Preflight, Form tile | The tile printed `as chosen above` — a placeholder in a value's position, reading as a filled field. The contract carried no form field and the page had no form list to join against | OBSERVED_RENDERED | `Preflight.vue:500` (pre-fix) | 2 | High | Done: the server resolves the label |
+
+### Unmeasured register
+
+Empty. Both facets carry a rendered assertion: the Form tile's text and the Legacy row's state
+word, each read from the DOM.
+
+### Gap register delta
+
+None. R6-05's facets (a) and (b) closed in S1.3; facet (c) is the heading's reactivity, which is
+the legacy step's own renderer and is untouched here.
+
+### Commit body basis
+
+| # | Question | Result | Basis |
+| --- | --- | --- | --- |
+| 1 | Add, remove or move a control? | `N/A` | No control |
+| 2 | Change what is on screen at once? | `N/A` | Same tiles, same rows |
+| 3 | Change a colour, tint or state? | `PASS` | The Legacy row can now read `Warning` or `Missing` where it read `Pass` |
+| 4 | Change a type size or weight? | `N/A` | No type change |
+| 5 | Change what the user can undo, or where the action is? | `N/A` | No action |
+| 6 | Change where a thing lives, or what it is called? | `PASS` | The Form tile names the form |
+| 7 | Change a progress, an incomplete state or a boundary? | `PASS` | The Legacy row's completion state now matches its count |
+| 8 | Change what the user has to read or remember? | `PASS` | Removes a placeholder the reader has to decode |
+| 9 | Add a new destination, a landmark or a control type? | `N/A` | None |
+| 10 | Change the words? | `PASS` | One tile's value, one row's state word |
+
+`RENDERED_EVIDENCE = TRUE`, declared from this slice's own probe: the browser spec's two new cases
+assert the Form tile's rendered text and the Legacy row's rendered state word beside its summary.
+
+### Lore delta (Rule 5)
+
+`Lore docs: 556 (was 556 at S3.2); code: 314 (was 314 at S3.2).` Delta **0** on both modes; nothing
+to rule. The pre-incident attempt reported 555 → 556 and attributed it to this slice; measurement
+then and now puts both slice-end numbers at 556, so that delta was never this slice's.
+
+### Verification output
+
+```
+npx playwright test tests/browser/career-preflight.spec.ts
+  11 passed (54.8s)
+
+vendor/bin/pest tests/Feature/CareerPreflightTest.php
+  Tests:    23 passed (317 assertions)
+
+vendor/bin/pest tests/Feature/CareerLegacyDeckStepsTest.php tests/Feature/CareerBuildTargetTest.php
+  Tests:    31 passed (445 assertions)
+
+npm run typecheck   clean
+pint --test --format agent <two PHP paths>   passed
+phpstan analyse --memory-limit=1G <controller>   [OK] No errors
+md_fence_check.py <both audit files>   0 invalid closing fences
+```
+
+The browser count is **11**, matching the pre-incident capture exactly. A different number would
+have meant a case moved or was lost in re-application.

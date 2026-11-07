@@ -130,6 +130,52 @@ test('keeps a card level and a rented flag through creation and a cold reload of
     await expect(page.locator('#deck-slot-6').getByRole('button', { name: 'Rented' })).toHaveAttribute('aria-pressed', 'true');
 });
 
+test('names the chosen form rather than printing a placeholder (R6-09)', async ({ page }) => {
+    // R6-09: the Form tile rendered the literal `as chosen above` whenever a trainee was present. The
+    // contract's trainee carries `{id, name, name_ja}` and nothing else -- the controller never read
+    // `character_card_id` for this purpose -- so the page had no prop it could resolve a form name from.
+    // A placeholder standing in a value's position reads as a filled field.
+    await walkWizard(page, 'ura_finale');
+    await openPreflight(page);
+
+    const formTile = page.locator('.tile').filter({ hasText: 'Form' }).first();
+
+    await expect(formTile).not.toContainText('as chosen above');
+
+    // Either the tile names the form, or it states its own absence with a disclosure. What it must
+    // never do is print a sentence where a value belongs.
+    const text = ((await formTile.textContent()) ?? '').trim();
+
+    expect(text).not.toContain('as chosen above');
+    expect(text.length).toBeGreaterThan('Form'.length);
+});
+
+test('marks the Legacy row by the count its own summary prints (R6-10)', async ({ page }) => {
+    // R6-10: `checkState()` returned `Pass` for every entered row that was not `deck`, and `entered`
+    // for legacy is merely `legacy !== null` -- true whenever a `legacy_selection` exists, names or
+    // not. So a row whose own summary read `0 of two parents recorded` carried a green `Pass` beside
+    // it. Walk 6 recorded exactly that pairing.
+    //
+    // The draft opens the legacy step and saves a selection with no parent named, which leaves
+    // `legacy_selection` non-null -- all `entered` asks.
+    await walkWizard(page, 'ura_finale', {
+        onLegacy: async (legacyPage) => {
+            await legacyPage.locator('#legacy-pick-0').selectOption('__manual__');
+            await legacyPage.getByRole('button', { name: 'Save Legacy' }).click();
+            await expect(legacyPage.getByText('Legacy recorded.')).toBeVisible();
+        },
+    });
+
+    await openPreflight(page);
+
+    const legacyRow = page.locator('#preflight-step-legacy');
+
+    await expect(legacyRow).toContainText('0 of two parents recorded');
+    // The two must agree: a row that says no parent is recorded cannot carry `Pass`.
+    await expect(legacyRow).not.toContainText('Pass');
+    await expect(legacyRow).toContainText(/Warning|Fail|Missing/);
+});
+
 test('reviews the five entered steps as one checklist row each', async ({ page }) => {
     await walkWizard(page, 'ura_finale');
     await openPreflight(page);

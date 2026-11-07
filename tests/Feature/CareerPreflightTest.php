@@ -479,6 +479,44 @@ it('refuses a draft with no trainee, creating nothing', function (): void {
     expect(TrainingRun::count())->toBe($before);
 });
 
+it('resolves the chosen form onto the trainee it belongs to (R6-09)', function (): void {
+    // R6-09: the Form tile printed `as chosen above` because no prop could name the form. The label now
+    // travels inside `trainee` -- not beside it -- because `contract.build` is pinned to four keys by the
+    // case below, and a fifth sibling would break that structural invariant.
+    $fixture = preflightFixture();
+    $card = SupportCard::query()->findOrFail($fixture['cards'][0]);
+
+    session([SetupDraft::SESSION_KEY => preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents'], [
+        'character_card_id' => $card->id,
+    ])]);
+
+    $this->get(route('career.preflight'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/Preflight')
+            ->has('contract.build.trainee.form_label')
+            ->where('contract.build.trainee.form_label', $card->displayName()));
+});
+
+it('marks the Legacy row by how many parents were actually named (R6-10)', function (): void {
+    // R6-10: `checkState()` returned `Pass` for every entered row that was not `deck`, and `entered` for
+    // legacy is only `legacy !== null` -- true whenever a `legacy_selection` exists, names or not. The
+    // state word and the summary count must agree in both directions; this pins the named direction,
+    // the browser case pins the unnamed one.
+    $fixture = preflightFixture();
+
+    session([SetupDraft::SESSION_KEY => preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents'])]);
+
+    // The section's two members come from the stored `legacy_selection` payload, not from the veteran ids
+    // in `legacy_parents`, so the names asserted are the payload's own (see `preflightDraft()`).
+    $this->get(route('career.preflight'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('contract.build.legacy.members', 2)
+            ->where('contract.build.legacy.members.0.rank', 3)
+            ->where('contract.build.legacy.members.1.is_guest', true));
+});
+
 it('renders a heading whose count matches the rendered step rows', function (): void {
     $fixture = preflightFixture();
     session([SetupDraft::SESSION_KEY => preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents'])]);

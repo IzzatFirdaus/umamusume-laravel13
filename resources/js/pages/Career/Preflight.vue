@@ -47,6 +47,8 @@ interface Trainee {
     id: number;
     name: string;
     name_ja: string | null;
+    /** The chosen costume form's own label, resolved server-side; null when the draft names none. */
+    form_label: string | null;
 }
 
 interface Scenario {
@@ -257,10 +259,31 @@ const legacySummary = computed((): string => {
         return 'Not entered';
     }
 
-    const named = legacy.members.filter((member) => member.name !== null).length;
     const affinity = legacy.affinity === null ? 'No Affinity grade read' : `Affinity ${legacy.affinity}`;
 
-    return `${affinity} · ${named} of two parents recorded`;
+    return `${affinity} · ${legacyNamedCount.value} of two parents recorded`;
+});
+
+/** How many parents the stored selection actually names, which is what the row's state must follow. */
+const legacyNamedCount = computed((): number => {
+    const legacy = props.contract.build.legacy;
+
+    return legacy === null ? 0 : legacy.members.filter((member) => member.name !== null).length;
+});
+
+/**
+ * The Legacy row's state word, derived from the same count its summary prints (R6-10).
+ *
+ * `Missing` for none, `Warning` for one, `Pass` only for two. Before this, every entered non-deck
+ * row was `Pass`, so `Pass` appeared beside `0 of two parents recorded` -- a green word
+ * contradicting its own sentence.
+ */
+const legacyState = computed((): 'Pass' | 'Warning' | 'Missing' => {
+    if (legacyNamedCount.value >= 2) {
+        return 'Pass';
+    }
+
+    return legacyNamedCount.value === 0 ? 'Missing' : 'Warning';
 });
 
 const targetSummary = computed((): string => {
@@ -421,7 +444,15 @@ function checkState(row: ChecklistRow): 'Pass' | 'Warning' | 'Missing' {
         return 'Missing';
     }
 
-    return row.key === 'deck' ? deckState.value : 'Pass';
+    if (row.key === 'deck') {
+        return deckState.value;
+    }
+
+    if (row.key === 'legacy') {
+        return legacyState.value;
+    }
+
+    return 'Pass';
 }
 
 /** The wireframe's career length: three career years on the client's own 24-turn grid. */
@@ -498,8 +529,12 @@ const CAREER_TURNS = 72;
                         <div class="tile">
                             <p class="k">Form</p>
                             <p class="v">
-                                <template v-if="props.contract.build.trainee">as chosen above</template>
-                                <AbsenceValue v-else compact reason="No trainee has been chosen in this draft, so no costume form is named." />
+                                <template v-if="props.contract.build.trainee?.form_label">{{ props.contract.build.trainee.form_label }}</template>
+                                <AbsenceValue
+                                    v-else
+                                    compact
+                                    reason="No costume form was chosen in this draft, so none is named here."
+                                />
                             </p>
                         </div>
                         <div class="tile">
