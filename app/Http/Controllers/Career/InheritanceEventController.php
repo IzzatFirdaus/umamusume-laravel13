@@ -146,10 +146,43 @@ class InheritanceEventController extends Controller
     }
 
     /**
+     * A parent's grandparent sparks, normalised to one list per ancestor slot.
+     *
+     * The stored key is aligned by ancestor index and absent on a names-only Legacy, so an unfilled slot
+     * walks as an empty list rather than being skipped. The shape mirrors `sparks` so the renderer treats
+     * both the same way.
+     *
+     * @param  array<string, mixed>  $legacyData
+     * @return list<list<array{kind: string, kind_label: string, target: string|null, stars: int|null}>>
+     */
+    private function ancestorSparks(array $legacyData): array
+    {
+        $sparkKindLabels = LegacySelectionPayload::sparkKindLabels();
+        $grouped = [];
+
+        foreach ((array) ($legacyData['ancestors_sparks'] ?? []) as $ancestorSparks) {
+            $sparks = [];
+
+            foreach ((array) $ancestorSparks as $spark) {
+                $sparks[] = [
+                    'kind' => $spark['kind'],
+                    'kind_label' => $sparkKindLabels[$spark['kind']] ?? ucfirst($spark['kind']),
+                    'target' => $spark['target'],
+                    'stars' => $spark['stars'],
+                ];
+            }
+
+            $grouped[] = $sparks;
+        }
+
+        return $grouped;
+    }
+
+    /**
      * The legacy selection payload, flattened for the predicted section.
      *
      * @param  array{0: string|null, 1: string|null}  $parentNames
-     * @return array{affinity: string|null, parents: list<array{slot: string, label: string, name: string|null, rank: int|null, is_guest: bool, ancestors: list<string|null>, sparks: list<array{kind: string, kind_label: string, target: string|null, stars: int|null}>, spark_counts: list<array{kind: string, kind_label: string, count: int}>, blue_spark_bonus: array<string, int>}>}
+     * @return array{affinity: string|null, parents: list<array{slot: string, label: string, name: string|null, rank: int|null, is_guest: bool, ancestors: list<string|null>, sparks: list<array{kind: string, kind_label: string, target: string|null, stars: int|null}>, ancestors_sparks: list<list<array{kind: string, kind_label: string, target: string|null, stars: int|null}>>, spark_counts: list<array{kind: string, kind_label: string, count: int}>, blue_spark_bonus: array<string, int>}>}
      */
     private function legacySection(LegacySelectionPayload $legacy, array $parentNames): array
     {
@@ -198,6 +231,12 @@ class InheritanceEventController extends Controller
                 // position is the slot, and the wizard writes names (`StoreLegacySelectionRequest`).
                 'ancestors' => $legacyData['ancestors'],
                 'sparks' => $sparks,
+                // R6-08 facet (b): the Inheritance tile prints how many blue sparks the tree carries, and
+                // the source's tree has six nodes (`UMAMUSUME_REFERENCE.md` section 1.5.4). The tile could
+                // only ever reach `sparks`, the parent's own set, so a grandparent blue spark counted on
+                // the cockpit and vanished here. `predictedSection()` already sums both (R3-02, `2470a4c`);
+                // this hands the tile the same data rather than deriving a second total for it.
+                'ancestors_sparks' => $this->ancestorSparks($legacyData),
                 'spark_counts' => $sparkCounts,
                 'blue_spark_bonus' => $blueSparkBonus,
             ];

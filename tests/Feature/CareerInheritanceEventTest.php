@@ -433,3 +433,52 @@ it('carries no predicted total or numeric confidence anywhere in the payload', f
                 ! isset($o['confidence'])
             ));
 });
+
+it('counts grandparent blue sparks in the Inheritance tile (R6-08 facet b)', function (): void {
+    // R6-08 facet (b): two counters disagree about how many blue sparks a run carries.
+    // `CockpitController`'s `capComposition.sparks` sums parent AND grandparent sparks, which is what the
+    // source's six-node tree implies (`UMAMUSUME_REFERENCE.md` section 1.5.4). The Inheritance tile's own
+    // `blueSparks` computed reads `parent.sparks` only, so on a run holding a grandparent blue spark the
+    // two screens print different totals for one tree.
+    //
+    // R3-02 (`2470a4c`) already fixed `predictedSection()`, which sums `ancestors_sparks`. The tile is a
+    // DIFFERENT renderer and was never in that patch, so this is the surviving half.
+    $run = inheritanceRun([
+        'legacy_selection' => inheritanceLegacyPayload(),
+    ]);
+
+    $this->get(route('runs.inheritance', $run))
+        ->assertOk()
+        ->assertInertia(function (Assert $page): void {
+            $props = $page->toArray()['props'];
+            $parent = $props['legacy']['parents'][0];
+
+            // The parent's own blue spark: one.
+            $parentBlue = array_values(array_filter(
+                $parent['sparks'],
+                static fn (array $s): bool => $s['kind'] === 'blue'
+            ));
+
+            expect($parentBlue)->toHaveCount(1);
+
+            // The tile derives its number from the component's own computed over `legacy.parents[].sparks`,
+            // so the payload has to carry the ancestor sparks for the tile to be able to reach them at
+            // all. Asserting the wire first states where the defect lives: the tile cannot count what it
+            // is never sent.
+            expect($parent)->toHaveKey('ancestors_sparks');
+
+            $grandparentBlue = [];
+            foreach ($parent['ancestors_sparks'] as $ancestorSparks) {
+                foreach ($ancestorSparks as $spark) {
+                    if ($spark['kind'] === 'blue') {
+                        $grandparentBlue[] = $spark;
+                    }
+                }
+            }
+
+            expect($grandparentBlue)->toHaveCount(1);
+
+            // The correct total for this tree, which is what the cockpit already prints.
+            expect(count($parentBlue) + count($grandparentBlue))->toBe(2);
+        });
+});

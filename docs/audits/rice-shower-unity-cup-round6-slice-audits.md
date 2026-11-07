@@ -1817,3 +1817,135 @@ read `4 failed, 6 passed (1.5m)`. The fourth failure was **mine, and it was corr
 `Burst count bands` on the cockpit, which does not render the board. That run is recorded rather than
 discarded because it is the measurement behind the surface correction above — the brief said the cockpit,
 the browser said no, and the page says *"Full scenario boards are on Scenario detail"*.
+
+## S3.6 — two spark counters agree
+
+### Identity
+
+| Item | Value |
+| --- | --- |
+| Audit ID | `RS-UC-R6-SLICE-AUDITS-S3.6` |
+| Mode | M1 change audit |
+| Row | R6-08 facet (b) — the second half of a row S3.4 fixed only facet (a) of |
+| Scope | `app/Http/Controllers/Career/InheritanceEventController.php`, `resources/js/pages/Career/InheritanceEvent.vue`, `tests/Feature/CareerInheritanceEventTest.php` |
+| Out of scope | The cockpit's `capComposition.sparks` derivation (already correct, untouched), the Inheritance tile's other three tiles, and `predictedSection()` (already correct since R3-02) |
+
+### Pre-flight
+
+| Item | Value |
+| --- | --- |
+| HEAD at open | `7296dc95` |
+| Dirty set on the touched paths | Empty |
+| The `R3-02` check the brief asked for | **`2470a4c` exists** — `fix(inheritance): count grandparent Sparks in the predicted total`. `predictedSection()` at `:241-255` **does** sum `legacyData['ancestors_sparks']` today |
+| So is facet (b) already fixed? | **No.** `R3-02` fixed `predictedSection()`. The tile is a different renderer: `legacySection()` sends only per-parent `sparks`, and the tile's own `blueSparks` computed reads `parent?.sparks ?? []`. Neither was in `2470a4c`'s patch |
+| The defect, measured on one run | Parent A holds 1 blue parent spark **and** 1 blue grandparent spark. `predictedSection()` counts 2; the tile counts 1; the cockpit counts 2 |
+| Suite gate | `vendor/bin/pest tests/Feature/ScenarioMetadataTest.php` -> 3 passed (52 assertions) |
+| `RENDERED_EVIDENCE` | **TRUE** (probe from this pass's opening: chromium 153.0.8010.12, 1201 ms). **The browser case was NOT run** — see the Unmeasured register |
+
+### RED evidence (captured before GREEN)
+
+```
+it counts grandparent blue sparks in the Inheritance tile (R6-08 facet b)
+  Failed asserting that an array has the key 'ancestors_sparks'
+  at tests/Feature/CareerInheritanceEventTest.php:468
+  Tests:    1 failed, 15 passed (340 assertions)
+```
+
+The failure is at the wire, before the count: the tile cannot count a grandparent spark it is never
+sent. That is the defect's actual location, and asserting it first states where the fix must go rather
+than only that a number is short.
+
+### GREEN
+
+Two halves, because the defect has two:
+
+1. **The wire.** `legacySection()` gains an `ancestors_sparks` key per parent, built by a new private
+   `ancestorSparks()` helper that normalises the stored shape (aligned by ancestor index, absent on a
+   names-only Legacy) to one list per slot with the same `kind`/`kind_label`/`target`/`stars` keys as
+   `sparks`. The helper mirrors `predictedSection()`'s own read rather than deriving a second total.
+2. **The tile.** `blueSparks` now flattens `parent.sparks` **and** `parent.ancestors_sparks` before
+   filtering to blue. The `LegacyParent` interface gains the field.
+
+The cockpit's derivation is untouched. `predictedSection()` is untouched.
+
+### Rule sweep (dimensions A-H)
+
+| Dimension | Result |
+| --- | --- |
+| A. Status and feedback | `no finding` |
+| B. Control and target | `no finding` |
+| C. Error prevention and recovery | `no finding` |
+| D. Consistency and signifiers | **finding** — F1 |
+| E. Cognitive load and memory | `no finding` |
+| F. Visual grouping and hierarchy | `no finding` |
+| G. Accessibility semantics and contrast | `no finding` |
+| H. Content and language | `no finding` |
+
+### Findings
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F1 | `GP-3` | Gerhardt-Powals | Cockpit cap panel vs Inheritance tile, one run holding a grandparent blue spark | Two surfaces counted the same tree differently: the cockpit summed parent and grandparent sparks, the tile summed parents only, so the same run printed two different totals | OBSERVED_SOURCE | `InheritanceEventController.php:171-197` and `InheritanceEvent.vue:147-151` (pre-fix) | 2 | High | Done: both read the six-node tree |
+
+### Unmeasured register
+
+**One item, and it is the browser half.** `career-inheritance-event.spec.ts` was **not run**: this
+worktree's `node_modules` directory is empty (0 entries, mtime 10:20:17, 19 stale `node` processes), so
+`playwright` is absent and `npm run typecheck` fails at `vue-tsgo: not recognized`. A peer session's
+install is in a dead state and this pass did not run a competing `npm install` in a shared worktree.
+
+Consequences, stated rather than glossed:
+
+- The tile's rendered number is **UNMEASURED**. The feature case proves the wire carries the ancestor
+  sparks and that the correct total is 2; the `.flat()` in `blueSparks` is verified by the Vue typecheck
+  that could not run and by reading the diff, not by a browser.
+- `npm run typecheck` is **unrun**, which matters more than usual here: `tsc --noEmit` alone does not
+  parse `.vue` SFCs, and this slice edits one. The `LegacyParent` field was added by hand against the
+  controller's own output shape.
+
+A pass with a working `node_modules` should run `career-inheritance-event.spec.ts` and `npm run
+typecheck` before trusting the rendered half.
+
+### Gap register delta
+
+**R6-08 is now complete.** Facet (a) closed in S3.4 (`c70240cf`); facet (b) closes here. The row's §4
+status stays `Confirmed defect`, per the standing rule that §4 is the reading at `3f295e80` and §14/§16
+record the repair.
+
+### Commit body basis
+
+| # | Question | Result | Basis |
+| --- | --- | --- | --- |
+| 1 | Add, remove or move a control? | `N/A` | No control |
+| 2 | Change what is on screen at once? | `N/A` | Same tiles |
+| 3 | Change a colour, tint or state? | `N/A` | No class change |
+| 4 | Change a type size or weight? | `N/A` | No type change |
+| 5 | Change what the user can undo, or where the action is? | `N/A` | No action |
+| 6 | Change where a thing lives, or what it is called? | `N/A` | Neither label moved |
+| 7 | Change a progress, an incomplete state or a boundary? | `N/A` | No boundary |
+| 8 | Change what the user has to read or remember? | `PASS` | Two screens now agree on one number instead of printing two |
+| 9 | Add a new destination, a landmark or a control type? | `N/A` | None |
+| 10 | Change the words? | `N/A` | No copy changed |
+
+### Lore delta (Rule 5)
+
+`Lore docs: 556 (was 556 at close-out); code: 314 (was 314 at close-out).` Delta **0**.
+
+### Verification output
+
+```
+vendor/bin/pest tests/Feature/CareerInheritanceEventTest.php tests/Feature/CareerCockpitTest.php
+  Tests:    62 passed (879 assertions)
+
+vendor/bin/pint --test --format agent <the two PHP paths>
+  {"tool":"pint","result":"passed"}
+
+vendor/bin/phpstan analyse --no-progress --memory-limit=1G app/Http/Controllers/Career/InheritanceEventController.php
+  [OK] No errors
+```
+
+**Non-vacuity, path-scoped revert (Rule 3):** the two-file diff (99 lines of patch) was saved, both
+files reverted with `git checkout -- <the two explicit paths>`, RED confirmed at
+`Failed asserting that an array has the key 'ancestors_sparks'` / `1 failed, 15 passed (340
+assertions)`, the patch re-applied, GREEN confirmed at `16 passed (342 assertions)`. `git diff --stat`
+reads 55 insertions / 2 deletions both before and after.

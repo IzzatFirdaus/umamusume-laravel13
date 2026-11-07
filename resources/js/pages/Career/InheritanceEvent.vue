@@ -53,6 +53,8 @@ interface LegacyParent {
     /** A list of names, not slot records: the position is the slot (`ADR-0010` Consequences §2). */
     ancestors: (string | null)[];
     sparks: { kind: string; kind_label: string; target: string | null; stars: number | null }[];
+    /** Grandparent sparks, one list per ancestor slot (R6-08 facet b). */
+    ancestors_sparks: { kind: string; kind_label: string; target: string | null; stars: number | null }[][];
     spark_counts: { kind: string; kind_label: string; count: number }[];
 }
 
@@ -142,9 +144,21 @@ const sparkCarries = (spark: LegacyParent['sparks'][number]): string => {
     return 'Scenario spark';
 };
 
+/**
+ * Every blue spark the tree carries, parent and grandparent alike (R6-08 facet (b)).
+ *
+ * The tile used to read `parent.sparks` only, the parent's own set, while the cockpit's
+ * `capComposition.sparks` sums both. The source's tree has six nodes
+ * (`UMAMUSUME_REFERENCE.md` section 1.5.4), so a grandparent's spark counts and the two screens
+ * must agree on one number. `ancestors_sparks` is aligned by ancestor index, so it flattens the
+ * same way.
+ */
 const blueSparks = computed(() =>
     [parentA.value, parentB.value]
-        .flatMap((parent) => parent?.sparks ?? [])
+        .flatMap((parent) => [
+            ...(parent?.sparks ?? []),
+            ...(parent?.ancestors_sparks ?? []).flat(),
+        ])
         .filter((spark) => spark.kind === 'blue'),
 );
 
