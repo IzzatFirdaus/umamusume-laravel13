@@ -60,6 +60,8 @@ $ git status --short
 | --- | --- | --- | --- |
 | S3 | R7-82, R7-22, R7-25, R7-61 | `27a3d374` | **landed** — `#s3--r7-82-r7-22-r7-25-r7-61` |
 | S5 | R7-05 | `da61a04f` | **landed** — `#s5--r7-05` |
+| S1 | R7-20 | — | **HELD** — pre-existing red in `career-training-detail.spec.ts`, see `#stop--pre-existing-red-training-detail` |
+| S2 | R7-26 | `4efa0876` | **landed** — `#s2--r7-26` |
 
 ---
 
@@ -307,3 +309,190 @@ tests/browser/career-build-target.spec.ts
 - **`R7-49`** (`E-11`, `TOTAL AGAINST THE PUBLISHED SAMPLE` prints `N/A` both sides) — untouched.
 - **The walk's `7000` vs the measured `6000`.** Recorded in §3; the walk's figure was not reproducible because
   `capStats` carries four entries. The register's row is not edited.
+
+---
+
+## §stop--pre-existing-red-training-detail — S1 held: the training spec is red at HEAD, not from this session
+
+**Classified: pre-existing product defect, not caused by any slice in this session, not in the register.**
+
+### What is measured
+
+`tests/browser/career-training-detail.spec.ts` is **red at `21cf63b0` on a clean working copy** — verified by
+`git checkout -- tests/browser/career-training-detail.spec.ts` and re-running. Every case in the file fails, not only
+the one this session added, and the failure is inside the shared `recordFirstTurn()` helper at
+`tests/browser/career-training-detail.spec.ts:34`:
+
+```
+Error: locator.fill: Test timeout of 180000ms exceeded.
+  waiting for locator('input[name="speed"]')
+  locator resolved to <input ... id="turn-speed" ...>
+  338 × waiting for element to be visible, enabled and editable
+    - element is not visible
+```
+
+### Why
+
+The disclosure is **open by default** and the helper clicks it **closed**:
+
+```
+resources/js/pages/Career/TrainingDetail.vue:740
+    <details class="card mt-4" open>
+
+tests/browser/career-training-detail.spec.ts:34
+    await page.getByText('Client totals this turn (required to record)').click();
+```
+
+Measured in a live browser at `http://127.0.0.1:8000/training-runs/3/training`:
+
+```json
+{"found": true, "before": true, "after": false, "speedVisible": true,
+ "summaryText": "Client totals this turn (required to record)"}
+```
+
+`before: true` — the element already carries `open`. The click **removes** it, hiding the very fields the helper then
+tries to fill. `speedVisible: true` before the click proves the fields are reachable without clicking at all.
+
+### Dating both halves
+
+```
+$ git blame -L 740,740 HEAD -- resources/js/pages/Career/TrainingDetail.vue
+dcc562b63 (IzzatFirdaus 2026-11-04 00:49:16 +0800 740)  <details class="card mt-4" open>
+
+$ git blame -L 127,133 HEAD -- tests/browser/career-training-detail.spec.ts
+2b44b45bd (IzzatFirdaus 2026-10-29 02:31:26 +0800 127)  test('the client totals stay behind one disclosure, closed by default', ...
+2b44b45bd (IzzatFirdaus 2026-10-29 02:31:26 +0800 132)      await expect(details).not.toHaveAttribute('open', '');
+```
+
+**The spec has asserted closed-by-default since 2026-10-29. `dcc562b6` added `open` on 2026-11-04, five days later.**
+The spec's own header at `:14` states the intent in prose — *"the client totals the write boundary requires live in one
+**collapsed** disclosure, which is the documented deviation (HFW OVERRIDE (write fields) in the page)"* — so the
+attribute contradicts both the test and the page's own documentation.
+
+### Why this is a stop, not a fix
+
+The dispatch's §5 is explicit: *"A gate reveals a pre-existing red the slice did not cause — classify and record, do
+not fix."* Removing `open` is a one-attribute edit, but it is **not S1's scope**: S1 relabels the turn field. Touching
+the disclosure's default state would also silently change a rendered surface that the walk did not classify, which is
+exactly the re-classification this round forbids.
+
+**It blocks more than S1**: `career-training-detail.spec.ts` is the browser home for S1, S13 and S14. All three are
+held behind it.
+
+### What is owed
+
+Either the owner rules that the disclosure is open by default — in which case the spec's assertion and its
+`recordFirstTurn` helper must change, and that is its own slice — or `dcc562b6`'s `open` is a defect and removing it
+restores the documented state. **A one-line owner ruling resolves it.** Until then, S1, S13 and S14 cannot run their
+browser REDs and are held with this reason.
+
+**Nothing in this session changed either file.** `git status --short` on both is empty.
+
+---
+
+## §s2 — S2: the maiden lock clears from the run's position, not only from a record
+
+### 1. Slice, rows, register reference
+**S2.** Row `R7-26`, `Confirmed defect`, **blocking**, register §4.1. Owner ruling **(4)** — derive the lock from the
+run's effective position — recorded in `round7-owner-calls.md` §2.
+
+### 2. Pre-flight
+```
+$ git status --short -- app/Models/TrainingRun.php app/Http/Controllers/Career/RaceDecisionController.php tests/Feature/CareerRaceDecisionTest.php tests/browser/career-race-decision.spec.ts
+(empty — CLEAN)
+
+$ vendor/bin/pest tests/Feature/ScenarioMetadataTest.php
+  Tests:    3 passed (52 assertions)
+```
+
+### 3. RED
+New case in `tests/Feature/CareerRaceDecisionTest.php`:
+`it('clears the maiden lock from the run position when the run carries no Debut record')`.
+
+```
+$ vendor/bin/pest tests/Feature/CareerRaceDecisionTest.php --filter='clears the maiden lock from the run position'
+  ➜ 200▕     expect($run->hasClearedMaidenLock())->toBeTrue();
+  Tests:    1 failed (1 assertions)
+```
+
+The message is the walk's harm: a run at Senior Early October with no `race_entries` reports the lock uncleared.
+
+**Test-shape note, found while writing the RED:** the first version asserted `races.0.maiden_gated` on the turn-67 run
+and failed with `Property [races.0.maiden_gated] does not exist` — the `raceSlot()` helper defaults its slot to Junior
+turn 13, and a run at turn 67 is not offered a turn-13 race. The case was split: the **model** assertion runs on the
+turn-67 run, the **payload** assertion on a turn-13 run whose position sits on the slot. Both are in the same case, so
+neither half is lost.
+
+### 4. GREEN
+`app/Models/TrainingRun.php` — `hasClearedMaidenLock()` gains a leading check:
+
+```php
+if ($this->nextTurnNumber() - 1 > 12) {
+    return true;
+}
+```
+
+`nextTurnNumber()` is the effective position **plus one** for both doors: a wizard run reads its last logged turn
+(`:678`), a snapshot reads `career_position.turnIndex` (`:685`). Subtracting one therefore yields the position without
+a new accessor. Boundary is `> 12`, not `>= 12` — the ruling's own text: at turn 12 the Debut may not have resolved, by
+turn 13 it has. `maidenGates()` is unchanged, so Debut/Maiden slots are still not gated.
+
+```
+$ vendor/bin/pest tests/Feature/CareerRaceDecisionTest.php
+  Tests:    20 passed (380 assertions)
+```
+
+### 5. Non-vacuity
+```
+$ git diff app/Models/TrainingRun.php > .scratch-uma/r7-slices/S2.patch    # 23 lines
+$ git checkout -- app/Models/TrainingRun.php
+$ vendor/bin/pest ... --filter='clears the maiden lock from the run position'
+  Failed asserting that false is true.
+  Tests:    1 failed (1 assertions)
+$ git apply .scratch-uma/r7-slices/S2.patch
+$ git diff app/Models/TrainingRun.php | diff - .scratch-uma/r7-slices/S2.patch
+  DIFF MATCHES
+$ vendor/bin/pest ... --filter='clears the maiden lock from the run position'
+  Tests:    1 passed (12 assertions)
+```
+
+### 6. Regression
+```
+$ vendor/bin/pest tests/Feature/CareerRaceDecisionTest.php tests/Feature/CareerRacePlannerTest.php tests/Feature/CareerCockpitTest.php
+  Tests:    86 passed (1293 assertions)
+```
+
+**The pre-existing gate case survives.** `it('gates a standard race on the run-level maiden lock and clears it on a
+debut win')` uses `raceRun(turns: 12)`, i.e. effective position 12, which `> 12` correctly leaves gated.
+
+### 7. Gates
+| Gate | Result |
+| --- | --- |
+| Focused test | `CareerRaceDecisionTest` → **20 passed (380 assertions)** |
+| Regression | three suites → **86 passed (1293 assertions)** |
+| Pint | `{"tool":"pint","result":"passed"}` |
+| PHPStan | `[OK] No errors` on `TrainingRun.php` |
+| Lore docs / code | **556 / 75 exempt**, both — delta 0 |
+| Fence | **0 invalid** |
+| Browser | `career-race-decision.spec.ts` → **8 passed, 2 skipped, 0 failed** |
+| Typecheck / build | not run — no `.ts`/`.vue` changed (**UNMEASURED**, stated) |
+
+### 8. Lore delta
+`Lore docs: 556 (was 556); code: 556 (was 556)`. **Delta 0.**
+
+### 9. Commit
+`4efa0876` — `fix(career): clear the maiden lock from the run position past turn 12 (R7-26)`
+
+```
+app/Models/TrainingRun.php
+tests/Feature/CareerRaceDecisionTest.php
+```
+
+### 10. What this slice did not close
+- **`R7-75`** (`U-13`, the Daishoten card's own absence) — the lock no longer blocks, but the race card still has no
+  field of its own. `Confirmed defect`, unchanged.
+- **`R7-26`'s calendar half.** The lock is clear, but whether the race desk carries the source's race at the run's turn
+  is a separate question the register answers at the surface (`R7-75`).
+- **The turn-12 boundary itself** is a source-derived inference (Junior Late June), recorded in the ruling's evidence
+  table, not a value the tree states. If a future source contradicts it, the constant moves — it is a literal `12`,
+  not a config entry.
