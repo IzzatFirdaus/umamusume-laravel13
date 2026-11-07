@@ -82,6 +82,16 @@ const breadcrumb = computed(() => {
  */
 const isActiveRun = computed((): boolean => props.status === 'active' || props.statusLabel.toLowerCase() === 'active');
 
+/**
+ * R7-38 / R7-62: the status the stepper gates on.
+ *
+ * The nav is mounted only under `v-if="isActiveRun"`, so the branch this feeds can only hold an active
+ * run — a page that does not pass `:status` (seven of the eight do not) still gets the correct gate, and
+ * `Result` cannot come out live on a career that has not ended. This is the invariant stated once rather
+ * than a fallback guessed per page.
+ */
+const navStatus = computed((): string => (isActiveRun.value ? 'Active' : (props.status ?? '')));
+
 const whoPill = computed(() => {
     const turn = props.position?.match(/turn\s+(\d+)/i)?.[1];
 
@@ -128,13 +138,18 @@ const whoPill = computed(() => {
               completed career loses it: there is no next turn to navigate, and the Result screen the
               stepper's last step points at is the only door such a run still has.
             -->
+            <!-- R7-38 / R7-62: the nav is mounted only on an active run, so `Result` is unreachable on
+                 every screen that draws it. The `status` prop is passed explicitly rather than left to
+                 the component's permissive default, because seven of the eight pages that mount this
+                 layout do not pass it: measured on one run, `/cockpit` dimmed `Result` while `/events`
+                 linked it live. Deriving it here means a page cannot forget. -->
             <CareerSectionNav
                 v-if="isActiveRun"
                 :trainee="props.trainee"
                 :trainee-ja="props.traineeJa"
                 :scenario-label="props.scenarioLabel"
                 :status-label="props.statusLabel"
-                :status="props.status"
+                :status="navStatus"
                 :position="props.position"
                 :run-url="props.runUrl"
                 :current="props.current"

@@ -979,3 +979,46 @@ for (const variant of COCKPIT_VARIANTS) {
         );
     });
 }
+
+test('gates the Result step the same way on every career screen (R7-38, R7-62)', async ({ page }) => {
+    // Measured on one run, two screens: `/cockpit` rendered `Result` as a non-focusable SPAN with the
+    // sentence "Available when the career is completed", while `/events` on the same run rendered it as a
+    // live anchor with an href. Both mount `CareerSectionNav` through `CareerLayout`; the cockpit passes
+    // `:status`, the other seven screens do not, and `reachable()` returns true for every step when the
+    // status is unspecified. The gate is the same gate, so it must present the same way.
+    //
+    // This walks the seven screens the earlier probe named, and asserts the SAME presentation on each.
+    await openCockpit(page);
+    const runId = page.url().match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+    expect(runId).not.toBe('');
+
+    const readResultStep = async (): Promise<{ tag: string; href: string | null }> =>
+        page.evaluate(() => {
+            const nav = document.querySelector('nav[aria-label="Career"]');
+
+            if (!nav) {
+                return { tag: 'NO NAV', href: null };
+            }
+
+            const step = [...nav.querySelectorAll('.step')].find((el) => (el.textContent || '').trim() === 'Result');
+
+            return step === undefined
+                ? { tag: 'MISSING', href: null }
+                : { tag: step.tagName, href: step.getAttribute('href') };
+        });
+
+    // The seven pages that mount `CareerLayout` without passing `:status`, plus the cockpit which does.
+    // `/skills` is the SkillsPlanner page's own URL; `/races` is the decision screen.
+    const screens = ['cockpit', 'events', 'inheritance', 'deck', 'timeline', 'skills', 'races'];
+
+    for (const screen of screens) {
+        await page.goto(`/training-runs/${runId}/${screen}`, { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
+
+        const step = await readResultStep();
+
+        // An active career has no Result: not an anchor, and no href to follow.
+        expect(step.tag, `${screen} must not render Result as a live link on an active run`).toBe('SPAN');
+        expect(step.href, `${screen} must not give Result an href on an active run`).toBeNull();
+    }
+});
