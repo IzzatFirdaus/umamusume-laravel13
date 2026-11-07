@@ -326,6 +326,14 @@ final class CareerSkillsPlannerRecommendationTest extends TestCase
     /**
      * @return array<string, mixed>
      */
+    private function purchasable(TrainingRun $run): array
+    {
+        return $this->plannerProps($run)['purchasable'];
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
     private function plannerProps(TrainingRun $run): array
     {
         $response = $this->get(route('runs.skills.planner', $run));
@@ -361,5 +369,57 @@ final class CareerSkillsPlannerRecommendationTest extends TestCase
             'hint_levels' => [],
             ...$overrides,
         ];
+    }
+
+    /**
+     * R7-84: the panel said "no recorded SP" while the budget bar on the same screen showed 173.
+     *
+     * The recommendation read SP from `$run->turnEntries->sortByDesc('turn')->first()?->sp`, so a run
+     * whose LATEST turn recorded no SP had no budget at all -- even though an earlier turn had recorded
+     * one and the bar printed it. The run's SP is the most recent turn that actually carries a figure,
+     * not the figure the newest row happens to hold.
+     */
+    public function test_reads_the_run_sp_from_the_latest_turn_that_recorded_one(): void
+    {
+        $run = $this->plannerRun();
+        $skill = $this->skill('Budgeted Skill', 100);
+
+        $run->characterCard()->update(['skills_innate' => [$skill->export_id]]);
+
+        // Turn 1 records the pool of Skill Points; turn 2 is a race that records none.
+        TurnEntry::factory()->create(['training_run_id' => $run->id, 'turn' => 1, 'sp' => 173]);
+        TurnEntry::factory()->create(['training_run_id' => $run->id, 'turn' => 2, 'sp' => null]);
+
+        $recommended = $this->recommended($run);
+
+        $this->assertSame(173, $recommended['sp'], 'the run holds the SP its last recording turn states');
+        $this->assertSame(0, $recommended['shortfall'], 'a 100 SP skill against 173 held is not short');
+        $this->assertNotEmpty($recommended['rows'], 'a priced skill must be offered when the run holds SP');
+    }
+
+    /**
+     * R7-85: the Purchasable panel listed the whole Global catalogue -- 476 priced skills and a 7140 SP
+     * total on a run whose own pool is a handful -- because it queried `availableOnGlobal()` without the
+     * pool filter the recommendation has always applied. The shortfall it stated was the catalogue's,
+     * not the run's, so the figure could never be met by any play of that career.
+     */
+    public function test_purchasable_lists_the_run_pool_not_the_whole_catalogue(): void
+    {
+        $run = $this->plannerRun();
+        $mine = $this->skill('Pool Skill', 100);
+        $theirs = $this->skill('Catalogue Only Skill', 200);
+
+        // Only the first is in this run's pool: the card's innate list names it, nothing names the other.
+        $run->characterCard()->update(['skills_innate' => [$mine->export_id]]);
+
+        TurnEntry::factory()->create(['training_run_id' => $run->id, 'turn' => 1, 'sp' => 500]);
+
+        $purchasable = $this->purchasable($run);
+
+        $names = array_column($purchasable['rows'], 'name');
+
+        $this->assertContains('Pool Skill', $names, 'the run\'s own pool skill must be offered');
+        $this->assertNotContains('Catalogue Only Skill', $names, 'a skill outside the pool cannot be learned');
+        $this->assertSame(1, $purchasable['count'], 'the count states the pool, not the catalogue');
     }
 }

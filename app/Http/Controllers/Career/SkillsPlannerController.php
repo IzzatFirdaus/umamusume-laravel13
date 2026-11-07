@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Advisor\BuildTargetPayload;
 use App\Models\Skill;
 use App\Models\TrainingRun;
+use App\Models\TurnEntry;
 use App\Services\HintDiscount;
 use App\Services\SkillSpendCoverage;
 use Illuminate\Support\Collection;
@@ -105,12 +106,19 @@ final class SkillsPlannerController extends Controller
             ->pluck('id')
             ->all();
 
-        // ponytail: the payload is capped at the 100 cheapest rows; the seeded Global catalogue prices
-        // over a thousand skills and shipping all of them is a slow page for a reference list. The full
-        // pool size travels as `count` so the panel can say "cheapest 100 of N". Upgrade path: paginate
-        // the list if the panel ever needs the whole pool at once.
+        // ponytail: the payload is capped at the 100 cheapest rows; a run's pool can price well over a
+        // hundred skills and shipping all of them is a slow page for a reference list. The full pool
+        // size travels as `count` so the panel can say "cheapest 100 of N". Upgrade path: paginate the
+        // list if the panel ever needs the whole pool at once.
+        // R7-85: the panel listed the whole catalogue -- 476 priced skills, 7140 SP -- against a run
+        // that can only ever learn its own pool. `poolSkillIds()` is the game's rule and the
+        // recommendation already used it; this panel was the one place that ignored it, so the
+        // shortfall it stated was the catalogue's rather than the run's.
+        $poolSkillIds = $this->poolSkillIds($run);
+
         $base = Skill::query()
             ->availableOnGlobal()
+            ->whereIn('export_id', $poolSkillIds)
             ->whereNotIn('id', $acquired)
             ->whereNotNull('sp_cost');
 
@@ -133,7 +141,7 @@ final class SkillsPlannerController extends Controller
             ->all();
 
         $latest = $run->turnEntries->sortByDesc('turn')->first();
-        $sp = $latest?->sp;
+        $sp = $this->runSkillPoints($run);
 
         // Add affordable flag based on current SP
         if ($sp !== null) {
@@ -155,6 +163,27 @@ final class SkillsPlannerController extends Controller
     }
 
     /**
+     * The run's Skill Points: the figure from the latest turn that actually recorded one.
+     *
+     * R7-84 / R7-85. Every section used `$run->turnEntries->sortByDesc('turn')->first()?->sp`, so a
+     * run whose newest turn was a race or a rest -- neither of which records SP -- read as having no
+     * budget at all, while the budget bar printed the figure from the last turn that did. The bar and
+     * the panels were reading two different things off one run, which is what the walk measured as
+     * "Recommended says no recorded SP while the bar shows 173".
+     *
+     * A turn with a null `sp` is silent on the question, not an answer; the most recent answer wins.
+     * A run with no answer anywhere returns null, and the copy that says so is correct.
+     */
+    private function runSkillPoints(TrainingRun $run): ?int
+    {
+        $recorded = $run->turnEntries
+            ->sortByDesc('turn')
+            ->first(static fn (TurnEntry $entry): bool => $entry->sp !== null);
+
+        return $recorded?->sp;
+    }
+
+    /**
      * P4: Budget-aware recommendation — covers priorities first at their hint-adjusted costs,
      * then fills remaining SP with the cheapest remaining skills.
      *
@@ -169,8 +198,7 @@ final class SkillsPlannerController extends Controller
      */
     private function recommendedSection(TrainingRun $run, array $required): array
     {
-        $latest = $run->turnEntries->sortByDesc('turn')->first();
-        $sp = $latest?->sp;
+        $sp = $this->runSkillPoints($run);
 
         if ($sp === null) {
             return [
@@ -380,7 +408,7 @@ final class SkillsPlannerController extends Controller
         }
 
         $latest = $run->turnEntries->sortByDesc('turn')->first();
-        $sp = $latest?->sp;
+        $sp = $this->runSkillPoints($run);
 
         $state = match (true) {
             $this->priorityNames($run) === [] => 'no_priorities',

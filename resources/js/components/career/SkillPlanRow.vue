@@ -88,7 +88,14 @@ async function move(delta: number): Promise<void> {
         <div class="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
             <h4 class="text-lg font-semibold text-ink-strong">
                 {{ props.row.name }}
-                <span v-if="props.row.name_ja !== null" :lang="langOf(props.row.name_ja) ?? undefined" class="ml-1 font-normal text-ink-muted">{{ props.row.name_ja }}</span>
+                <!-- R7-88: the Japanese name is not client vocabulary, so the rule is not "never show it" --
+                     it is "never let it read as part of the English name". `ml-1` spaced it and left the
+                     two run together everywhere text is read rather than seen, exactly as R7-54's
+                     `Rice Showerライスシャワー` did. Parenthesised markup keeps them distinct while
+                     leaving the English name the one a Trainer reads first. -->
+                <span v-if="props.row.name_ja !== null" class="font-normal text-ink-muted">
+                    (<span :lang="langOf(props.row.name_ja) ?? undefined">{{ props.row.name_ja }}</span>)
+                </span>
                 <span
                     v-if="props.row.is_unique"
                     class="ml-1 rounded-full bg-sunken px-2 py-0.5 text-xs font-normal text-ink-strong"

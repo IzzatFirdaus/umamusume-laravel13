@@ -6,6 +6,7 @@ namespace Tests\Feature;
 
 use App\Enums\ReleaseStatus;
 use App\Enums\SkillAcquisition;
+use App\Models\CharacterCard;
 use App\Models\Skill;
 use App\Models\SkillLevel;
 use App\Models\TrainingRun;
@@ -649,6 +650,24 @@ final class CareerSkillsPlannerTest extends TestCase
         ]);
 
         $run->setSkillStatus($learned, SkillAcquisition::Acquired, 1);
+
+        // R7-85: these are the run's own pool. The panel listed the whole Global catalogue before, so
+        // this case passed without ever stating which skills the run could learn -- and once the panel
+        // was scoped to the pool, a fixture naming none of them read as an empty list.
+        //
+        // `plannerRun()` builds a run with no card at all (`character_card_id` is null), so a relation
+        // update has nothing to update and silently does nothing. The card is attached here, then named.
+        // `export_id` is the pool's own key and a factory row carries none, so the three skills are given
+        // the ids the card names. The pool join is on `export_id`, never on the primary key.
+        $cheap->update(['export_id' => 9001]);
+        $mid->update(['export_id' => 9002]);
+        $learned->update(['export_id' => 9003]);
+
+        $card = CharacterCard::factory()->create([
+            'skills_innate' => [9001, 9002, 9003],
+        ]);
+        $run->update(['character_card_id' => $card->id]);
+        $run->refresh();
 
         TurnEntry::factory()->create([
             'training_run_id' => $run->id,

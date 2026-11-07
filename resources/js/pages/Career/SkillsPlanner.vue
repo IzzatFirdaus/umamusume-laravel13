@@ -570,7 +570,7 @@ const coverageConstants = computed(() =>
                     </table>
                 </div>
                 <div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-sm">
-                    <span class="text-ink-muted">{{ filteredRows.length }} skills · page {{ page }} of {{ pageCount }}</span>
+                    <span class="text-ink-muted">{{ filteredRows.length }} {{ filteredRows.length === 1 ? 'skill' : 'skills' }} · page {{ page }} of {{ pageCount }}</span>
                     <div class="flex gap-2">
                         <button type="button" class="btn btn-sm min-h-11" :disabled="page <= 1" @click="page = Math.max(1, page - 1)">Previous</button>
                         <button type="button" class="btn btn-sm min-h-11" :disabled="page >= pageCount" @click="page = Math.min(pageCount, page + 1)">Next</button>
