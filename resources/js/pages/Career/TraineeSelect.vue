@@ -355,6 +355,19 @@ function choose(trainee: TraineeRow): void {
     // The write URL is supplied by the server (`career.trainee.store`) so the page never states it as
     // a literal. Focus is restored in `onSuccess` after the new props land, because the component
     // instance survives a client-side visit and `onMounted` would not re-run (WCAG 2.4.3).
+    // R7-01: the write's redirect is built from the request's own `search`/`sortBy`/`direction`
+    // (`TraineeSelectController::filterQuery`), and this form posted none of them, so selecting a
+    // trainee reloaded all 67 rows and the URL dropped the term the Trainer had typed. The server
+    // half existed since R4-23; nothing was sending it.
+    selectForm.transform((data) => ({
+        ...data,
+        // The live filter state, not `props.filters`: the props are what the last visit rendered, and a
+        // Trainer who typed a term and then picked a row never caused a visit in between.
+        search: filterValues.value.search ?? '',
+        sortBy: sortBy.value,
+        direction: direction.value,
+    }));
+
     selectForm.put(props.action, {
         preserveScroll: true,
         onSuccess: () => {

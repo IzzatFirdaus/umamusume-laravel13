@@ -709,3 +709,30 @@ test.describe('Trainee Selection and Profile', () => {
         expect(captionSizes, 'the shipped caption must stay on the signed Metadata tier').toEqual(['14px']);
     });
 });
+
+    test('keeps the search term and the narrowed roster after a pick (R7-01)', async ({ page }) => {
+        // The walk's two screenshots are the evidence: `S03b-trainee-search.png` shows the roster narrowed
+        // to `Rice Shower` with the term in the Search box; `S03c-trainee-chosen.png` shows `Search` still
+        // reading `Rice Shower` over all 66 rows and a URL with no query. The server has carried the
+        // filter through the write since R4-23 -- `filterQuery()` reads `search`/`sortBy`/`direction` off
+        // the request -- but the form posted none of them, so `filterQuery()` had nothing to carry.
+        await page.goto('/career/setup/trainee');
+        await page.locator('#app > *').first().waitFor();
+
+        await page.getByLabel('Search').fill('Rice Shower');
+        await expect(card(page, 'Rice Shower')).toBeVisible();
+
+        // The narrowed roster: one row, not the full catalogue.
+        const rowsBefore = await page.locator('[data-trainee-card]').count();
+        expect(rowsBefore).toBeLessThan(5);
+
+        await card(page, 'Rice Shower').getByRole('button', { name: 'Select', exact: true }).click();
+        await expect(page.getByText('Trainee set: Rice Shower.')).toBeVisible();
+
+        // The term survives in the URL and in the box, and the roster stays narrowed.
+        await expect(page).toHaveURL(/search=Rice/);
+        await expect(page.getByLabel('Search')).toHaveValue('Rice Shower');
+
+        const rowsAfter = await page.locator('[data-trainee-card]').count();
+        expect(rowsAfter, 'the roster must stay narrowed after the pick').toBe(rowsBefore);
+    });
