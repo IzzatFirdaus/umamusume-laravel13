@@ -112,10 +112,24 @@ is recorded in §5 and, where it adds substance, in the canonical row's facets.
 
 ### 2.2 Statuses
 
-Six, unchanged from rounds 3–6:
+Six base statuses, unchanged from rounds 3–6:
 
 `Confirmed fixed` · `Confirmed defect` · `Known limitation` · `Unrepresented source data` ·
 `Source conflict / open` · `Does not reproduce`
+
+**Two sanctioned variants**, each with its own rule, because neither collapses into a base status without losing
+the distinction the row exists to make (C15):
+
+- **`Ruled out`** — the *observation* reproduces, and the *claim* built on it is refuted by a prior ruling or a
+  reference. Distinct from `Does not reproduce`, which refutes the observation itself. Used by `R7-07` (two
+  figures are visible; they are two mechanics, so the "contradiction" claim fails) and `R7-18` (the URA labels are
+  visible; the rounds are shared by design, so the "wrong scenario" claim fails). The refuting authority is named
+  in the row: a `UMAMUSUME_REFERENCE.md` section, or a closed `KI-nn`, or an accepted ADR.
+- **`Walk-artifact + Confirmed defect`** — a compound for a row whose display is *honest about an invented value*
+  while the surrounding representability defect stands. Used once, by `R7-34`: the `★★★` correctly renders the
+  `Rank (stars) = 3` the walk typed (`§7.4 I-01`), so the star half is not a fabrication, but the letter that
+  should have been rendered is discarded (`R7-33`). The compound is paired with the base status it qualifies, never
+  used alone.
 
 Plus one working label, paired with a status and never used alone: **`Regression from an earlier register's landed
 fix`**, which requires a proven predecessor boundary commit.
@@ -255,7 +269,7 @@ Cited by rows; none used to classify a walk finding.
 | R7-54 | E-16 | `Trainee · Pass · Rice Showerライスシャワー` | Confirmed defect | Latin and JP names run together |
 | R7-55 | E-17 | `Create the run` explanation below the button | Known limitation | The reason is present, misplaced |
 | R7-56 | E-18 | `Energy state` defaults `Exact` while `ENERGY AFTER` is empty | Confirmed defect | Default contradicts the field |
-| R7-57 | E-19 | Seven unlabelled number inputs (`failure_rate`, six `preview_gains[*]`) | Confirmed defect | No label, heading or help text. **Carries R7-24's residual**: the recorded-action card quotes a stored snapshot with no visible "at time of action" wording |
+| R7-57 | E-19 | Seven unlabelled number inputs (`failure_rate`, six `preview_gains[*]`) | Confirmed defect | No label, heading or help text. **Carries R7-24's residual as an explicit observation**: the recorded-action card prints `Recorded 07/11/2026` over a quote that carries no "as advised before this turn" wording, so two Energy sentences from different points in time read as simultaneous (C13). That wording gap is this row's copy defect; the data behind both sentences is correct |
 | R7-58 | E-20 | Off-calendar defaults (`NotOffered`, `Late`) vs the run's `Early` | Confirmed defect | Same root as R7-28 |
 | R7-59 | E-21 | `No skill is recorded on this run yet` beside `SKILL POINTS 173` | Known limitation | Both true; the screen does not distinguish never-entered from never-acquired |
 | R7-60 | E-22 | Run-scoped deck shows editable `Level`/`Ownership` with no visible save control | Confirmed defect | Commit path unstated |
@@ -307,6 +321,56 @@ Cited by rows; none used to classify a walk finding.
 | R7-96 | snapshot §7.7 item 25 | Deck: no read-back of the source's six cards | The deck screen's contract is the run's six slots, not a comparison surface | Known limitation | Contract, not defect |
 | R7-97 | snapshot §7.3 S11 | Deck analysis collapsed group purpose unclear | Label reads `Choose a card` / `Deck analysis` | Does not reproduce | The function is self-evident on expand |
 | R7-98 | snapshot §7.3 S05 | Snapshot door: no Mood field; cockpit prints `N/A, not recorded` | `Snapshot/Setup.vue` field list | Unrepresented source data | The source's `GREAT` cannot be entered on that door |
+| R7-99 | snapshot-door §7.3 S04 | Snapshot review's read-back omits **Scenario** and **Trainee** while the copy claims `This is exactly what will be written. Read it back` | `SnapshotController::reviewFields()` (`:196`…) builds one row per `field_states` key only, and `CreateSnapshotRun::OPTIONAL_STATE_FIELDS`/`CORE_STATE_FIELDS` (`:41`, `:46`) carry `speed`, `stamina`, `power`, `guts`, `wit`, `energy`, `fans`, `skill_points` — no `umamusume_id`, no `scenario`. Both are `required` in `StoreSnapshotRequest::fieldRules()` (`:47`, `:48`), so the review re-posts them via `payload` (`Review.vue:53`) but never renders them. | **Confirmed defect** | Two required identity inputs are confirmable nowhere on the confirm screen. `payload` carries them (so the write is correct); the read-back is what omits them. S-only — the wizard's S08 preflight is a different contract screen and its read-back does name both (R7-16). Filing closes the one gap plan v1 §5.2 listed as `S-F-14` and plan v2 §5.5 dropped. C16 |
+
+### 4.4a The snapshot-door inventory, enumerated
+
+Plan v1 §5.2 enumerated sixteen `S-F-nn` items and then pointed at the walk for the E and U sides ("listed in walk
+7 snapshot-door §7.7"); plan v2 §5.5 replaced the whole scheme with an unnumbered list, having measured that the
+walk carries no `S-F-nn` IDs at all (C10). Neither plan's list is a mapping. This table closes the question the
+review raised: every item either plan named, against the register row that carries it.
+
+**Column `v1 §5.2`** is the ID plan v1 assigned. **Column `v2 §5.5`** is the row plan v2 assigned, where it did.
+**Column `§7.7`** is the snapshot walk's own open-item number, which is the only numbering the walk actually
+carries.
+
+| v1 §5.2 | Surface | §7.7 | Register row | Door | Basis |
+| --- | --- | --- | --- | --- | --- |
+| `S-F-01` | Maiden lock blocks all calendar races | — (§7.3 S07) | R7-26 | both | Same defect as `F-26`; wizard row carries it |
+| `S-F-02` | `Undo turn 18` on a turn-67 run | 8 | R7-27 | both | Same class as `F-27`; the register cites both values (`1`, `19`, `67`) |
+| `S-F-03` | Timeline `RACES ENTERED 0` after four races | 6 | R7-83 | S | Extended row: the wizard walk recorded no off-calendar race |
+| `S-F-04` | Advisor reports Junior obligation on Senior run | 9 | R7-22 | both | Same defect as `F-22` |
+| `S-F-05` | URA obligations on Unity Cup run | 10 | R7-18 | both | **Ruled out** on both doors (C12) |
+| `S-F-06` | `Energy not recorded` beside `Energy 50` | 11 | R7-24 | both | **Does not reproduce** — temporal quote (C13) |
+| `S-F-07` | Cockpit prints floor under `cap` | 12 | R7-19 | both | Same defect as `F-19` |
+| `S-F-08` | Skills Recommended misdiagnoses SP state | 13 | R7-84 | S | Extended row |
+| `S-F-09` | Skills Purchasable reads full catalogue | 14 | R7-85 | S | Extended row |
+| `S-F-10` | Available-column copy contradicts state | 15 | R7-86 | S | Extended row |
+| `S-F-11` | Raw condition expression leaked | 16 | R7-87 | S | Extended row |
+| `S-F-12` | JP skill name in display | 17 | R7-88 | S | Extended row |
+| `S-F-13` | `Record event` enabled with empty required fields | 20 | R7-31 | both | Same defect as `F-31` |
+| **`S-F-14`** | **Snapshot review omits Scenario and Trainee from read-back** | — (§7.3 S04) | **R7-99** | **S** | **Added by C16.** Was the one uncovered item |
+| `S-F-15` | `1 skills · page 1 of 1` | 19 | R7-89 | S | Extended row |
+| `S-F-16` | `Result` nav live while band says available when completed | 7 | R7-38 | both | Same defect as `F-38` |
+| `S-E-01…S-E-11` | (eleven, listed in the walk) | — | R7-82…R7-98 overlap; no `S-E` marker in the walk | S | Plan v1 gave no per-item text and the walk carries no `S-E-nn` IDs; each observation is either a `both` facet already in §4.1–§4.3 or an extended row. **Not enumerable** — see the note below |
+| `S-U-01…S-U-11` | (eleven, listed in the walk) | — | as above | S | Same |
+
+**Why the E and U sides cannot be enumerated item by item.** Plan v1 wrote
+`S-E-01 through S-E-11 | E | (11 experiential findings, listed in walk 7 snapshot-door §7.7)` — a range over no
+list. The walk's own marker scan returns `1 (E-)` and `12 (U-)` (C10), so there is no eleven-plus-eleven set to
+map. §7.7's twenty-five items are numbered but not classified into F/E/U. The register therefore maps the F side
+item by item (sixteen rows above, all accounted for) and records the E and U sides as **counts, not IDs**:
+**19 unnumbered markers = 6 `(F-)` + 1 `(E-)` + 12 `(U-)`**, of which the six `(F-)` are `S-F-01`…`S-F-06`
+territory and the thirteen E/U markers are carried by the extended rows and the `both` facets. **The reduction is
+complete for every item either plan named as an item; it is not item-by-item for the two ranges plan v1 wrote
+without text**, and this register does not invent that text.
+
+**§7.7 ↔ register row, all twenty-five.** Item 1 (aptitude conflict) → R7-64; item 2 (Vodka Power spark) → R7-68;
+item 3 (Daiwa Guts spark) → R7-68; item 4 (`UG` vs `UG1`) → R7-64's family; item 5 (per-ancestor spark chains) →
+R7-68; item 6 → R7-83; item 7 → R7-38; item 8 → R7-27; item 9 → R7-22; item 10 → R7-18; item 11 → R7-24;
+item 12 → R7-19; item 13 → R7-84; item 14 → R7-85; item 15 → R7-86; item 16 → R7-87; item 17 → R7-88; item 18 →
+R7-29; item 19 → R7-89; item 20 → R7-31; item 21 → R7-91; item 22 → R7-92; item 23 → R7-93; item 24 → R7-94/95/96;
+item 25 → R7-95/96. **Every §7.7 item is mapped; none is unfiled.**
 
 ### 4.5 Walk 6's F-01 → F-17 re-measurement
 
@@ -387,6 +451,7 @@ doors and is filed once.
 | R7-63…R7-81 | U-01…U-19 | W | R6-32…R6-54 equivalents | Per row above |
 | R7-82 | dropped | W | R6-51 adjacent | New symptom of the same derivation |
 | R7-83…R7-98 | snapshot | S | — (R7-94 = R4-20) | Snapshot-door-only set plus the dropped row |
+| R7-99 | snapshot §7.3 S04 | S | R7-16 (the wizard's read-back, which does name both) | S-only: the wizard's preflight is a different contract screen and its read-back names scenario and trainee; the snapshot review's does not |
 
 **Unattributed walk-7 findings: zero.** Every `R7-01`…`R7-81` row appears above.
 
@@ -499,6 +564,62 @@ Mechanism: `TeamPanelBuilder.php:323-353` requires a `race_entries` row (or a qu
 met; `:261` then renders `$reached => 'missed'` for a past goal. **Absence of a record becomes a negative state.**
 Filed as R7-82, `Confirmed defect`, **Blocking**.
 
+### C15 — `Ruled out` and `Walk-artifact + Confirmed defect` are sanctioned variants, not drift
+
+The first landed version of this register used two statuses §2.2 did not define. Both are real categories and both
+stay, now defined in §2.2 with their rules:
+
+- **`Ruled out`** (R7-07, R7-18) — the observation reproduces and the claim is refuted. This is deliberately not
+  `Does not reproduce`: §2.3 rule 2 reserves that for evidence refuting the **observation**, and both rows here show
+  the user-visible state exactly as the walk described it. What fails is the inference. A status that names which
+  half failed is worth its slot.
+- **`Walk-artifact + Confirmed defect`** (R7-34) — a compound for a row whose display is honest about an invented
+  value while the surrounding defect stands. The `★★★` renders the `Rank (stars) = 3` the walk typed; the letter is
+  discarded elsewhere. `Confirmed defect` alone would misdescribe the star; `Does not reproduce` would misdescribe
+  the letter.
+
+**The base six are unchanged and every other row uses them.** The variants are not licence to add a seventh for
+convenience: a new status needs a rule here before a row may use it.
+
+### C16 — `S-F-14` is real and is filed as `R7-99`
+
+The coverage review found one gap. **The gap is real and this register had missed it.** Plan v1 §5.2 listed
+`S-F-14 | Snapshot review omits Scenario and Trainee from read-back`; plan v2 dropped the whole `S-F-nn` scheme when
+it measured that the walk carries no IDs, and the register inherited the drop without re-reading the underlying
+observation. The snapshot walk's own `§7.3 S04` records it in its "Source data with no UI home" section: the review
+**does not read back Scenario or Trainee** although the copy claims `This is exactly what will be written.`
+
+Settled at `8a3cf21c`:
+
+- `StoreSnapshotRequest::fieldRules()` (`:47`, `:48`) marks **both** `umamusume_id` and `scenario` `required`.
+- `SnapshotController::review()` (`:111-122`) passes `payload` (the whole validated body) and `fields` (built by
+  `reviewFields()`, `:196`) to the Vue page. **The payload carries both identity values, so the write is correct.**
+- `reviewFields()` builds one row per `field_states` key, and the state-field set is
+  `CreateSnapshotRun::CORE_STATE_FIELDS` (`:41`) + `OPTIONAL_STATE_FIELDS` (`:46`) — `speed`, `stamina`, `power`,
+  `guts`, `wit`, `energy`, `fans`, `skill_points`. **Neither `umamusume_id` nor `scenario` is in it.**
+- `Review.vue` renders `props.fields` (`:135`) and `props.position_label` (`:128`). Nothing renders either identity.
+
+**Filed as `R7-99`, `Confirmed defect`, `Door: S`.** S-only because the wizard's S08 preflight is a different
+contract screen and its read-back does name both (R7-16 measured `TRAINEE Rice Shower`, `SCENARIO Unity Cup`).
+Slice **S18's scope widens by one row**.
+
+### C17 — The snapshot inventory is enumerated in §4.4a
+
+C10 corrected the plan's 38-finding premise; it did not show the work. §4.4a now maps, one row per item, every
+`S-F-nn` plan v1 named (sixteen), every §7.7 item the walk carries (twenty-five), and the two ranges plan v1 wrote
+without item text (`S-E-01…11`, `S-U-01…11`). The finding: **all sixteen F items are covered** — fifteen by rows
+that existed, the sixteenth by `R7-99` under C16. The two E/U ranges are recorded as counts rather than IDs because
+**plan v1 supplied no item text and the walk carries no `S-E-nn`/`S-U-nn` markers**; the register does not invent
+the missing twenty-two descriptions. Every §7.7 item maps to a row.
+
+### C18 — The §11 self-test is a script over row starts, not an `awk` field walk
+
+The first version's `awk` range plus `grep -cE '^\| R7-'` over-counts when a row contains an escaped pipe
+(`{entered: number\|null; scenario: number}` at R7-19), because `awk`'s field indexing diverges from the visual row
+count and the range boundary can land mid-table. The self-test is now a Python count keyed on the row **start**
+(`^\| R7-\d{2} `) inside the `§4.1`–`§4.5` span, which is what the measured 98 is. §11 carries the working
+command.
+
 ---
 
 ## §7 Verification-only closes
@@ -565,7 +686,7 @@ Filed as R7-82, `Confirmed defect`, **Blocking**.
 
 | Slice | Rows | Shape |
 | --- | --- | --- |
-| **S18** | R7-83 | Timeline joins `race_entries` into the row set |
+| **S18** | R7-83 + R7-99 | Timeline joins `race_entries` into the row set; the snapshot review's read-back renders `umamusume_id` and `scenario` beside the state fields (C16) |
 | **S19** | R7-84 + R7-85 + R7-86 + R7-88 + R7-89 | Skills planner diagnosis and copy |
 | **S20** | R7-87 | Strip the raw predicate from the Skill cell |
 | **S21** | R7-90 | Level ceiling matches the caption ladder |
@@ -624,31 +745,59 @@ Noticed while reading the tree; no walk row covers them. None is a slice.
 
 Run before each commit:
 
-```
-# row count: §4.1–§4.4 only (§5 repeats IDs in the mapping table and must be excluded)
-awk '/^### 4\.1 Functional/,/^### 4\.5/' register | grep -cE '^\| R7-[0-9]{2} '      → 98
-awk '/^### 4\.1 Functional/,/^### 4\.5/' register | grep -oE '^\| R7-[0-9]{2} ' | sort -u | wc -l → 98 unique
-walk-ID coverage: F 38 + E 24 + U 19, each exactly once                            → 81 canonical
-placeholder scan over §4 status cells                                              → 0
-python tools/md_fence_check.py                                                      → 0 invalid closing fences
+The row count is a **Python script over row starts**, not an `awk` field walk: several rows contain escaped
+pipes (`{entered: number\|null; scenario: number}` at R7-19), so `awk`'s field indexing diverges from the visual row
+count (C18). Run from the repository root:
+
+```bash
+python3 - <<'PY'
+import re
+src = open('docs/audits/rice-shower-unity-cup-round7-reconciliation.md', encoding='utf-8').read()
+sec = re.search(r'### 4\.1 Functional.*?(?=### 4\.5)', src, re.S).group(0)
+rows = [l for l in sec.splitlines() if re.match(r'^\| R7-\d{2} ', l)]
+ids = [l.split('|')[1].strip() for l in rows]
+STATUS = {'Confirmed defect', 'Known limitation', 'Unrepresented source data',
+          'Source conflict / open', 'Does not reproduce', 'Ruled out',
+          'Walk-artifact + Confirmed defect'}
+bad = [i for i, l in zip(ids, rows)
+       if not any(c.strip().replace('**', '').split(' —')[0].split(' (')[0] in STATUS
+                  for c in l.split('|')[1:-1])]
+print('rows:', len(rows), '| unique:', len(set(ids)), '| no-status:', bad or 'none')
+PY
 ```
 
+Expected: `rows: 99 | unique: 99 | no-status: none`.
+
+| Check | Command | Expected |
+| --- | --- | --- |
+| Row count and unique IDs | the Python block above | **99 / 99** |
+| Walk-ID coverage | `awk`-free count over §4.1–§4.3 | **F 38 + E 24 + U 19 = 81**, each exactly once |
+| Extended rows | §4.4 | **18** (`R7-82`…`R7-99`) |
+| Status vocabulary | the `STATUS` set in the Python block | every row matches one of the seven sanctioned values |
+| Placeholder scan | same block, `no-status` empty | **none** |
+| Markdown fences | `python tools/md_fence_check.py <register>` | **0 invalid closing fences** |
+
 - [x] `R7-01`…`R7-81` present, 1:1 with `F-01`…`F-38`, `E-01`…`E-24`, `U-01`…`U-19`; each walk ID appears once.
-- [x] Extended rows `R7-82`…`R7-98` present, each naming its snapshot-door section or the walk's traceability matrix
+- [x] Extended rows `R7-82`…`R7-99` present, each naming its snapshot-door section or the walk's traceability matrix
       and its settling read.
-- [x] Every status is one of the six; no placeholder word in any status cell.
+- [x] Every row's status is one of the six base statuses or one of the two sanctioned variants defined in §2.2
+      (C15) — whether or not every value appears; `Confirmed fixed` is zero as rows by design. No placeholder word
+      appears in any status cell.
 - [x] Every row carries a settling read with `file:line` at `8a3cf21c`, or a named later commit, or a `db read`
       whose query and output are quoted.
 - [x] Every screenshot-rendered claim names its file.
 - [x] Every game-mechanic claim cites a `UMAMUSUME_REFERENCE.md` section where one applies.
 - [x] Every correction to a walk or a prior register is a dated note in §6; no walk and no round 2–6 register edited.
 - [x] The cross-register mapping is complete; zero unattributed walk-7 findings.
+- [x] §4.4a enumerates every `S-F-nn` plan v1 named and every §7.7 item the walk carries, with the two untexted
+      E/U ranges recorded as counts rather than invented IDs (C17).
 - [x] §10 fence findings are unnumbered and each carries one line of evidence.
 - [x] Gates run and not run are stated; `UNMEASURED` is not implied away.
-- [x] §6 C1–C14 present with dated notes: C2 carries the R6-13 falsification, C3 the blocking correction, C4 the
+- [x] §6 C1–C18 present with dated notes: C2 carries the R6-13 falsification, C3 the blocking correction, C4 the
       F-33/F-34 shared root, C5 the Spirit Burst read, C6 the seven probe dispositions, C7 the label/figure split,
       C8 the walk artifact, C9 the R4-13 context, C10 the snapshot inventory correction, C11–C13 the three
-      ruling-outs, C14 the dropped finding's mechanism.
+      ruling-outs, C14 the dropped finding's mechanism, C15 the two sanctioned status variants, C16 the `S-F-14`
+      coverage gap and `R7-99`, C17 the §4.4a enumeration, C18 the self-test's rewrite.
 - [x] The blocking set reads `R7-20`, `R7-26`, `R7-82` — three, not three-plus-`R7-10`.
 - [x] §1 names the five peer paths verbatim, both walk hashes, `migrate:status`, the devtools count, the
       `RENDERED_EVIDENCE` probe and the screenshot counts.
@@ -661,26 +810,28 @@ python tools/md_fence_check.py                                                  
 | `R7-01`…`R7-38` (F) | 38 |
 | `R7-39`…`R7-62` (E) | 24 |
 | `R7-63`…`R7-81` (U) | 19 |
-| `R7-82`…`R7-98` (extended) | 17 |
-| **Total** | **98** |
+| `R7-82`…`R7-99` (extended) | 18 |
+| **Total** | **99** |
 | §4.5 walk-6 re-measurement (separate table) | 17 |
 
-**Status tally across the 98, measured** (a script over the §4.1–§4.4 tables, every row classified):
+**Status tally across the 99, measured** (a script over the §4.1–§4.4 tables, every row classified, one row
+contributes one status):
 
 | Status | Count |
 | --- | --- |
-| `Confirmed defect` | **52** |
+| `Confirmed defect` | **53** |
 | `Known limitation` | **22** (one of them discoverability, per C3) |
 | `Unrepresented source data` | **10** |
 | `Does not reproduce` | **8** |
 | `Source conflict / open` | **3** (`R7-02`, `R7-64`, `R7-70`) |
-| `Ruled out` | **2** (`R7-07`, `R7-18`) |
-| `Walk-artifact + Confirmed defect` (working label) | **1** (`R7-34`) |
-| **Total** | **98** |
+| `Ruled out` | **2** (`R7-07`, `R7-18`; the variant defined in C15) |
+| `Walk-artifact + Confirmed defect` | **1** (`R7-34`; the variant defined in C15) |
+| **Total** | **99** |
 
 The plan's provisional expectation was "~50–55 confirmed defect, ~18–20 known limitation, ~12–15 unrepresented,
-~6–8 DNR, ~4–6 source-conflict, ~6–7 confirmed fixed". Three of the six land inside their band
-(`Confirmed defect` 52, `Does not reproduce` 8, and `Source conflict / open` 3 sits one below its 4–6). Two do not:
-`Known limitation` measures 22 against an expected 18–20, and `Unrepresented source data` measures 10 against an
-expected 12–15. `Confirmed fixed` is **zero as rows** because the eight fixed findings are evidence in §4.5 rather
-than rows of their own — exactly as the plan's §3 specifies; the shortfall there is structural, not a gap.
+~6–8 DNR, ~4–6 source-conflict, ~6–7 confirmed fixed". Four of the six land inside their band
+(`Confirmed defect` 53, `Does not reproduce` 8, `Source conflict / open` 3 one below its 4–6, and `Ruled out` +
+`Walk-artifact` are not base statuses so the plan did not anticipate them). Two do not: `Known limitation` measures
+22 against an expected 18–20, and `Unrepresented source data` measures 10 against an expected 12–15. `Confirmed
+fixed` is **zero as rows** because the eight fixed findings are evidence in §4.5 rather than rows of their own —
+exactly as the plan's §3 specifies; the shortfall there is structural, not a gap.
