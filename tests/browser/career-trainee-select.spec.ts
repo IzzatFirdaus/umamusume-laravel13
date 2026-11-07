@@ -516,6 +516,10 @@ test.describe('Trainee Selection and Profile', () => {
 
         // Rarity is the form's own fact, printed beside the form it belongs to.
         await expect(page.getByRole('heading', { name: 'Costume forms' })).toBeVisible();
+
+        // R7-02 (b3): the count names its scope. This screen lists every confirmed form, so its number
+        // can exceed the picker's offer — and now says which of them the client carries.
+        await expect(page.getByText(/^\d+ forms? \(\d+ released, \d+ undated\)$|^\d+ forms? \(all released\)$/)).toBeVisible();
         await expect(page.getByText('[Starry Nocturne]')).toBeVisible();
         await expect(page.getByRole('img', { name: /Three stars/i }).first()).toBeVisible();
         await expect(page.getByText('Mar 5, 2026')).toBeVisible();

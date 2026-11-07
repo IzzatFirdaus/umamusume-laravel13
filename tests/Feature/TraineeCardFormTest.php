@@ -99,3 +99,38 @@ it('refuses a costume form that belongs to another trainee and starts no run', f
 
     expect(TrainingRun::query()->where('umamusume_id', $trainee->id)->count())->toBe(0);
 });
+
+it('labels the form count each surface reports, so a scope cannot be read as a total', function (): void {
+    // R7-02, owner ruling (b3). Three surfaces scope `character_cards` differently and all three are
+    // right for their purpose: the picker offers only forms with a Global release date (a form the client
+    // does not carry cannot be chosen), the profile and the catalog show every confirmed form (a read
+    // screen hides nothing). Card 170 `Yummy Dreamy Fairy` has `global_release_date = NULL`, which is why
+    // walk 7 read `2 forms` on one screen and three on another.
+    //
+    // Neither filter changes. What changes is that each count says what it counts.
+    $trainee = formTrainee('Rice Shower', ['debut form', '[Rosy Dreams]']);
+
+    // A form with no Global release date: confirmed, on the character, but not yet on the client.
+    CharacterCard::factory()->for($trainee)->create([
+        'title' => 'Yummy Dreamy Fairy',
+        'rarity' => CardRarity::ThreeStar,
+        'is_debut_form' => false,
+        'global_release_date' => null,
+    ]);
+
+    $this->get(route('career.trainee'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            // The picker still filters: two forms carry a release date, so two are offered.
+            ->where('trainees.data.0.form_count', 2)
+            // And it now says which two — the released ones, not "all of them".
+            ->where('trainees.data.0.form_count_label', '2 released forms'));
+
+    $this->get(route('career.trainee.profile', ['umamusume' => $trainee->id]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            // The read screen lists all three and splits the count, so a Trainer can see the third form
+            // exists without being offered a career on it.
+            ->where('forms', fn ($forms) => count($forms) === 3)
+            ->where('form_count_label', '3 forms (2 released, 1 undated)'));
+});

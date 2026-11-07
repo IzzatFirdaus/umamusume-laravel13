@@ -45,6 +45,7 @@ interface TraineeRow {
     name_ja: string | null;
     release_status_label: string;
     form_count: number;
+    form_count_label: string;
     artworkURL: string | null;
     /** The trainee's own ten letters, or null when the source published none. */
     aptitudes: Record<string, string> | null;
@@ -368,8 +369,12 @@ function choose(trainee: TraineeRow): void {
 }
 
 
-/** The wireframe's pill reads "1 form" / "2 forms", which is the count alone rather than the noun. */
-const formPillLabel = (count: number): string => (count === 1 ? '1 form' : `${count} forms`);
+/**
+ * R7-02 (b3): the pill names the scope, not just the noun. This surface offers only forms with a
+ * Global release date, so `2 forms` read as a total when it was an offer. The sentence is composed
+ * server-side (`FormCount::releasedLabel()`) so the picker and the profile cannot disagree about what
+ * either count means.
+ */
 
 /** The form the card's rarity pill states: the one the draft names, else the first the catalog lists. */
 function headlineForm(row: TraineeRow): FormRow | null {
@@ -739,7 +744,7 @@ const sortLabel = computed(
                                 {{ headlineForm(row)?.rarity_stars }} {{ headlineForm(row)?.rarity_word }}
                             </span>
                             <span data-region="pill-outline" class="pill pill-outline">
-                                {{ formPillLabel(row.form_count) }}
+                                {{ row.form_count_label }}
                             </span>
                             <span data-region="pill-positive" class="pill pill-positive">
                                 {{ row.release_status_label }}

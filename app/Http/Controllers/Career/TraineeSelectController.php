@@ -13,6 +13,7 @@ use App\Models\Umamusume;
 use App\Services\Career\SetupDraft;
 use App\Services\DataPipeline\ArtworkMirror;
 use App\Services\PageSize;
+use App\Support\FormCount;
 use Closure;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
@@ -290,6 +291,9 @@ class TraineeSelectController extends Controller
             'name_ja' => $umamusume->name_ja,
             'release_status_label' => $umamusume->release_status->label(),
             'form_count' => $cards->count(),
+            // R7-02 (b3): the count says what it counts. This surface filters to forms with a Global
+            // release date, so "2 forms" read as a total when it was a scope. See `FormCount::label()`.
+            'form_count_label' => FormCount::label($cards),
             'artworkURL' => $headerCard === null
                 ? null
                 : $mirror->url('card_portrait', (int) $headerCard->card_id),

@@ -10,6 +10,7 @@ use App\Models\Skill;
 use App\Models\Umamusume;
 use App\Services\Career\SetupDraft;
 use App\Services\DataPipeline\ArtworkMirror;
+use App\Support\FormCount;
 use Closure;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
@@ -110,6 +111,9 @@ class TraineeProfileController extends Controller
                     ? null
                     : $mirror->url('card_portrait', (int) $headerCard->card_id),
             ],
+            // R7-02 (b3): this screen lists every confirmed form and says which of them the client
+            // carries, so its count cannot be read as the picker's offer. `FormCount` owns the sentence.
+            'form_count_label' => FormCount::splitLabel($cards),
             'forms' => $cards->map(function (CharacterCard $card) use ($mirror, $resolved): array {
                 $lists = [
                     ['key' => 'skills_unique', 'label' => 'Unique skill', 'ids' => $card->skills_unique ?? []],

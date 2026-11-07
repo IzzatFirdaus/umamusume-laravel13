@@ -98,6 +98,8 @@ const props = defineProps<{
     choices: { label: string; value: string | null; url: string | null }[];
     trainee: Trainee;
     forms: FormEntry[];
+    /** R7-02 (b3): the count with its scope, composed by `FormCount::splitLabel()`. */
+    form_count_label: string;
     selected: number | null;
     /** The costume form the draft already names for this trainee, or null before a pick. */
     selectedCardId: number | null;
@@ -391,6 +393,11 @@ function remainingLetters(group: AptitudeGroup): string {
 
                 <section class="card" aria-labelledby="forms">
                     <h2 id="forms">Costume forms</h2>
+
+                    <!-- R7-02 (b3): the count names what it counts. This screen lists every confirmed
+                         form and marks the ones with no Global release date, which is why its number is
+                         larger than the picker's offer. -->
+                    <p v-if="props.forms.length > 0" class="mt-1 text-sm text-ink-muted">{{ props.form_count_label }}</p>
 
                     <p v-if="props.forms.length === 0" class="mt-2 rounded-md border border-dashed border-rule bg-raised p-3 text-sm text-ink-muted">
                         No confirmed costume form. Her unique and starting skills come from a form, so nothing
