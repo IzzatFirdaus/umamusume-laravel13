@@ -266,3 +266,29 @@ it('derives every undo label and prefill from the one helper and keeps no local 
             ->and($source, $surface)->not->toContain('Math.max(1, (props.write.turns');
     }
 });
+
+it('shows a recorded race that carries no turn link (R7-83)', function (): void {
+    // The Timeline is the auditable record behind the Result screen, and the Races screen's manual form
+    // allows a race with no turn link (`CareerRaceDecisionTest` pins that: "leaves the turn link null on
+    // a manual race the Trainer does not tie to a turn"). The row set was built by walking the turns and
+    // pulling each turn's races, so a race with no turn could never appear — the snapshot walk recorded
+    // four races and then read `RACES ENTERED 0` here (snapshot-door §7.7 item 6).
+    $run = timelineRun(turns: 2);
+
+    RaceEntry::factory()->create([
+        'training_run_id' => $run->id,
+        'turn_entry_id' => null,
+        'status' => 'Completed',
+        'placement' => 1,
+    ]);
+
+    /** @var list<array<string, mixed>> $entries */
+    $entries = test()->get(route('runs.timeline', $run))->assertOk()->inertiaProps('entries');
+
+    $raceRows = array_values(array_filter($entries, static fn (array $e): bool => $e['kind'] === 'race'));
+
+    expect($raceRows)->toHaveCount(1)
+        // A race with no turn still has to sort somewhere; it lands after the last turn rather than
+        // claiming turn 0, which would read as a position the run never held.
+        ->and((int) $raceRows[0]['turn'])->toBeGreaterThanOrEqual(1);
+});

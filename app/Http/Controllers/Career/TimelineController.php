@@ -180,12 +180,23 @@ class TimelineController extends Controller
             $entries[] = $this->turnRow($run, $turn, $previous);
 
             foreach ($run->raceEntries->where('turn_entry_id', $turn->id) as $race) {
-                $entries[] = $this->raceRow($run, $turn, $race);
+                $entries[] = $this->raceRow($run, $turn->turn, $race);
             }
 
             foreach ($run->turnEvents->where('turn', $turn->turn) as $event) {
                 $entries[] = $this->eventRow($run, $turn, $event);
             }
+        }
+
+        // R7-83: a race the Trainer recorded without tying it to a turn still belongs to the auditable
+        // record. The loop above walks turns and pulls each turn's races, so a race with no
+        // `turn_entry_id` could never appear — the Races screen's manual form allows exactly that link
+        // to be left null. These land after the last turn, at the run's own latest position, rather than
+        // claiming a turn the run never held.
+        $latestTurn = $turns->isEmpty() ? 1 : (int) $turns->last()->turn;
+
+        foreach ($run->raceEntries->whereNull('turn_entry_id') as $race) {
+            $entries[] = $this->raceRow($run, $latestTurn, $race);
         }
 
         // The HFW's Position column: the calendar's own label for the row's turn, read back through
@@ -260,7 +271,7 @@ class TimelineController extends Controller
     /**
      * @return array<string, mixed>
      */
-    private function raceRow(TrainingRun $run, TurnEntry $turn, RaceEntry $race): array
+    private function raceRow(TrainingRun $run, int $turnNumber, RaceEntry $race): array
     {
         $title = $race->raceCatalogSlot->title ?? $race->scenarioSlot->title ?? 'a race with no calendar row';
 
@@ -269,7 +280,7 @@ class TimelineController extends Controller
             'kind' => 'race',
             'kind_label' => 'Race',
             'glyph' => '●',
-            'turn' => $turn->turn,
+            'turn' => $turnNumber,
             'action_label' => $race->tierKey() !== null ? "Race: {$title} ({$race->tierKey()})" : "Race: {$title}",
             'before' => null,
             'actual' => null,
