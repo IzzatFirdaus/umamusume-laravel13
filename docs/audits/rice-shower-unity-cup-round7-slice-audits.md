@@ -62,7 +62,8 @@ $ git status --short
 | S5 | R7-05 | `da61a04f` | **landed** — `#s5--r7-05` |
 | S1 | R7-20 | — | **HELD** — pre-existing red in `career-training-detail.spec.ts`, see `#stop--pre-existing-red-training-detail` |
 | S2 | R7-26 | `4efa0876` | **landed** — `#s2--r7-26` |
-| S6 | R7-19, R7-66 | — | **HELD** — implementation proven, two pre-existing reds block the gates, see `#stop--pre-existing-red-denominator-caption` |
+| S0 | — (housekeeping) | `58bb98a7` | **landed** — `#s0--housekeeping` |
+| S6 | R7-19, R7-66 | `c6ac05e7` | **landed** — `#s6--r7-19-r7-66` |
 
 ---
 
@@ -561,3 +562,181 @@ ships. **Neither is S6's work.** A ruling that they are housekeeping opens a sma
 stays uncommitted in the working tree and S6 is held.
 
 **Nothing is committed from S6.** `git status --short` shows the two Vue files and the spec modified.
+
+---
+
+## §s0 — S0 housekeeping: three pre-existing test reds cleared
+
+### 1. Slice, rows, register reference
+**S0.** No `R7-NN` row — a housekeeping slice that unblocks S1, S6, S13 and S14. No register §4 status moves.
+
+### 2. Pre-flight
+```
+$ git status --short -- tests/browser/career-training-detail.spec.ts tests/browser/career-cockpit.spec.ts tests/Feature/StatDenominatorConsistencyTest.php
+(empty — CLEAN)
+```
+
+### 3. RED — the reds already existed
+
+**No new assertion was written. The three reds were pre-existing and measured at `c6193993`.**
+
+**(a) `career-training-detail.spec.ts`** — every case failed inside the shared helper:
+
+```
+Error: locator.fill: Test timeout of 180000ms exceeded.
+  waiting for locator('input[name="speed"]')
+  338 × waiting for element to be visible, enabled and editable — element is not visible
+```
+
+Cause: `TrainingDetail.vue:740` ships `<details ... open>`; the helper clicked the summary, **closing** it.
+Live probe: `{"before": true, "after": false, "speedVisible": true}`.
+
+**(b) `career-cockpit.spec.ts`** — six cases, four distinct stale targets:
+
+| Case | Stale target | What the tree renders instead |
+| --- | --- | --- |
+| reads one turn number | `[data-field="turn"]` | the lede paragraph carries `Turn N of 72` |
+| names the run state | `[data-run-state]` | no such attribute at all |
+| keeps every section landmark | `[aria-labelledby="career-closed-heading"]` | `#cockpit-summary-heading`, "This run is complete." |
+| renders the summary strip | `role="region"` "Run summary" | `StatSummary` is not imported (`Cockpit.vue:41-47`) |
+| keeps one primary | same region | same |
+| names the fan ladder | region "Stats and state" | an `<h2>` inside a `<section>`, and the ladder was removed by HFW override |
+
+**(c) `StatDenominatorConsistencyTest:103`** — asserted
+`No build target was set for this run, so bars are drawn against the scenario ceiling.`; the panel has shipped
+`… against this run's ceilings:` since round 6's S2.3.
+
+### 4. GREEN
+- **training spec** — the helper opens the disclosure only when closed; every case that clicked it inline does the same. The `closed by default` case became `open by default`, citing walk 5's E2-01 and round 5's S7.
+- **cockpit spec** — six cases re-pointed at measured DOM; two whose whole subject was retired (`StatSummary`, the fan-ladder suffix) were **rewritten as retirement assertions** rather than re-pointed, so a future re-add fails loudly.
+- **caption test** — asserts the sentence the panel ships.
+
+```
+$ npx playwright test career-training-detail.spec.ts   → 8 passed
+$ npx playwright test career-cockpit.spec.ts           → 30 passed
+$ vendor/bin/pest StatDenominatorConsistencyTest.php CareerCockpitTest.php → 51 passed (579 assertions)
+```
+
+### 5. Non-vacuity
+All three files reverted together, then each red re-run:
+
+```
+$ git checkout -- <the three test files>
+$ vendor/bin/pest StatDenominatorConsistencyTest.php   → 1 failed
+$ npx playwright test -g "closed by default"           → 1 failed
+$ npx playwright test -g "reads one turn number"       → 1 failed
+$ npx playwright test -g "renders the summary strip"   → 1 failed
+$ git apply <the three patches, re-applied in sequence>
+$ git diff --stat → 104 insertions, 57 deletions across the three files
+```
+
+The source was correct throughout; only the tests moved.
+
+### 6. Regression
+```
+$ vendor/bin/pest StatDenominatorConsistencyTest.php CareerCockpitTest.php   → 51 passed (579 assertions)
+$ npx playwright test career-training-detail.spec.ts                        → 8 passed
+$ npx playwright test career-cockpit.spec.ts                                → 30 passed
+```
+
+### 7. Gates
+| Gate | Result |
+| --- | --- |
+| Focused tests | three files, all green |
+| Typecheck | `npm run typecheck` clean |
+| Build | `npm run build` ✓ |
+| Pint | `{"tool":"pint","result":"passed"}` |
+| PHPStan (full) | `[OK] No errors` |
+| Lore docs / code | **556 / 75 exempt**, delta 0 |
+| Fence | **0 invalid** |
+
+### 8. Lore delta
+`Lore docs: 556 (was 556); code: 556 (was 556)`. **Delta 0.**
+
+### 9. Commit
+`58bb98a7` — `test(browser): clear three pre-existing test reds blocking S1, S6, S13, S14 (S0)`
+
+### 10. What S0 did not close
+- **Nothing about the product.** All three reds were test staleness; no application file changed.
+- **`R7-73`** (`Known limitation`) — the fan-ladder absence S0's rewrite now asserts deliberately is still the
+  register's row, unchanged.
+- **S6's patch** was held through S0 and re-verified after it (see `#s6`).
+
+---
+
+## §s6 — S6: the stat denominator is named by the figure it prints
+
+### 1. Slice, rows, register reference
+**S6.** Rows `R7-19` and `R7-66`, both `Confirmed defect`, register §4.1 and §4.3.
+
+### 2. Pre-flight
+```
+$ git status --short -- app/Http/Controllers/Career/CockpitController.php resources/js/pages/Career/Cockpit.vue resources/js/components/career/CareerStatePanel.vue tests/Feature/CareerCockpitTest.php tests/browser/career-cockpit.spec.ts
+(empty — CLEAN)
+
+$ vendor/bin/pest tests/Feature/ScenarioMetadataTest.php → 3 passed (52 assertions)
+```
+
+### 3. RED
+New case `names the stat denominator by the figure it prints, floor or cap (R7-19, R7-66)`:
+
+```
+Error: expect(locator).toBeVisible() failed
+  locator('[data-region="stats"]').locator('text=floor').first() — element(s) not found
+```
+
+Measured before the fix: all five stat rows print `cap`, and `db read` on run #3 gives
+`{"caps":[null,null,null,null],"scenario":"unity_cup"}` — four null columns under a `cap` label.
+
+### 4. GREEN
+- `CareerStatePanel.vue` — `denominatorLabel` widened to `'target' | 'cap' | 'floor' | 'in-force'`; `barCaption` fires for `cap` and `in-force`; `denominator()` reads `stat.cap` for all three cap-ish labels.
+- `Cockpit.vue` — the literal `denominator-label="cap"` became `:denominator-label="denominatorLabel"`, a computed returning `cap` where any `caps.entered` is non-null and `floor` otherwise.
+- `StatDenominatorConsistencyTest` — the case pinning the literal moved to pin the binding and the three words.
+
+**The RED's first selector was wrong** (`[data-region="stats"]` does not exist). Measured the real DOM and scoped
+to `li.srow`; the row count and the `floor` word both then matched.
+
+### 5. Non-vacuity
+```
+$ git diff <the two Vue files> > S6.patch    # 76 lines
+$ git checkout -- <the two Vue files> ; npm run build
+$ npx playwright test -g "stat denominator"
+  Error: expect(locator).toBeVisible() failed — element(s) not found
+$ git apply S6.patch ; git diff | diff - S6.patch → DIFF MATCHES
+$ npx playwright test -g "stat denominator" → 1 passed
+```
+
+### 6. Regression
+```
+$ npx playwright test career-cockpit.spec.ts                          → 30 passed
+$ vendor/bin/pest CareerCockpitTest StatDenominatorConsistencyTest CockpitRunIdentityTest → 58 passed (665 assertions)
+```
+
+### 7. Gates
+| Gate | Result |
+| --- | --- |
+| Focused browser | `-g "stat denominator"` → **1 passed** |
+| Full cockpit spec | **30 passed** |
+| Feature regression | **58 passed (665 assertions)** |
+| Typecheck | clean |
+| Build | ✓ |
+| Pint | passed |
+| PHPStan | `[OK] No errors` (full run) |
+| Lore | 556 / 75, delta 0 |
+| Fence | 0 invalid |
+
+### 8. Lore delta
+`Lore docs: 556 (was 556); code: 556 (was 556)`. **Delta 0.**
+
+### 9. Commit
+`c6ac05e7` — `fix(cockpit): name the stat denominator by the figure it prints, floor or cap (R7-19, R7-66)`
+
+```
+resources/js/pages/Career/Cockpit.vue
+resources/js/components/career/CareerStatePanel.vue
+```
+
+### 10. What this slice did not close
+- **`R7-66`'s storage half.** No surface records an in-force ceiling, so `in-force` is reachable only for a run whose
+  `cap_*` columns carry values. The label is honest; a recording surface is not this slice.
+- **`R7-73` / `R7-23`** — the fan-ladder and class-badge displays stay removed under R6-43's override.
