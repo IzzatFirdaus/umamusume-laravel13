@@ -199,6 +199,31 @@ class SnapshotController extends Controller
 
         $rows = [];
 
+        // R7-99: the two identity fields the snapshot is *about* lead the read-back. Both are
+        // `required` in `StoreSnapshotRequest::fieldRules()`, and `payload` already carries them, so the
+        // write was always correct — the review simply never rendered what it was going to write about.
+        // The screen's own copy is "This is exactly what will be written. Read it back", and a Trainer
+        // could not confirm the trainee or the scenario from it.
+        $identity = [
+            ['key' => 'umamusume_id', 'label' => 'Trainee', 'value' => $this->traineeName($data)],
+            ['key' => 'scenario', 'label' => 'Scenario', 'value' => $this->scenarioLabel($data)],
+        ];
+
+        foreach ($identity as $row) {
+            $known = is_string($row['value']) && $row['value'] !== '';
+
+            $rows[] = [
+                'key' => $row['key'],
+                'label' => $row['label'],
+                'state' => $known ? SnapshotFieldState::Known->value : SnapshotFieldState::NotProvided->value,
+                'state_label' => $known ? SnapshotFieldState::Known->label() : SnapshotFieldState::NotProvided->label(),
+                'value' => null,
+                'display' => $known
+                    ? "Known · {$row['label']} {$row['value']}"
+                    : "Not provided · {$row['label']}",
+            ];
+        }
+
         foreach (StoreSnapshotRequest::STATE_FIELDS as $field) {
             $label = self::FIELD_LABELS[$field];
 
@@ -225,5 +250,39 @@ class SnapshotController extends Controller
         }
 
         return $rows;
+    }
+
+    /**
+     * The trainee's display name for the read-back, or null when the payload names none.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function traineeName(array $data): ?string
+    {
+        $id = $data['umamusume_id'] ?? null;
+
+        if (! is_int($id) && ! (is_string($id) && ctype_digit($id))) {
+            return null;
+        }
+
+        return Umamusume::query()->find((int) $id)?->name;
+    }
+
+    /**
+     * The scenario's configured label, never the stored slug.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function scenarioLabel(array $data): ?string
+    {
+        $key = $data['scenario'] ?? null;
+
+        if (! is_string($key) || $key === '') {
+            return null;
+        }
+
+        $label = config('scenarios.scenarios.'.$key.'.label');
+
+        return is_string($label) ? $label : null;
     }
 }

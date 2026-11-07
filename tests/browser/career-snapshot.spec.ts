@@ -191,6 +191,23 @@ test.describe('Snapshot review', () => {
         await expect(page.getByText(/Position: Senior Year . Early October/)).toBeVisible();
     });
 
+    test('reads back the trainee and the scenario it will write (R7-99)', async ({ page }) => {
+        // The screen's own copy promises "This is exactly what will be written. Read it back", and both
+        // identity fields are required by the write. Before R7-99 the read-back showed only the eight
+        // state fields, so the two things the snapshot is *about* were the two things a Trainer could
+        // not confirm. (Snapshot walk §7.3 S04.)
+        await fillSetupAndReview(page);
+
+        // `Known · Trainee <name>` and `Known · Scenario <label>` lead the list: the identity is what
+        // the write is about, so it reads first. The names come from the setup form's own selections.
+        await expect(page.getByText(/Known · Trainee /).first()).toBeVisible();
+        await expect(page.getByText(/Known · Scenario /).first()).toBeVisible();
+
+        // And they are real values, not the absence sentence.
+        await expect(page.getByText('Not provided · Trainee')).toHaveCount(0);
+        await expect(page.getByText('Not provided · Scenario')).toHaveCount(0);
+    });
+
     test('reads the three states back apart and offers one commit', async ({ page }) => {
         await fillSetupAndReview(page);
 
@@ -259,7 +276,9 @@ test.describe('Snapshot review, bare visit', () => {
 
         await expect(page.getByRole('heading', { name: 'Review snapshot', level: 1 })).toBeVisible();
         await expect(page.getByRole('navigation', { name: 'Snapshot steps' })).toBeVisible();
-        await expect(page.locator('[data-state="not_provided"]')).toHaveCount(8);
+        // R7-99: ten rows, not eight — the two identity rows lead the read-back and a bare visit
+        // reports them as not provided like every other field.
+        await expect(page.locator('[data-state="not_provided"]')).toHaveCount(10);
         await expect(page.getByRole('status').filter({ hasText: 'No snapshot has been entered yet' })).toBeVisible();
         await expect(page.getByRole('button', { name: 'Record snapshot' })).toBeDisabled();
     });

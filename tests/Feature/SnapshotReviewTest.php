@@ -49,11 +49,13 @@ it('renders the three confidence states as three distinct labels', function (): 
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Career/Snapshot/Review')
-            ->where('fields.0.display', 'Known · Speed 607')
-            ->where('fields.3.display', 'Unknown · Guts')
-            ->where('fields.5.display', 'Not provided · Energy')
-            ->where('fields.3.state', 'unknown')
-            ->where('fields.5.state', 'not_provided'));
+            // R7-99 prepended the two identity rows (trainee, scenario), so the state rows now start
+            // at index 2 rather than 0.
+            ->where('fields.2.display', 'Known · Speed 607')
+            ->where('fields.5.display', 'Unknown · Guts')
+            ->where('fields.7.display', 'Not provided · Energy')
+            ->where('fields.5.state', 'unknown')
+            ->where('fields.7.state', 'not_provided'));
 });
 
 it('keeps Unknown and Not provided apart rather than rendering both as one absence', function (): void {
@@ -148,9 +150,9 @@ it('opens on a bare visit with every field not provided instead of bouncing to t
             ->component('Career/Snapshot/Review')
             ->where('has_draft', false)
             ->where('position_label', null)
-            ->has('fields', 8)
-            ->where('fields.0.display', 'Not provided · Speed')
-            ->where('fields.7.display', 'Not provided · Skill Points')
+            ->has('fields', 10)
+            ->where('fields.2.display', 'Not provided · Speed')
+            ->where('fields.9.display', 'Not provided · Skill Points')
             ->where('entry', route('career.snapshot')));
 });
 
@@ -161,7 +163,7 @@ it('reads back the session draft after the setup form opened the review once', f
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('has_draft', true)
-            ->where('fields.0.display', 'Known · Speed 607'));
+            ->where('fields.2.display', 'Known · Speed 607'));
 });
 
 it('reads the submitted body and refuses to read a payload carried in the query string', function (): void {
@@ -179,4 +181,24 @@ it('reads the submitted body and refuses to read a payload carried in the query 
         ->assertInertia(fn (Assert $page) => $page
             ->where('has_draft', true)
             ->where('payload.notes', 'read from the body only'));
+});
+
+it('reads back the trainee and the scenario it will write (R7-99)', function (): void {
+    // The review's own copy claims "This is exactly what will be written. Read it back." Both identity
+    // fields are `required` in `StoreSnapshotRequest::fieldRules()`, and the payload carries them — but
+    // `reviewFields()` walked only `STATE_FIELDS`, so neither appeared in the read-back. A Trainer could
+    // not confirm the two things the snapshot is *about*. (Round 7 R7-99; snapshot walk §7.3 S04.)
+    $trainee = Umamusume::factory()->create(['name' => 'Rice Shower', 'name_ja' => 'ライスシャワー']);
+
+    $this->post(route('career.snapshot.review.submit'), reviewPayload(['umamusume_id' => $trainee->id]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/Snapshot/Review')
+            // The two identity rows come first: they are what the write is about, and the read-back's
+            // contract is that the top of the list is the thing being confirmed.
+            ->where('fields.0.key', 'umamusume_id')
+            ->where('fields.0.display', 'Known · Trainee Rice Shower')
+            ->where('fields.1.key', 'scenario')
+            // Config's label, never the stored slug.
+            ->where('fields.1.display', 'Known · Scenario '.config('scenarios.scenarios.unity_cup.label')));
 });
