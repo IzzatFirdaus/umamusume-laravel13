@@ -50,6 +50,7 @@ const glyphs: Record<string, string> = {
     current: '◉',
     upcoming: '○',
     missed: '×',
+    not_reached: '–',
 };
 
 const words: Record<string, string> = {
@@ -57,6 +58,7 @@ const words: Record<string, string> = {
     current: 'Due now',
     upcoming: 'Upcoming',
     missed: 'Missed',
+    not_reached: 'Not reached',
 };
 
 const headingId = (group: string): string =>

@@ -261,3 +261,19 @@ it('leaves the group out entirely for a trainee whose ladder was never fetched',
         ->and($objectives->first()['rows'])->toBe([])
         ->and($objectives->first()['summary'])->toBeNull();
 });
+
+it('reads a past objective the run never played as not reached, not as missed', function (): void {
+    $run = goalsRun();
+    // Two objectives whose deadlines are behind the run's position: the debut at Junior turn 12, and a
+    // Senior-year goal at turn 54. Neither has a race entry, because this run was imported mid-career and
+    // never played the turns in between. The panel must not read that absence as a failure.
+    goalFor($run, ['career_year' => 1, 'turn' => 12, 'source_order' => 1, 'goal_type' => TraineeGoalType::Participate, 'required_placement' => 0]);
+    goalFor($run, ['career_year' => 3, 'turn' => 54, 'source_order' => 5, 'required_placement' => 3]);
+
+    $states = array_column(goalsGroup($run)['rows'], 'state');
+
+    // `missed` claims the run went and failed. Nothing in this tree records that it went at all, so the
+    // honest reading is that the deadline passed with no record — its own state, not a verdict.
+    expect($states[0])->toBe('not_reached')
+        ->and($states)->not->toContain('missed');
+});

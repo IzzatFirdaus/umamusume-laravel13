@@ -111,7 +111,10 @@ final class TeamPanelBuilder
                 $next === null => 'upcoming',
                 $turn !== null && $turn === $next['turn'] && (int) $slot->year === (int) $next['year'] => 'current',
                 $turn === null => $reached ? 'current' : 'upcoming',
-                $reached => 'missed',
+                // `$recorded` returned already, so a `missed` here would assert the run entered this
+                // race and failed it while holding no entry at all. A deadline behind the position with
+                // no record is a gap in the record, not a verdict on an attempt.
+                $reached => 'not_reached',
                 default => 'upcoming',
             };
 
@@ -258,7 +261,11 @@ final class TeamPanelBuilder
                 $next === null => 'upcoming',
                 $goal->turnWithinYear() === (int) $next['turn']
                     && $goal->career_year === (int) $next['year'] => 'current',
-                $reached => 'missed',
+                // A deadline behind the run's position with no record that the run played it is not a
+                // failure. `missed` claims the run went and did not meet the requirement; a run imported
+                // mid-career never went. The distinction is whether anything at all was logged against
+                // the goal's race, so the state is read from the record, not from the calendar alone.
+                $reached => $this->objectiveHasRecord($goal, $run) ? 'missed' : 'not_reached',
                 default => 'upcoming',
             };
 
@@ -313,6 +320,21 @@ final class TeamPanelBuilder
             'summary' => $obligations > 0 ? 'Goals Achieved '.$cleared.' of '.$obligations : null,
             'empty_note' => null,
         ];
+    }
+
+    /**
+     * Whether this run holds any record of the race an objective names.
+     *
+     * `missed` is a verdict on an attempt, so it needs an attempt to judge. A run imported mid-career
+     * carries no entry for the turns before its position, and reading that silence as a failure claims
+     * the Trainer played a turn this run never saw (round 7 `R7-82`, `R7-22`, `R7-25`).
+     */
+    private function objectiveHasRecord(TraineeGoal $goal, TrainingRun $run): bool
+    {
+        $slot = $goal->raceCatalogSlot;
+
+        return $slot !== null
+            && $run->raceEntries->contains('race_catalog_slot_id', $slot->id);
     }
 
     /**

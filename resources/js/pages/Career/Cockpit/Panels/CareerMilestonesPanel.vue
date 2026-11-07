@@ -43,6 +43,7 @@ const stateGlyphs: Record<string, string> = {
     current: '◉',
     upcoming: '○',
     missed: '×',
+    not_reached: '–',
 };
 
 const stateWords: Record<string, string> = {
@@ -50,6 +51,7 @@ const stateWords: Record<string, string> = {
     current: 'Due now',
     upcoming: 'Upcoming',
     missed: 'Missed',
+    not_reached: 'Not reached',
 };
 
 const glyph = (state: string): string => stateGlyphs[state] ?? '○';
