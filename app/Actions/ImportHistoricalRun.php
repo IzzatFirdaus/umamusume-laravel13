@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Enums\EnergyState;
 use App\Models\TrainingRun;
 use Illuminate\Support\Facades\DB;
 
@@ -55,6 +56,7 @@ final class ImportHistoricalRun
                     'sp' => $turn['sp'] === null ? null : (int) $turn['sp'],
                     'condition' => $turn['condition'],
                     'energy' => $turn['energy'] === null ? null : (int) $turn['energy'],
+                    'energy_state' => $turn['energy'] === null ? EnergyState::Unknown->value : EnergyState::Exact->value,
                     'mood' => $turn['mood'],
                     'fans' => $turn['fans'] === null ? null : (int) $turn['fans'],
                 ]);

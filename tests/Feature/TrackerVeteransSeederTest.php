@@ -56,11 +56,11 @@ beforeEach(function (): void {
     }
 });
 
-it('files the seven career-end tracker runs in the Veteran library', function (): void {
+it('files the eight career-end tracker runs in the Veteran library', function (): void {
     $this->seed(TrackerVeteransSeeder::class);
 
-    expect(Veteran::count())->toBe(7)
-        ->and(TrainingRun::count())->toBe(7)
+    expect(Veteran::count())->toBe(8)
+        ->and(TrainingRun::count())->toBe(8)
         ->and(TrainingRun::query()->where('status', '!=', RunStatus::Completed->value)->count())->toBe(0);
 
     $veteranRunIds = Veteran::pluck('training_run_id')->all();
@@ -77,7 +77,7 @@ it('leaves the in-progress and race-plan-only snapshots out of both buckets', fu
 
     $labels = TrainingRun::pluck('import_source')->all();
 
-    foreach ([1, 2, 5, 6, 7, 8, 9, 11, 13, 17] as $skipped) {
+    foreach ([1, 2, 5, 6, 7, 8, 9, 11, 17] as $skipped) {
         expect($labels)->not->toContain('docs/Umamusume_Progress_Tracker_Runs.md (Run '.$skipped.')');
     }
 });
@@ -89,16 +89,16 @@ it('stores the Mayano Top Gun career end from the tracker line', function (): vo
     $turn = $run->turnEntries()->sole();
 
     expect($run->status)->toBe(RunStatus::Completed)
-        ->and($run->umamusume_id)->toBe(24)
-        ->and($run->character_card_id)->toBe(29)
-        ->and($turn->turn)->toBe(48)
+        ->and($run->umamusume_id)->toBe(22)
+        ->and($run->character_card_id)->toBe(23)
+        ->and($turn->turn)->toBe(72)
         ->and($turn->speed)->toBe(296)
         ->and($turn->stamina)->toBe(391)
         ->and($turn->power)->toBe(271)
         ->and($turn->guts)->toBe(243)
         ->and($turn->wit)->toBe(191)
         ->and($turn->sp)->toBe(83)
-        ->and($turn->energy)->toBe(5)
+        ->and($turn->energy)->toBe(50)
         ->and($turn->mood)->toBe(MoodTier::Great)
         ->and($turn->condition)->toBeNull();
 
@@ -182,12 +182,12 @@ it('is idempotent: re-running the seeder adds and changes nothing', function ():
         'veteran_rows' => Veteran::orderBy('id')->get(['training_run_id', 'notes'])->toJson(),
     ];
 
-    expect($before['runs'])->toBe(7)->and($before['veterans'])->toBe(7);
+    expect($before['runs'])->toBe(8)->and($before['veterans'])->toBe(8);
 
     $this->seed(TrackerVeteransSeeder::class);
 
-    expect(TrainingRun::count())->toBe(7)
-        ->and(Veteran::count())->toBe(7)
+    expect(TrainingRun::count())->toBe(8)
+        ->and(Veteran::count())->toBe(8)
         ->and(TurnEntry::count())->toBe($before['turns'])
         ->and(RaceEntry::count())->toBe($before['races'])
         ->and(RunSkill::count())->toBe($before['run_skills'])
