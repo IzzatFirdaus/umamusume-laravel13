@@ -850,3 +850,4 @@ renumbered.*
 | R7 | Slice | Commit | Status | Audit | RED / GREEN |
 | --- | --- | --- | --- | --- | --- |
 | R7-82, R7-22, R7-25, R7-61 | S3 | `27a3d374` | `Confirmed defect` → `Confirmed fixed` | `#s3--r7-82-r7-22-r7-25-r7-61` | RED: past goal returned `'missed'`; GREEN: `'not_reached'` |
+| R7-05 | S5 | `da61a04f` | `Confirmed defect` → `Confirmed fixed` | `#s5--r7-05` | RED: empty form printed floor sum under an "entered" label; GREEN: `No ceilings entered` |

@@ -59,6 +59,7 @@ $ git status --short
 | Slice | Rows | Commit | Result |
 | --- | --- | --- | --- |
 | S3 | R7-82, R7-22, R7-25, R7-61 | `27a3d374` | **landed** — `#s3--r7-82-r7-22-r7-25-r7-61` |
+| S5 | R7-05 | `da61a04f` | **landed** — `#s5--r7-05` |
 
 ---
 
@@ -197,3 +198,112 @@ tests/Feature/TraineeGoalsPanelTest.php
 - **`R7-61`** (phase copy calling `Junior Make Debut` "the one dated obligation") — a copy consequence outside this
   file; untouched.
 - **Browser coverage** of the four renderer maps. No spec asserts them; UNMEASURED above.
+
+---
+
+## §s5 — S5: the entered-ceilings total sums what was entered
+
+### 1. Slice, rows, register reference
+**S5.** Row `R7-05`, `Confirmed defect`, register §4.1. The label moved in R6-04's S2.3 (`e55f5458`); the figure under
+it did not (register C7).
+
+### 2. Pre-flight
+```
+$ git status --short -- resources/js/pages/Career/BuildTarget.vue tests/Feature/CareerBuildTargetTest.php tests/browser/career-build-target.spec.ts
+(empty — CLEAN)
+
+$ vendor/bin/pest tests/Feature/ScenarioMetadataTest.php
+  Tests:    3 passed (52 assertions)
+```
+
+### 3. RED
+`tests/browser/career-build-target.spec.ts:129-136`, added to the existing R6-04 case:
+
+```ts
+const totalRow = page.locator('[data-field="total-cap"]');
+await expect(totalRow).toContainText(/No ceilings entered/i);
+await expect(totalRow).not.toContainText('7000');
+```
+
+First run failed at `:127` — the **label** assertion, because `public/build` was stale and Vite had not rebuilt the
+`.vue`. After `npm run build`, the case reached the R7-05 assertions:
+
+```
+Error: expect(locator).toContainText(expected) failed
+Expected pattern: /No ceilings entered/i
+Received string:  "Sum of the entered ceilings6000"
+  at tests/browser/career-build-target.spec.ts:134
+```
+
+**`6000` is the four published floors (Speed 1200 + Stamina 1200 + Power 1200 + Guts 1200) printed under a label that
+says "entered".** The walk recorded `7000` on a five-stat sum; the arithmetic differs because `capStats` carries four
+entries, not five. Same defect, and the measured figure is recorded here rather than the walk's.
+
+### 4. GREEN
+`resources/js/pages/Career/BuildTarget.vue`:
+- `totalCap` replaced by `totalEnteredCap`, which maps `props.capStats` through `props.enteredCaps[capColumn(stat)]`
+  and returns `null` when every entry is empty
+- the row gains `data-field="total-cap"`, prints `No ceilings entered` on `null`, and the label reads
+  `Sum of the entered ceilings` (was `Sum of the five entered ceilings` — five was wrong, only four are enterable)
+
+```
+$ npx playwright test tests/browser/career-build-target.spec.ts --reporter=line
+  10 passed (27.7s)
+```
+
+### 5. Non-vacuity
+Two proofs, because the revert path alone only exercised the label:
+
+**(a) whole-file revert** — `git diff BuildTarget.vue > S5.patch` (55 lines), `git checkout --`, rebuild, re-run:
+failed again at `:127` on the label. Re-applied; `git diff | diff - S5.patch` → `DIFF MATCHES PRE-REVERT`.
+
+**(b) computed-only revert** — the defective `totalCap` restored with the new markup kept, so the R7-05 assertion is
+reachable in isolation:
+```
+Expected pattern: /No ceilings entered/i
+Received string:  "Sum of the entered ceilings6000"
+  at tests/browser/career-build-target.spec.ts:134
+```
+Restored from `.bak`; `git diff | diff - S5.patch` → `DIFF MATCHES`; rebuild; full spec `10 passed (22.9s)`.
+
+Proof (b) is the one that binds: it shows the figure assertion, not the label assertion, is what the computation
+fixes.
+
+### 6. Regression
+```
+$ vendor/bin/pest tests/Feature/CareerBuildTargetTest.php tests/Feature/CareerPreflightTest.php tests/Feature/CareerCockpitTest.php
+  Tests:    84 passed (990 assertions)
+```
+
+### 7. Gates
+| Gate | Result |
+| --- | --- |
+| Focused browser | `career-build-target.spec.ts` → **10 passed** |
+| Regression | three Feature suites → **84 passed (990 assertions)** |
+| Typecheck | `npm run typecheck` → **clean** |
+| Build | `npm run build` → **✓ built in 13.79s** |
+| Pint | `{"tool":"pint","result":"passed"}` |
+| PHPStan | not run — no PHP file changed (**UNMEASURED**, stated) |
+| Lore docs / code | **556 / 75 exempt**, both |
+| Fence | **0 invalid** |
+
+**Environment note:** `npm run build` was required before the browser case could see the change, and was re-run three
+times during non-vacuity. `public/build` is gitignored (`git check-ignore` confirms), so no build output is committed.
+
+### 8. Lore delta
+`Lore docs: 556 (was 556); code: 556 (was 556)`. **Delta 0.**
+
+### 9. Commit
+`da61a04f` — `fix(career): the entered-ceilings total sums what was entered, not the scenario floor (R7-05)`
+
+```
+resources/js/pages/Career/BuildTarget.vue
+tests/browser/career-build-target.spec.ts
+```
+
+### 10. What this slice did not close
+- **`R7-48`** (`E-10`, only four of five stats have a ceiling input) — `Known limitation`, unchanged. This slice makes
+  the total honest about the four; it does not add a fifth.
+- **`R7-49`** (`E-11`, `TOTAL AGAINST THE PUBLISHED SAMPLE` prints `N/A` both sides) — untouched.
+- **The walk's `7000` vs the measured `6000`.** Recorded in §3; the walk's figure was not reproducible because
+  `capStats` carries four entries. The register's row is not edited.
