@@ -835,3 +835,17 @@ The plan's provisional expectation was "~50–55 confirmed defect, ~18–20 know
 22 against an expected 18–20, and `Unrepresented source data` measures 10 against an expected 12–15. `Confirmed
 fixed` is **zero as rows** because the eight fixed findings are evidence in §4.5 rather than rows of their own —
 exactly as the plan's §3 specifies; the shortfall there is structural, not a gap.
+
+---
+
+## §12 Slice landing record
+
+**Append-only.** One row per landed slice. §4's status cells stay at `8a3cf21c`; this section records what landed after
+the register's own read. It is the only part of this register a slice writes.
+
+*Numbering note: the implementation dispatch calls this section "§14". This register ends at §11 — there is no §12 or
+§13 — so the landing record is §12 here and the dispatch's number is not reproduced. Recorded rather than silently
+renumbered.*
+
+| R7 | Slice | Commit | Status | Audit | RED / GREEN |
+| --- | --- | --- | --- | --- | --- |
