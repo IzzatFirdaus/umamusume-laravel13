@@ -216,3 +216,22 @@ test('renders the undo disabled, matching what it says about itself (R7-21)', as
     // placeholder number and must not become one.
     await expect(undo).toHaveAccessibleName(/Undo turn \d+/);
 });
+
+test('renders the seven preview readings labelled without a click (R7-57)', async ({ page }) => {
+    // The seven inputs carry real `<label>` wrappers in source, so a source read says they are labelled.
+    // They sat inside a `<details>` that was closed by default, and a closed `<details>` renders none of
+    // its contents: the walk read seven bare number boxes. Round 5 answered the identical shape for
+    // `Client totals this turn` by opening the group (`TrainingDetail.vue:740`); this is the same fix for
+    // the same reason, and it is what R7-57's "unlabelled" finding measured.
+    await openTrainingDetail(page);
+
+    // Scoped to the group by id prefix: `Speed` alone also matches the turn's own stat input, so an
+    // unscoped label lookup would pass on the wrong field.
+    await expect(page.locator('#turn-failure_rate')).toBeVisible();
+    await expect(page.locator('#turn-preview_gains-speed')).toBeVisible();
+    await expect(page.locator('#turn-preview_gains-sp')).toBeVisible();
+
+    // All seven at once, so a future half-revert fails here rather than passing on one field.
+    await expect(page.locator('[id^="turn-preview_gains-"]')).toHaveCount(6);
+    await expect(page.getByLabel('Failure rate')).toBeVisible();
+});

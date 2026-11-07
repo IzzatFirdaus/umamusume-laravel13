@@ -849,7 +849,7 @@ const energyBandNote = computed(() =>
                  preview gains. Transcribed, not computed: the tool stores what the Trainer read
                  and never projects an outcome (`ADR-0016`, `PRD.md` §6.11). Optional by design, so
                  a turn logged without reading them stores neither. -->
-            <details class="rounded-md border border-rule bg-raised p-3">
+            <details open class="rounded-md border border-rule bg-raised p-3">
                 <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">
                     Preview readings
                 </summary>

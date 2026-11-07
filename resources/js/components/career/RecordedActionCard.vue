@@ -95,13 +95,17 @@ const when = (iso: string | null): string => {
         </h3>
 
         <p class="mt-1 text-lg font-bold text-ink-strong">{{ props.action }}</p>
+        <!-- R7-57 (carrying R7-24's residual): the quote is what the rail said BEFORE the turn was
+             recorded, not a reading taken at the moment of this card. A bare timestamp reads as "now",
+             so two Energy sentences from two different points in time read as one. The stamp says what
+             it is a stamp ON, and the heading says when the quote was true. -->
         <p class="text-xs text-ink-muted">
-            Recorded {{ when(props.recordedAt) }}<span v-if="props.correctedFrom !== null">,
+            Advice captured {{ when(props.recordedAt) }}<span v-if="props.correctedFrom !== null">,
                 correcting row {{ props.correctedFrom }}</span>
         </p>
 
         <h4 class="mt-3 text-lg font-semibold text-ink-strong">
-            What the rail said
+            What the rail said before this turn
         </h4>
         <dl v-if="props.expected.length > 0" class="mt-1 space-y-1">
             <div
