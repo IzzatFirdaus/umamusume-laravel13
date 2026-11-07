@@ -128,7 +128,7 @@ class InheritanceEventController extends Controller
     }
 
     /**
-     * @return array{id: int, trainee: string, trainee_ja: string|null, scenario_label: string, status_label: string, run_url: string, cockpit_url: string}
+     * @return array{id: int, trainee: string, trainee_ja: string|null, scenario_label: string, status_label: string, run_url: string, cockpit_url: string, career_position: array<string, mixed>|null}
      */
     private function runSection(TrainingRun $run): array
     {
@@ -142,6 +142,10 @@ class InheritanceEventController extends Controller
             'status_label' => $run->status->label(),
             'run_url' => route('runs.cockpit', $run),
             'cockpit_url' => route('runs.cockpit', $run),
+            // R7-32: the turn prefill reads this where the run has logged nothing yet. A snapshot
+            // entered at Senior Early October has no turns to add to, and deriving from an empty log
+            // would send its first inheritance event back to Junior January.
+            'career_position' => $run->careerPosition()?->toArray(),
         ];
     }
 

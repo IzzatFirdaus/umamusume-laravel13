@@ -23,6 +23,7 @@ import Note from '../../components/ui/Note.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
+import { nextTurn, undoTurnLabel } from '../../lib/career/turnDisplay';
 import { BaseInput, BaseRadio, BaseSelect, BaseTextarea } from '../../components/Form';
 
 interface RunSection {
@@ -33,6 +34,7 @@ interface RunSection {
     status_label: string;
     run_url: string;
     cockpit_url: string;
+    career_position: { year: number; month: number; phase: string; turn_index: number } | null;
 }
 
 interface StateSection {
@@ -98,10 +100,10 @@ const form = useForm({
     origin_note: '',
 });
 
-// The turn the entry is recorded on: one past the last logged turn, the same rule the other
-// decision screens use; the Undo control names the turn before it.
-const initialTurn = (props.write.turns.at(-1)?.turn ?? 0) + 1;
-const undoableTurn = Math.max(1, initialTurn - 1);
+// The turn the entry is recorded on, from the one shared derivation that the Timeline label and the
+// Inheritance form also read; the Undo control names the turn before it (R7-27, R7-32).
+const initialTurn = nextTurn({ turnEntries: props.write.turns, career_position: props.run.career_position });
+const undoableTurn = undoTurnLabel(initialTurn);
 form.turn = String(initialTurn);
 
 const alert = ref<HTMLElement | null>(null);

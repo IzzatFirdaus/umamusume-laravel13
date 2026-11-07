@@ -24,6 +24,7 @@ import AbsenceValue from '../../components/AbsenceValue.vue';
 import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
+import { latestLoggedTurn } from '../../lib/career/turnDisplay';
 import { BaseButton, BaseInput, BaseSelect } from '../../components/Form';
 
 interface Fact {
@@ -58,7 +59,7 @@ interface Race {
 }
 
 const props = defineProps<{
-    run: { id: number; trainee: string; trainee_ja: string | null; scenario_label: string; status_label: string; run_url: string; training_url: string };
+    run: { id: number; trainee: string; trainee_ja: string | null; scenario_label: string; status_label: string; run_url: string; training_url: string; career_position: { year: number; month: number; phase: string; turn_index: number } | null };
     nextTurn: { year_label: string; turn: number; position_label: string } | null;
     races: Race[];
     deadlines: { id: number; title: string; year_label: string; turn: number | null; state: string; is_next: boolean; reached: boolean }[];
@@ -68,7 +69,7 @@ const props = defineProps<{
     empty: string | null;
     entry_mode: 'calendar' | 'manual';
     manual_slots: { id: number; title: string }[];
-    manual_defaults: { month: string; half: string; tier: string };
+    manual_defaults: { month: string; half: string; tier: string; status: string };
     race_statuses: string[];
 }>();
 
@@ -95,7 +96,9 @@ const manualForm = useForm({
     month: props.manual_defaults.month,
     half: props.manual_defaults.half,
     tier: props.manual_defaults.tier,
-    status: props.race_statuses[0] ?? '',
+    // The form records a race that was run, so its selected outcome says so; `NotOffered` stays in
+    // the list for a race the Trainer decided against (R7-58).
+    status: props.manual_defaults.status,
     placement: '',
     fans_gain: '',
     turn_entry_id: '',
@@ -162,7 +165,13 @@ const selectRace = (id: number): void => {
 
 const trainingUrl = computed(() => props.run.training_url);
 
-const undoableTurn = computed(() => Math.max(1, (props.nextTurn?.turn ?? 1) - 1));
+// The turn an undo would remove: the run's latest logged turn, falling back to the position it stands
+// at for a snapshot with nothing logged. This screen used to read `nextTurn.turn`, which is the turn
+// number *within its year* (19 for a career standing at turn 67), so the label named a turn the run
+// never had (R7-27).
+const undoableTurn = computed(() =>
+    latestLoggedTurn({ turnEntries: props.entry.turns, career_position: props.run.career_position }),
+);
 
 const enterForm = useForm({ turn_entry_id: '' });
 

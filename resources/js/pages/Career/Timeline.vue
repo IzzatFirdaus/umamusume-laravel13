@@ -17,6 +17,7 @@ import Note from '../../components/ui/Note.vue';
 import { Head, Link } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
+import { latestLoggedTurn } from '../../lib/career/turnDisplay';
 
 const props = defineProps<{
     run: { id: number; trainee: string; trainee_ja: string | null; scenario_label: string; status_label: string; run_url: string; cockpit_url: string };
@@ -129,7 +130,11 @@ const energyText = (entry: { energy_reading: { text: string | null } | null }): 
     entry.energy_reading?.text ?? null;
 const spOf = (entry: { actual: Record<string, number | null> | null }): number | null => entry.actual?.sp ?? null;
 
-const lastTurn = computed(() => Math.max(0, ...props.entries.map((entry) => entry.turn)));
+// The turn an undo would remove: the run's latest logged turn, from the same derivation the Events
+// and Inheritance forms prefill with. The rail used to take its own maximum across every entry, so
+// the label answered "how far does this rail reach" rather than "which turn is the run's last"
+// (R7-27, R7-32).
+const undoableTurn = computed(() => latestLoggedTurn({ turnEntries: props.entries }));
 const resultUrl = computed(() => props.run.cockpit_url.replace(/\/cockpit$/, '/result'));
 
 const phaseCount = (head: string): number => props.entries.filter((entry) => entry.position.startsWith(head)).length;
@@ -164,7 +169,7 @@ const finaleText = computed(() => {
             >
                 <template #actions>
                     <a :href="resultUrl" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">Career result</a>
-                    <button type="button" class="btn btn-quiet min-h-11" title="The build has no undo; this screen proposes one.">Undo turn {{ lastTurn }}</button>
+                    <button type="button" class="btn btn-quiet min-h-11" title="The build has no undo; this screen proposes one.">Undo turn {{ undoableTurn }}</button>
                     <Link href="/training-runs" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">All careers</Link>
                 </template>
             </PageHeader>

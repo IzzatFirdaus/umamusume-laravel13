@@ -594,3 +594,35 @@ it('writes a free race through the rendered manual form, not a direct post', fun
         ->assertInertia(fn (Assert $assert) => $assert
             ->where('manual_slots', [['id' => $slot->id, 'title' => 'Autumn Practice Stakes']]));
 });
+
+it('derives the off-calendar form defaults from the run position, not the turn being decided', function (): void {
+    // R7-28. The walk opened a run standing at Senior Year, Early October (turn 67: year 3, month 10,
+    // an odd turn index in a month is its Early half) and the free-race form prefilled month 10 /
+    // half Late, which contradicted the position the screen states two regions above the form. The
+    // defaults were read from the turn *being decided* (68, Late October) rather than from the run's
+    // own position, so the form described a half the career had not reached. They come off the run's
+    // position now: month from its month, half from its phase.
+    $run = raceRun(turns: 67);
+    raceSlot();
+
+    $this->get(route('runs.races.decision', ['run' => $run, 'entry_mode' => 'manual']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('manual_defaults.month', '10')
+            ->where('manual_defaults.half', 'Early'));
+});
+
+it('defaults the off-calendar form status to Entered, because the form records a race', function (): void {
+    // R7-58 / R7-28's other facet: `NotOffered` is the calendar's word for a race the run declined or
+    // was never shown. A Trainer opening "Race not on the calendar" is recording a race they ran, so
+    // the selected outcome is `Entered`; `NotOffered` stays in the list for the case where they are
+    // recording a decision not to take it. The default travels in the defaults payload rather than
+    // by reordering `RaceEntryStatus::cases()`, which the calendar's own state select reads.
+    $run = raceRun(turns: 12);
+    raceSlot();
+
+    $this->get(route('runs.races.decision', ['run' => $run, 'entry_mode' => 'manual']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('manual_defaults.status', 'Entered'));
+});

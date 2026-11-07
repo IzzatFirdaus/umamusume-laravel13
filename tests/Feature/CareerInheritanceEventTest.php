@@ -482,3 +482,20 @@ it('counts grandparent blue sparks in the Inheritance tile (R6-08 facet b)', fun
             expect(count($parentBlue) + count($grandparentBlue))->toBe(2);
         });
 });
+
+it('carries the run position for the turn prefill on a snapshot that has logged nothing', function (): void {
+    // R7-32, the Inheritance half. The form prefilled `68` from `write.turns` on a run at turn 67 and
+    // the screen's own label read differently on the other surfaces; the prefill and the label come
+    // from one helper now. A run with no logged turns has nothing to add to, so the position it stands
+    // at is what the form opens on.
+    $run = inheritanceRun([
+        'scenario' => 'ura_finale',
+        'career_position' => ['year' => 3, 'month' => 10, 'phase' => 'Early', 'turn_index' => 67],
+    ], turns: 0);
+
+    $this->get(route('runs.inheritance', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('run.career_position.turn_index', 67)
+            ->has('write.turns', 0));
+});

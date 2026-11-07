@@ -230,3 +230,24 @@ test('meets the 44px floor and passes axe', async ({ page }) => {
 
     expect(results.violations).toEqual([]);
 });
+
+test('defaults the off-calendar half to the run position, not the turn being decided (R7-28)', async ({ page }) => {
+    const runUrl = await openDecision(page);
+
+    // The fixture logs eleven turns, so the run stands at Junior Early June (turn 11, an odd turn
+    // index is a month's Early half) and the turn being decided is turn 12, June's Late half. The
+    // free-race form prefilled the Late half from the decision turn, printing a half the career had
+    // not reached; it reads the run's own position now.
+    await page.goto(`${runUrl}/races`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await page.getByText('Race not on the calendar').click();
+
+    const form = page
+        .locator('details')
+        .filter({ has: page.locator('summary', { hasText: 'Race not on the calendar' }) })
+        .locator('form');
+
+    await expect(form.locator('select[name="half"]')).toHaveValue('Early');
+    await expect(form.locator('select[name="month"]')).toHaveValue('6');
+});

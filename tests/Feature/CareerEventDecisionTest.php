@@ -258,3 +258,32 @@ it('reports a no-turn run in the state section without a zero stat', function ()
             ->has('write.turns', 0)
         );
 });
+
+it('carries the run position for the turn prefill, and prefills the turn after the last logged one', function (): void {
+    // R7-32. The Events form prefilled `68` on a run whose latest logged turn was 67 while the
+    // Timeline labelled the same run `67`, so the two halves of one convention printed neighbouring
+    // numbers. Both read `nextTurn`/`latestLoggedTurn` from
+    // `resources/js/lib/career/turnDisplay.ts` now; this pins the payload half the form derives from,
+    // and the position a run with nothing logged falls back to - the case where an empty log used to
+    // send a Senior snapshot's first event back to Junior January.
+    $snapshot = eventDecisionRun([
+        'scenario' => 'ura_finale',
+        'career_position' => ['year' => 3, 'month' => 10, 'phase' => 'Early', 'turn_index' => 67],
+    ], turns: 0);
+
+    $this->get(route('runs.events.decision', $snapshot))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('run.career_position.turn_index', 67)
+            ->where('run.career_position.month', 10)
+            ->where('run.career_position.phase', 'Early')
+            ->has('write.turns', 0));
+
+    $logged = eventDecisionRun(['scenario' => 'ura_finale'], turns: 3);
+
+    $this->get(route('runs.events.decision', $logged))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('run.career_position.turn_index', 3)
+            ->where('write.turns.2.turn', 3));
+});

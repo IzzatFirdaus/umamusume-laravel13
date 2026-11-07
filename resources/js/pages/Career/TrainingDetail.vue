@@ -37,6 +37,7 @@ import Note from '../../components/ui/Note.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
+import { undoTurnLabel } from '../../lib/career/turnDisplay';
 import { TURN_ENTRY_ENERGY_BANDS, TURN_ENTRY_ENERGY_STATES, TURN_ENTRY_FACILITY_FIELDS, TURN_ENTRY_PREVIEW_FIELDS, TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
 
 interface Cost {
@@ -523,7 +524,7 @@ const discard = (): void => {
     window.history.back();
 };
 
-const undoableTurn = computed(() => Math.max(1, props.write.turn - 1));
+const undoableTurn = computed(() => undoTurnLabel(props.write.turn));
 
 const energyBandNote = computed(() =>
     props.energy.state === 'exact' && props.energy.value !== null

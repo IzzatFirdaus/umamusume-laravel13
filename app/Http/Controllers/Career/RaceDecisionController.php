@@ -84,13 +84,13 @@ class RaceDecisionController extends Controller
             'empty' => $this->emptyState($run, $next, count($races)),
             'entry_mode' => $entryMode,
             'manual_slots' => $this->manualSlotRows($run),
-            'manual_defaults' => $this->manualDefaults($run, $next),
+            'manual_defaults' => $this->manualDefaults($run),
             'race_statuses' => array_map(static fn (RaceEntryStatus $status): string => $status->value, RaceEntryStatus::cases()),
         ]);
     }
 
     /**
-     * @return array{id: int, trainee: string, trainee_ja: string|null, scenario_label: string, status_label: string, run_url: string}
+     * @return array{id: int, trainee: string, trainee_ja: string|null, scenario_label: string, status_label: string, run_url: string, career_position: array<string, mixed>|null}
      */
     private function runSection(TrainingRun $run): array
     {
@@ -106,6 +106,9 @@ class RaceDecisionController extends Controller
             // The "Train instead" door, supplied rather than string-replaced on `run_url`
             // (AUD-20261102-002 F-04).
             'training_url' => route('runs.training', $run),
+            // R7-28: the off-calendar form's month and half come off this, so the position the page
+            // states and the defaults the form carries are one value rather than two derivations.
+            'career_position' => $run->careerPosition()?->toArray(),
         ];
     }
 
@@ -430,26 +433,33 @@ class RaceDecisionController extends Controller
     }
 
     /**
-     * What a blank manual form pre-fills: the month and half of the turn being decided, so a Trainer
-     * entering a free race at turn N gets turn N's month and half. The values are what
-     * `StoreRaceEntryRequest` requires (`month` 1-12, `half` Early/Late); `tier` is nullable and
-     * starts empty. With no turn to read, both are blank and the Trainer picks.
+     * What a blank manual form pre-fills: the month and half of the run's own position, so a Trainer
+     * entering a free race records it where the career actually stands (R7-28).
      *
-     * @param  array{year: int, turn: int}|null  $next
-     * @return array{month: string, half: string, tier: string}
+     * The values are what `StoreRaceEntryRequest` requires (`month` 1-12, `half` Early/Late). They
+     * used to come off the turn *being decided*, which is the half after the one the run is standing
+     * in: a run at Senior Early October (turn 67) got `Late`, a half it had not reached, beside a
+     * position line two regions above the form that said `Early`. `tier` is nullable and starts
+     * empty. A run with no position at all gets blanks and the Trainer picks.
+     *
+     * @return array{month: string, half: string, tier: string, status: string}
      */
-    private function manualDefaults(TrainingRun $run, ?array $next): array
+    private function manualDefaults(TrainingRun $run): array
     {
-        $turn = $next['turn'] ?? $run->turnEntries->sortByDesc('turn')->first()?->turn;
+        $position = $run->careerPosition();
 
-        if ($turn === null) {
-            return ['month' => '', 'half' => '', 'tier' => ''];
+        // `Entered`, not `NotOffered`: this form records a race the Trainer ran, so the selected
+        // outcome is the one that says so. `NotOffered` stays in the list for a race they decided
+        // against; it describes the calendar's view, not an entry (R7-58).
+        if ($position === null) {
+            return ['month' => '', 'half' => '', 'tier' => '', 'status' => RaceEntryStatus::Entered->value];
         }
 
         return [
-            'month' => (string) (intdiv($turn - 1, 2) + 1),
-            'half' => $turn % 2 === 1 ? 'Early' : 'Late',
+            'month' => (string) $position->month,
+            'half' => $position->phase->value,
             'tier' => '',
+            'status' => RaceEntryStatus::Entered->value,
         ];
     }
 

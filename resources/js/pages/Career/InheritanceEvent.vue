@@ -32,6 +32,7 @@ import SparkChip from '../../components/legacy/SparkChip.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
+import { nextTurn } from '../../lib/career/turnDisplay';
 import { BaseInput, BaseSelect, BaseTextarea } from '../../components/Form';
 
 interface RunSection {
@@ -42,6 +43,7 @@ interface RunSection {
     status_label: string;
     run_url: string;
     cockpit_url: string;
+    career_position: { year: number; month: number; phase: string; turn_index: number } | null;
 }
 
 interface LegacyParent {
@@ -164,8 +166,6 @@ const blueSparks = computed(() =>
 
 const blueStars = computed(() => blueSparks.value.reduce((sum, spark) => sum + (spark.stars ?? 0), 0));
 
-const undoableTurn = computed(() => Math.max(1, (props.write.turns.at(-1)?.turn ?? 0)));
-
 const skip = (): void => {
     router.visit(props.run.cockpit_url);
 };
@@ -189,8 +189,9 @@ const form = useForm({
     origin_note: '',
 });
 
-// The turn the entry is recorded on: one past the last logged turn.
-const initialTurn = (props.write.turns.at(-1)?.turn ?? 0) + 1;
+// The turn the entry is recorded on, from the one shared derivation: the Events form and this one
+// prefilled different turns for the same run before it landed (R7-32).
+const initialTurn = nextTurn({ turnEntries: props.write.turns, career_position: props.run.career_position });
 form.turn = String(initialTurn);
 
 const alert = ref<HTMLElement | null>(null);
