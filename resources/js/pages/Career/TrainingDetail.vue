@@ -745,8 +745,19 @@ const energyBandNote = computed(() =>
                 </p>
                 <div class="mt-3 grid max-w-3xl grid-cols-2 gap-3 text-sm @4xl:grid-cols-3">
                     <label class="flex flex-col gap-1">
-                        <span class="text-ink-muted">Turn *</span>
+                        <!-- R7-20, owner ruling (a): the field's value is already the run's next turn
+                             (`TrainingDecisionController.php:574` sends `nextTurnNumber()`), so the defect
+                             was the label. `Turn *` read as "the run's position" while the value is the
+                             turn about to be recorded, which is how walk 6 committed a Junior position on
+                             a mid-career run without noticing. The label names what it holds; the helper
+                             below says what the number means and how the client prints it. -->
+                        <span class="text-ink-muted">Turn to play (the run's next turn) *</span>
                         <BaseInput id="turn-turn" v-model="form.turn" type="number" name="turn" min="1" required :aria-describedby="describedBy('turn')" :error="errorOf('turn')" />
+                        <span class="text-xs text-ink-muted">
+                            The turn this entry records. As the client shows this turn, the calendar name
+                            and the index are the same fact: Senior Year Early October is turn 67. A run
+                            imported at a later position records that turn here.
+                        </span>
                     </label>
                     <label v-for="field in statFields" :key="field.name" class="flex flex-col gap-1">
                         <span class="text-ink-muted">{{ field.label }} *</span>

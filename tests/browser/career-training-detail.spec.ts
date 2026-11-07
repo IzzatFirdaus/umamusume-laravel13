@@ -150,6 +150,25 @@ test('the client totals stay in one disclosure, open by default (S0)', async ({ 
     await expect(page.locator('input[name="speed"]')).toBeVisible();
 });
 
+test('names the turn field as the turn to play and states what the index means (R7-20)', async ({ page }) => {
+    await openTrainingDetail(page);
+
+    // R7-20's owner ruling is (a). The field's VALUE is already correct — the server sends
+    // `nextTurnNumber()` (`TrainingDecisionController.php:574`), which is 1 on a fresh run and 68 on a
+    // mid-career one. What walk 6 fell over was the affordance: `Turn *` reads as "the run's position"
+    // while the value is the turn about to be recorded, so a Trainer importing a later position never
+    // learns the field is where that position goes.
+    const totals = page.locator('details').filter({ hasText: 'Client totals this turn (required to record)' });
+    const label = totals.locator('label').filter({ hasText: /Turn to play/ });
+
+    await expect(label).toHaveCount(1);
+    await expect(label).toContainText("the run's next turn");
+
+    // The helper states what the index is, and names the mapping the client uses, so the number a
+    // Trainer types is the one their own screen showed them.
+    await expect(totals.getByText(/as the client shows this turn/i)).toBeVisible();
+});
+
 test('keeps the tab order and the 44px target floor, and passes axe', async ({ page }) => {
     await openTrainingDetail(page);
 
