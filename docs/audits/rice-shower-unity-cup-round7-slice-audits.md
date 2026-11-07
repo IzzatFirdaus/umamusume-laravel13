@@ -1109,3 +1109,58 @@ tests/browser/career-preflight.spec.ts
   a wizard-created run has no form. Measured and recorded; a separate slice if the owner wants it.
 - **`R7-13`'s picker half** — the select's default. Unchanged: the select shows what the draft holds, and the draft
   holds nothing on that path.
+
+---
+
+## S4b — `R7-03`'s persistence half, closed as verification-only
+
+### 1. Slice
+S4b, the carried-forward defect the dispatch named: "the wizard's `Form` select does not write
+`character_card_id` to `SetupDraft`."
+
+### 2. Verdict — **does not reproduce**
+
+Every link in the chain is present at HEAD:
+
+| Link | Where | Evidence |
+| --- | --- | --- |
+| The select's state | `TraineeSelect.vue:180-183` | `selectForm` carries `umamusume_id` and `character_card_id`; `:352` sets the card from `pickedForm` on every pick |
+| The write | `TraineeSelectController::store()` `:167,182` | reads `$request->validated('character_card_id')` and writes it, nulls passing through untouched |
+| The validation | `StoreTraineeRequest.php:50` | `nullable|integer|exists:character_cards,id`, plus a rule that the card belongs to the chosen trainee |
+| The read | `SetupDraft::characterCardId()` `:137` | `self::bag()['character_card_id']` |
+| The run | `TraineeCardFormTest` | already asserts `$run->character_card_id` is the chosen form, not the debut one and not null |
+
+`TraineeCardFormTest` walks the wizard's own route (`career.trainee.store` then
+`career.preflight.store`) and reads the created run. **5 passed (47 assertions)** at HEAD.
+
+### 3. Why the dispatch carried it
+
+The dispatch's claim came from S4's own §10 note, which recorded `R7-03`'s persistence half as
+"measured and recorded" on the basis of a walked path where the run ended up formless. That path goes
+through a *carry* (`TraineeSelectController::carry()`), which deliberately writes
+`character_card_id => null` — a carry names no costume form, so a previous pick's card is cleared with it
+(the R3-06 rule `store()` applies). A formless run after a carry is the contract, not a gap.
+
+### 4. Result
+
+No code change. No commit. `R7-03`'s resolver half stands at `bab1b072`; its persistence half never
+existed as a defect.
+
+---
+
+## S20, S21, S22 — nothing to open
+
+Every row these slices would have carried is `Held` in the register's §9, and the §9 table is the
+register's own statement of what this pass cannot land:
+
+| Slice's rows | Held by |
+| --- | --- |
+| `R7-64` (aptitude conflict) | `ADR-0004` erratum: the export is authoritative |
+| `R7-67` (Growth Rate row) | R6-37 — the field exists on Run settings, off-wizard |
+| `R7-70` (borrowed placement) | Two legitimate deck models; no ruling picks one |
+| `R7-71` (countdown dead pipe) | R6-34 — reconnecting is a design call |
+| `R7-74`…`R7-79` | Roster absence, partial field coverage, no wizard skills step (`ADR-0029` D1) |
+| `R7-94`…`R7-98` | Their round-6 parents, each unchanged |
+
+None is a code defect this pass can settle from repository evidence, and opening a slice for one would
+mean inventing a requirement. They stay held.

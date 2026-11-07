@@ -857,3 +857,18 @@ renumbered.*
 | R7-02 | S17b | `1d6a39af` | `Source conflict / open` → `Confirmed defect (copy)` → `Confirmed fixed` | `#s17b--r7-02` | RED: no `form_count_label`; GREEN: `2 released forms` / `3 forms (2 released, 1 undated)` |
 | R7-03, R7-13 | S4 | `bab1b072` | `Confirmed defect` → `Confirmed fixed` (label half; persistence half open) | `#s4--r7-03-r7-13` | RED: `formLabel()` returned null for a real `character_cards` id; GREEN: the title |
 | R7-19, R7-66 | S6 | `c6ac05e7` | `Confirmed defect` → `Confirmed fixed` | `#s6--r7-19-r7-66` | RED: five stat rows labelled `cap` on a run with four null cap columns; GREEN: `floor` |
+| R7-06 | S9 | `36e010c1` | `Confirmed defect` → `Confirmed fixed` | `#s9--r7-06` | RED: rank-stars input advertised `valuemax="0"`; GREEN: `max="3"` |
+| R7-27, R7-28, R7-32 | S13 | `dba72d62` + `bd5c769c` | `Confirmed defect` → `Confirmed fixed` | `#s13--r7-27-r7-28-r7-32` | RED: `'-'Early` vs `'Late'`, `manual_defaults.status` missing; GREEN: one `turnDisplay` helper behind all five surfaces |
+| R7-99 | S18a | `3aefce57` | `Confirmed defect` → `Confirmed fixed` | `#s18a--r7-99` | RED: review listed eight state fields and neither identity field; GREEN: trainee and scenario lead the list |
+| R7-83 | S18b | `598a4282` | `Confirmed defect` → `Confirmed fixed` | `#s18b--r7-83` | RED: a race with no turn link never appeared; GREEN: it lands after the last turn |
+| R7-33, R7-34, R7-80 | S8 | `d487b83e` | `Confirmed defect` → `Confirmed fixed` | `#s8--r7-33-r7-34-r7-80` | RED: `legacy.parents.0.rank_label` absent from the payload; GREEN: the letter prints beside the stars |
+| R7-21 | S14 | `80c1d19e` | `Confirmed defect` → `Confirmed fixed` | `#s14--r7-21-r7-29` | RED: undo enabled while its own title says it does not exist; GREEN: `Expected: disabled / Received: enabled` on revert |
+| R7-57 | S7 | `4720b877` | `Confirmed defect` → `Confirmed fixed` | `#s7--r7-57` | RED: seven preview inputs `Received: hidden`; GREEN: visible, and the advice is dated as advice |
+| R7-31, R7-35 | S10 | `99d17545` | `Confirmed defect` → `Confirmed fixed` | `#s10--r7-31-r7-35` | RED: both primaries enabled with required fields empty; GREEN: both disabled with a reason |
+| R7-38, R7-62 | S15 | `68015d36` | `R7-38` `Does not reproduce` on the cockpit; `R7-62` `Confirmed defect` → `Confirmed fixed` | `#s15--r7-38-r7-62` | RED: `events must not render Result as a live link: Expected SPAN, Received A` |
+| R7-43, R7-45, R7-46, R7-54 | S16 | `a23fd59a` | `Confirmed defect` → `Confirmed fixed` | `#s16--r7-43-r7-45-r7-46-r7-54` | copy-only; no RED per AGENTS.md §9's change-class table |
+| R7-01 | S16 | `e5e38468` | `Confirmed defect` → `Confirmed fixed` | `#s16--r7-01` | RED: URL lost the term, `Received: /career/setup/trainee`; GREEN: `/search=Rice/` and a narrowed roster |
+| R7-14 | S16 | `d2c15ca8` | `Confirmed defect` → `Confirmed fixed` | `#s16--r7-14` | RED: `Your targetMissingNot entered`; GREEN: `Skipped` |
+| R7-84, R7-85, R7-88, R7-89 | S19 | `3f260461` | `Confirmed defect` → `Confirmed fixed`; `R7-86` `Does not reproduce` | `#s19--r7-84-r7-85-r7-88-r7-89` | RED: `null` vs `173`; pool listed `Catalogue Only Skill` |
+| R7-36, R7-68 | S11 | `cdd0083a` | `R7-36` `Does not reproduce` as stated; `R7-68` `Unrepresented` → `Confirmed fixed` | `#s11--r7-36-r7-68` | RED: `Expected: 4, Received: 0` `Add Spark` buttons |
+| R7-03 persistence half | S4b | — verification-only | `Confirmed defect` → `Does not reproduce` | `#s4b` | five links read; `TraineeCardFormTest` 5 passed |
