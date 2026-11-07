@@ -70,7 +70,7 @@ const props = defineProps<{
      * "Final stats", the word the HFW gives it once nothing is left to change.
      */
     title?: string;
-    denominatorLabel: 'target' | 'cap';
+    denominatorLabel: 'target' | 'cap' | 'floor' | 'in-force';
     /**
      * A-0.11: the client's Mood Effect headline (the `GREAT` tier's +20% training / +4% running),
      * sourced from `config('uma.mood_effect')` (`UMAMUSUME_REFERENCE.md` §1.1.6). Rendered beside the
@@ -154,7 +154,7 @@ const currentMoodEffect = computed((): { training: number; running: number } | n
  * ranks against a target that does not exist, so the bars are the only reading the screen has.
  */
 const barCaption = computed((): string | null => {
-    if (props.denominatorLabel !== 'cap') {
+    if (props.denominatorLabel !== 'cap' && props.denominatorLabel !== 'in-force') {
         return null;
     }
 
@@ -174,7 +174,9 @@ const barCaption = computed((): string | null => {
 // target otherwise. `cap` is always a number; `target` is null until one is entered, and the row says so
 // in words rather than printing the cap under the target's name (R2-09).
 const denominator = (stat: Stat): number | null =>
-    props.denominatorLabel === 'cap' ? stat.cap : stat.target;
+    props.denominatorLabel === 'cap' || props.denominatorLabel === 'floor' || props.denominatorLabel === 'in-force'
+        ? stat.cap
+        : stat.target;
 
 function percent(stat: Stat): number {
     const total = denominator(stat);

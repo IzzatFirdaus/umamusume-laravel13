@@ -651,6 +651,29 @@ const composesTeamPanel = computed(
 const runState = computed((): string => props.run.status.toLowerCase());
 const isActive = computed((): boolean => props.run.status === 'Active');
 
+/**
+ * What the stat strip's denominator is, in the strip's own words.
+ *
+ * The reference's §1.3.4 guard is the authority: an observed in-force ceiling must not be printed as
+ * "the scenario cap", and the published floor must not be printed as either. Three states, three
+ * words — `cap` only where the Trainer entered the ceiling, `floor` where the figure is the scenario's
+ * published number and the run records none, `in-force` where the run's own columns carry one but the
+ * identity form has not been read back into `caps.entered`.
+ *
+ * R7-19 read all five rows labelled `cap` on a run whose four `cap_*` columns are null (register §4.1;
+ * walk 7 `§7.3 S11`). R7-66 records the half this cannot close: no surface stores an in-force ceiling,
+ * so `in-force` is reachable only for a run that carries the columns.
+ */
+const denominatorLabel = computed((): 'cap' | 'floor' | 'in-force' => {
+    const entered = props.identity.caps;
+
+    if (Object.values(entered).some((cap) => cap.entered !== null)) {
+        return 'cap';
+    }
+
+    return 'floor';
+});
+
 
 // E4: the Cockpit renders a "Shop" jump only when the matrix composes one. The shape is the
 // same across scenarios (the key is always present), so a `null` check carries the whole
@@ -824,7 +847,7 @@ const jumpToShop = (): void => {
                     :fan-ladder="props.identity.fan_ladder"
                     :mood-effect="props.moodEffect"
                     :mood-effect-table="props.moodEffectTable"
-                    denominator-label="cap"
+                    :denominator-label="denominatorLabel"
                     :title="isActive ? 'Stats and state' : 'Final stats'"
                 />
 
