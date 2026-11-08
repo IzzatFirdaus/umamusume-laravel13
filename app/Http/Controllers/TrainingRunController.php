@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\ImportHistoricalRun;
+use App\Actions\SeedRunSkills;
 use App\Enums\CardRarity;
 use App\Enums\EnergyState;
 use App\Enums\MoodTier;
@@ -260,26 +261,10 @@ class TrainingRunController extends Controller
      */
     private function prePopulateSkills(TrainingRun $run): void
     {
-        $card = $run->characterCard;
-
-        if ($card === null) {
-            return;
-        }
-
-        // The union, deduped: an id should not appear on both lists, and if the source ever says so
-        // the run gets one row rather than two fighting over the same pivot key.
-        $exportIds = array_values(array_unique([
-            ...($card->skills_innate ?? []),
-            ...($card->skills_unique ?? []),
-        ]));
-
-        if ($exportIds === []) {
-            return;
-        }
-
-        foreach (Skill::query()->availableOnGlobal()->whereIn('export_id', $exportIds)->get() as $skill) {
-            $run->setSkillStatus($skill, SkillAcquisition::Suggested);
-        }
+        // One owner for the seeding, shared with the wizard's door (`S-A-P01.2`): the two create paths
+        // disagreed about whether a new run starts with the card's skills, and a copy per controller is
+        // how they would drift again.
+        app(SeedRunSkills::class)->handle($run);
     }
 
     /**

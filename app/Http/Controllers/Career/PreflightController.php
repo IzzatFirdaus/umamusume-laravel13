@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Career;
 
+use App\Actions\SeedRunSkills;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Career\StartCareerRequest;
 use App\Models\Advisor\BuildTargetPayload;
@@ -48,8 +49,9 @@ use InvalidArgumentException;
  * commits, so a double submit cannot mint a second career from the same setup. The run is created
  * `Active` because that is what a career is, on the costume form step 2 recorded when there is one
  * (`R3-06`, `character_card_id`; a step that named no form leaves the column null, and the Cockpit header
- * then prints no title). No start skills are seeded (the same shape `runs.import` has, and for the same
- * reason: the Trainer's sheet names a trainee, and only a form she chose says which one was equipped).
+ * then prints no title). The card's starting skills seed as `Suggested` rows on the run
+ * (`SeedRunSkills`, `S-A-P01.2`): the dashboard's own run form has always seeded them, and two create
+ * doors that disagreed about what a new run holds is the inconsistency that fix removed.
  */
 class PreflightController extends Controller
 {
@@ -148,6 +150,11 @@ class PreflightController extends Controller
     {
         $run = DB::transaction(function () use ($request): TrainingRun {
             $run = TrainingRun::create($request->runAttributes());
+
+            // S-A-P01.2: the card's starting skills land with the run, inside the same transaction, the
+            // way the dashboard door already did. A half-created run would show an empty Skills section
+            // the Trainer has to reason about alone (`SHR-1`: two doors, one behaviour).
+            app(SeedRunSkills::class)->handle($run);
 
             $ownership = $request->ownershipByPosition();
             // R6-11: the level the deck step recorded, read beside the flag for the same positions, and

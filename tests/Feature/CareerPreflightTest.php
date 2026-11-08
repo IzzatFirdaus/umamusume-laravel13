@@ -3,9 +3,12 @@
 declare(strict_types=1);
 
 use App\Enums\CardRarity;
+use App\Enums\ReleaseStatus;
 use App\Enums\RunStatus;
+use App\Enums\SkillAcquisition;
 use App\Models\CharacterCard;
 use App\Models\DeckSlot;
+use App\Models\Skill;
 use App\Models\SupportCard;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
@@ -639,4 +642,73 @@ it('counts a manual parent pair as two recorded parents', function (): void {
 
     expect($selection->legacies[0]['name'])->toBe('Silence Suzuka')
         ->and($selection->legacies[1]['name'])->toBe('Tokai Teio');
+});
+
+/*
+ * S-A-P01.2 — the wizard door seeds the card's starting skills, the way the legacy door already does.
+ *
+ * Two create doors existed and only one seeded: `TrainingRunController::store()` calls
+ * `prePopulateSkills`, `PreflightController::store()` seeded nothing and its docblock said so
+ * (`:51`). A Trainer starting from the wizard got an empty Skills section while the same trainee
+ * started from the dashboard got her card's list — proposal P-01 §4.1, `SHR-1`.
+ */
+it('seeds the card starting skills on a career started from the wizard', function (): void {
+    $umamusume = Umamusume::factory()->create();
+
+    $unique = Skill::factory()->create([
+        'name' => 'Seeded Unique',
+        'export_id' => 900001,
+        'release_status' => ReleaseStatus::GlobalReleased,
+        'name_is_client' => true,
+        'is_unique' => true,
+    ]);
+
+    $innate = Skill::factory()->create([
+        'name' => 'Seeded Innate',
+        'export_id' => 900002,
+        'release_status' => ReleaseStatus::GlobalReleased,
+        'name_is_client' => true,
+    ]);
+
+    $card = CharacterCard::factory()->create([
+        'umamusume_id' => $umamusume->id,
+        'is_debut_form' => true,
+        'skills_unique' => [$unique->export_id],
+        'skills_innate' => [$innate->export_id],
+    ]);
+
+    SetupDraft::write([
+        'scenario' => 'ura_finale',
+        'umamusume_id' => $umamusume->id,
+        'character_card_id' => $card->id,
+    ]);
+
+    $this->put(route('career.preflight.store'))->assertRedirect();
+
+    $run = TrainingRun::query()->where('umamusume_id', $umamusume->id)->sole();
+
+    expect($run->skills()->pluck('skills.id')->all())
+        ->toHaveCount(2)
+        ->toContain($unique->id, $innate->id);
+
+    // `Suggested`, never `Acquired`: a seeded row is the card's implication, not a skill the Trainer
+    // earned. The status is what keeps the two distinguishable on the planner (P-01 §7 decision 2).
+    expect($run->skills()->get()->pluck('pivot.status')->unique()->all())
+        ->toBe([SkillAcquisition::Suggested->value]);
+});
+
+it('seeds nothing when the draft names no costume form', function (): void {
+    $umamusume = Umamusume::factory()->create();
+
+    SetupDraft::write([
+        'scenario' => 'ura_finale',
+        'umamusume_id' => $umamusume->id,
+        'character_card_id' => null,
+    ]);
+
+    $this->put(route('career.preflight.store'))->assertRedirect();
+
+    $run = TrainingRun::query()->where('umamusume_id', $umamusume->id)->sole();
+
+    expect($run->skills()->count())->toBe(0);
 });
