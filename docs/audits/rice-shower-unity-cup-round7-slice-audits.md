@@ -85,6 +85,7 @@ $ git status --short
 | S21 | R7-90 | — | **does not reproduce** (skill level 1..6 per `ADR-0029` D4; a different quantity from the five-rung hint ladder) |
 | S22 | R7-91, R7-92, R7-93 | — | **does not reproduce** (no custom caret; no clipping on either screen — live probe) |
 | S0b | — (housekeeping) | `d8f75849` | **landed** — `#s0b--housekeeping-three-named-reds` |
+| S-A-F01 | R7-22, R7-25, R7-61 (obligation half) | `30eb2b4d` | **landed (post-close-out)** — `#post-close-out-fix-F-01` |
 | close-out | — | — | `#close-out` |
 
 ---
