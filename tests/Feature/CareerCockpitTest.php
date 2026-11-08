@@ -8,6 +8,7 @@ use App\Enums\RunMode;
 use App\Enums\RunStatus;
 use App\Enums\TurnChoice;
 use App\Models\Advisor\BuildTargetPayload;
+use App\Models\CharacterCard;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvent;
@@ -1010,4 +1011,49 @@ it('does not print a literal spark count its own data can contradict (R6-08)', f
                 expect((int) $matches[1])->not->toBe(6);
             }
         });
+});
+
+/*
+ * S-A-P01.3 — the card's base stats ride on the state payload as a reference, never as a reading.
+ *
+ * The base five are a **card fact, not run state** (proposal P-01 §4.2 and §7 decision 2): the card
+ * holds them, `turn_entries` records what the Trainer read each turn, and the cockpit must not
+ * present one as the other. The strip answers `SHR-7` (the value a turn-1 decision needs is on the
+ * decision screen) without `TOG-3`'s failure (a run with no card claiming a base line it does not
+ * have).
+ */
+it('carries the card base stats as a reference on the cockpit state payload', function (): void {
+    $umamusume = Umamusume::factory()->create();
+    $card = CharacterCard::factory()->create([
+        'umamusume_id' => $umamusume->id,
+        'base_stats' => ['Speed' => 96, 'Stamina' => 61, 'Power' => 105, 'Guts' => 75, 'Wit' => 88],
+    ]);
+
+    $run = TrainingRun::factory()->create([
+        'status' => RunStatus::Active,
+        'umamusume_id' => $umamusume->id,
+        'character_card_id' => $card->id,
+    ]);
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('state.starting_stats.Speed', 96)
+            ->where('state.starting_stats.Stamina', 61)
+            ->where('state.starting_stats.Power', 105)
+            ->where('state.starting_stats.Guts', 75)
+            ->where('state.starting_stats.Wit', 88));
+});
+
+it('carries no starting stats for a run that names no costume form', function (): void {
+    // `TOG-3`: status may be stale or absent, but never wrong. A run with no card has no base line,
+    // and printing one — or five zeroes — would be a claim about a record that does not exist.
+    $run = TrainingRun::factory()->create([
+        'status' => RunStatus::Active,
+        'character_card_id' => null,
+    ]);
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('state.starting_stats', null));
 });

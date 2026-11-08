@@ -54,7 +54,7 @@ const WRITE = { timeout: 60_000 } as const;
 export async function walkWizard(
     page: Page,
     scenario = 'unity_cup',
-    options: { onLegacy?: (page: Page) => Promise<void>; skipTargetDetails?: boolean } = {},
+    options: { onLegacy?: (page: Page) => Promise<void>; onTrainee?: (page: Page) => Promise<void>; skipTargetDetails?: boolean } = {},
 ): Promise<string> {
     await page.goto('/career/setup/scenario', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
@@ -78,6 +78,14 @@ export async function walkWizard(
     const traineeName = (await echo.locator('p').first().innerText()).trim();
 
     expect(traineeName, 'the selection echo names no trainee after the pick').not.toBe('');
+
+    // The step-2 hook (`S-A-P01.3`). The default walk picks the first roster row and leaves the costume
+    // form unset; a caller that needs a card-backed run re-picks here with a form, and the rest of the
+    // walk then carries that draft forward. It runs before the name is returned so a caller that also
+    // reads `traineeName` gets the trainee it ended on.
+    if (options.onTrainee) {
+        await options.onTrainee(page);
+    }
 
     await page.goto('/career/setup/target', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
@@ -141,7 +149,7 @@ export async function walkWizard(
 export async function startCareer(
     page: Page,
     scenario = 'unity_cup',
-    options: { onLegacy?: (page: Page) => Promise<void> } = {},
+    options: { onLegacy?: (page: Page) => Promise<void>; onTrainee?: (page: Page) => Promise<void> } = {},
 ): Promise<string> {
     await walkWizard(page, scenario, options);
 

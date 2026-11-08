@@ -49,6 +49,15 @@ const props = defineProps<{
     stats: Stat[];
     meta: Meta[];
     /**
+     * The card's base five, or null when the run names no costume form (`S-A-P01.3`).
+     *
+     * Printed as a labelled `Starting:` line beneath the rail and nowhere else: it is the line the
+     * career began on, not a reading, so it never enters a stat row's `current` slot. Null renders
+     * nothing at all — not `N/A`, not five zeroes — because a run with no card has no base line and a
+     * number there would be a claim about a record that does not exist (`TOG-3`).
+     */
+    startingStats?: Record<string, number> | null;
+    /**
      * The trainee's growth-rate row, keyed by the stat matrix (the same keys `stats` carries). Null
      * until the Trainer reads it off the card, so a stat with no entry shows no percentage rather than
      * a `+0%` nobody entered.
@@ -238,6 +247,23 @@ function percent(stat: Stat): number {
                 <p v-else-if="stat.current === null" class="col-span-2 mt-1 text-xs text-ink-muted">{{ currentHint(stat) }}</p>
             </li>
         </ul>
+
+        <!-- `S-A-P01.3`: the card's own base line, as a labelled reference rather than a reading. It is a
+             single labelled sentence and not five more rows, because five bare numbers under a rail that
+             already prints five would read as a second measurement of the same stats (`NRM-2`). Absent
+             entirely when the run names no card: no `N/A`, no zeroes (`TOG-3`). The label carries the
+             word `Starting` so the two lines are told apart by more than position (`P-01` §4.5.2). -->
+        <p
+            v-if="props.startingStats !== null && props.startingStats !== undefined"
+            class="mt-2 text-xs text-ink-muted"
+            data-region="starting-stats"
+        >
+            <span class="font-semibold">Starting</span>
+            <span v-for="stat in props.stats" :key="`starting-${stat.key}`" class="ml-2 font-mono tabular-nums">
+                {{ props.startingStats[stat.key] ?? 'N/A' }}
+            </span>
+            <span class="ml-1">(the card's base line, before any training)</span>
+        </p>
 
         <!-- The HFW's four tiles in a 2x2 grid: `.tiles` + `.tile`, key above value. It was a `dl`
              of bordered `div`s, which read as a different component beside the same cards elsewhere. -->

@@ -678,7 +678,13 @@ class CockpitController extends Controller
      * show a number the form would refuse (KI-47, `ADR-0015`). Absent values are null rather than
      * zero: a run that logged nothing has no stats, and a run with no target has no target.
      *
-     * @return array{stats: list<array{key: string, label: string, current: int|null, target: int|null, cap: int}>, meta: list<array{key: string, label: string, value: int|string|null, band_text: string|null}>}
+     * **`starting_stats` is the card's base line, not a reading** (`S-A-P01.3`). It rides here so the
+     * rail can print what the career started from beside what it stands at, which is the comparison a
+     * turn-1 decision makes (`SHR-7`). Null when the run names no costume form: a run with no card has
+     * no base line, and a zeroed or invented one would be a claim about a record that does not exist
+     * (`TOG-3`). Nothing writes it into `turn_entries` and no column stores it (`P-01` §5 A and B).
+     *
+     * @return array{stats: list<array{key: string, label: string, current: int|null, target: int|null, cap: int}>, meta: list<array{key: string, label: string, value: int|string|null, band_text: string|null}>, starting_stats: array<string, int>|null}
      */
     private function stateSection(TrainingRun $run, ?TurnEntry $latest): array
     {
@@ -722,7 +728,7 @@ class CockpitController extends Controller
             ];
         }
 
-        return ['stats' => $stats, 'meta' => $meta];
+        return ['stats' => $stats, 'meta' => $meta, 'starting_stats' => $run->characterCard?->base_stats];
     }
 
     /**

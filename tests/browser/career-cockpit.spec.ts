@@ -1022,3 +1022,53 @@ test('gates the Result step the same way on every career screen (R7-38, R7-62)',
         expect(step.href, `${screen} must not give Result an href on an active run`).toBeNull();
     }
 });
+
+/*
+ * S-A-P01.3 — the card's base line rides the rail as a labelled reference, never as a reading.
+ *
+ * The five numbers a turn-1 decision is weighed against live on the card and were visible only on the
+ * trainee profile the Trainer had already left (`SHR-7`). What this asserts is the distinction the
+ * recommendation rests on: one labelled `Starting` sentence beneath the rail printing the card's five
+ * values, not five more rows that would read as a second measurement of the same stats (`NRM-2`).
+ *
+ * The walk is the shared `startCareer` helper, with its new `onTrainee` hook re-picking Vodka's costume
+ * form: the default walk leaves `character_card_id` null, and a run with no card has no base line — the
+ * branch `CareerCockpitTest` pins directly at the payload level.
+ */
+test('prints the card base stats as a labelled Starting line beneath the stat rail', async ({ page }) => {
+    const runUrl = await startCareer(page, 'unity_cup', {
+        onTrainee: async (stepPage) => {
+            // Two forms, so this step asks which. `Vodka` is filtered by name and the single filtered
+            // row is waited for, because the search is a server round trip and the Select buttons are
+            // disabled while it runs.
+            const rows = stepPage.locator('button[id^="trainee-"]');
+            await stepPage.getByLabel('Search').fill('Vodka', WRITE);
+            await expect(rows).toHaveCount(1, WRITE);
+            await expect(rows.first()).toBeEnabled(WRITE);
+
+            const vodkaId = (await rows.first().getAttribute('id')) as string;
+            await stepPage.locator(`#${vodkaId}`).click();
+            await expect(stepPage.locator(`#${vodkaId}`)).toHaveAttribute('aria-pressed', 'true', WRITE);
+
+            const formSelect = stepPage.locator('#selected-form');
+            await expect(formSelect).toBeVisible();
+            const formValue = await formSelect.locator('option').first().getAttribute('value');
+            expect(formValue, 'the form select carries no option').not.toBeNull();
+            await formSelect.selectOption(formValue as string, WRITE);
+        },
+    });
+
+    createdRunUrls.push(runUrl);
+
+    const line = page.locator('[data-region="starting-stats"]');
+    await expect(line).toBeVisible();
+    await expect(line).toContainText('Starting');
+    await expect(line).toContainText('before any training');
+
+    // Five numbers, one per stat: the rail's five rows are the readings and this is one sentence.
+    await expect(line.locator('span.font-mono')).toHaveCount(5);
+    // Vodka `[Wild Top Gear]`'s base line, measured from the database in proposal P-01 §2.
+    await expect(line).toContainText('96');
+    await expect(line).toContainText('105');
+    await expect(line).toContainText('88');
+});

@@ -208,6 +208,8 @@ const props = defineProps<{
     state: {
         stats: { key: string; label: string; current: number | null; target: number | null; cap: number }[];
         meta: { key: string; label: string; value: number | string | null }[];
+        /** The card's base five (`S-A-P01.3`), or null when the run names no costume form. */
+        starting_stats: Record<string, number> | null;
     };
     /** A-0.11: the client's Mood Effect headline (great tier: +20% training, +4% running). */
     moodEffect: { training: number; running: number };
@@ -843,6 +845,7 @@ const jumpToShop = (): void => {
                 <CareerStatePanel
                     :stats="props.state.stats"
                     :meta="props.state.meta"
+                    :starting-stats="props.state.starting_stats"
                     :growth-rate="props.identity.growth_rate"
                     :fan-ladder="props.identity.fan_ladder"
                     :mood-effect="props.moodEffect"
