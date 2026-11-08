@@ -1455,7 +1455,84 @@ targets is not rendered by any current component. This round touched no file tha
 is not green and was not green before this round. The 74 carry the same standing as the three Pest
 failures at item 10a — debt owed to earlier rounds.
 
-### 8. Lore delta
+### 7b. The two non-reproducing failures — named
+
+**The record said "72 of 74" without naming the other two.** That subtraction was itself a read of two
+counts, which is the failure mode this pass exists to correct. Named by diffing the two logs' failure
+lists case-by-case:
+
+| Spec | Case | At `--workers=1` |
+| --- | --- | --- |
+| `tests/browser/career-legacy-deck-steps.spec.ts:652` | Setup step 5 — Support deck › carries the ancestry and the deck through the steps and writes no run behind them | **did not fail** |
+| `tests/browser/runs-index.spec.ts:31` | the filter row is one line, the active row is named, and the turn carries its de[something] | **did not fail** |
+
+No case failed at one worker that had not failed in the sweep, so the direction is unambiguous: these two
+are the difference and nothing else is.
+
+**What the record now claims, precisely.** 72 of 74 reproduce at one worker. The remaining two are
+**`UNMEASURED` for cause**: one run at one worker is not evidence that a case is contention-dependent, only
+that it did not fail under that condition. Calling them "contention" would repeat the error this pass is
+correcting — inferring a mechanism from a single observation. The sentence "contention is refuted" is
+narrowed to what the experiment supports: **72 of 74 are not contention**; two have no measured cause.
+
+`career-legacy-deck-steps` is a spec this round touched, so its non-reproduction matters: it did not fail
+at one worker here, and it passed 3/3 on the touched cases in an earlier isolated run. That is consistent
+but not proof; it stays `UNMEASURED` rather than being claimed green.
+
+### 7c. The 41-vs-42 spec set — reconciled
+
+The dispatch said "74 failures across 42 spec files"; this ledger says 41. Measured:
+
+- Distinct spec files carrying at least one failure in the sweep: **41**.
+- Spec files in the single-worker run: **41**.
+- Failing specs absent from that run: **none**.
+- Specs in that run that never failed: **none**.
+
+The two sets are identical, so **the dispatch's 42 was wrong** and the 72-of-74 denominator is right. No
+spec was silently excluded, which was the dangerous possibility: had one been, the reproduction figure
+would have been denominated against the wrong set and the claim would have been meaningless.
+
+### 7d. The eight remaining gate sections — verified mechanically
+
+The `### 7. Gates` heading appears **nine times** in this file, and one of those (S3's) was overwritten by
+a positional edit and restored at `e81fe7b9`. "Checked by eye" is what missed it the first time, so each
+was verified by a token that must appear only in its own section:
+
+| Section | Distinguishing token | Result |
+| --- | --- | --- |
+| `§s3` | `TraineeGoalsPanelTest` | present |
+| `§s5` | `career-build-target` | present |
+| `§s2` | `CareerRaceDecisionTest` | present |
+| `§s0` | `three files` | present |
+| `§s6` | `stat denominator` | present |
+| `§s1` | `9 passed` | present |
+| `§s17b` | `TraineeCardFormTest` | present |
+| `§s4` | `CareerPreflightTest` | present |
+| `close-out` | `Full Pest` | present |
+
+Each table's first row also names the slice its enclosing `##` header claims. **No further drift.**
+
+### 7e. The 72 browser failures — grouped by boundary
+
+The record said the failures were "owed earlier rounds with boundary commits named". That was true of the
+three Pest failures and **not** of the 72, which had no commits named at all. Grouped measurement:
+
+| Group | Count | What the failures are | Boundary (measured) |
+| --- | --- | --- | --- |
+| Stale locator and accessible-name assertions | 69 | the selectors and names the assertions address changed shape under a later component commit | each spec's own introducing commit; three specimens measured: `career-deck-summary` ← `3a4459ca`, `page-header` ← `457237a9`, `scenario-panel`'s meter ← `f7d99280`. **All three verified ancestors of `6f95c476`** |
+| `scenario-panel`'s meter cases | 3 (of the 69) | `getByRole('img', { name: /Team Rank: not recorded/ })` — no `role="img"` carries that label in any commit (register §10) | never rendered; the assertion has been failing since written. `f7d99280` is the commit that restored the surrounding cockpit surfaces |
+| The two non-reproducing cases | 2 | named at item 7b; did not fail at one worker | **`UNMEASURED`** — one observation is not a cause |
+
+**The check that matters:** no specimen's boundary is the session base `6f95c476` or later, so none of
+these is this round's defect. Had any been, the classification would have been wrong and the round's own
+defect list would have grown.
+
+The grouping is by mechanism rather than by commit-per-case because the alternative — one `git log -S` per
+failing selector across 72 cases — costs hours and would produce the same three-era answer. What is
+measured is that the three specimens span the three eras; what is not measured is a commit per case, and
+the count column says so by naming 69 as a group rather than claiming each.
+
+### 8. Lore delta### 8. Lore delta
 `Lore docs: 556 / 75 exempt` — **delta 0** since S0's open.
 `Lore code: 318` — **delta +136** from the last recorded baseline of 182.
 

@@ -769,6 +769,25 @@ Noticed while reading the tree; no walk row covers them. None is a slice.
   `tail -5`; (c) never write a figure into a durable record without at least one of those two.
   **Every future session quoting a test figure owes its exit code or its summary line.** A figure
   without one is a claim, not a measurement. Dated 2026-11-08.
+- **A durable record edited positionally is a record that can be overwritten** — this round's close-out
+  gate table anchored on the string `### 7. Gates`, which appears **nine times** in the slice ledger. The
+  edit landed in S3's section and replaced S3's own measured gate record (20 passed on
+  `TraineeGoalsPanelTest`, 116 across six adjacent suites, plus an environment note about an empty
+  `node_modules`) with the close-out's table and a refuted verdict. No tool caught it; the count was only
+  noticed because an unrelated grep returned the wrong row. Restored at `e81fe7b9`. **The guard is not
+  "be careful":** anchor a durable-record edit on the enclosing section header (`## §s3 — …`), never a
+  heading that repeats, and after any edit re-read the section's own items 1-4 to confirm the file still
+  describes the slice it claims to. Dated 2026-11-08.
+- **A spec can assert a surface that was never built** — `tests/browser/scenario-panel.spec.ts:91` addresses
+  `getByRole('img', { name: /Team Rank: not recorded/ })`. No component renders that: the Team Rank reading
+  is `ResourceStrip.vue:68-70` (a `Team Rank` label with `not yet recorded` as sub-text) and
+  `TeamRankGauge.vue:18` (the prose `Rank not recorded`). Neither is an `img` role, and
+  `git log --all -S'aria-label="Team Rank'` returns nothing, so **the label the assertion names has never
+  existed in any commit**. `role="img"` itself does exist in the tree — seven hits, `ResourceStrip.vue:124`
+  among them — so the absence is specific to this label and this surface, not to the attribute. Three
+  `scenario-panel` cases fail on it. This is not a walk row (no walk saw it) and not this round's defect;
+  it is a test asserting an aspirational shape, and a future pass decides whether the surface returns under
+  that name or the spec changes shape. Dated 2026-11-08.
 - **A browser assertion quotes a stale caption.** `tests/browser/career-cockpit.spec.ts:829` asserts a string the
   cockpit no longer prints.
 - **`Saved.` on `UnityCupEditor` has no `role="status"`.** The confirmation is not announced.
@@ -991,5 +1010,12 @@ command-level record.
   mode. The `--code` flag form is docs mode (`tools/lore.php:47` reads `$argv[1] === 'code'`) and was the
   source of an earlier, wrong `code: 556` baseline. Deltas against round 6's recorded 555 / 313 are
   +3 / +5; the ledger's `#close-out` item 8 carries the correction below its own earlier text.
+
+- **The lore figures above read 558 / 318; the ledger now measures 560 / 318.** The two extra docs hits
+  are this verification pass's own ruling prose, which quotes the trigger words while ruling on them
+  (class 1 — naming the list to rule on it). The ledger's `#close-out` item 7 is the authoritative gate
+  record and reads 560; where this note and the ledger differ, **the ledger wins** by construction, since
+  it carries each figure with the command and exit code that produced it and this note is a summary of it.
+  The code figure is unchanged at 318 and its delta against round 6's 313 is +5.
 
 **The register is closed.** The ledger is the durable record of what landed and what did not.
