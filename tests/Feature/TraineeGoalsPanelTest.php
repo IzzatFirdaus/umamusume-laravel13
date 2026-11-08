@@ -281,21 +281,38 @@ it('reads a past objective the run never played as not reached, not as missed', 
 /*
  * S-A-P01.1 — the ladder is URA's, so it composes only for a scenario that carries character goals.
  *
- * `trainee_goals` has no `scenario` column and holds one source's rows (`ura-objectives.*.json`,
- * P-01 §2 M-12/M-13), while `panels.career_goals` is on for three scenarios (M-17). A Unity Cup run
- * therefore composed a URA ladder as its own — ten race demands the scenario does not make.
- * Unity Cup is confirmed; Our Grand Concert keeps today's behaviour pending P-01 §7 decision 7.
+ * `trainee_goals` has no `scenario` column, and that is not a gap — it is the grain the data has.
+ * `ADR-0026` (Accepted, owner-ratified 2026-10-13) decides it: *"**Trainee grain, no run scope.**
+ * `trainee_goals` keys on `umamusume_id`"* — and `docs/scenarios/09-global-race-calendar.md:641`
+ * states it from the source side: *"The goals are the character's own, per trainee rather than per
+ * scenario."* Measured: all 1,677 stored rows point at a `race_catalog_slots` row whose
+ * `scenario_key` is **null** — the shared races every scenario runs — and the four scenario-scoped
+ * slots are the finals, which carry no goal row at all.
+ *
+ * So the ladder is **the character's own goals**, not URA's, and it is not wrong data under another
+ * scenario. `docs/scenarios/02-unity-cup.md:169` says so directly: Unity Cup is *"URA Finals plus a
+ * team layer — same base schedule, same objective shape, same final 3 races"*, and `:289` repeats it:
+ * *"your trainee's individual race goals are unchanged from URA Finale and still run in parallel."*
+ * Our Grand Concert says the same (`docs/scenarios/07-grand-concert.md:242`: *"The scenario has
+ * character race goals, which is what the panel is for"*).
+ *
+ * **These cases were wrong once.** `S-A-P01.1` gated Unity Cup off, arguing the ladder was *"URA's"*
+ * and therefore another scenario's business. That argument used the same reading that mislabels the
+ * data: the ladder is the character's, so it was the character's own demands being shown. Corrected
+ * 2026-11-08 with the corpus read that settled it.
  */
-it('composes no trainee goal ladder for a Unity Cup run, because the table is URA only', function (): void {
+it('composes the trainee own ladder for a Unity Cup run, because the goals are the characters', function (): void {
+    // `02-unity-cup.md:169` — Unity Cup keeps the per-character race goals on their normal schedule.
     $run = goalsRun('unity_cup');
     goalFor($run, ['career_year' => 1, 'turn' => 12, 'source_order' => 1, 'goal_type' => TraineeGoalType::Participate, 'required_placement' => 0]);
 
     $group = goalsGroup($run);
 
-    expect($group['rows'])->toBe([]);
+    expect($group['rows'])->toHaveCount(1)
+        ->and($group['group'])->toBe('Trainee goals');
 });
 
-it('still composes the ladder for a URA Finale run on the same data', function (): void {
+it('composes the trainee own ladder for a URA Finale run on the same data', function (): void {
     $run = goalsRun('ura_finale');
     goalFor($run, ['career_year' => 1, 'turn' => 12, 'source_order' => 1, 'goal_type' => TraineeGoalType::Participate, 'required_placement' => 0]);
 
@@ -305,15 +322,13 @@ it('still composes the ladder for a URA Finale run on the same data', function (
         ->and($group['group'])->toBe('Trainee goals');
 });
 
-it('leaves Our Grand Concert composing the ladder until the owner rules on its goal source', function (): void {
-    // P-01 §7 decision 7 is open: `config/scenarios.php:1118-1119` says the trainee's own ladder is
-    // "a career fact rather than a concert mechanic" without saying which ladder. Until the owner
-    // rules, the panel keeps the behaviour it has, so this case pins today's answer rather than a
-    // guess at tomorrow's.
+it('composes the trainee own ladder for an Our Grand Concert run', function (): void {
+    // `07-grand-concert.md:242` — the scenario has character race goals, which is what the panel is for.
     $run = goalsRun('our_grand_concert');
     goalFor($run, ['career_year' => 1, 'turn' => 12, 'source_order' => 1, 'goal_type' => TraineeGoalType::Participate, 'required_placement' => 0]);
 
     $group = goalsGroup($run);
 
-    expect($group['rows'])->toHaveCount(1);
+    expect($group['rows'])->toHaveCount(1)
+        ->and($group['group'])->toBe('Trainee goals');
 });

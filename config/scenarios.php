@@ -415,11 +415,12 @@ return [
                 'Taiki Shuttle', 'Rice Shower', 'Haru Urara', 'Matikanefukukitaru', 'Riko Kashimoto',
             ],
             'facility_level_source' => 'team_rank',
-            // `trainee_goals` holds the URA source's rows only, so this scenario composes no
-            // per-character ladder. `panels.career_goals` stays on because the panel is where a
-            // scenario's own objective content draws; it now draws none here rather than another
-            // scenario's (S-A-P01.1).
-            'goal_source' => null,
+            // The per-character ladder, which is this scenario's own: `02-unity-cup.md:169` says
+            // Unity Cup is "URA Finals plus a team layer — same base schedule, same objective shape,
+            // same final 3 races", and `:289` repeats that the trainee's individual race goals "are
+            // unchanged from URA Finale and still run in parallel". Team Races are the layer Unity
+            // Cup adds; the character's own goals stay (S-A-P01.4).
+            'goal_source' => 'trainee_goals',
             // Post 2026-07-01: the extra energy cost on team training was removed.
             'team_training_energy_penalty' => false,
             'wit_burst_energy_bonus' => 5,
@@ -1078,6 +1079,15 @@ return [
             | up every four times you use them ... until level 5." Same rule as URA, tier B, one page.
             */
             'facility_level_source' => 'repetition',
+            /*
+            | The per-character goal ladder, which this scenario carries: `07-grand-concert.md:242`
+            | records that "the scenario has character race goals, which is what the panel is for", and
+            | the ladder's own grain is the character rather than the scenario (`ADR-0026`: "Trainee
+            | grain, no run scope"; `09-global-race-calendar.md:641`: "the goals are the character's own,
+            | per trainee rather than per scenario"). Every stored row points at a shared race, so the
+            | ladder describes the trainee under any scenario that asks for it (S-A-P01.4).
+            */
+            'goal_source' => 'trainee_goals',
             /*
             | `documented` is a provenance marker, not a rendering switch: nothing in app/, resources/ or
             | tests/ reads it. It asserted that no mechanics guide was held here, and after the 2026-10-05

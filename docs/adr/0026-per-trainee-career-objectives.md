@@ -32,6 +32,14 @@ a turn that agrees with the stored turn on every one of them. The three that mis
 `unreleased_servers: ["en"]` marker, so the source states that they are not Global races rather than leaving
 that to be inferred.
 
+*Dated note 2026-11-08 (S-A-P01.4).* The figures above are as measured on the roster of that day. The
+roster has since grown: the `trainee_goals` table now holds **133 trainees and 1,677 objectives**, of which
+**399** are the three post-December finals. The ratio is the same and the decision is unchanged — 399 is
+exactly 3 × 133, and 201 was exactly 3 × 67 — so what the table holds is the same shape at nearly twice the
+size. Nothing here is contradicted; a reader comparing the two sets of figures should not read 201 against
+399 as a discrepancy. The decision's grain, which is the part that binds, is unaffected: the ladder is keyed
+on `umamusume_id`, so every stored row describes a character rather than a scenario.
+
 Two independent readings confirm the decode rather than one. The `[Global]` client captures in
 `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:186-191` state Rice Shower's four Senior objectives with month and
 half, and the export's ladder for `char_id 1030` lands on the same turns, the same races and the same placings.
