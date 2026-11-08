@@ -2364,3 +2364,150 @@ Ledger section committed with this pass's final ledger commit.
 - The Builder's `Applies to` label (P-02's surface, recorded in `§s-a-p01-3` §9).
 - `legacy-index.spec.ts:110`'s pre-existing 404 (`§s-a-p02-4` §6).
 - No register row: none was opened.
+
+---
+
+## §s-a-p02-5 — S-A-P02.5: the Target list is searchable by the Japanese name it prints
+
+### 1. What this slice is
+P-02 decision 4's second half. The option list carried `name` alone, so a Trainer could not find a skill
+by the Japanese name the row prints beside it.
+
+### 2. Why it was not in `.2`
+P-02 §0.3 first recorded it as *"not cheap"*. That was a judgement, not a measurement, and it was wrong.
+The change is one column on the payload in two controllers: `pluck('name')` to `get(['name','name_ja'])`.
+
+### 3. What changed
+`app/Http/Controllers/Career/LegacySelectController.php`, `app/Http/Controllers/LegacyController.php` —
+the `sparkTargets.Skill` entry is now `list<array{name: string, name_ja: string|null}>` instead of
+`list<string>`. `Stat` and `Aptitude` stay plain strings: they are the client's own words with no second
+spelling, and `inferCategory()` reads them by value.
+
+`resources/js/components/legacy/SparkTargetPicker.vue` — accepts `(string | {name, name_ja})[]`,
+normalises to one shape, renders the Japanese name in a `<span lang="ja">`, and matches either name in
+`matches`. `lang="ja"` is not decoration: it is what tells a screen reader to switch pronunciation.
+
+Three prop declarations updated to the accurate type (`Career/LegacySelect.vue`,
+`legacy/AncestorEditor.vue`, `Legacy/Builder.vue`).
+
+### 4. The rule this answers
+`SkillController.php:515`, in the tree's own words: *"The rule is search matches what the user can see."*
+Two existing pickers already follow it — support cards match `name_ja` (`SupportCardController.php:643`)
+and the skill catalogue matches `match_key_ja` (`SkillController.php:579`). The spark picker was the
+outlier. 605 of the 623 Global-client skills carry a `name_ja` that differs from `name`, and `DESIGN.md:573`
+already lists `name_ja` among the fields a skill row prints.
+
+### 5. RED to GREEN
+`tests/Feature/SparkTargetValidationTest.php` — the two existing cases asserted `toContain($skill->name)`
+against a string array, so the shape change rewrote both to read `array_column($skills, 'name')`, and a
+third case was added asserting the `name_ja` rides beside the name. RED: 3 failed. GREEN after the
+controller change: **9 passed (33 assertions)**.
+
+`tests/browser/career-legacy-deck-steps.spec.ts` — a case types the Japanese name and asserts the matching
+row is still selectable by keyboard. **This case was proved non-vacuous twice, and the first proof found a
+real defect in the test.** Its first version passed against a build with the Japanese match removed,
+because it read the row's `innerText` (which includes the English name) and sliced a three-character
+prefix — an English prefix. The corrected version reads the `lang="ja"` span itself; with only the
+Japanese match reverted it fails with `Expected substring: "十万バリキ"`, and with the change restored it
+passes. Spec file: **19 passed** in 33.1s.
+
+### 6. Gates
+```
+$ vendor/bin/pest tests/Feature/SparkTargetValidationTest.php tests/Feature/CareerLegacyDeckStepsTest.php \
+    tests/Feature/LegacyLabPageTest.php tests/Feature/LegacySelectionSchemaTest.php --compact
+  -> 68 passed (736 assertions)
+$ PLAYWRIGHT_PORT=8201 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/impl-session-2026-11-08/browser-8201.sqlite \
+    npx playwright test tests/browser/career-legacy-deck-steps.spec.ts  -> 19 passed (33.1s)
+$ vendor/bin/pint --test --format agent <3 touched php files>  -> passed
+$ vendor/bin/phpstan analyse --no-progress --memory-limit=1G    -> [OK] No errors
+$ npm run typecheck                                             -> clean
+$ npm run build                                                 -> built in 11.82s
+$ vendor/bin/pest tests/Feature/LineEndingGuardTest.php         -> 1 passed (2 assertions)
+```
+`LineEndingGuardTest` failed once mid-slice: four files carried CRLF after an edit pass. Normalised, then
+green. That guard exists because `.gitattributes` declares `eol=lf` for these paths.
+
+### 7. Commit
+`662a0a42` — `feat(legacy): spark target list searchable by the Japanese name it prints (S-A-P02.5)`.
+
+---
+
+## §s-a-p01-4 — S-A-P01.4: the goal ladder is the character's own, so every scenario that asks for it composes it
+
+### 1. What this slice is
+The correction to `S-A-P01.1`. `.1` gated Unity Cup off the character goal ladder, arguing the table held
+*"URA-only data"*. **That premise was wrong**, and this slice ships the corrected reading.
+
+### 2. The evidence that overturned it
+- `ADR-0026` (Accepted): *"Trainee grain, no run scope. `trainee_goals` keys on `umamusume_id`"*.
+- `docs/scenarios/09-global-race-calendar.md:641`: *"The goals are the character's own, per trainee rather
+  than per scenario"*.
+- `docs/scenarios/02-unity-cup.md:169`: *"Your trainee's own individual race goals still apply on their
+  normal schedule (same as URA Finale) ... Unity Cup adds Team Races on top; it does not remove the
+  underlying career race-goal structure."*
+- `docs/scenarios/02-unity-cup.md:289`: *"your trainee's individual race goals are unchanged from URA
+  Finale and still run in parallel — Unity Cup adds a layer on top, it doesn't remove the underlying
+  goal-race structure."*
+- `docs/scenarios/07-grand-concert.md:242`: *"The scenario has character race goals, which is what the
+  panel is for"*.
+- `docs/UMAMUSUME_REFERENCE.md` §1.2 (`:388`): *"The Debut Race is mandatory for **every character**"*;
+  §2.2 (`:1260`): *"**The standard career is back.** Race goals, career events and per-character hidden
+  events all return"*.
+- The measurement agrees: **1,201 of 1,677 goal rows carry a `race_catalog_slot_id`, and every one of the
+  1,201 joins a slot whose `scenario_key` is `null`** — a shared race. **Zero** rows point at any of the
+  four scenario-scoped slots (`ura_finale` 410, `unity_cup` 408, `trackblazer` 407, `our_grand_concert`
+  409). The other **476 carry a NULL slot id**: 399 `FinalRound` (excluded from the ladder at
+  `TeamPanelBuilder:243`), 63 `Fan`, 11 `Undecoded`, 3 `Placement`.
+
+### 3. A figure corrected
+The owner review recorded *"1,677 of 1,677 rows point at shared races"*. The **conclusion** is right — no
+goal row names a scenario — but the **denominator** was not: 476 rows carry no slot id at all. The
+reproducible figure is **1,201 of 1,677**, and it is the figure P-01 §0.3 now states.
+
+### 4. What changed
+`config/scenarios.php` — `unity_cup`'s `goal_source` restored to `'trainee_goals'`, with the corpus quote
+in its comment; `our_grand_concert`'s `goal_source` named `'trainee_goals'` explicitly. Trackblazer stays
+`null`, and its comment now says why: it has no `panels.career_goals` at all, so no panel composes whatever
+the key says.
+
+`docs/scenarios/07-grand-concert.md:242` — a dated note recording that the decision the cell named has been
+made, that it went the other way from what the cell expected, and that the character goal ladder **is**
+composed while the race *calendar* stays off (a separate surface, a separate absence).
+
+`docs/adr/0026-per-trainee-career-objectives.md` — a dated note recording the roster's growth: the ADR's
+67 trainees / 829 objectives / 201 finals was measured on that day's roster; today it is **133 / 1,677 /
+399**. The shape is identical — 399 is exactly 3 x 133 as 201 was exactly 3 x 67 — so the two figure sets
+are consistent rather than contradictory, and the decision's grain is unaffected.
+
+### 5. RED to GREEN
+`tests/Feature/TraineeGoalsPanelTest.php` — three cases rewritten. The Unity Cup case now asserts the
+ladder **composes**, with `02-unity-cup.md:169,289` quoted in its docblock; the URA case is unchanged in
+behaviour; the OGC case asserts it composes too, with `07-grand-concert.md:242` quoted. RED on the Unity
+Cup case before the config change: **1 failed, 22 passed (234 assertions)**. GREEN after: **23 passed
+(235 assertions)**.
+
+Non-vacuity: the config diff was reverted, the suite returned to `1 failed, 22 passed`, and the exact diff
+was reapplied — `git diff` byte-identical to the saved diff — returning 23 passed.
+
+`config/scenarios.php` at rest now reads: `ura_finale` `'trainee_goals'` (`:201`), `unity_cup`
+`'trainee_goals'` (`:423`), `trackblazer` `null` (`:644`), `our_grand_concert` `'trainee_goals'` (`:1090`).
+
+### 6. Gates
+```
+$ vendor/bin/pest tests/Feature/TraineeGoalsPanelTest.php tests/Feature/CockpitObjectivesTest.php \
+    tests/Feature/CareerCockpitTest.php tests/Feature/ScenarioPanelTest.php \
+    tests/Feature/LineEndingGuardTest.php --compact          -> 113 passed (1446 assertions)
+$ vendor/bin/pint --test --format agent config/scenarios.php tests/Feature/TraineeGoalsPanelTest.php -> passed
+$ vendor/bin/phpstan analyse --no-progress --memory-limit=1G -> [OK] No errors
+$ python tools/md_fence_check.py <both docs>                 -> 0 invalid closing fence(s) in 2 file(s)
+```
+
+### 7. Commit
+`f434b41a` — `fix(cockpit): the goal ladder is the character's own, so every scenario that asks for it composes it (S-A-P01.4)`.
+
+### 8. Does not close
+- `S-A-P01.OG` no longer exists as separate work: decision 7 is settled here, by the corpus rather than by
+  a new ruling.
+- The Builder's `Applies to` label split (P-02's surface, `§s-a-p02-4` §6).
+- `legacy-index.spec.ts:110`'s pre-existing 404.
+- No register row: none was opened.
