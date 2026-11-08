@@ -528,11 +528,22 @@ test.describe('Trainee Selection and Profile', () => {
         // states the absence rather than a number.
         await expect(page.getByRole('heading', { name: 'Unique skill' })).toBeVisible();
         await expect(page.getByText('Shooting Star of Dioskouroi')).toBeVisible();
-        await expect(page.getByText('Unique')).toBeVisible();
 
-        // The two rows the wireframe keeps for figures this catalogue does not hold.
-        await expect(page.getByText(/No growth figure is recorded/)).toBeVisible();
-        await expect(page.getByText(/No base-stat figure is recorded/)).toBeVisible();
+        // S0b: `getByText('Unique')` resolved to three elements once the section grew a heading and a
+        // provenance pill beside the word, so the case failed on strict mode rather than on a missing
+        // fact. The heading is what the wireframe draws and what the assertion means.
+        await expect(page.getByRole('heading', { name: 'Unique skill' })).toBeVisible();
+        await expect(page.getByText(/✦ Unique · from the source/)).toBeVisible();
+
+        // S0b: the two absence rows render only when the figure really is absent, and this trainee's
+        // debut form carries growth rates (Speed 10, Power 20) and base stats, so neither sentence is
+        // due here. The old assertion encoded the opposite premise -- that the catalogue holds neither
+        // figure for anyone -- and the page correctly withholds both sentences when the data exists.
+        await expect(page.getByText(/No growth figure is recorded/)).toHaveCount(0);
+        await expect(page.getByText(/No base-stat figure is recorded/)).toHaveCount(0);
+
+        // What IS on the page for this form: the growth cells carry the recorded percentages.
+        await expect(page.getByText('20%').first()).toBeVisible();
 
         // The Build analysis section is GONE (slice 3.4); its durable sentence survives as prose.
         await expect(page.getByRole('heading', { name: 'Build analysis' })).toHaveCount(0);
