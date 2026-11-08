@@ -1,6 +1,6 @@
 # Proposal — Trainee preset auto-fill at career start
 
-**Status:** proposal, not slice. **Decisions 1-4 ruled and implemented as `S-A-P01.1`-`.3`** — `955ff4f2`, `39804efe`, `4072042c`. **Decision 7 (Our Grand Concert's goal source) is still open** and `S-A-P01.OG` is held on it. Awaiting that ruling and review.
+**Status:** proposal, not slice. **Decisions 1-7 ruled and implemented as `S-A-P01.1`-`.4`** — `955ff4f2`, `39804efe`, `4072042c`, `f434b41a`. **Decision 7 is now settled by the corpus, not by a new ruling** (§0.4), and §4.3's Unity Cup gating was **corrected** at `.4` because it rested on a misreading of the ladder's grain (§0.3). Awaiting review.
 **Date opened:** 2026-11-08
 **Implemented:** 2026-11-08, same session
 **Source:** user's session, 2026-11-08; screenshot `/umamusume/vodka` profile page (base stats `96 / 61 / 105 / 75 / 88`, growth row `10 / 0 / 20 / 0 / 0`); user's words quoted in §1.
@@ -18,10 +18,10 @@
 
 | Slice | Commit | Files | What it delivered |
 | --- | --- | --- | --- |
-| `S-A-P01.1` | `955ff4f2` | `config/scenarios.php`, `TeamPanelBuilder.php`, `TraineeGoalsPanelTest.php` | A per-scenario `goal_source` key (`ura_finale` → `'trainee_goals'`, `unity_cup` → `null`, `trackblazer` → `null`, OGC **unset**). `TeamPanelBuilder::traineeGoalRows()` returns no rows when the key is `null`. **Unity Cup no longer composes a URA ladder.** Three cases: Unity Cup composes none, URA Finale still does, OGC unchanged pending decision 7 |
+| `S-A-P01.1` | `955ff4f2` | `config/scenarios.php`, `TeamPanelBuilder.php`, `TraineeGoalsPanelTest.php` | A per-scenario `goal_source` key. `TeamPanelBuilder::traineeGoalRows()` returns no rows when the key is `null`. **Its Unity Cup half was wrong and was corrected at `.4`** — see §0.3 item 0. The gate mechanism itself stands |
 | `S-A-P01.2` | `39804efe` | `SeedRunSkills.php` (new), `PreflightController.php`, `TrainingRunController.php`, `CareerPreflightTest.php` | `app/Actions/SeedRunSkills.php` is now the **one** seeding owner; `TrainingRunController::prePopulateSkills()` delegates to it and the wizard door calls it inside the same transaction. The stale "No start skills are seeded" sentence at `PreflightController:51` is corrected. Two cases: a wizard-started run holds the card's `innate ∪ unique` as `Suggested`; a card-less draft seeds nothing |
 | `S-A-P01.3` | `4072042c` | `CockpitController.php`, `CareerStatePanel.vue`, `Cockpit.vue`, `CareerCockpitTest.php`, `career-cockpit.spec.ts`, `start-career.ts` | `state.starting_stats` on the payload and a labelled `Starting:` line beneath the stat rail: `96 61 105 75 88` with the words *"the card's base line, before any training"*. **Absent entirely for a run with no card** — not `N/A`, not five zeroes |
-| `S-A-P01.OG` | **held** | — | Our Grand Concert's `goal_source`, pending decision 7 |
+| `S-A-P01.4` | `f434b41a` | `config/scenarios.php`, `TraineeGoalsPanelTest.php`, `07-grand-concert.md`, `ADR-0026` | **The correction.** `unity_cup`'s `goal_source` restored to `'trainee_goals'` and `our_grand_concert`'s named `'trainee_goals'`; Trackblazer stays `null`. The ladder is **the character's own goals**, so every scenario that asks for it composes it. `07-grand-concert.md:242` gains a dated note and `ADR-0026` a dated roster-growth note |
 
 Ledger: `§s-a-p01-1` … `§s-a-p01-3` and `§s-a-p01-close-out` in `docs/audits/rice-shower-unity-cup-round7-slice-audits.md`.
 
@@ -32,13 +32,27 @@ Ledger: `§s-a-p01-1` … `§s-a-p01-3` and `§s-a-p01-close-out` in `docs/audit
 | 1 | Seed starting skills on the wizard door | Yes | `.2` — `SeedRunSkills` action, called from `PreflightController::store()` |
 | 2 | Base stats as a reference, not an input | Yes — reference | `.3` — `state.starting_stats` + the `Starting:` line |
 | 3 | Extend the snapshot door | No | not done, as ruled. `CreateSnapshotRun` names no card, so there is nothing to seed from |
-| 4 | Gate the goal ladder per scenario | Yes, Unity Cup | `.1` — the `goal_source` key |
-| 4a | Hidden panel or empty state | Hidden | `.1` — the panel composes no rows, following `ScenarioPanel.vue`'s off-flag behaviour and Trackblazer's precedent |
+| 4 | Gate the goal ladder per scenario | Yes — but the gate's *scope* was wrong and was corrected at `.4` | `.1` — the `goal_source` key. **Corrected at `.4`**: the ladder is the character's own, so the gate now applies only to Trackblazer, whose `panels.career_goals` is already absent. See §0.3 item 1 |
+| 4a | Hidden panel or empty state | Hidden | `.1` — the panel composes no rows, following `ScenarioPanel.vue`'s off-flag behaviour and Trackblazer's precedent. `.4` kept the mechanism and the precedent; only the value changed |
 | 5 | Add `scenario` to `trainee_goals` | No | not done, as ruled. A schema change for data that does not exist |
 | 6 | Editability after seeding | Already supported | nothing built — `SkillsPlannerController` writes `Acquired`/`Skipped`/`Suggested`; `RunSettings.vue` edits `growth_rate` and the caps |
-| 7 | Our Grand Concert's ladder | **OPEN** | `S-A-P01.OG` held — see §0.4 |
+| 7 | Our Grand Concert's ladder | **Settled by the corpus, not by a new ruling** — see §0.4 | `.4` — `our_grand_concert`'s `goal_source` is `'trainee_goals'`, named explicitly |
 
 ### §0.3 Where implementation diverged from the proposal
+
+0. **The biggest divergence: §4.3's premise was wrong, and the fix shipped its correction at `.4`.** §4.3 called `trainee_goals` *"URA-only data"* (M-12, M-13) and gated Unity Cup off on that basis. **The data is not URA's.** Three sources, read after the owner review:
+
+   - `ADR-0026` (Accepted, owner-ratified 2026-10-13): *"**Trainee grain, no run scope.** `trainee_goals` keys on `umamusume_id`"*.
+   - `docs/scenarios/09-global-race-calendar.md:641`: *"The goals are the character's own, per trainee rather than per scenario"*.
+   - `docs/scenarios/02-unity-cup.md:169`: *"Your trainee's own individual race goals still apply on their normal schedule (same as URA Finale) … Unity Cup adds Team Races on top; it does not remove the underlying career race-goal structure"*, and `:289`: *"your trainee's individual race goals are unchanged from URA Finale and still run in parallel — Unity Cup adds a layer on top, it doesn't remove the underlying goal-race structure"*.
+
+   So the ladder is the character's own goals, and Unity Cup composing Vodka's race demands was **never wrong data** — those are Vodka's goals, on races every scenario shares. §4.3's reasoning used the same mislabelling that produced the false "URA ladder" binary, and the owner review is what caught it: *"If the ladder is the character's, not URA's, then Unity Cup rendering Vodka's ten race demands is not wrong data."*
+
+   **Measured, precisely** (`select … from trainee_goals left join race_catalog_slots`): of 1,677 goal rows, **1,201 carry a `race_catalog_slot_id` and every one of the 1,201 joins a slot whose `scenario_key` is `null`** — a shared race. **Zero** goal rows point at any of the four scenario-scoped slots (`ura_finale` 410, `unity_cup` 408, `trackblazer` 407, `our_grand_concert` 409). The remaining **476 carry a NULL `race_catalog_slot_id`**: 399 `FinalRound`, 63 `Fan`, 11 `Undecoded`, 3 `Placement`. The 399 finals are the per-scenario fork, and `TeamPanelBuilder:243` already excludes them from the ladder; the 63 `Fan` rows are the fan-threshold goals that carry no slot by construction.
+
+   **The correction, landed at `S-A-P01.4` (`f434b41a`):** `unity_cup`'s `goal_source` restored to `'trainee_goals'`, `our_grand_concert`'s named `'trainee_goals'`, and **Trackblazer stays `null`** — it has no `panels.career_goals` at all (M-17), so it composes no panel whatever the key says. The gate mechanism from `.1` stands; only its values changed.
+
+   **A number in the owner's own review is corrected here, because the proposal now carries it.** The review recorded *"1,677 of 1,677 rows point at shared races"*. The **conclusion** is right — no goal row names a scenario — but the **denominator** was wrong: it is **1,201 of 1,677** that carry a slot at all, and it is those 1,201 that all point at shared slots. The other 476 hold no slot id and so cannot name a scenario either way. The proposal states the corrected figure because it is the figure a reader can reproduce with one query.
 
 1. **A fourth test had to move.** `CockpitGoalFromCompletedRaceTest` asserted a `unity_cup` run composes a trainee ladder — precisely the behaviour `.1` was ruled to remove. The case is about the derivation from a completed race, so it now runs on `ura_finale`, the scenario whose ladder exists. Fixed at `04b9b092`, with the reason written into the test. It was the **fourth** Pest failure of the full suite and the only one this work caused.
 
@@ -46,14 +60,31 @@ Ledger: `§s-a-p01-1` … `§s-a-p01-3` and `§s-a-p01-close-out` in `docs/audit
 
 3. **The browser case needed a fixture the tree did not have.** `tests/utils/start-career.ts` picks the first roster row and never sets a costume form, so every run it creates is card-less and could only assert the absent branch. Rather than duplicate the walk, an `onTrainee` hook was added beside the existing `onLegacy` hook — the same additive shape that helper's own docblock records for round 4.1. The case then picks Vodka, who has two forms in the fixture.
 
-### §0.4 `S-A-P01.OG` — the one held slice
+### §0.4 Decision 7 — settled by the corpus, and it settled more than OGC
 
-`config/scenarios.php:1118-1119` reads: *"the trainee's own objective ladder is a career fact, not a concert mechanic"* and calls it "the one panel this entry composes". It does not say whether that ladder is the URA list `trainee_goals` holds or a concert-specific one no table carries.
+`config/scenarios.php:1118-1119` reads: *"the trainee's own objective ladder is a career fact, not a concert mechanic"* and calls it "the one panel this entry composes". It did not say whether that ladder is the URA list `trainee_goals` holds or a concert-specific one no table carries.
 
-- If **URA's ladder** → OGC's `goal_source` becomes `'trainee_goals'`, one config line, and its cockpit keeps the rows it shows today.
-- If **a concert ladder** → OGC's `goal_source` becomes `null`, one config line, and `TeamPanelBuilder` gates it exactly as it gates Unity Cup.
+**The corpus answers the question, and the answer is "neither".** The ladder is **the character's own**, and that is a third thing the two branches did not contain:
 
-Either way it is one line plus one test. **OGC's key is deliberately left unset**, so `config('scenarios.scenarios.X.goal_source', 'trainee_goals')` defaults to the ladder and the scenario keeps exactly the behaviour it had — shipping a gate that changed OGC's cockpit before the owner ruled would have been a policy decision this work has no authority to make. Nothing else depends on the answer, which is why the other three slices ship without it.
+- `ADR-0026` (Accepted): *"Trainee grain, no run scope. `trainee_goals` keys on `umamusume_id`"*.
+- `docs/scenarios/09-global-race-calendar.md:641`: *"The goals are the character's own, per trainee rather than per scenario"*.
+- `docs/scenarios/07-grand-concert.md:242`: *"The scenario has character race goals, which is what the panel is for"*.
+- `docs/scenarios/02-unity-cup.md:169` and `:289`: Unity Cup *"adds Team Races on top; it does not remove the underlying career race-goal structure"*.
+
+**The owner's review is what forced the read, and it was right to force it:** the review noted that landing OGC's half alone *"produces an asymmetry the corpus does not support: OGC composes the ladder, Unity Cup does not, both on identical evidence, no distinguishing source cited. A future reader of `config/scenarios.php` will not be able to explain it from the file."* That is exactly what happened, and the two candidate files named in the review settled it — with one correction: the Unity Cup file is `docs/scenarios/02-unity-cup.md`, not `08-unity-cup.md` (`08` is Grand Masters, `[JP]`-only).
+
+**What landed, at `S-A-P01.4` (`f434b41a`) — the unified fix, not the OGC half:**
+
+| Scenario | `goal_source` | Why |
+| --- | --- | --- |
+| `ura_finale` | `'trainee_goals'` | unchanged — it was always right |
+| `unity_cup` | `'trainee_goals'` | **restored.** `02-unity-cup.md:169,289` — the character goals still apply |
+| `our_grand_concert` | `'trainee_goals'` | **named.** `07-grand-concert.md:242` — the scenario has character race goals |
+| `trackblazer` | `null` | **stays off.** No `panels.career_goals` at all (M-17), so no panel composes whatever the key says |
+
+Two owner decisions are now closed that were not open before: decision 7, and decision 4's Unity Cup half, whose original reasoning did not survive the read.
+
+**The documents moved with the code.** `07-grand-concert.md:242` gained a dated note recording that the decision named there *"is an owner decision, not a fact to flip"*, that it has since been made, and that it went the other way from what the cell expected — the ladder **is** composed, and what stays off is the race *calendar*, a separate surface with a separate absence. `ADR-0026` gained a dated note recording that the roster grew from 67 trainees and 829 objectives to **133 and 1,677**, with the finals from 201 to **399** — the same shape at nearly twice the size (399 is exactly 3 × 133, as 201 was exactly 3 × 67), so the two figure sets are consistent rather than contradictory, and the decision's grain is unaffected.
 
 ### §0.5 What the measurement predicted vs what shipped
 
@@ -61,8 +92,8 @@ Either way it is one line plus one test. **OGC's key is deliberately left unset*
 | --- | --- |
 | `growth_rate` already seeds (M-7) | Confirmed and left alone — `StartCareerRequest.php:165-177` |
 | Skills seed on one door only (M-9) | Confirmed — the wizard door now seeds too, through one shared action |
-| `trainee_goals` has **no** `scenario` column, is URA-only (M-12, M-13) | Confirmed — the gate is a config key, not a column |
-| `panels.career_goals` is `true` for three scenarios (M-17) | Confirmed — URA and Unity Cup now differ; OGC awaits the ruling |
+| `trainee_goals` has **no** `scenario` column, is URA-only (M-12, M-13) | **The column half is confirmed** — the gate is a config key, not a column. **The "URA-only" half was wrong** — the rows are the character's own (ADR-0026; `09-global-race-calendar.md:641`), and `.4` corrected the recommendation that rested on it. See §0.3 item 0 |
+| `panels.career_goals` is `true` for three scenarios (M-17) | Confirmed — and after `.4` all three compose the ladder, because it is theirs. Trackblazer, the fourth, has no such panel |
 | `run_skills` was 0 rows across the dev database (M-6) | Still 0 for existing runs — the seeding applies to **new** runs only, which is the point |
 | The base five are a **card fact, not run state** | Enforced: the reference is read from the card at read time and written nowhere |
 
@@ -85,10 +116,38 @@ peer set        clean at open and close
 
 ### §0.7 Still open
 
-- **`S-A-P01.OG`** — decision 7, as §0.4 states.
+- **Nothing from decision 7.** It is closed by §0.4's corpus read.
 - **The `Applies to` / `Target` label split** on the Builder's Spark row. P-02's surface; recorded there and in `§s-a-p01-3` §9.
 - **`legacy-index.spec.ts:110`**'s pre-existing fixture 404. P-02's surface; recorded in `§s-a-p02-4` §6.
 - **The three pre-existing Pest failures** named in ledger §10a: `ScenarioAdvisorFinaleTest`, `UraPanelTest`, `UiHygieneTest`. The third is `TeamPanelBuilder.php:577` shipping a source-file path in payload copy — the line was 552 before this work's 25-line insertion above it and is **not in this work's diff**.
+
+### §0.8 Decision 7, explained — why the ladder is the character's own
+
+The owner's review asked for the reasoning to be stated against `docs/UMAMUSUME_REFERENCE.md` and the framework files. This is that statement.
+
+**The claim, in one sentence.** `trainee_goals` holds **the character's own career goals**, so a run composes them because the run is *that character's*, not because the scenario happens to be URA.
+
+**The reference corpus says so, in the client's own words.** `docs/UMAMUSUME_REFERENCE.md` §1.2 (`:388`) records what a race goal is and who owns it: *"The Debut Race is mandatory for **every character**"*; *"Campaign objectives are 'getting a minimum placing in a specific race or acquiring a set amount of fans before a set date'"*. **Every character.** Not every URA run — every character. The reference document attributes it to the export and to the career-mode wiki, and the subject of the goals is the character.
+
+**What the reference says about the scenarios that re-shape the career.** §2.2 (`:1260`) records for Our Grand Concert: *"**The standard career is back.** Race goals, career events and per-character hidden events all return, including New Year events and the hot spring lottery, so a Runaway-style gate is reachable here in a way it is not in Trackblazer."* The sentence's shape is the answer: the scenarios are not competing vocabularies for the goal concept; each one **keeps or removes the standard career**, and where the standard career is present the character's race goals are present with it. §2.2 (`:1124`) records the opposite case for the scenario that drops it: *"Open career, no race goals, no scenario link … What replaces career goals is four shared …"* — Trackblazer, which is the one scenario whose `goal_source` is `null`.
+
+**The scenario corpus confirms it for Unity Cup specifically.** `docs/scenarios/02-unity-cup.md:169`: *"Your trainee's own individual race goals still apply on their normal schedule (same as URA Finale) … Unity Cup adds Team Races on top; it does not remove the underlying career race-goal structure."* And `:289`: *"your trainee's individual race goals are unchanged from URA Finale and still run in parallel — Unity Cup adds a layer on top, it doesn't remove the underlying goal-race structure."* Unity Cup **adds a layer**. That is the opposite of "a different ladder replaces this one".
+
+**The measurement agrees, and it is the check that settles it.** Of 1,677 goal rows, 1,201 carry a `race_catalog_slot_id` and **every one of the 1,201 joins a slot whose `scenario_key` is `null`** — a race every scenario shares. **Zero** rows point at any of the four scenario-scoped slots. A ladder that belonged to URA would point at URA's slots. It points at shared ones.
+
+**What follows from it, per scenario.** URA, Unity Cup and Our Grand Concert all keep the standard career, so all three compose the character's goals. Trackblazer replaces the career with a different shape, so it composes none. **That is what `config/scenarios.php` now says**, with every key named explicitly rather than relying on a default.
+
+**The framework rules this answers to.**
+
+| Rule | What it requires | How the fix satisfies it |
+| --- | --- | --- |
+| `NRM-3` | *"A rule the system enforces is expressed by the control, not by a message after it."* | The enforced rule is "the ladder belongs to the character". The panel expresses that rule by drawing the character's own rows. The old gate expressed the opposite rule — "this ladder is URA's" — by drawing it under Unity Cup, which is why it read as a false claim. |
+| `H5` (error prevention) | Do not show the user a fact that is false for their run. | Under the corrected reading, Vodka's ten race demands under Unity Cup are **not** a false fact; they are her demands. The correction removes a defect that was created by the mislabelling, rather than introducing one. |
+| `IA-6` | *"Adding a scenario must cost configuration, not layout."* | The rule is expressed as one config key per scenario. A scenario that carries the standard career composes the ladder; one that replaces the career does not. Adding a fifth scenario costs a config row, not a branch. |
+| `SHR-1` | *"A consistency exception must be named in a document and be few."* | Trackblazer is the only scenario that does not compose the ladder, and it is the only one whose `panels.career_goals` is absent. One exception, named, and the reason is a corpus quote. |
+| `GP-1` | *"The product computes a figure the user would otherwise compute."* | The ladder is the product's own stored fact, joined by `umamusume_id`. Rendering it is the product computing; the Trainer never reconstructs her own objectives. |
+
+**The honest part.** The first draft of this proposal called the same table *"URA-only data"* and gated two scenarios off on that basis. That was the proposal's mislabelling, and the owner review caught it: *"If the ladder is the character's, not URA's, then Unity Cup rendering Vodka's ten race demands is not wrong data."* The shipped fix is the corrected reading, and §0.3 records the correction rather than quietly rewriting the original reasoning.
 
 ---
 
@@ -224,6 +283,8 @@ This is deliberately *not* "auto-fill the stat input". Pre-filling turn 1's stat
 
 ### 4.3 Gate the goal ladder on the scenario actually carrying character goals (defect)
 
+> **Dated correction 2026-11-08 (`S-A-P01.4`).** The paragraph below is kept as this proposal was written and reviewed, because it is the reasoning the owner ruled on. **Its central premise was wrong, and the shipped fix corrects it.** `trainee_goals` is **not** URA-only data: it is **the character's own goals**, which `ADR-0026` (*"Trainee grain, no run scope"*) and `docs/scenarios/09-global-race-calendar.md:641` (*"the goals are the character's own, per trainee rather than per scenario"*) both state, and which `docs/scenarios/02-unity-cup.md:169` states for Unity Cup in its own words (*"Unity Cup adds Team Races on top; it does not remove the underlying career race-goal structure"*). Measured: **1,201 of the 1,677 goal rows carry a `race_catalog_slot_id`, and every one of the 1,201 joins a slot whose `scenario_key` is `null`** — a shared race. **Zero** goal rows point at any of the four scenario-scoped slots. So a Unity Cup run composing Vodka's race demands was **never wrong data**: those are Vodka's own goals, on races every scenario shares. The gate's *mechanism* survives; its *values* changed — `unity_cup` restored to `'trainee_goals'`, `our_grand_concert` named `'trainee_goals'`, Trackblazer left `null`. The original reasoning and its rejected alternative are preserved below; §0.3 records the correction in full.
+
 `trainee_goals` is URA-only (M-12, M-13). `panels.career_goals` is `true` for three scenarios (M-17). Those two facts together mean Unity Cup and Our Grand Concert cockpits compose a URA ladder as if it were theirs.
 
 Two ways to close it, and the choice is the owner's:
@@ -253,9 +314,9 @@ So 4.4 is not a seeding task. It is 4.3: making the join scenario-correct. **Rec
 | Scenario | `panels.career_goals` | `trainee_goals` holds | Recommendation |
 | --- | --- | --- | --- |
 | **URA Finale** | `true` | her ladder (13 rows for Vodka) | Keep as-is. This is the one scenario the data fits. |
-| **Unity Cup — confirmed** | `true` | her URA ladder — wrong data | Gate off via 4.3(a) **confirmed**. Unity Cup has no URA ladder of its own; the panel currently renders Vodka's ten race demands under a scenario that is not URA. The panel's team-race content stays, under its own `team_race` flag. |
-| **Trackblazer** | absent | her URA ladder | Already gated off; nothing to do. |
-| **Our Grand Concert — pending §7 decision 7** | `true` | her URA ladder | **Held.** `config/scenarios.php:1118-1119` says *"the trainee's own objective ladder is a career fact, not a concert mechanic"* and that it is "the one panel this entry composes" — without saying whether "the trainee's own objective ladder" means the URA list or a concert-specific one. If the owner rules it means the URA ladder, OGC behaves as URA behaves and **no gate is added**. If the owner rules it means a concert-specific ladder, §4.3 gates OGC off exactly as Unity Cup, because the table holds no concert rows. |
+| **Unity Cup** | `true` | **her own ladder** — the goal rows are the character's | **Composes the ladder.** `02-unity-cup.md:169`: the trainee's individual race goals *"still apply on their normal schedule (same as URA Finale)"*; `:289`: *"unchanged from URA Finale and still run in parallel"*. Team Races are the layer Unity Cup adds, not a replacement for the character's goals. The panel's team-race content stays, under its own `team_race` flag. **This row was "gate off" in the first draft; §0.3 records the correction.** |
+| **Trackblazer** | absent | her ladder | **Composes no panel** — `panels.career_goals` is absent, so no ladder is drawn whatever `goal_source` says. The key is `null` to say so explicitly rather than by omission. |
+| **Our Grand Concert** | `true` | **her own ladder** | **Composes the ladder.** `07-grand-concert.md:242`: *"The scenario has character race goals, which is what the panel is for"*; `09-global-race-calendar.md:641` gives the grain. The key is named `'trainee_goals'` explicitly rather than left to a default. **What stays off is the race *calendar*** — a separate surface, with its own absence. |
 
 ### §4.5 Framework adherence
 
@@ -369,7 +430,7 @@ Eleven derived-rule families exist across ten files; this section names only the
 
 Three separable pieces, in evidence strength order. They need not ship together. *(They did not: piece 1 is the evidence-strongest and shipped first.)*
 
-- **Piece 1 (4.3, the defect).** `config/scenarios.php` gains one key per scenario; `CockpitController::scenarioSectionContext()` and `TeamPanelBuilder::traineeGoalRows()` read it. Files: `config/scenarios.php`, `app/Http/Controllers/Career/CockpitController.php`, `app/Services/Career/TeamPanelBuilder.php`. Test: a feature test creating a Unity Cup run on a trainee with `trainee_goals` rows and asserting the `career_goals` panel composes no ladder rows, plus the URA counterpart asserting it still does. RED: today the Unity Cup run gets Vodka's ten URA rows. *→ Shipped as `S-A-P01.1` (`955ff4f2`). `CockpitController` needed **no** change: the existing `panels.career_goals` flag already decides whether the panel composes, and the new key decides whose rows it draws. The RED was `expect($group['rows'])->toBe([])` — the Unity Cup run composed row 0 from Vodka's URA ladder. OGC's key is left **unset** pending decision 7 (§0.4).*
+- **Piece 1 (4.3, the defect).** `config/scenarios.php` gains one key per scenario; `CockpitController::scenarioSectionContext()` and `TeamPanelBuilder::traineeGoalRows()` read it. Files: `config/scenarios.php`, `app/Http/Controllers/Career/CockpitController.php`, `app/Services/Career/TeamPanelBuilder.php`. Test: a feature test creating a Unity Cup run on a trainee with `trainee_goals` rows and asserting the `career_goals` panel composes no ladder rows, plus the URA counterpart asserting it still does. RED: today the Unity Cup run gets Vodka's ten URA rows. *→ Shipped as `S-A-P01.1` (`955ff4f2`). `CockpitController` needed **no** change: the existing `panels.career_goals` flag already decides whether the panel composes, and the new key decides whose rows it draws. The RED was `expect($group['rows'])->toBe([])` — the Unity Cup run composed row 0 from Vodka's URA ladder. **Historical — this slice's Unity Cup half was wrong and was corrected at `S-A-P01.4` (§0.3 item 0): the ladder is the character's own, so a Unity Cup run composing Vodka's race demands was never wrong data. The shape below is right and the key's value for `unity_cup` is now `'trainee_goals'`, not `null`.*
 - **Piece 2 (4.1, the parity gap).** `PreflightController::store()` seeds skills; the `:51` docblock sentence is corrected. Files: `app/Http/Controllers/Career/PreflightController.php` (and `TrainingRunController` if `prePopulateSkills` is lifted into an action). Test: extend `CareerPreflightTest` asserting `run_skills` holds the card's `innate ∪ unique` as `Suggested` after a wizard start. RED: 0 rows today. *→ Shipped as `S-A-P01.2` (`39804efe`), with the lifting done: `app/Actions/SeedRunSkills.php` is the one owner, `TrainingRunController::prePopulateSkills()` delegates to it, and the wizard door calls it inside the same transaction. The RED was `expect($run->skills()->pluck('skills.id')->all())->toHaveCount(2)` against 0.*
 - **Piece 3 (4.2, the reference strip).** `CockpitController::identitySection()` or `stateSection()` gains `starting_stats`; the rail component renders it. Files: `app/Http/Controllers/Career/CockpitController.php`, the cockpit stat component under `resources/js/`. Test: a browser spec asserting the five numbers render beside the rail for a run with a card, and render nothing (not `N/A`) for a run without one — the distinction `DESIGN.md` §4.7 and `AGENTS.md` §13 make between `N/A` and an absent slot. *→ Shipped as `S-A-P01.3` (`4072042c`). It is `stateSection()`, and the component is `resources/js/components/career/CareerStatePanel.vue`. The strip is **one labelled sentence**, not five more rows: `Starting 96 61 105 75 88 (the card's base line, before any training)`. The browser case needed a card-backed run, so `tests/utils/start-career.ts` gained an `onTrainee` hook (§0.3 item 3).*
 - **Pint / PHPStan / typecheck / lint:ui** per the hand-off sequence. `lint:ui` will flag any arbitrary Tailwind value in the new strip; reuse the rail's existing tile classes. *→ `lint:ui` flagged none. Pint flagged `line_ending` twice — once on `config/scenarios.php` and once on `TrainingRunController.php` — because the edits wrote CRLF into files `HEAD` holds as LF. Both were re-normalised rather than waived, and the real `ordered_imports` finding (one import out of alphabetical position) was fixed by Pint.*
@@ -405,4 +466,5 @@ Three separable pieces, in evidence strength order. They need not ship together.
 | 2026-11-08 | §4.5 — `4.1.1` appears once, as the mandated withdrawal caveat (§4.5 opening); no rule grounding rests on it. The adherence brief's §7 grep expecting zero did not account for the caveat. |
 | 2026-11-08 | Implemented — `S-A-P01.1` (`955ff4f2`) adds a per-scenario `goal_source` key and gates `TeamPanelBuilder::traineeGoalRows()` on it; Unity Cup composes no URA ladder, OGC keeps its behaviour pending decision 7. `S-A-P01.2` (`39804efe`) lifts the seeding into `app/Actions/SeedRunSkills.php` and calls it from the wizard door, correcting the stale `PreflightController:51` docblock. `S-A-P01.3` (`4072042c`) adds `state.starting_stats` and the labelled `Starting:` line; absent entirely for a run with no card. |
 | 2026-11-08 | Decision 7 still open. `S-A-P01.OG` is held and named in `§s-a-p01-1`'s §9. Our Grand Concert's `goal_source` is deliberately **unset** rather than guessed, so the default keeps today's behaviour until the owner rules which ladder `config/scenarios.php:1118-1119` means. |
+| 2026-11-08 | **Decision 7 settled by the corpus; §4.3's premise corrected.** The owner review forced the read of the Unity Cup corpus file, and the read showed the ladder is **the character's own** goals (`ADR-0026`: "Trainee grain, no run scope"; `09-global-race-calendar.md:641`: "the goals are the character's own, per trainee rather than per scenario"; `02-unity-cup.md:169,289`: Unity Cup "adds Team Races on top; it does not remove the underlying career race-goal structure"). **Consequence: §4.3's Unity Cup gating was wrong and was corrected at `S-A-P01.4` (`f434b41a`)** — `unity_cup` restored to `'trainee_goals'`, `our_grand_concert` named `'trainee_goals'`, Trackblazer left `null`. The unified fix landed rather than the OGC half alone, which is what the review required. **A figure in the review is corrected in §0.3: it is 1,201 of 1,677 goal rows that carry a race slot, and all 1,201 point at shared slots — not "1,677 of 1,677".** The conclusion the review drew holds; the denominator did not. |
 | 2026-11-08 | **§0 added — implementation status.** §0.1 slices landed and their commits · §0.2 decision-by-decision disposition (decision 7 still open) · §0.3 the three divergences · §0.4 the held `S-A-P01.OG` slice and what the owner must decide · §0.5 measurement-vs-shipped · §0.6 gates at close-out · §0.7 still open. §9 and §10 carry dated notes marking them historical; their content is unchanged. |
