@@ -53,7 +53,7 @@ type Badge = ProvenanceState;
 
 interface Objective {
     label: string;
-    state: 'upcoming' | 'current' | 'completed' | 'unknown';
+    state: 'upcoming' | 'current' | 'completed' | 'not_reached' | 'unknown';
     due_turn: number | null;
     due_label: string | null;
     consequence: string | null;
@@ -156,7 +156,7 @@ const objectives = computed(() => props.decision.objectives);
 const recordedAction = computed(() => props.decision.recorded_action);
 
 // The one obligation the rail must not let the Trainer miss. Same rule the server used to name it.
-const due = computed(() => objectives.value.find((row) => row.state === 'current') ?? null);
+const due = computed(() => objectives.value.find((row) => row.state === 'current' || row.state === 'not_reached') ?? null);
 
 // An empty list is a real state, not a missing one: a scenario whose matrix turns the calendar off
 // composes no obligations, and saying so beats an empty box.
@@ -177,6 +177,8 @@ const statePill = (state: string): { word: string; cls: string } => {
     switch (state) {
         case 'current':
             return { word: 'current', cls: 'pill-caution' };
+        case 'not_reached':
+            return { word: 'not reached', cls: 'pill-caution' };
         case 'completed':
             return { word: 'met', cls: 'pill-positive' };
         case 'upcoming':
@@ -202,7 +204,7 @@ const incompleteData = computed(
              It opens the card, where `cockpit-unity-cup.html` puts it: the fact comes before the
              thing to do about it. -->
         <div v-if="due !== null" class="warn flex flex-wrap items-start gap-2">
-            <span class="pill pill-caution shrink-0">current</span>
+            <span class="pill pill-caution shrink-0">{{ statePill(due.state).word }}</span>
             <AlertRow
                 class="min-w-0 flex-1"
                 glyph="▲"

@@ -48,11 +48,12 @@ export type ProvenanceState = 'confirmed' | 'calculated' | 'estimated' | 'unknow
 export interface Objective {
     label: string;
     /**
-     * The four states FD-3 can reach from recorded data. `missed` is in the vocabulary the milestone
-     * tracker will need (FD-5, G3) and is produced by nothing here: a slot behind the run with no entry is
-     * the same stored fact as a slot not entered yet, and no source says it became unattainable.
+     * The states `objectiveSection` can emit. `missed` is in the vocabulary the milestone tracker will
+     * need (FD-5, G3) and is produced by nothing here. A slot whose deadline is behind the run with no
+     * entry is `not_reached` — a gap in the record, never `current`: a status word may be stale or
+     * absent, never wrong (AUD-R7-A F-01 / TOG-3).
      */
-    state: 'upcoming' | 'current' | 'completed' | 'unknown';
+    state: 'upcoming' | 'current' | 'completed' | 'not_reached' | 'unknown';
     due_turn: number | null;
     due_label: string | null;
     /** Null because no source states what changes when an obligation is missed. Never an invented sentence. */

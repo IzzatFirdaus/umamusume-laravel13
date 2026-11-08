@@ -871,6 +871,7 @@ class CockpitController extends Controller
             $state = match (true) {
                 $recorded => 'completed',
                 $slot->turn === null => 'unknown',
+                $slot->isAtOrBeforeTurn($next) && $slot->turnIndex() < (int) $next['turn_index'] => 'not_reached',
                 $slot->isAtOrBeforeTurn($next) => 'current',
                 default => 'upcoming',
             };
@@ -892,8 +893,11 @@ class CockpitController extends Controller
                 'title' => match ($state) {
                     'completed' => 'Compared race_entries.race_catalog_slot_id against this '
                         .'race_catalog_slots row: an entered race points at it.',
+                    'not_reached' => 'Compared race_catalog_slots.year and .turn against the turn this run is '
+                    .'deciding: the slot fell due at turn '.$slot->turnNumber().', before this run\'s position at '
+                    .'turn '.(int) $next['turn'].', and no race_entries row points at it.',
                     'current' => 'Compared race_catalog_slots.year and .turn against the turn this run is '
-                        .'deciding: the slot has arrived and no race_entries row points at it.',
+                            .'deciding: the slot has arrived and no race_entries row points at it.',
                     'upcoming' => 'Compared race_catalog_slots.year and .turn against the turn this run is '
                         .'deciding: the slot falls later, and no race_entries row points at it.',
                     default => 'The source states no turn for this slot (race_catalog_slots.turn is null), '

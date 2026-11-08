@@ -27,7 +27,7 @@ type Badge = ProvenanceState;
 
 const props = defineProps<{
     label: string;
-    state: 'upcoming' | 'current' | 'completed' | 'unknown';
+    state: 'upcoming' | 'current' | 'completed' | 'not_reached' | 'unknown';
     due_turn: number | null;
     due_label: string | null;
     consequence: string | null;
@@ -38,9 +38,10 @@ const props = defineProps<{
     url: string | null;
 }>();
 
-const STATES: Record<'upcoming' | 'current' | 'completed' | 'unknown', { glyph: string; word: string }> = {
+const STATES: Record<'upcoming' | 'current' | 'completed' | 'not_reached' | 'unknown', { glyph: string; word: string }> = {
     completed: { glyph: '●', word: 'Met' },
     current: { glyph: '◉', word: 'Due' },
+    not_reached: { glyph: '○', word: 'Not reached' },
     upcoming: { glyph: '○', word: 'Ahead' },
     unknown: { glyph: '○', word: 'Undated' },
 };

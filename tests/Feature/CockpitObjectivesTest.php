@@ -327,3 +327,20 @@ it('keeps the objectives list empty rather than inventing a row when the calenda
 
     expect(objectiveRows($run))->toBe([]);
 });
+
+it('reads a past-due obligation with no record as not_reached, not current', function () {
+    // Turn 67 with a Junior obligation due turn 12 that was never entered: the deadline passed
+    // 55 turns ago and the run holds no race_entries row for it. `current` is the wrong word for
+    // a passed deadline (F-01 / TOG-3); `not_reached` is the honest value, matching the goals
+    // panel S3 landed in `TeamPanelBuilder::objectiveState`.
+    $run = objectiveRun('unity_cup', 67);
+    objectiveSlot('unity_cup', 'Junior Make Debut', RaceCatalogSlot::YEAR_JUNIOR, 6);
+
+    $juniorDebut = collect(objectiveRows($run))->firstWhere('label', 'Junior Make Debut');
+
+    expect($juniorDebut)->not->toBeNull()
+        ->and($juniorDebut['state'])->toBe('not_reached')
+        ->and($juniorDebut['state'])->not->toBe('current')
+        // The title must not claim the slot "has arrived": it fell due before this run's position.
+        ->and($juniorDebut['title'])->not->toContain('has arrived');
+});
