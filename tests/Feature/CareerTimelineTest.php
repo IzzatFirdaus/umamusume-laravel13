@@ -247,10 +247,19 @@ it('prefills the next turn on every form from the same derivation (R7-32)', func
     // `nextTurn`/`latestLoggedTurn`; this case pins the VALUES each page binds, taken from the payload.
     $run = timelineRun(turns: 3);
 
-    // The timeline's own rows agree on one highest turn; a form prefill is that plus one.
+    // The timeline's own TURN rows agree on one highest turn; a form prefill is that plus one.
+    //
+    // Filtered to `kind === 'turn'` deliberately: deriving the maximum from every row kind re-encodes
+    // the mixed input this slice exists to stop passing (a race or event row borrows a turn number that
+    // a turn row already holds, so the two agree today and would silently diverge tomorrow).
     /** @var list<array<string, mixed>> $entries */
     $entries = test()->get(route('runs.timeline', $run))->assertOk()->inertiaProps('entries');
-    $highest = max(array_map(static fn (array $e): int => (int) $e['turn'], $entries));
+
+    $turnRows = array_values(array_filter($entries, static fn (array $e): bool => $e['kind'] === 'turn'));
+
+    expect($turnRows)->not->toBeEmpty();
+
+    $highest = max(array_map(static fn (array $e): int => (int) $e['turn'], $turnRows));
 
     // The race screen's decision turn is the same next turn, read from the same run.
     $this->get(route('runs.races.decision', $run))

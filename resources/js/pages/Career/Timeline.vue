@@ -192,7 +192,17 @@ const finaleText = computed(() => {
             >
                 <template #actions>
                     <a :href="resultUrl" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">Career result</a>
-                    <button type="button" class="btn btn-quiet min-h-11" title="The build has no undo; this screen proposes one.">Undo turn {{ undoableTurn }}</button>
+                    <!-- R7-21 on this screen too: the title says the build has no undo, so the control
+                         must not invite a click. `RaceDecision.vue` and `TrainingDetail.vue` both carry
+                         the binding; this was the third instance of the same control without it. -->
+                    <button
+                        type="button"
+                        class="btn btn-quiet min-h-11"
+                        disabled
+                        title="The build has no undo; this screen proposes one."
+                    >
+                        Undo turn {{ undoableTurn }}
+                    </button>
                     <Link href="/training-runs" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">All careers</Link>
                 </template>
             </PageHeader>

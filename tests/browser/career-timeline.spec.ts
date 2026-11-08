@@ -218,3 +218,23 @@ test('passes an axe scan at WCAG A and AA', async ({ page }) => {
 
     expect(results.violations).toEqual([]);
 });
+
+test('labels the undo with the last logged turn, not the rail maximum (R7-27)', async ({ page }) => {
+    // The label is computed in the page from the rail's TURN rows (`latestLoggedTurn`), so a payload
+    // assertion cannot reach the rendered string -- the sibling Feature case pins the number the
+    // component feeds it, this one pins what a Trainer reads. Both are needed: the first cannot catch a
+    // wrong binding, the second cannot catch a wrong number.
+    const runId = await openTimelineWithReadings(page);
+    expect(runId).not.toBe('');
+
+    const undo = page.getByRole('button', { name: /Undo turn \d+/ });
+    await expect(undo).toBeVisible();
+
+    // `openTimelineWithReadings` logs turns 1 and 2, so the undo names the second: the turn it would
+    // remove, which is the highest turn IN THE LOG. Turn 0 would name a turn no career has, and turn 3
+    // would name one the rail does not hold -- the defect class the `Math.max(0, ...)` derivation had.
+    await expect(undo).toHaveAccessibleName('Undo turn 2');
+
+    // And the control is inert, matching what its own title says (R7-21's rule, same shell).
+    await expect(undo).toBeDisabled();
+});
