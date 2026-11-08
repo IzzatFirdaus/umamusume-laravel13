@@ -51,6 +51,7 @@ import BaseInput from '@/components/Form/BaseInput.vue';
 import BaseSelect from '@/components/Form/BaseSelect.vue';
 import BaseCheckbox from '@/components/Form/BaseCheckbox.vue';
 import AncestorEditor from '@/components/legacy/AncestorEditor.vue';
+import SparkTargetPicker from '@/components/legacy/SparkTargetPicker.vue';
 import BaseButton from '@/components/Form/BaseButton.vue';
 import BaseRadio from '@/components/Form/BaseRadio.vue';
 
@@ -638,12 +639,21 @@ const hasAnyNode = computed(() =>
                                                 :options="Object.keys(sparkKinds).map(kind => ({ value: kind, label: sparkKinds[kind] }))"
                                               />
 
-                                            <BaseInput
-                                                :id="`spark-target-${parent.slot}-${sparkIndex}`"
-                                                v-model="spark.target"
-                                                type="text"
-                                                label="Applies to"
+                                            <BaseSelect
+                                                :id="`spark-category-${parent.slot}-${sparkIndex}`"
+                                                v-model="spark.category"
+                                                label="Category"
+                                                :options="SPARK_CATEGORIES.map((category) => ({ value: category, label: category }))"
+                                                @change="spark.target = ''"
                                               />
+
+                                            <SparkTargetPicker
+                                                :id="`spark-target-${parent.slot}-${sparkIndex}`"
+                                                :model-value="spark.target"
+                                                :targets="sparkTargets[spark.category as 'Stat' | 'Aptitude' | 'Skill'] || []"
+                                                label="Applies to"
+                                                @update:model-value="spark.target = $event"
+                                            />
 
 <BaseInput
                                                 :id="`spark-stars-${parent.slot}-${sparkIndex}`"

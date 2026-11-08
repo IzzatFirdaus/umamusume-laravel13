@@ -19,6 +19,7 @@
  */
 import BaseInput from '../Form/BaseInput.vue';
 import BaseSelect from '../Form/BaseSelect.vue';
+import SparkTargetPicker from './SparkTargetPicker.vue';
 
 /** One draft Spark on a grandparent node: the same shape the enclosing form posts. */
 interface AncestorSparkDraft {
@@ -174,11 +175,12 @@ function removeSpark(sparkIndex: number): void {
                         :options="SPARK_CATEGORIES.map((category) => ({ value: category, label: category }))"
                         @change="spark.target = ''"
                     />
-                    <BaseSelect
+                    <SparkTargetPicker
                         :id="sparkId('ancestor-spark-target', sparkIndex)"
-                        v-model="spark.target"
+                        :model-value="spark.target"
+                        :targets="props.sparkTargets[spark.category as 'Stat' | 'Aptitude' | 'Skill'] || []"
                         label="Target"
-                        :options="[{ value: '', label: 'Not recorded' }, ...(props.sparkTargets[spark.category as 'Stat' | 'Aptitude' | 'Skill'] || []).map((target) => ({ value: target, label: target }))]"
+                        @update:model-value="spark.target = $event"
                     />
                     <BaseInput
                         :id="sparkId('ancestor-spark-stars', sparkIndex)"

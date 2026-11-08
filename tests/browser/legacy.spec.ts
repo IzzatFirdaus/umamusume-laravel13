@@ -240,9 +240,15 @@ test.describe('Legacy Lab builder', () => {
         await page.getByLabel('Grandparent A1', { exact: true }).fill('Tokai Teio');
         await page.getByLabel('Own rank').first().fill('3');
 
-        await page.getByRole('button', { name: 'Add Spark' }).first().click();
+        // The parent's own button, not `/Add Spark/`.first(): the four grandparent editors render
+        // before this fieldset in DOM order, so the loose matcher adds a Spark to a grandparent.
+        await page.getByRole('button', { name: 'Add Spark to Parent A' }).click();
         await page.getByLabel('Kind').first().selectOption('blue');
+        // `Applies to` is the picker's combobox since `S-A-P02.3`: a bare `fill()` types a filter and
+        // never commits a value, so the selection goes through the option list the way a Trainer does.
+        await page.getByLabel('Applies to').first().click();
         await page.getByLabel('Applies to').first().fill('Speed');
+        await page.locator('[role="option"]', { hasText: 'Speed' }).first().click();
         // `exact` because the grandparent rows carry "Grandparent rank (stars)", which a substring label
         // match answers to first, and the fill would land on the rank rather than the Spark. The wizard
         // step's own walk pins the same control the same way.
@@ -455,5 +461,49 @@ test.describe('Legacy Lab compare', () => {
 
         // No difference anywhere is a permitted verdict, and it is printed in words.
         await expect(page.getByText(/Nothing decisive/)).toBeVisible();
+    });
+});
+
+/*
+ * S-A-P02.3 — the picker reaches the run-scoped surfaces, not only the wizard step.
+ *
+ * `AncestorEditor` is shared by the wizard's Legacy step and this builder (`LegacySelect.vue:36`,
+ * `Legacy/Builder.vue:53`), so one wiring covers four of the six editors; this case proves the
+ * run-scoped half renders the combobox rather than the `<select>` it replaced, and that the parent
+ * row's own field followed. The ids stay the contract (`AncestorEditor.vue:5-9`).
+ */
+test.describe('Legacy Lab builder — the spark Target picker', () => {
+    test('renders the searchable Target combobox on the parent row and the grandparent rows', async ({ page }) => {
+        const runId = await createActiveRun(page, 'Special Week');
+
+        await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
+        await openAllDisclosures(page);
+
+        // The builder's own parent row, slot `a` (Parent A). The button's accessible name is
+        // `Add Spark to Parent A` (the `<span class="sr-only">` appends the node name), and a bare
+        // `/Add Spark/` would match the four grandparent buttons, which render first in DOM order.
+        await page.getByRole('button', { name: 'Add Spark to Parent A' }).click();
+
+        // `AncestryGraph::parentNode` passes `parent_a` / `parent_b` as the slot
+        // (`AncestryGraph.php:69-70`), so the builder's ids differ from the wizard's `a` / `b`.
+        const parentTarget = page.locator('#spark-target-parent_a-0');
+        await expect(parentTarget).toHaveAttribute('role', 'combobox');
+
+        // The four grandparent rows come from the shared `AncestorEditor`, so this one is the wizard's
+        // contract on a different page. `ancestor-spark-target-parent_a-0-0` is Grandparent A1's first
+        // Spark on this surface.
+        await page.getByRole('button', { name: /Add Spark to Grandparent A1/ }).click();
+
+        const grandparentTarget = page.locator('#ancestor-spark-target-parent_a-0-0');
+        await expect(grandparentTarget).toHaveAttribute('role', 'combobox');
+
+        // Filtering works here too: the wiring is the same component, so the behaviour is shared rather
+        // than reimplemented per page. The row's Category scopes the list and it defaults to `Stat`
+        // (`AncestorEditor.vue`'s `addSpark`), so the skill catalogue needs the Category set first.
+        await page.locator('#ancestor-spark-category-parent_a-0-0').selectOption('Skill');
+        await grandparentTarget.click();
+        await grandparentTarget.fill('Cut and');
+        await expect(page.locator('[role="option"]').first()).toContainText('Cut and Drive!');
     });
 });
