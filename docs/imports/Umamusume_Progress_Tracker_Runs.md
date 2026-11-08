@@ -1027,11 +1027,11 @@ RATE (%)
                                           GOALS
   JUNIOR MAKE DEBUT                      RUN RACE                              1ST
 
-     Kyodo News Hai                         TOP 5                             TOP 5
+      Kyodo News Hai                         TOP 5                             5TH
 
-        NHK Mile C.                         TOP 5                              2ND
+         NHK Mile C.                         TOP 5                              2ND
 
-      Japanese Derby                        TOP 5
+       Japanese Derby                        TOP 5
 
        Mainichi Okan                        TOP 3
 
@@ -1402,7 +1402,7 @@ Outer Post Proficiency ○         81             ❌
 
   ENERGY (n/100%)                     RACE DAY?                  GOAL      STRATEGY
 
-           5                                N0                RACES/TRA     FRONT
+           50                              N0                RACES/TRA     FRONT
                                                                 INING
 
  *Energy does not affect race performance in Uma Musume. It only matters for
@@ -2518,4 +2518,20 @@ Medium      A
 
   End        E
 
-```
+---
+
+## Provenance notes (added 2026-11-07 per PDF arrival)
+
+The original PDF is 82 pages: pages 1–13 are the support-card catalogue, pages 17–73 are
+the seventeen runs, and pages 14–16 plus 74–82 are two blank template forms (one
+pre-filled URA goals panel). The PDF should be stored under `docs/imports/` so the
+extraction can be re-derived.
+
+Truncations (`CLASSI…` on run 5, `[pf. Winning Equation…]` on run 17) and stale headers
+(runs 10, 13 showing CLASSIC LATE OCT / CLASSIC EARLY NOV instead of the correct SENIOR
+positions) are defects in the source tracker form, not in the transcription.
+
+The transcription itself is sound: every one of seventeen runs' goal rows matches the PDF
+row for row; differences are line wrapping only. The only genuine extraction losses are
+one value row (run 13's condition/mood/energy/race day/goal/strategy block) and run 17's
+missing month (Senior Year Late April).
