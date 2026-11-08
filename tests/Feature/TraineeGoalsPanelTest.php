@@ -277,3 +277,43 @@ it('reads a past objective the run never played as not reached, not as missed', 
     expect($states[0])->toBe('not_reached')
         ->and($states)->not->toContain('missed');
 });
+
+/*
+ * S-A-P01.1 — the ladder is URA's, so it composes only for a scenario that carries character goals.
+ *
+ * `trainee_goals` has no `scenario` column and holds one source's rows (`ura-objectives.*.json`,
+ * P-01 §2 M-12/M-13), while `panels.career_goals` is on for three scenarios (M-17). A Unity Cup run
+ * therefore composed a URA ladder as its own — ten race demands the scenario does not make.
+ * Unity Cup is confirmed; Our Grand Concert keeps today's behaviour pending P-01 §7 decision 7.
+ */
+it('composes no trainee goal ladder for a Unity Cup run, because the table is URA only', function (): void {
+    $run = goalsRun('unity_cup');
+    goalFor($run, ['career_year' => 1, 'turn' => 12, 'source_order' => 1, 'goal_type' => TraineeGoalType::Participate, 'required_placement' => 0]);
+
+    $group = goalsGroup($run);
+
+    expect($group['rows'])->toBe([]);
+});
+
+it('still composes the ladder for a URA Finale run on the same data', function (): void {
+    $run = goalsRun('ura_finale');
+    goalFor($run, ['career_year' => 1, 'turn' => 12, 'source_order' => 1, 'goal_type' => TraineeGoalType::Participate, 'required_placement' => 0]);
+
+    $group = goalsGroup($run);
+
+    expect($group['rows'])->toHaveCount(1)
+        ->and($group['group'])->toBe('Trainee goals');
+});
+
+it('leaves Our Grand Concert composing the ladder until the owner rules on its goal source', function (): void {
+    // P-01 §7 decision 7 is open: `config/scenarios.php:1118-1119` says the trainee's own ladder is
+    // "a career fact rather than a concert mechanic" without saying which ladder. Until the owner
+    // rules, the panel keeps the behaviour it has, so this case pins today's answer rather than a
+    // guess at tomorrow's.
+    $run = goalsRun('our_grand_concert');
+    goalFor($run, ['career_year' => 1, 'turn' => 12, 'source_order' => 1, 'goal_type' => TraineeGoalType::Participate, 'required_placement' => 0]);
+
+    $group = goalsGroup($run);
+
+    expect($group['rows'])->toHaveCount(1);
+});

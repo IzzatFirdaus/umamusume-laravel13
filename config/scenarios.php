@@ -189,6 +189,16 @@ return [
             ],
             'scenario_links' => ['Aoi Kiryuin'],
             'facility_level_source' => 'repetition',
+            /*
+            | Which table carries this scenario's per-character objective ladder, or `null` for a
+            | scenario that has none. `trainee_goals` is that table and it holds one source's rows
+            | (`ura-objectives.*.json`), so it describes a URA career and no other. A scenario that
+            | names none composes no ladder, whatever `panels.career_goals` says about the panel.
+            |
+            | This is the same shape `facility_level_source` already uses: a per-scenario rule stated
+            | as configuration rather than as a branch on the scenario's name (gate G-33, `IA-6`).
+            */
+            'goal_source' => 'trainee_goals',
             'notes' => 'Defined by absence: no team system, no shop, no scenario currency. '
                 .'This is the minimal strip, and adding another scenario widget here would state something false.',
 
@@ -405,6 +415,11 @@ return [
                 'Taiki Shuttle', 'Rice Shower', 'Haru Urara', 'Matikanefukukitaru', 'Riko Kashimoto',
             ],
             'facility_level_source' => 'team_rank',
+            // `trainee_goals` holds the URA source's rows only, so this scenario composes no
+            // per-character ladder. `panels.career_goals` stays on because the panel is where a
+            // scenario's own objective content draws; it now draws none here rather than another
+            // scenario's (S-A-P01.1).
+            'goal_source' => null,
             // Post 2026-07-01: the extra energy cost on team training was removed.
             'team_training_energy_penalty' => false,
             'wit_burst_energy_bonus' => 5,
@@ -622,6 +637,10 @@ return [
             ],
             'scenario_links' => [],
             'facility_level_source' => 'repetition_plus_purchases',
+            // No mandatory race goals in this scenario (`notes` below), so no per-character ladder
+            // either. Stated rather than left absent: a reader comparing the four entries should not
+            // have to guess whether the key was forgotten (S-A-P01.1).
+            'goal_source' => null,
             /*
             | Grade Point objectives are aptitude-conditional. Rendering the
             | standard track for a dirt-leaning trainee shows the wrong target,

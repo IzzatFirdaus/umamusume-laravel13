@@ -211,6 +211,31 @@ final class TeamPanelBuilder
      */
     private function traineeGoalRows(TrainingRun $run, ?array $next, Collection $mandatory): array
     {
+        /*
+         * S-A-P01.1: the ladder is only this scenario's when the config says this scenario carries one.
+         *
+         * `trainee_goals` has no scenario column and holds one source's rows (`ura-objectives.*.json`,
+         * proposal P-01 §2 M-12/M-13), so a Unity Cup run composing it was reading a URA career as its
+         * own. The gate is a config key rather than a branch on the scenario's name, which is the shape
+         * this matrix already uses for `facility_level_source` (gate G-33, `IA-6`).
+         *
+         * **An absent key keeps today's behaviour.** Our Grand Concert declares no `goal_source` while
+         * P-01 §7 decision 7 is open (`config/scenarios.php:1118-1119` says the trainee's ladder is a
+         * career fact without saying which ladder). Defaulting an absent key to `'trainee_goals'` is the
+         * only choice that ships no unruled change: a scenario that has not answered the question keeps
+         * the rows it had.
+         */
+        $goalSource = config('scenarios.scenarios.'.$run->scenarioKey().'.goal_source', 'trainee_goals');
+
+        if ($goalSource === null) {
+            return [
+                'rows' => [],
+                'alerts' => [],
+                'summary' => null,
+                'empty_note' => null,
+            ];
+        }
+
         /** @var Collection<int, TraineeGoal> $goals */
         $goals = TraineeGoal::query()
             ->where('umamusume_id', $run->umamusume_id)
