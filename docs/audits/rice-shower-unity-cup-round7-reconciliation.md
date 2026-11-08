@@ -978,6 +978,14 @@ command-level record.
   skip counts and omits the failure count. Corrected at `a31f6a83`; the read rule is §10's fourth fence
   finding. **Every figure in the gate list now carries its exit code or summary-line source in the
   ledger's `#close-out` item 7**, and a figure without one is not to be quoted from this register.
+- **The browser failures are NOT contention, and the earlier verdict saying so is refuted.** The
+  failing 41-spec set was re-run at `--workers=1` in the sweep's own order: `EXIT=1`, `72 failed`,
+  `260 passed` (1.2h). 72 of the 74 reproduce at one worker, so they are real assertion failures rather
+  than a concurrency artefact. They are not this round's: `scenario-panel`, the only candidate the round
+  could have caused, still failed 3 of 10 with the round's glyph change reverted and rebuilt, and the
+  surface its assertion addresses (`getByRole('img', { name: /Team Rank: not recorded/ })`) has no
+  `role="img"` anywhere in the cockpit at HEAD. The 74 are debt owed to earlier rounds, recorded at the
+  ledger's item 7a and carrying the same standing as item 10a's three Pest failures.
 - The lore figures above (`558 docs / 75 exempt`, `318 code`) are measured by
   `php tools/lore.php` and `php tools/lore.php code` — the **positional** form, which is the only code
   mode. The `--code` flag form is docs mode (`tools/lore.php:47` reads `$argv[1] === 'code'`) and was the

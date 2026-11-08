@@ -1403,19 +1403,64 @@ Both commits verified ancestors of `6f95c476` with `git merge-base --is-ancestor
 round**; recorded for the register.
 
 ### 7. Gates
-| Gate | Result |
-| --- | --- |
-| Full Pest | 2287 passed / 3 failed (classified above) |
-| Browser suite | **726 passed / 74 failed / 2 skipped** (802 cases, 1.4h). **The figure first committed to this row said "0 failed" and was wrong** — it was read from the log's last three lines, which print the skip count and the pass count but not the failure count, and the failure count sits 60 lines above them. Correction and classification below. |
-| PHPStan level 6 | `[OK] No errors` (whole tree, `--memory-limit=1G`) |
-| Pint | `{"tool":"pint","result":"passed"}` (whole tree, `--test --format agent`) |
-| Typecheck | clean (`vue-tsgo -p tsconfig.vue.json && tsc --noEmit`) |
-| Build | `✓ built in 11.36s`, manifest 64,402 bytes |
-| Lore docs | 556 hits / 75 exempt — unchanged since S0's open |
-| Lore code | 318 hits — was 182 at the last recorded baseline |
-| Fence | 0 invalid in all four round-7 audit files |
-| `migrate:status` | 0 Pending |
-| Peer set | byte-identical to session start, plus one foreign untracked file recorded at item 2 |
+
+Every figure carries its exit code or the summary line that produced it. A figure without one is a claim,
+not a measurement (register §10, fourth fence finding).
+
+| Gate | Result | Source |
+| --- | --- | --- |
+| Full Pest | 2287 passed / 3 failed / 9 warnings, 36074 assertions, 214.25s | `php artisan test --compact`, `EXIT=1`; summary line quoted |
+| Browser sweep (default workers) | 726 passed / 74 failed / 2 skipped, 802 cases, 1.4h | `npx playwright test`, `EXIT=1`; summary `74 failed` / `2 skipped` / `726 passed` |
+| Browser, failing set at `--workers=1` | **260 passed / 72 failed, 41 specs, 1.2h** | `EXIT=1`; summary `72 failed` / `260 passed` — see item 7a |
+| PHPStan level 6 | `[OK] No errors` | `EXIT=0` |
+| Pint | `{"tool":"pint","result":"passed"}` | `EXIT=0` |
+| Typecheck | clean | `EXIT=0` |
+| Build | `✓ built in 11.36s`, manifest 64,402 bytes | `EXIT=0` |
+| Lore docs | 560 hits / 75 exempt | `php tools/lore.php`, `EXIT=0` |
+| Lore code | 318 hits | `php tools/lore.php code` (positional — the only code mode), `EXIT=0` |
+| Fence | 0 invalid in 19 files | `EXIT=0` |
+| `migrate:status` | 0 Pending | `EXIT=0` |
+| Peer set | byte-identical to session start, plus one foreign untracked file recorded at item 2 | `git status --short` diffed against §0's baseline |
+
+The docs figure reads 560 against 558 before this pass: the two extra hits are this pass's own correction
+prose quoting the trigger words while ruling on them (class 1). The code figure is unchanged at 318,
+because no source file changed.
+
+### 7a. Browser failure classification — corrected
+
+**The classification recorded at `a31f6a83` — "contention, not product" — is refuted by measurement.**
+It rested on four specs passing when run alone, which cannot exclude a defect that is order-dependent or
+one that fires under the sweep's fixture state. The verification dispatch named the correct experiment and
+it was run.
+
+**The experiment.** All 41 spec files carrying the 74 failures were re-run at `--workers=1`, in the
+sweep's own order, on a session-private port and scratch database:
+
+```
+npx playwright test <41 specs> --workers=1 --reporter=line
+EXIT=1
+   72 failed
+  260 passed (1.2h)
+```
+
+**72 of 74 reproduced at one worker. Contention is refuted.** The "same specs pass alone" evidence was a
+sampling error dressed as a classification, and it is corrected here rather than deleted.
+
+**What they are.** Assertion failures, not timeouts: `toHaveCount` expecting 1 and receiving 3 on
+`career-deck-summary`; `toBeVisible` on accessible names that do not resolve in `scenario-panel`. The
+`scenario-panel` case is order-dependent — 7/7 alone at the start of the session, 3 failures alone now,
+3 in the sweep — so it depends on state a prior spec in the same file leaves behind.
+
+**Not this round's defect, on two measurements.** `scenario-panel` was the candidate, because `0e43782f`
+changed the cockpit panels' absence glyph. Reverted in the working tree and rebuilt, `scenario-panel`
+still produced `3 failed / 7 passed` — the glyph change is exonerated. The mechanism is a missing surface:
+the spec addresses `getByRole('img', { name: /Team Rank: not recorded/ })` and **no `role="img"` exists
+anywhere in the cockpit panels or career components at HEAD**, so the accessible meter the assertion
+targets is not rendered by any current component. This round touched no file that renders an `img` role.
+
+**Verdict.** 72 of 74 are baked in at one worker; none is a defect this round introduced; the browser suite
+is not green and was not green before this round. The 74 carry the same standing as the three Pest
+failures at item 10a — debt owed to earlier rounds.
 
 ### 8. Lore delta
 `Lore docs: 556 / 75 exempt` — **delta 0** since S0's open.
