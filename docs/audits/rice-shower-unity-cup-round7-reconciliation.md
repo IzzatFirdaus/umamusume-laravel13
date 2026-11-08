@@ -759,6 +759,16 @@ Noticed while reading the tree; no walk row covers them. None is a slice.
   within a few lines of each other and both say "Level". Not a defect — a copy-clarity risk a future walk
   should expect. The row stays `Confirmed defect` in §4 (frozen); the ledger's `#s20-s21-s22` records the
   settling read. Dated 2026-11-08.
+- **The summary line, not the tail** — a test runner's final count lives on its **summary line** and in
+  its **exit code**, not in the last N lines of output. This round committed a browser figure of
+  `726 passed / 0 failed` by reading `tail -3` of a 1.4-hour log whose exit code was 1; the true figure
+  was `726 / 74 / 2`, found in the same session and corrected at `a31f6a83`. Playwright's tail block
+  prints the pass count and the skip count and stops, so a reader who checks only the end sees a green
+  line under a red run. Three guards: (a) `echo "EXIT=$?"` immediately after the command and quote that
+  figure; (b) `grep -E '\b[0-9]+ (passed|failed|skipped)\b'` on the log's last summary block, never
+  `tail -5`; (c) never write a figure into a durable record without at least one of those two.
+  **Every future session quoting a test figure owes its exit code or its summary line.** A figure
+  without one is a claim, not a measurement. Dated 2026-11-08.
 - **A browser assertion quotes a stale caption.** `tests/browser/career-cockpit.spec.ts:829` asserts a string the
   cockpit no longer prints.
 - **`Saved.` on `UnityCupEditor` has no `role="status"`.** The confirmation is not announced.
@@ -959,5 +969,19 @@ earlier figure of 556/182 in that section was wrong: the 556 came from the `--co
 `tools/lore.php:47` does not recognise as code mode, and 182 was a baseline carried without a source).
 Fence 0 invalid. Migrations 0 pending. Peer set byte-identical. The ledger's `#close-out` carries the
 command-level record.
+
+**Dated additions — verification pass, 2026-11-08.**
+
+- The browser figure in the gate list above (`726 / 74 / 2`) is verified against the runner's **exit
+  code** (`EXIT=1`) and its summary line, not against the log's tail. The figure first committed at
+  `079bdb35` was `726 / 0 / 2` and was a tail-read error: Playwright's tail block prints the pass and
+  skip counts and omits the failure count. Corrected at `a31f6a83`; the read rule is §10's fourth fence
+  finding. **Every figure in the gate list now carries its exit code or summary-line source in the
+  ledger's `#close-out` item 7**, and a figure without one is not to be quoted from this register.
+- The lore figures above (`558 docs / 75 exempt`, `318 code`) are measured by
+  `php tools/lore.php` and `php tools/lore.php code` — the **positional** form, which is the only code
+  mode. The `--code` flag form is docs mode (`tools/lore.php:47` reads `$argv[1] === 'code'`) and was the
+  source of an earlier, wrong `code: 556` baseline. Deltas against round 6's recorded 555 / 313 are
+  +3 / +5; the ledger's `#close-out` item 8 carries the correction below its own earlier text.
 
 **The register is closed.** The ledger is the durable record of what landed and what did not.

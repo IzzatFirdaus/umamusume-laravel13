@@ -184,56 +184,28 @@ $ vendor/bin/pest tests/Feature/TraineeGoalsPanelTest.php tests/Feature/CockpitO
 ```
 
 ### 7. Gates
-| Gate | Command | Result |
+
+Every figure below carries its exit code or the summary line that produced it. A figure without one is a
+claim, not a measurement (register §10, fourth fence finding).
+
+| Gate | Figure | Source |
 | --- | --- | --- |
-| Focused test | `pest TraineeGoalsPanelTest.php` | **20 passed (208 assertions)** |
-| Regression | six adjacent suites | **116 passed (1423 assertions)** |
-| Typecheck | `npm run typecheck` | **clean** (`vue-tsgo` + `tsc`) |
-| Pint | `pint --test --format agent <2 paths>` | `{"tool":"pint","result":"passed"}` |
-| PHPStan | `phpstan analyse --memory-limit=1G app/Services/Career/TeamPanelBuilder.php` | `[OK] No errors` |
-| Lore docs | `php tools/lore.php` | **556 hits, 75 exempt** |
-| Lore code | `php tools/lore.php --code` | **556 hits, 75 exempt** |
-| Fence | `md_fence_check.py <register + slice-audits>` | **0 invalid** |
-| Browser | not run | No browser spec asserts objective states (`grep missed\|not_reached tests/browser/scenario-panel.spec.ts` → no state assertion). The change is a server payload plus four renderer maps; the renderer maps have no spec coverage. **UNMEASURED** — stated, not implied away |
+| Full Pest | 2287 passed / 3 failed / 9 warnings, 36074 assertions, 214.25s | `php artisan test --compact`, `EXIT=1`; summary line quoted |
+| Browser sweep (default workers) | 726 passed / 74 failed / 2 skipped, 802 cases, 1.4h | `npx playwright test`, `EXIT=1`; summary line `74 failed` / `2 skipped` / `726 passed` |
+| Browser, failing set at `--workers=1` | **pending — see item 7a** | `EXIT=` recorded on completion |
+| PHPStan level 6 | `[OK] No errors` | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`, `EXIT=0` |
+| Pint | `{"tool":"pint","result":"passed"}` | `vendor/bin/pint --test --format agent`, `EXIT=0` |
+| Typecheck | clean, no output beyond the script banner | `npm run typecheck`, `EXIT=0` |
+| Build | `✓ built in 11.36s`, manifest 64,402 bytes | `npm run build`, `EXIT=0` |
+| Lore docs | 560 hits / 75 exempt | `php tools/lore.php`, `EXIT=0` |
+| Lore code | 318 hits | `php tools/lore.php code` (positional — the only code mode), `EXIT=0` |
+| Fence | 0 invalid in 19 files | `python tools/md_fence_check.py docs/audits/*.md`, `EXIT=0` |
+| `migrate:status` | 0 Pending | `php artisan migrate:status --no-ansi`, `EXIT=0` |
+| Peer set | byte-identical | `git status --short` diffed against §0's baseline |
 
-**Environment note:** `node_modules/` was an empty directory at session start, so `npm run typecheck` failed with
-`'vue-tsgo' is not recognized`. Ran `npm ci` (167 packages, 12s) to unblock. `package.json` and `package-lock.json`
-are untouched (`git status --short` on both is empty), so no dependency changed.
-
-### 7a. Browser failure classification
-
-74 failures across 42 spec files. The classification is **contention, not product**, and the evidence
-is that the same specs pass when run alone on a quiet box:
-
-| Spec | Failures in the sweep | Run alone |
-| --- | --- | --- |
-| `career-deck-summary.spec.ts` | 6 | **6/6 passed** |
-| `page-header.spec.ts` | 6 | (passed in the two-spec run alongside deck-summary) |
-| `scenario-panel.spec.ts` | 3 | **7/7 passed** |
-| `career-legacy-deck-steps.spec.ts` | 1 | **3/3 passed** on the three cases this round touched |
-
-Every re-run used `--workers=1` on its own session-private port and scratch database. The sweep ran the
-default worker count against one server on port 8230 for 1.4 hours.
-
-The failure causes corroborate it: 21 `toBeVisible` timeouts, 11 `toHaveCount` mismatches, 8 `click`
-timeouts at the 180s ceiling — the shape of work that never got the server's attention, not of
-assertions that measured a wrong value. Two errors are `title= on non-interactive elements`, an axe rule
-firing on markup no slice this round edited.
-
-**One failure is the known pre-existing case**: `career-timeline.spec.ts:189` "sizes the controls to the
-44px contract" — `Expected: 0 / Received: 2` undersized controls, recorded as pre-existing in S18b's
-commit and independently in S13's report, reproduced on a clean HEAD build.
-
-**No failure is in a spec this round introduced.** The specs this round added cases to —
-`career-cockpit`, `career-preflight`, `career-trainee-select`, `career-event-decision`,
-`career-inheritance-event`, `career-training-detail`, `career-build-target` — none appears in the
-74-failure list except `career-preflight-indep` (1, a spec this round did not touch) and
-`career-timeline` (1, the known 44px case).
-
-Per the close-out dispatch's own rule this is not a stop condition: the failures are not in this
-round's touched set and they do not reproduce in isolation. They are recorded as a fact about the
-sweep's conditions, and **the sweep's own figure is not evidence of a green browser suite.** The
-evidence that matters is the per-spec runs, which are green on every spec this round changed.
+The docs figure reads 560 here against 558 at the commit before this pass: the two extra hits are this
+session's own correction prose quoting the trigger words while ruling on them (class 1 — naming the list
+to rule on it). The code figure is unchanged at 318, because no source file changed in this pass.
 
 ### 8. Lore delta
 
@@ -274,6 +246,18 @@ unresolved.
 
 **Baseline note:** the ledger's §0 session-start line is left as written — it is a historical fact about
 what was measured then, and a close-out corrects the delta rather than rewriting the earlier reading.
+
+**Dated correction, 2026-11-08 (verification pass).** The paragraph above replaces an earlier version of
+this item that read `code: 318 — was 182`, giving a delta of +136. That baseline was wrong: the true
+round-6 code figure is **313**, recorded at
+`docs/audits/rice-shower-unity-cup-round6-reconciliation.md:26` verbatim as
+"`php tools/lore.php code` (313 hits)". The +136 compared a real code-mode count against a number never
+produced by a code-mode invocation. Verified this pass by running all three forms:
+`php tools/lore.php` → 560 docs (the count grew by two as this session's own correction prose landed),
+`php tools/lore.php code` → **318**, `php tools/lore.php --code` → 560 docs, i.e. **not code mode**
+(`tools/lore.php:47`). The true code delta against 313 is **+5**. The two class-2 rulings
+(`CareerLayout.vue:143` `mount`, `career-cockpit.spec.ts:743` `stable`) stand unchanged — they hold
+whichever invocation produces the count.
 
 ### 9. Commit
 `27a3d374` — `fix(career): read a past objective with no record as not reached, not missed (R7-82, R7-22, R7-25, R7-61)`
@@ -1464,3 +1448,19 @@ The register's §13 enumerates them; quoted there rather than restated here so t
 `R7-66`'s storage half, `R7-22`'s alert half, `R7-36` facet (b) / `R7-68`'s vocabulary beyond
 kind/target/stars, `R7-87`'s seven undecodable condition keys, and the `career-timeline.spec.ts` 44px
 case (two undersized controls, pre-existing).
+
+### 10a. Owed earlier rounds — three Pest failures
+
+The three failures in the 2287/3 figure are pre-existing reds, correctly classified and **not** this
+round's defects. They are named here so a reader arriving at §13 does not read a closed round as one
+whose tests are green:
+
+| Test | Cause | Correction owed |
+| --- | --- | --- |
+| `ScenarioAdvisorFinaleTest::it names the finale and counts the turns while it is close` | expects the bare label `'Our Grand Concert'`; `TrainerAdvisor.php:246,259` appends `' finals'` | `49a90c3a`'s owner |
+| `UraPanelTest::it raises a Critical alert when a mandatory race turn has arrived and nothing is recorded for it` | same advisor change, same label | `49a90c3a`'s owner |
+| `UiHygieneTest::it never ships a repository identifier to a Trainer` | `TeamPanelBuilder.php:552` ships a source-file path in payload copy | `5bc07c6c`'s owner |
+
+Each is a test-versus-source disagreement, not a product defect this round introduced: in the first two
+the source moved and the assertion did not; in the third the copy itself carries a path a Trainer should
+never read. Both commits are ancestors of the session base `6f95c476`.
