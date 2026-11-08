@@ -49,6 +49,27 @@ async function hydrate(page: import('@playwright/test').Page, url: string): Prom
     await page.locator('#app > *').first().waitFor();
 }
 
+/**
+ * Pick a Spark `Target` through the combobox (`S-A-P02.4`).
+ *
+ * The field is an `<input role="combobox">` since `S-A-P02.2`, so `selectOption()` no longer reaches it —
+ * Playwright fails with `Element is not a <select> element`. Typing a prefix filters the list and the
+ * option is clicked, which is the same path a Trainer takes. The id is the caller's, kept verbatim from
+ * `AncestorEditor.vue:5-9`'s load-bearing contract.
+ */
+async function selectSparkTarget(
+    page: import('@playwright/test').Page,
+    id: string,
+    label: string,
+): Promise<void> {
+    const field = page.locator(`#${id}`);
+    await field.click();
+    // Three characters is enough to narrow a catalogue to a handful without risking a prefix that also
+    // matches a longer name ahead of the target in sort order.
+    await field.fill(label.slice(0, 3));
+    await page.locator('[role="option"]', { hasText: label }).first().click();
+}
+
 async function assertMinHeight(page: import('@playwright/test').Page, selector: string): Promise<void> {
     const box = await page.locator(selector).boundingBox();
     expect(box?.height ?? 0, `${selector} is not sized to the 44px contract`).toBeGreaterThanOrEqual(44);
@@ -355,7 +376,7 @@ test.describe('Setup step 4 — Legacy', () => {
         const target = page.locator('#legacy-spark-target-0-0');
 
         await category.selectOption('Aptitude');
-        await target.selectOption('Turf');
+        await selectSparkTarget(page, 'legacy-spark-target-0-0', 'Turf');
         await page.locator('#legacy-spark-stars-0-0').fill('3');
         await category.selectOption('Stat');
 
@@ -407,7 +428,7 @@ test.describe('Setup step 4 — Legacy', () => {
         }
 
         await page.getByRole('button', { name: /Add Spark/ }).first().click();
-        await page.locator('#legacy-spark-target-0-0').selectOption('Speed');
+        await selectSparkTarget(page, 'legacy-spark-target-0-0', 'Speed');
         await page.locator('#legacy-spark-stars-0-0').fill('3');
 
         // No save: the cell follows the form.
@@ -706,4 +727,50 @@ test.describe('Setup step 5 — Support deck', () => {
         await hydrate(page, '/training-runs');
         await expect(page.getByText('No runs yet')).toBeVisible();
     });
+});
+
+/*
+ * S-A-P02.2 — the Spark row's `Target` is a searchable combobox, not a 1,910-row native `<select>`.
+ *
+ * The defect the proposal measured: a `<select>` carrying the whole skill catalogue is a hunt, not a
+ * choice (P-02 §2 M-6). This asserts the replacement's two load-bearing behaviours in the browser —
+ * the field exposes `role="combobox"`, and typing filters the list down to a skill the Trainer can
+ * then pick with the keyboard. The native select it replaced could do neither.
+ */
+test('filters the Spark Target list by typing and selects with the keyboard', async ({ page }) => {
+    await hydrate(page, '/career/setup/legacy');
+
+    await page.locator('#legacy-pick-0').selectOption('__manual__');
+    await page.locator('#legacy-name-0').fill('Silence Suzuka');
+
+    const editor = page.locator('#legacy-pick-0').locator('xpath=ancestor::div[1]').locator('details');
+
+    if (!(await editor.evaluate((el) => (el as HTMLDetailsElement).open))) {
+        await editor.locator('> summary').click();
+    }
+
+    await editor.getByRole('button', { name: 'Add Spark' }).click();
+
+    // The row's Category scopes the list; Skill is the one that carries the 623-name catalogue.
+    await page.locator('#legacy-spark-category-0-0').selectOption('Skill');
+
+    const target = page.locator('#legacy-spark-target-0-0');
+
+    // A native `<select>` cannot be a combobox: this is the assertion that fails on the old field.
+    await expect(target).toHaveAttribute('role', 'combobox');
+
+    // Part of the value, not the whole name: the field must filter, not jump-to-prefix.
+    await target.click();
+    await target.fill('Cut and');
+
+    const options = page.locator('[role="option"]');
+    await expect(options.first()).toContainText('Cut and Drive!');
+    await expect(options).toHaveCount(1);
+
+    // The keyboard path the `<select>` had must survive the replacement.
+    await target.press('ArrowDown');
+    await target.press('Enter');
+
+    await expect(target).toHaveValue('');
+    await expect(page.locator('#legacy-spark-target-0-0')).toHaveAttribute('placeholder', 'Cut and Drive!');
 });

@@ -34,6 +34,7 @@
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import { BaseInput, BaseSelect } from '../../components/Form';
 import AncestorEditor from '../../components/legacy/AncestorEditor.vue';
+import SparkTargetPicker from '../../components/legacy/SparkTargetPicker.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { nextTick, ref } from 'vue';
 
@@ -569,12 +570,13 @@ const pickOptions = (): { value: string; label: string }[] => [
                                         :options="['Stat', 'Aptitude', 'Skill'].map((category) => ({ value: category, label: category }))"
                                         @change="spark.target = ''"
                                     />
-                                    <BaseSelect
+                                    <SparkTargetPicker
                                         :id="`legacy-spark-target-${index}-${sparkIndex}`"
-                                        v-model="spark.target"
+                                        :model-value="spark.target"
+                                        :targets="props.sparkTargets[(spark.category as 'Stat' | 'Aptitude' | 'Skill')] || []"
                                         label="Target"
-                                        :options="[{ value: '', label: 'Not recorded' }, ...(props.sparkTargets[(spark.category as 'Stat' | 'Aptitude' | 'Skill')] || []).map((target) => ({ value: target, label: target }))]"
                                         :error="errorFor(index, `sparks.${sparkIndex}.target`)"
+                                        @update:model-value="spark.target = $event"
                                     />
                                     <BaseInput
                                         :id="`legacy-spark-stars-${index}-${sparkIndex}`"
