@@ -270,7 +270,10 @@ class LegacyController extends Controller
             'sparkTargets' => [
                 'Stat' => array_values((array) config('scenarios.stat_order')),
                 'Aptitude' => LegacySelectionPayload::SPARK_APTITUDES,
-                'Skill' => Skill::query()->orderBy('name')->pluck('name')->all(),
+                // S-A-P02.1: the same Global-client read the wizard's step sends, and the same reason.
+                // Both doors post against one request (`StoreLegacySelectionRequest`), so a list that
+                // differed between them would offer one field two different vocabularies.
+                'Skill' => Skill::query()->availableOnGlobal()->orderBy('name')->pluck('name')->all(),
             ],
             'notice' => self::RECORD_ONLY_NOTICE,
         ]);

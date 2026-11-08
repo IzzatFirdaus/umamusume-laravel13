@@ -2,6 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Enums\ReleaseStatus;
+use App\Models\Skill;
+use App\Models\TrainingRun;
+use App\Models\Umamusume;
+use Inertia\Testing\AssertableInertia as Assert;
+
 /**
  * Typed Spark targets.
  *
@@ -76,4 +82,61 @@ it('refuses a pick at or beyond the recorded Sparks', function (): void {
 
     $this->put(route('career.legacy.store'), $payload)
         ->assertSessionHasErrors(['legacies.0.pick']);
+});
+
+/*
+ * S-A-P02.1 — the Skill target list is the Global client's catalogue, not the whole table.
+ *
+ * The picker offers these names and the write accepts any string, so the list is the only thing
+ * standing between a Trainer and a Japan-only skill the shipped client cannot award
+ * (`ADR-0011` §2, `Skill::scopeAvailableOnGlobal()`). Both doors assemble it: the wizard's
+ * `LegacySelectController::show()` and the run-scoped `LegacyController::builder()`.
+ */
+it('offers only Global-client skills as Skill spark targets on the wizard step', function (): void {
+    $global = Skill::factory()->create([
+        'name' => 'Xceleration',
+        'release_status' => ReleaseStatus::GlobalReleased,
+        'name_is_client' => true,
+    ]);
+
+    $japanOnly = Skill::factory()->create([
+        'name' => 'Japan Only Sample',
+        'release_status' => ReleaseStatus::JapanOnly,
+        'name_is_client' => false,
+    ]);
+
+    $response = $this->get(route('career.legacy'));
+
+    $response->assertInertia(function (Assert $page) use ($global, $japanOnly): void {
+        $skills = $page->toArray()['props']['sparkTargets']['Skill'];
+
+        expect($skills)->toContain($global->name)
+            ->and($skills)->not->toContain($japanOnly->name);
+    });
+});
+
+it('offers only Global-client skills as Skill spark targets on the run-scoped builder', function (): void {
+    $trainee = Umamusume::factory()->create();
+    $run = TrainingRun::factory()->create(['umamusume_id' => $trainee->id, 'scenario' => 'ura_finale']);
+
+    $global = Skill::factory()->create([
+        'name' => 'Global Sample Skill',
+        'release_status' => ReleaseStatus::GlobalReleased,
+        'name_is_client' => true,
+    ]);
+
+    $japanOnly = Skill::factory()->create([
+        'name' => 'Japan Only Sample Two',
+        'release_status' => ReleaseStatus::JapanOnly,
+        'name_is_client' => false,
+    ]);
+
+    $response = $this->get(route('legacy.builder', $run));
+
+    $response->assertInertia(function (Assert $page) use ($global, $japanOnly): void {
+        $skills = $page->toArray()['props']['sparkTargets']['Skill'];
+
+        expect($skills)->toContain($global->name)
+            ->and($skills)->not->toContain($japanOnly->name);
+    });
 });

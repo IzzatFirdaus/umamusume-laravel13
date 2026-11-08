@@ -194,7 +194,12 @@ class LegacySelectController extends Controller
             'sparkTargets' => [
                 'Stat' => array_values((array) config('scenarios.stat_order')),
                 'Aptitude' => LegacySelectionPayload::SPARK_APTITUDES,
-                'Skill' => Skill::query()->orderBy('name')->pluck('name')->all(),
+                // S-A-P02.1: the Global client's catalogue, not the whole table. The picker offers these
+                // names and the write accepts any string, so this list is the only thing between a
+                // Trainer and a Japan-only skill the shipped client cannot award (`ADR-0011` §2,
+                // `Skill::scopeAvailableOnGlobal()`). The same read the planner's pickers use, so a
+                // second copy of the filter cannot drift from them.
+                'Skill' => Skill::query()->availableOnGlobal()->orderBy('name')->pluck('name')->all(),
             ],
             'notice' => LegacyController::RECORD_ONLY_NOTICE,
             // The step's write URL, supplied server-side the way CareerLayout.vue:11 and
