@@ -2848,8 +2848,8 @@ the builder posts through Inertia's `form.legacies` object rather than a native 
 attributes are a testability affordance here, not a functional requirement — and that reasoning is exactly why
 they were never added.
 
-`TrackerVeteransSeeder` files seven Veterans from the committed tracker: Maruzensky ×2, Mayano Top Gun,
-Haru Urara, Daiwa Scarlet, Vodka ×2. Neither named trainee appears. `LegacyController::roster()` renders
+`TrackerVeteransSeeder` files eight Veterans from the committed tracker: Maruzensky ×2, Mayano Top Gun,
+Haru Urara, Tokai Teio, Daiwa Scarlet, Vodka ×2. Neither named trainee appears. `LegacyController::roster()` renders
 `name` as the bare `umamusume->name`, so the two duplicated trainees also produce two visually identical
 options — a separate finding, recorded in the appendix.
 
