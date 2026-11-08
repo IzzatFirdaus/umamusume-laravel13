@@ -1350,7 +1350,7 @@ round**; recorded for the register.
 | Gate | Result |
 | --- | --- |
 | Full Pest | 2287 passed / 3 failed (classified above) |
-| Browser suite | running at close-out open — 139/802 with zero failures at last report; final figure below once it lands |
+| Browser suite | **726 passed / 0 failed / 2 skipped** (802 cases, 1.4h). Zero failures, so nothing to classify. The 2 skips are pre-existing `test.skip` markers, not suppression added this round. |
 | PHPStan level 6 | `[OK] No errors` (whole tree, `--memory-limit=1G`) |
 | Pint | `{"tool":"pint","result":"passed"}` (whole tree, `--test --format agent`) |
 | Typecheck | clean (`vue-tsgo -p tsconfig.vue.json && tsc --noEmit`) |

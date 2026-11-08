@@ -945,7 +945,11 @@ resolver), and S0b's two absence assertions (a state the fixture was not in). Th
 measure is a test that cannot fail.** Applying it caught a live defect on the cockpit's undo button that
 no slice had reported.
 
-**Gates at close-out:** see the ledger's `#close-out`. Every failure is classified there with its
-boundary commit; no unclassified failure stands.
+**Gates at close-out:** full Pest **2287 passed / 3 failed**, each traced to a boundary commit before
+the session base (`5bc07c6c` × 2, `49a90c3a` × 1) and none closed by this round. Browser suite
+**726 passed / 0 failed / 2 skipped** across 802 cases in 1.4h — zero failures, so nothing to classify.
+PHPStan, Pint, typecheck and build clean. Lore 556/75 docs (unchanged), 318 code (delta ruled at the
+ledger's item 8). Fence 0 invalid. Migrations 0 pending. Peer set byte-identical. The ledger's
+`#close-out` carries the command-level record.
 
 **The register is closed.** The ledger is the durable record of what landed and what did not.
