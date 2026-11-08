@@ -1164,3 +1164,59 @@ register's own statement of what this pass cannot land:
 
 None is a code defect this pass can settle from repository evidence, and opening a slice for one would
 mean inventing a requirement. They stay held.
+
+---
+
+## Fix rounds — S13 and the two review returns
+
+Three separate returns landed against work already committed. Recorded here because each changed code
+after the slice's own ledger entry was written.
+
+### S13, review round 1 — `bd5c769c`
+
+Review verdict `spec=FAIL`, `quality=CHANGES_REQUESTED`, two findings.
+
+1. **The two new `CareerTimelineTest` cases were source-text scans** (`toContain("from '../../lib/career/turnDisplay'")`).
+   They passed on the presence of the diff's own strings and would pass unchanged if the label printed
+   a wrong number. Replaced with payload assertions on the values each page binds; re-review confirmed
+   `CareerTimelineTest.php` carries zero `file_get_contents`/`toContain` calls.
+2. **`Timeline.vue` fed every row kind to `latestLoggedTurn`.** `props.entries` holds turn, race, event
+   and purchase rows; the turn rows alone are the log. Numerically coincident today because non-turn rows
+   borrow turns that turn rows hold, but wrong input. Now filtered to `kind === 'turn'`.
+
+### S13, review round 2 — `329d4ef0`
+
+The first review's output was truncated in delivery; the full set was six findings, including a Critical.
+
+3. **Critical: `nextTurn()` dropped the `+1` on the position branch.** `TrainingRun::nextTurnNumber()`
+   is the server's one owner and answers `career_position.turnIndex + 1` there, so a snapshot standing at
+   turn 67 prefilled 67 in the Events and Inheritance forms while TrainingDetail opened at 68. The exact
+   split R7-32 exists to close. The fix does not restate the arithmetic in the browser: `write.prefill_turn`
+   now ships from the controller, so the three screens read one number from one owner.
+4. **`TimelineController::runSection` shipped no `career_position`.** A snapshot that logged nothing
+   rendered `Undo turn 1` on the Timeline while the Races screen printed 67.
+5. **The prefill value was never asserted.** The `CareerEventDecisionTest` case of that name checked only
+   the position and the turn list, so it passed with finding 3 present.
+6. **Minor:** `undoTurnLabel` names a number, `Entered` as the off-calendar status default has a knock-on
+   into Trackblazer's projected inflow. Recorded, not changed.
+
+### Residuals after round 2 — `9f23d4d9`
+
+The round-2 re-review approved both findings but named two residuals, and taking the first caught a
+seventh defect:
+
+7. **Timeline's undo carried no `disabled` binding** while its own title said the build has no undo.
+   `RaceDecision` and `TrainingDetail` both carry it; R7-21 fixed the same control on TrainingDetail in
+   this round. Third instance, now bound.
+8. The rendered `Undo turn N` string had no assertion anywhere — a wrong binding outside the filter would
+   pass. A browser case now reads it (`Undo turn 2` for turns 1 and 2 logged).
+9. The R7-32 case derived its maximum from every entry kind, re-encoding the mixed input finding 2 named.
+   Now filters to `kind === 'turn'` and asserts the set is non-empty first.
+
+### What the fix rounds establish
+
+Every one of findings 1-9 was found by a reviewer or by running a sibling suite, not by the slice's own
+gates. The slice's browser cases asserted the words and not the number; its Feature cases asserted the
+payload and not the value. **A test that names a behaviour it does not measure is the failure mode this
+round reproduced three times**, and the two-source rule that closed it — payload assertion for the number,
+browser assertion for the string — is what the remaining slices inherited.
