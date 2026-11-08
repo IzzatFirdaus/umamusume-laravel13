@@ -1703,3 +1703,195 @@ Peer set unchanged: `git status --short` showed only the three staged paths befo
   it today (P-02 §2 M-14), so the guard's test is the component's own, not a data-driven one.
 - The three browser specs' `selectOption()` calls on the target field — `S-A-P02.4`.
 - `Skill` category server-side validation — P-02 §7 decision 8 rules no.
+
+## §s-a-p02-2 — S-A-P02.2: a searchable Target combobox on the wizard's parent rows
+
+### 1. Slice, rows, register reference
+**S-A-P02.2**, from `docs/proposals/2026-11-08-sparks-skill-picker.md` §4 items 1, 2, 4 and §7
+decisions 2-6. **No register row** — post-close-out, following `§post-close-out-fix-F-01`'s precedent.
+
+### 2. Pre-flight
+```
+$ git rev-parse HEAD
+7fb232e3 (S-A-P02.1's commit)
+$ git status --short -- resources/js/components/Form/SearchableSkillPicker.vue \
+    resources/js/components/legacy/AncestorEditor.vue \
+    resources/js/pages/Career/LegacySelect.vue \
+    tests/browser/career-legacy-deck-steps.spec.ts
+(empty — CLEAN)
+$ node -e "require('playwright').chromium.launch()…"
+launched 153.0.8010.12
+```
+`RENDERED_EVIDENCE = TRUE`, re-probed for this slice rather than inherited.
+
+**Decision 6 resolution (sibling vs generalisation).** Read `SearchableSkillPicker.vue` in full (278 lines):
+props `options: { id, name, type }[]`, emit `select: { id, name }`. A Spark's target is a bare string the
+payload stores verbatim (`ADR-0010`). Teaching one component both shapes means a union prop and a union emit
+at three existing call sites — more than the sibling costs. **Sibling chosen:**
+`resources/js/components/legacy/SparkTargetPicker.vue`, 250 lines, modelled on the picker's listbox and
+keyboard contract rather than sharing its types.
+
+### 3. RED
+New browser case in `tests/browser/career-legacy-deck-steps.spec.ts:719`
+(`filters the Spark Target list by typing and selects with the keyboard`), asserting `role="combobox"` on
+`#legacy-spark-target-0-0` after setting Category to `Skill`, then typing `Cut and` and picking with
+ArrowDown + Enter.
+
+Run against the previous build (component and wiring reverted, `npm run build` re-run):
+```
+Error: expect(locator).toHaveAttribute(expected) failed
+Locator:  locator('#legacy-spark-target-0-0')
+Expected: "combobox"
+Received: null
+  at tests\browser\career-legacy-deck-steps.spec.ts:739:26
+  1 failed
+```
+The old field is a native `<select>`, which has no `role` attribute at all.
+
+### 4. GREEN
+```
+[1/1] › tests\browser\career-legacy-deck-steps.spec.ts:719:1 › filters the Spark Target list by typing…
+  1 passed (18.6s)
+```
+
+### 5. Non-vacuity
+Two independent changes (the new component, and the page wiring), so two proofs.
+
+**Proof A — the component.** Deleted `SparkTargetPicker.vue` and reverted `LegacySelect.vue`, re-built:
+```
+Error: expect(locator).toHaveAttribute(expected) failed   →  1 failed
+```
+Restored both; `git diff | diff - parent.diff` → **MATCH**; case passes again.
+
+**Proof B — the spec helper.** `selectSparkTarget()` in `career-legacy-deck-steps.spec.ts` replaces three
+`selectOption()` calls on the target field. With the component in place but the helper removed, the two
+existing cases fail with `locator.selectOption: Error: Element is not a <select> element` — which is the
+proof that the helper, not a timeout, is what makes them pass.
+
+### 6. Regression
+`tests/browser/career-legacy-deck-steps.spec.ts` whole file, after the helper landed:
+```
+18 passed (47.1s)
+```
+Two of those are the cases the contract change broke and the helper repaired; both are named in §5's
+Proof B rather than reported as green-only.
+
+### 7. Gates
+```
+$ vendor/bin/pint --test --format agent <php paths>      → {"tool":"pint","result":"passed"}
+$ vendor/bin/phpstan analyse --no-progress --memory-limit=1G   → [OK] No errors
+$ npm run typecheck                                      → clean (vue-tsgo + tsc)
+$ npm run build                                          → ✓ built
+$ npm run lint:ui                                        → one hit in the new component, removed
+$ php tools/lore.php code                                → 318 hit(s) (unchanged from S-A-P02.1)
+```
+**`lint:ui` finding, fixed not baselined.** The first draft carried `min-w-[12rem]`, an arbitrary value that
+would have been the 210th entry in a list the gate treats as deferred debt. Replaced with the token scale's
+`min-w-48`. Re-run: no hit in the file. The one remaining hit near this change,
+`LegacySelect.vue:433` `[15px]`, predates the slice.
+
+### 8. Commit
+```
+$ git add -- resources/js/components/legacy/SparkTargetPicker.vue \
+              resources/js/pages/Career/LegacySelect.vue \
+              tests/browser/career-legacy-deck-steps.spec.ts
+$ git commit -m "feat(legacy): searchable spark target picker with current-value guard (S-A-P02.2)"
+[master 195c39d4]  3 files changed, 324 insertions(+), 5 deletions(-)
+$ git diff HEAD~1 HEAD --name-only
+resources/js/components/legacy/SparkTargetPicker.vue
+resources/js/pages/Career/LegacySelect.vue
+tests/browser/career-legacy-deck-steps.spec.ts
+```
+
+**The spec helper rode in this commit rather than in `S-A-P02.4`.** The dispatch assigned the `fill()`-based
+helpers to `.4`, but `.2` cannot leave the suite green without them: the component change is what breaks
+`selectOption()`. Splitting them would have committed a knowingly-red suite. `.4` then covers the two
+remaining specs, which — measured — carry no spark-target reference at all.
+
+### 9. Slice did not close
+- The run-scoped Builder's parent row and the four grandparent editors — `S-A-P02.3`.
+- `legacy.spec.ts`'s own spark selection, which `.3` repairs alongside its wiring.
+- `legacy-index.spec.ts` and `career-inheritance-event.spec.ts` — `.4`, and neither addresses this field.
+- Server-side `Skill` validation — P-02 §7 decision 8 rules no.
+
+## §s-a-p02-3 — S-A-P02.3: the picker reaches the run-scoped Builder and the four grandparent editors
+
+### 1. Slice, rows, register reference
+**S-A-P02.3**, from P-02 §4 items 1, 2 and §7 decision 7 (both surfaces). **No register row.**
+
+### 2. Pre-flight
+```
+$ git rev-parse HEAD
+195c39d4 (S-A-P02.2's commit)
+$ git status --short -- resources/js/pages/Legacy/Builder.vue \
+    resources/js/components/legacy/AncestorEditor.vue tests/browser/legacy.spec.ts
+(empty — CLEAN)
+$ node -e "…chromium.launch()…"     → launched 153.0.8010.12
+```
+`RENDERED_EVIDENCE = TRUE`.
+
+**A measured correction to the dispatch's assumption.** The run-scoped Builder's parent Spark row carried
+**no Category control at all** — `SparkDraft.category` existed on the form model and was populated by
+`inferCategory()`, but the row rendered only `Kind`, a free-text `Applies to`, and `Stars`. Wiring a
+category-scoped picker there required adding the Category select the wizard's row already had. Recorded
+rather than silently widened: the alternative was a picker whose list could not be scoped, which would have
+reintroduced the "two independent filters over one vocabulary" defect `IA-3` names.
+
+### 3. RED
+New browser case in `tests/browser/legacy.spec.ts:470`
+(`renders the searchable Target combobox on the parent row and the grandparent rows`), asserting
+`role="combobox"` on `#spark-target-parent_a-0` and `#ancestor-spark-target-parent_a-0-0`.
+
+Run with both `.vue` files reverted and the build re-run:
+```
+Error: expect(locator).toHaveAttribute(expected) failed
+Locator: locator('#spark-target-parent_a-0')
+Expected: "combobox"
+  1 failed
+```
+
+**Two locator corrections the case needed, both measured rather than guessed:**
+- `AncestryGraph::parentNode` passes `parent_a` / `parent_b` as the slot (`AncestryGraph.php:69-70`), not the
+  wizard's `a` / `b`, so the run-scoped ids differ from the wizard step's.
+- A bare `/Add Spark/` matches the four grandparent buttons, which render first in DOM order; the parent's
+  button is `Add Spark to Parent A` (its `<span class="sr-only">` appends the node name).
+
+### 4. GREEN
+```
+[1/1] › tests\browser\legacy.spec.ts:470:5 › renders the searchable Target combobox…
+  1 passed (17.4s)
+```
+
+### 5. Non-vacuity
+Two `.vue` files changed independently, so two proofs.
+
+**Proof A — `AncestorEditor.vue`.** Reverted alone: the grandparent assertion fails, the parent assertion
+still passes. **Proof B — `Builder.vue`.** Reverted alone: the parent assertion fails, the grandparent one
+still passes. Both restored, `git diff | diff - <patch>` → **MATCH** each, case passes.
+
+### 6. Regression
+`tests/browser/legacy.spec.ts` whole file: **10 passed**, after one pre-existing case
+(`confirms a selection and shows it back on the compare surface`) was repaired by this slice's contract
+change. Its `fill('Speed')` on `Applies to` typed a filter and never committed a value; it now clicks the
+option. The case is unchanged in intent — it still selects Speed and asserts the read-back.
+
+### 7. Gates
+```
+$ vendor/bin/pint --test --format agent resources/js     → {"tool":"pint","result":"passed"}
+$ npm run typecheck                                     → clean
+$ npm run build                                         → ✓ built
+$ npm run lint:ui                                       → no new hits in the three touched files
+```
+
+### 8. Commit
+```
+$ git commit -m "feat(legacy): wire picker run-scoped Builder and four grandparent editors (S-A-P02.3)"
+[master cb0d4943]  3 files changed, 70 insertions(+), 8 deletions(-)
+```
+
+### 9. Slice did not close
+- `legacy-index.spec.ts` and `career-inheritance-event.spec.ts` — `.4`, and measured: neither touches the
+  spark-target field, so `.4` carries no edit for them.
+- The `Applies to` label on the Builder's parent row is kept verbatim. It differs from the wizard's `Target`
+  and from the grandparent rows' `Target`, which is a real inconsistency (`SHR-1`) that this slice does not
+  close: renaming it moves three specs' locators and is a separate, nameable change.
