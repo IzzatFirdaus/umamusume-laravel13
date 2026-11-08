@@ -1,6 +1,6 @@
 # Proposal — Sparks skill picker: replace the native `<select>` with a searchable picker
 
-**Status:** proposal, not slice. Awaiting owner ruling.
+**Status:** proposal, not slice. **Decisions 1-7 ruled: implemented as `S-A-P02.1`-`.4`.** Slices `7fb232e3`, `195c39d4`, `cb0d4943`; the spec-contract slice follows them. Awaiting review, not further rulings.
 **Date opened:** 2026-11-08
 **Source:** user's session, 2026-11-08; screenshot `/umamusume/vodka` profile page and the Legacy step's `Kind` / `Category` / `Target` row; user's words quoted in §1.
 **Register reference:** none (not a Round 7 row).
@@ -253,3 +253,5 @@ Eleven derived-rule families exist across ten files; this section names only the
 | 2026-11-08 | Refinement — duplicate check against `docs/proposals/` run (title filter + body grep for `character_cards.*base.?stat`, `spark.?target`, `1,?910`, `JapanOnly`); the only hits are this proposal's own text. No prior proposal covers this surface. |
 | 2026-11-08 | §4.5 — framework adherence section: justifying/constraining/accepted/N-A rules, attribution table cited, target-size settlement cited for the picker's 44px options |
 | 2026-11-08 | §4.5 — `4.1.1` appears once, as the mandated withdrawal caveat (§4.5 opening); no rule grounding rests on it. No `SHR-8` citation in this proposal (the ID is not defined in `shneiderman-golden-rules-2026-10-21.md`, whose rules stop at `SHR-7`). |
+| 2026-11-08 | Implemented — `S-A-P02.1` (`7fb232e3`) filters both doors' Skill list to `availableOnGlobal()`: 1,910 → 623. `S-A-P02.2` (`195c39d4`) adds `SparkTargetPicker.vue` with the current-value guard and wires the wizard's parent rows. `S-A-P02.3` (`cb0d4943`) wires the run-scoped Builder and the four grandparent editors; the Builder's parent row gained the Category control it was missing. `S-A-P02.4` repairs the three specs that drove the field with `selectOption()`. |
+| 2026-11-08 | Implementation note — the `fill()`-based helpers landed in `.2`/`.3` rather than `.4`, because those slices cannot leave the suite green without them. `.4` then covered `legacy-index.spec.ts` and `career-inheritance-event.spec.ts`, which do drive the field (`fill('Speed')` on `Applies to`) and which the dispatch expected to be untouched. |

@@ -1,6 +1,6 @@
 # Proposal — Trainee preset auto-fill at career start
 
-**Status:** proposal, not slice. Awaiting owner ruling.
+**Status:** proposal, not slice. **Decisions 1-4 ruled: implemented as `S-A-P01.1`-`.3`.** Slices `955ff4f2`, `39804efe`, `4072042c`. **Decision 7 (Our Grand Concert's goal source) still open** — `S-A-P01.OG` is held pending it. Awaiting that ruling and review.
 **Date opened:** 2026-11-08
 **Source:** user's session, 2026-11-08; screenshot `/umamusume/vodka` profile page (base stats `96 / 61 / 105 / 75 / 88`, growth row `10 / 0 / 20 / 0 / 0`); user's words quoted in §1.
 **Register reference:** none (not a Round 7 row).
@@ -318,3 +318,5 @@ Three separable pieces, in evidence strength order. They need not ship together.
 | 2026-11-08 | §4.5 — framework adherence section: justifying/constraining/accepted/N-A rules, attribution table cited, seven settled conflicts referenced (consistency-exceptions for §4.2 and §4.3; closure-honesty for §4.3) |
 | 2026-11-08 | §4.5 cited `SHR-7` per `shneiderman-golden-rules-2026-10-21.md` (rules stop at `SHR-7`); the planning brief's §3.3 `SHR-8` ID is not defined in that file (round-6 §11.4 records the derived-table off-by-one). §5 alternative B's `SHR-8` substituted too. |
 | 2026-11-08 | §4.5 — `4.1.1` appears once, as the mandated withdrawal caveat (§4.5 opening); no rule grounding rests on it. The adherence brief's §7 grep expecting zero did not account for the caveat. |
+| 2026-11-08 | Implemented — `S-A-P01.1` (`955ff4f2`) adds a per-scenario `goal_source` key and gates `TeamPanelBuilder::traineeGoalRows()` on it; Unity Cup composes no URA ladder, OGC keeps its behaviour pending decision 7. `S-A-P01.2` (`39804efe`) lifts the seeding into `app/Actions/SeedRunSkills.php` and calls it from the wizard door, correcting the stale `PreflightController:51` docblock. `S-A-P01.3` (`4072042c`) adds `state.starting_stats` and the labelled `Starting:` line; absent entirely for a run with no card. |
+| 2026-11-08 | Decision 7 still open. `S-A-P01.OG` is held and named in `§s-a-p01-1`'s §9. Our Grand Concert's `goal_source` is deliberately **unset** rather than guessed, so the default keeps today's behaviour until the owner rules which ladder `config/scenarios.php:1118-1119` means. |

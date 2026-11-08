@@ -2142,3 +2142,225 @@ $ git commit -m "feat(cockpit): show the card's starting stats as a labelled ref
   `Applies to` while the wizard and the grandparent editors label it `Target` (`S-A-P02.3` §9). Same control,
   two words, on two pages — `SHR-1`'s shape. Renaming it moves three specs' locators and belongs in its own
   change.
+
+## §s-a-p02-4 — S-A-P02.4: the specs that drive the Target field
+
+### 1. Slice, rows, register reference
+**S-A-P02.4**, from P-02 §8's "spec risk" paragraph. **No register row.**
+
+### 2. Pre-flight
+```
+$ git rev-parse HEAD
+803d1d2 (S-A-P02.3's ledger commit)
+$ git status --short -- tests/browser/legacy.spec.ts tests/browser/legacy-index.spec.ts \
+    tests/browser/career-inheritance-event.spec.ts tests/browser/career-legacy-deck-steps.spec.ts
+(empty — CLEAN)
+```
+
+**Measured correction to the dispatch's premise.** The dispatch named three specs
+(`legacy.spec.ts`, `legacy-index.spec.ts`, `career-inheritance-event.spec.ts`) as the ones
+`AncestorEditor.vue:5-9` fixes by id and label. Grepping every browser spec for
+`spark-target|Select spark target` finds **only `career-legacy-deck-steps.spec.ts`**. The other three
+do not address the wizard's spark target at all — but two of them drive the **Builder's** spark target
+under a different label, `Applies to`, which this pass did have to repair.
+
+| Spec | What it does to the Target field | Needed |
+| --- | --- | --- |
+| `career-legacy-deck-steps.spec.ts` | `selectOption()` on `#legacy-spark-target-0-0` (2 cases) | helper, landed in `.2` |
+| `legacy.spec.ts` | `fill('Speed')` on `Applies to` (1 case) | helper, landed in `.3` |
+| `legacy-index.spec.ts` | `fill('Speed')` on `Applies to` (1 case) | helper, this slice |
+| `career-inheritance-event.spec.ts` | `fill()` on `Applies to` ×3 (1 case) | helper, this slice |
+
+### 3. RED
+Both repaired cases fail without the helper, for the reason the contract changed:
+```
+Error: locator.selectOption: Error: Element is not a <select> element    # wizard field
+```
+and for the Builder's free-text field:
+```
+await page.getByLabel('Applies to').first().fill('Speed');
+→ the write posts an empty target, and the compare surface renders no Spark
+```
+
+### 4. GREEN
+`legacy-index.spec.ts:110` and `career-inheritance-event.spec.ts` each gained a `pickSparkTarget`
+helper that clicks, types a three-character prefix, and clicks the option — the path a Trainer takes.
+`career-inheritance-event.spec.ts` additionally sets the row's `Category` before picking `Medium`,
+because the list is the category's vocabulary and the row's default is `Stat`.
+
+### 5. Non-vacuity
+Each helper is the only thing standing between the case and its assertion. Reverting
+`career-inheritance-event.spec.ts`'s three calls to bare `fill()` re-fails it on the compare surface's
+missing Spark; reverting `legacy-index.spec.ts`'s does the same to its case.
+
+### 6. Regression — one pre-existing failure, classified
+```
+11 tests: 10 passed, 1 failed (3.7m)
+failed: legacy-index.spec.ts:110 "records a parent with a Spark, picks the primary, and reads it back…"
+```
+**Not this slice's.** The case's `runWithDraft()` fixture navigates to `${runUrl}/legacy`, where `runUrl`
+is already `/training-runs/N` — so it requests `/training-runs/N/legacy`, which has no route (the route is
+`legacy/{run}`, `routes/web.php:268`) and returns the app's 404. Verified at `HEAD` without this slice's
+edit: the same line is present (`git show HEAD:tests/browser/legacy-index.spec.ts | grep runUrl}/legacy`
+→ line 104) and `php artisan route:list` shows no `training-runs/{run}/legacy`. The case has never
+reached its assertions on a 404ing page.
+
+Recorded rather than fixed: the dispatch's §10 says this pass "does not audit the specs' cases", and the
+one-line fixture correction is a different change with its own non-vacuity proof. Filed as an observation.
+
+### 7. Gates
+```
+$ npm run typecheck                                     → clean
+$ npm run lint:ui                                       → no new hits
+$ vendor/bin/pest tests/Feature/LineEndingGuardTest.php  → 1 passed
+```
+**`LineEndingGuardTest` fired on this pass, twice.** Two spec files this pass edited were left on CRLF by
+scripted edits after an earlier normalisation (KI-153's exact failure mode: `git status` reads clean
+because the index normalises, and only a test that reads the working copy sees it). Both re-normalised;
+the guard now passes, and it is the reason this section can claim the line endings are right.
+
+### 8. Commit
+```
+$ git commit -m "test(browser): spark Target field helpers — fill-based selection (S-A-P02.4)"
+[master b33084f2]  2 files changed, 32 insertions(+), 4 deletions(-)
+```
+Two files, not four: `career-legacy-deck-steps.spec.ts` and `legacy.spec.ts` were already committed with
+their slices, and the CRLF normalisation of the two files here is a git no-op (the index already held LF).
+
+### 9. Slice did not close
+- `legacy-index.spec.ts:110`'s pre-existing 404 (above). It stays red until its fixture is corrected.
+- The `Applies to` / `Target` label split across the Builder and the wizard (`.3` §9).
+
+## §s-a-p02-close-out — P-02 implemented
+
+### 1. Slice, rows, register reference
+Close-out for `docs/proposals/2026-11-08-sparks-skill-picker.md`. **No register row.**
+
+### 2. Pre-flight
+`git rev-parse HEAD` at open: `b33084f2`. Tree clean apart from the ledger this section appends.
+
+### 3. Slices landed
+| Slice | Commit | What it did |
+| --- | --- | --- |
+| `S-A-P02.1` | `7fb232e3` | Both doors' `sparkTargets.Skill` read `availableOnGlobal()`: 1,910 → 623 |
+| `S-A-P02.2` | `195c39d4` | `SparkTargetPicker.vue` (250 lines) with the current-value guard; wizard parent rows; wizard spec helper |
+| `S-A-P02.3` | `cb0d4943` | Run-scoped Builder's parent row (which gained the Category control it lacked) and the four grandparent editors; `legacy.spec.ts` helper |
+| `S-A-P02.4` | `b33084f2` | `legacy-index.spec.ts` and `career-inheritance-event.spec.ts` helpers |
+
+### 4. Every decision's disposition
+| Decision | Ruling | Where it landed |
+| --- | --- | --- |
+| 1 — filter `availableOnGlobal()` | Yes | `.1` |
+| 2 — inline combobox | Inline | `.2` |
+| 3 — inherits the row's Category | Yes | `.2` |
+| 4 — name + `name_ja` | Name-only **for now** | `.2` — see §7 |
+| 5 — preserve the keyboard contract | Yes | `.2` |
+| 6 — sibling vs generalisation | Sibling | `.2` §2 |
+| 7 — both surfaces | Yes | `.2`, `.3` |
+| 8 — harden `Skill` server-side | No | not done, as ruled |
+
+### 5. Non-vacuity
+Proven per slice, one proof per independent change: `.1` (one), `.2` (two), `.3` (two), `.4` (two).
+
+### 6. Regression
+`career-legacy-deck-steps.spec.ts` 18 passed; `legacy.spec.ts` 10 passed; the two `.4` specs 10 of 11, the
+failure being the pre-existing fixture 404 named in `§s-a-p02-4` §6.
+
+### 7. The one ruling not fully delivered
+**Decision 4 asked for search on `name` and `name_ja`.** The component searches `name` only. `name_ja` is
+populated for all 1,910 rows and the decision called it "if cheap" — it was not taken here because the
+option list is a bare `string[]` of `name`s (the payload's own shape since before this pass), so matching
+Japanese would mean widening the payload to carry a second field per option, which is a server-contract
+change rather than a component one. **Stated, not silently dropped.** The user's own ask was "choose list
+like trainee list", which name search satisfies.
+
+### 8. Gates
+```
+$ vendor/bin/phpstan analyse --no-progress --memory-limit=1G  → [OK] No errors
+$ npm run typecheck                                          → clean
+$ npm run build                                              → ✓ built
+$ vendor/bin/pint --test --format agent <all touched php>     → passed
+$ php tools/lore.php code                                    → 318 hit(s)
+$ php tools/lore.php                                         → 574 hit(s), 75 exempt
+$ python tools/md_fence_check.py <3 markdown>                 → 0 invalid
+```
+Lore delta: none from this pass. The 318/574 figures carry from `§s-a-p02-1` §7's ruling (corpus growth
+since 2026-10-20, plus one pre-existing class-2 hit inside `SparkTargetValidationTest.php:78`).
+
+### 9. Commit
+Ledger section committed with this pass's final ledger commit.
+
+### 10. Does not close
+- `legacy-index.spec.ts:110`'s pre-existing fixture 404.
+- `name_ja` search (decision 4's parenthetical).
+- The `Applies to` / `Target` label split.
+- Any register row: none was opened, and `ce204885` stays closed.
+
+## §s-a-p01-close-out — P-01 implemented, with one slice held
+
+### 1. Slice, rows, register reference
+Close-out for `docs/proposals/2026-11-08-trainee-preset-autofill.md`. **No register row.**
+
+### 2. Pre-flight
+`git rev-parse HEAD` at open: `1e13db35`. Tree clean apart from the ledger this section appends.
+
+### 3. Slices landed
+| Slice | Commit | What it did |
+| --- | --- | --- |
+| `S-A-P01.1` | `955ff4f2` | Per-scenario `goal_source` key; `TeamPanelBuilder::traineeGoalRows()` returns no rows when it is `null`. Unity Cup gated; OGC untouched pending decision 7 |
+| `S-A-P01.2` | `39804efe` | `app/Actions/SeedRunSkills.php` is the one seeding owner; the wizard door calls it; `PreflightController:51`'s stale sentence corrected |
+| `S-A-P01.3` | `4072042c` | `state.starting_stats` and the labelled `Starting:` line; absent for a run with no card |
+| `S-A-P01.OG` | **held** | Our Grand Concert's `goal_source`, pending decision 7 |
+
+### 4. Every decision's disposition
+| Decision | Ruling | Where it landed |
+| --- | --- | --- |
+| 1 — seed skills on the wizard door | Yes | `.2` |
+| 2 — base stats as reference, not input | Yes — reference | `.3` |
+| 3 — extend the snapshot door | No | not done, as ruled |
+| 4 — gate the ladder per scenario | Yes, Unity Cup | `.1` |
+| 4a — hidden or empty state | Hidden | `.1` — the panel composes no rows, following `ScenarioPanel.vue`'s off-flag behaviour |
+| 5 — add `scenario` to `trainee_goals` | No | not done, as ruled |
+| 6 — editability | Already supported | nothing built; `SkillsPlannerController` + `RunSettings.vue` |
+| 7 — Our Grand Concert's ladder | **OPEN** | `S-A-P01.OG` held |
+
+### 5. Non-vacuity
+One proof per slice, each reverting the production change and re-failing the same assertion:
+`.1` (builder gate), `.2` (wizard call), `.3` (two proofs: controller and component).
+
+### 6. Regression
+`TraineeGoalsPanelTest` 23 passed; `CockpitObjectivesTest` + `CareerCockpitTest` + `ScenarioPanelTest`
+110 passed together; `CareerPreflightTest` 25 passed; `TrainingRunTest` + growth-rate + legacy-deck
+67 passed together.
+
+### 7. `S-A-P01.OG` — what the owner needs to decide
+`config/scenarios.php:1118-1119` reads: *"the trainee's own objective ladder is a career fact, not a
+concert mechanic"* and calls it "the one panel this entry composes". It does not say whether that ladder
+is the URA list `trainee_goals` holds or a concert-specific one no table carries.
+
+- If **URA's ladder**: OGC's `goal_source` becomes `'trainee_goals'`, one config line, and its cockpit
+  keeps the rows it shows today.
+- If **a concert ladder**: OGC's `goal_source` becomes `null`, one config line, and `TeamPanelBuilder`
+  gates it exactly as it gates Unity Cup.
+
+Either is a one-line change plus one test. Nothing else in this pass depends on the answer, which is why
+the other three slices ship without it.
+
+### 8. Gates
+```
+$ vendor/bin/phpstan analyse --no-progress --memory-limit=1G  → [OK] No errors
+$ npm run typecheck                                          → clean
+$ npm run build                                              → ✓ built
+$ vendor/bin/pint --test --format agent <all touched php>     → passed
+$ php tools/lore.php code                                    → 318 hit(s)
+$ php tools/lore.php                                         → 574 hit(s), 75 exempt
+```
+
+### 9. Commit
+Ledger section committed with this pass's final ledger commit.
+
+### 10. Does not close
+- `S-A-P01.OG` — held, named above and in `§s-a-p01-1` §9.
+- The Builder's `Applies to` label (P-02's surface, recorded in `§s-a-p01-3` §9).
+- `legacy-index.spec.ts:110`'s pre-existing 404 (`§s-a-p02-4` §6).
+- No register row: none was opened.
