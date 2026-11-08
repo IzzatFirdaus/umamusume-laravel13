@@ -1580,3 +1580,126 @@ whose tests are green:
 Each is a test-versus-source disagreement, not a product defect this round introduced: in the first two
 the source moved and the assertion did not; in the third the copy itself carries a path a Trainer should
 never read. Both commits are ancestors of the session base `6f95c476`.
+
+## §s-a-p02-1 — S-A-P02.1: the Skill spark target list is the Global client's catalogue
+
+### 1. Slice, rows, register reference
+**S-A-P02.1**, from `docs/proposals/2026-11-08-sparks-skill-picker.md` §4 item 3 and §7 decision 1
+(owner ruling: yes). **No register row.** Round 7's register closed at `ce204885`; this is post-close-out
+work following `§post-close-out-fix-F-01`'s precedent (`30eb2b4d`), which files a distinct ledger section
+and touches no register.
+
+### 2. Pre-flight
+```
+$ git rev-parse HEAD
+2a564a2e397bf187355b07483b96ef24b8797a75
+$ git status --short
+(empty — CLEAN)
+$ git stash list
+stash@{0}: WIP on master: b4458c09 fix(raceplanner): remove the duplicate closing template tag…
+stash@{1}: On master: peer-traineeprofile
+stash@{2}: On master: Phase 2.1 work in progress (foreign, pre-state)
+$ php artisan migrate:status
+… 2026_11_05_084524_add_match_key_ja_to_skills_table .................. [1] Ran   (all Ran)
+```
+Pre-flight slice paths (`LegacySelectController.php`, `LegacyController.php`, `SparkTargetValidationTest.php`)
+were clean. `RENDERED_EVIDENCE` not required: this slice changes no `.vue` and adds no browser case.
+
+**Test-home correction.** The dispatch named `tests/Feature/LegacySelectionSchemaTest.php` as the RED's home.
+Read at `:1-40`: that file asserts schema shape only (`Schema::hasColumn`, foreign keys) and carries no
+`sparkTargets` reference. The correct home is `tests/Feature/SparkTargetValidationTest.php`, which already owns
+the Spark target boundary (`assertTargetMatchesCategory`). Recorded here rather than silently substituted.
+
+### 3. RED
+Two new cases appended to `tests/Feature/SparkTargetValidationTest.php:88-142`
+(`offers only Global-client skills as Skill spark targets on the wizard step`, `… on the run-scoped builder`).
+Run: `vendor/bin/pest tests/Feature/SparkTargetValidationTest.php --compact`
+
+```
+  FAILED  Tests\Feature\SparkTargetValidationTest > it offers only Global-client skills as Skill spark targets on t…
+  Expecting […] not to contain 'Japan Only Sample Two'.
+  at tests\Feature\SparkTargetValidationTest.php:140
+  Tests:    2 failed, 6 passed (25 assertions)
+```
+Both failed on the same assertion: a `JapanOnly` name reached the picker's option list. That is P-02 §2 M-4's
+defect stated as a test — `Skill::query()->orderBy('name')->pluck('name')` with no release scope.
+
+### 4. GREEN
+`LegacySelectController.php:194-202` and `LegacyController.php:270-277` now read
+`Skill::query()->availableOnGlobal()->orderBy('name')->pluck('name')->all()`.
+
+```
+  Tests:    8 passed (25 assertions)
+  Duration: 1.55s
+```
+
+### 5. Non-vacuity
+```
+$ git diff app/Http/Controllers/Career/LegacySelectController.php app/Http/Controllers/LegacyController.php \
+    > .scratch-uma/impl-session-2026-11-08/p02-1/proof-a.diff        # 34 lines
+$ git checkout -- app/Http/Controllers/Career/LegacySelectController.php app/Http/Controllers/LegacyController.php
+$ vendor/bin/pest tests/Feature/SparkTargetValidationTest.php --compact
+  Tests:    2 failed, 6 passed (25 assertions)      # fails again, same assertion
+$ git apply .scratch-uma/impl-session-2026-11-08/p02-1/proof-a.diff
+$ vendor/bin/pest tests/Feature/SparkTargetValidationTest.php --compact
+  Tests:    8 passed (25 assertions)
+$ git diff … | diff - .scratch-uma/impl-session-2026-11-08/p02-1/proof-a.diff
+MATCH
+```
+One change in this slice, so one proof. (The picker guard, the second independent change the dispatch anticipated
+here, moved to `S-A-P02.2` with the component that carries it — the guard is a rendering behaviour, not a server
+filter, and there is no controller-side half of it.)
+
+### 6. Regression
+`vendor/bin/pest tests/Feature/SparkTargetValidationTest.php tests/Feature/CareerLegacyDeckStepsTest.php tests/Feature/CareerPreflightTest.php tests/Feature/LegacyLabPageTest.php tests/Feature/LegacySelectionSchemaTest.php --compact`
+
+```
+  Tests:    90 passed (1045 assertions)
+  Duration: 7.37s
+```
+
+### 7. Gates
+```
+$ vendor/bin/pint --test --format agent <3 touched paths>
+{"tool":"pint","result":"passed"}
+$ vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+[OK] No errors
+$ php tools/lore.php code
+lore-code: 318 hit(s)          # baseline 182 at 5ed45d67 (2026-10-20); the corpus grew
+$ php tools/lore.php
+lore-docs: 574 hit(s), 75 exempt line(s)   # baseline 478 / 75
+```
+**Lore ruling.** Neither touched controller produces a hit. The one hit inside a touched file is
+`tests/Feature/SparkTargetValidationTest.php:78` — `a parent with a headline factor she does not carry` — where
+the matched term is a substring inside the ordinary word "factor" (class 2), on a line this slice did not add.
+Carried, not fixed: the hygiene gate would need a `lore-ignore-line` marker and `LoreGateParityTest` refuses one
+outside `docs/`.
+
+The 318-vs-182 and 574-vs-478 deltas are corpus growth between 2026-10-20 and today, not this slice's. Named so a
+reader does not read the delta as regression.
+
+### 8. Commit
+```
+$ git add -- app/Http/Controllers/Career/LegacySelectController.php \
+              app/Http/Controllers/LegacyController.php \
+              tests/Feature/SparkTargetValidationTest.php
+$ git diff --cached --stat
+ .../Controllers/Career/LegacySelectController.php  |  7 ++-
+ app/Http/Controllers/LegacyController.php          |  5 +-
+ tests/Feature/SparkTargetValidationTest.php        | 63 ++++++++++++++++++++++
+ 3 files changed, 73 insertions(+), 2 deletions(-)
+$ git commit -m "fix(legacy): filter spark target list availableOnGlobal (S-A-P02.1)"
+[master 7fb232e3]
+$ git diff HEAD~1 HEAD --name-only
+app/Http/Controllers/Career/LegacySelectController.php
+app/Http/Controllers/LegacyController.php
+tests/Feature/SparkTargetValidationTest.php
+```
+Peer set unchanged: `git status --short` showed only the three staged paths before the commit and nothing after.
+
+### 9. Slice did not close
+- The `<select>` itself — `Target` is still a native select on both surfaces. `S-A-P02.2` and `.3`.
+- The current-value guard — `SparkTargetPicker` carries it (`S-A-P02.2`). No stored spark target exists to exercise
+  it today (P-02 §2 M-14), so the guard's test is the component's own, not a data-driven one.
+- The three browser specs' `selectOption()` calls on the target field — `S-A-P02.4`.
+- `Skill` category server-side validation — P-02 §7 decision 8 rules no.
