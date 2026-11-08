@@ -259,7 +259,7 @@ class EventDecisionController extends Controller
     }
 
     /**
-     * @return array{action: string, turns: list<array{id: int, turn: int}>, sources: list<array{value: string, label: string}>}
+     * @return array{action: string, prefill_turn: int, turns: list<array{id: int, turn: int}>, sources: list<array{value: string, label: string}>}
      */
     private function writeSection(TrainingRun $run): array
     {

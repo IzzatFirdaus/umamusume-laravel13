@@ -32,7 +32,6 @@ import SparkChip from '../../components/legacy/SparkChip.vue';
 import { Head, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
-import { nextTurn } from '../../lib/career/turnDisplay';
 import { BaseInput, BaseSelect, BaseTextarea } from '../../components/Form';
 
 interface RunSection {

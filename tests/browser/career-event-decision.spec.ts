@@ -153,10 +153,11 @@ test('holds the primary disabled until the required fields are filled (R7-31)', 
 });
 
 test('prefills the same turn TrainingDetail names, on the same run (R7-32)', async ({ page }) => {
-    // R7-32's claim is that the two halves of one convention print the same number. The prefill is
-    // computed in the page rather than shipped in the payload, so `CareerEventDecisionTest`'s case of
-    // that name pinned the position and the turn list and never the number -- a payload assertion
-    // cannot reach it, and the review named exactly that gap (finding 4).
+    // R7-32's claim is that the two halves of one convention print the same number. Both screens now
+    // read that number from one owner -- the controllers ship it from `TrainingRun::nextTurnNumber()` --
+    // so this is a cross-check of a single source rather than of two derivations. It exists because the
+    // value had no rendered assertion at all: the sibling Feature case pinned the position and the turn
+    // list and never the number (review finding 4).
     //
     // TrainingDetail takes its number from the server (`TrainingDecisionController:574` sends
     // `nextTurnNumber()`), so reading both screens on one run is a real cross-check of the helper the

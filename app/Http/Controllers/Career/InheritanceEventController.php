@@ -411,7 +411,7 @@ class InheritanceEventController extends Controller
     /**
      * The write section: the route and minimal fields for recording an observed inheritance event.
      *
-     * @return array{action: string, turns: list<array{id: int, turn: int}>, sources: list<string>}
+     * @return array{action: string, prefill_turn: int, turns: list<array{id: int, turn: int}>, sources: list<string>}
      */
     private function writeSection(TrainingRun $run): array
     {

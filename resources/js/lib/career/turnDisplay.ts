@@ -16,11 +16,15 @@
  * `latestLoggedTurn` is the turn an undo would remove. Its floor is 1, the first turn of a career:
  * a label naming turn 0 names a turn no career has.
  *
- * `nextTurn` is the turn a form records on. With a log it is one past the last one. With nothing
- * logged it is the turn the run stands on - the imported position for a snapshot, which is the turn
- * the Trainer is playing, or 1 for a career that has not started. It is deliberately not
- * `latestLoggedTurn + 1` in that case: the floor 1 is not a logged fact, and adding to it would
- * prefill turn 2 for a run whose first turn is still turn 1.
+ * `nextTurn` is the turn a form records on, and it matches `TrainingRun::nextTurnNumber()`, the server's
+ * one owner of the number: one past the last logged turn, else one past the imported position for a
+ * snapshot, else 1 for a career that has not started. The `+1` applies on both of the first two
+ * branches. Dropping it on the position branch prefilled the turn a snapshot had already recorded, and
+ * disagreed with every screen that read the server's value.
+ *
+ * The three controllers now ship that number (`write.prefill_turn`) rather than let a page re-derive
+ * it, so this function is for callers with no payload to read. Two implementations of one number is
+ * how the drift this comment describes happened once already.
  */
 
 /** The run shape the two functions read. Both keys are optional: no payload carries both. */
