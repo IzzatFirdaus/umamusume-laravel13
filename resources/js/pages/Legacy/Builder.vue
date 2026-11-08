@@ -30,7 +30,7 @@
  * projection input and `StartingCapProjection` never reads it. It is an index into the Sparks the
  * server stores, so `postedPick()` re-reads it against the posted list: a blank draft row is
  * discarded on the way out and would otherwise shift the pointer onto its neighbour.
- * `HFW-OVERRIDE (structure: each parent's Sparks stay editable rows - Kind, Applies to, Stars,
+ * `HFW-OVERRIDE (structure: each parent's Sparks stay editable rows - Kind, Target, Stars,
  *  Remove Spark - with the pick radio as the row's last cell; legacy-builder.html:75-82 and :88-95
  *  draw a read-only Spark | Grade | Carries | (radio) table). The editor's rows carry inputs the
  *  wireframe's read-only table cannot, so the table shape is refused rather than faked.
@@ -651,7 +651,7 @@ const hasAnyNode = computed(() =>
                                                 :id="`spark-target-${parent.slot}-${sparkIndex}`"
                                                 :model-value="spark.target"
                                                 :targets="sparkTargets[spark.category as 'Stat' | 'Aptitude' | 'Skill'] || []"
-                                                label="Applies to"
+                                                label="Target"
                                                 @update:model-value="spark.target = $event"
                                             />
 

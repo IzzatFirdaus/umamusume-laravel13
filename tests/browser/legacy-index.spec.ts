@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { deleteRun } from '../utils/delete-run';
+import { fileCareer } from '../utils/file-career';
 
 /*
  * S7.1 — the Legacy Lab's browse surface, measured on `legacy.html`.
@@ -101,31 +102,54 @@ async function runWithDraft(page: Page): Promise<string> {
     const runUrl = page.url().replace(/\/cockpit$/, '');
     createdRunUrls.push(runUrl);
 
-    await page.goto(`${runUrl}/legacy`, { waitUntil: 'domcontentloaded' });
+    // `S-A-P02.6`: the Builder's route is `legacy/{run}` (`routes/web.php`, `legacy.builder`), not
+    // `/training-runs/{id}/legacy`. This fixture built the second form from `runUrl`, so it navigated to a
+    // route that does not exist and waited on `#app > *` until the case timed out — a 404 shell renders no
+    // app root. Verified pre-existing (the same construction was at `HEAD` before this pass), and fixed
+    // here because the row label rename this pass makes cannot be checked through a case that never loads.
+    const runId = runUrl.split('/').pop() ?? '';
+
+    await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
     return runUrl;
 }
 
 test('records a parent with a Spark, picks the primary, and reads it back on the compare surface', async ({ page }) => {
+    // `S-A-P02.6`: the parent list is the **Veteran library** — `LegacyController::roster()` maps stored
+    // `veterans` rows, not the catalogue — and the browser scratch database starts with **zero** of them
+    // (`global-setup.ts` runs `migrate --seed`, and no seeder files a career). A parent therefore has to be
+    // created by filing one, which is the only path the product offers: `runs.veteran.store` is reached
+    // from a completed run. Filed *before* the draft run, because the Builder's roster is read when the
+    // page loads — creating the Veteran afterwards would need a second navigation and the draft's own
+    // `Save legacy` would already have left the screen. The case previously named `Gold Ship` outright,
+    // which resolves on no database this repo can build.
+    createdRunUrls.push(await fileCareer(page, 'Silence Suzuka', null));
+
     const runUrl = await runWithDraft(page);
     const runId = runUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
 
     // Assign a parent and give her one Spark, then mark it primary. The pick is the wireframe's radio
     // (`legacy-builder.html:78`): the group is named for the parent and each radio is named by the
     // Spark in its own row, so "Primary" alone is not four identical names in one group.
-    await page.getByLabel('Assign to Parent A').selectOption({ label: 'Gold Ship' });
+    const parentSelect = page.getByLabel('Assign to Parent A');
+    const parentOption = await parentSelect.locator('option').nth(1).textContent();
+    const parentName = (parentOption ?? '').trim();
+    expect(parentName, 'the Veteran library offers no parent to assign').not.toBe('');
+
+    await parentSelect.selectOption({ label: parentName });
     await page.getByLabel('Grandparent A1', { exact: true }).fill('Tokai Teio');
     await page.getByLabel('Own rank').first().fill('3');
     await page.getByRole('button', { name: 'Add Spark to Parent A' }).click();
     await page.getByLabel('Kind').first().selectOption('blue');
-    // `Applies to` is the picker's combobox since `S-A-P02.3` (`S-A-P02.4`): a bare `fill()` types a
+    // `Target` is the picker's combobox since `S-A-P02.3` (`S-A-P02.4`): a bare `fill()` types a
     // filter and never commits a value, so the selection goes through the option list.
-    await page.getByLabel('Applies to').first().click();
-    await page.getByLabel('Applies to').first().fill('Speed');
+    // The row's label is `Target` tree-wide since `S-A-P02.6`; this surface said `Applies to` alone.
+    await page.getByLabel('Target').first().click();
+    await page.getByLabel('Target').first().fill('Speed');
     await page.locator('[role="option"]', { hasText: 'Speed' }).first().click();
     await page.getByLabel('Stars', { exact: true }).first().fill('3');
-    await page.getByRole('radio', { name: /Primary spark for Gold Ship: blue Speed/i }).check();
+    await page.getByRole('radio', { name: new RegExp(`Primary spark for ${parentName}: blue Speed`, 'i') }).check();
 
     await page.getByRole('button', { name: 'Save legacy' }).click();
     await page.waitForURL(/\/legacy\/compare/, { waitUntil: 'domcontentloaded' });
@@ -135,5 +159,8 @@ test('records a parent with a Spark, picks the primary, and reads it back on the
     // is the "Parent A" row, which is what a Trainer opened the page to check.
     const table = page.getByRole('region', { name: /side by side/i }).getByRole('table');
     await expect(table).toBeVisible();
-    await expect(table.getByRole('row', { name: /Parent A/ })).toContainText('Gold Ship');
+    // `S-A-P02.6`: the table carries one row per *field* for each parent — name, rank, ancestors, then a
+    // row per Spark kind — so `/Parent A/` resolves to eight rows and a bare assertion is ambiguous. The
+    // row this case is about is the one naming the parent, and that row is the one holding the name.
+    await expect(table.getByRole('row', { name: new RegExp(`Parent A ${parentName}`, 'i') })).toBeVisible();
 });

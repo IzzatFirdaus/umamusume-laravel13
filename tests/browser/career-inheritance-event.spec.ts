@@ -73,7 +73,7 @@ async function openInheritanceEvent(page: import('@playwright/test').Page): Prom
             await page.getByRole('combobox', { name: 'Category' }).nth(index).selectOption(category);
         }
 
-        const target = page.getByRole('combobox', { name: 'Applies to' }).nth(index);
+        const target = page.getByRole('combobox', { name: 'Target' }).nth(index);
         await target.click();
         await target.fill(label.slice(0, 3));
         await page.locator('[role="option"]', { hasText: label }).first().click();
@@ -87,7 +87,7 @@ async function openInheritanceEvent(page: import('@playwright/test').Page): Prom
     await addSpark('Parent A').click();
     await addSpark('Parent A').click();
 
-    // `Applies to` is the picker's combobox since `S-A-P02.3`, so each Spark's target is chosen from the
+    // `Target` is the picker's combobox since `S-A-P02.3`, so each Spark's target is chosen from the
     // list its Category scopes rather than typed (`S-A-P02.4`). The Category is set explicitly because the
     // row's default is `Stat`, which would not offer `Medium`.
     await page.getByRole('combobox', { name: 'Kind' }).nth(0).selectOption('blue');

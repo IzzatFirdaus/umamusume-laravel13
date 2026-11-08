@@ -244,10 +244,11 @@ test.describe('Legacy Lab builder', () => {
         // before this fieldset in DOM order, so the loose matcher adds a Spark to a grandparent.
         await page.getByRole('button', { name: 'Add Spark to Parent A' }).click();
         await page.getByLabel('Kind').first().selectOption('blue');
-        // `Applies to` is the picker's combobox since `S-A-P02.3`: a bare `fill()` types a filter and
+        // `Target` is the picker's combobox since `S-A-P02.3`: a bare `fill()` types a filter and
         // never commits a value, so the selection goes through the option list the way a Trainer does.
-        await page.getByLabel('Applies to').first().click();
-        await page.getByLabel('Applies to').first().fill('Speed');
+        // The row's label is `Target` tree-wide since `S-A-P02.6`; this surface said `Applies to` alone.
+        await page.getByLabel('Target').first().click();
+        await page.getByLabel('Target').first().fill('Speed');
         await page.locator('[role="option"]', { hasText: 'Speed' }).first().click();
         // `exact` because the grandparent rows carry "Grandparent rank (stars)", which a substring label
         // match answers to first, and the fill would land on the rank rather than the Spark. The wizard
