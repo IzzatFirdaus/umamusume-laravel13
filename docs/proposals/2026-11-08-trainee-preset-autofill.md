@@ -23,7 +23,7 @@
 | `S-A-P01.3` | `4072042c` | `CockpitController.php`, `CareerStatePanel.vue`, `Cockpit.vue`, `CareerCockpitTest.php`, `career-cockpit.spec.ts`, `start-career.ts` | `state.starting_stats` on the payload and a labelled `Starting:` line beneath the stat rail: `96 61 105 75 88` with the words *"the card's base line, before any training"*. **Absent entirely for a run with no card** — not `N/A`, not five zeroes |
 | `S-A-P01.4` | `f434b41a` | `config/scenarios.php`, `TraineeGoalsPanelTest.php`, `07-grand-concert.md`, `ADR-0026` | **The correction.** `unity_cup`'s `goal_source` restored to `'trainee_goals'` and `our_grand_concert`'s named `'trainee_goals'`; Trackblazer stays `null`. The ladder is **the character's own goals**, so every scenario that asks for it composes it. `07-grand-concert.md:242` gains a dated note and `ADR-0026` a dated roster-growth note |
 
-Ledger: `§s-a-p01-1` … `§s-a-p01-3` and `§s-a-p01-close-out` in `docs/audits/rice-shower-unity-cup-round7-slice-audits.md`.
+Ledger: `§s-a-p01-1` … `§s-a-p01-3` and `§s-a-p01-close-out` in `docs/research-scratch/SLICE-RECORDS.md`.
 
 ### §0.2 Decision-by-decision disposition
 
@@ -117,9 +117,9 @@ peer set        clean at open and close
 ### §0.7 Still open
 
 - **Nothing from decision 7.** It is closed by §0.4's corpus read.
-- **The `Applies to` / `Target` label split** on the Builder's Spark row. P-02's surface; recorded there and in `§s-a-p01-3` §9.
-- **`legacy-index.spec.ts:110`**'s pre-existing fixture 404. P-02's surface; recorded in `§s-a-p02-4` §6.
-- **The three pre-existing Pest failures** named in ledger §10a: `ScenarioAdvisorFinaleTest`, `UraPanelTest`, `UiHygieneTest`. The third is `TeamPanelBuilder.php:577` shipping a source-file path in payload copy — the line was 552 before this work's 25-line insertion above it and is **not in this work's diff**.
+- **The `Applies to` / `Target` label split — CLOSED at `S-A-P02.6` (`1c51fd04`).** The Builder's row said `Applies to`; the wizard and the four grandparent editors said `Target`. Renamed to `Target`, the tree's own word for the field (`LegacySelectionPayload::SPARK_KEYS` is `['kind','target','stars']`).
+- **`legacy-index.spec.ts:110`'s fixture 404 — CLOSED at `S-A-P02.6` (`1c51fd04`).** Two fixture defects, not one: a wrong Builder URL and a parent name no buildable database holds. The case now runs in 16.3 s. See P-02 `§0.6` and ledger `§s-a-p02-6`.
+- **The three pre-existing Pest failures** named in ledger §10a: `ScenarioAdvisorFinaleTest`, `UraPanelTest`, `UiHygieneTest`. The third is `TeamPanelBuilder.php:577` shipping a source-file path in payload copy — the line was 552 before this work's 25-line insertion above it and is **not in this work's diff**. Re-confirmed against the full suite this pass: the same three, nothing new.
 
 ### §0.8 Decision 7, explained — why the ladder is the character's own
 
