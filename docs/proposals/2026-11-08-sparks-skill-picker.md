@@ -24,7 +24,7 @@
 | `S-A-P02.4` | `b33084f2` | `legacy-index.spec.ts`, `career-inheritance-event.spec.ts` | `fill()`-based selection helpers for the two specs that drive the Builder's field |
 | `S-A-P02.5` | `662a0a42` | `LegacySelectController.php`, `LegacyController.php`, `SparkTargetPicker.vue`, three prop declarations, `SparkTargetValidationTest.php`, `career-legacy-deck-steps.spec.ts` | **Decision 4's `name_ja` half.** The option list carries `{name, name_ja}`; the list prints the Japanese name in a `lang="ja"` span; search matches either name. 605 of the 623 Global-client skills have a Japanese name that differs from the English one |
 
-Ledger: `§s-a-p02-1` … `§s-a-p02-4` and `§s-a-p02-close-out` in `docs/audits/rice-shower-unity-cup-round7-slice-audits.md`, each with pre-flight, RED, GREEN, non-vacuity, regression, gates, commit and what it did not close.
+Ledger: `§s-a-p02-1` … `§s-a-p02-4` and `§s-a-p02-close-out` in `docs/research-scratch/SLICE-RECORDS.md`, each with pre-flight, RED, GREEN, non-vacuity, regression, gates, commit and what it did not close.
 
 ### §0.2 Decision-by-decision disposition
 
@@ -79,8 +79,8 @@ peer set        clean at open and close
 
 ### §0.6 Still open
 
-- **`legacy-index.spec.ts:110`** fails on a fixture bug that predates this work: `runWithDraft()` navigates to `${runUrl}/legacy` where `runUrl` already ends `/training-runs/N`, giving a route that does not exist. Verified present at `HEAD` before any change here. Classified, not fixed — outside this proposal's surface.
-- **The `Applies to` / `Target` label split.** The Builder's parent row says `Applies to`; the wizard and the grandparent editors say `Target`. Same control, two words, on two pages — a real `SHR-1` shape this work leaves standing. Renaming it moves three specs' locators.
+- **`legacy-index.spec.ts:110` — CLOSED at `S-A-P02.6` (`1c51fd04`).** It was not one fixture bug but three, and the first two made the case unrunnable: the Builder URL was built as `/training-runs/{id}/legacy` instead of the real `legacy/{run}`; the parent name `Gold Ship` resolves on no database this repo can build, because the parent list is the **Veteran library** (`LegacyController::roster()`) and the browser scratch database holds zero veterans; and the final assertion matched eight rows when the table carries one row per field. All three fixed, and the case now runs in **16.3 s** instead of timing out at 3.3 m. See `§s-a-p02-6`.
+- **The `Applies to` / `Target` label split — CLOSED at `S-A-P02.6` (`1c51fd04`).** `LegacySelect.vue` and `AncestorEditor.vue` both said `Target`; only the run-scoped `Builder.vue:654` said `Applies to`. Renamed to `Target` on the outlier, because the tree's own vocabulary is `target` (`LegacySelectionPayload::SPARK_KEYS`, `['kind','target','stars']`) and every field ID there is `spark-target-*`. `SCREEN_SPEC.md:4215` names `Applies to` in passing; that description is now stale and the code is right.
 - Decision 8's hardening — ruled no, and the boundary is unchanged.
 
 ### §0.8 Decision 6, explained — why a sibling picker and not a generalised one

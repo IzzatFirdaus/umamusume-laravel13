@@ -2511,3 +2511,92 @@ $ python tools/md_fence_check.py <both docs>                 -> 0 invalid closin
 - The Builder's `Applies to` label split (P-02's surface, `§s-a-p02-4` §6).
 - `legacy-index.spec.ts:110`'s pre-existing 404.
 - No register row: none was opened.
+
+---
+
+## §s-a-p02-6 — S-A-P02.6: the Spark row says `Target` everywhere, and two fixtures that could not run now do
+
+### 1. What this slice is
+The two items P-02 §0.6 left open, both on the same surface. Neither is new scope: both were recorded as
+open in `§s-a-p02-4` §6 and in P-01 `§0.7`.
+
+### 2. The label split, measured
+`SparkTargetPicker` carries one prop, `label`. Three call sites:
+
+| Site | Label before |
+| --- | --- |
+| `resources/js/pages/Career/LegacySelect.vue:577` (wizard, parent rows) | `Target` |
+| `resources/js/components/legacy/AncestorEditor.vue:182` (four grandparent editors, shared by both doors) | `Target` |
+| `resources/js/pages/Legacy/Builder.vue:654` (run-scoped parent rows) | **`Applies to`** |
+
+One outlier out of three. The tree's own vocabulary is `target`: `LegacySelectionPayload::SPARK_KEYS` is
+`['kind', 'target', 'stars']` (`:63`), every payload array shape in that class spells it `target`, and the
+Builder's own IDs are `spark-target-*`. `SCREEN_SPEC.md:4215` records the row as `Kind, Applies to, Stars`
+— that line describes the state the builder was in, and it is the line that goes stale with this change
+rather than a rule that forbids it.
+
+**Renamed to `Target`.** The row now reads the same on all three surfaces, and the label matches the field
+it writes.
+
+### 3. The two fixtures that could not run
+`legacy-index.spec.ts` carried two defects that made its second case unrunnable. Neither was introduced by
+P-02; both were reproducible at `HEAD` before this pass.
+
+**(a) The Builder URL was built the wrong way.** The case navigated to `${runUrl}/legacy`, i.e.
+`/training-runs/{id}/legacy`. The route is `legacy/{run}` (`routes/web.php`, `legacy.builder`). The 404
+shell renders no app root, so `#app > *` waited until the 180 s timeout. The file's *other* helper already
+built the correct URL (`/legacy/${runId}`), so the two disagreed with each other.
+
+**(b) The parent name resolved on no database this repo can build.** The case named `Gold Ship` as the
+parent. The parent list is the **Veteran library** — `LegacyController::roster()` (`:470`) maps stored
+`veterans` rows joined to `training_runs.umamusume`, not the catalogue. The browser scratch database holds
+**zero** veterans: `global-setup.ts:183` runs `migrate --seed`, and no seeder files a career. Measured on
+`browser-8214.sqlite`: `veterans = 0`, `training_runs = 0`, `umamusume = 133`, `character_cards = 263`.
+The case is now ducted through the product's only path: `fileCareer` (the shared helper `veterans.spec.ts`
+and `veteran-compare.spec.ts` already use) files a career, which creates the Veteran, and the case then
+reads whichever name the list offers and asserts on that.
+
+### 4. A vacuity found on the way
+The sibling case's helper (`runWithPair`) selects `{ index: 0 }` on the same control and saves. With zero
+veterans in the database, index 0 is the placeholder, so that helper writes a pair with **no parent** and
+still reaches the compare surface — the product permits it (`Builder.vue:447`'s `hasSelection` accepts a
+grandparent name alone). That case is about the pair table and the reference column, not about a parent, so
+it is not wrong to leave it; but it was the reason the sibling looked like proof that the roster was
+populated. Recorded here rather than changed, because widening it is a different case's work.
+
+### 5. RED → GREEN
+The rename's RED is the three specs' locators: each bound `getByLabel('Applies to')`, which after the rename
+resolves to nothing. GREEN is the three specs passing with `Target`.
+
+The fixtures' RED is the timeouts: `legacy-index.spec.ts` ran **3.3 m** per attempt and failed every time,
+at three successive defects (navigation → parent list → ambiguous row). GREEN: **2 passed (16.3 s)**, an
+order of magnitude faster because nothing is timing out.
+
+The row assertion was narrowed as well: the compare table carries one row per *field* per parent (name, rank,
+ancestors, then one per Spark kind), so `/Parent A/` resolved to eight rows and was a strict-mode violation.
+The case now asserts the row that names the parent, which is the row it is about.
+
+### 6. Gates
+```
+$ npm run typecheck                                          -> clean
+$ npm run build                                              -> built in 12.75s
+$ npx playwright test legacy-index.spec.ts                    -> 2 passed (16.3s)
+$ npx playwright test legacy.spec.ts career-inheritance-event.spec.ts \
+    career-legacy-deck-steps.spec.ts                         -> 38 passed (1.1m)
+$ vendor/bin/pest tests/Feature/LineEndingGuardTest.php      -> 1 passed (2 assertions)
+```
+
+### 7. Commit
+`1c51fd04` — `fix(legacy): the Spark row says Target everywhere, and two fixtures that could not run now do (S-A-P02.6)`.
+Four files, no deletions.
+
+**A note on the commit, because it went wrong once and the record should say so.** The first attempt used
+`git add -- <4 paths>` followed by a bare `git commit`, and the resulting commit swept in **17 unrelated
+deletions** (`docs/proposals/TASKS.md`, the three `AUD-20261108-R7-*` reports, `docs/OPEN-QUESTIONS.md` and
+others) that a peer session had staged. That is `AGENTS.md` §14's exact hazard: `git add` guards the index,
+not the commit. The commit was rebuilt with `git commit -m … -- <4 paths>` and now carries four files and
+nothing else. The peer's deletions remain in the working tree, unstaged, exactly as they were found.
+
+### 8. Does not close
+- `runWithPair`'s parent-less pair (§4 above) — a different case's scope.
+- The five dirty `docs/research-scratch/` masters — peer work, untouched.
