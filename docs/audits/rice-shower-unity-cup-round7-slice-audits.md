@@ -1895,3 +1895,250 @@ $ git commit -m "feat(legacy): wire picker run-scoped Builder and four grandpare
 - The `Applies to` label on the Builder's parent row is kept verbatim. It differs from the wizard's `Target`
   and from the grandparent rows' `Target`, which is a real inconsistency (`SHR-1`) that this slice does not
   close: renaming it moves three specs' locators and is a separate, nameable change.
+
+## §s-a-p01-1 — S-A-P01.1: the character goal ladder composes only for the scenario that carries it
+
+### 1. Slice, rows, register reference
+**S-A-P01.1**, from `docs/proposals/2026-11-08-trainee-preset-autofill.md` §4.3 and §7 decision 4.
+**No register row.** **Not `KI-122`, not `R7-18`, not `R5-12`:** those settle `race_catalog_slots`, whose
+`scenario_key` column makes shared-vs-specific a real distinction. `trainee_goals` has no `scenario` column
+and holds one source's URA rows (P-01 §2 M-12/M-13), so this gate answers a different question about a
+different table.
+
+### 2. Pre-flight
+```
+$ git rev-parse HEAD
+61ec1861 (S-A-P02.3's ledger commit)
+$ git status --short -- config/scenarios.php app/Services/Career/TeamPanelBuilder.php \
+    tests/Feature/TraineeGoalsPanelTest.php
+(empty — CLEAN)
+$ vendor/bin/pest tests/Feature/ScenarioMetadataTest.php   → passes
+```
+
+### 3. RED
+New case in `tests/Feature/TraineeGoalsPanelTest.php:288`
+(`composes no trainee goal ladder for a Unity Cup run, because the table is URA only`), plus two companions
+pinning URA Finale (composes) and Our Grand Concert (unchanged pending §7 decision 7).
+
+```
+  ➜ 295▕     expect($group['rows'])->toBe([]);
+  Tests:    1 failed, 22 passed (233 assertions)
+```
+A Unity Cup run composed row 0 from the trainee's URA ladder — the product defect, stated as one assertion.
+
+### 4. GREEN
+`config/scenarios.php` gains a `goal_source` key per scenario (`ura_finale` → `'trainee_goals'`,
+`unity_cup` → `null`, `trackblazer` → `null`, Our Grand Concert **unset**), and
+`TeamPanelBuilder::traineeGoalRows()` reads it, returning an empty group when it is `null`.
+
+```
+  Tests:    23 passed (233 assertions)
+```
+
+**The absent key is the OGC answer, and it is deliberate.** `config('scenarios.scenarios.X.goal_source',
+'trainee_goals')` defaults to the ladder, so a scenario that has not answered §7 decision 7 keeps exactly
+the behaviour it had. Shipping a gate that changed OGC's cockpit before the owner ruled would have been a
+policy decision this slice has no authority to make.
+
+### 5. Non-vacuity
+```
+$ git checkout -- app/Services/Career/TeamPanelBuilder.php
+  Tests:    1 failed, 22 passed (233 assertions)      # the Unity Cup case, same assertion
+$ git apply .scratch-uma/impl-session-2026-11-08/p01-1/builder.diff
+  Tests:    23 passed (233 assertions)
+$ git diff … | diff - builder.diff   → MATCH
+```
+
+### 6. Regression
+```
+$ vendor/bin/pest tests/Feature/TraineeGoalsPanelTest.php tests/Feature/CockpitObjectivesTest.php \
+      tests/Feature/CareerCockpitTest.php tests/Feature/ScenarioPanelTest.php --compact
+  Tests:    110 passed (1416 assertions)
+```
+
+### 7. Gates
+```
+$ vendor/bin/pint --test --format agent <3 paths>
+{"tool":"pint","result":"fail","files":[{"path":"config\scenarios.php","fixers":["line_ending"]}]}
+```
+**Caught and fixed, not waived.** The file is LF in `HEAD`; the edit had written CRLF. Re-normalised to LF,
+re-ran: `{"tool":"pint","result":"passed"}`. Recorded because a `line_ending` failure reads as cosmetic and
+is the one fixer that silently rewrites a whole file's diff on the next commit.
+```
+$ vendor/bin/phpstan analyse --no-progress --memory-limit=1G   → [OK] No errors
+```
+
+### 8. Commit
+```
+$ git commit -m "fix(cockpit): gate character goal ladder per scenario — Unity Cup no longer composes URA goals (S-A-P01.1)"
+[master 955ff4f2]  3 files changed, 84 insertions(+)
+```
+
+### 9. Slice did not close
+- **Our Grand Concert.** `S-A-P01.OG` is held: `config/scenarios.php:1118-1119` reads *"the trainee's own
+  objective ladder is a career fact, not a concert mechanic"* without naming which ladder, and the owner has
+  not ruled. Recorded in §10 below.
+- `panels.career_goals` is untouched. The panel flag still says which scenarios compose the panel; the new
+  key says whose rows it draws. Two questions, two keys.
+
+## §s-a-p01-2 — S-A-P01.2: one seeding owner for both career-create doors
+
+### 1. Slice, rows, register reference
+**S-A-P01.2**, from P-01 §4.1 and §7 decision 1. **No register row.**
+
+### 2. Pre-flight
+```
+$ git rev-parse HEAD
+955ff4f2 (S-A-P01.1's commit)
+$ git status --short -- app/Http/Controllers/Career/PreflightController.php \
+    app/Http/Controllers/TrainingRunController.php tests/Feature/CareerPreflightTest.php
+(empty — CLEAN)
+```
+
+### 3. RED
+Two cases appended to `tests/Feature/CareerPreflightTest.php:660-731`: one asserting a wizard-started run
+holds the card's `innate ∪ unique` as `Suggested` rows, one asserting a draft with no costume form seeds
+nothing.
+
+```
+  ➜ 691▕     expect($run->skills()->pluck('skills.id')->all())
+  ➜         ->toHaveCount(2)
+  Tests:    1 failed, 24 passed (321 assertions)
+```
+Zero rows: the wizard door seeded nothing, while `TrainingRunController::store()` had seeded since `dd90330e`.
+
+### 4. GREEN
+`app/Actions/SeedRunSkills.php` is the one owner (52 lines, the moved logic plus its reasoning);
+`TrainingRunController::prePopulateSkills()` delegates to it; `PreflightController::store()` calls it inside
+the same `DB::transaction` as the create; the class docblock's "No start skills are seeded" sentence is
+corrected in place.
+
+```
+  Tests:    25 passed (324 assertions)
+```
+
+### 5. Non-vacuity
+```
+$ git checkout -- app/Http/Controllers/Career/PreflightController.php
+  Tests:    1 failed, 24 passed (321 assertions)     # same assertion
+$ git apply …/p01-2/preflight.diff
+  Tests:    25 passed (324 assertions)               # `git diff | diff -` → MATCH
+```
+
+### 6. Regression
+```
+$ vendor/bin/pest tests/Feature/CareerPreflightTest.php tests/Feature/TrainingRunTest.php \
+      tests/Feature/CareerStartGrowthRateTest.php tests/Feature/CareerLegacyDeckStepsTest.php --compact
+  Tests:    67 passed (731 assertions)
+```
+`TrainingRunTest` matters most here: its "a second creation from the same card does not re-derive over
+Trainer-entered rows" case is the one the moved logic had to keep passing, and it does.
+
+### 7. Gates
+```
+$ vendor/bin/pint --test --format agent <4 paths>
+{"tool":"pint","result":"fail","files":[… "line_ending", "unary_operator_spaces",
+ "not_operator_with_successor_space", "ordered_imports"]}
+$ vendor/bin/phpstan analyse --no-progress --memory-limit=1G   → [OK] No errors
+```
+**Classified before fixing.** `line_ending` came from the edit (CRLF, re-normalised). The other three were
+produced by the CRLF too, except `ordered_imports`, which was real: the new `use App\Actions\SeedRunSkills;`
+sat one line above its alphabetical position. Confirmed by running Pint on the file and diffing — the only
+change Pint made beyond line endings was moving that one import. Re-ran: `passed`.
+
+### 8. Commit
+```
+$ git commit -m "feat(career): seed card skills on the wizard door, matching the legacy door (S-A-P01.2)"
+[master 39804efe]  4 files changed, 138 insertions(+), 22 deletions(-)
+```
+
+### 9. Slice did not close
+- Editability. Seeded rows land as `Suggested` and the existing planner writes `Acquired` / `Skipped` /
+  `Suggested` per skill (`ADR-0029`); no new control was needed (P-01 §7 decision 6).
+- The snapshot door. `CreateSnapshotRun` names no card, so there is nothing to seed from (P-01 §7 decision 3).
+
+## §s-a-p01-3 — S-A-P01.3: the card's base line as a labelled reference, never a reading
+
+### 1. Slice, rows, register reference
+**S-A-P01.3**, from P-01 §4.2 and §7 decision 2. **No register row.**
+
+### 2. Pre-flight
+```
+$ git rev-parse HEAD
+39804efe (S-A-P01.2's commit)
+$ git status --short -- app/Http/Controllers/Career/CockpitController.php \
+    resources/js/components/career/CareerStatePanel.vue resources/js/pages/Career/Cockpit.vue \
+    tests/Feature/CareerCockpitTest.php tests/browser/career-cockpit.spec.ts
+(empty — CLEAN)
+$ node -e "…chromium.launch()…"     → launched 153.0.8010.12
+```
+`RENDERED_EVIDENCE = TRUE`, re-probed for this slice.
+
+### 3. RED
+Two feature cases in `tests/Feature/CareerCockpitTest.php:1030-1059` — a card-backed run carries the five
+values, a card-less run carries `null` — and one browser case in `tests/browser/career-cockpit.spec.ts:1038`
+asserting the rendered `Starting` line.
+
+```
+  ➜ 1058▕         ->assertInertia(fn (Assert $page) => $page->where('state.starting_stats', null));
+  Tests:    2 failed, 46 passed (553 assertions)
+```
+The key did not exist on the payload.
+
+### 4. GREEN
+`CockpitController::stateSection()` gains `'starting_stats' => $run->characterCard?->base_stats`;
+`CareerStatePanel.vue` gains the prop and one labelled line; `Cockpit.vue` passes it and its `state` type
+declares it.
+
+```
+  Tests:    48 passed (563 assertions)          # feature
+  1 passed (17.6s)                              # browser
+```
+
+**The browser case needed a fixture the tree did not have.** `tests/utils/start-career.ts` picks the first
+roster row and never sets a costume form, so every run it creates is card-less and would have asserted only
+the absent branch. Rather than duplicate the walk, an `onTrainee` hook was added beside the existing
+`onLegacy` hook — the same additive shape that helper's own docblock records for round 4.1. The case then
+picks Vodka (two forms in the fixture) and her debut form.
+
+### 5. Non-vacuity
+Two independent changes, two proofs.
+
+**Proof A — the controller.** Reverted alone: both feature cases fail. Restored: pass; `diff | diff -` MATCH.
+**Proof B — the component.** Reverted alone, rebuilt: the browser case fails at
+`expect(locator).toBeVisible()` with `element(s) not found`. Restored, rebuilt: passes;
+`diff | diff -` MATCH.
+
+### 6. Regression
+```
+$ vendor/bin/pest tests/Feature/CareerCockpitTest.php --compact
+  Tests:    48 passed (563 assertions)
+```
+The Round 7 stat-denominator cases are untouched: `starting_stats` is a separate payload key and no existing
+`state.stats` assertion moved.
+
+### 7. Gates
+```
+$ vendor/bin/pint --test --format agent <2 php paths>          → passed
+$ vendor/bin/phpstan analyse --no-progress --memory-limit=1G   → [OK] No errors
+$ npm run typecheck                                            → clean
+$ npm run build                                                → ✓ built
+$ npm run lint:ui                                              → no new hits in CareerStatePanel.vue or Cockpit.vue
+```
+
+### 8. Commit
+```
+$ git commit -m "feat(cockpit): show the card's starting stats as a labelled reference (S-A-P01.3)"
+[master 4072042c]  6 files changed, 143 insertions(+), 4 deletions(-)
+```
+
+### 9. Slice did not close
+- The base line is **not** written to `turn_entries` and no `training_runs` column stores it. Both rejected
+  alternatives (P-01 §5 A and B) stay rejected: a seeded row would be indistinguishable from a typed
+  reading, and a column would duplicate what `character_cards` already holds keyed by a card the run already
+  points at.
+- The turn form is unchanged. The Trainer's "edit values" is the turn reading (P-01 §7 decision 2).
+- **A labelled inconsistency this slice leaves standing:** the Builder's parent Spark row labels its target
+  `Applies to` while the wizard and the grandparent editors label it `Target` (`S-A-P02.3` §9). Same control,
+  two words, on two pages — `SHR-1`'s shape. Renaming it moves three specs' locators and belongs in its own
+  change.
