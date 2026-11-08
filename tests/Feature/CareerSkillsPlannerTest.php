@@ -229,7 +229,11 @@ final class CareerSkillsPlannerTest extends TestCase
         $this->get(route('runs.skills.planner', $run))
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
-                ->where('groups.1.rows.0.conditions', 'distance_type==3&ground_type==1&running_style==2&phase>=2&weather==3')
+                // R7-87: the row prints the client's words, not the source's predicate. Distance 3 is
+                // Medium and ground 1 is Turf, both from the published maps the fit cells below cite;
+                // `running_style`, `phase` and `weather` have no published client phrasing, so they are
+                // named as an absence rather than decoded or echoed raw.
+                ->where('groups.1.rows.0.conditions', "Distance Medium, Turf, and one further condition this tool cannot state in the client's words")
                 // Distance and surface: both number maps are published, so every evaluated cell,
                 // match or mismatch, cites the published map.
                 ->where('groups.1.rows.0.fit.0', fn ($cell): bool => $cell['state'] === 'matches'
@@ -788,5 +792,54 @@ final class CareerSkillsPlannerTest extends TestCase
             'skill_priorities' => [],
             ...$overrides,
         ];
+    }
+
+    /**
+     * R7-87: a skill cell printed the raw condition predicate -- `distance_type==3&is_finalcorner==1
+     * &overtake_target_time>=2` -- straight into the row sub-copy. The predicates are the SOURCE's
+     * vocabulary, not the client's: `distance_type 3` is Medium and `ground_type 1` is Turf, both decoded
+     * in `UMAMUSUME_REFERENCE.md` §1.2 and already mapped in `config('uma.skills.fit_*')` for the
+     * race-fit cells on this same screen. The decoded words are what a Trainer reads; the predicate is
+     * what the parser ate.
+     */
+    public function test_decodes_a_skill_condition_rather_than_printing_its_predicate(): void
+    {
+        $run = $this->plannerRun();
+        $skill = $this->skill('Decoded Condition', 100, [
+            ['condition' => 'distance_type==3&ground_type==1', 'precondition' => null],
+        ]);
+
+        // `conditionsLine()` feeds `requiredRows()` -- the run's planned skills -- not the purchasable
+        // panel, which selects only id/name/sp_cost/rarity. So the skill is named as a priority, which
+        // is what puts it in the section that prints conditions.
+        $skill->update(['export_id' => 9101]);
+
+        $card = CharacterCard::factory()->create(['skills_innate' => [9101]]);
+        $run->update([
+            'character_card_id' => $card->id,
+            'build_target' => $this->target(['skill_priorities' => ['Decoded Condition']]),
+        ]);
+        $run->refresh();
+
+        $response = $this->get(route('runs.skills.planner', $run));
+        $response->assertOk();
+
+        // The Required group is one of three `groups` entries, keyed by its own `key`.
+        $groups = collect($response->viewData('page')['props']['groups'] ?? [])->keyBy('key');
+        $rows = collect($groups['required']['rows'] ?? [])->keyBy('name');
+
+        $this->assertTrue($rows->has('Decoded Condition'), 'the fixture skill did not reach the Required group');
+
+        $conditions = (string) ($rows['Decoded Condition']['conditions'] ?? '');
+
+        // The decoded words, in the client's vocabulary.
+        $this->assertStringContainsString('Medium', $conditions);
+        $this->assertStringContainsString('Turf', $conditions);
+
+        // And the raw predicate tokens are gone. `distance_type`, `ground_type`, `==`, `&` are the
+        // source's syntax, and none of them belongs in a Trainer's copy.
+        $this->assertStringNotContainsString('distance_type', $conditions);
+        $this->assertStringNotContainsString('ground_type', $conditions);
+        $this->assertStringNotContainsString('==', $conditions);
     }
 }

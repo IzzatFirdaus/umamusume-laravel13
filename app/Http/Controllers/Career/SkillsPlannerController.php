@@ -675,6 +675,21 @@ final class SkillsPlannerController extends Controller
     /**
      * The activation conditions exactly as the source states them, or null when it states none.
      */
+    /**
+     * The skill's activation condition in the client's words, or null when no source decodes it.
+     *
+     * R7-87. This used to `implode` the raw `condition` strings, so a Trainer read
+     * `distance_type==3&is_finalcorner==1&overtake_target_time>=2` in a table cell. Those tokens are the
+     * source's syntax: `distance_type 3` is Medium and `ground_type 1` is Turf, both decoded in
+     * `UMAMUSUME_REFERENCE.md` §1.2 and already mapped in `config('uma.skills.fit_*')` for this screen's
+     * own race-fit cells. The maps are the one owner of that translation, so this reads them rather
+     * than restating them.
+     *
+     * A key with no published map is NOT printed as a decoded word and NOT printed as its raw token:
+     * `overtake_target_time>=2` has no client-facing phrasing in any source this repository cites, and
+     * inventing one is the fabrication AGENTS.md §5 forbids. The absence is named instead, once, however
+     * many undecoded atoms a group carries.
+     */
     private function conditionsLine(?Skill $skill): ?string
     {
         $groups = $skill?->condition_groups;
@@ -683,7 +698,46 @@ final class SkillsPlannerController extends Controller
             return null;
         }
 
-        return implode(' | ', array_map(static fn (array $group): string => $group['condition'], $groups));
+        /** @var array<int, string> $distanceMap */
+        $distanceMap = config('uma.skills.fit_distance_type', []);
+        /** @var array<int, string> $surfaceMap */
+        $surfaceMap = config('uma.skills.fit_surface_type', []);
+
+        $atoms = $this->conditionAtoms($skill);
+
+        $lines = [];
+
+        foreach ($atoms as $index => $group) {
+            $words = [];
+
+            foreach ($group['distance_type'] ?? [] as $value) {
+                if (isset($distanceMap[(int) $value])) {
+                    $words[] = 'Distance '.$distanceMap[(int) $value];
+                }
+            }
+
+            foreach ($group['ground_type'] ?? [] as $value) {
+                if (isset($surfaceMap[(int) $value])) {
+                    $words[] = $surfaceMap[(int) $value];
+                }
+            }
+
+            // Any key this method did not decode, plus any comparison that is not a plain `==` (the atoms
+            // parser only sees those, so a range operator leaves nothing behind to name).
+            $decoded = ['distance_type', 'ground_type'];
+            $undecoded = array_diff(array_keys($group), $decoded);
+
+            $raw = (string) ($groups[$index]['condition'] ?? '');
+            $hasRangeOperator = preg_match('/[<>]=?/', $raw) === 1;
+
+            if ($undecoded !== [] || $hasRangeOperator) {
+                $words[] = 'and one further condition this tool cannot state in the client\'s words';
+            }
+
+            $lines[] = $words === [] ? 'condition not decoded' : implode(', ', $words);
+        }
+
+        return implode(' | ', $lines);
     }
 
     /**
