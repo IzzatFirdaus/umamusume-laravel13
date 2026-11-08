@@ -49,7 +49,7 @@ const props = defineProps<{
     /** `config/uma.php`'s spark kind vocabulary, keyed by the stored value. */
     sparkKinds: Record<string, string>;
     /** The targets each category offers, from the same config the server validates against. */
-    sparkTargets: { Stat: string[]; Aptitude: string[]; Skill: string[] };
+    sparkTargets: { Stat: string[]; Aptitude: string[]; Skill: { name: string; name_ja: string | null }[] };
     /** The server's message for this node's name, when it refused one. */
     error?: string;
     /** The sentence the server supplies for a node that records no Sparks yet. */

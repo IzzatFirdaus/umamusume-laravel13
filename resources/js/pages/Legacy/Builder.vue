@@ -109,7 +109,7 @@ const props = defineProps<{
     sparkKinds: Record<string, string>;
     affinityGrades: string[];
     rankLetters: string[];
-    sparkTargets: { Stat: string[]; Aptitude: string[]; Skill: string[] };
+    sparkTargets: { Stat: string[]; Aptitude: string[]; Skill: { name: string; name_ja: string | null }[] };
     /**
      * The run's starting ceilings per stat, already owned by `ScenarioCaps::forRun()` server-side
      * (`LegacyController::startingCaps()`, which prints the run's entered ceiling where it states one

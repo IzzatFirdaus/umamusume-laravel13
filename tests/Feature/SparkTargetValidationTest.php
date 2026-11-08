@@ -109,9 +109,10 @@ it('offers only Global-client skills as Skill spark targets on the wizard step',
 
     $response->assertInertia(function (Assert $page) use ($global, $japanOnly): void {
         $skills = $page->toArray()['props']['sparkTargets']['Skill'];
+        $names = array_column($skills, 'name');
 
-        expect($skills)->toContain($global->name)
-            ->and($skills)->not->toContain($japanOnly->name);
+        expect($names)->toContain($global->name)
+            ->and($names)->not->toContain($japanOnly->name);
     });
 });
 
@@ -135,8 +136,44 @@ it('offers only Global-client skills as Skill spark targets on the run-scoped bu
 
     $response->assertInertia(function (Assert $page) use ($global, $japanOnly): void {
         $skills = $page->toArray()['props']['sparkTargets']['Skill'];
+        $names = array_column($skills, 'name');
 
-        expect($skills)->toContain($global->name)
-            ->and($skills)->not->toContain($japanOnly->name);
+        expect($names)->toContain($global->name)
+            ->and($names)->not->toContain($japanOnly->name);
+    });
+});
+
+/*
+ * S-A-P02.5 — the Skill option list carries the Japanese name beside the English one.
+ *
+ * `SkillController.php:515` states the rule this case pins: *"The rule is search matches what the user
+ * can see."* 605 of the 623 Global-client skills carry a `name_ja` that differs from `name`
+ * (`Gourmand` / `食いしん坊`), and `DESIGN.md:573` already lists `name_ja` among the fields a skill row
+ * prints. A picker that shows the Japanese name and cannot be searched by it is the rule's failure
+ * inverted: the Trainer types what they see and nothing comes up.
+ */
+it('carries the Japanese name beside the English one for every Skill spark target', function (): void {
+    $skill = Skill::factory()->create([
+        'name' => 'Gourmand Sample',
+        'name_ja' => '食いしん坊サンプル',
+        'release_status' => ReleaseStatus::GlobalReleased,
+        'name_is_client' => true,
+    ]);
+
+    $response = $this->get(route('career.legacy'));
+
+    $response->assertInertia(function (Assert $page) use ($skill): void {
+        $skills = $page->toArray()['props']['sparkTargets']['Skill'];
+        $row = null;
+
+        foreach ($skills as $candidate) {
+            if (($candidate['name'] ?? null) === $skill->name) {
+                $row = $candidate;
+                break;
+            }
+        }
+
+        expect($row)->not->toBeNull()
+            ->and($row['name_ja'])->toBe('食いしん坊サンプル');
     });
 });

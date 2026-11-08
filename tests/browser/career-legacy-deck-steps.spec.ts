@@ -774,3 +774,50 @@ test('filters the Spark Target list by typing and selects with the keyboard', as
     await expect(target).toHaveValue('');
     await expect(page.locator('#legacy-spark-target-0-0')).toHaveAttribute('placeholder', 'Cut and Drive!');
 });
+
+/*
+ * S-A-P02.5 — the Skill target list is searchable by the Japanese name it prints.
+ *
+ * `SkillController.php:515` states the rule: *"The rule is search matches what the user can see."*
+ * The list prints the Japanese name beside the English one, so typing the Japanese name must find the
+ * row — the same thing the support-card search (`SupportCardController.php:643`) and the skill
+ * catalogue (`SkillController.php:579`) already do.
+ */
+test('finds a Spark target by the Japanese name the list prints', async ({ page }) => {
+    await hydrate(page, '/career/setup/legacy');
+
+    await page.locator('#legacy-pick-0').selectOption('__manual__');
+    await page.locator('#legacy-name-0').fill('Silence Suzuka');
+
+    const editor = page.locator('#legacy-pick-0').locator('xpath=ancestor::div[1]').locator('details');
+
+    if (!(await editor.evaluate((el) => (el as HTMLDetailsElement).open))) {
+        await editor.locator('> summary').click();
+    }
+
+    await editor.getByRole('button', { name: 'Add Spark' }).click();
+    await page.locator('#legacy-spark-category-0-0').selectOption('Skill');
+
+    const target = page.locator('#legacy-spark-target-0-0');
+    await target.click();
+
+    // The Japanese name is printed on each row, so it must be searchable.
+    const japanese = page.locator('[role="option"]').filter({ hasText: /[぀-ヿ一-鿿]/ }).first();
+    await expect(japanese).toBeVisible();
+
+    // The Japanese span alone, not the row's whole text: the row prints the English name first, so
+    // reading the row would slice an English prefix and the case would pass without ever searching
+    // by Japanese. This locator reads the `lang="ja"` span itself.
+    const japaneseName = (await japanese.locator('span[lang="ja"]').innerText()).trim();
+    expect(japaneseName, 'no option carries a Japanese name').not.toBe('');
+
+    await target.fill(japaneseName.slice(0, 3));
+
+    // The row that matched is the row that carries that name, and it is still selectable.
+    const options = page.locator('[role="option"]');
+    await expect(options.first()).toContainText(japaneseName);
+
+    await target.press('ArrowDown');
+    await target.press('Enter');
+    await expect(target).toHaveAttribute('placeholder', /.+/);
+});

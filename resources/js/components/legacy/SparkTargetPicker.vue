@@ -25,9 +25,19 @@
  */
 import { computed, nextTick, ref, watch } from 'vue';
 
+/**
+ * One option in the list.
+ *
+ * A bare string is the Stat and Aptitude vocabulary (`config('scenarios.stat_order')` and
+ * `LegacySelectionPayload::SPARK_APTITUDES`), which are the client's own words and have no second
+ * spelling. The object form is the Skill catalogue, which carries a Japanese name beside the English
+ * one on 605 of its 623 rows.
+ */
+type TargetOption = string | { name: string; name_ja: string | null };
+
 interface Props {
     /** The option list, already scoped by the row's Category. */
-    targets: string[];
+    targets: TargetOption[];
     /** The stored target, or `''` / `null` for a Spark that records none. */
     modelValue: string | null;
     /** The field's id. Load-bearing: three specs locate it (`AncestorEditor.vue:5-9`). */
@@ -55,38 +65,65 @@ const inputRef = ref<HTMLInputElement | null>(null);
 const selectedLabel = computed<string>(() => (props.modelValue === null || props.modelValue === '' ? '' : props.modelValue));
 
 /**
+ * The list in one shape, whatever the Category's vocabulary is.
+ *
+ * The stored value is always the English `name`, because that is the string the payload keeps
+ * (`ADR-0010`); the Japanese name is the second way a Trainer finds the same option, never a second
+ * value to store.
+ */
+const options_ = computed<{ value: string; name: string; name_ja: string | null }[]>(() =>
+    props.targets.map((target) =>
+        typeof target === 'string'
+            ? { value: target, name: target, name_ja: null }
+            : { value: target.name, name: target.name, name_ja: target.name_ja },
+    ),
+);
+
+/**
  * The guard, as a list entry. Rendered only when the stored value is not in `targets`, which is the
  * case a filter change or an imported run produces.
  */
 const storedButFiltered = computed<string | null>(() => {
     const value = selectedLabel.value;
 
-    return value !== '' && !props.targets.includes(value) ? value : null;
+    return value !== '' && !options_.value.some((option) => option.value === value) ? value : null;
 });
 
 /**
- * What the list offers for the current search text. The `Current:` sentinel is excluded from the normal
- * list and prepended below, so a search never duplicates it.
+ * What the list offers for the current search text, matching on either name.
+ *
+ * The Japanese name is searched because it is printed: `SkillController.php:515` states the rule this
+ * answers — *"The rule is search matches what the user can see"* — and the two existing pickers in
+ * this tree already follow it, the support-card search on `name_ja` (`SupportCardController.php:643`)
+ * and the skill catalogue on `match_key_ja` (`SkillController.php:579`). A Trainer who types
+ * `食いしん坊` and sees that name on the row must not get nothing back.
+ *
+ * The comparison folds case so `Gourmand` and `gourmand` are one search, the way the catalogue's own
+ * normaliser does.
  */
-const matches = computed<string[]>(() => {
+const matches = computed<{ value: string; name: string; name_ja: string | null }[]>(() => {
     const q = search.value.trim().toLowerCase();
 
     if (q === '') {
-        return props.targets;
+        return options_.value;
     }
 
-    return props.targets.filter((target) => target.toLowerCase().includes(q));
+    return options_.value.filter(
+        (option) =>
+            option.name.toLowerCase().includes(q) ||
+            (option.name_ja ?? '').toLowerCase().includes(q),
+    );
 });
 
 /** The list as rendered: the guard row first when it applies, then the matches. */
-const options = computed<{ value: string; label: string; isGuard: boolean }[]>(() => {
+const options = computed<{ value: string; name: string; name_ja: string | null; isGuard: boolean }[]>(() => {
     const guard = storedButFiltered.value === null
         ? []
-        : [{ value: storedButFiltered.value, label: `Current: ${storedButFiltered.value}`, isGuard: true }];
+        : [{ value: storedButFiltered.value, name: storedButFiltered.value, name_ja: null, isGuard: true }];
 
     return [
         ...guard,
-        ...matches.value.map((target) => ({ value: target, label: target, isGuard: false })),
+        ...matches.value.map((option) => ({ ...option, isGuard: false })),
     ];
 });
 
@@ -239,7 +276,8 @@ watch(isOpen, (open) => {
                 @click="select(option.value)"
                 @mousemove="highlighted = index"
             >
-                {{ option.label }}
+                {{ option.name }}
+                <span v-if="option.name_ja" lang="ja" class="ml-2 text-xs">{{ option.name_ja }}</span>
             </li>
 
             <li v-if="options.length === 0" class="px-3 py-2 text-sm text-ink-muted">

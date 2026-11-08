@@ -103,7 +103,7 @@ const props = defineProps<{
     /** The rank letters the client prints, for the rank-letter field's spelling aid. */
     rankLetters: string[];
     /** The targets each Spark category offers, from the same lists the write validates against. */
-    sparkTargets: { Stat: string[]; Aptitude: string[]; Skill: string[] };
+    sparkTargets: { Stat: string[]; Aptitude: string[]; Skill: { name: string; name_ja: string | null }[] };
     notice: string;
     /** `route('career.legacy.store')`, supplied by the server so the page never hard-codes the URL. */
     action: string;
