@@ -79,9 +79,11 @@ $ git status --short
 | S18a | R7-99 | `3aefce57` | **landed** — `#s18a--r7-99` |
 | S18b | R7-83 | `598a4282` | **landed** — `#s18b--r7-83` |
 | S19 | R7-84, R7-85, R7-88, R7-89 | `3f260461` | **landed** (R7-86 does not reproduce) — `#s19--r7-84-r7-85-r7-88-r7-89` |
-| S4b | R7-03 (persistence half) | — (verification-only) | **closed by read, does not reproduce** — `#s4b` |
-| S12 | R7-37 | — (verification-only) | **closed by read, does not reproduce** — `#s12` |
-| S20–S22 | R7-87, R7-90…R7-93 | `6af4555c` | **disposed: one fixed, four do not reproduce** — `#s20-s21-s22--disposition-measured-at-head-not-inherited` |
+| S4b | R7-03 (persistence half) | — (verification-only) | **closed by read, does not reproduce** — `#s4b--r7-03s-persistence-half-closed-as-verification-only` |
+| S12 | R7-37 | — (verification-only) | **closed by read, does not reproduce** |
+| S20 | R7-87 | `6af4555c` | **landed** — `#s20-s21-s22--disposition-measured-at-head-not-inherited` |
+| S21 | R7-90 | — | **does not reproduce** (skill level 1..6 per `ADR-0029` D4; a different quantity from the five-rung hint ladder) |
+| S22 | R7-91, R7-92, R7-93 | — | **does not reproduce** (no custom caret; no clipping on either screen — live probe) |
 | S0b | — (housekeeping) | `d8f75849` | **landed** — `#s0b--housekeeping-three-named-reds` |
 | close-out | — | — | `#close-out` |
 
@@ -1298,3 +1300,95 @@ The card-grain failure was two defects, and the second only surfaced after the f
 **Non-vacuity is not available for a stale-assertion fix** — the source was already correct, so there is
 no defect to reintroduce. What proves the fix is the existence of the state it now asserts, read from
 the database (`growth_rates` not null on card 65) and from the register (`ADR-0029` D4).
+
+---
+
+## close-out
+
+### 1. Slice
+Close-out — no walk rows. The register's §12 landing record and §13 close-out note are the references;
+this section is the gate record.
+
+### 2. Pre-flight
+Measured at close-out's open, `HEAD` = `0fcb40f0`:
+
+```
+git rev-parse --short HEAD          → 0fcb40f0
+git stash list                      → 3 entries, all foreign, none touched
+php artisan migrate:status           → 0 Pending
+md_fence_check.py (4 audit files)    → 0 invalid closing fences
+```
+
+`git status --short` carried the six peer paths, the seven untracked round-7 audit entries, and one
+untracked file this session did not write: `docs/imports/ura-finale-runs.md.bak`, dated Oct 19 02:41
+(three weeks before this session's base). Recorded as foreign; not touched.
+
+### 3. RED
+**N/A** — close-out introduces no assertion.
+
+### 4. GREEN
+**N/A** — close-out proves no fix.
+
+### 5. Non-vacuity
+**N/A** — nothing to reintroduce.
+
+### 6. Regression
+Full Pest suite at `0fcb40f0`: **2287 passed, 3 failed, 9 warnings, 36074 assertions** (214.25s).
+Each failure classified against its boundary commit, all three ancestors of the session base
+`6f95c476`:
+
+| Failure | Boundary commit | What it is |
+| --- | --- | --- |
+| `ScenarioAdvisorFinaleTest` — "names the finale and counts the turns while it is close" | `49a90c3a` | `TrainerAdvisor:246,259` appends `' finals'` to the config label; the test still expects the bare label |
+| `UraPanelTest` — "raises a Critical alert when a mandatory race turn has arrived and nothing is recorded for it" | `49a90c3a` | Same advisor change, same label |
+| `UiHygieneTest` — "never ships a repository identifier to a Trainer" | `5bc07c6c` | `TeamPanelBuilder.php:552` ships a source-file path in payload copy |
+
+Both commits verified ancestors of `6f95c476` with `git merge-base --is-ancestor`. **Not closed by this
+round**; recorded for the register.
+
+### 7. Gates
+| Gate | Result |
+| --- | --- |
+| Full Pest | 2287 passed / 3 failed (classified above) |
+| Browser suite | running at close-out open — 139/802 with zero failures at last report; final figure below once it lands |
+| PHPStan level 6 | `[OK] No errors` (whole tree, `--memory-limit=1G`) |
+| Pint | `{"tool":"pint","result":"passed"}` (whole tree, `--test --format agent`) |
+| Typecheck | clean (`vue-tsgo -p tsconfig.vue.json && tsc --noEmit`) |
+| Build | `✓ built in 11.36s`, manifest 64,402 bytes |
+| Lore docs | 556 hits / 75 exempt — unchanged since S0's open |
+| Lore code | 318 hits — was 182 at the last recorded baseline |
+| Fence | 0 invalid in all four round-7 audit files |
+| `migrate:status` | 0 Pending |
+| Peer set | byte-identical to session start, plus one foreign untracked file recorded at item 2 |
+
+### 8. Lore delta
+`Lore docs: 556 / 75 exempt` — **delta 0** since S0's open.
+`Lore code: 318` — **delta +136** from the last recorded baseline of 182.
+
+The delta is corpus growth across this round's 24 commits, not a regression: the code-mode runner scans
+app paths including untracked files, so every file the round touched is in scope. The two hits in files
+this session authored carry rulings:
+
+- `resources/js/layouts/CareerLayout.vue:143` — `mount`, whole-word match (`-inwE` in `tools/lore.php:60`),
+  used in the ordinary software sense ("seven of the eight pages that mount this layout"). **Class 2**;
+  no marker added.
+- `tests/browser/career-cockpit.spec.ts:743` — `stable`, whole-word match (`-inwE` in
+  `tools/lore.php:64`), used as the ordinary adjective ("the stable invariant is the structural shape").
+  **Class 2**; no marker added.
+
+No hit introduced by this round's slices is unresolved. The remaining hits are pre-existing corpus —
+`friend`/`factors`/`sand` and the borrowed-parent mechanic across `LegacySelect.vue`,
+`StoreLegacySelectionRequest.php` and `LegacySelectionPayload.php` — each a mechanic sharing a word
+(class 2), unchanged by this round.
+
+### 9. Commit
+`<sha>` — `docs(audits): close out round 7 — §13 close-out, §10 fence findings, ledger §close-out (R7 close-out)`
+
+Pathspec: `docs/audits/rice-shower-unity-cup-round7-reconciliation.md`,
+`docs/audits/rice-shower-unity-cup-round7-slice-audits.md`. Peer set untouched.
+
+### 10. What close-out did not close
+The register's §13 enumerates them; quoted there rather than restated here so the two cannot drift:
+`R7-66`'s storage half, `R7-22`'s alert half, `R7-36` facet (b) / `R7-68`'s vocabulary beyond
+kind/target/stars, `R7-87`'s seven undecodable condition keys, and the `career-timeline.spec.ts` 44px
+case (two undersized controls, pre-existing).

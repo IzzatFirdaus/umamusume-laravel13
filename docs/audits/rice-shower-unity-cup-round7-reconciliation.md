@@ -733,8 +733,32 @@ Noticed while reading the tree; no walk row covers them. None is a slice.
   earned`) and `UnityCupPanel.vue:341` (`Extreme Spirit Burst count`).
 - **`Preseason wins` carries no stated ceiling.** `UnityCupEditor.vue:136` prints the label with no bound; the source
   states four rounds plus the finals.
-- **The scenario card's ruleset date can read as a run date.** `CockpitController`'s scenario payload carries
-  `ruleset_date: "2026-07-01 (rework)"` beside per-run fields.
+- **The `<details>` disclosure is a place defects hide** — five instances this round: `R7-57` (the
+  recorded-action quote had no dating sentence), `R7-36` (the parent spark editor), `R7-68` (four grandparent
+  spark editors), `R7-24`'s residual (survives as `R7-57`), and walk-5 `E2-01`, whose identical shape round 5
+  answered once (`TrainingDetail.vue`'s collapsed "Client totals this turn" summary). A closed `<details>`
+  renders none of its contents, so an editor that exists, validates and posts is indistinguishable from an
+  editor that was never built. That is exactly what the walk reported for `R7-36` ("no spark input of any
+  kind"), and the source contradicted it at `LegacySelect.vue:555-575`. The `<details>` state is behaviour,
+  not presentation: a future walk reads every collapsible surface as a first-class observation and records
+  whether it was open. Dated 2026-11-08.
+- **The two-source rule for tests** — three of this round's test failures asserted source text or payload
+  shape rather than the rendered value: S13's `prefill_turn` (client-derived; the server never owned it),
+  S13's `undo turn N` (payload max, not the rendered string), and S17's `CareerPreflightTest` (fixture built
+  from `SupportCard`s against a `CharacterCard` resolver, passing because the fixture held an id the runtime
+  never queries). Closing S13 took three returns, and each return tightened one assertion from "the payload
+  says X" to "the rendered element says X". The rule: **payload for the number, browser for the string; a
+  test that asserts neither measures neither.** Applying it found a live defect nobody had reported —
+  `Timeline.vue`'s undo button carried no `disabled` while its own title said the build has no undo, the
+  third instance of that control after `RaceDecision` and `TrainingDetail` (`R7-21`). Dated 2026-11-08.
+- **Level and hint level share a word, adjacently, on one screen** — `R7-90` was classified `Confirmed defect`
+  at `8a3cf21c` on the reading "the Learned card exposes `Level … of 6` while the hint ladder's captions show
+  five". Measured: both are correct. Skill level is 1..6 per `ADR-0029` D4 and `StoreRunSkillRequest:78`
+  validates `between:1,6`; the hint ladder is a five-rung caption list whose own note reads "Lv Max is a
+  caption, not a fifth number". The walk conflated two quantities because `SkillPlanRow.vue` places them
+  within a few lines of each other and both say "Level". Not a defect — a copy-clarity risk a future walk
+  should expect. The row stays `Confirmed defect` in §4 (frozen); the ledger's `#s20-s21-s22` records the
+  settling read. Dated 2026-11-08.
 - **A browser assertion quotes a stale caption.** `tests/browser/career-cockpit.spec.ts:829` asserts a string the
   cockpit no longer prints.
 - **`Saved.` on `UnityCupEditor` has no `role="status"`.** The confirmation is not announced.
