@@ -1,11 +1,84 @@
 # Proposal — Sparks skill picker: replace the native `<select>` with a searchable picker
 
-**Status:** proposal, not slice. **Decisions 1-7 ruled: implemented as `S-A-P02.1`-`.4`.** Slices `7fb232e3`, `195c39d4`, `cb0d4943`; the spec-contract slice follows them. Awaiting review, not further rulings.
+**Status:** proposal, not slice. **Decisions 1-7 ruled and implemented as `S-A-P02.1`-`.4`** — `7fb232e3`, `195c39d4`, `cb0d4943`, `b33084f2`. Decision 4's `name_ja` half was not taken (see §0.3). Awaiting review, not further rulings.
 **Date opened:** 2026-11-08
+**Implemented:** 2026-11-08, same session
 **Source:** user's session, 2026-11-08; screenshot `/umamusume/vodka` profile page and the Legacy step's `Kind` / `Category` / `Target` row; user's words quoted in §1.
 **Register reference:** none (not a Round 7 row).
 **Audit reference:** none (`AUD-20261108-R7-A`, `-B`, `-C` did not name this).
 **Ownership:** proposal recommends; §7 lists the decisions the owner makes.
+
+> **This document is now both the record and the progress log.** §1-§8 are the proposal as it stood before any code landed; their measurements and reasoning are unchanged. **§0 records what was built**, and §9/§10 carry dated notes because both said "no code" and are now historical. §11 logs each revision.
+
+---
+
+## §0 Implementation status
+
+### §0.1 Slices landed
+
+| Slice | Commit | Files | What it delivered |
+| --- | --- | --- | --- |
+| `S-A-P02.1` | `7fb232e3` | `LegacySelectController.php`, `LegacyController.php`, `SparkTargetValidationTest.php` | Both doors' `sparkTargets.Skill` now read `Skill::query()->availableOnGlobal()`. **1,910 → 623 options.** Two feature cases assert a `JapanOnly` name is excluded and a `GlobalReleased` one included, on the wizard **and** the run-scoped builder |
+| `S-A-P02.2` | `195c39d4` | `SparkTargetPicker.vue` (new, 250 lines), `LegacySelect.vue`, `career-legacy-deck-steps.spec.ts` | The combobox: `role="combobox"` + `role="listbox"` + `aria-activedescendant`, type-to-filter, ArrowUp/Down, Enter, Escape, Tab, `Current: <name>` guard row, `No targets match "…"` empty state, caller-supplied id. Wizard parent rows wired. Browser case proves typing `Cut and` narrows to one option and Enter selects it |
+| `S-A-P02.3` | `cb0d4943` | `AncestorEditor.vue`, `Legacy/Builder.vue`, `legacy.spec.ts` | The four grandparent editors (shared by both surfaces) and the run-scoped Builder's parent row. **The Builder's parent row gained the `Category` control it did not have** — see §0.3 |
+| `S-A-P02.4` | `b33084f2` | `legacy-index.spec.ts`, `career-inheritance-event.spec.ts` | `fill()`-based selection helpers for the two specs that drive the Builder's field |
+
+Ledger: `§s-a-p02-1` … `§s-a-p02-4` and `§s-a-p02-close-out` in `docs/audits/rice-shower-unity-cup-round7-slice-audits.md`, each with pre-flight, RED, GREEN, non-vacuity, regression, gates, commit and what it did not close.
+
+### §0.2 Decision-by-decision disposition
+
+| # | Decision | Ruling | Landed |
+| --- | --- | --- | --- |
+| 1 | Filter to `availableOnGlobal()` + current-value guard | Yes | `.1` (filter, both doors) · `.2` (guard, in the component) |
+| 2 | Inline combobox, not modal | Inline | `.2` |
+| 3 | Picker inherits the row's Category | Yes | `.2` — `targets` arrives already scoped; the component filters nothing by category |
+| 4 | Search matches `name` (+ `name_ja` if cheap) | Name only | `.2` — **the `name_ja` half was not taken; see §0.3** |
+| 5 | Preserve the keyboard contract | Yes | `.2` — type, ArrowUp/Down, Enter, Escape, Tab |
+| 6 | Reuse `SearchableSkillPicker` or sibling | **Sibling** | `.2` — decided at pre-flight; the shapes differ (`{id,name}` in/out vs `string` in/out) and generalising meant a union at 3 call sites |
+| 7 | Both surfaces | Yes | `.2` (wizard parents) · `.3` (Builder + four grandparents) |
+| 8 | Harden `Skill` server-side | No | not done, as ruled. `assertTargetMatchesCategory()` is unchanged |
+
+### §0.3 Where implementation diverged from the proposal
+
+Three points, each recorded in its ledger section rather than smoothed over.
+
+1. **Decision 4's `name_ja` was not delivered.** Search matches `name` only. `name_ja` is populated for all 1,910 rows, but the option payload is a bare `string[]` of names — matching Japanese would need a server-contract widening to carry a second field per option, which is not a component change. The proposal called this "if cheap"; it was not cheap. The user's own ask ("choose list like trainee list") is satisfied by name search.
+
+2. **The Builder's parent Spark row had no Category control.** `SparkDraft.category` existed on the form model and was populated by `inferCategory()`, but the row rendered only Kind / free-text `Applies to` / Stars. A category-scoped picker there required adding the Category select the wizard's row already had. Widened the slice rather than shipping a picker whose list could not be scoped — a second independent filter over one vocabulary is the `IA-3` defect this proposal exists to avoid.
+
+3. **The `fill()` helpers landed in `.2`/`.3`, not `.4`.** The dispatch assigned them to `.4`, but `.2` cannot leave the suite green without them: the component change is what breaks `selectOption()` on that field. Splitting them would have committed a knowingly-red suite.
+
+### §0.4 What the measurement predicted vs what shipped
+
+| Proposal said (§2) | Shipped |
+| --- | --- |
+| `Skill` list = 1,910, no release scope (M-4, M-5) | `availableOnGlobal()` in both doors → **623** |
+| Rendered `<select>` = 1,911 options (M-6) | Combobox; the same catalogue, filtered, and typed into rather than scrolled |
+| Stat 6 / Aptitude 11 options (M-7) | Same counts, now in a listbox with search present in every mode |
+| Only `career-legacy-deck-steps.spec.ts` drives `#legacy-spark-target-…` | Confirmed. The other two specs named in §8 drive the Builder's `Applies to` field instead |
+| "The three specs need a read before implementation" (§8) | Read at pre-flight: **three** specs drive the field, but **two** of them under a different label, across both surfaces |
+
+### §0.5 Gates at close-out
+
+```unknown
+Pest            2297 passed, 3 failed  — the 3 are pre-existing, named in ledger §10a
+Browser         career-legacy-deck-steps 18 · legacy 10 · career-inheritance-event 9
+                legacy-index 1 passed, 1 failed (pre-existing fixture 404, ledger §s-a-p02-4 §6)
+PHPStan level 6 [OK] No errors
+Pint            passed on every touched PHP file
+typecheck       clean (vue-tsgo -p tsconfig.vue.json && tsc --noEmit)
+build           ✓ built
+lint:ui         no new arbitrary values — one in the first draft of the component was removed, not baselined
+lore            code 318 hit(s) · docs 574, 75 exempt — delta 0 from this pass
+fences          0 invalid closing fence(s)
+peer set        clean at open and close
+```
+
+### §0.6 Still open
+
+- **`legacy-index.spec.ts:110`** fails on a fixture bug that predates this work: `runWithDraft()` navigates to `${runUrl}/legacy` where `runUrl` already ends `/training-runs/N`, giving a route that does not exist. Verified present at `HEAD` before any change here. Classified, not fixed — outside this proposal's surface.
+- **The `Applies to` / `Target` label split.** The Builder's parent row says `Applies to`; the wizard and the grandparent editors say `Target`. Same control, two words, on two pages — a real `SHR-1` shape this work leaves standing. Renaming it moves three specs' locators.
+- Decision 8's hardening, and decision 4's `name_ja` half, as above.
 
 ---
 
@@ -222,24 +295,26 @@ Eleven derived-rule families exist across ten files; this section names only the
 
 ## §9 Proposed slice shape (not commitment)
 
-**Not a commitment.** Naming a shape, not a slice id, commit or phase.
+**As written before implementation.** Naming a shape, not a slice id, commit or phase. *Dated note 2026-11-08: realised as `S-A-P02.1`-`.4` — four slices rather than the "one or two" contemplated below, because the two spec-contract repairs could not share a commit with the wiring that broke them. See §0.1 for what actually shipped.*
 
-- **One commit or two.** Decision 1 (`availableOnGlobal()`) is a server-only change and could land alone with its own test; the picker is the frontend half. Two commits if the owner wants the count reduction immediately.
-- **Files.** `resources/js/components/legacy/SparkTargetPicker.vue` (new), `resources/js/components/legacy/AncestorEditor.vue`, `resources/js/pages/Career/LegacySelect.vue`, `app/Http/Controllers/Career/LegacySelectController.php`, `app/Http/Controllers/LegacyController.php`; `resources/js/pages/Legacy/Builder.vue` only if the parent rows differ from `LegacySelect`'s.
-- **Test file.** A feature test asserting `sparkTargets.Skill` excludes a `JapanOnly` name and includes a `GlobalReleased` one, pinning the count drop; a browser spec on the Legacy step asserting the Target control is a combobox, that typing `Xceleration` narrows it, and that ArrowDown + Enter selects.
-- **RED looks like.** The feature test fails with `Expected [623 rows] but got [1910]` before the scope lands. The browser spec fails locating a `role="listbox"` beside the Target label, because a `<select>` exposes `role="combobox"` with no listbox child.
-- **Pint/PHPStan/typecheck** per the hand-off sequence; `npm run lint:ui` will flag any new arbitrary Tailwind value, and the picker should reuse `SearchableSkillPicker`'s existing classes rather than invent any.
+- **One commit or two.** Decision 1 (`availableOnGlobal()`) is a server-only change and could land alone with its own test; the picker is the frontend half. Two commits if the owner wants the count reduction immediately. *→ It did land alone, as `S-A-P02.1`.*
+- **Files.** `resources/js/components/legacy/SparkTargetPicker.vue` (new), `resources/js/components/legacy/AncestorEditor.vue`, `resources/js/pages/Career/LegacySelect.vue`, `app/Http/Controllers/Career/LegacySelectController.php`, `app/Http/Controllers/LegacyController.php`; `resources/js/pages/Legacy/Builder.vue` only if the parent rows differ from `LegacySelect`'s. *→ They did differ: the Builder's row lacked the Category control entirely, so it changed and gained one.*
+- **Test file.** A feature test asserting `sparkTargets.Skill` excludes a `JapanOnly` name and includes a `GlobalReleased` one, pinning the count drop; a browser spec on the Legacy step asserting the Target control is a combobox, that typing `Xceleration` narrows it, and that ArrowDown + Enter selects. *→ Both landed, in `SparkTargetValidationTest.php` and `career-legacy-deck-steps.spec.ts`. The typed probe is `Cut and` rather than `Xceleration`, for the reason given in the spec: three characters is enough to narrow without risking a prefix that sorts ahead of the target.*
+- **RED looks like.** The feature test fails with `Expected [623 rows] but got [1910]` before the scope lands. The browser spec fails locating a `role="listbox"` beside the Target label, because a `<select>` exposes `role="combobox"` with no listbox child. *→ The feature RED was `Expecting […] not to contain 'Japan Only Sample Two'`; the browser RED was `Expected: "combobox" / Received: null`, since a native `<select>` carries no `role` attribute at all.*
+- **Pint/PHPStan/typecheck** per the hand-off sequence; `npm run lint:ui` will flag any new arbitrary Tailwind value, and the picker should reuse `SearchableSkillPicker`'s existing classes rather than invent any. *→ `lint:ui` did flag one (`min-w-[12rem]`, the first draft); replaced with the token scale's `min-w-48` rather than added to the baseline.*
 
 ---
 
 ## §10 Proposal does not do
 
-- No code. No file under `app/`, `resources/`, `database/`, `tests/`, `config/`, `routes/` is changed by this session.
-- No slice opened. No RED, no GREEN, no pre-flight gate.
-- No dispatch. No slice id, commit SHA or phase named.
-- No re-opening of Round 7. This defect is not `R7-36`, `R7-68`, `R7-78`, `R7-79` or `R7-80`: those record sparks being **absent or unrepresented**; the editors exist and store correctly (`R7-36` is `Does not reproduce` at `cdd0083a`, recon `:926`). This is the picker's ergonomics, which no register row names.
-- No claim that the audits named this. `AUD-20261108-R7-A/B/C` did not.
-- No third issue. One observation worth recording: `Skill` targets are unvalidated server-side (M-13). Noted in §6 and §7 decision 8, not proposed.
+**Dated note 2026-11-08: this list described the planning session that wrote §1-§9. Code has since landed under a separate dispatch — `S-A-P02.1`-`.4`, §0.1.** The items below stay true of the proposal *as authored*; they are no longer true of the tree. What the implementation still does not do is §0.6.
+
+- No code. No file under `app/`, `resources/`, `database/`, `tests/`, `config/`, `routes/` is changed by this session. *(True of the proposal session; those files changed under the dispatch.)*
+- No slice opened. No RED, no GREEN, no pre-flight gate. *(True of the proposal session.)*
+- No dispatch. No slice id, commit SHA or phase named. *(True of the proposal session; the dispatch named four slices and this document now cites their commits as the record.)*
+- No re-opening of Round 7. This defect is not `R7-36`, `R7-68`, `R7-78`, `R7-79` or `R7-80`: those record sparks being **absent or unrepresented**; the editors exist and store correctly (`R7-36` is `Does not reproduce` at `cdd0083a`, recon `:926`). This is the picker's ergonomics, which no register row names. *(Still true; no register row was opened by the implementation either.)*
+- No claim that the audits named this. `AUD-20261108-R7-A/B/C` did not. *(Still true.)*
+- No third issue. One observation worth recording: `Skill` targets are unvalidated server-side (M-13). Noted in §6 and §7 decision 8, not proposed. *(Still true; decision 8 ruled no and the boundary is unchanged. The implementation surfaced two further observations, both in §0.6.)*
 
 ---
 
@@ -255,3 +330,4 @@ Eleven derived-rule families exist across ten files; this section names only the
 | 2026-11-08 | §4.5 — `4.1.1` appears once, as the mandated withdrawal caveat (§4.5 opening); no rule grounding rests on it. No `SHR-8` citation in this proposal (the ID is not defined in `shneiderman-golden-rules-2026-10-21.md`, whose rules stop at `SHR-7`). |
 | 2026-11-08 | Implemented — `S-A-P02.1` (`7fb232e3`) filters both doors' Skill list to `availableOnGlobal()`: 1,910 → 623. `S-A-P02.2` (`195c39d4`) adds `SparkTargetPicker.vue` with the current-value guard and wires the wizard's parent rows. `S-A-P02.3` (`cb0d4943`) wires the run-scoped Builder and the four grandparent editors; the Builder's parent row gained the Category control it was missing. `S-A-P02.4` repairs the three specs that drove the field with `selectOption()`. |
 | 2026-11-08 | Implementation note — the `fill()`-based helpers landed in `.2`/`.3` rather than `.4`, because those slices cannot leave the suite green without them. `.4` then covered `legacy-index.spec.ts` and `career-inheritance-event.spec.ts`, which do drive the field (`fill('Speed')` on `Applies to`) and which the dispatch expected to be untouched. |
+| 2026-11-08 | **§0 added — implementation status.** §0.1 slices landed and their commits · §0.2 decision-by-decision disposition · §0.3 the three divergences from the proposal · §0.4 measurement-vs-shipped · §0.5 gates at close-out · §0.6 still open. §9 and §10 carry dated notes marking them historical; their content is unchanged. |

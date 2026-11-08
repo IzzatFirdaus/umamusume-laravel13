@@ -1,11 +1,94 @@
 # Proposal — Trainee preset auto-fill at career start
 
-**Status:** proposal, not slice. **Decisions 1-4 ruled: implemented as `S-A-P01.1`-`.3`.** Slices `955ff4f2`, `39804efe`, `4072042c`. **Decision 7 (Our Grand Concert's goal source) still open** — `S-A-P01.OG` is held pending it. Awaiting that ruling and review.
+**Status:** proposal, not slice. **Decisions 1-4 ruled and implemented as `S-A-P01.1`-`.3`** — `955ff4f2`, `39804efe`, `4072042c`. **Decision 7 (Our Grand Concert's goal source) is still open** and `S-A-P01.OG` is held on it. Awaiting that ruling and review.
 **Date opened:** 2026-11-08
+**Implemented:** 2026-11-08, same session
 **Source:** user's session, 2026-11-08; screenshot `/umamusume/vodka` profile page (base stats `96 / 61 / 105 / 75 / 88`, growth row `10 / 0 / 20 / 0 / 0`); user's words quoted in §1.
 **Register reference:** none (not a Round 7 row).
 **Audit reference:** none (`AUD-20261108-R7-A`, `-B`, `-C` did not name this).
 **Ownership:** proposal recommends; §7 lists the decisions the owner makes.
+
+> **This document is now both the record and the progress log.** §1-§8 are the proposal as it stood before any code landed; their measurements and reasoning are unchanged. **§0 records what was built**, and §9/§10 carry dated notes because both said "no code" and are now historical. §11 logs each revision.
+
+---
+
+## §0 Implementation status
+
+### §0.1 Slices landed
+
+| Slice | Commit | Files | What it delivered |
+| --- | --- | --- | --- |
+| `S-A-P01.1` | `955ff4f2` | `config/scenarios.php`, `TeamPanelBuilder.php`, `TraineeGoalsPanelTest.php` | A per-scenario `goal_source` key (`ura_finale` → `'trainee_goals'`, `unity_cup` → `null`, `trackblazer` → `null`, OGC **unset**). `TeamPanelBuilder::traineeGoalRows()` returns no rows when the key is `null`. **Unity Cup no longer composes a URA ladder.** Three cases: Unity Cup composes none, URA Finale still does, OGC unchanged pending decision 7 |
+| `S-A-P01.2` | `39804efe` | `SeedRunSkills.php` (new), `PreflightController.php`, `TrainingRunController.php`, `CareerPreflightTest.php` | `app/Actions/SeedRunSkills.php` is now the **one** seeding owner; `TrainingRunController::prePopulateSkills()` delegates to it and the wizard door calls it inside the same transaction. The stale "No start skills are seeded" sentence at `PreflightController:51` is corrected. Two cases: a wizard-started run holds the card's `innate ∪ unique` as `Suggested`; a card-less draft seeds nothing |
+| `S-A-P01.3` | `4072042c` | `CockpitController.php`, `CareerStatePanel.vue`, `Cockpit.vue`, `CareerCockpitTest.php`, `career-cockpit.spec.ts`, `start-career.ts` | `state.starting_stats` on the payload and a labelled `Starting:` line beneath the stat rail: `96 61 105 75 88` with the words *"the card's base line, before any training"*. **Absent entirely for a run with no card** — not `N/A`, not five zeroes |
+| `S-A-P01.OG` | **held** | — | Our Grand Concert's `goal_source`, pending decision 7 |
+
+Ledger: `§s-a-p01-1` … `§s-a-p01-3` and `§s-a-p01-close-out` in `docs/audits/rice-shower-unity-cup-round7-slice-audits.md`.
+
+### §0.2 Decision-by-decision disposition
+
+| # | Decision | Ruling | Landed |
+| --- | --- | --- | --- |
+| 1 | Seed starting skills on the wizard door | Yes | `.2` — `SeedRunSkills` action, called from `PreflightController::store()` |
+| 2 | Base stats as a reference, not an input | Yes — reference | `.3` — `state.starting_stats` + the `Starting:` line |
+| 3 | Extend the snapshot door | No | not done, as ruled. `CreateSnapshotRun` names no card, so there is nothing to seed from |
+| 4 | Gate the goal ladder per scenario | Yes, Unity Cup | `.1` — the `goal_source` key |
+| 4a | Hidden panel or empty state | Hidden | `.1` — the panel composes no rows, following `ScenarioPanel.vue`'s off-flag behaviour and Trackblazer's precedent |
+| 5 | Add `scenario` to `trainee_goals` | No | not done, as ruled. A schema change for data that does not exist |
+| 6 | Editability after seeding | Already supported | nothing built — `SkillsPlannerController` writes `Acquired`/`Skipped`/`Suggested`; `RunSettings.vue` edits `growth_rate` and the caps |
+| 7 | Our Grand Concert's ladder | **OPEN** | `S-A-P01.OG` held — see §0.4 |
+
+### §0.3 Where implementation diverged from the proposal
+
+1. **A fourth test had to move.** `CockpitGoalFromCompletedRaceTest` asserted a `unity_cup` run composes a trainee ladder — precisely the behaviour `.1` was ruled to remove. The case is about the derivation from a completed race, so it now runs on `ura_finale`, the scenario whose ladder exists. Fixed at `04b9b092`, with the reason written into the test. It was the **fourth** Pest failure of the full suite and the only one this work caused.
+
+2. **`TeamPanelBuilder` needed no `CockpitController` change.** §9's Piece 1 predicted both files would read the new key. Only `TeamPanelBuilder::traineeGoalRows()` does: the existing `panels.career_goals` flag already decides whether the *panel* composes, and the new key decides *whose rows* it draws. Two questions, two keys, one file changed.
+
+3. **The browser case needed a fixture the tree did not have.** `tests/utils/start-career.ts` picks the first roster row and never sets a costume form, so every run it creates is card-less and could only assert the absent branch. Rather than duplicate the walk, an `onTrainee` hook was added beside the existing `onLegacy` hook — the same additive shape that helper's own docblock records for round 4.1. The case then picks Vodka, who has two forms in the fixture.
+
+### §0.4 `S-A-P01.OG` — the one held slice
+
+`config/scenarios.php:1118-1119` reads: *"the trainee's own objective ladder is a career fact, not a concert mechanic"* and calls it "the one panel this entry composes". It does not say whether that ladder is the URA list `trainee_goals` holds or a concert-specific one no table carries.
+
+- If **URA's ladder** → OGC's `goal_source` becomes `'trainee_goals'`, one config line, and its cockpit keeps the rows it shows today.
+- If **a concert ladder** → OGC's `goal_source` becomes `null`, one config line, and `TeamPanelBuilder` gates it exactly as it gates Unity Cup.
+
+Either way it is one line plus one test. **OGC's key is deliberately left unset**, so `config('scenarios.scenarios.X.goal_source', 'trainee_goals')` defaults to the ladder and the scenario keeps exactly the behaviour it had — shipping a gate that changed OGC's cockpit before the owner ruled would have been a policy decision this work has no authority to make. Nothing else depends on the answer, which is why the other three slices ship without it.
+
+### §0.5 What the measurement predicted vs what shipped
+
+| Proposal said (§2) | Shipped |
+| --- | --- |
+| `growth_rate` already seeds (M-7) | Confirmed and left alone — `StartCareerRequest.php:165-177` |
+| Skills seed on one door only (M-9) | Confirmed — the wizard door now seeds too, through one shared action |
+| `trainee_goals` has **no** `scenario` column, is URA-only (M-12, M-13) | Confirmed — the gate is a config key, not a column |
+| `panels.career_goals` is `true` for three scenarios (M-17) | Confirmed — URA and Unity Cup now differ; OGC awaits the ruling |
+| `run_skills` was 0 rows across the dev database (M-6) | Still 0 for existing runs — the seeding applies to **new** runs only, which is the point |
+| The base five are a **card fact, not run state** | Enforced: the reference is read from the card at read time and written nowhere |
+
+### §0.6 Gates at close-out
+
+```unknown
+Pest            2297 passed, 3 failed  — the 3 are pre-existing, named in ledger §10a
+Browser         career-cockpit 32 passed · career-legacy-deck-steps 18 · legacy 10
+                career-inheritance-event 9 · legacy-index 1 passed, 1 pre-existing failure
+PHPStan level 6 [OK] No errors
+Pint            passed on every touched PHP file
+typecheck       clean (vue-tsgo -p tsconfig.vue.json && tsc --noEmit)
+build           ✓ built
+lint:ui         no new arbitrary values in the touched components
+lore            code 318 hit(s) · docs 574, 75 exempt — delta 0 from this pass
+fences          0 invalid closing fence(s)
+migrate:status  76 Ran, 0 Pending
+peer set        clean at open and close
+```
+
+### §0.7 Still open
+
+- **`S-A-P01.OG`** — decision 7, as §0.4 states.
+- **The `Applies to` / `Target` label split** on the Builder's Spark row. P-02's surface; recorded there and in `§s-a-p01-3` §9.
+- **`legacy-index.spec.ts:110`**'s pre-existing fixture 404. P-02's surface; recorded in `§s-a-p02-4` §6.
+- **The three pre-existing Pest failures** named in ledger §10a: `ScenarioAdvisorFinaleTest`, `UraPanelTest`, `UiHygieneTest`. The third is `TeamPanelBuilder.php:577` shipping a source-file path in payload copy — the line was 552 before this work's 25-line insertion above it and is **not in this work's diff**.
 
 ---
 
@@ -282,23 +365,25 @@ Eleven derived-rule families exist across ten files; this section names only the
 
 ## §9 Proposed slice shape (not commitment)
 
-**Not a commitment.** Naming a shape, not a slice id, commit or phase.
+**As written before implementation.** Naming a shape, not a slice id, commit or phase. *Dated note 2026-11-08: realised as `S-A-P01.1`-`.3`, one slice per piece, in the order below. See §0.1 for what actually shipped.*
 
-Three separable pieces, in evidence strength order. They need not ship together.
+Three separable pieces, in evidence strength order. They need not ship together. *(They did not: piece 1 is the evidence-strongest and shipped first.)*
 
-- **Piece 1 (4.3, the defect).** `config/scenarios.php` gains one key per scenario; `CockpitController::scenarioSectionContext()` and `TeamPanelBuilder::traineeGoalRows()` read it. Files: `config/scenarios.php`, `app/Http/Controllers/Career/CockpitController.php`, `app/Services/Career/TeamPanelBuilder.php`. Test: a feature test creating a Unity Cup run on a trainee with `trainee_goals` rows and asserting the `career_goals` panel composes no ladder rows, plus the URA counterpart asserting it still does. RED: today the Unity Cup run gets Vodka's ten URA rows.
-- **Piece 2 (4.1, the parity gap).** `PreflightController::store()` seeds skills; the `:51` docblock sentence is corrected. Files: `app/Http/Controllers/Career/PreflightController.php` (and `TrainingRunController` if `prePopulateSkills` is lifted into an action). Test: extend `CareerPreflightTest` asserting `run_skills` holds the card's `innate ∪ unique` as `Suggested` after a wizard start. RED: 0 rows today.
-- **Piece 3 (4.2, the reference strip).** `CockpitController::identitySection()` or `stateSection()` gains `starting_stats`; the rail component renders it. Files: `app/Http/Controllers/Career/CockpitController.php`, the cockpit stat component under `resources/js/`. Test: a browser spec asserting the five numbers render beside the rail for a run with a card, and render nothing (not `N/A`) for a run without one — the distinction `DESIGN.md` §4.7 and `AGENTS.md` §13 make between `N/A` and an absent slot.
-- **Pint / PHPStan / typecheck / lint:ui** per the hand-off sequence. `lint:ui` will flag any arbitrary Tailwind value in the new strip; reuse the rail's existing tile classes.
+- **Piece 1 (4.3, the defect).** `config/scenarios.php` gains one key per scenario; `CockpitController::scenarioSectionContext()` and `TeamPanelBuilder::traineeGoalRows()` read it. Files: `config/scenarios.php`, `app/Http/Controllers/Career/CockpitController.php`, `app/Services/Career/TeamPanelBuilder.php`. Test: a feature test creating a Unity Cup run on a trainee with `trainee_goals` rows and asserting the `career_goals` panel composes no ladder rows, plus the URA counterpart asserting it still does. RED: today the Unity Cup run gets Vodka's ten URA rows. *→ Shipped as `S-A-P01.1` (`955ff4f2`). `CockpitController` needed **no** change: the existing `panels.career_goals` flag already decides whether the panel composes, and the new key decides whose rows it draws. The RED was `expect($group['rows'])->toBe([])` — the Unity Cup run composed row 0 from Vodka's URA ladder. OGC's key is left **unset** pending decision 7 (§0.4).*
+- **Piece 2 (4.1, the parity gap).** `PreflightController::store()` seeds skills; the `:51` docblock sentence is corrected. Files: `app/Http/Controllers/Career/PreflightController.php` (and `TrainingRunController` if `prePopulateSkills` is lifted into an action). Test: extend `CareerPreflightTest` asserting `run_skills` holds the card's `innate ∪ unique` as `Suggested` after a wizard start. RED: 0 rows today. *→ Shipped as `S-A-P01.2` (`39804efe`), with the lifting done: `app/Actions/SeedRunSkills.php` is the one owner, `TrainingRunController::prePopulateSkills()` delegates to it, and the wizard door calls it inside the same transaction. The RED was `expect($run->skills()->pluck('skills.id')->all())->toHaveCount(2)` against 0.*
+- **Piece 3 (4.2, the reference strip).** `CockpitController::identitySection()` or `stateSection()` gains `starting_stats`; the rail component renders it. Files: `app/Http/Controllers/Career/CockpitController.php`, the cockpit stat component under `resources/js/`. Test: a browser spec asserting the five numbers render beside the rail for a run with a card, and render nothing (not `N/A`) for a run without one — the distinction `DESIGN.md` §4.7 and `AGENTS.md` §13 make between `N/A` and an absent slot. *→ Shipped as `S-A-P01.3` (`4072042c`). It is `stateSection()`, and the component is `resources/js/components/career/CareerStatePanel.vue`. The strip is **one labelled sentence**, not five more rows: `Starting 96 61 105 75 88 (the card's base line, before any training)`. The browser case needed a card-backed run, so `tests/utils/start-career.ts` gained an `onTrainee` hook (§0.3 item 3).*
+- **Pint / PHPStan / typecheck / lint:ui** per the hand-off sequence. `lint:ui` will flag any arbitrary Tailwind value in the new strip; reuse the rail's existing tile classes. *→ `lint:ui` flagged none. Pint flagged `line_ending` twice — once on `config/scenarios.php` and once on `TrainingRunController.php` — because the edits wrote CRLF into files `HEAD` holds as LF. Both were re-normalised rather than waived, and the real `ordered_imports` finding (one import out of alphabetical position) was fixed by Pint.*
 
 ---
 
 ## §10 Proposal does not do
 
-- No code. No file under `app/`, `resources/`, `database/`, `tests/`, `config/`, `routes/` is changed by this session.
-- No slice opened. No RED, no GREEN, no pre-flight gate.
-- No dispatch. No slice id, commit SHA or phase named.
-- No re-opening of Round 7. This defect is not `R7-78` / `R7-79` (those record *owned/acquired* skills and per-skill level as unrepresented source data; `R7-78`'s note "No wizard skills step; nothing seeds the acquired set" describes the same absence but is a *source-data* row, not a preset question). It is not `R7-20` / `R7-32` (turn convention). It is not `R7-99` (snapshot read-back).
+**Dated note 2026-11-08: this list described the planning session that wrote §1-§9. Code has since landed under a separate dispatch — `S-A-P01.1`-`.3`, §0.1.** The items below stay true of the proposal *as authored*; they are no longer true of the tree. What the implementation still does not do is §0.7.
+
+- No code. No file under `app/`, `resources/`, `database/`, `tests/`, `config/`, `routes/` is changed by this session. *(True of the proposal session; those files changed under the dispatch.)*
+- No slice opened. No RED, no GREEN, no pre-flight gate. *(True of the proposal session.)*
+- No dispatch. No slice id, commit SHA or phase named. *(True of the proposal session; the dispatch named three slices plus one held, and this document now cites their commits as the record.)*
+- No re-opening of Round 7. This defect is not `R7-78` / `R7-79` (those record *owned/acquired* skills and per-skill level as unrepresented source data; `R7-78`'s note "No wizard skills step; nothing seeds the acquired set" describes the same absence but is a *source-data* row, not a preset question). It is not `R7-20` / `R7-32` (turn convention). It is not `R7-99` (snapshot read-back). *(Still true; no register row was opened by the implementation either.)*
 - No claim that the audits named this. `AUD-20261108-R7-A/B/C` did not.
 - No third proposal. Two observations recorded but not proposed: (i) the 10 duplicate skill names (P-02 §2 M-2) affect goal and skill matching generally; (ii) three `[Global]` trainees have no `trainee_goals` rows (133 of 136, M-12). Neither is in scope here.
 - **No claim that the user's screenshot is the whole card set.** It showed one form's block; Vodka has two forms in the tree. Recorded in §2 so no reader mistakes the screenshot for an inventory.
@@ -320,3 +405,4 @@ Three separable pieces, in evidence strength order. They need not ship together.
 | 2026-11-08 | §4.5 — `4.1.1` appears once, as the mandated withdrawal caveat (§4.5 opening); no rule grounding rests on it. The adherence brief's §7 grep expecting zero did not account for the caveat. |
 | 2026-11-08 | Implemented — `S-A-P01.1` (`955ff4f2`) adds a per-scenario `goal_source` key and gates `TeamPanelBuilder::traineeGoalRows()` on it; Unity Cup composes no URA ladder, OGC keeps its behaviour pending decision 7. `S-A-P01.2` (`39804efe`) lifts the seeding into `app/Actions/SeedRunSkills.php` and calls it from the wizard door, correcting the stale `PreflightController:51` docblock. `S-A-P01.3` (`4072042c`) adds `state.starting_stats` and the labelled `Starting:` line; absent entirely for a run with no card. |
 | 2026-11-08 | Decision 7 still open. `S-A-P01.OG` is held and named in `§s-a-p01-1`'s §9. Our Grand Concert's `goal_source` is deliberately **unset** rather than guessed, so the default keeps today's behaviour until the owner rules which ladder `config/scenarios.php:1118-1119` means. |
+| 2026-11-08 | **§0 added — implementation status.** §0.1 slices landed and their commits · §0.2 decision-by-decision disposition (decision 7 still open) · §0.3 the three divergences · §0.4 the held `S-A-P01.OG` slice and what the owner must decide · §0.5 measurement-vs-shipped · §0.6 gates at close-out · §0.7 still open. §9 and §10 carry dated notes marking them historical; their content is unchanged. |
