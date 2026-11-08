@@ -236,7 +236,44 @@ sweep's conditions, and **the sweep's own figure is not evidence of a green brow
 evidence that matters is the per-spec runs, which are green on every spec this round changed.
 
 ### 8. Lore delta
-`Lore docs: 556 (was 556); code: 556 (was 556)`. **Delta 0.**
+
+**The figure this section first carried was wrong, and the error was mine.** It read
+`docs: 556 / 75 exempt — delta 0` and `code: 318 — was 182`. Three invocations settle it:
+
+| Invocation | Output | What it is |
+| --- | --- | --- |
+| `php tools/lore.php` | `lore-docs: 558 hit(s), 75 exempt line(s)` | docs mode — the default |
+| `php tools/lore.php code` | `lore-code: 318 hit(s)` | code mode, **positional argument** |
+| `php tools/lore.php --code` | `lore-docs: 558 hit(s), 75 exempt line(s)` | **not a code-mode invocation** — `tools/lore.php:47` reads `$argv[1] === 'code'`, so a `--code` flag falls through to docs |
+
+That third row is the whole discrepancy. The session-start baseline recorded `code: 556` because it used
+the **flag** form, which is docs mode wearing a code label; and my close-out §8 then compared a true code
+count (318) against a stale "182" I had carried from memory without a source line. Both numbers were
+wrong in different directions, and neither was measured where it was written down.
+
+**Corrected figures, both measured at `a31f6a83`:**
+
+- **Docs:** 558 hits, 75 exempt. Round 6's close-out recorded **555**. Delta **+3** across this round's
+  27 commits. The three are this round's own audit prose: two lines in this ledger that quote the trigger
+  words while ruling on them (class 1 — naming the list to rule on it), and one line of register §10.
+- **Code:** 318 hits. Round 6's close-out recorded **313** (`round6-reconciliation.md:26`, quoted
+  verbatim: "`php tools/lore.php code` (313 hits)"). Delta **+5** across 27 commits — plausible for a
+  round that touched twelve source files, and nowhere near the +136 the wrong baseline implied.
+
+**The two hits in files this session authored carry class-2 rulings:**
+
+- `resources/js/layouts/CareerLayout.vue:143` — `mount`, whole-word match (`-inwE`, `tools/lore.php:60`),
+  ordinary software sense ("seven of the eight pages that mount this layout"). **Class 2**; no marker.
+- `tests/browser/career-cockpit.spec.ts:743` — `stable`, whole-word match (`-inwE`, `tools/lore.php:64`),
+  ordinary adjective ("the stable invariant is the structural shape"). **Class 2**; no marker.
+
+Every other hit is pre-existing corpus: the borrowed-parent mechanic (`friend`) across `LegacySelect.vue`,
+`StoreLegacySelectionRequest.php` and `LegacySelectionPayload.php`, and the design-corpus prohibition lists
+in `DESIGN.md` which must name what they forbid (class 1). No hit introduced by this round's slices is
+unresolved.
+
+**Baseline note:** the ledger's §0 session-start line is left as written — it is a historical fact about
+what was measured then, and a close-out corrects the delta rather than rewriting the earlier reading.
 
 ### 9. Commit
 `27a3d374` — `fix(career): read a past objective with no record as not reached, not missed (R7-82, R7-22, R7-25, R7-61)`

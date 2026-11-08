@@ -953,8 +953,11 @@ port, and the failure causes are 180s timeouts rather than wrong values. One is 
 `career-timeline` 44px case. **No failure is in a spec this round added cases to.** An earlier version
 of this paragraph reported "0 failed" — that figure was read off the log's last three lines, which omit
 the failure count; it was wrong and is corrected here rather than quietly replaced.
-PHPStan, Pint, typecheck and build clean. Lore 556/75 docs (unchanged), 318 code (delta ruled at the
-ledger's item 8). Fence 0 invalid. Migrations 0 pending. Peer set byte-identical. The ledger's
-`#close-out` carries the command-level record.
+PHPStan, Pint, typecheck and build clean. Lore **558 docs / 75 exempt** and **318 code**, against round
+6's recorded 555 and 313 — deltas +3 and +5 across 27 commits, both ruled at the ledger's item 8 (an
+earlier figure of 556/182 in that section was wrong: the 556 came from the `--code` flag, which
+`tools/lore.php:47` does not recognise as code mode, and 182 was a baseline carried without a source).
+Fence 0 invalid. Migrations 0 pending. Peer set byte-identical. The ledger's `#close-out` carries the
+command-level record.
 
 **The register is closed.** The ledger is the durable record of what landed and what did not.
