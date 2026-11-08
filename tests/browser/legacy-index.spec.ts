@@ -117,9 +117,13 @@ test('records a parent with a Spark, picks the primary, and reads it back on the
     await page.getByLabel('Assign to Parent A').selectOption({ label: 'Gold Ship' });
     await page.getByLabel('Grandparent A1', { exact: true }).fill('Tokai Teio');
     await page.getByLabel('Own rank').first().fill('3');
-    await page.getByRole('button', { name: 'Add Spark' }).first().click();
+    await page.getByRole('button', { name: 'Add Spark to Parent A' }).click();
     await page.getByLabel('Kind').first().selectOption('blue');
+    // `Applies to` is the picker's combobox since `S-A-P02.3` (`S-A-P02.4`): a bare `fill()` types a
+    // filter and never commits a value, so the selection goes through the option list.
+    await page.getByLabel('Applies to').first().click();
     await page.getByLabel('Applies to').first().fill('Speed');
+    await page.locator('[role="option"]', { hasText: 'Speed' }).first().click();
     await page.getByLabel('Stars', { exact: true }).first().fill('3');
     await page.getByRole('radio', { name: /Primary spark for Gold Ship: blue Speed/i }).check();
 

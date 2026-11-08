@@ -60,6 +60,25 @@ async function openInheritanceEvent(page: import('@playwright/test').Page): Prom
     const addSpark = (parent: string) =>
         page.getByRole('button', { name: new RegExp(`Add Spark to ${parent}`) });
 
+    /**
+     * Choose a Spark row's `Target` through the combobox (`S-A-P02.4`).
+     *
+     * The field is an `<input role="combobox">` since `S-A-P02.3`, so a bare `fill()` types a filter and
+     * never commits — the write would post an empty target. Typing a prefix and clicking the option is the
+     * path a Trainer takes. `category` is set first when the row's default (`Stat`) would not offer the
+     * value, because the list is the category's own vocabulary.
+     */
+    const pickSparkTarget = async (index: number, label: string, category?: string): Promise<void> => {
+        if (category !== undefined) {
+            await page.getByRole('combobox', { name: 'Category' }).nth(index).selectOption(category);
+        }
+
+        const target = page.getByRole('combobox', { name: 'Applies to' }).nth(index);
+        await target.click();
+        await target.fill(label.slice(0, 3));
+        await page.locator('[role="option"]', { hasText: label }).first().click();
+    };
+
     await page.locator('#rank-parent_a').fill('3');
     // R7-33: a letter rank is recorded alongside the stars, so the screen has something to render.
     await page.locator('#rank-letter-parent_a').fill('B+');
@@ -67,18 +86,23 @@ async function openInheritanceEvent(page: import('@playwright/test').Page): Prom
     await page.locator('#ancestor-parent_a-1').fill('Mejiro McQueen');
     await addSpark('Parent A').click();
     await addSpark('Parent A').click();
+
+    // `Applies to` is the picker's combobox since `S-A-P02.3`, so each Spark's target is chosen from the
+    // list its Category scopes rather than typed (`S-A-P02.4`). The Category is set explicitly because the
+    // row's default is `Stat`, which would not offer `Medium`.
     await page.getByRole('combobox', { name: 'Kind' }).nth(0).selectOption('blue');
-    await page.getByRole('textbox', { name: 'Applies to' }).nth(0).fill('Speed');
+    await pickSparkTarget(0, 'Speed');
     await page.getByRole('spinbutton', { name: 'Stars' }).nth(0).fill('3');
+
     await page.getByRole('combobox', { name: 'Kind' }).nth(1).selectOption('pink');
-    await page.getByRole('textbox', { name: 'Applies to' }).nth(1).fill('Medium');
+    await pickSparkTarget(1, 'Medium', 'Aptitude');
     await page.getByRole('spinbutton', { name: 'Stars' }).nth(1).fill('2');
 
     await page.locator('#rank-parent_b').fill('2');
     await page.locator('#ancestor-parent_b-0').fill('Special Week');
     await addSpark('Parent B').click();
     await page.getByRole('combobox', { name: 'Kind' }).nth(2).selectOption('blue');
-    await page.getByRole('textbox', { name: 'Applies to' }).nth(2).fill('Stamina');
+    await pickSparkTarget(2, 'Stamina');
     await page.getByRole('spinbutton', { name: 'Stars' }).nth(2).fill('2');
 
     await page.getByRole('button', { name: 'Save legacy' }).click();
