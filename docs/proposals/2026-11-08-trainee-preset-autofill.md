@@ -174,6 +174,62 @@ So 4.4 is not a seeding task. It is 4.3: making the join scenario-correct. **Rec
 | **Trackblazer** | absent | her URA ladder | Already gated off; nothing to do. |
 | **Our Grand Concert — pending §7 decision 7** | `true` | her URA ladder | **Held.** `config/scenarios.php:1118-1119` says *"the trainee's own objective ladder is a career fact, not a concert mechanic"* and that it is "the one panel this entry composes" — without saying whether "the trainee's own objective ladder" means the URA list or a concert-specific one. If the owner rules it means the URA ladder, OGC behaves as URA behaves and **no gate is added**. If the owner rules it means a concert-specific ladder, §4.3 gates OGC off exactly as Unity Cup, because the table holds no concert rows. |
 
+### §4.5 Framework adherence
+
+This section grounds §4's four recommendations in `docs/framework-ui-ux/`. It is design reasoning, not an audit: it states which rules a recommendation would satisfy, which constrain it, what it knowingly gives up, and which do not apply. No finding, severity, confidence or evidence status appears here, and §2's M-series is not re-measured.
+
+**Where a rule's provenance is partial, the caveat travels rather than being presented as settled.** Norman's book was not fetched, so `NRM-` rules are cited from `norman-interaction-principles-2026-10-21.md`'s own text with that file's caveat. Brown's eight IA principles are a mirrored enumeration with the prose discussion unread. Gerhardt-Powals' primary is paywalled, with items 5 and 6 unconfirmed as separate principles. Tognazzini's 2014 revision truncated. `WCAG 4.1.1` is withdrawn in 2.2 and is not cited anywhere here; the 44px house rule exceeds 2.5.8 (24×24) and is never called 2.5.8 conformance. The two law collections are separate files and `design-framework-index-2026-10-21.md`'s attribution table governs which publishes what.
+
+#### §4.5.1 Rules justifying the recommendations
+
+| Recommendation | Rule ID(s) | Reasoning |
+| --- | --- | --- |
+| **§4.1** — seed the starting skills on the wizard door | `SHR-1`, `GP-1` | `SHR-1` permits a consistency exception only when it is named and few. Today the two create doors differ and neither documents the difference: `PreflightController:51` says no skills are seeded, `prePopulateSkills`'s docblock says they are, and both are written as if unremarkable. The fix does not document that exception, it removes it — both doors then behave alike, which is what the rule prefers. `GP-1` is the arithmetic half: the product already holds the card's `innate ∪ unique` list, so requiring the Trainer to type it back on turn 1 is work the tool could have done and left in the user's head. |
+| **§4.2** — a labelled reference strip for the card's base stats | `SHR-7`, `GP-1`, `H2` | `SHR-7` is the direct one: the five numbers a turn-1 training decision is weighed against belong on the decision screen, not one screen back on the trainee profile the Trainer has already left. `GP-1` covers the reading: the product holds `base_stats`, so printing it is a figure the user would otherwise recompute or re-open a tab to copy. `H2` bounds the naming — these are the client's own five base values under the client's own words, so the strip must print them as the client does rather than inventing a tool-specific label. |
+| **§4.3** — gate the goal ladder on the scenario that carries character goals | `NRM-3`, `H5`, `IA-6` | `NRM-3` says a rule the system enforces is expressed by the control rather than by a message after it. The system's actual rule is "this ladder is URA's"; the panel expresses the opposite by rendering it under Unity Cup. Gating the panel makes the control agree with the rule. `H5` is the consequence: a Unity Cup Trainer reading ten URA race demands is being told a fact that is false for their run, which is an error the screen prevents only by not drawing it. `IA-6` is why the fix is a config key rather than a layout change — adding or correcting a scenario's composition must cost configuration, and `facility_level_source` (M-18) is the config's own precedent for stating a per-scenario rule this way. |
+| **§4.4** — no separate goal-seeding work | `GP-3` | No new rule is needed, and that is the honest grounding. `GP-3` is the only nearby one: a labelled summation tells the reader the parts exist. Reading the ladder by join already keeps the parts visible — each row is its own sourced goal — so a seeded copy would create a second presentation of one fact without adding a label. The recommendation is "do nothing beyond §4.3," and the rule-citation reason is that no framework rule asks for a stored copy of a derived list. |
+| **Disposition table** | — | `N/A — §4.3's rule grounding is the gate's; the table is a factual disposition of four scenarios, not a separate recommendation.` |
+
+#### §4.5.2 Rules constraining the implementation
+
+| Constraint | Rule | Why it binds this change |
+| --- | --- | --- |
+| A run with no card must render no reference strip, not a zeroed or invented one | `TOG-3` | Status may be stale or absent, but never wrong. `character_cards.base_stats` is nullable in principle even though all 263 rows carry it (M-2). A run whose `character_card_id` is null has no card to read, and printing `96 / 61 / 105 / 75 / 88` or five zeros there would be a wrong claim about a record that does not exist. The strip must be absent. |
+| The reference must be labelled as a starting line, not five bare numbers | `NRM-2` | The rule is that a control states what it is rather than relying on position. Five numbers beside a stat rail that already prints five numbers are otherwise indistinguishable from a second reading of the same five stats. `Starting:` is the label that keeps the two apart. |
+| Seeding must not produce a state the Trainer cannot distinguish from one they entered | `H9` | Error recovery in this file means an error states the cause and what is still saved. The adjacent concern is the reverse: a seeded row must not read as a Trainer-entered one, or clearing it later looks like undoing their own work. `SkillAcquisition::Suggested` is the status that carries the distinction, and the seeding must use it rather than `Acquired`. |
+| The gate must be one shape for every scenario it applies to | `SHR-1` | Two scenarios gated by two different mechanisms — a config key for Unity Cup, a hardcoded check for something else — would be a second unnamed exception. The key must be the only mechanism. |
+| The absent ladder must not read as a failure | `GT-2` | A partial indicator may look complete but must not claim completeness. Inverted here: the panel's absence must not be dressed as an error or a load failure. The tree's existing off-flag behaviour draws nothing and says nothing, which is the correct silence; adding a "goals unavailable" notice would claim a fault where the composition is deliberate. |
+| No scenario name may enter a component or a controller branch | `AGENTS.md` §7 | Repository rule: scenario names live only in `config/scenarios.php`, and `CockpitController:336` already gates on the config flag rather than a name. The new key must be read the same way. |
+
+#### §4.5.3 Rules the recommendation accepts a limitation against
+
+**`IA-5` against `SHR-1`, via §4.3's hidden panel.** `IA-5` says an empty state shows an example of what would fill it. Gating the panel off draws nothing at all, so a Unity Cup Trainer sees no career-goals surface and no explanation of why. That is a genuine loss of signposting. It is accepted because the tree already has exactly one behaviour for an off panel flag — `ScenarioPanel.vue` draws nothing, and Trackblazer is the live precedent — and introducing a second treatment for one panel would be the unnamed exception `SHR-1` forbids. §7 decision 4 carries the owner's override if they prefer the named absence.
+
+**`H6` against `SHR-7`, via §4.2's reference strip rather than an editable field.** The Trainer's stated wish was "auto apply … but trainers option edit values." A field pre-filled with `96` that they could overwrite would satisfy the edit half more literally than a read-only strip does. It is declined because pre-filling the turn-1 stat inputs makes the first recorded reading indistinguishable from a typed one, which is the fabrication `CreateSnapshotRun` refuses in the same terms. The recommendation accepts a narrower reading of "edit": the Trainer edits the *reading*, on the turn form, and the strip only states the baseline it started from. §7 decision 2 records that reading rather than leaving it implicit.
+
+**`GP-2` is not claimed, and that is deliberate.** `GP-2` asks a derived figure to state the rule that produced it and whether the rule is the client's or ours. The reference strip is not derived — it is a copied card fact — so the rule does not apply and no provenance badge is owed. Claiming `GP-2` would imply a computation this proposal does not perform.
+
+**The seeded skill list costs a Trainer who clears it.** §8's risk paragraph names this: a workflow that enters the sheet's real state first will find `Suggested` rows to remove. The mitigation is the status distinction, not an absence of seeding, and the trade is accepted rather than hidden.
+
+#### §4.5.4 Rules that do not apply, and why
+
+Eleven derived-rule families exist across ten files; this section names only the ones a reader of §4.5.1–§4.5.3 might expect to see and does not.
+
+| Rule | Why N/A here |
+| --- | --- |
+| `WCAG 1.2` (time-based media) | The tool carries no audio or video; nothing here introduces any. |
+| `WCAG 2.5.7` (dragging movements) | No drag interaction is added. |
+| `UX-2` (survivable option count) | No option list is added or resized by any of §4.1–§4.4. The picker-shaped defect is P-02's surface, not this one. |
+| `WCAG 4.1.2` (name, role, value) | The reference strip is text, not a control; the seeded skill rows reuse the existing planner's semantics. Neither introduces a component that needs a role it does not have. |
+| `SHR-6` (reversibility of a committed turn) | No turn is created, altered or made irreversible. §4.1 seeds a run's *pre-turn* state; §4.2 adds a read-only strip. |
+| `SHR-4` (closure statement) | The wizard's closure statement at Preflight is unchanged; §4.1 changes what the run holds when it is created, not what the last screen says. |
+| `TOG-6` (undo or named confirmation) | No destructive control is added or moved. |
+| `WCAG 3.3.7` (redundant entry) | Worth naming because it is *nearly* on point: the rule forbids asking again for information already provided. §4.1 and §4.2 both cite `GP-1` for the same phenomenon. `3.3.7` is scoped to data the user has entered in a process; a card's preset was fetched, not entered, so the criterion does not reach it and `GP-1` is the applicable ground. |
+
+**Attribution.** Closure and Continuity are published by `uilaws-2026-10-21.md`, not by `laws-of-ux-2026-10-21.md`; Common Fate is Gestalt only and is not a law in either collection; there is no "Law of Experience" — the concept is Mental Model, entry 17 of the Laws of UX; Fitts, Hick and Jakob are cited from `laws-of-ux-2026-10-21.md` as the more specific collection even though both carry them. This proposal cites none of the five, which is why the table is stated once rather than assumed.
+
+**Conflicts.** Two of the index's seven settled conflicts bear on this change, and it cites both settlements rather than re-opening either. **Consistency versus exceptions** runs through §4.2 and §4.3: the base-stat reference is a named exception to the rail's normal `N/A` state, and the goal gate is a named exception to a panel that otherwise composes. Shneiderman governs, and the settlement's bound — exceptions must be "comprehensible and limited in number" — is why both are named here in §4.5 rather than left to the code. **Closure versus honesty** bears on §4.3's hidden panel: visual closure is permitted, informational closure is not, so the gate may leave no visible gap while it may not claim the ladder was empty.
+
 ---
 
 ## §5 Rejected alternatives
@@ -259,3 +315,4 @@ Three separable pieces, in evidence strength order. They need not ship together.
 | 2026-11-08 | Refinement — §4.3 scoped to Unity Cup confirmed; Our Grand Concert held pending §7 decision 7 |
 | 2026-11-08 | Refinement — §4.3 states the gate's rendered outcome: the panel is hidden entirely, following `ScenarioPanel.vue`'s existing off-flag behaviour and Trackblazer's precedent |
 | 2026-11-08 | Refinement — duplicate check against `docs/proposals/` run (title filter + body grep for `character_cards.*base.?stat`, `spark.?target`, `1,?910`, `JapanOnly`); no prior proposal covers this surface. |
+| 2026-11-08 | §4.5 — framework adherence section: justifying/constraining/accepted/N-A rules, attribution table cited, seven settled conflicts referenced (consistency-exceptions for §4.2 and §4.3; closure-honesty for §4.3) |

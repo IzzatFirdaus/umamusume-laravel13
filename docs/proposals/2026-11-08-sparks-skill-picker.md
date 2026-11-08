@@ -110,6 +110,63 @@ Specifically:
 
 **Related, not filed:** `H6` (recognition over recall) is the same defect stated heuristically; `UX-2` is the narrower citation and `H6` travels as the secondary reading.
 
+### §4.5 Framework adherence
+
+This section grounds §4's four items in `docs/framework-ui-ux/`. It is design reasoning, not an audit: it states which rules a recommendation would satisfy, which constrain it, what it knowingly gives up, and which do not apply. No finding, severity, confidence or evidence status appears here, and §2's M-series is not re-measured.
+
+**Where a rule's provenance is partial, the caveat travels rather than being presented as settled.** Norman's book was not fetched; the `NRM-` rules are cited from `norman-interaction-principles-2026-10-21.md`'s own text and that file's caveat applies. Brown's eight IA principles are a mirrored enumeration with the prose discussion unread. Gerhardt-Powals' primary is paywalled and its 9-vs-10 count is unconfirmed at items 5 and 6. Tognazzini's 2014 revision truncated. `WCAG 4.1.1` is withdrawn in 2.2 and is not cited anywhere in this proposal; the 44px house rule is a house rule **exceeding** 2.5.8 (24×24), never 2.5.8 conformance. The two law collections are separate files and the attribution table in `design-framework-index-2026-10-21.md` governs which publishes what.
+
+#### §4.5.1 Rules justifying the recommendations
+
+| Recommendation | Rule ID(s) | Reasoning |
+| --- | --- | --- |
+| **§4 item 1** — one new `SparkTargetPicker` replacing the native `<select>` | `SHR-1`, `SHR-2`, `UX-2` | `SHR-1` requires a consistency exception to be named and few; a field that is a picker everywhere else in this wizard and a raw `<select>` here is an unnamed exception, and replacing it removes the exception rather than documenting it. `SHR-2` says nothing offered to an expert may make the first run harder: the search box serves the expert who knows the name and the novice who does not, while a 1,910-row `<select>` serves neither past the first few dozen. `UX-2` states the option count on a decision surface must be survivable, and 1,910 in a flat list is not. |
+| **§4 item 2** — three input modes, one control shape | `SHR-1` | The rule's mechanism is that exceptions be few and named. Letting the control's shape change with the Category would create a second and third control shape for one field, all unnamed. Holding one shape across Stat, Aptitude and Skill keeps the field one role with one behaviour. |
+| **§4 item 3** — filter the Skill list to `availableOnGlobal()` | `UX-2`, `H6` | `UX-2` is the count rule again, applied at the source rather than in the widget: 1,910 → 623 is the largest single reduction available and it costs one scope call. `H6` (recognition rather than recall) is the reason the filtered list is also the *correct* list: a `[Global]` run can only produce Global skills, so offering 1,287 Japan-only names asks the Trainer to recognise which of them the client will refuse. |
+| **§4 item 4** — the field id and the `Target` label carry across | `WCAG 4.1.2`, `WCAG 2.5.3` | `4.1.2` requires every component to expose name, role and value; the id and label are how this field's accessible name is assembled today and a replacement that drops either loses the value's association. `2.5.3` requires the visible label text to appear in the accessible name, so `Target` must remain both the visible label and part of the name. |
+
+#### §4.5.2 Rules constraining the implementation
+
+| Constraint | Rule | Why it binds this change |
+| --- | --- | --- |
+| The picker must not lose name/role/value when it stops being a `<select>` | `WCAG 4.1.2` | A native `<select>` carries its role for free. A combobox supplies `role="listbox"` / `role="option"`, `aria-expanded`, `aria-activedescendant` explicitly, and `SearchableSkillPicker.vue:185-266` is the working model. A replacement that renders a bare `<input>` with a `<ul>` beneath it has removed the role it had. |
+| The visible label must equal the accessible name | `WCAG 2.5.3` | The field is labelled `Target` on screen; the accessible name must contain that word, or speech input and screen-reader users name a control that does not answer. |
+| A no-match state must say so, not render an empty box | `NRM-2` | The rule is that a control which is unavailable says why rather than disappearing. `SearchableSkillPicker.vue:268-273` already prints `No skills match "…"`; the new component must keep an equivalent, because an empty list under a live search reads as a broken control. |
+| The row's control shape must not change with the Category | `GT-4` | Two elements that look alike must behave alike. If Stat rendered a `<select>` and Skill a combobox, two controls occupying the same position in the same row would behave differently for a reason the Trainer cannot see. |
+| The picker must not duplicate the Category filter as a second, conflicting axis | `IA-3` | The rule is that a library is browsable by more than one axis. This picker filters on the Category the row already carries; adding a second independent filter would give the same list two competing dimensions and let the two disagree. |
+| A spark's already-stored target must render even when the filter excludes it | `TOG-3` | Status may be stale or absent, but never wrong. A stored `JapanOnly` target that the filtered list omits would render as unset — a state claim that is false about the record. |
+| No scenario name may enter the picker or its parent | `AGENTS.md` §7 | Repository rule, not a framework one: scenario names live only in `config/scenarios.php`, and a component that branches on one is a defect. The picker is scenario-agnostic by construction. |
+
+#### §4.5.3 Rules the recommendation accepts a limitation against
+
+**`UX-2` against `H6`, via §4 item 3's filter.** The filter removes 1,287 `JapanOnly` skills from the offer. A Trainer who wants to plan a spark against a Japan-only skill — because they play the JP client, or because they are reading ahead — can no longer find it in this picker. That is a real reduction, and it is accepted because the run this picker feeds is a `[Global]` career and the shipped client cannot award a skill it does not have. §7 decision 1's guard is the half that is *not* given up: a spark already stored against such a target still shows its value, so the loss is confined to new selections and never to recorded data.
+
+**`IA-5` against `SHR-1`, via §4 item 2's one-shape rule.** A category-aware control could have shown a plain `<select>` for the five Stat targets and a search box only where search is needed — proportionate, and arguably the smaller change. That would make the field's shape depend on its Category, which is the sameness failure `GT-4` names and a new unnamed exception under `SHR-1`. The recommendation declines the proportion and takes the consistency instead. This is also why §5 alternative E is rejected on the same grounds rather than on cost.
+
+**`H7` is deliberately not claimed.** The picker is keyboard-operable, and that operand is `4.1.2`'s name/role/value contract plus the D-55 keyboard path the existing picker already implements — not `H7`'s accelerators. The heuristics file's own gap register records that accelerators are absent from this repository; a search box on one field does not change that, and claiming `H7` here would overstate what the change delivers.
+
+**`SHR-2`'s cost is the one accepted without a matching gain.** A Trainer who has entered the same spark target many times loses the muscle memory of a native `<select>`'s type-ahead, which is fast for a known prefix. The search box is slower for that one case and faster for every case where the Trainer does not remember the exact opening characters. `SHR-2` does not forbid that trade — it forbids making the first run harder, and the first run is the one where a name is not yet known.
+
+#### §4.5.4 Rules that do not apply, and why
+
+Eleven derived-rule families exist across ten files; this section names only the ones a reader of §4.5.1–§4.5.3 might expect to see and does not.
+
+| Rule | Why N/A here |
+| --- | --- |
+| `WCAG 1.2` (time-based media) | The tool carries no audio or video. Nothing in this change introduces any. |
+| `WCAG 2.5.7` (dragging movements) | The picker adds no drag interaction; selection is click and keyboard. |
+| `WCAG 3.3.7` (redundant entry) | The picker asks for nothing the row already holds — it inherits the Category rather than re-asking it. The rule is satisfied by construction, not waived. |
+| `SHR-4` (closure statement) | This change alters one field inside the Legacy step; the wizard's own closure statement at Preflight is untouched. |
+| `SHR-6` (reversibility of a committed turn) | No turn is committed or altered by the picker. The spark payload is a draft write with its own edit path. |
+| `TOG-6` (undo or named confirmation) | No destructive control is added or moved. Removing a spark keeps its existing `Remove Spark` button. |
+| `GT-2` (partial-indicator honesty) | No indicator is added. The picker's "no match" line is a state message, not a partial indicator. |
+| `UX-1` (44px target, primary action nearest) | The picker reuses `SearchableSkillPicker`'s `min-h-11` (44px) option rows and its existing focus ring. **The 44px figure is this repository's house rule exceeding 2.5.8's 24×24 minimum; it is not 2.5.8 conformance and is not described as such.** The settlement is recorded in `design-framework-index-2026-10-21.md`. |
+| `GP-3` (summation labelling) | Nothing here is summed. The one count-bearing statement — the option total — is a list length, not an arithmetic result presented as one. |
+
+**Attribution.** Closure and Continuity are published by `uilaws-2026-10-21.md`, not by `laws-of-ux-2026-10-21.md`; Common Fate is Gestalt only and is not a law in either collection; there is no "Law of Experience" — the concept is Mental Model, entry 17 of the Laws of UX; Fitts, Hick and Jakob are cited from `laws-of-ux-2026-10-21.md` because that is the more specific collection for them even though both carry them. None of those five appears in this section, which is precisely why the table is stated once here rather than assumed.
+
+**Conflicts.** One of the index's seven settled conflicts bears on this change: **target size**, where the 44px house rule exceeds 2.5.8's 24×24 minimum and must never be described as conformance. The settlement above follows the index and does not re-open it. **Consistency versus exceptions** also runs through §4.5.3, and its settlement — Shneiderman governs, exceptions must be comprehensible and few — is what makes "remove the exception" the right answer here rather than "document the exception."
+
 ---
 
 ## §5 Rejected alternatives
@@ -194,3 +251,4 @@ Specifically:
 | 2026-11-08 | Refinement — §5 alternative E: conditional picker (`<select>` for Stat/Aptitude, picker only for Skill) rejected on `SHR-1` |
 | 2026-11-08 | Refinement — §7 decision 1 guard: the picker includes the row's current value even when the `availableOnGlobal()` filter excludes it; M-14 added recording that no such value exists yet |
 | 2026-11-08 | Refinement — duplicate check against `docs/proposals/` run (title filter + body grep for `character_cards.*base.?stat`, `spark.?target`, `1,?910`, `JapanOnly`); the only hits are this proposal's own text. No prior proposal covers this surface. |
+| 2026-11-08 | §4.5 — framework adherence section: justifying/constraining/accepted/N-A rules, attribution table cited, target-size settlement cited for the picker's 44px options |
