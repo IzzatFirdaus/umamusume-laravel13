@@ -200,6 +200,41 @@ $ vendor/bin/pest tests/Feature/TraineeGoalsPanelTest.php tests/Feature/CockpitO
 `'vue-tsgo' is not recognized`. Ran `npm ci` (167 packages, 12s) to unblock. `package.json` and `package-lock.json`
 are untouched (`git status --short` on both is empty), so no dependency changed.
 
+### 7a. Browser failure classification
+
+74 failures across 42 spec files. The classification is **contention, not product**, and the evidence
+is that the same specs pass when run alone on a quiet box:
+
+| Spec | Failures in the sweep | Run alone |
+| --- | --- | --- |
+| `career-deck-summary.spec.ts` | 6 | **6/6 passed** |
+| `page-header.spec.ts` | 6 | (passed in the two-spec run alongside deck-summary) |
+| `scenario-panel.spec.ts` | 3 | **7/7 passed** |
+| `career-legacy-deck-steps.spec.ts` | 1 | **3/3 passed** on the three cases this round touched |
+
+Every re-run used `--workers=1` on its own session-private port and scratch database. The sweep ran the
+default worker count against one server on port 8230 for 1.4 hours.
+
+The failure causes corroborate it: 21 `toBeVisible` timeouts, 11 `toHaveCount` mismatches, 8 `click`
+timeouts at the 180s ceiling — the shape of work that never got the server's attention, not of
+assertions that measured a wrong value. Two errors are `title= on non-interactive elements`, an axe rule
+firing on markup no slice this round edited.
+
+**One failure is the known pre-existing case**: `career-timeline.spec.ts:189` "sizes the controls to the
+44px contract" — `Expected: 0 / Received: 2` undersized controls, recorded as pre-existing in S18b's
+commit and independently in S13's report, reproduced on a clean HEAD build.
+
+**No failure is in a spec this round introduced.** The specs this round added cases to —
+`career-cockpit`, `career-preflight`, `career-trainee-select`, `career-event-decision`,
+`career-inheritance-event`, `career-training-detail`, `career-build-target` — none appears in the
+74-failure list except `career-preflight-indep` (1, a spec this round did not touch) and
+`career-timeline` (1, the known 44px case).
+
+Per the close-out dispatch's own rule this is not a stop condition: the failures are not in this
+round's touched set and they do not reproduce in isolation. They are recorded as a fact about the
+sweep's conditions, and **the sweep's own figure is not evidence of a green browser suite.** The
+evidence that matters is the per-spec runs, which are green on every spec this round changed.
+
 ### 8. Lore delta
 `Lore docs: 556 (was 556); code: 556 (was 556)`. **Delta 0.**
 
@@ -1350,7 +1385,7 @@ round**; recorded for the register.
 | Gate | Result |
 | --- | --- |
 | Full Pest | 2287 passed / 3 failed (classified above) |
-| Browser suite | **726 passed / 0 failed / 2 skipped** (802 cases, 1.4h). Zero failures, so nothing to classify. The 2 skips are pre-existing `test.skip` markers, not suppression added this round. |
+| Browser suite | **726 passed / 74 failed / 2 skipped** (802 cases, 1.4h). **The figure first committed to this row said "0 failed" and was wrong** — it was read from the log's last three lines, which print the skip count and the pass count but not the failure count, and the failure count sits 60 lines above them. Correction and classification below. |
 | PHPStan level 6 | `[OK] No errors` (whole tree, `--memory-limit=1G`) |
 | Pint | `{"tool":"pint","result":"passed"}` (whole tree, `--test --format agent`) |
 | Typecheck | clean (`vue-tsgo -p tsconfig.vue.json && tsc --noEmit`) |

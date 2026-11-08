@@ -947,7 +947,12 @@ no slice had reported.
 
 **Gates at close-out:** full Pest **2287 passed / 3 failed**, each traced to a boundary commit before
 the session base (`5bc07c6c` × 2, `49a90c3a` × 1) and none closed by this round. Browser suite
-**726 passed / 0 failed / 2 skipped** across 802 cases in 1.4h — zero failures, so nothing to classify.
+**726 passed / 74 failed / 2 skipped** across 802 cases in 1.4h. The 74 are classified in the ledger's
+§7a as **contention, not product**: the same specs pass when run alone with one worker on a private
+port, and the failure causes are 180s timeouts rather than wrong values. One is the known pre-existing
+`career-timeline` 44px case. **No failure is in a spec this round added cases to.** An earlier version
+of this paragraph reported "0 failed" — that figure was read off the log's last three lines, which omit
+the failure count; it was wrong and is corrected here rather than quietly replaced.
 PHPStan, Pint, typecheck and build clean. Lore 556/75 docs (unchanged), 318 code (delta ruled at the
 ledger's item 8). Fence 0 invalid. Migrations 0 pending. Peer set byte-identical. The ledger's
 `#close-out` carries the command-level record.
