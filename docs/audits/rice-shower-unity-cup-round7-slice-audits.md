@@ -67,6 +67,23 @@ $ git status --short
 | S17 | R7-02 | — (verification-only) | **settled, Outcome B** — `#s17--r7-02` |
 | S17b | R7-02 | `1d6a39af` | **landed** — `#s17b--r7-02` |
 | S4 | R7-03, R7-13 | `bab1b072` | **landed (label half)** — `#s4--r7-03-r7-13` |
+| S7 | R7-57 | `4720b877` | **landed** — `#s7--r7-57` |
+| S8 | R7-33, R7-34, R7-80 | `d487b83e` | **landed** — `#s8--r7-33-r7-34-r7-80` |
+| S9 | R7-06 | `36e010c1` | **landed** — `#s9--r7-06` |
+| S10 | R7-31, R7-35 | `99d17545` | **landed** — `#s10--r7-31-r7-35` |
+| S11 | R7-36, R7-68 | `cdd0083a` | **landed** — `#s11--r7-36-r7-68` |
+| S13 | R7-27, R7-28, R7-32 | `dba72d62` → `bd5c769c` → `329d4ef0` → `9f23d4d9` → `85ed8085` | **landed after four review returns** — `#fix-rounds` |
+| S14 | R7-21 | `80c1d19e` | **landed** (R7-29 left as its register status, `Known limitation`) — `#s14--r7-21-r7-29` |
+| S15 | R7-38, R7-62 | `68015d36` | **landed** — `#s15--r7-38-r7-62` |
+| S16 | R7-43, R7-45, R7-46, R7-54, R7-01, R7-14 | `a23fd59a`, `e5e38468`, `d2c15ca8` | **landed, three commits** — `#s16` |
+| S18a | R7-99 | `3aefce57` | **landed** — `#s18a--r7-99` |
+| S18b | R7-83 | `598a4282` | **landed** — `#s18b--r7-83` |
+| S19 | R7-84, R7-85, R7-88, R7-89 | `3f260461` | **landed** (R7-86 does not reproduce) — `#s19--r7-84-r7-85-r7-88-r7-89` |
+| S4b | R7-03 (persistence half) | — (verification-only) | **closed by read, does not reproduce** — `#s4b` |
+| S12 | R7-37 | — (verification-only) | **closed by read, does not reproduce** — `#s12` |
+| S20–S22 | R7-87, R7-90…R7-93 | `6af4555c` | **disposed: one fixed, four do not reproduce** — `#s20-s21-s22--disposition-measured-at-head-not-inherited` |
+| S0b | — (housekeeping) | `d8f75849` | **landed** — `#s0b--housekeeping-three-named-reds` |
+| close-out | — | — | `#close-out` |
 
 ---
 
@@ -1220,3 +1237,64 @@ gates. The slice's browser cases asserted the words and not the number; its Feat
 payload and not the value. **A test that names a behaviour it does not measure is the failure mode this
 round reproduced three times**, and the two-source rule that closed it — payload assertion for the number,
 browser assertion for the string — is what the remaining slices inherited.
+
+---
+
+## S20, S21, S22 — disposition (measured at HEAD, not inherited)
+
+The close-out dispatch flagged that the previous session's "every row Held in §9" claim was asserted
+rather than measured. It was wrong. Read at HEAD:
+
+### 1. Register §4 status, the five rows
+
+| Row | Status at `05be6616` |
+| --- | --- |
+| `R7-87` | `Confirmed defect` |
+| `R7-90` | `Confirmed defect` |
+| `R7-91` | `Confirmed defect` |
+| `R7-92` | `Confirmed defect` |
+| `R7-93` | `Confirmed defect` |
+
+### 2. Register §9 Held entries
+
+None. A grep of §9's table for all five returns nothing. **This is case (a): the slices opened.**
+
+### 3. Disposition
+
+| Row | Disposition | Evidence |
+| --- | --- | --- |
+| `R7-87` | **Fixed** (`6af4555c`) | `conditionsLine()` printed the raw predicate. Now decodes through the same `config('uma.skills.fit_*')` maps the screen's race-fit cells already cite, and names an undecoded key as an absence instead of echoing it. Seven of the keys in a typical condition have no published client phrasing. |
+| `R7-90` | **Does not reproduce** | `SkillPlanRow.vue:131` carries `max="6"` / `of 6` on the **skill level** field. `ADR-0029` D4 governs skill level as 1..6 and `StoreRunSkillRequest:78` validates `between:1,6`. The hint ladder beside it has five rungs and its own note reads "Lv Max is a caption, not a fifth number". The walk read two different quantities as one. |
+| `R7-91` | **Does not reproduce** | Neither screen draws a caret. Both disclosures are native `<details>` and their native markers toggle with the element. Live probe on `/training-runs/3/events`: three details, `before [false,false,false]` → `after [true,true,true]`. |
+| `R7-92` | **Does not reproduce** | No `line-clamp`, `truncate`, `max-h-` or `overflow-hidden` on the Inheritance sub-copy. Probed for `scrollWidth > clientWidth` overruns and trailing ellipses: the only hit is an `sr-only` "Collapse navigation" span, and zero ellipses. |
+| `R7-93` | **Does not reproduce** | Same probe on `/training-runs/3/timeline`, same result. |
+
+**Four of five were stale observations, and the register's §4 statuses are frozen so they are not
+edited.** The one real defect was fixed.
+
+---
+
+## S0b — housekeeping, three named reds
+
+The dispatch named three specs. Measured each at HEAD rather than trusting the record:
+
+| Spec | Measured | Action |
+| --- | --- | --- |
+| `career-skills-planner.spec.ts` | **13/13 pass** | None. The reds recorded against it were cleared by S19's work. |
+| `scenario-panel.spec.ts` | **7/7 pass** | None. Same. |
+| `career-trainee-select.spec.ts` | `card grain` **failed** | Two stale assertions in one case; fixed in `d8f75849`. |
+
+The card-grain failure was two defects, and the second only surfaced after the first was fixed:
+
+1. `getByText('Unique')` resolved to three elements once the section grew a heading and a provenance
+   pill, so the case failed on Playwright's strict mode rather than on a missing fact. Retargeted to the
+   heading and the pill separately.
+2. The case then asserted two absence sentences were visible — "No growth figure is recorded" and
+   "No base-stat figure is recorded" — on the premise that the catalogue holds neither. It holds both
+   for this trainee: card 65 carries `growth_rates` Speed 10, Power 20. The page correctly withholds both
+   sentences when the data exists, which is what `v-if="!growthRates"` was written for. Now pins the real
+   state.
+
+**Non-vacuity is not available for a stale-assertion fix** — the source was already correct, so there is
+no defect to reintroduce. What proves the fix is the existence of the state it now asserts, read from
+the database (`growth_rates` not null on card 65) and from the register (`ADR-0029` D4).

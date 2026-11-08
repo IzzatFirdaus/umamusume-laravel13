@@ -872,3 +872,56 @@ renumbered.*
 | R7-84, R7-85, R7-88, R7-89 | S19 | `3f260461` | `Confirmed defect` → `Confirmed fixed`; `R7-86` `Does not reproduce` | `#s19--r7-84-r7-85-r7-88-r7-89` | RED: `null` vs `173`; pool listed `Catalogue Only Skill` |
 | R7-36, R7-68 | S11 | `cdd0083a` | `R7-36` `Does not reproduce` as stated; `R7-68` `Unrepresented` → `Confirmed fixed` | `#s11--r7-36-r7-68` | RED: `Expected: 4, Received: 0` `Add Spark` buttons |
 | R7-03 persistence half | S4b | — verification-only | `Confirmed defect` → `Does not reproduce` | `#s4b` | five links read; `TraineeCardFormTest` 5 passed |
+
+---
+
+## §13 Close-out
+
+Round 7 closes at `d8f75849`. §4's statuses stay frozen at `8a3cf21c`; §12 records the repairs; this
+section is the honest summary of what landed and what did not.
+
+**Landed:** twenty slices and four review returns. S1, S2, S3, S4, S5, S6, S7, S8, S9, S10, S11, S13
+(four returns), S14, S15, S16 (three commits), S17, S17b, S18a, S18b, S19, S20–S22, S0, S0b. Rows moved
+`Confirmed defect` → `Confirmed fixed` per §12, except where a row's status survived its slice because
+the defect did not reproduce — those are named below.
+
+**Closed by read, does not reproduce:** S4b (`R7-03`'s persistence half — five links present and
+covered by `TraineeCardFormTest`); S12 (`R7-37`); `R7-86` (the string it names is not in the tree, only
+in walks 1 and 3); `R7-38` on the cockpit (the nav gates correctly there; `R7-62` was the real defect);
+`R7-36` as stated (the spark editors exist and always have); `R7-90` (skill level is 1..6 per `ADR-0029`
+D4, and the hint ladder beside it is a different quantity); `R7-91`, `R7-92`, `R7-93` (no custom caret,
+no clipping — probed on live pages).
+
+**Disposed at close-out:** S20 fixed `R7-87` (`6af4555c`). The other four rows S20–S22 would have
+carried are the not-reproducing set above. The register's §4 statuses for those four are unchanged and
+stale by design — §4 is frozen, and this section is where the correction lives.
+
+**Open facets recorded that no slice closed:**
+- `R7-66`'s "caps column null on a wizard-created run" — the label is honest, the storage surface is not.
+  A schema item, not a slice.
+- `R7-22`'s alert half — the current-run alert path is unchanged.
+- `R7-36` facet (b) / `R7-68` — the write path and the Inheritance tile now agree; the source's
+  aptitude and inherited-skill vocabulary beyond kind/target/stars remains unrepresented.
+- `R7-87`'s residual — seven condition keys in a typical predicate have no published client phrasing.
+  They are now named as an absence rather than echoed; decoding them needs a source this repository
+  does not cite.
+- The `career-timeline.spec.ts` 44px case: two undersized controls, reproduced on a clean HEAD build
+  and independently in S13's own report. Pre-existing, outside every slice's touched surface.
+
+**Recurring pattern worth naming.** Five of this round's defects were built-and-hidden, not missing:
+`R7-57`'s preview readings, `R7-36`'s parent spark editor, `R7-68`'s four grandparent editors — each an
+editor behind a closed `<details>` rendering none of its contents. Round 5 answered the identical shape
+once (the collapsed "Client totals" disclosure) and it recurred twice more. **The disclosure is where
+these defects hide, and its open/closed state is behaviour, not presentation.**
+
+**Second pattern.** Five more were tests that named behaviour they never measured: S13's `prefill_turn`,
+S13's undo label, S17's preflight fixture (built from `SupportCard`s against a `CharacterCard`
+resolver), and S0b's two absence assertions (a state the fixture was not in). The rule that closed them:
+**the payload for the number, the browser for the string; a test that names a behaviour it does not
+measure is a test that cannot fail.** Applying it caught a live defect on the cockpit's undo button that
+no slice had reported.
+
+**Gates at close-out:** see the ledger's `#close-out`. Every failure is classified there with its
+boundary commit; no unclassified failure stands.
+
+**The register is closed.** The ledger is the durable record of what landed and what did not.
