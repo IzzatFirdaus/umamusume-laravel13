@@ -41,10 +41,15 @@ final class CockpitGoalFromCompletedRaceTest extends TestCase
             'source_order' => 1,
         ]);
 
+        // `ura_finale`, not `unity_cup`: `S-A-P01.1` gated the per-character ladder on the scenario
+        // carrying one, and `trainee_goals` holds the URA source's rows only. This case is about the
+        // derivation from a completed race, so it belongs on the scenario whose ladder exists; a Unity
+        // Cup run composing the same rows was the defect that slice removed, and
+        // `TraineeGoalsPanelTest` pins that it no longer does.
         $run = TrainingRun::factory()->create([
             'umamusume_id' => $trainee->id,
             'status' => RunStatus::Active,
-            'scenario' => 'unity_cup',
+            'scenario' => 'ura_finale',
         ]);
 
         // Nothing recorded yet: the trainee goals group reads 0 of 1.
