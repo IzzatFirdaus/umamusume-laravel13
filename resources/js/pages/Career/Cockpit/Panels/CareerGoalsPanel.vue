@@ -78,13 +78,20 @@ const deadlineTitle = (row: GoalRow): string | undefined =>
 
 <template>
     <div class="flex flex-col gap-4">
+        <!-- The glyph and tone follow the level the server computed, never a constant:
+             `TeamPanelBuilder` heads a trainee-objective alert with the row's own state word
+             (`Not reached`, `Due now`, `Missed`) and keeps `Critical` for the mandatory-race group,
+             whose copy already says "not recorded". `AlertRow`'s own contract pairs `▲` with a
+             critical line and `○` with a neutral note, so both markers follow the level key; a
+             `critical` tone on every arm would re-assert the severity the key just stopped claiming
+             (round-7 `F-02`). -->
         <AlertRow
             v-for="alert in props.scenario.alerts"
             :key="alert.text"
-            glyph="▲"
+            :glyph="alert.level === 'Critical' ? '▲' : '○'"
             :text="`${alert.level}: ${alert.text}`"
             :detail="alert.detail"
-            tone="critical"
+            :tone="alert.level === 'Critical' ? 'critical' : 'note'"
         />
 
         <section
