@@ -87,6 +87,8 @@ Restored the fix, rebuilt, re-ran → `1 passed (20.9s)`. **F-01 is genuinely pi
 `SpiritBurstRoster` → one card, bands table then roster rows beneath, `Estimated` stays on the bands
 half, capsule text preserved). No ambiguity stop.
 
+**Commit:** `64c37c4f` — `refactor(scenario-detail): merge Spirit Bursts into Burst bands (Move 3)`.
+
 ### Implementation
 
 - `SpiritBurstRoster.vue` gains a **`bare`** prop: suppresses its own `card` wrapper and
