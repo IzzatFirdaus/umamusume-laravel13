@@ -4749,3 +4749,60 @@ component's output (not a bare `N/A` text node) plus a copy assertion that the e
 travels. Not fixed here: this pass is a registration, not a slice.
 
 *Determination recorded in `docs/research/ki-154-scenario-widget-sweep-2026-11-10.md` §1.5.*
+
+## KI-158 — `UraPanelTest` pins the superseded `missed` state for a past objective with no record, so it fails against the behaviour `27a3d374` deliberately shipped
+
+**State:** OPEN, filed 2026-11-10 while verifying an unrelated slice. This is **not** a regression from
+that slice: it reproduces against `HEAD`'s committed `TeamPanelBuilder.php` with the working tree's
+changes removed.
+
+**Defect.** `tests/Feature/UraPanelTest.php:180` asserts:
+
+```php
+expect($rows->firstWhere('label', 'Junior Make Debut')['state'])->toBe('missed')
+```
+
+The case is the *turn 13* arm — "turn 12 has gone by with nothing logged" (the test's own comment at
+`:172`). For that input `TeamPanelBuilder.php:302` deliberately returns `not_reached`:
+
+```php
+$reached => $this->objectiveHasRecord($goal, $run) ? 'missed' : 'not_reached',
+```
+
+with the comment above it: "`missed` claims the run went and did not meet the requirement; a run
+imported mid-career never went. The distinction is whether anything at all was logged against the
+goal's race, so the state is read from the record, not from the calendar alone."
+
+That line arrived at `27a3d374` — `fix(career): read a past objective with no record as not reached,
+not missed (R7-82, R7-22, R7-25, R7-61)` — and was reinforced by `30eb2b4d` (`AUD-R7-A F-01, R7-22,
+R7-25, R7-61`). Neither commit touched `UraPanelTest`; `git show --stat 27a3d374 | grep -c UraPanelTest`
+returns `0`. **So the assertion has been pinning the pre-fix state since the fix landed.**
+
+**Why this matters more than the usual "known failure".** The suite's summary reads
+`3 failed, 2302 passed`, and that failure has been carried forward across several slices as
+"pre-existing, not ours". That label is accurate about *causation* and wrong about *meaning*: this is
+a test asserting the exact behaviour a ratified round-7 fix reversed. Left alone it is an anchor
+reminding the codebase that `missed` is correct. Anyone reading the register's baseline line sees a
+number, not a contradiction inside a test file.
+
+**Closure.** Change the assertion to `not_reached` and add the reason, in the shape `AGENTS.md` §9
+prescribes for a test that pins a defect: a dated comment naming `27a3d374` and `30eb2b4d` and saying
+why the old value no longer matches. The neighbouring assertions in the same case
+(`URA Finals Final` → `upcoming`, and the alert-text `not->toContain(...)`) are unaffected and already
+agree with the current code. **Not fixed here** — this pass was verifying a different slice, and
+editing another slice's test without its review would be the change-sweeping this repository's commit
+rule exists to prevent.
+
+**Reproduction:**
+
+```
+vendor/bin/pest tests/Feature/UraPanelTest.php --compact
+  FAILED  … > it raises a Critical alert when a mandatory race turn has arrived and nothin…
+  -'missed'
+  +'not_reached'
+  at tests/Feature/UraPanelTest.php:180
+  Tests:    1 failed, 7 passed (137 assertions)
+```
+
+Reproduced identically with `git show HEAD:app/Services/Career/TeamPanelBuilder.php` in place, which
+excludes the working tree's uncommitted alert-vocabulary change as the cause.
