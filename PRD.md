@@ -7,7 +7,7 @@ Inertia + Vue 3 ([ADR-0020](docs/adr/0020-trainer-desk-2-program.md)), so this i
 documentation-and-scaffolding document. Whether Phase 1 exit (§8) has been declared: **to be confirmed**.
 Product name: **Trainer Desk**, owner decision 2026-09-27, closing OQ-1.
 
-Revision: [CHANGELOG.md](CHANGELOG.md). Open-question register: [docs/OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md).
+Revision: [CHANGELOG.md](CHANGELOG.md). Open-question register: [docs/OPEN-QUESTIONS.md](docs/research-scratch/PLANS-AND-BRIEFS.md).
 
 ## 1. Product Vision
 
@@ -472,7 +472,7 @@ upload; see OQ-6. [ADR-0021]
 ## 7. Open Questions
 
 The register — question, status, owner, and where each was resolved — is
-[docs/OPEN-QUESTIONS.md](docs/OPEN-QUESTIONS.md), which carries the answered-and-remainder detail for OQ-5
+[docs/OPEN-QUESTIONS.md](docs/research-scratch/PLANS-AND-BRIEFS.md), which carries the answered-and-remainder detail for OQ-5
 and OQ-6. The history of how each entry got its current shape is in [CHANGELOG.md](CHANGELOG.md). One line
 each here:
 

@@ -242,7 +242,7 @@ When documents disagree: `docs/research-scratch/GOVERNANCE.md` §"CONSTRAINTS.md
 
 ## Skill Automation Subsystem (separate tooling layer)
 
-`app/Services/Skill{Registry,Matcher,Executor}.php` and `php artisan skill:manage` drive the declarative skills in `.agents/skills.json` (machine-local registry, not tracked). They touch none of the catalog/run tables and are documented in `docs/SKILL_AUTOMATION.md`. Treat them as separate tooling from the Uma domain.
+`app/Services/Skill{Registry,Matcher,Executor}.php` and `php artisan skill:manage` drive the declarative skills in `.agents/skills.json` (machine-local registry, not tracked). They touch none of the catalog/run tables and are documented in `docs/research-scratch/PLANS-AND-BRIEFS.md`. Treat them as separate tooling from the Uma domain.
 
 ## Contribution
 

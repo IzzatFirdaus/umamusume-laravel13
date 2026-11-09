@@ -559,7 +559,7 @@ cross-references were repointed inside the embedded bodies, so no citation rots:
 substitutions, each asserting its own occurrence count before it was applied, across
 `KNOWN-ISSUES.md` (the six “See …” ruling pointers into `## group-ab-rulings-owed.md`),
 `docs/adr/0029-per-run-measurement-columns.md` (five), `docs/proposals/primitive-reconciliation.md` (one),
-`docs/proposals/frontend-architecture-plan.md` (two `coverage.md` mentions), the two root skill files' own <!-- census: quoted-original -->
+`docs/research-scratch/PROCESS-PLANS.md` (two `coverage.md` mentions), the two root skill files' own <!-- census: quoted-original -->
 sibling links (`[coverage.md](coverage.md)` ×3, `[CHANGELOG.md](CHANGELOG.md)` → `../../`), and the
 nineteen intra-thread pointers in the bodies here. `GOVERNANCE.md`'s four live skill-registry pointers
 (§SOURCE-OF-TRUTH header, §6 twice, the authority table) were repointed by hand; the 2026-09-30 drift row
@@ -638,7 +638,7 @@ cannot mistake it for body content. Blank-line spacing inside bodies is preserve
 blank lines, not byte positions.
 
 **References.** Live citations were repointed before the delete:
-`docs/reports/2026-11-02-legacy-builder-completion-report.md` (the two `### Added` rows naming
+`docs/research-scratch/SLICE-RECORDS.md` (the two `### Added` rows naming
 `AUD-20261102-029-legacy-builder-2026-11-02.md` and `2026-11-02-legacy-builder-pass.md`) and
 `tests/browser/career-legacy-deck-steps.spec.ts` (the mechanism-table docblock naming
 `scr-car-008-legacy-source-accuracy-2026-10-30.md`), each repointed at the master and its section
@@ -707,7 +707,7 @@ does not "consolidate" them and destroy the reason they exist.
 
 | File                                                                | Why it stays                                                                                                                                                                                                                     |
 | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/SKILL_AUTOMATION.md` (90 lines)                               | Documents the skill layer that lives in `.ai/skills/`, so it belongs with tooling, not with research. Cited by `KNOWN-ISSUES.md`                                                                                                 |
+| `docs/research-scratch/PLANS-AND-BRIEFS.md` (90 lines)                               | Documents the skill layer that lives in `.ai/skills/`, so it belongs with tooling, not with research. Cited by `KNOWN-ISSUES.md`                                                                                                 |
 | `docs/design-research/prototypes/superseded/README.md` (16 lines)   | Its whole job is to stand in a directory of four retired prototypes and say they are not the current design                                                                                                                      |
 | `docs/deprecated/` (3 PDFs, review, README)                         | Binary originals that no gate can read and a dated review of them. Restored 2026-10-02 from the agent checkpoint `9a38915` after the consolidation deleted the folder, and now tracked so it cannot be lost the same way twice   |
 
@@ -755,7 +755,7 @@ Four files were unclassified. They are resolved, not merely recorded, and the re
 | -------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `docs/_UMAMUSUME UX DELIVERABLES - MERGED.md`            | Promoted to master `16`, now `docs/research-scratch/UX-DELIVERABLES.md`. It held the only working-tree copies of three write-ups the consolidation deleted, so folding it into an existing master would have produced a 25,000-line file and leaving it `_`-prefixed in `docs/` put it outside the index. Byte-identical move; sha256 unchanged; 25 lines of provenance and erratum added, zero body lines deleted.   |
 | `docs/design-research/_scratch/WEB-FINDINGS.md`          | Folded into `DESIGN-CORPUS.md` as `## WEB-FINDINGS.md`, then deleted. It was tracked inside a directory G-60 lists as ignored historical scratch. 335 non-blank lines verified present, 22 headings demoted with no depth errors, and the corpus's own pointer to it repointed at the embedded section.                                                                                                               |
-| `docs/SKILL_AUTOMATION.md`                               | **Deliberate exception, left in place.** 90 lines, cited by `KNOWN-ISSUES.md`. It documents automation for the skill layer that lives in `.ai/skills/`, so it belongs with the code-side tooling tree, not in a research master. Registered in the Routing Table below.                                                                                                                                               |
+| `docs/research-scratch/PLANS-AND-BRIEFS.md`                               | **Deliberate exception, left in place.** 90 lines, cited by `KNOWN-ISSUES.md`. It documents automation for the skill layer that lives in `.ai/skills/`, so it belongs with the code-side tooling tree, not in a research master. Registered in the Routing Table below.                                                                                                                                               |
 | `docs/design-research/prototypes/superseded/README.md`   | **Deliberate exception, left in place.** 16 lines whose entire function is to stand in a directory of four retired prototypes and say they are not the current design. Moving it destroys the warning it exists to give. Registered in the Routing Table below.                                                                                                                                                       |
 
 No repo-level protected-file registry exists to check future strays against: the pre-consolidation

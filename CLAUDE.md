@@ -93,7 +93,7 @@ version of this file named `.agents/` and `~/.claude/`, neither of which holds i
 
 **Skill automation** (`.agentrules`, `app/Services/Skill{Registry,Matcher,Executor}.php`,
 `php artisan skill:manage`) is a separate declarative layer documented in
-`docs/SKILL_AUTOMATION.md`. It reads `.agents/skills.json` (gitignored) and touches no
+`docs/research-scratch/PLANS-AND-BRIEFS.md`. It reads `.agents/skills.json` (gitignored) and touches no
 catalog or run table. Do not wire it into domain code.
 
 ## 4. Claude work pattern

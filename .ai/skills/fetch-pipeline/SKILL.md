@@ -13,7 +13,7 @@ metadata:
 Work the stage-isolated ingest engine: `fetch -> snapshot -> parse -> normalize -> match -> promote | review`.
 This skill owns adding a source, changing a parser, and debugging why catalog rows did or did not appear.
 It is about the ingest engine only. The `Skill{Registry,Matcher,Executor}` trio, `php artisan skill:manage`,
-and `.agentrules` are a separate declarative tooling layer (`docs/SKILL_AUTOMATION.md`) that touches no
+and `.agentrules` are a separate declarative tooling layer (`docs/research-scratch/PLANS-AND-BRIEFS.md`) that touches no
 catalog or run table; so is `uma:fetch-art` (artwork mirroring, ADR-0021). Do not mix the three.
 
 ## When to Use

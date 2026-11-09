@@ -63,7 +63,7 @@ truth for mechanics; the two ADRs that contradicted it were amended rather than 
 
 **Not tagged.** `git tag -l '3.0.*'` is empty. The 2026-10-28 parity audit against the HFW found 32
 divergent pages, 1 blank page and 17 near pages, so `3.0.0` waits for the repair pass and its re-audit
-(`docs/proposals/TASKS.md` § "v3.0.0 parity audit — Task A"). This section records what the tree
+(`docs/research-scratch/PROCESS-PLANS.md` § "v3.0.0 parity audit — Task A"). This section records what the tree
 contains today; it is not a release note until the tag exists, and whoever cuts the tag dates it.
 
 The HFW-parity work. The v3 frontend slices landed across the preceding sessions (S3a-S3c, S5, S6,
@@ -170,10 +170,10 @@ where its keybox requires one-pick radios.
 
 ### Documentation
 
-- `docs/proposals/frontend-development-update-plan.md` - **DM-3 amended**: four family roles across
+- `docs/research-scratch/PROCESS-PLANS.md` - **DM-3 amended**: four family roles across
   five colour keys (`SPARK_KINDS` is `blue, pink, green, white, scenario`), with the Inheritance screen
   (`f0caa281`) printing all five.
-- `docs/proposals/TASKS.md` - this release's evidence ledger: tree state, base attribution, the lint
+- `docs/research-scratch/PROCESS-PLANS.md` - this release's evidence ledger: tree state, base attribution, the lint
   block, the peer blocks, per-slice premise measurement and the gate runs.
 
 ### Deferred, with the reason on file
@@ -488,7 +488,7 @@ not bind; the label is applied because the owner directed this pass to ship as i
   and `GOVERNANCE.md` §6, replaced in the file by one provenance line pointing at `AGENTS.md` §2 (the
   code wins) for the stale generated-file rule. The pairing named there is real: `.agents/skills.json`
   inventories `php artisan skill:manage` commands, not agent skills, so `GOVERNANCE.md` §6's
-  machine-readable-half pairing is a naming collision (`AGENTS.md` §8, `docs/SKILL_AUTOMATION.md`).
+  machine-readable-half pairing is a naming collision (`AGENTS.md` §8, `docs/research-scratch/PLANS-AND-BRIEFS.md`).
 
 - The dashboard's active career reads its progress as a rail of 72 discrete turn marks instead of a
   progress bar, and the rail carries the career's own length: the client's grid is 24 turns to a

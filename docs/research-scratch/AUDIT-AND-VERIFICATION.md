@@ -344,7 +344,7 @@ Verification of these columns is in section 14.
 | `source.md` | 9988 / 172 | tracked | `775b88a` 2026-09-27 | notes | The system prompt that initialised this repo through Laravel Boost, kept as the record of that step. | current | - | 1 | no |
 | `docs/research-scratch/GOVERNANCE.md` | 12724 / 159 | tracked | `31f97a5` 2026-09-29 | constraint | Which gate enforces what, where the gate lives, and which gates are knowingly not automated. | current | - | 12 | yes |
 | `docs/research-scratch/GOVERNANCE.md` | 12682 / 98 | tracked | `775b88a` 2026-09-27 | research | What could go wrong in the consolidation, written before the artefacts it then shaped. | current | - | 11 | no |
-| `docs/SKILL_AUTOMATION.md` | 3077 / 91 | tracked | `cf8021d` 2026-09-27 | config-doc | How the repo's skill-discovery hook finds and loads skills. | unknown | - | 1 | no |
+| `docs/research-scratch/PLANS-AND-BRIEFS.md` | 3077 / 91 | tracked | `cf8021d` 2026-09-27 | config-doc | How the repo's skill-discovery hook finds and loads skills. | unknown | - | 1 | no |
 | `docs/research-scratch/GOVERNANCE.md` | 19283 / 295 | tracked | `2033434` 2026-09-29 | reference | One page that restates the binding rules from seven other documents for agents that read only one. | stale | - | 10 | no |
 | `docs/UMAMUSUME_REFERENCE.md` | 448522 / 2179 | tracked | `24e491c` 2026-09-29 | reference | The mechanics corpus, eight sections, source-cited and dated. Everything the UI asserts about the game traces here. | current | - | 41 | yes |
 | `docs/data/2026-09-29-global-roster-crosscheck.md` | 36974 / 504 | tracked | `07941eb` 2026-09-30 | probe-record | Every Global costume card checked against two publishers, with the method and its date. | current | - | 2 | no |
@@ -542,7 +542,7 @@ These three are the prose half of the same capture set. The brief names the dire
 | adr              | 13      | `docs/adr/0001` to `0013`, each with an inline Status line. Two are not standing: 0001 superseded in part, 0013 withdrawn                                                                                                                                                                                                                           |
 | audit-report     | 9       | The frontend audit README, skills gaps, session consolidation, brief audit, spec divergence, mechanics triage, external design review triage, roster closing report, and the C-5 enforcement gap                                                                                                                                                    |
 | constraint       | 6       | `CONSTRAINTS.md`, `docs/research-scratch/DESIGN-CORPUS.md`, `docs/research-scratch/GOVERNANCE.md`, `.ai/rules/code-style.md`, `.ai/rules/testing-standards.md`, root `DESIGN.md`                                                                                                                                                                                     |
-| config-doc       | 5       | `Makefile`, the two `.ai/guidelines/**`, `.ai/rules/index.md`, `docs/SKILL_AUTOMATION.md`                                                                                                                                                                                                                                                           |
+| config-doc       | 5       | `Makefile`, the two `.ai/guidelines/**`, `.ai/rules/index.md`, `docs/research-scratch/PLANS-AND-BRIEFS.md`                                                                                                                                                                                                                                                           |
 | spec             | 5       | `PRD.md`, `ARCHITECTURE.md`, `AGENTS.md`, `DESIGN.md`, and the untracked UX behaviour spec                                                                                                                                                                                                                                     |
 | brief            | 6       | Two repo requests, `DECISIONS-NEEDED.md` from the audit, and three incoming external write-ups parked untracked. Also `TASK-16-RUN-VIEW-FRAME-BRIEF.md`                                                                                                                                                                                             |
 | scenario         | 5       | `docs/scenarios/01`, `02`, `03`, `07`, `08`. The four publisher-sourced files, `04`, `05`, `06`, `09`, are typed `reference` instead                                                                                                                                                                                                                |
@@ -566,7 +566,7 @@ Two type calls worth defending:
 | current      | 169     | All 94 captures, all 11 live ADRs, the scenario guides, the slice records, the constraint files                                                                                                                                                                                                     |
 | stale        | 8       | `SKILL.md`, `AGENTS.md`, `PLAN.md`, `docs/research-scratch/GOVERNANCE.md`, `.ai/guidelines/custom/domain.md`, `.ai/guidelines/framework/core.md`, `.ai/rules/index.md`, `docs/design-research/_scratch/WEB-FINDINGS.md`                                                                                         |
 | superseded   | 5       | `ADR-0013` by ADR-0012 Decision 4; `ADR-0001` section 5 by ADR-0003; `ADR-0005` closed by R37; `slice-12` by master's own history; the untracked `COMPREHENSIVE UX DELIVERABLES` by its own triage banner                                                                                           |
-| unknown      | 20      | The seven `.ai/skills/**` guides, the five `_scratch/*.json` measurement files, `.ai/rules/code-style.md`, `.ai/rules/testing-standards.md`, the three untracked incoming specs, `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md`, `PRODUCT.md`, `docs/SKILL_AUTOMATION.md`, the UX behaviour spec   |
+| unknown      | 20      | The seven `.ai/skills/**` guides, the five `_scratch/*.json` measurement files, `.ai/rules/code-style.md`, `.ai/rules/testing-standards.md`, the three untracked incoming specs, `ARCHITECTURE.md`, `ARCHITECTURE-ESSENTIALS.md`, `PRODUCT.md`, `docs/research-scratch/PLANS-AND-BRIEFS.md`, the UX behaviour spec   |
 | duplicate    | 0       | Nothing met the bar. Section 8 explains the six near-misses                                                                                                                                                                                                                                         |
 
 ##### 5.3 By authoring session
@@ -924,7 +924,7 @@ output measured in this session against `master` at `2033434`.
 - Read in full this pass: `PLAN.md` (684 lines — the draft said 682), `KNOWN-ISSUES.md`
   status block + open-entry headings, `docs/requests/2026-09-29-catalog-roster-and-trainee-selector{.md,-plan.md}`
   (spec + Tasks 1–5 of the 3,991-line plan), `docs/design-research/SKILLS-GAPS.md` §1–§3, §8–§10,
-  `docs/SKILL_AUTOMATION.md`, `ADR-0009` header.
+  `docs/research-scratch/PLANS-AND-BRIEFS.md`, `ADR-0009` header.
 - Verified against the tree, not the docs: migration list (`git ls-tree HEAD database/migrations`
   = 33 files, incl. `2026_09_29_120000` / `120100` / `120200`), `addcslashes` present in
   `CatalogController.php:60,:82` **on HEAD** and fix commit `f2c978b` contained in `master`
@@ -3331,7 +3331,7 @@ registry absent  (fresh clone)      ->  7 skipped, 0 failed
 
 Non-zero exit means the input is untracked, and the test proves nothing anywhere — it is not merely unrunnable in CI. `.gitignore:46-55` ignores `/.agents`, `/.claude`, `/.cursor`, `/.grok`, `/CLAUDE.md` and others, so any test reaching into those inherits this shape. This is the same failure as KI-39 (`SkillFactory` deriving `match_key` with a different algorithm than production) one grain up: a test that passes while exercising something other than the thing under test.
 
-**Owner.** Data Engineer with whoever owns `docs/SKILL_AUTOMATION.md`. Found by the catalog-roster plan's Task 1 provisioning step, which now copies `.agents` into its worktree; that copy is a workaround local to one branch and does not close this entry.
+**Owner.** Data Engineer with whoever owns `docs/research-scratch/PLANS-AND-BRIEFS.md`. Found by the catalog-roster plan's Task 1 provisioning step, which now copies `.agents` into its worktree; that copy is a workaround local to one branch and does not close this entry.
 
 ---
 
@@ -20383,4 +20383,474 @@ See §6 row `CardCompare modal semantics completeness` (updated): `aria-modal`/i
 #### R5 — `sr-only-label` mechanism
 
 `BaseCheckbox.vue` already declares `srOnlyLabel?: boolean` (line 16) and renders `<span :class="srOnlyLabel ? 'sr-only' : 'font-medium text-ink'">` (line 78). F-01's fix uses the existing prop — no edit to `BaseCheckbox.vue`, no fence violation.
+
+## docs/audits/AUD-20261108-R7-A.md
+
+> **Consolidated 2026-11-09 (owner-ordered).** Source: `docs/audits/AUD-20261108-R7-A.md` (98 non-blank lines),
+> reproduced verbatim below with headings demoted one level. Original deleted from the tree
+> after every non-blank line was found here; live citations repointed to this section.
+
+## Audit report — Round 7 Batch A: S1, S2, S3 and the S3 glyph change
+
+### 1. Identity
+- Audit id: AUD-20261108-R7-A
+- Date: 2026-11-08
+- Mode: M1 change audit (batched, first of three)
+- Scope: Batch A per the Round 7 audit dispatch — S1 `e5cdc971` (`resources/js/pages/Career/TrainingDetail.vue` turn field label + helper), S2 `4efa0876` (`app/Models/TrainingRun.php` maiden-lock reset), S3 `27a3d374` + `0e43782f` (`app/Services/Career/TeamPanelBuilder.php` `not_reached` state + four cockpit panels' `○` glyph), S3-glyph `0e43782f` (`–` → `○` on the not_reached marker). Register rows in scope: R7-20, R7-26, R7-82, R7-22, R7-25, R7-61.
+- Out of scope: Batches B and C; S12, S4b, S21, S22 (no code change); every file not in the dispatch §2.1 table; in-app rendered frames (no server frame captured — source review plus Chromium capability probe only).
+- Frameworks applied: H2 (S1 label vocabulary), SHR-8 (S1 helper value), UI-1 (S1 type size), NRM-2 / NRM-3 / GT-4 (S2 disabled-row reason), GP-4 / UI-3 / GT-2 / H4 / GT-3 (S3 glyph + state + four-panel agreement), H1 / TOG-3 (R7-22 residual: status never wrong). No WCAG criterion is cited in a finding — no colour, contrast or target-size claim survived source review, and rendered claims are unmeasured.
+- Rendered evidence: PARTIAL — standalone Chromium launch succeeds (probe exit 0, Chromium 153.0.8010.12); no in-app frame of TrainingDetail or the cockpit was captured in this session, so every rendered claim on those surfaces is UNMEASURED.
+
+### 2. Executive summary
+- One confirmed new finding: F-01 — R7-22 residual persists. `CockpitController::objectiveSection` still derives `current` ("the slot has arrived") for a past-due unrecorded obligation (turn-12 obligation at run position 67 reads `current` while its subtitle says "fell due ... 55 turns ago"). A wrong status breaches TOG-3 ("Status may be stale or absent, but never wrong"); the user is misinformed about what is going on (H1, related). S3 fixed the sibling goals panel (TeamPanelBuilder → `not_reached` + `○` + "Not reached") but did not touch `CockpitController.php`; the obligation panel is unchanged. Severity 3, confidence High. Register refs: R7-22 (root), R7-25 (same root, distinct symptom), R7-61 (same root family).
+- All other Batch A checks pass or are N/A: S1 label + helper + type size (H2, SHR-8, UI-1); S2 disabled-row reason and post-12 unlock behaviour (NRM-2, NRM-3, GT-4); S3 glyph + state + four-panel agreement (GP-4, UI-3, GT-2, H4, GT-3).
+- Register statuses are not disputed: no register-disagreement entries. The audit reports a partial fix, not a mis-classification.
+- Largest unmeasured risk: in-app fit and contrast at 320 / 390 / 768 / 1280px in both themes (UI-1 reflow, WCAG 1.4.3, UX-1 / TOG-5 target size) — no frame captured; listed in §6.
+
+### 3. Scope and coverage
+Surfaces covered per change, all at source level (no in-app frame captured):
+- S1 `TrainingDetail.vue`: turn field label + helper, populated state; empty/loading/error states not altered by S1.
+- S2 `TrainingRun.php`: maiden-lock predicate, disabled race row, populated state.
+- S3 `TeamPanelBuilder.php` + `CareerGoalsPanel.vue`, `CareerMilestonesPanel.vue`, `TeamRankLadderPanel.vue`, `UraMandatoryLadder.vue`: `not_reached` state, `○` glyph, "Not reached" copy, populated state; four panels compared for agreement.
+- S3-glyph: `–` → `○` marker replacement.
+
+States / themes / viewports not covered in-frame: empty, loading, error; light and dark themes; 320 / 390 / 768 / 1280px. Reason: no server-rendered frame captured in this session; every such claim is UNMEASURED and listed in §6.
+
+Framework coverage matrix:
+| Framework | Rules applied | Result |
+| --- | --- | --- |
+| Heuristics (H) | H1 (related), H2 | H2 PASS on S1; H1 related to F-01 |
+| Shneiderman (SHR-) | SHR-8 | PASS on S1 |
+| Laws of UI (UI-) | UI-1 | PASS on S1 |
+| Tognazzini (TOG-) | TOG-3 | F-01 FAIL on objectiveSection |
+| Gerhardt-Powals (GP-) | GP-4 | PASS on S3 |
+| Gestalt (GT-) | GT-2, GT-3, GT-4 | PASS on S3 |
+| Norman (NRM-) | NRM-2, NRM-3 | PASS on S2 |
+| WCAG | none cited | no colour/contrast/target-size claim measured |
+
+### 4. Evidence status and limits
+- Evidence capability: standalone Chromium launch verified (exit 0); this batch makes no OBSERVED_RENDERED claims.
+- OBSERVED_SOURCE: all state derivations (`objectiveSection` match, `TeamPanelBuilder` state fall-through, `reachedBy` arithmetic), label and helper text, panel glyph diffs, register walk-7 traces.
+- UNMEASURED: 320px reflow of the turn-field label (S1, UI-1), contrast of changed copy (WCAG 1.4.3), target size on changed controls (UX-1 / TOG-5, 44px house rule), dark-theme rendering — settled only by a rendered frame (see §6).
+- Prior measurements cited: none — no dated measurement artifact exists in this session.
+- Provenance caveats carried: Gerhardt-Powals primary paywalled (secondary deck enumerated; GP-4 cited from the local file's own text); Norman's book not fetched (NRM-2 / NRM-3 cited from the local file's own text); Tognazzini 2014 revision truncated (TOG-3 text verified in-file); WCAG 4.1.1 withdrawn, not cited; 44px house rule never described as 2.5.8 conformance.
+
+Fence-finding check (dispatch §8): none of the six recurrence classes appear in Batch A's changed code — the pre-existing `<details>` on TrainingDetail is `open` by default and untouched by S1; the panel tests assert rendered labels, not lib payloads; no level/hint adjacency, summary-tail reading, positional heading anchors, or `role="img"` assertions in the changed tests. No new fence instance → no fence-finding finding.
+
+### 5. Findings
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation | register_ref |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| F-01 | TOG-3 | Tognazzini first principles | Cockpit obligation panel (`objectiveSection`), populated state, run position past obligation's turn | `$slot->isAtOrBeforeTurn($next)` returns `true` for any slot whose turn is at or before the next turn to play, with no exception for a deadline that passed while the run holds no `race_entries` row. At position 67, a Junior obligation due turn 12 ("It fell due on turn 12, 55 turns ago") reads `current`, titled "the slot has arrived and no race_entries row points at it". The state word is wrong for a passed deadline; the honest value is `not_reached` — the treatment S3 applied to the sibling goals panel in `TeamPanelBuilder.php`. A wrong status breaches "Status may be stale or absent, but never wrong" (TOG-3), and leaves the user misinformed about what is going on (H1, related, not double-filed). | OBSERVED_SOURCE | `app/Http/Controllers/Career/CockpitController.php:865-876` (state derivation), `:892-896` (`current` title); `app/Models/RaceCatalogSlot.php:195-223` (`reachedBy` arithmetic); register walk-7 trace R7-22 (turn 67 / turn 12 / "55 turns ago") | 3 | High | Derive `not_reached` when the slot's turn is before the run's position and no `race_entries` row points at it; keep `current` only while the obligation window is open — same shape as `TeamPanelBuilder.php` after S3. Effort M. Acceptance check: obligation row at a position past its turn shows `not_reached` + "Not reached", never `current`. | R7-22 (root), R7-25 (same root, distinct symptom), R7-61 (same root family) |
+
+No S1 / S2 / S3 entries are filed: every check there passes or is N/A and is recorded in §9. This is not a register disagreement: the register's statuses (Confirmed defect) stand; the audit reports a partial fix, not a mis-classification, so §7 of the template carries no entries.
+
+
+**Dated addition, 2026-11-08 — F-01 resolved.** F-01 resolved commit `30eb2b4d` (slice `S-A-F01`).
+fix: `CockpitController::objectiveSection` now derives `not_reached` for a past-due obligation with no
+`race_entries` row pointing at it (the slot's turn strictly before the run's position), keeps `current`
+only while the obligation window is open, and the `current` title no longer claims "the slot has arrived".
+Evidence: `tests/Feature/CockpitObjectivesTest.php:331-346` RED/GREEN (`state` `not_reached`, title lacks
+"has arrived"), non-vacuity via revert-and-reapply against `.scratch-uma/r7-audit/S-A-F01.patch`, five-suite
+regression 111 passed (1404 assertions). Register refs R7-22, R7-25, R7-61 remain frozen at `8a3cf21c`;
+ledger's §10 "alert half open" no longer describes the current tree. See
+`SLICE-RECORDS.md section `## docs/research-scratch/SLICE-RECORDS.md`` `#post-close-out-fix-F-01`. The §5 finding row
+above is unchanged — this note records resolution, not reclassification.
+
+### 6. Unmeasured register
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Turn-field label/helper reflow at 320px (S1, UI-1) | No in-app frame captured | Rendered screenshot at 320 / 390 / 768 / 1280px, both themes; label not truncated, helper legible |
+| Contrast of changed copy (WCAG 1.4.3; Laws of UI ratios) | No frame | Contrast measurement in light and dark themes |
+| Target size on changed controls (UX-1 / TOG-5, 44px house rule) | No frame | Target-size measurement; never described as 2.5.8 conformance |
+| Dark-theme body-text ratio | No frame | Rendered measurement in dark theme |
+
+### 7. Conflict, gap and fence log
+- Framework conflicts: none encountered; no settlements applied.
+- Gaps: none — every surface in scope exists; no gap registered and no per-screen gap findings.
+- Fence findings (dispatch §8): none of the six classes recur in Batch A's changed code; no new instance recorded.
+
+### 8. Recommendations
+Ordered by severity, then confidence, then effort:
+1. Fix `objectiveSection` so a past-due unrecorded obligation derives `not_reached` (TOG-3 / H1). Severity 3, confidence High, effort M. Acceptance: at a position past the obligation's turn, row shows `not_reached` + "Not reached", never `current`. Register refs R7-22 / R7-25 / R7-61.
+2. Observation, not a finding: S3-glyph replaced `–` with `○` on the not_reached marker, removing the en-dash-as-bullet copy flagged by `RenderedCopyHygieneTest`. No framework rule ID covers copy hygiene; keep the glyph, no further action.
+
+### 9. Change-audit re-check (M1 only)
+| # | Question | Framework | Result | Basis |
+| --- | --- | --- | --- | --- |
+| 1 | Does the change add, remove or move a control? | Fitts (44px), Hick (count) | N/A | S1 changes label + helper text only; S2 changes a state predicate; S3 changes a state word and glyph. No control added, removed or moved. |
+| 2 | Does it change what is on screen at once? | Cognitive load, choice overload, chunking | N/A | No quantity change. |
+| 3 | Does it change a colour, a tint or a state? | WCAG 1.4.1/1.4.3/1.4.11, Laws of UI 4 and 8 | PASS | S3's state change is carried by glyph + word + data-state; no colour-alone state (UI-3). Contrast and target size unmeasured (§6). |
+| 4 | Does it change a type size or a weight? | Laws of UI 5, Laws of UX 28 | PASS | S1 uses pre-existing `text-xs`; no new size category (15+ `text-xs` instances already on the page). |
+| 5 | Does it change what the user can undo, or where the action is? | Shneiderman 4/5/6, Tognazzini 7/10, H3, H5 | N/A | No turn commit or reversal surface changed. |
+| 6 | Does it change where a thing lives, or what it is called? | IA 1/2/7/8, Mental Model | N/A | Nothing moved or renamed. |
+| 7 | Does it change a progress, an incomplete state or a boundary? | Zeigarnik, Laws of UI 9/10, Goal-Gradient | PASS | S3's incomplete state is now honest: `not_reached` + "Not reached" makes no completion claim (GT-2 / UI-4). |
+| 8 | Does it change what the user has to read or remember? | Shneiderman 8, Gerhardt-Powals 1/3, H6 | PASS | S1's helper states the turn value on the decision screen; nothing is carried between screens. |
+| 9 | Does it add a new destination, a new landmark or a new control type? | WCAG 2.4.1/4.1.2, H4, Laws of UI 6 | N/A | None added. |
+| 10 | Does it change the words? | WCAG 3.3.1/3.3.3, H9 | PASS | S1 label and S3 "Not reached" use client vocabulary; non-blaming. |
+
+Result named in the commit body: 10 of 10 questions answered — Q1 N/A, Q2 N/A, Q3 PASS, Q4 PASS, Q5 N/A, Q6 N/A, Q7 PASS, Q8 PASS, Q9 N/A, Q10 PASS.
+
+### 10. Exit checklist
+- [x] Scope, mode, surfaces, states, viewports and themes stated (§1, §3).
+- [x] Framework routing recorded, narrowest framework chosen per question (TOG-3 decides "status never wrong"; H1 listed as related, not double-filed).
+- [x] Pre-flight provenance caveats carried into the report (§4).
+- [x] Evidence capability recorded (PARTIAL; Chromium launch OK, no in-app frame).
+- [x] Every finding has a rule ID, surface and state, a specific observation, and an evidence status (F-01).
+- [x] No finding rests on inference alone at severity 3 (F-01 is a source-read deterministic predicate; the register's walk-7 trace confirms the input condition: turn 67 position, turn 12 obligation).
+- [x] Severity and confidence are separate axes (3 / High).
+- [x] No defect filed twice under two frameworks (TOG-3 only; H1 related).
+- [x] Known conflicts logged as settlements, not findings (none encountered).
+- [x] Gaps are not repeated as per-screen findings (none).
+- [x] The unmeasured register is complete and names what would settle each claim (§6).
+- [x] The report follows the §7 template (plus the `register_ref` column required by the dispatch).
+- [x] The ten re-check questions are answered and named in the commit body (§9).
+- [x] No WCAG conformance claimed beyond tested criteria; no rendered observation claimed that was not made.
+
+## docs/audits/AUD-20261108-R7-B.md
+
+> **Consolidated 2026-11-09 (owner-ordered).** Source: `docs/audits/AUD-20261108-R7-B.md` (103 non-blank lines),
+> reproduced verbatim below with headings demoted one level. Original deleted from the tree
+> after every non-blank line was found here; live citations repointed to this section.
+
+## Audit report — Round 7 Batch B: S4, S7, S8, S9, S10, S11
+
+### 1. Identity
+- Audit id: AUD-20261108-R7-B
+- Date: 2026-11-08
+- Mode: M1 change audit (batched, second of three)
+- Scope: Batch B per the Round 7 audit dispatch — S4 `bab1b072` (`app/Http/Controllers/Career/PreflightController.php` form-label lookup), S7 `4720b877` (`resources/js/components/career/RecordedActionCard.vue` dating line + `resources/js/pages/Career/TrainingDetail.vue` disclosure opened by default), S8 `d487b83e` (`resources/js/pages/Career/InheritanceEvent.vue` + `app/Http/Controllers/Career/InheritanceEventController.php` ancestor letter rank beside its stars), S9 `36e010c1` (`resources/js/components/career/AncestorEditor.vue` + `resources/js/pages/Career/LegacySelect.vue` rank-stars input `max="3"`), S10 `99d17545` (`resources/js/pages/Career/EventDecision.vue` + `resources/js/pages/Career/InheritanceEvent.vue` Save disabled with its reason), S11 `cdd0083a` (`resources/js/components/career/SkillsPlanner.vue` + `resources/js/components/career/RecordedActionCard.vue` + `resources/js/components/career/SkillPlanRow.vue` two spark-editor disclosures opened by default). Register rows in scope: S4 R7-03, R7-13; S5 R7-05, R7-48, R7-49; S6 R7-19, R7-66; S7 R7-24, R7-57; S8 R7-33, R7-34, R7-80; S9 R7-06; S10 R7-31, R7-35; S11 R7-36, R7-68 (register rows per dispatch §3.2, i.e. the residuals each slice's own §10 named).
+- Out of scope: Batch C (S13–S20); S12, S4b, S21, S22 (no code change); every file not in dispatch §2.1 table; in-app rendered frames (source review plus Chromium capability probe only).
+- Frameworks applied: TOG-3 (S4 label–payload agreement; S6 floor/cap honesty), H2 (S7 timing wording), GP-4 (S8 two codings), WCAG 4.1.2 cited by criterion (S9 programmatic limit) with NRM-3, NRM-2 + NRM-3 (S10 disabled reason upfront), TOG-3/H1 (S11 editors visible). UI-1 type size checked: N/A, no new size category. No WCAG criterion is cited in a finding — no colour, contrast or target-size claim survived source review, and rendered claims are unmeasured.
+- Rendered evidence: PARTIAL — standalone Chromium launch succeeds (probe exit 0, Chromium 153.0.8010.12); no in-app frame of any Batch B surface was captured in this session, so every rendered claim on those surfaces is UNMEASURED.
+
+### 2. Executive summary
+- Zero new findings. All six slices change exactly what their register rows named; every check passes or is N/A; no register-disagreement entries; every §10 residual carried forward unchanged, not re-filed.
+- Register statuses are not disputed: no register-disagreement entries. The audit reports fixes that match the residuals, not mis-classifications.
+- Largest unmeasured risk: rendered fit and contrast at 320 / 390 / 768 / 1280px in both themes (UI-1 reflow, WCAG 1.4.3, UX-1 / TOG-5 target size) — no frame captured; listed in §6.
+
+### 3. Scope and coverage
+Surfaces covered per change, all at source level (no in-app frame captured):
+- S4 `PreflightController.php`: `formLabel()` lookup table, populated state; empty/loading/error states not altered by S4.
+- S7 `RecordedActionCard.vue`: dating line copy ("Advice captured <date>"), populated state; `TrainingDetail.vue`: disclosure `open` by default, populated state.
+- S8 `InheritanceEvent.vue` + `InheritanceEventController.php`: "Rank <letter>" beside each ancestor's stars, per-ancestor row, populated state; absence state "Rank not recorded" when no letter exists.
+- S9 `AncestorEditor.vue` + `LegacySelect.vue`: `max="3"` on the rank-stars number input, populated state.
+- S10 `EventDecision.vue` + `InheritanceEvent.vue`: Save disabled until event type, source and choice are filled, with the reason in the control's title; empty and populated states.
+- S11 `SkillsPlanner.vue` + `RecordedActionCard.vue` + `SkillPlanRow.vue`: both spark-editor disclosures `open` by default, populated state.
+
+States / themes / viewports not covered in-frame: empty, loading, error (S7–S11 absence states covered at source only); light and dark themes; 320 / 390 / 768 / 1280px. Reason: no server-rendered frame captured in this session; every such claim is UNMEASURED and listed in §6.
+
+Framework coverage matrix:
+| Framework | Rules applied | Result |
+| --- | --- | --- |
+| Heuristics (H) | H1, H2 | H1 PASS on S4, S6, S11; H2 PASS on S7 |
+| Shneiderman (SHR-) | none cited | no SHR rule decides a Batch B question; SHR-6 (committed-turn reversal) is open and not touched by Batch B |
+| Laws of UI (UI-) | UI-1 | N/A — no new type size category |
+| Tognazzini (TOG-) | TOG-3 | PASS on S4, S6, S11 |
+| Gerhardt-Powals (GP-) | GP-4 | PASS on S8 |
+| Gestalt (GT-) | none cited | no Batch B change creates two look-alikes |
+| Norman (NRM-) | NRM-2, NRM-3 | PASS on S9, S10 |
+| WCAG | none cited in a finding | 4.1.2 cited by criterion on S9 (OBSERVED_SOURCE); no conformance claimed |
+
+### 4. Evidence status and limits
+- Evidence capability: standalone Chromium launch verified (exit 0); this batch makes no OBSERVED_RENDERED claims.
+- OBSERVED_SOURCE: `formLabel` return value vs the `character_cards` table it now queries (before/after); total-row label vs the figure it sums (S5 before/after); `denominatorLabel` branch table ('cap' when any `cap_*.entered` non-null, else 'floor'); dating-line copy before/after; disclosure `open` attribute on S7 and S11; letter-per-row render keyed by the same index as stars (S8); `max="3"` attribute (S9); disabled predicate + title reason (S10); register walk traces R7-03, R7-05, R7-06, R7-13, R7-19, R7-24, R7-31, R7-33, R7-34, R7-35, R7-36, R7-48, R7-49, R7-57, R7-66, R7-68, R7-80.
+- UNMEASURED: label fit at 320px (S4 tile, S7 heading — UI-1); contrast of changed copy (WCAG 1.4.3; Laws of UI ratios); target size on changed controls (UX-1 / TOG-5, 44px house rule — never described as 2.5.8 conformance); dark-theme body-text ratio.
+- Prior measurements cited: none — no dated measurement artifact exists in this session.
+- Provenance caveats carried: Gerhardt-Powals primary paywalled (secondary deck enumerated; GP-4 cited from the local file's own text); Norman's book not fetched (NRM-2 / NRM-3 cited from the local file's own text); Tognazzini 2014 revision truncated (TOG-3 text verified in-file); WCAG 4.1.1 withdrawn, not cited; 44px house rule never described as 2.5.8 conformance.
+
+### 5. Findings
+None. Zero new findings in Batch B.
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation | register_ref |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+
+No rows: every S4 / S7 / S8 / S9 / S10 / S11 check passes or is N/A and is recorded in §9. This is not a register disagreement: the register's statuses stand; the audit reports fixes that match the residuals named by the slices themselves, so §7 carries no entries.
+
+### 6. Unmeasured register
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Preflight tile label fit at 320px (S4, UI-1) | No in-app frame captured | Rendered screenshot at 320 / 390 / 768 / 1280px, both themes; label not truncated |
+| Dating-line contrast (S7, WCAG 1.4.3) | No frame | Contrast measurement in light and dark themes |
+| Letter-rank legibility at 320px (S8, UI-1) | No frame | Rendered measurement; type scale unchanged (existing stat text class) |
+| Target size on rank-stars input and Save button (S9, S10, UX-1 / TOG-5, 44px house rule) | No frame | Target-size measurement; never described as 2.5.8 conformance |
+| Dark-theme ratios on every changed surface | No frame | Rendered measurement in dark theme |
+
+Observation, not a finding: S6's `denominatorLabel` declares `in-force` in its prop type but never returns it — no surface records an in-force ceiling (the run's own columns carry one only when the identity form has been read back, which no surface does). This is the R7-66 residual the slice's own §10 named; it is unobservable in the current build and is carried forward, not re-filed.
+
+### 7. Register disagreements
+None. The audit agrees with every register row it touches; no entry.
+
+Deduplication (dispatch §7): every rule the Batch B code touches was already named by the slice's own §10, so no candidate is new:
+- S4 label ↔ payload agreement → R7-03 / R7-13 (named residuals, not new)
+- S5 total-row label vs figure → R7-05 / R7-48 / R7-49 (named)
+- S6 cap / floor honesty → R7-19 / R7-66 (named)
+- S7 timing wording → R7-24 / R7-57 (named)
+- S8 two codings (letter + stars) → R7-33 / R7-34 / R7-80 (named)
+- S9 `max="3"` exposing the limit → R7-06 (named)
+- S10 disabled reason upfront → R7-31 / R7-35 (named)
+- S11 disclosures opened by default → R7-36 / R7-68 (named)
+
+The register's classification is treated as the anchor; where the audit agrees, nothing is re-filed (§7 of the template stays empty).
+
+### 8. Fence-finding appearances
+| Register §10 fence finding | Where appeared in Batch B | New instance |
+| --- | --- | --- |
+| `<details>` built-and-hidden | S7 (`TrainingDetail.vue` disclosure now `open`); S11 (both spark-editor disclosures now `open`) | No — the class is remediated in the changed code (opened by default), matching the Round 5 answer on `TrainingDetail.vue`; no closed disclosure with content was added |
+| Two-source rule tests | None — changed specs assert rendered page locators, not lib payloads or payload shape | No |
+| Level vs hint level adjacency | None — no changed screen places two same-named quantities beside each other | No |
+| Summary line, not tail | None — no changed Pest run reads a log tail instead of an exit code | No |
+| Positional edit collision | None — no changed test or doc anchors on a heading repeated more than once | No |
+| `role="img"` aspirational | None — no changed spec targets a role or accessible name no component renders | No |
+
+No new fence instance → no fence-finding finding.
+
+### 9. Change-audit re-check (M1 only)
+| # | Question | Framework | Result | Basis |
+| --- | --- | --- | --- | --- |
+| 1 | Does the change add, remove or move a control? | Fitts (44px), Hick (count) | N/A | No control added, removed or moved. S11 only reveals existing editors (same controls, new visibility). |
+| 2 | Does it change what is on screen at once? | Cognitive load, choice overload, chunking | N/A | S8 renders a stored letter beside existing stars — no new decision, no additional target, no quantity change in any decision. |
+| 3 | Does it change a colour, a tint or a state? | WCAG 1.4.1/1.4.3/1.4.11, Laws of UI 4 and 8 | PASS | S4 tile label agrees with payload; S6 floor/cap label matches derivation; S10 disabled states honest; S11 editors visible — state never carried by colour alone (UI-3). Contrast and target size unmeasured (§6). |
+| 4 | Does it change a type size or a weight? | Laws of UI 5, Laws of UX 28 | PASS | S8 letter uses the existing stat text class; no new size category on any changed page. |
+| 5 | Does it change what the user can undo, or where the action is? | Shneiderman 4/5/6, Tognazzini 7/10, H3, H5 | N/A | No turn commit or reversal surface changed; SHR-6 remains the known open gap. |
+| 6 | Does it change where a thing lives, or what it is called? | IA 1/2/7/8, Mental Model | N/A | Nothing moved or renamed. |
+| 7 | Does it change a progress, an incomplete state or a boundary? | Zeigarnik, Laws of UI 9/10, Goal-Gradient | PASS | S5 total row honest ("Sum of the entered ceilings" / "No ceilings entered"); S6 floor vs cap honest; S8 absence honest ("Rank not recorded", GT-2 / UI-4 no completion claim); S10 refusal stated before the act. |
+| 8 | Does it change what the user has to read or remember? | Shneiderman 8, Gerhardt-Powals 1/3, H6 | PASS | S7 dating line states when advice was captured (nothing carried between screens); S9 limit expressed in the control (NRM-3). |
+| 9 | Does it add a new destination, a new landmark or a new control type? | WCAG 2.4.1/4.1.2, H4, Laws of UI 6 | N/A | None added. |
+| 10 | Does it change the words? | WCAG 3.3.1/3.3.3, H9 | PASS | S7 "Advice captured <date>" / "What the rail said before this turn" (H2, non-blaming H9); S10 title in plain language; S5 "Sum of the entered ceilings" (H1/H2). |
+
+Result named in the commit body: 10 of 10 questions answered — Q1 N/A, Q2 N/A, Q3 PASS, Q4 PASS, Q5 N/A, Q6 N/A, Q7 PASS, Q8 PASS, Q9 N/A, Q10 PASS.
+
+### 10. Exit checklist
+- [x] Scope, mode, surfaces, states, viewports and themes stated (§1, §3).
+- [x] Framework routing recorded, narrowest framework chosen per question (TOG-3 decides label-state honesty; H1 listed where related, not double-filed).
+- [x] Pre-flight provenance caveats carried into the report (§4).
+- [x] Evidence capability recorded (PARTIAL; Chromium launch OK, no in-app frame).
+- [x] No finding rests on inference alone (zero findings; every check is OBSERVED_SOURCE or N/A).
+- [x] Severity and confidence are separate axes (not applicable — zero findings).
+- [x] No defect filed twice under two frameworks.
+- [x] Known conflicts logged as settlements, not findings (none encountered).
+- [x] Gaps are not repeated as per-screen findings (none).
+- [x] The unmeasured register is complete and names what would settle each claim (§6).
+- [x] The report follows the §7 template (plus the `register_ref` column required by the dispatch).
+- [x] The ten re-check questions are answered and named in the commit body (§9).
+- [x] No WCAG conformance claimed beyond tested criteria; no rendered observation claimed that was not made.
+
+## docs/audits/AUD-20261108-R7-C.md
+
+> **Consolidated 2026-11-09 (owner-ordered).** Source: `docs/audits/AUD-20261108-R7-C.md` (109 non-blank lines),
+> reproduced verbatim below with headings demoted one level. Original deleted from the tree
+> after every non-blank line was found here; live citations repointed to this section.
+
+## Audit report — Round 7 Batch C: S13, S14, S15, S16, S17b, S20
+
+### 1. Identity
+- Audit id: AUD-20261108-R7-C
+- Date: 2026-11-08
+- Mode: M1 change audit (batched, third of three)
+- Scope: Batch C per the Round 7 audit dispatch §3.3:
+  - **S13** `dba72d62` + `bd5c769c` (R7-27, R7-28, R7-32): new `resources/js/lib/career/turnDisplay.ts` — `latestLoggedTurn`, `nextTurn`, `undoTurnLabel`, the single derivation of "which turn is this run on"; Timeline, TrainingDetail and RaceDecision undo labels now read it; RaceDecision manual form defaults read the run's `career_position` (the off-calendar source) and default the entry status to `Entered`; EventDecision and InheritanceEvent prefill via `nextTurn({ turnEntries, career_position })`. `bd5c769c` is S13's review fix: CareerTimelineTest asserts the values pages bind instead of scanning source text, and Timeline feeds `latestLoggedTurn` turn rows only.
+  - **S14** `80c1d19e` (R7-21, R7-29): TrainingDetail's undo button rendered `disabled`, matching its own title ("The build has no undo; this screen proposes one") and RaceDecision's; TYPE/HINTS filters left disabled with their reason — classified Known limitation at `8a3cf21c`, no change, no further disabling.
+  - **S15** `68015d36` (R7-38, R7-62): `CareerLayout.vue` derives `navStatus` once (`'Active'` on an active run, else the reported status) and passes it to `CareerSectionNav`; `Result` can no longer render as a live link on a career that has not ended. No `aria-disabled` added (DESIGN.md §5(a): unreachable destinations are non-focusable text with the reason in prose).
+  - **S16** `a23fd59a` + `e5e38468` + `d2c15ca8` (R7-01, R7-14, R7-43, R7-45, R7-46, R7-54): '1 trainee is / N trainees are catalogued' agreement; 'Pace Chaser' one casing; TraineeProfile scenarios heading says what the list is ('you can run this trainee in') and the note says why it cannot claim more; katakana name in parens with `lang="ja"` (separated in accessible name and copied text); search term preserved through the pick (form transform sends the live filter state); optional target step reads `Skipped` instead of `Missing`, and its summary names the absence instead of printing nulls.
+  - **S17b** `1d6a39af` (R7-02): new `App\Support\FormCount` — picker reads 'N released forms', profile reads 'N forms (x released, y undated)'; one owner composes both labels.
+  - **S20** `6af4555c` (R7-87): `SkillsPlannerController::conditionsLine` decodes `distance_type`/`ground_type` via `config('uma.skills.fit_*')`; keys without a published client phrasing are named once as an absence; raw predicates (`distance_type==3&ground_type==1`) no longer printed in a table cell. One existing test expectation updated to the decoded sentence. R7-90/91/92/93 measured do not reproduce and are not re-filed.
+- Register rows in scope: S13 R7-27/28/32; S14 R7-21/29; S15 R7-38/62; S16 R7-01/14/43/45/46/54; S17b R7-02; S20 R7-87 (per dispatch §3.3, i.e. the residuals each slice's own §10 named).
+- Out of scope: Batches A and B; S12, S4b, S21, S22 (no code change); every file not in dispatch §2.1; in-app rendered frames (source review plus Chromium capability probe only).
+- Frameworks applied: SHR-8 / H4 / TOG-3 (S13 — one number, one owner; one derivation; undo label names a real turn); TOG-1 / GT-4 / NRM-2 (S14 — disabled state honest, disabled-vs-enabled lookalike reconciled, reason on the control); TOG-3 / H1 (S15 — status never wrong, stated once); H2 / H1 / TOG-3 (S16 — client vocabulary, state-word honesty); H2 (S17b — the count says what it counts); WCAG 3.3.1 / 3.3.3 by criterion (S20 — conditions in the client's words; undecoded atoms named as absence, never echoed raw). UI-1 checked: N/A, no new type size category on any changed surface. WCAG 4.1.1 withdrawn, not cited; the 44px house rule is never described as 2.5.8 conformance.
+- Rendered evidence: PARTIAL — standalone Chromium launch verified (exit 0); no in-app frame of any Batch C surface was captured, so every rendered claim (fit at 320 / 390 / 768 / 1280px, contrast, target size, dark theme) is UNMEASURED.
+
+### 2. Executive summary
+- Zero new findings. Every Batch C slice changes exactly what its register row named, and no slice leaves a framework-visible residual that row did not already name; every residual is either closed by the change or carried forward unmeasured (R7-29 stays Known limitation, untouched, as its slice decided).
+- R7-27/28/32: the four-way turn disagreement (Timeline's rail maximum, Events/Inheritance prefill 68 vs Timeline label 67, RaceDecision's year-relative turn) collapses to one derivation in `turnDisplay.ts`. Undo labels name the last logged turn, floored at 1 (no turn 0 names a turn no career has). Prefill on an empty log is the run's position — never turn 2 for a career whose first turn is still turn 1.
+- R7-21: TrainingDetail's undo is now disabled, matching its title and RaceDecision's; non-vacuity shown by the binding's removal reproducing 'Expected: disabled / Received: enabled' in the slice's own record.
+- R7-38/62: reachability is now stated once in the layout; seven pages that never passed `:status` can no longer forget it, and `Result` is non-focusable text with its reason on any career that has not ended.
+- Pre-existing red carried forward unmeasured: `career-trainee-select.spec.ts` 'renders the profile at card grain' (`getByText('Unique')` resolves to 3 elements) — red on clean HEAD before this batch, classified in the S16/S17b ledgers, unrelated to these changes, left alone per round discipline.
+- Register statuses are not disputed: no register-disagreement entries. The audit reports residuals closed, not mis-classifications.
+- Largest unmeasured risk: rendered fit, contrast and target size at 320 / 390 / 768 / 1280px in both themes (§6).
+
+### 3. Scope and coverage
+Surfaces covered per change, all at source level (no in-app frame captured):
+- S13 `turnDisplay.ts` (new) + `Timeline.vue`, `TrainingDetail.vue`, `RaceDecision.vue`, `RaceDecisionController.php`, `EventDecisionController.php`, `EventDecision.vue`, `InheritanceEventController.php`, `InheritanceEvent.vue`: shared turn derivation, undo labels on four screens, manual-form defaults from `career_position`, prefill from `nextTurn`; populated state; empty/loading/error not altered.
+- S14 `TrainingDetail.vue`: undo button `disabled`; populated state.
+- S15 `layouts/CareerLayout.vue`: `navStatus` derivation; `Result` stepper gating; populated state on all eight pages that mount the layout.
+- S16 `TraineeSelect.vue`, `TraineeProfile.vue`, `Preflight.vue`, `TraineeSelectController.php`: agreement/casing/heading/note copy, `lang="ja"` name wrapper, filter-state transform, `Skipped`/`Missing` state word, summary nulls; populated state.
+- S17b `app/Support/FormCount.php` (new), `TraineeSelect.vue`, `TraineeProfile.vue`: count labels with scope; populated state.
+- S20 `SkillsPlannerController.php`: `conditionsLine` decode; populated state.
+
+States / themes / viewports not covered in-frame: empty, loading, error; light and dark themes; 320 / 390 / 768 / 1280px. Reason: no server-rendered frame captured in this session; every such claim is UNMEASURED and listed in §6.
+
+Framework coverage matrix:
+
+| Framework | Rules applied | Result |
+| --- | --- | --- |
+| Heuristics (H) | H1, H2, H4 | H4 PASS on S13; H1 related to S15, S16; H2 PASS on S16, S17b, S20 |
+| Shneiderman (SHR-) | SHR-8 | PASS on S13 |
+| Tognazzini (TOG-) | TOG-1, TOG-3 | PASS on S13, S14, S15, S16 |
+| Gerhardt-Powals (GP-) | none cited | no GP question raised by Batch C changes |
+| Gestalt (GT-) | GT-4 | PASS on S14 |
+| Norman (NRM-) | NRM-2 | PASS on S14 |
+| WCAG | 3.3.1, 3.3.3 by criterion | PASS on S20 by criterion; no conformance claimed; colour/contrast/target-size unmeasured (§6) |
+
+### 4. Evidence status and limits
+- Evidence capability: standalone Chromium launch verified (exit 0); this batch makes no OBSERVED_RENDERED claims.
+- OBSERVED_SOURCE: `turnDisplay.ts` derivation and all six call sites (Timeline undo label, TrainingDetail undo label + helper import, RaceDecision undo label + manual defaults, EventDecision prefill, InheritanceEvent prefill); `manualDefaults` before/after (off-calendar month/half, `status: Entered`); `CareerLayout.navStatus` + `CareerSectionNav.reachable()`; copy before/after (agreement, casing, heading, note, `lang="ja"` wrapper); filter-state transform; `Skipped` branch and summary render; `FormCount` labels; `conditionsLine` decode + absence branch + updated test expectation; register walk traces R7-01, R7-14, R7-21, R7-27, R7-28, R7-29, R7-32, R7-38, R7-43, R7-45, R7-46, R7-54, R7-62, R7-87.
+- UNMEASURED: undo-label and Result-reason rendering at 320 / 390 / 768 / 1280px in both themes; contrast of changed copy (WCAG 1.4.3, Laws of UI ratios); target size on changed controls (UX-1 / TOG-5, 44px house rule — never described as 2.5.8 conformance); dark-theme body-text ratios.
+- Prior measurements cited: none — no dated measurement artifact exists in this session.
+- Provenance caveats carried: Norman's book not fetched (NRM-2 cited from the local framework file's own text); Tognazzini 2014 revision truncated (TOG-1 / TOG-3 text verified in-file); WCAG 4.1.1 withdrawn, not cited; 44px house rule never described as 2.5.8 conformance; no in-app frame of any Batch C surface exists in this session.
+
+### 5. Findings
+None. Zero new findings in Batch C.
+
+| ID | Rule ID | Framework | Surface / state | Observation | Evidence status | Evidence location | Severity | Confidence | Recommendation | register_ref |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+|||||||||||||
+
+No rows: every S13 / S14 / S15 / S16 / S17b / S20 check passes or is N/A and is recorded in §9. Not a register disagreement: the register's statuses stand; residuals closed by the change are not re-filed, and residuals carried forward (R7-29) were carried forward by the slices themselves.
+
+Deduplication (dispatch §7): no candidate finding collides with a register row, because no candidate is filed. Every rule Batch C code touches was already named by its slice's §10:
+- S13 turn derivation → R7-27 / R7-28 / R7-32 (named residuals, closed by the shared helper)
+- S14 disabled undo honesty → R7-21 (closed); R7-29 filters (Known limitation, untouched as classified)
+- S15 status gating → R7-38 / R7-62 (closed)
+- S16 copy and state words → R7-01 / R7-14 / R7-43 / R7-45 / R7-46 / R7-54 (closed)
+- S17b count scope → R7-02 (closed)
+- S20 condition decode → R7-87 (closed); R7-90 / R7-91 / R7-92 / R7-93 measured do not reproduce (not register rows, not re-filed)
+
+### 6. Unmeasured register
+
+| Claim | Why unmeasured | What would settle it |
+| --- | --- | --- |
+| Undo-label fit and contrast at 320 / 390 / 768 / 1280px (S13, UI-1 / WCAG 1.4.3) | No in-app frame captured | Rendered screenshot of each undo button, both themes; label not truncated, legible |
+| Target size on changed controls (S13 undo, S14 disabled undo, S10 carry-over, UX-1 / TOG-5, 44px house rule) | No frame | Target-size measurement; never described as 2.5.8 conformance |
+| `Result` non-focusable rendering and its reason sentence (S15, WCAG 1.4.1 / UI-3) | No frame | Rendered measurement: span, not anchor; reason visible without colour |
+| Label fit after copy changes ('trainees are catalogued', 'Pace Chaser', heading) (S16, UI-1) | No frame | Rendered screenshot at 320px, both themes; no truncation or wrap break |
+| `lang="ja"` name separation in copied text and accessible name (S16 R7-54, WCAG 1.3.1 by intent) | No frame | Accessibility-tree inspection of the row's accessible name |
+
+### 7. Register disagreements
+None. The audit agrees with every register row it touches; no entry. Rows frozen at `8a3cf21c`; corrections live in a future round, not here.
+
+### 8. Fence-finding appearances (dispatch §8)
+
+| Register §10 fence finding | Where appeared in Batch C | New instance |
+| --- | --- | --- |
+| `<details>` built-and-hidden | None — Batch C changes no `<details>`; TrainingDetail's disclosure and both spark-editor disclosures (opened by default in S7/S11) are untouched | No |
+| Two-source rule tests | None — `bd5c769c` replaced `toContain('from ...turnDisplay')` source-text scans with assertions on the values pages bind to the template; that remediates the vacuum pattern, it does not repeat it; no changed test asserts a raw payload string as a rendered value | No |
+| Level vs hint level adjacency | None — no changed screen places two same-named quantities beside each other | No |
+| Summary line, not tail | None — no changed Pest run reads a log tail instead of an exit code | No |
+| Positional edit collision | None — no changed test or doc anchors on a heading repeated more than once | No |
+| `role="img"` aspirational | None — no changed spec targets a role or accessible name no component renders | No |
+
+No new fence instance → no fence-finding finding.
+
+### 9. Change-audit re-check (M1 only)
+
+| # | Question | Framework | Result | Basis |
+| --- | --- | --- | --- | --- |
+| 1 | Does the change add, remove or move a control? | Fitts (44px), Hick (count) | N/A | No control added, removed or moved. S14 disables TrainingDetail's undo (state only); S15 renders `Result` as the pre-existing unreachable-step span with reason text — not a new control type. |
+| 2 | Does it change what is on screen at once? | Cognitive load, choice overload, chunking | N/A | No quantity change on any changed surface. |
+| 3 | Does it change a colour, a tint or a state? | WCAG 1.4.1/1.4.3/1.4.11, Laws of UI 4 and 8 | PASS | State derivations are honest (undo label = last logged turn; `Result` reachability by derived status; `Skipped` vs `Missing`; conditions decoded or named as absence). No state is carried by colour alone. Contrast unmeasured (§6). |
+| 4 | Does it change a type size or a weight? | Laws of UI 5, Laws of UX 28 | PASS | `lang="ja"` name uses the existing muted text class; no new size category on any changed page. |
+| 5 | Does it change what the user can undo, or where the action is? | Shneiderman 4/5/6, Tognazzini 7/10, H3, H5 | PASS | TrainingDetail's undo is now disabled, matching its own title and RaceDecision's — the affordance matches what the system actually does. No turn commit or reversal surface changed; SHR-6 (committed-turn reversal) remains the known open gap, untouched. |
+| 6 | Does it change where a thing lives, or what it is called? | IA 1/2/7/8, Mental Model | N/A | Nothing moved or renamed. |
+| 7 | Does it change a progress, an incomplete state or a boundary? | Zeigarnik, Laws of UI 9/10, Goal-Gradient | PASS | Undo floor is 1 (no label names turn 0); prefill on an empty log is the run's position, never a fabricated turn; `Skipped` vs `Missing` is honest; `conditionsLine` names an absence instead of fabricating a phrasing (R7-90–93 measured do not reproduce). |
+| 8 | Does it change what the user has to read or remember? | Shneiderman 8, Gerhardt-Powals 1/3, H6 | PASS | Search term survives the pick — nothing retyped; one turn number owned by `turnDisplay` (SHR-8); conditions in client words — nothing memorised from source syntax. |
+| 9 | Does it add a new destination, a new landmark or a new control type? | WCAG 2.4.1/4.1.2, H4, Laws of UI 6 | N/A | None added. |
+| 10 | Does it change the words? | WCAG 3.3.1/3.3.3, H9 | PASS | Copy uses client vocabulary ('Pace Chaser' one casing; 'trainees are' agreement; conditions decoded); non-blaming (H9); no invented phrasing for undecoded atoms. |
+
+Result named in the commit body: 10 of 10 questions answered — Q1 N/A, Q2 N/A, Q3 PASS, Q4 PASS, Q5 PASS, Q6 N/A, Q7 PASS, Q8 PASS, Q9 N/A, Q10 PASS.
+
+### 10. Exit checklist
+- [x] Scope, mode, surfaces, states, viewports and themes stated (§1, §3).
+- [x] Framework routing recorded; narrowest framework chosen per question (TOG-3 decides "status never wrong" and "undo names a real turn"; H4 decides one derivation; H1 listed as related where it applies, not double-filed).
+- [x] Pre-flight provenance caveats carried into the report (§4).
+- [x] Evidence capability recorded (PARTIAL; Chromium launch OK, no in-app frame).
+- [x] Every finding would carry a rule ID, surface and state, a specific observation, and an evidence status — zero findings filed; none needed.
+- [x] No defect filed twice under two frameworks.
+- [x] Known conflicts logged as settlements, not findings (none encountered).
+- [x] Gaps are not repeated as per-screen findings (none).
+- [x] The unmeasured register is complete and names what would settle each claim (§6).
+- [x] The report follows the `_audit-prompt.md` §7 template (plus the `register_ref` column required by the dispatch).
+- [x] The ten re-check questions are answered and named in the commit body (§9).
+- [x] No WCAG conformance claimed beyond tested criteria; no rendered observation claimed that was not made; 4.1.1 not cited; 44px house rule not described as 2.5.8 conformance.
+
+## docs/proposals/mechanics-audit-2026-10-28.md
+
+> **Consolidated 2026-11-09 (owner-ordered).** Source: `docs/proposals/mechanics-audit-2026-10-28.md` (65 non-blank lines),
+> reproduced verbatim below with headings demoted one level. Original deleted from the tree
+> after every non-blank line was found here; live citations repointed to this section.
+
+## Mechanics Audit — Trainer Desk vs UMAMUSUME_REFERENCE.md
+
+Dated 2026-10-28. One row per reference subsection §1.1.1 through §2.2.4, with the code
+location and a status of **correct** / **wrong (fixed)** / **missing**. The governing rule is
+`UMAMUSUME_REFERENCE.md` for game mechanics, ADRs for architecture; where an ADR contradicted a
+mechanic it was amended, never obeyed.
+
+| § | Reference claim | Code location | Status |
+|---|---|---|---|
+| 1.1.1 | Five disciplines (Speed/Stamina/Power/Guts/Wit), Wit costs no energy and pays more SP | `config/scenarios.php` per-level training tables | correct |
+| 1.1.2 | `gain = (base + bonus) × growth × mood × effectiveness × friendship × participant` | `TrainingCard.vue` gain caption names mood/bonds/growth terms | correct |
+| 1.1.3 | Friendship at gauge 80, type-match, multiplicative stacking (1.25×1.30=1.625) | `DeckAnalysis` reads `calc`, 80 threshold | correct |
+| 1.1.4 | Hint discount ladder Lv1 10 / Lv2 20 / Lv3 30 / Lv4 35 / LvMax 40, cost = floor(base×(1−d)) | `config/uma.php` `skills.hint_discount`, `App\Services\HintDiscount` | **wrong (fixed R5)** |
+| 1.1.5 | Failure risk is energy-scaled, no hard cliff; three penalties; mitigation table | `risk_absence`, Good-Luck Charm (0% for 1 turn, the real item) | correct |
+| 1.1.6 | Five mood states, ten percentages (training + race columns), non-monotone colour ramp | `CareerStatePanel.vue` `MOOD_TRAINING_PCT`/`MOOD_RUNNING_PCT` | **wrong (fixed R5)** |
+| 1.1.7 | Idle mode: 50 min, app closed, three inputs, no trophies/gallery/concerts, growth rate ignored | `IndependentTrainingRun`, `Lifecycle`, `Simulator`, `CompleteIndependentTraining` | **missing → built (R6)** |
+| 1.2.1 | Turf/Dirt, four distance bands, 1400m = engine Mile | `RaceFacts`, `config/uma.php` `fit_distance_type` | correct |
+| 1.2.2 | Four strategies (Front Runner/Pace Chaser/Late Surger/End Closer), a trainee property | `config/uma.php` `veteran.suggested_tags` | correct |
+| 1.2.3 | Four phases, section boundaries from export | `RaceFacts` phase gating | correct |
+| 1.2.4 | Course factors: corners/straights/elevation/surface changes | `RaceFacts` / parser course flags | correct |
+| 1.2.5 | Four weather + four ground codes, −50 Speed on Heavy, community stamina multipliers | parser + `RaceFacts` (community-grade per §8.4) | correct |
+| 1.2.6 | Five grade codes, run-level maiden lock, not a per-race column | `TrainingRun::maidenGates()`/`hasClearedMaidenLock()`, per-race columns dropped | **wrong (fixed R5/R6)** |
+| 1.3.1–1.3.3 | Five stats and their gates (Speed 2000, Stamina 1200, Power, Guts, Wit) | `RaceFacts`, stat band | correct |
+| 1.3.4 | Four cap layers; scenario cap read from config, not hardcoded 1200 | `ScenarioCaps` reads `config/scenarios.php` | correct |
+| 1.3.5 | `stat_bonus` = Growth Rate row, a multiplier not a training bonus | `training_runs.growth_rate` stored as entered row, rendered `+N%` | correct |
+| 1.3.6–1.3.7 | Final totals / current targets are informational | Cockpit target display | correct |
+| 1.4.1 | Seven card types; Pal differs by event kit; Group is a distinct type | `SupportCard` type, `PerformanceType`-adjacent enums | correct |
+| 1.4.2 | R/SR/SSR, four breaks, +5/level (30/35/40/45/50 SSR) — Global model, not JP levels-removed | `CardRarity` (R/SR/SSR), anchor ladder to 50 | correct |
+| 1.4.3 | Friendship gauge 80, type match, multiplicative | `DeckAnalysis` `calc` | correct |
+| 1.4.4 | 135 char / 11 Pal / 5 group chains; hint levels 10%/level | `GametoraSupportCardParser` `hint_skills` | correct |
+| 1.4.5 | Six slots, no duplicate, 2–3 per type, no Pal/Group stacking | `deck_slots` + `DeckPickerSearchRequest` | correct |
+| 1.4.7 | Level ladder 1,5,…,50, floor interpolation, `-1` = locked; Unique Perk unresolved (conflict row 47) | `SupportCardEffects::forLevel()`/`atCap()` (floor, not round) | **wrong (fixed R5)** |
+| 1.4.8 | Only Friendship Bonus, Failure Protection, Energy Cost Reduction, Specialty Priority combine; rest flat | `DeckAnalysis` reads `calc` | correct |
+| 1.5.1 | Career start deterministic; April Classic/Senior probabilistic; white never fires at start | `InheritanceEventController` | correct |
+| 1.5.2 | Four colours (Blue stat / Pink aptitude / Green unique-skill / White skill-hint+competition) | `LegacySelectionPayload`, `LegacySelect.vue`, `Help.vue` | correct |
+| 1.5.3 | Star odds rolled, not chosen: <600 90/10/0, 600–1100 50/45/6, >1100 20/70/10 | `InheritanceEventController::starRollTable()` (probabilities, not a map) | correct |
+| 1.5.4 | Two parents + four grandparents, no self-ancestor, one rented parent | `LegacySelectionPayload` | correct |
+| 1.5.5 | Chain strategy informational; no strategy advisor ships | — | correct (informational) |
+| 1.6.0–1.6.11 | Twelve modes; Champions Meeting joins on `resource_id` not name; no guarantee-success item | mode config, no `resource_id`/name bug, `Good-Luck Charm` is the real 0% item | correct |
+| 2.1 | Four Global scenarios; caps derived from `scenarios.json` | `config/scenarios.php` (URA 1400×5, Unity 1300/1800, Trackblazer 1200/1900, Grand Live 1600/1300) | correct |
+| 2.2.1 | URA Finale: Happy Meek duel, facility repetition, fan gates | `config/scenarios.php` `ura_finale` | correct |
+| 2.2.2 | Unity Cup: per-stat ranks G–S, S+ is overall not per-stat, per-member Spirit gauge | `team_rank_ladder` (S+ excluded), `SpiritBurstState` | correct |
+| 2.2.3 | Trackblazer: Grade Points (not Result Pts), four objectives, Alarm Clock retry | `config/scenarios.php` `grade_points`/`shop_coins` | correct |
+| 2.2.4 | Our Grand Concert: Performance/Promo Concert/Grand Concert/lessons/songs/Great Success | `PerformanceType` (Dance/Passion/Vocals/Visuals/Composure), config nouns | correct |
+
+### Fixed in Round 5 (four defects)
+
+1. §1.1.4 hint discount ladder — ADR-0011/0029 said "no discounts / level only"; the ladder exists in
+   the client. Added `config/uma.php` `skills.hint_discount`, `HintDiscount`, wired the Skills
+   Planner, amended both ADRs.
+2. §1.1.6 mood — running column was GREAT-only; added the full per-tier running column.
+3. §1.2.6 maiden lock — per-race columns nullified and dead; run-level `maidenGates()` + dropped the
+   per-race columns (migration `2026_10_27_120000`).
+4. §1.4.7 effect floor — `round()` was nearest; `floor()` is the reference's truncation.
+
+### Built in Round 6
+
+§1.1.7 Independent Training: schema, lifecycle, simulator, scheduled completion. The simulator is a
+calibrated approximation — §1.1.7 does not publish the per-turn algorithm — and its docstring states
+that boundary, with two pinned rules (growth rate excluded, priority list is the hint set).
+
+### Re-scoped, not built
+
+The plan's "20-run DailyCap" (`canStart` false at 20) is contradicted by the reference's own conflict
+log row 1/28: "Recorded as a cap on jewel payout from training race rewards rather than on
+自主トレ育成 entries; plan on the jewel limit binding, not the run count." The 20/day is a free-Carat
+payout ceiling, not a run-start gate, and the app models no Carat reward, so there is nothing to
+gate. No run-start cap was added.
+
+### Reference-unresolved, correctly unrendered
+
+§1.4.7's Unique Perk is genuinely unresolved in the reference (conflict row 47: a "perk level" or a
+"card-level unlock", no source settles it). The app ships **no** perk code at all — `grep perk` over
+`app/` returns nothing — so it neither invents a deterministic perk level nor renders a badge it
+cannot source. That is "matches the reference's uncertainty", not "matches a fact".
 

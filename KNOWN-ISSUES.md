@@ -4080,7 +4080,7 @@ unreachable, which is a data-loss bug rather than a fix. The doors are: `GET/POS
 /training-runs/{run}` (run deletion, on its own confirmation page). The redundant `Actions` and `Races in this run`
 sections can go as soon as the disclosure's own copy is settled. Filed rather than fixed here: the three new
 screens are outside the parity slice's scope, and the routing of four writes onto three doors is a decision, not a
-layout change. The slice spec is filed in `docs/proposals/frontend-development-update-plan.md` as **Slice 6b —
+layout change. The slice spec is filed in `docs/research-scratch/PROCESS-PLANS.md` as **Slice 6b —
 Retire the Career tools disclosure**.
 *Erratum 2026-11-01.* Three sentences above are stale and are preserved rather than rewritten. The
 `Career tools` disclosure is gone: `grep -c "career-tools" resources/js/pages/Career/Cockpit.vue` returns 0, which is
@@ -4381,7 +4381,7 @@ unreachable, which is a data-loss bug rather than a fix. The doors are: `GET/POS
 /training-runs/{run}` (run deletion, on its own confirmation page). The redundant `Actions` and `Races in this run`
 sections can go as soon as the disclosure's own copy is settled. Filed rather than fixed here: the three new
 screens are outside the parity slice's scope, and the routing of four writes onto three doors is a decision, not a
-layout change. The slice spec is filed in `docs/proposals/frontend-development-update-plan.md` as **Slice 6b —
+layout change. The slice spec is filed in `docs/research-scratch/PROCESS-PLANS.md` as **Slice 6b —
 Retire the Career tools disclosure**.
 *Erratum 2026-11-01.* Three sentences above are stale and are preserved rather than rewritten. The
 `Career tools` disclosure is gone: `grep -c "career-tools" resources/js/pages/Career/Cockpit.vue` returns 0, which is
@@ -4511,10 +4511,14 @@ was applied in this pass (4 deleted, 0 remaining).
 for durability so a future reader understands why the read-path filter cannot be used.
 
 
- 
- # #   K I - 1 4 9      C a t a l o g   S h o w   d o e s   n o t   r e n d e r   ` c h a r a c t e r _ c a r d s . b a s e _ s t a t s `   /   ` . g r o w t h _ r a t e s `   e v e n   w h e n   p o p u l a t e d  
-  
- * * S t a t e : * *   O P E N   2 0 2 6 - 1 1 - 0 2 .   ` c h a r a c t e r _ c a r d s `   n o w   s t o r e s   ` b a s e _ s t a t s `   a n d   ` g r o w t h _ r a t e s `   ( A D R - 0 0 3 0 ,   m i g r a t i o n   ` 2 0 2 6 _ 1 1 _ 0 2 _ 1 4 1 6 3 9 ` ) ,   p o p u l a t e d   b y   t h e   r e p a r s e .   T h e   t r a i n e e   p r o f i l e   ( ` / c a r e e r / s e t u p / t r a i n e e / { i d } ` )   r e n d e r s   t h e m .   T h e   c a t a l o g   d e t a i l   p a g e   ( ` / u m a m u s u m e / { s l u g } ` )   s t i l l   p r i n t s   N o t  
+
+ 
+ # #   K I - 1 4 9      C a t a l o g   S h o w   d o e s   n o t   r e n d e r   ` c h a r a c t e r _ c a r d s . b a s e _ s t a t s `   /   ` . g r o w t h _ r a t e s `   e v e n   w h e n   p o p u l a t e d 
+ 
+ 
+ 
+ * * S t a t e : * *   O P E N   2 0 2 6 - 1 1 - 0 2 .   ` c h a r a c t e r _ c a r d s `   n o w   s t o r e s   ` b a s e _ s t a t s `   a n d   ` g r o w t h _ r a t e s `   ( A D R - 0 0 3 0 ,   m i g r a t i o n   ` 2 0 2 6 _ 1 1 _ 0 2 _ 1 4 1 6 3 9 ` ) ,   p o p u l a t e d   b y   t h e   r e p a r s e .   T h e   t r a i n e e   p r o f i l e   ( ` / c a r e e r / s e t u p / t r a i n e e / { i d } ` )   r e n d e r s   t h e m .   T h e   c a t a l o g   d e t a i l   p a g e   ( ` / u m a m u s u m e / { s l u g } ` )   s t i l l   p r i n t s   N o t 
+ 
  
 ## KI-152 — Catalog Show does not render character_cards.base_stats / .growth_rates even when populated
 

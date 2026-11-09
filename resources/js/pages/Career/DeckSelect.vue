@@ -456,7 +456,7 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
         <!-- `g-side`: the deck on the left, the checks and the type table on the right. Page-level
              grids use viewport media queries, not `@container`: the shell's content box is 1088px at a
              1440px viewport, so an `@3xl` page grid would collapse a column at a width the page reads as
-             desktop (`frontend-architecture-plan.md`, container-query note). -->
+             desktop (`docs/research-scratch/PROCESS-PLANS.md`, container-query note). -->
         <div class="mt-5 grid gap-5 min-[1081px]:grid-cols-[minmax(0,1fr)_22rem]">
             <section class="card" aria-labelledby="draft-slots-heading">
                 <h2 id="draft-slots-heading">
