@@ -219,11 +219,20 @@ final class TeamPanelBuilder
          * own. The gate is a config key rather than a branch on the scenario's name, which is the shape
          * this matrix already uses for `facility_level_source` (gate G-33, `IA-6`).
          *
-         * **An absent key keeps today's behaviour.** Our Grand Concert declares no `goal_source` while
-         * P-01 §7 decision 7 is open (`config/scenarios.php:1118-1119` says the trainee's ladder is a
-         * career fact without saying which ladder). Defaulting an absent key to `'trainee_goals'` is the
-         * only choice that ships no unruled change: a scenario that has not answered the question keeps
-         * the rows it had.
+         * **S-A-P01.OG resolved 2026-11-10.** This comment used to say Our Grand Concert "declares no
+         * `goal_source` while P-01 §7 decision 7 is open", and pointed at `config/scenarios.php` for the
+         * unresolved sentence. Both halves are now false: decision 7 is answered, the scenario declares
+         * `'trainee_goals'` explicitly, and the resolution is recorded in
+         * `docs/research/s-a-p01-og-goal-source-2026-11-10.md`. What settled it: the scenario "returns
+         * the standard trainee career features of race goals and career events"
+         * (`docs/scenarios/07-grand-concert.md:92-95`; Game8 `archives/607337` says the same with "for
+         * each Umamusume"), and the ladder's grain is the trainee rather than the scenario
+         * (`ADR-0026`: "Trainee grain, no run scope"), so `trainee_goals` describes the trainee under
+         * any scenario that asks for it.
+         *
+         * The absent-key default below is therefore a compatibility fallback for a scenario that has not
+         * answered the question, not the mechanism that decides this one: a declared key is what makes
+         * the answer auditable.
          */
         $goalSource = config('scenarios.scenarios.'.$run->scenarioKey().'.goal_source', 'trainee_goals');
 
@@ -318,14 +327,48 @@ final class TeamPanelBuilder
             // a door that already closed. Same year scope as the mandatory group above: an ordinal
             // deadline stays passed for the rest of the career, so a Senior run would banner its
             // Classic-year objectives every turn.
+            //
+            // **The alert speaks the row's own state** (`TOG-3`, round-7 `F-02`). `not_reached` means
+            // this run holds no entry for the race at all, so "not met" is a verdict on an attempt that
+            // never happened; the row already prints `Not reached` and the alert now says the same
+            // thing. The heading is the row's word in every arm, and the copy never claims a failure
+            // the run's own record cannot support. One state, one vocabulary: the heading and the
+            // ladder row can no longer disagree about the same objective.
             $ranThisRace = $slot !== null && $finished->has((int) $slot->id);
 
             if ($state !== null && $reached && ! $met && ! $ranThisRace && $run->status === RunStatus::Active
                 && ($slot === null || ! $mandatory->contains('id', $slot->id))
                 && (int) $goal->career_year === (int) $next['year']) {
+                // The heading is the row's own word, not a severity this tool cannot support: the row
+                // renders `Not reached`, `Due now` or `Missed` from the same `$state`, and the alert
+                // vocabulary is `CareerGoalsPanel`'s own map, so the two cannot drift. `Critical` for
+                // this group was retired by round-7 `F-02` (plan `2026-11-09-scenario-detail-upgrade`
+                // §2.2): the only states reachable here hold no completed race, and a Level 1 claim
+                // needs one. The mandatory-races group keeps its `Critical` heading, whose copy
+                // already says "not recorded" and whose obligation is the calendar's own.
                 $alerts[] = [
-                    'level' => 'Critical',
-                    'text' => $race !== null ? $race.' is due and not met' : 'A trainee objective is due and not met',
+                    'level' => match ($state) {
+                        'not_reached' => 'Not reached',
+                        'current' => 'Due now',
+                        default => 'Missed',
+                    },
+                    'text' => match ($state) {
+                        // No entry at all: the row says `Not reached`, and "not met" would be a
+                        // verdict on an attempt this run never made.
+                        'not_reached' => $race === null
+                            ? 'A trainee objective is past due with no entry recorded in this run'
+                            : $race.' is past due with no entry recorded in this run',
+                        // The turn is being decided: nothing has happened yet.
+                        'current' => $race === null
+                            ? 'A trainee objective is due now and no result is recorded'
+                            : $race.' is due now and no result is recorded',
+                        // An entry exists but is not a completed race, so its result is unproven rather
+                        // than failed (the `$ranThisRace` guard above already excludes the completed
+                        // case).
+                        default => $race === null
+                            ? 'A trainee objective is past due and its recorded entry is not a finished race'
+                            : $race.' is past due and its recorded entry is not a finished race',
+                    },
                     'detail' => 'The source puts it at '.$goal->yearLabel().' year turn '.$goal->turnWithinYear()
                         .', and the next turn to play is '.$next['turn'].'. '
                         .($phrase !== null ? $phrase.' is what it asks for.' : 'What it asks for is not decoded here.'),
