@@ -1,0 +1,404 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Pre-paint resolution, mirroring the v2 set and the app (theme server-side to first paint;
+     layout width from the stored preference, standard when unset). localStorage here is the
+     static-artifact concession the v2 set records; the app stores both server-side. -->
+<script>(function(){try{var s=localStorage.getItem('td-wireframe-theme');if(s!=='light'&&s!=='dark'){s=window.matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';}document.documentElement.dataset.theme=s;}catch(e){document.documentElement.dataset.theme='light';}try{var L=localStorage.getItem('td-wireframe-layout');document.documentElement.dataset.layout=(L==='compact'||L==='wide'||L==='standard')?L:'standard';}catch(e){document.documentElement.dataset.layout='standard';}})();</script>
+<title>Scenario detail HFW · Unity Cup · Trainer Desk wireframe</title>
+<!--
+  HIGH-FIDELITY WIREFRAME — the updated Scenario detail screen (SCR-CAR-029), drawn in the app's
+  majority visual language. Responds to three closed predecessors, cited not edited:
+    docs/research/scenario-detail-design-language-survey-2026-11-09.md   (the measurement)
+    docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md                      (the content audit)
+    docs/proposals/2026-11-09-scenario-detail-upgrade.md                 (the landed plan)
+
+  WHAT IS REAL HERE
+    Data      : run 7's live payload — the seeded canonical walk (RosyDreamsRiceShowerSeeder:
+                Rice Shower · Unity Cup · Senior Early October, turn 67), plus the committed
+                seeder's own team state and one league-board turn event. Nothing invented.
+    Tokens    : the v2 set's shell.css (app.css values), linked across folders — the shared
+                design language the survey measured as the app's majority.
+    Width     : standard 1152px shell, so the bento the panels carry at @5xl resolves here;
+                at the survey host's 764px it reads one column.
+    Structure : every panel the updated page composes, in the app's reading order, with the
+                two content fixes landed 2026-11-09 visible (no "composes no panels" sentence;
+                state-led alert vocabulary quoted in the key).
+
+  THE ONE VISUAL DECISION THIS WIREFRAME MAKES
+    The survey (§3, §5-Q2) measured the lime CapsuleHeader as the page's single divergence from
+    the app's majority: one call site, zero other pages, up to 14 capsules per board. This
+    wireframe applies the survey's re-skin reading — every panel keeps its content, copy and
+    order; the chrome headers become the plain .card > h2 headings the other 21 pages use.
+    Nothing else moves. That decision is the owner's to rule on (survey §5); this file is the
+    drawing the ruling would act on.
+-->
+<link rel="stylesheet" href="../frontend-v2-wireframes/assets/shell.css">
+<style>
+/* HFW-specific: the panels' own bento, at the spans UnityCupPanel.vue:183 declares
+   (12 tracks at @5xl). Collapses to one column at the same 820px break shell.css uses. */
+.b12{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:14px;align-items:start;margin-top:14px}
+.b12>.s3{grid-column:span 3}.b12>.s4{grid-column:span 4}.b12>.s6{grid-column:span 6}
+.b12>.s8{grid-column:span 8}.b12>.s12{grid-column:span 12}
+@media(max-width:820px){.b12{grid-template-columns:minmax(0,1fr)}.b12>[class*='s']{grid-column:auto}}
+/* the run's own band row, as the app marks it */
+tr.is-run td,.b12 tr.is-run th{font-weight:800;color:var(--ink-strong)}
+/* UX-1: the app's own record link carries `min-h-11` (44px) — CareerGoalsPanel.vue:142. The
+   in-table link reproduces it so the sweep measures the same target the app ships. */
+.link-rec{display:inline-flex;align-items:center;min-height:44px;padding:0 4px;
+  font-size:12px;font-weight:600;color:var(--ink-strong);text-decoration:underline}
+</style>
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+<div class="app">
+  <aside class="rail" id="primary-nav-rail" aria-label="Global navigation">
+    <div class="rail-top">
+      <div class="rail-brand">
+        <span class="mk" aria-hidden="true">TD</span>
+        <span class="tx">TRAINER DESK</span>
+      </div>
+      <button class="rail-toggle" type="button" data-rail-toggle aria-expanded="true" aria-controls="primary-nav-rail" title="Collapse navigation">
+        <span class="sr-only" data-rail-verb>Collapse navigation</span>
+        <span class="rail-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 5.5 16 12l-6.5 6.5"/></svg></span>
+      </button>
+    </div>
+    <nav class="rail-nav" aria-label="Primary">
+      <div class="rail-group">Play</div>
+      <a class="nav-item" href="../frontend-v2-wireframes/index.html" title="Dashboard"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11 12 4l8 7"/><path d="M6.6 9.6V20h10.8V9.6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Dashboard</span></a>
+      <a class="nav-item" href="../frontend-v2-wireframes/career-scenario.html" title="New Career"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.4v17.2"/><path d="M6 4.6h11l-2.7 3.5L17 11.6H6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">New Career</span></a>
+      <div class="rail-group">My data</div>
+      <a class="nav-item active" href="../frontend-v2-wireframes/runs-index.html" aria-current="page" title="Careers"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 7h12"/><path d="M8 12h12"/><path d="M8 17h12"/><path d="M4.4 7h.01"/><path d="M4.4 12h.01"/><path d="M4.4 17h.01"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Careers</span></a>
+      <a class="nav-item" href="../frontend-v2-wireframes/legacy.html" title="Legacy Lab"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M6 7h.01"/><path d="M18 7h.01"/><path d="M12 17h.01"/><path d="M6.5 7.7 11.3 16"/><path d="M17.5 7.7 12.7 16"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Legacy Lab</span></a>
+      <a class="nav-item" href="../frontend-v2-wireframes/veterans.html" title="Veterans"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v4.2a4 4 0 0 1-8 0z"/><path d="M8 5H5.6a2.4 2.4 0 0 0 2.4 3.9"/><path d="M16 5h2.4a2.4 2.4 0 0 1-2.4 3.9"/><path d="M12 12.4v2.8"/><path d="M8.6 20h6.8"/><path d="M12 15.2a3 3 0 0 0-3.4 4.8h6.8a3 3 0 0 0-3.4-4.8"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Veterans</span></a>
+      <a class="nav-item" href="../frontend-v2-wireframes/review.html" title="Review"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5 20.6 19H3.4z"/><path d="M12 10.2v3.6"/><path d="M12 16.4h.01"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Review</span></a>
+      <div class="rail-group">Library</div>
+      <a class="nav-item" href="../frontend-v2-wireframes/support-cards.html" title="Support Cards"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9.4 4.6h8v10h-8z"/><path d="M5 8.6h9.4v10.8H5z"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Support Cards</span></a>
+      <a class="nav-item" href="../frontend-v2-wireframes/skills.html" title="Skills"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4l2 6 6 2-6 2-2 6-2-6-6-2 6-2z"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Skills</span></a>
+      <div class="rail-group">System</div>
+      <a class="nav-item" href="../frontend-v2-wireframes/database.html" title="Database"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 6.6C10 5.1 7 4.7 4.2 5.3v13C7 17.7 10 18.1 12 19.6"/><path d="M12 6.6c2-1.5 5-1.9 7.8-1.3v13C17 17.7 14 18.1 12 19.6"/><path d="M12 6.6v13"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Database</span></a>
+      <a class="nav-item" href="../frontend-v2-wireframes/preferences.html" title="Settings"><span class="glyph" aria-hidden="true"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9.2a2.8 2.8 0 1 0 0 5.6 2.8 2.8 0 0 0 0-5.6z"/><path d="M12 3.6v2.2"/><path d="M12 18.2v2.2"/><path d="M3.6 12h2.2"/><path d="M18.2 12h2.2"/><path d="M6.1 6.1l1.6 1.6"/><path d="M16.3 16.3l1.6 1.6"/><path d="M17.9 6.1l-1.6 1.6"/><path d="M7.7 16.3l-1.6 1.6"/></svg></span><span class="dot" aria-hidden="true"></span><span class="nav-label">Settings</span></a>
+    </nav>
+    <a class="rail-foot" href="../frontend-v2-wireframes/database-sources.html" title="Data sources"><span class="rail-foot-word">Data sources</span></a>
+  </aside>
+
+  <main class="main" id="main">
+    <header class="topbar">
+      <div class="topbar-in">
+        <span class="crumb">Rice Shower · <b>Unity Cup</b> · Scenario</span>
+        <span class="proto" title="Structure, states and labels are real; the controls are not wired except the Settings page.">Static wireframe</span><span class="spacer"></span>
+        <span class="who"><span class="pill pill-positive">Turn 67 · Active</span></span>
+        <div class="toputils"><a class="iconbtn" href="../frontend-v2-wireframes/help.html" title="Help and documentation"><span aria-hidden="true">?</span><span class="lbl">Help</span></a></div>
+      </div>
+    </header>
+
+    <div class="phead">
+      <div class="eyebrow">Scenario</div>
+      <div class="hrow">
+        <div>
+          <h1>Scenario detail</h1>
+          <p class="lede">The boards Unity Cup composes for this run. Every panel reads what the run recorded and names what it has not.</p>
+        </div>
+        <div class="hrow-actions">
+          <a class="btn" href="../frontend-v2-wireframes/runs-index.html">Back to Cockpit</a>
+        </div>
+      </div>
+      <div class="hr"></div>
+    </div>
+
+    <div class="canvas">
+
+      <nav aria-label="Career" class="stepper" style="margin-bottom:14px">
+        <a class="step" href="../frontend-v2-wireframes/index.html">Cockpit</a>
+        <a class="step" href="../frontend-v2-wireframes/training-decision.html">Training</a>
+        <a class="step" href="../frontend-v2-wireframes/race-decision.html">Races</a>
+        <a class="step" href="../frontend-v2-wireframes/skills-planner.html">Skills</a>
+        <a class="step" href="../frontend-v2-wireframes/event-decision.html">Events</a>
+        <a class="step" href="../frontend-v2-wireframes/inheritance.html">Inheritance</a>
+        <a class="step" href="../frontend-v2-wireframes/run-deck.html">Deck</a>
+        <a class="step" href="../frontend-v2-wireframes/timeline.html">Timeline</a>
+        <span class="step" aria-current="step">Scenario</span>
+      </nav>
+
+      <div class="info" style="margin-bottom:14px">
+        <span aria-hidden="true">i</span>
+        <span><b>The race calendar renders in this screen's Races in this run column</b>: this run's recorded races, the turn being decided, and the mandatory races still to come. This board suite is reference, not decision — it writes nothing; the team-state write lives on Team edit.</span>
+      </div>
+
+      <!-- ============ the team bento, at the spans the panel declares ============ -->
+      <div class="b12">
+
+        <section class="card s12" style="margin:0" aria-labelledby="h-race">
+          <h2 id="h-race">Team Race</h2>
+          <p class="sub">Aim for at least 3 circles as a margin, not a win condition. A loss lowers the league rank, and after the 2026-07-01 rework a loss can be retried with an Alarm Clock.</p>
+          <div class="note"><span class="g" aria-hidden="true">○</span><span>
+            No team races recorded. Circles are entered on the race form as the number the client showed before you committed.
+          </span></div>
+        </section>
+
+        <section class="card s4" style="margin:0" aria-labelledby="h-team">
+          <h2 id="h-team">Team</h2>
+          <table class="t">
+            <tbody>
+              <tr><th scope="row">Name</th><td><b>Blue Bloom</b></td></tr>
+              <tr><th scope="row">Motto</th><td>Dreaming Big</td></tr>
+              <tr><th scope="row">League placement</th><td class="mono">8</td></tr>
+              <tr><th scope="row">Preseason rounds won</th><td class="mono">4</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="card s4" style="margin:0" aria-labelledby="h-spirit">
+          <h2 id="h-spirit">Spirit</h2>
+          <div class="tiles" style="grid-template-columns:1fr">
+            <div class="tile"><div class="k">Current Spirit</div><div class="v na">N/A</div></div>
+          </div>
+          <p class="sublabel" style="margin-top:10px">Why</p>
+          <p class="sub" style="margin:0">No column records a Spirit value. The client prints the gauge on its Team Info panel; until an input stores it, there is no reading to show.</p>
+          <div class="note" style="margin-top:10px"><span class="g" aria-hidden="true">○</span><span>
+            Burst readiness is not computed: the bands below are thresholds, but no Spirit reading is recorded, so there is nothing to set against them.
+          </span></div>
+          <div class="note" style="margin-top:8px"><span class="g" aria-hidden="true">○</span><span>
+            Recommended timing and projected benefit are not built. The trigger rule is recorded (a burst fires on the next Special Training once a teammate's gauge is full), but what to do about it and what it would yield are not computed here.
+          </span></div>
+        </section>
+
+        <section class="card s4" style="margin:0" aria-labelledby="h-rank">
+          <h2 id="h-rank">Team Rank</h2>
+          <div class="tiles" style="grid-template-columns:1fr 1fr">
+            <div class="tile"><div class="k">Rank</div><div class="v">S</div></div>
+            <div class="tile"><div class="k">Facility</div><div class="v">Lv 5 <span class="u" style="font-size:11px;font-weight:600;color:var(--ink-muted)">derived from the rank letter</span></div></div>
+          </div>
+          <p class="sublabel" style="margin-top:12px">The ladder</p>
+          <div style="display:flex;gap:6px;flex-wrap:wrap">
+            <span class="pill pill-neutral">G · lv 1</span><span class="pill pill-neutral">F · lv 1</span>
+            <span class="pill pill-neutral">D · lv 2</span><span class="pill pill-neutral">E · lv 2</span>
+            <span class="pill pill-neutral">B · lv 3</span><span class="pill pill-neutral">C · lv 3</span>
+            <span class="pill pill-neutral">A · lv 4</span><span class="pill pill-accent">S · current</span>
+          </div>
+          <p class="sub" style="margin-top:10px">The ladder carries S+ above S: it grants a second hint rather than a higher facility, so it has no level to show.</p>
+          <p style="margin:10px 0 0;font-size:12.5px;color:var(--ink)">Team Ranking Bonus: <b>All Attributes +30</b> <span class="trust trust-estimated"><span class="g" aria-hidden="true">~</span>Estimated</span></p>
+          <p class="sub" style="margin-top:4px">Seen beside the Rank S emblem in the recorded run (client tooltip). <b>Corpus correction:</b> the app's own note calls this a rank bonus "inferred from screen position"; <code>docs/research/flows-career-workspace.md:232</code> records the opposite and is the stronger reading — it is the <b>league-placement</b> bonus (2nd–5th +50, 6th–10th +30, 11th–15th +20, 16th–20th +10), and this run's 8th place sits in the +30 band. The figure is right; the attribution here was not.</p>
+        </section>
+
+        <section class="card s4" style="margin:0" aria-labelledby="h-progress">
+          <h2 id="h-progress">Unity Cup progress</h2>
+          <p style="margin:0;font-size:14px;font-weight:700;color:var(--ink-strong)">Unity Trainings 55 · Spirit Bursts 6 / 5 Extreme</p>
+          <p class="sub" style="margin-top:8px">The paired burst tally is drawn whole because both counts are recorded; a run that stated only one would name that one alone, never <s>6 / N/A</s>.</p>
+        </section>
+
+        <section class="card s8" style="margin:0" aria-labelledby="h-grades">
+          <h2 id="h-grades">Team stat grades</h2>
+          <table class="t">
+            <tbody>
+              <tr><th scope="row" style="text-align:left;font-weight:400">Speed</th><td class="n mono" style="color:var(--ink-muted)">N/A</td></tr>
+              <tr><th scope="row" style="text-align:left;font-weight:400">Stamina</th><td class="n mono" style="color:var(--ink-muted)">N/A</td></tr>
+              <tr><th scope="row" style="text-align:left;font-weight:400">Power</th><td class="n mono" style="color:var(--ink-muted)">N/A</td></tr>
+              <tr><th scope="row" style="text-align:left;font-weight:400">Guts</th><td class="n mono" style="color:var(--ink-muted)">N/A</td></tr>
+              <tr><th scope="row" style="text-align:left;font-weight:400">Wit</th><td class="n mono" style="color:var(--ink-muted)">N/A</td></tr>
+            </tbody>
+          </table>
+          <p class="sub" style="margin-top:8px">No per-stat team grade is recorded for this run yet. Enter it in the team-state editor.</p>
+        </section>
+
+        <section class="card s8" style="margin:0" aria-labelledby="h-bands">
+          <h2 id="h-bands">Burst count bands <span class="trust trust-estimated" style="vertical-align:middle"><span class="g" aria-hidden="true">~</span>Estimated</span></h2>
+          <table class="t">
+            <caption style="text-align:left;font-size:11px;color:var(--ink-muted);padding-bottom:6px">Reward by combined Spirit Burst and Extreme Spirit Burst count</caption>
+            <thead><tr><th>Total bursts</th><th style="text-align:left">Reward</th></tr></thead>
+            <tbody>
+              <tr><td class="mono">4–6</td><td style="text-align:left">White hint Lv1, +10 to the matching stat, +10 SP</td></tr>
+              <tr><td class="mono">7–9</td><td style="text-align:left">White hint Lv3, +20 to the matching stat, +20 SP</td></tr>
+              <tr class="is-run"><td class="mono">10–12</td><td style="text-align:left">Gold hint Lv1, +30 to the matching stat, +30 SP &nbsp;<span class="pill pill-accent">this run</span></td></tr>
+              <tr><td class="mono">13+</td><td style="text-align:left">Gold hint Lv3, +40 to the matching stat, +40 SP</td></tr>
+            </tbody>
+          </table>
+          <div class="warn" style="margin-top:10px"><span aria-hidden="true">!</span><span>
+            Three parts of this table are publisher conflicts, not settled facts: whether Extreme Bursts count toward the total, the Skill Point figures, and the month of the payout event. GameTora prints four numbered bands (4–9 / 7–9 / 10–12 / 13+) paying 10/20/30/40 SP with a matching stat, and states its own low-end values are not known; Umamusu Wiki prints the same four reward tiers but attaches a <em>criterion</em> to the gold rows rather than numbered edges, and never says whether Extreme Bursts increment. The overlap between GameTora's first two bands (4–9 and 7–9) cannot both hold, so the edges this table prints are config's resolution of that conflict, not a publisher's. The payout lands in Senior Year Late November. The client's own Team Info count is the tiebreaker (UMAMUSUME_REFERENCE §2.2.2, conflict row 57).
+          </span></div>
+          <p class="sub" style="margin-top:8px">Source: config/scenarios.php, transcribed there from GameTora. The two publishers put the low bands in different places: GameTora prints an overlapping "4 to 9" and "7 to 9", which cannot both hold, so these edges are the tool's own and a run near the boundary may sit in the neighbouring band on another sheet.</p>
+          <p style="margin:8px 0 0;font-size:12.5px;color:var(--ink)">The gold versions arrive from the scripted event in Senior Year, Late November. <b>This run: 11 bursts combined, inside the 10–12 band.</b></p>
+        </section>
+
+        <section class="card s4" style="margin:0" aria-labelledby="h-roster">
+          <h2 id="h-roster">Spirit Burst</h2>
+          <div class="note"><span class="g" aria-hidden="true">○</span><span>
+            No teammate burst states recorded. The six states this tool models are chargeable, charged, held, normal spent, extreme chargeable and extreme spent — its own identifiers, not client strings: no Global capture names these states (<code>SpiritBurstState.php:10-12</code>, D-20).
+          </span></div>
+        </section>
+
+        <section class="card s4" style="margin:0" aria-labelledby="h-special">
+          <h2 id="h-special">Special Training</h2>
+          <p style="margin:0;font-size:12.5px;line-height:1.55">The extra Energy cost on Special Training was removed on 2026-07-01.</p>
+          <p style="margin:8px 0 0;font-size:12.5px;line-height:1.55">A burst on the Wit facility grants 5 Energy recovery.</p>
+          <p class="sub" style="margin-top:8px">Per-facility levels and per-member training state are not recorded here. The Cockpit's turns carry what the Trainer entered.</p>
+        </section>
+
+        <section class="card s8" style="margin:0" aria-labelledby="h-coverage">
+          <h2 id="h-coverage">Team race coverage</h2>
+          <p class="sub">One race per category, up to three Umamusume fielded in each. The reading this run has for a category is who it fields there, and no column stores it.</p>
+          <table class="t">
+            <thead><tr><th>Category</th><th class="n">This run fields</th></tr></thead>
+            <tbody>
+              <tr><th scope="row" style="text-align:left;font-weight:400">Sprint</th><td class="n mono" style="color:var(--ink-muted)">N/A</td></tr>
+              <tr><th scope="row" style="text-align:left;font-weight:400">Mile</th><td class="n mono" style="color:var(--ink-muted)">N/A</td></tr>
+              <tr><th scope="row" style="text-align:left;font-weight:400">Medium</th><td class="n mono" style="color:var(--ink-muted)">N/A</td></tr>
+              <tr><th scope="row" style="text-align:left;font-weight:400">Long</th><td class="n mono" style="color:var(--ink-muted)">N/A</td></tr>
+              <tr><th scope="row" style="text-align:left;font-weight:400">Dirt</th><td class="n mono" style="color:var(--ink-muted)">N/A</td></tr>
+            </tbody>
+          </table>
+          <p class="sub" style="margin-top:8px">No column records who this run fields in any category, so every row states the ask with no reading beside it and no coverage state is claimed. The five categories and the number fielded in each come from a guide transcribed into the scenario's own settings.</p>
+        </section>
+
+        <section class="card s12" style="margin:0" aria-labelledby="h-shape">
+          <h2 id="h-shape">Team race shape</h2>
+          <div class="grid g-2" style="gap:14px">
+            <div>
+              <p style="margin:0;font-size:12.5px;line-height:1.55">Arrives every 6 months, at Late June and Late December. 5 races, one per category.</p>
+              <p style="margin:8px 0 0;font-size:12.5px;line-height:1.55">Clearing the set pays an increase to all stats, sized by performance. No source publishes the size, so none is shown.</p>
+            </div>
+            <div class="tiles" style="grid-template-columns:1fr">
+              <div class="tile"><div class="k">Opponent projection</div><div class="v na">N/A</div>
+                <p class="sub" style="margin:6px 0 0">No source says how strong each opponent team is. The guides name which teams to avoid before a rank is high enough and stop there, so no side of any team race can be called favoured and no chance is printed.</p></div>
+              <div class="tile"><div class="k">Next team race</div><div class="v na">N/A</div>
+                <p class="sub" style="margin:6px 0 0">A team race arrives every 6 months, at Late June and Late December, and no source publishes the career turn a round falls on, so no turn is printed here.</p></div>
+            </div>
+          </div>
+          <p class="sub" style="margin-top:10px">No published source ranks the three teams, so the screen calls no side of a team race easier. No column records who this run fields in each category, so the board states the ask and not the run.</p>
+        </section>
+
+      </div>
+
+      <!-- ============ the goals board: TWO cards, one per group ============ -->
+      <section class="card" style="margin-top:14px" aria-labelledby="h-goals">
+        <h2 id="h-goals">Trainee goals</h2>
+        <table class="t">
+          <thead><tr><th>Obligation</th><th>State</th><th class="n">Due</th><th class="n"></th></tr></thead>
+          <tbody>
+            <tr><td>Participate in Junior Make Debut</td><td><span class="pill pill-neutral">Not reached</span></td><td class="n" style="white-space:nowrap">Junior year, turn 12</td><td class="n" style="white-space:nowrap;width:1%"><a class="link-rec" href="../frontend-v2-wireframes/race-decision.html">Record this race</a></td></tr>
+            <tr><td>Place top 5 in Spring Stakes</td><td><span class="pill pill-neutral">Not reached</span></td><td class="n" style="white-space:nowrap">Classic year, turn 6</td><td class="n" style="white-space:nowrap;width:1%"><a class="link-rec" href="../frontend-v2-wireframes/race-decision.html">Record this race</a></td></tr>
+            <tr><td>Place top 5 in Tokyo Yushun (Japanese Derby)</td><td><span class="pill pill-neutral">Not reached</span></td><td class="n" style="white-space:nowrap">Classic year, turn 10</td><td class="n" style="white-space:nowrap;width:1%"><a class="link-rec" href="../frontend-v2-wireframes/race-decision.html">Record this race</a></td></tr>
+            <tr><td>Place top 3 in Kikuka Sho</td><td><span class="pill pill-neutral">Not reached</span></td><td class="n" style="white-space:nowrap">Classic year, turn 20</td><td class="n" style="white-space:nowrap;width:1%"><a class="link-rec" href="../frontend-v2-wireframes/race-decision.html">Record this race</a></td></tr>
+            <tr class="is-run"><td>Place top 3 in Nikkei Sho</td><td><span class="pill pill-caution">Missed</span></td><td class="n" style="white-space:nowrap">Senior year, turn 6</td><td class="n" style="white-space:nowrap;width:1%"><a class="link-rec" href="../frontend-v2-wireframes/race-decision.html">Record this race</a></td></tr>
+            <tr class="is-run"><td>Place 1st in Tenno Sho (Spring)</td><td><span class="pill pill-positive">Recorded</span></td><td class="n" style="white-space:nowrap">Senior year, turn 8</td><td class="n"></td></tr>
+            <tr class="is-run"><td>Place top 3 in Takarazuka Kinen</td><td><span class="pill pill-caution">Missed</span></td><td class="n" style="white-space:nowrap">Senior year, turn 12</td><td class="n" style="white-space:nowrap;width:1%"><a class="link-rec" href="../frontend-v2-wireframes/race-decision.html">Record this race</a></td></tr>
+            <tr><td>Place 1st in Arima Kinen</td><td><span class="pill pill-outline">Upcoming</span></td><td class="n" style="white-space:nowrap">Senior year, turn 24</td><td class="n" style="white-space:nowrap;width:1%"><a class="link-rec" href="../frontend-v2-wireframes/race-decision.html">Record this race</a></td></tr>
+          </tbody>
+        </table>
+        <p style="margin:8px 0 0;font-size:12.5px;font-weight:800;color:var(--ink-strong)">Goals Achieved 1 of 8</p>
+        <p class="sub" style="margin-top:4px">Counted by ladder position: Tenno Sho (Spring) is the one met obligation — the entry is recorded with the 1st the source asked for. Nikkei Sho and Takarazuka Kinen carry entries whose placements were never typed in, so their requirement is unproven rather than failed, and the row says <b>Missed</b> because a record exists to judge.</p>
+      </section>
+
+      <section class="card" style="margin-top:14px" aria-labelledby="h-mandatory">
+        <h2 id="h-mandatory">Mandatory races</h2>
+        <table class="t">
+          <thead><tr><th>Race</th><th>State</th><th class="n">Due</th><th class="n"></th></tr></thead>
+          <tbody>
+            <tr><td>Junior Make Debut</td><td><span class="pill pill-neutral">Not reached</span></td><td class="n" style="white-space:nowrap">Junior year, turn 12</td><td class="n" style="white-space:nowrap;width:1%"><a class="link-rec" href="../frontend-v2-wireframes/race-decision.html">Record this race</a></td></tr>
+            <tr><td>URA Finals Qualifier</td><td><span class="pill pill-outline">Upcoming</span></td><td class="n" style="color:var(--ink-muted)">N/A</td><td class="n" style="white-space:nowrap;width:1%"><a class="link-rec" href="../frontend-v2-wireframes/race-decision.html">Record this race</a></td></tr>
+            <tr><td>URA Finals Semifinal</td><td><span class="pill pill-outline">Upcoming</span></td><td class="n" style="color:var(--ink-muted)">N/A</td><td class="n" style="white-space:nowrap;width:1%"><a class="link-rec" href="../frontend-v2-wireframes/race-decision.html">Record this race</a></td></tr>
+            <tr><td>URA Finals Final (Aoharu)</td><td><span class="pill pill-outline">Upcoming</span></td><td class="n" style="color:var(--ink-muted)">N/A</td><td class="n" style="white-space:nowrap;width:1%"><a class="link-rec" href="../frontend-v2-wireframes/race-decision.html">Record this race</a></td></tr>
+          </tbody>
+        </table>
+        <p class="sub" style="margin-top:6px">The three Finals rounds carry no turn in the catalogue, only their career year — the N/A names that, and the absence is why they can be current but can never be missed.</p>
+      </section>
+
+      <!-- ============ the baseline strip (no "composes no panels" sentence — see key item 4) ============ -->
+      <section class="card" style="margin-top:14px" aria-labelledby="h-strip">
+        <h2 id="h-strip">Unity Cup <span class="pill pill-positive" style="vertical-align:middle">Documented</span></h2>
+        <p class="sub" style="margin-top:6px">Ruleset version: <span class="pill pill-neutral">N/A</span> — no source defines a Global ruleset version, so this run stores none to print.</p>
+        <p class="sub" style="margin:6px 0 0"><b>Scenario ruleset date:</b> 2026-07-01 (rework). July 1, 2026 rework raised caps (1200→1300 per stat, Wit to 1800), added Extreme Spirit Bursts, removed the Energy cost on Special Training, and changed Spirit Burst hints to use the card's own hint pool. Source: The mechanics reference guide and the scenario publisher references.</p>
+
+        <div class="tiles" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));margin-top:12px">
+          <div class="tile"><div class="k">Team Rank</div><div class="v">S</div></div>
+          <div class="tile"><div class="k">Spirit Bursts</div><div class="v mono">11</div>
+            <p class="sub" style="margin:6px 0 0">Normal plus Extreme, the same combined figure the bands panel places in <b>10–12 (this run)</b>. Both tallies are recorded (6 Spirit + 5 Extreme), so the tile fills; a run that stated only one would name the absence rather than half a count (D-220). Fixed in KI-154.</p></div>
+        </div>
+
+        <p class="sublabel">Published stat caps</p>
+        <p class="sub">Verified 2026-11-02 · the date the matrix was last checked against its sources; nothing here was fetched on it. Published caps from the scenario reference, verified 2026-11-02 against the sources it names.</p>
+        <table class="t">
+          <caption class="sr-only" style="position:absolute;left:-9999px">Published stat caps for this scenario</caption>
+          <thead><tr><th>Stat</th><th class="n">Base</th><th class="n">Bonus</th><th class="n">Cap</th></tr></thead>
+          <tbody>
+            <tr><td>Speed</td><td class="n mono">1200</td><td class="n mono">+100</td><td class="n mono"><b>1300</b></td></tr>
+            <tr><td>Stamina</td><td class="n mono">1200</td><td class="n mono">+100</td><td class="n mono"><b>1300</b></td></tr>
+            <tr><td>Power</td><td class="n mono">1200</td><td class="n mono">+100</td><td class="n mono"><b>1300</b></td></tr>
+            <tr><td>Guts</td><td class="n mono">1200</td><td class="n mono">+100</td><td class="n mono"><b>1300</b></td></tr>
+            <tr><td>Wit</td><td class="n mono">1200</td><td class="n mono">+600</td><td class="n mono"><b>1800</b></td></tr>
+          </tbody>
+        </table>
+        <p class="sub" style="margin-top:6px">Three terms, never collapsed to one number. This table is the ADR-0025 surface whose own source line names config/scenarios.php, so it prints the published arithmetic alone; the run's entered ceilings (1325 / 1322 / 1368 / 1308) live beside their entry fields on the Cockpit and the wizard's target step, by that ADR's design.</p>
+
+        <p style="margin:12px 0 0;font-size:13px"><b>Finale</b>: Unity Cup. Not yet reached.</p>
+        <div class="note" style="margin-top:10px"><span class="g" aria-hidden="true">○</span><span>
+          No source this tool reads states scenario advice, so none is offered here. The advisor ranks the turn you are deciding.
+        </span></div>
+      </section>
+
+      <!-- ============ annotation key ============ -->
+      <div class="keybox">
+        <h2>Annotation key · Scenario detail HFW</h2>
+        <ol>
+          <li><b>The one visual decision: chrome headers → plain card headings.</b> The design-language survey (<code>docs/research/scenario-detail-design-language-survey-2026-11-09.md</code> §2–§3) measured the lime <code>CapsuleHeader</code> as this page's single divergence from the app's majority: one call site in the tree, zero other pages, up to 14 capsules on one Unity Cup board, while the other 21 career pages head their cards with a plain <code>text-lg font-semibold</code> h2. This wireframe draws every panel with that heading: <b>fourteen panel <code>&lt;h2&gt;</code> elements, zero <code>CapsuleHeader</code>, zero <code>class="…lattice-bleed"</code>, zero <code>class="…bg-chrome"</code></b> (<code>grep -c 'class="[^"]*lattice-bleed\|class="[^"]*bg-chrome'</code> returns 0; the four literal mentions in this file are this sentence and item 2's, in prose). The only pills left are <em>data</em>, never heading chrome: the status badges (<code>Documented</code>, <code>Not reached</code>, <code>Missed</code>, <code>Recorded</code>, <code>Upcoming</code>), the ladder rungs, and the two provenance marks (<code>Estimated</code> on the bands, plus the trust mark the bands carry). <b>Panel set, panel order, spans and data are unchanged</b> — item 2 lists the order and its source.</li>
+          <li><b>Panel set and order are the component's own, unchanged.</b> The eleven team panels follow <code>UnityCupPanel.vue</code>'s DOM order and its declared spans exactly (<code>6493326a</code>): Team Race (s12) → Team (s4) → Spirit (s4) → Team Rank (s4) → Unity Cup progress (s4) → Team stat grades (<b>s8</b>) → Burst count bands (s8) → Spirit Burst (s4) → Special Training (s4) → Team race coverage (s8) → Team race shape (s12). The component's own comment names that order: <em>"Team Race leads the grid …, then the owner's order: Team, Spirit, Team Rank, Unity Cup progress, stat grades, burst bands, Spirit Burst, Special Training, and the two team-race blocks."</em> The audit screenshot's top row read differently because the audit captured a <b>sparse</b> run where <code>v-if</code> removes the Team, Spirit, Unity Cup progress and Special Training cells entirely — those four are data-conditional wrappers, not a different order.</li>
+          <li><b>The goals board keeps its two cards, one per group.</b> <code>CareerGoalsPanel.vue:97</code> renders <code>&lt;section v-for="group in props.scenario.objectives"&gt;</code> with a <code>CapsuleHeader</code> per group, so Trainee goals and Mandatory races are two cards on the shipped page. This wireframe draws them as two plain-h2 cards, in the payload's own group order, with the summary line and the Finals note where the panel puts them.</li>
+          <li><b>The bento stays, because it is also the app's language.</b> The panels' 12-track container grid (<code>UnityCupPanel.vue:183</code>) resolves here at the standard 1152px shell, with the same spans the component declares. The Cockpit, Snapshot and Veterans pages carry container-query grids too, so the grid is not the divergence — at the survey host's 764px it simply never resolves, which is why the page read as a long single column of capsules.</li>
+          <li><b>Content fixes landed 2026-11-09 are visible by absence.</b> The strip no longer prints "This scenario composes no panels of its own" on a scenario that draws eleven panels (audit F-01; the guard is now <code>panel_absence === null && onPanels.length === 0</code>).</li>
+          <li><b>Alert copy is state-led now (audit F-02, severity 3).</b> This run fires no alerts — its three past-due goals carry entries. On the sparse run the same panel printed <s>Critical: Nikkei Sho is due and not met</s>; it now prints <b>Not reached: Nikkei Sho is past due with no entry recorded in this run</b> — the heading is the row's own state word, and "not met" appears only where a record exists to judge (<code>TOG-3</code>: status may be stale or absent, but never wrong).</li>
+          <li><b>The caps table stays three columns.</b> The Cockpit HFW v2 drew a fifth "Your ceiling" column; ADR-0025 (read 2026-11-09, audit F-03) rules the published table the one surface whose source line names <code>config/scenarios.php</code>, so it prints the published arithmetic alone and the entered ceilings stay beside their entry fields. The ruled-out finding is recorded, not re-opened.</li>
+          <li><b>Every number is run 7's real payload</b> — the seeded canonical walk (RosyDreamsRiceShowerSeeder: 607/577/549/736/397, SP 173, fans 209,245, Blue Bloom / Dreaming Big / league 8 / 4 preseason wins, 55 trainings, 6 + 5 bursts, rank S → facility 5, band 10–12, goals 1 of 8). Nothing invented; the two absences the survey could not fill (stat grades, coverage fielded) are absences in the data too.</li>
+          <li><b>Heuristic coverage.</b> H1 + H8. Every panel states its system status once, in words, with its absence named where a reading does not exist; the density is the scenario's own reference material, and every element carries information.</li>
+          <li><b>Framework coverage.</b> Shneiderman 1 (the remodel is a consistency repair whose exception was unnamed) and Gerhardt-Powals 2–3 (each derived figure carries its rule and source — the bands name their publisher conflict, the caps name their verification date, the facility level names its derivation from the rank letter).</li>
+          <li><b>Framework audit, measured in this file's own render (2026-11-09).</b> Both themes, Chromium 153: <b>WCAG 1.4.3</b> contrast on every text node — <b>0 failures</b> in light and 0 in dark; <b>UX-1</b> 44px floor — <b>0 undersized controls</b> after the record links were given the app's own <code>min-h-11</code> (<code>CareerGoalsPanel.vue:142</code>), which was the artifact's one real defect on first measure (11 links at 35px); <b>UI-1</b> three-step ladder — h1 28px / h2 15px / body, after the caps card's <code>h3</code> became the v2 shell's <code>.sublabel</code> paragraph (it measured a fourth step at 13px); <b>WCAG 1.4.10</b> reflow at 320px — document width 320 = viewport 320, tables scroll inside their own cards; <b>WCAG 2.4.1</b> skip link and <code>main#main</code> present; <b>4.1.2</b> no unnamed link, no image without alt; <b>1.4.1</b> every state pill carries a word. Not claimed: a conformance verdict — these are the criteria a rendered frame can decide.</li><li><b>Targets.</b> Every control here is a link or a static reading; the stepper, the rail and the record links inherit the shell's 44px floor (UX-1 house rule, never described as 2.5.8 conformance).</li>
+          <li><b>Two corpus checks changed the copy, and both are recorded rather than silently applied.</b> The <code>+30</code> line carries the app's own attribution (“inferred from screen position” that it binds to the rank), which <code>docs/research/flows-career-workspace.md:232</code> contradicts: it is the league-placement bonus (2nd–5th +50, 6th–10th +30, 11th–15th +20, 16th–20th +10), and this run's 8th place is the +30 band. The figure stands, the attribution is corrected here and is still wrong in <code>UnityCupPanel.vue:128-131</code>. And the bands caveat now quotes what <code>UMAMUSUME_REFERENCE.md</code> §2.2.2 and conflict row 57 actually say (GameTora prints overlapping edges; the Wiki prints criteria, not edges), rather than a <s>15/15/20/20 SP from two other publishers</s> claim that lives in the run report and not in the reference corpus.</li><li><b>One corpus correction to the coverage board.</b> It read “3 fielded in each”; <code>UMAMUSUME_REFERENCE.md</code> §2.2.2 says “up to three Umamusume per race” and <code>02-unity-cup.md:287</code> says 1–3 per category, so the copy now reads “up to three”. The app's own config carries <code>field_per_category =&gt; 3</code>, which is the ceiling and prints as such.</li><li><b>Spirit Burst states are the tool's own words, not the client's.</b> The panel now says so, because <code>SpiritBurstState.php:10-12</code> records D-20: no Global English capture names any of the six, so printing them as if the client wrote them is the defect the enum's own docblock warns about.</li><li><b>One real defect this drawing surfaces, and it is in the code, not the wireframe.</b> The strip's <b>Spirit Bursts</b> tile reads <code>N/A</code> while the bands panel places the same run in <code>10–12</code> from a combined total of 11. Both figures come from one payload, and the two disagree because <code>ScenarioSectionBuilder.php:84</code> reads <code>$values[$widget] = $widget === 'team_rank' ? $team['rank'] : null;</code> — every widget except team rank is hardcoded absent, so a run that records both burst tallies is told it has none. The correct value is the combined <code>spirit_bursts_count + extreme_bursts_count</code> the team section already computes as <code>combined_bursts</code>. <b>This is a content defect the audit did not file</b> (it recorded the N/A as "absence honest" against the sparse run, where it <em>was</em> honest). Not fixed here — this artifact changes no code; it is named so the owner sees it before the page is ruled on.</li>
+        </ol>
+        <p style="margin:12px 0 0;font-size:12px;color:var(--ink-muted)">
+          Wireframe only. Data: run 7's live Inertia props (seeded canonical walk). Tokens: the v2 set's shell.css, linked across folders.
+          No component, token, test or copy string changed by this artifact.
+        </p>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<nav class="mbar" aria-label="Primary mobile">
+  <a href="../frontend-v2-wireframes/index.html"><span class="dot" aria-hidden="true"></span>Home</a>
+  <a href="../frontend-v2-wireframes/runs-index.html" class="active"><span class="dot" aria-hidden="true"></span>Career</a>
+  <a href="../frontend-v2-wireframes/legacy.html"><span class="dot" aria-hidden="true"></span>Legacy</a>
+  <a href="../frontend-v2-wireframes/run-deck.html"><span class="dot" aria-hidden="true"></span>Deck</a>
+  <a href="../frontend-v2-wireframes/database.html"><span class="dot" aria-hidden="true"></span>More</a>
+</nav>
+<script>
+/* The collapsible rail, mirroring resources/js/layouts/AppLayout.vue:191-233 —
+   the same script and localStorage key the v2 set carries, so a choice made
+   there carries across to this folder. */
+(function(){
+  var KEY = 'trainer-desk.nav-rail';
+  var rail = document.getElementById('primary-nav-rail');
+  var toggle = document.querySelector('[data-rail-toggle]');
+  if(!rail || !toggle){ return; }
+  var stored = null;
+  try { stored = localStorage.getItem(KEY); } catch (e) {}
+  var collapsed = stored === 'compact';
+  function paint(){
+    rail.classList.toggle('is-collapsed', collapsed);
+    document.documentElement.classList.toggle('rail-collapsed', collapsed);
+    toggle.setAttribute('aria-expanded', String(!collapsed));
+    toggle.setAttribute('aria-label', collapsed ? 'Expand navigation' : 'Collapse navigation');
+    toggle.setAttribute('title', collapsed ? 'Expand navigation' : 'Collapse navigation');
+    toggle.querySelector('[data-rail-verb]').textContent = collapsed ? 'Expand navigation' : 'Collapse navigation';
+  }
+  toggle.addEventListener('click', function(){
+    collapsed = !collapsed;
+    try { localStorage.setItem(KEY, collapsed ? 'compact' : 'wide'); } catch (e) {}
+    paint();
+  });
+  paint();
+})();
+</script>
+</body>
+</html>
