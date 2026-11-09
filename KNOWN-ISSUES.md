@@ -4571,3 +4571,181 @@ exactly the class of test this repository uses heavily for copy and vocabulary g
 so a sweep that reads nothing cannot pass. The eleven files it additionally found were pre-existing
 `core.autocrlf` checkout artefacts with no diff against `HEAD`; normalising them was a git no-op, proven by an
 unchanged `git diff --stat HEAD`.
+
+## KI-154 — The `Spirit Bursts` scenario widget is hardcoded absent, so a run that records both burst tallies reads `N/A`
+
+**State:** **RESOLVED at `5e39a1f0`** (2026-11-10). Filed 2026-11-09 during the Scenario detail HFW
+build; found by data-flow check against run 7 (the seeded canonical walk), not by a test.
+
+**Closure.** `scenarioSection()` now fills `spirit_bursts` from `$team['combined_bursts']`, the same
+accessor the bands panel and the header strip already read, and keeps every key with no stored
+reading absent. Two tests pin it in `tests/Feature/UnityCupPanelTest.php`: one asserts `11` on a run
+with both tallies (and that the bands placement agrees), the other asserts the absence when only one
+tally is recorded. Both were verified non-vacuous — the first fails on the pre-fix code at exactly
+the fixed line. The full call-site sweep that produced this shape is
+`docs/research/ki-154-scenario-widget-sweep-2026-11-10.md`; it also records that **six of the seven
+labelled widget keys** were `null`, and that only this one had a recorded value behind it
+(`grade_points` and `shop_coins` have no stored reading, so they stay absent by design).
+
+**What closure does not cover.** (a) `UnityCupPanel.vue:324` still renders a bare `N/A` in a
+`<span title>` rather than through the shared absence component — a different file, different
+mechanism, and a separate register row (KI-157). (b) The `+30` attribution at
+`UnityCupPanel.vue:128-131` (KI-155) and the `15/15/20/20` caveat at `:370` (KI-156) are
+content-correctness defects, untouched by this fix. (c) The underlying shape — one figure computed
+in two payloads from one run — remains; the sweep's last section names it as a structural risk
+rather than a defect.
+
+---
+
+**Original report, preserved.**
+
+`ScenarioSectionBuilder::scenarioSection()` filled every scenario widget with the same expression
+(`app/Services/Career/ScenarioSectionBuilder.php:84`):
+
+```php
+$values[$widget] = $widget === 'team_rank' ? $team['rank'] : null;
+```
+
+`team_rank` is the one resource that fills; every other key in `config/scenarios.php`
+`scenarios.*.widgets` is written as `null` regardless of what the run recorded. For Unity Cup that
+means `spirit_bursts` — the one other widget the scenario declares — always renders as the
+`ResourceMeter`'s unrecorded state.
+
+**Why it is wrong, not just absent.** The same payload carries the figure. Run 7 records
+`spirit_bursts_count = 6` and `extreme_bursts_count = 5`, and
+`TeamPanelBuilder::teamSection()` already computes `combined_bursts = 11` and
+`burst_band = "10–12"` from them. So one page prints `Spirit Bursts: N/A` in its widget row and
+`This run: 11 bursts combined, inside the 10–12 band` in the bands panel below it. The comment above
+line 84 states the intended rule correctly — "A scenario resource with no recorded reading is a
+named absence rather than a zero" — and the code does not implement it: an unrecorded reading and a
+recorded one are both `null`.
+
+Measured payload on run 7:
+
+```json
+{"widgets":["team_rank","spirit_bursts"],
+ "widget_values":{"team_rank":"S","spirit_bursts":null},
+ "combined_bursts":11,"burst_band":"10–12"}
+```
+
+**Why the audit did not catch it.** The round-7 audit's run (id 3) records no bursts at all, so
+`N/A` was true there and was recorded as an honest absence. The defect only appears on a run that
+has the tallies, which is what the seeder-imported run 7 supplies.
+
+**Closure.** Fill `spirit_bursts` from the same value the bands read, `$team['combined_bursts']`,
+and leave the `null` default for any key the run genuinely has nothing for. Acceptance is a payload
+assertion that `widget_values.spirit_bursts` equals `combined_bursts` on a run with both tallies,
+plus a rendered assertion that the meter prints `11` rather than `N/A`. Not fixed here: the HFW and
+the two verification passes that surfaced it are documentation-only and change no code.
+
+*Surfaced in `docs/design-research/scenario-detail-hfw-2026-11-09/VERIFICATION.md`, which labels the
+tile a defect in the drawing rather than reproducing the absence as if it were honest.*
+
+## KI-155 — The `Team Ranking Bonus: All Attributes +30` line attributes the figure to the team rank; the corpus says it is the league-placement bonus
+
+**State:** OPEN, filed 2026-11-09 during the Scenario detail HFW reference pass.
+
+**Defect.** `resources/js/components/scenario/UnityCupPanel.vue:128-131` carries the provenance note
+for the `+30` line:
+
+> "Seen beside the Rank S emblem in the recorded run (client tooltip). That the bonus binds to the
+> rank rather than the league standing is inferred from screen position, so it is Estimated, not
+> Confirmed (run report §1.8, §7.5)."
+
+`docs/research/flows-career-workspace.md:232` records the opposite reading and states it as verified:
+
+> "The client prints a `Team Ranking Bonus: All Attributes +30` tooltip beside the Team Rank emblem,
+> and that figure is the **league-placement** bonus, not a reading of the rank letter: the published
+> ladder pays 2nd-5th +50, 6th-10th +30, 11th-15th +20 and 16th-20th +10, and the recorded run's 8th
+> place sits in the +30 band."
+
+The figure is right for this run — 8th place is in the 6th-10th band — and the attribution the panel
+prints is the one the corpus refutes. The `Estimated` badge is therefore right about the confidence
+and wrong about the subject: what is uncertain is the ladder's exact edges, not whether the bonus is
+placement-keyed.
+
+**Not the same ladder as the vendor table.** `SCENARIO-PUBLISHER-REFERENCES.md:1093` carries a second,
+differently-shaped table (`F +2 All Stats … S +5 All Stats and +1 Hint Level`) described as "bonus
+granted on each increase of overall team rank". That is a promotion reward keyed to the rank change,
+not the standing bonus the client prints beside the emblem. A fix must not substitute one for the
+other.
+
+**Closure.** Re-word the note to name the league-placement reading and cite
+`flows-career-workspace.md:232`, or — since no `league_bonus` ladder exists in `config/scenarios.php`
+— state the figure as an observation with the placement band named and no derived claim. Acceptance
+is a copy assertion on the panel plus the `title`, and a rendered case that the `+30` and its subject
+read as one statement. Not fixed here: no code change in the pass that found it.
+
+*Surfaced in `docs/design-research/scenario-detail-hfw-2026-11-09/VERIFICATION.md` (reference pass,
+row 13), where the HFW's own copy was corrected.*
+
+## KI-156 — The burst-band caveat names a `15/15/20/20` publisher figure the reference corpus does not carry
+
+**State:** OPEN, filed 2026-11-09 during the Scenario detail HFW reference pass.
+
+**Defect.** `resources/js/components/scenario/UnityCupPanel.vue:370` renders the band table's
+provenance note:
+
+> "gametora counts the bursts combined and pays 10/20/30/40 SP; umamusu.wiki's criteria never say
+> whether Extremes increment, and two other publishers report 15/15/20/20 with no stat component;
+> the payout is dated late November where those publishers print the first half."
+
+The `15/15/20/20` figure is not in `docs/UMAMUSUME_REFERENCE.md`. It appears in
+`docs/research-scratch/RACE-AND-SLICE-RESEARCH.md:2960` and in the run report's own §7, both citing a
+2025-11-20 Game8 JP page — pre-rework JP material, and the reference corpus records the rework that
+superseded it.
+
+What the reference corpus actually says the two publishers disagree about is different in kind.
+`UMAMUSUME_REFERENCE.md` §2.2.2 and conflict row 57 record: GameTora prints four numbered bands
+(`4 to 9`, `7 to 9`, `10 to 12`, `13+`) with matching-stat rewards and a disclaimer that its low-end
+values are unknown; Umamusu Wiki prints the same four reward tiers but attaches a *criterion* to the
+gold rows rather than numbered edges, and never states whether Extreme Bursts increment. The
+disagreement is **edges versus criteria**, not one SP figure against another. Row 57 also records
+that GameTora's first two bands overlap and cannot both hold, which is why `config/scenarios.php`'s
+four bands are the tool's own resolution.
+
+So the caveat's shape is right (there is a real conflict, and it is not settled) and two of its three
+named parts are misattributed: the Skill Point figures do not disagree between the two named
+publishers, and the `15/15/20/20` pair is carried by no source the corpus holds for the post-rework
+values.
+
+**Closure.** Rewrite the `detail` to the conflict row 57 wording — GameTora's overlapping edges, the
+Wiki's criteria-not-edges gold rows, the unanswered Extreme question, and Late November — dropping the
+`15/15/20/20` claim. Keep the visible `text` sentence's three-part shape. Acceptance is a copy
+assertion pinning the new detail and a negative assertion that `15/15/20/20` no longer appears in
+`resources/js/`. Not fixed here: no code change in the pass that found it.
+
+*Surfaced in `docs/design-research/scenario-detail-hfw-2026-11-09/VERIFICATION.md` (reference pass,
+row 14), where the HFW's own caveat was corrected to the corpus wording.*
+
+## KI-157 — The Unity Cup panel prints a bare `N/A` in a `title` attribute instead of the shared absence pattern
+
+**State:** OPEN, filed 2026-11-10. Surfaced by the KI-154 sweep's adjacent-defect audit (B.1 item 4),
+which determined it is **not** the same code path as KI-154 and must not be bundled with it.
+
+**Defect.** `resources/js/components/scenario/UnityCupPanel.vue:324` renders an unrecorded figure as
+a bare `N/A` inside a `<span title>`:
+
+```vue
+<span class="text-ink-muted" title="No column stores this reading">N/A</span>
+```
+
+`AGENTS.md` §5 and §13 set the rule this crosses: "A value a run has not recorded renders as `N/A`
+with a `title`, never a default and never a dash." The `title` is present, so the letter of the rule
+is met and a global `N/A` grep is right not to fail. What is missing is the app's **shared absence
+component**, which every sibling surface uses — `CareerStatePanel.vue` was moved onto it precisely
+because it carried the older bare pattern, and the scenario panels around this line already use it.
+So the page prints two different absence treatments for one class of fact.
+
+**Why it is not KI-154.** Different file (Vue template vs PHP service), different mechanism (markup
+vocabulary vs a `null` written over a recorded value), and no shared accessor. Fixing KI-154's
+`ScenarioSectionBuilder.php:84` changes nothing about what `:324` renders. Bundling them would have
+put a template change inside a service fix's commit, which is the mistake the dispatch's B.1.4
+instruction exists to prevent.
+
+**Closure.** Route `:324` through the shared absence component with its `title` preserved, matching
+the sibling panels. Acceptance is a rendered assertion that the absence renders as the shared
+component's output (not a bare `N/A` text node) plus a copy assertion that the explanation still
+travels. Not fixed here: this pass is a registration, not a slice.
+
+*Determination recorded in `docs/research/ki-154-scenario-widget-sweep-2026-11-10.md` §1.5.*
