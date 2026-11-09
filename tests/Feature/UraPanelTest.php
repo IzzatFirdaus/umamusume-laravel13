@@ -177,7 +177,20 @@ it('raises a Critical alert when a mandatory race turn has arrived and nothing i
             $all = $section->all();
             $rows = collect(collect($all['objectives'])->keyBy('group')->get('Mandatory races')['rows']);
 
-            expect($rows->firstWhere('label', 'Junior Make Debut')['state'])->toBe('missed')
+            // A past turn with nothing logged reads `not_reached`, not `missed` (KI-158).
+            //
+            // This assertion used to expect `'missed'`, and that expectation was correct when it
+            // was written. `27a3d374` then changed the state deliberately: "read a past objective
+            // with no record as not reached, not missed (R7-82, R7-22, R7-25, R7-61)". Its own
+            // comment says why — "`missed` claims the run went and did not meet the requirement; a
+            // run imported mid-career never went" — and the code picks between them on
+            // `objectiveHasRecord()`, so a row with no entry cannot be `missed`. `30eb2b4d`
+            // reinforced the same reading for the alert path. Neither commit touched this file
+            // (`git show --stat 27a3d374 | grep -c UraPanelTest` returns 0), so the assertion
+            // outlived the behaviour it pinned. Corrected 2026-11-10, not deleted: the case's other
+            // two assertions (`URA Finals Final` → `upcoming`, and the finale alert's absence) were
+            // already right and are unchanged.
+            expect($rows->firstWhere('label', 'Junior Make Debut')['state'])->toBe('not_reached')
                 // The finale block has no turn of its own, so it can never be missed and raises no
                 // alert: the alert this screen may make is about a recorded turn that has arrived.
                 ->and($rows->firstWhere('label', 'URA Finals Final')['state'])->toBe('upcoming')
