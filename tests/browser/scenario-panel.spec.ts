@@ -76,6 +76,8 @@ test('keeps a widget key from resolving a panel component, and each map resolves
 
 test('draws a resource the matrix labels through the meter, with the number and a labelled bar', async ({ page }) => {
     await openUnityCupCockpit(page);
+    // v3.0.0 moved the scenario boards onto their own page; the widgets ride with them.
+    await openScenarioDetail(page);
 
     const section = page.getByRole('region', { name: 'Scenario' });
     await expect(section).toBeVisible();
@@ -128,6 +130,8 @@ test('draws nothing at all for a panel the scenario leaves off', async ({ page }
 
 test('states the scenario, its documentation and the ruleset absence in the baseline strip', async ({ page }) => {
     await openUnityCupCockpit(page);
+    // v3.0.0 moved the scenario boards onto their own page; the strip rides with them.
+    await openScenarioDetail(page);
 
     const section = page.getByRole('region', { name: 'Scenario' });
     await expect(section.getByText('Unity Cup', { exact: true })).toBeVisible();
@@ -178,6 +182,8 @@ test('renders only the baseline strip for a scenario that composes no panel', as
 
     await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
+    // v3.0.0 moved the scenario boards onto their own page, so the empty branch is read there.
+    await openScenarioDetail(page);
 
     const section = page.getByRole('region', { name: 'Scenario' });
     await expect(section.getByText('Our Grand Concert', { exact: true })).toBeVisible();
@@ -189,6 +195,30 @@ test('renders only the baseline strip for a scenario that composes no panel', as
 
     // Every panel is off, so no renderer mounts and no fallback row does.
     await expect(section.getByText(/cannot draw yet/)).toHaveCount(0);
+});
+
+test('keeps the no-panels sentence off a scenario that composes panels', async ({ page }) => {
+    await openUnityCupCockpit(page);
+    // v3.0.0 moved the scenario boards onto their own page; this case reads the region there.
+    await openScenarioDetail(page);
+
+    const section = page.getByRole('region', { name: 'Scenario' });
+
+    // Round-7 F-01 (plan `2026-11-09-scenario-detail-upgrade` §2.1). `5e7da543` widened the strip's
+    // gate to `careerGoalsOn ||` so the published caps would stop hiding behind the goals ladder, and
+    // the "composes no panels of its own" sentence rode along inside the widened branch. Unity Cup
+    // draws Team races, the Team Rank ladder and Career goals, so the sentence contradicted the page
+    // above it. Red before the guard: this text was visible on this run.
+    await expect(section.getByText(/composes no panels of its own/)).toHaveCount(0);
+
+    // The caps the widening was for still render, and the panels above still render: the fix removes
+    // the false sentence and nothing else.
+    await expect(section.getByRole('table', { name: 'Published stat caps for this scenario' })).toBeVisible();
+    await expect(page.locator('[data-region="scenario-panels"]')).toBeVisible();
+
+    // The strip's own scenario identity is the shell's floor and is NOT part of this fix: it renders
+    // above the panels for every scenario, declared or not.
+    await expect(page.locator('[data-region="scenario"]').getByText('Unity Cup', { exact: true })).toBeVisible();
 });
 
 test('keeps the 44px floor across the cockpit and reflows at 320 px', async ({ page }) => {

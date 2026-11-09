@@ -332,3 +332,56 @@ it('composes the trainee own ladder for an Our Grand Concert run', function (): 
     expect($group['rows'])->toHaveCount(1)
         ->and($group['group'])->toBe('Trainee goals');
 });
+
+it('speaks the row state in the alert, so no objective says "not met" without an attempt', function (): void {
+    // Round-7 F-02 (plan `2026-11-09-scenario-detail-upgrade` §2.2). A past objective this run never
+    // played reads `not_reached` on its row; the alert beside it said "is due and not met", a verdict
+    // on an attempt the run never made (`TOG-3`: status may be stale or absent, but never wrong). The
+    // two codings of one state now travel together: the level key is the row's own word and the copy
+    // drops the failure claim.
+    $run = goalsRun();
+    $slot = RaceCatalogSlot::factory()->create(['year' => 1, 'month' => 5, 'half' => 'Late', 'title' => 'Junior Stakes']);
+    goalFor($run, [
+        'career_year' => 1, 'turn' => 11, 'source_order' => 1,
+        'race_catalog_slot_id' => $slot->id, 'required_placement' => 3,
+    ]);
+
+    /** @var list<array{level: string, text: string, detail: string|null}> $alerts */
+    $alerts = test()->get(route('runs.cockpit', $run))->assertOk()->inertiaProps('scenario.alerts');
+    /** @var array<string, mixed> $row */
+    $row = goalsGroup($run)['rows'][0];
+
+    expect($row['state'])->toBe('not_reached')
+        ->and($alerts)->toHaveCount(1)
+        // The same state, one vocabulary: the heading is the row's word, not a severity claim.
+        ->and($alerts[0]['level'])->toBe('Not reached')
+        ->and($alerts[0]['text'])->toContain('past due with no entry recorded in this run')
+        ->and($alerts[0]['text'])->not->toContain('not met');
+});
+
+it('keeps the critical heading and the not-met wording only where a record exists', function (): void {
+    // The other half of the same rule: an entry that is not a finished race leaves the requirement
+    // unproven, so the alert names that rather than a failure. The guard is `$ranThisRace`, so this
+    // case proves the wording moves with the state and not with a constant.
+    $run = goalsRun();
+    $slot = RaceCatalogSlot::factory()->create(['year' => 1, 'month' => 5, 'half' => 'Late', 'title' => 'Junior Stakes']);
+    goalFor($run, [
+        'career_year' => 1, 'turn' => 11, 'source_order' => 1,
+        'race_catalog_slot_id' => $slot->id, 'required_placement' => 3,
+    ]);
+
+    // An entry that is recorded but not completed: the race is on the log, its result is not.
+    $run->raceEntries()->create([
+        'race_catalog_slot_id' => $slot->id,
+        'status' => RaceEntryStatus::Entered->value,
+        'placement' => null,
+    ]);
+
+    /** @var list<array{level: string, text: string}> $alerts */
+    $alerts = test()->get(route('runs.cockpit', $run->fresh()))->assertOk()->inertiaProps('scenario.alerts');
+
+    expect($alerts)->toHaveCount(1)
+        ->and($alerts[0]['level'])->toBe('Missed')
+        ->and($alerts[0]['text'])->toContain('recorded entry is not a finished race')
+        ->and($alerts[0]['text'])->not->toContain('not met');
+});

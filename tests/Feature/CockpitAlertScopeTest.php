@@ -129,7 +129,9 @@ it('raises no due alert for a trainee objective whose race the run already enter
     expect(collect(scopedAlerts($run->fresh()))->pluck('text'))
         ->not->toContain('Nikkei Sho is due and not met');
 
-    // Over-suppression guard: the same objective with no entry at all is still outstanding.
+    // Over-suppression guard: the same objective with no entry at all is still outstanding. Its copy
+    // is the `not_reached` arm's, not the "not met" wording: no entry means no attempt to judge, so
+    // the alert names the state the row prints (round-7 F-02).
     $unran = scopedRun();
     $openSlot = scopedSlot('Yasuda Kinen', RaceCatalogSlot::YEAR_SENIOR, 11, false);
 
@@ -141,8 +143,13 @@ it('raises no due alert for a trainee objective whose race the run already enter
         'required_placement' => 1,
     ]);
 
-    expect(collect(scopedAlerts($unran->fresh()))->pluck('text'))
-        ->toContain('Yasuda Kinen is due and not met');
+    $open = collect(scopedAlerts($unran->fresh()));
+
+    expect($open->pluck('text'))->toContain('Yasuda Kinen is past due with no entry recorded in this run')
+        ->and($open->pluck('text'))->not->toContain('Yasuda Kinen is due and not met')
+        // The heading carries the state word, and the alert tone follows it, so the two codings of
+        // one state travel together (`GP-4`, `UI-3`).
+        ->and($open->firstWhere('level', 'Not reached'))->not->toBeNull();
 });
 
 it('does not banner a mandatory race from a career year the run has left behind', function (): void {
