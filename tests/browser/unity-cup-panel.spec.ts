@@ -396,9 +396,10 @@ test('capsules the four Scenario panels that sat outside the card pattern', asyn
 
     expect(panels.filter((panel) => !panel.capsule), JSON.stringify(panels)).toEqual([]);
 
-    // Nine cards rendered before this slice (Team and Unity Cup progress are data-conditional) plus
-    // the four added here.
-    expect(panels.length, JSON.stringify(panels)).toBeGreaterThanOrEqual(13);
+    // Twelve cards render: nine team panels before this slice (Team and Unity Cup progress are
+    // data-conditional) plus the four added here, minus one because Move 3 (`28d9afbf`) merged the
+    // Spirit Burst roster into the Burst count bands card, so those two are a single card now.
+    expect(panels.length, JSON.stringify(panels)).toBeGreaterThanOrEqual(12);
 });
 
 test('heads both scenario blocks with the documented capsule and keeps the region name', async ({ page }) => {
