@@ -34,7 +34,7 @@ rungs, provenance marks), never heading chrome.
 
 ## Panel set, order and cards — unchanged from the component
 
-**Rendered/current as `b3e0a1f`; Move 3 (Spirit Bursts → Burst bands) reflected.** Ten team panels in
+**Rendered/current as `42d91678`; Move 3 (Spirit Bursts → Burst bands) reflected.** Ten team panels in
 `UnityCupPanel.vue`'s own DOM order and spans (Team Race s12 → Team s4 → Spirit s4 → Team Rank s4 →
 Unity Cup progress s4 → Team stat grades s8 → Burst count bands + Spirit Burst roster **s12** →
 Special Training s4 → Team race coverage s8 → Team race shape s12), then Trainee goals and Mandatory
