@@ -34,14 +34,25 @@ rungs, provenance marks), never heading chrome.
 
 ## Panel set, order and cards — unchanged from the component
 
-Eleven team panels in `UnityCupPanel.vue`'s own DOM order and spans (Team Race s12 → Team s4 →
-Spirit s4 → Team Rank s4 → Unity Cup progress s4 → Team stat grades s8 → bands s8 → Spirit Burst s4
-→ Special Training s4 → coverage s8 → shape s12), then Trainee goals and Mandatory races as **two**
-cards (`CareerGoalsPanel.vue:97` renders one `<section>` per group), then the baseline strip.
+**Rendered/current as `b3e0a1f`; Move 3 (Spirit Bursts → Burst bands) reflected.** Ten team panels in
+`UnityCupPanel.vue`'s own DOM order and spans (Team Race s12 → Team s4 → Spirit s4 → Team Rank s4 →
+Unity Cup progress s4 → Team stat grades s8 → Burst count bands + Spirit Burst roster **s12** →
+Special Training s4 → Team race coverage s8 → Team race shape s12), then Trainee goals and Mandatory
+races as **two** cards (`CareerGoalsPanel.vue:97` renders one `<section>` per group), then the
+baseline strip.
 
-The row-3 spans were corrected at `6493326a`: Team stat grades moved `s4` → `s8`, which closed a
-341 px hole (8/12 tracks used → 12/12) without moving a single panel. `UnityCupPanel.vue` and this
-wireframe agree as of `5e39a1f0`.
+Two dated corrections to that list, both measured in a browser at 1280 px on a 977 px grid:
+
+- **`6493326a`** — Team stat grades moved `s4` → `s8`, closing a 341 px hole (8/12 tracks → 12/12)
+  without moving a single panel.
+- **Move 3** (`28d9afbf`, owner Ruling 2) — the Spirit Burst roster merged into the Burst count bands
+  card and that card widened `s8` → `s12`, because its `s4` sibling no longer exists. Panel count
+  **11 → 10**; the 236 px of dead column the review measured under the shorter card is gone, and the
+  worst remaining hole anywhere on the page is row 2's pre-existing 23 px.
+
+The roster keeps its own words inside the merged card, under a rule, as a labelled sub-block; its
+`CapsuleHeader` becomes a `.sublabel` paragraph, so the card carries one header rather than two. In
+the app that is `SpiritBurstRoster`'s new `bare` prop.
 
 ## The one real defect this drawing surfaced — now fixed
 
