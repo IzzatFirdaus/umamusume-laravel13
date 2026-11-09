@@ -29,7 +29,7 @@ proposal, one register update, and one workstream that stopped on its own condit
 
 | Gate | Command | Result |
 |---|---|---|
-| Tests | `vendor/bin/pest --no-coverage --compact` | **2302 passed, 3 failed** (36229 assertions). The three are the `142bb171` baseline (`ScenarioAdvisorFinaleTest`, `UiHygieneTest`, `UraPanelTest`). **+2 passed** vs the pre-dispatch 2300 — the two new KI-154 cases. |
+| Tests | `vendor/bin/pest --no-coverage --compact` | **2302 passed, 3 failed** (36229 assertions). **+2 passed** vs the pre-dispatch 2300 — the two new KI-154 cases. The three failures reproduce against `HEAD`'s committed code, so none is a regression from this chain; one of them is not merely "pre-existing" but a **test pinning superseded behaviour** — see KI-158. |
 | PHPStan | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` | `[OK] No errors` |
 | Lint | `npm run lint:ui` | **500 findings** = baseline, **delta 0**; 0 in any changed file |
 | Lore docs | `php tools/lore.php` | **577 hits, 75 exempt** — delta **+1** from 576. Source located and ruled: `VERIFICATION.md:20`, the word "pairing" in a facility-ladder row, class 2 (ordinary-word substring), added by `50e0d9fd`. Not edited; the ruling is the obligation. |
@@ -67,6 +67,10 @@ this same log reported `exit code 0` while the log says `EXIT=1`, which is the p
 - **KI-155** — the `+30` line attributes the figure to team rank; corpus says league placement. Open.
 - **KI-156** — the bands caveat cites a `15/15/20/20` publisher figure the corpus does not carry. Open.
 - **KI-157** — `UnityCupPanel.vue:324` prints a bare `N/A` instead of the shared absence pattern. Open.
+- **KI-158** — `UraPanelTest:180` pins `missed` for a past objective with no record, which `27a3d374`
+  deliberately changed to `not_reached`. Reproduced against `HEAD`'s committed file, not caused by
+  this chain. Open. Worth more than the usual baseline note: the test asserts the behaviour a
+  ratified round-7 fix reversed.
 
 KI-155/156/157 were **not** fixed: the dispatch lists all three as out of scope, and each needs its
 own slice.
