@@ -303,7 +303,7 @@ const counterSegments = computed((): string[] => {
             </div>
             </div>
 
-            <div class="@3xl:col-span-3 @5xl:col-span-4">
+            <div class="@3xl:col-span-3 @5xl:col-span-8">
             <div class="card p-3">
                 <CapsuleHeader title="Team stat grades" class="mb-2" />
                 <ul class="flex flex-col gap-1" aria-label="Team stat grades">
