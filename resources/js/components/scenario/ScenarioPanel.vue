@@ -276,9 +276,17 @@ const emptyText = computed<string>(() =>
              flag off reaches it for one config entry and no edit here. -->
         <div v-if="careerGoalsOn || onPanels.length === 0" class="flex flex-col gap-3">
             <!-- The generic sentence, only where the scenario declares no line of its own: a specific
-                 reason beats a generic one, and printing both would say the same thing twice. -->
+                 reason beats a generic one, and printing both would say the same thing twice.
+
+                 It is ALSO gated on `onPanels.length === 0`, and that half is load-bearing since
+                 `5e7da543`. That commit widened the strip's own gate to `careerGoalsOn ||` so the
+                 published caps would stop hiding behind the goals ladder; the sentence lives inside
+                 the widened branch, so every career-goals scenario (URA, Unity Cup, Our Grand
+                 Concert) began printing "composes no panels of its own" while drawing two to four
+                 panels directly above it. The caps table, the finale line and the advisor note belong
+                 in that widened branch; a claim about how many panels compose does not. -->
             <AlertRow
-                v-if="props.scenario.panel_absence === null"
+                v-if="props.scenario.panel_absence === null && onPanels.length === 0"
                 glyph="○"
                 :text="emptyText"
                 tone="note"
