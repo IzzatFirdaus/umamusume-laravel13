@@ -4752,9 +4752,15 @@ travels. Not fixed here: this pass is a registration, not a slice.
 
 ## KI-158 — `UraPanelTest` pins the superseded `missed` state for a past objective with no record, so it fails against the behaviour `27a3d374` deliberately shipped
 
-**State:** OPEN, filed 2026-11-10 while verifying an unrelated slice. This is **not** a regression from
-that slice: it reproduces against `HEAD`'s committed `TeamPanelBuilder.php` with the working tree's
-changes removed.
+**State:** **RESOLVED at `fdf6452f`** (2026-11-10). Filed while verifying an unrelated slice; the
+test now expects the state `27a3d374` shipped. This was **not** a regression from that slice: it
+reproduced against `HEAD`'s committed `TeamPanelBuilder.php` with the working tree's changes removed.
+
+**Closure.** `tests/Feature/UraPanelTest.php:180` now expects `not_reached`, with a dated comment
+naming `27a3d374` and `30eb2b4d` and why the old value no longer matched, in the shape `AGENTS.md` §9
+prescribes for a test that pins a defect. The case's other two assertions were already correct and
+are unchanged. Verified non-vacuous both ways: setting it back to `'missed'` fails the case
+(`1 failed, 7 passed`), and the corrected value passes (`8 passed, 140 assertions`).
 
 **Defect.** `tests/Feature/UraPanelTest.php:180` asserts:
 
