@@ -327,7 +327,7 @@ const counterSegments = computed((): string[] => {
             </div>
             </div>
 
-            <div v-if="composesBursts && props.scenario.team.bands.length > 0" class="@3xl:col-span-3 @5xl:col-span-8">
+            <div v-if="composesBursts && props.scenario.team.bands.length > 0" class="@3xl:col-span-6 @5xl:col-span-12">
             <div class="card p-3">
                 <div class="mb-2 flex flex-wrap items-baseline gap-2">
                     <CapsuleHeader title="Burst count bands" />
@@ -394,11 +394,19 @@ const counterSegments = computed((): string[] => {
                         Where this run sits in the bands is not shown: both burst tallies have not been recorded.
                     </template>
                 </p>
-            </div>
-            </div>
 
-            <div v-if="composesBursts" class="@3xl:col-span-3 @5xl:col-span-4">
-                <SpiritBurstRoster :enabled="composesBursts" :roster="props.scenario.team.roster" />
+                <!-- Move 3 (`28d9afbf`, Ruling 2): the roster joins this card as a labelled
+                     sub-block. The two panels state one run's burst position and left 236 px of dead
+                     column when they stood side by side; the divider keeps them readable as two
+                     things while the card, its header and its provenance badge stay single. -->
+                <div class="mt-3 border-t border-rule pt-3">
+                    <SpiritBurstRoster
+                        :enabled="composesBursts"
+                        :roster="props.scenario.team.roster"
+                        bare
+                    />
+                </div>
+            </div>
             </div>
 
             <div

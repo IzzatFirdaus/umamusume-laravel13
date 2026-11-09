@@ -16,6 +16,17 @@ type BurstState =
 defineProps<{
     enabled: boolean;
     roster: { teammate: string; state: BurstState; stateLabel: string }[];
+    /**
+     * Render as a labelled sub-block rather than a card of its own.
+     *
+     * Move 3 of the scenario-detail consolidation plan (`28d9afbf`, owner Ruling 2) merges this
+     * panel into the `Burst count bands` card: the two state the same run's burst position, and
+     * side by side they left 236 px of dead column under this one. In bare mode the card wrapper
+     * and the `CapsuleHeader` go, and the heading becomes a `.sublabel` paragraph — one card, one
+     * header, and the roster's own words preserved rather than dropped. The default keeps the
+     * standalone card so this component still stands alone if another surface mounts it.
+     */
+    bare?: boolean;
 }>();
 
 // Six states, each with its own word and its own mark, and the mark is never the only
@@ -32,8 +43,9 @@ const treatments: Record<BurstState, { mark: string; treat: string }> = {
 </script>
 
 <template>
-    <div v-if="enabled" class="card p-3">
-        <CapsuleHeader title="Spirit Burst" class="mb-3" />
+    <div v-if="enabled" :class="bare ? '' : 'card p-3'">
+        <p v-if="bare" class="sublabel mb-2">Spirit Burst</p>
+        <CapsuleHeader v-else title="Spirit Burst" class="mb-3" />
 
         <p v-if="roster.length === 0" class="text-sm text-ink-muted" role="status">
             No teammate burst states recorded. The six states are chargeable, charged, held,
