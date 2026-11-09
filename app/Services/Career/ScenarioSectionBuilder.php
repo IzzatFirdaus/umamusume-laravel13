@@ -79,9 +79,23 @@ final class ScenarioSectionBuilder
 
             $labels[$widget] = $widgetLabels[$widget];
             // A scenario resource with no recorded reading is a named absence rather than a zero: a
-            // zero would read as "the run has none", which this tool cannot know (D-220). The rank
-            // is the one resource a payload already records, so it fills when it exists.
-            $values[$widget] = $widget === 'team_rank' ? $team['rank'] : null;
+            // zero would read as "the run has none", which this tool cannot know (D-220). Only the
+            // keys whose value this payload already carries are filled (KI-154):
+            //
+            // - `team_rank` reads the most recent rank letter the Trainer reported.
+            // - `spirit_bursts` reads the combined normal + Extreme total, which is what the bands
+            //   panel places in a tier and what the header strip captions "normal plus Extreme"
+            //   (KI-97). It is null when either tally is unrecorded, never half a count; that rule
+            //   belongs to `TeamPanelBuilder::teamSection()` and is not repeated here.
+            //
+            // `grade_points` and `shop_coins` have no stored reading on a run, so they stay absent.
+            // The baseline three (`turn`, `energy`, `fans`) never reach this loop:
+            // `CockpitController::scenarioWidgets()` subtracts them before it builds the list.
+            $values[$widget] = match ($widget) {
+                'team_rank' => $team['rank'],
+                'spirit_bursts' => $team['combined_bursts'] ?? null,
+                default => null,
+            };
         }
 
         $panels = [];

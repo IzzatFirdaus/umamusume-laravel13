@@ -112,6 +112,33 @@ it('carries the recorded team facts for a run that has them all', function (): v
                 && $grades->pluck('label')->all() === config('scenarios.stat_order')));
 });
 
+it('sources the Spirit Bursts widget from the run\'s recorded tallies (KI-154)', function (): void {
+    // KI-154: `ScenarioSectionBuilder` wrote `null` for every widget but `team_rank`, so the tile
+    // read `N/A` on a run that recorded both tallies while the bands panel below it placed the
+    // same figure in a tier. The widget now reads the combined total the bands panel already owns.
+    $run = unityCupRun(['spirit_bursts_count' => 6, 'extreme_bursts_count' => 5]);
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scenario.widget_values.spirit_bursts', 11)
+            ->where('scenario.team.combined_bursts', 11)
+            // The bands panel places the same figure in a tier, so the two surfaces agree.
+            ->where('scenario.team.burst_band', '10–12'));
+});
+
+it('keeps the Spirit Bursts widget absent when only one tally is recorded', function (): void {
+    // D-220: an unrecorded half is not a zero and not a partial count. The combined figure is null
+    // unless both tallies exist, and the widget inherits that rule rather than re-deriving it.
+    $run = unityCupRun(['spirit_bursts_count' => 6, 'extreme_bursts_count' => null]);
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scenario.widget_values.spirit_bursts', null)
+            ->where('scenario.team.combined_bursts', null));
+});
+
 it('carries the configured burst bands, their payout timing and the Special Training facts', function (): void {
     $run = unityCupRun();
 
