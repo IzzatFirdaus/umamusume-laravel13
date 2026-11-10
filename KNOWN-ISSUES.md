@@ -14,6 +14,97 @@ log's horizontal scroll at phone width) and `KI-27` (`uma:fetch` reports "unchan
 snapshot" against a database it never wrote to). `KI-4` is RESOLVED. The master is authoritative for
 those entries' current status; this line names them, it does not restate them.
 
+**Status correction (2026-11-10, S-RS-REMAINING-1 close-out):** the full-file reconciliation the close-out dispatch names, one line per KI the register carries (measured against HEAD `76590c6d`, after this pass's 20 commits plus the close-out's own repair commit `76590c6d`; every closure names its hash or proving command; entries this pass changed name the slice). Duplicate-numbered entries (KI-70/71, KI-101..104, KI-142) are listed once per underlying entry where their statuses differ; the seven remaining duplicate numbers are classified in `docs/research-scratch/SLICE-RECORDS.md` section `## register-duplicates-2026-11-10.md`.
+
+- KI-57 CLOSED (screenshot manifest, prior session) - CLOSED (previous session, no change this pass)
+- KI-58 CLOSED - CLOSED (previous session, no change)
+- KI-59 OPEN - fixture-dependence of the catalog-detail absence case; not touched this pass
+- KI-60 OPEN - applied-to-dev leg (migrate:status not run this close-out; see the report's Gates)
+- KI-61 OPEN - preflight-screen gate owed; not touched
+- KI-62 CLOSED (previous session, no change)
+- KI-63 OPEN - NProgress `role="bar"` axe finding; owner-decision shape (capsule vs plain), not touched
+- KI-64 CLOSED (previous session, no change)
+- KI-65, KI-66, KI-67, KI-68 CLOSED (previous sessions, no change)
+- KI-69 OPEN, one half STALE - class-3 re-measured 9/9 PASS at HEAD (`.scratch-uma/rs-remaining-1/class3.log`, committed section `## ki-69-class3-veterans-2026-11-10.md` in SLICE-RECORDS, `34b1a0e2`); classes 1/2/4 not re-measured this pass, so the entry stays OPEN on those
+- KI-70 OPEN (2026-10-07 worktree-collision entry, unchanged); KI-70 (E1 44px entry, unchanged) OPEN - two distinct entries, both stay
+- KI-71 both entries CLOSED (2026-10-09) - distinct subjects, both stay
+- KI-72, KI-73, KI-75, KI-77, KI-78, KI-79, KI-80, KI-81 CLOSED (previous sessions)
+- KI-74 OPEN - contention rule; standing, no change
+- KI-76 CLOSED - `.env.example` half closed at HEAD (`8b2ab3d7`); `INERTIA_SSR_TIMEOUT` measured and declined (slice 1.4, `3253b8ea`)
+- KI-82 OPEN - finale catalogue row title; owner-decision (see `owner-decisions/KI-82` per Phase 3), not touched
+- KI-83 CLOSED/FIXED IN TREE (previous session)
+- KI-84 CLOSED at `91494a14`+`b30906a6` - R-1/R-2 approvals on record; status flipped this pass (slice 0.3, `bd0a8693`)
+- KI-85 CLOSED (previous session)
+- KI-86 CLOSED/FIXED IN TREE (previous session)
+- KI-87 OPEN - two-queries finale read; owner-decision (`owner-decisions/KI-82` family), not touched
+- KI-88, KI-89, KI-90 CLOSED (previous sessions)
+- KI-91 OPEN - Skills planner door; owner-decision placement, not touched
+- KI-92, KI-93 CLOSED (previous sessions)
+- KI-94 CLOSED at HEAD pre-existing - source-map-js 1.2.2 via `80025efe`; `npm audit --omit=dev` -> `found 0 vulnerabilities` re-verified this pass (slice 0.3, `bd0a8693`)
+- KI-95 FIXED-IN-TREE @ `8f45e552` + register note `4bcb945d` - header renders `Imported {date} from {source}` via `run.import_label`; payload case green in `HistoricalRunImportTest` (17 passed); `SCREEN_SPEC.md` record-screen section half stays OPEN
+- KI-96, KI-97 CLOSED (previous sessions)
+- KI-98, KI-99 FIXED IN TREE, NOT LANDED (per their own entries; O-1-held, no change)
+- KI-100 OPEN - 22 undecoded objectives; owner-decision (re-count, disclose, leave open), not touched
+- KI-101 (2026-10-16, harness staleness) OPEN - CONFIRMED live at HEAD: stale-bundle probe passed green over mutated source (slice 2.1, `ade1e5f9`); refusal proposal recorded, not applied (protected path)
+- KI-101 (2026-10-19, refresh trace) OPEN -> classified (a) test-side - `framenavigated=2, navigationTypes=["reload"]`; counter fix on branch `owner-decisions/KI-101-refresh` @ `31be0555`, 4/4 green, NOT merged (owner review)
+- KI-102 (2026-10-16) CLOSED at HEAD pre-existing - quoted name + SQLite defaults via `032b0c02`+`c91458f4`; dotenv parse exit 0 re-verified (slice 0.3)
+- KI-102 (2026-10-19, NFR-20 item 5) ACKNOWLEDGED GAP (standing, not touched)
+- KI-103 (2026-10-16) OPEN, premise withdrawn - `saved: number[]` declared on all seven wizard pages at HEAD (slice 0.3 note); saved-vs-visited semantic question stays open for its owner
+- KI-103 (2026-10-19, NFR-20 item 6) ACKNOWLEDGED GAP (standing)
+- KI-104 (2026-10-16) FIXED-IN-TREE, LANDED - empty diff vs HEAD, form is component root (slice 0.3 note); browser re-run instruction stands for the next browser pass
+- KI-104 (2026-10-19) PROPOSED - ADR-0027 unaccepted (standing, owner decision)
+- KI-105 OPEN - workflow guardrails; O-1 and harness-default decisions still owner-held, no change
+- KI-106 OPEN - citation ratchet 270 dead citations; not touched this pass (census today: 585 GONE vs 708 baseline, below bar)
+- KI-107 OPEN, PEER-OWNED - CLAUDE.md dead refs; peer file, no touch
+- KI-108 FIXED-IN-TREE @ `d662864b` - proof re-verified this close-out: worktree/`d662864b`-blob/HEAD-blob all `nuls: 0`, no BOM; recovered dispatch-record section restored as readable UTF-8
+- KI-109 OPEN, OWNER DECISION (standing) - this pass recorded that both named files left the tree at `5d88a88c` (note in `6a1c9227`); no file modified
+- KI-110 ACCEPTED LIMITATION (standing)
+- KI-111 FIXED-IN-TREE @ `1f5f5d76` - three mistagged closers + one unclosed block; `md_fence_check.py` -> `0 invalid closing fence(s) in 209 file(s)` (register note `0563f1de`)
+- KI-112, KI-113 CLOSED (previous sessions)
+- KI-114 OPEN - deck-picker browser files; not touched
+- KI-115 CLOSED - does not reproduce (ruling stands)
+- KI-116 OPEN - blocked on A-0.5
+- KI-117 OPEN - blocked: ADR
+- KI-118 CLOSED @ `005561c1` - status flipped this pass (slice 0.3): migration in tree, ancestor of HEAD
+- KI-119 SUPERSEDED-BY KI-133 (as its own dated note records)
+- KI-120 CLOSED @ `b102581a` - status flipped this pass (slice 0.3)
+- KI-121 CLOSED - ruled out (standing)
+- KI-122, KI-123 CLOSED - do not reproduce (standing)
+- KI-124 OPEN - openable, travel-note landed (per its own note), stays openable-unopened
+- KI-125, KI-126 CLOSED - declined per R8; status lines flipped to match their bodies this pass (slice 0.3)
+- KI-127 OPEN - team race facility panel card wrapper; not touched
+- KI-128 OPEN - owner placement decision
+- KI-129 OPEN - owner design call
+- KI-130 OPEN - blocked: owner ruling
+- KI-131 OPEN - openable copy fix; not touched
+- KI-132 OPEN - blocked: payload contract change (own pass)
+- KI-133 OPEN - blocked: shape decision + roster
+- KI-134 RESOLVED (previous session)
+- KI-135 RESOLVED 2026-10-30 (standing)
+- KI-136 OPEN, PEER-OWNED - full-career-journey locator; peer file, no touch
+- KI-137 OPEN (standing)
+- KI-138 RESOLVED @ `83105a45` (standing)
+- KI-139 RESOLVED @ `83105a45` (standing)
+- KI-140 CLOSED @ `d359e9d9` (pre-existing fix verified this pass: `FilterContractTest` -> `Tests: 35 passed (138 assertions)`; slice 0.3, `bd0a8693`)
+- KI-141 FIXED-IN-TREE @ `fa8c7eec` + `cd42c151` - target-step `title=` pair moved to `AbsenceValue`; wizard-parity target case `ok` in the 27-passed run
+- KI-142 FIXED-IN-TREE @ `62f43094` + `fb8266d6` - word form restored, gate decodes entities; non-vacuous RED->GREEN; four pager specs green
+- KI-143 FIXED-IN-TREE @ `76a08984` + `5e7ecf4e` - row variant retired (0 `variant=` occurrences at HEAD), spec header truthful, `aria-busy` cold-load defect fixed same file; review-detail 7/7 green
+- KI-144 CLOSED 2026-11-01 (standing; duplicate later copy removed slice 0.2 `32a7faf3`)
+- KI-145 OPEN, PEER-OWNED - lint baseline 282 vs 219; peer debt, no touch (today's gate: 500 findings, 0 in this pass's files)
+- KI-146 CLOSED @ `da59bdac` (standing; duplicate later copy removed slice 0.2)
+- KI-147 OPEN - OWNER-DECISION - disposition package measured and recorded (slice 2.5, `7befea63`, SLICE-RECORDS `## ki-147-disposition-2026-11-10.md`); re-measured 5 failed/1 passed, payload verified live
+- KI-148 RESOLVED (purged) - duplicate later copy + corrupt NUL fragment removed slice 0.4b (`6a1c9227`); the one remaining entry is the RESOLVED original
+- KI-149 OPEN (residual, documented)
+- KI-150 OPEN (architectural constraint, documented)
+- KI-151 OPEN - Dashboard type-scale drift (cross-cutting pass owed)
+- KI-152 OPEN - catalog base_stats render gap; owner-decision (`owner-decisions/KI-152` per Phase 3), not touched
+- KI-153 CLOSED 2026-11-05 (standing; LineEndingGuardTest)
+- KI-154, KI-155, KI-156, KI-157 RESOLVED 2026-11-10 by the Scenario detail HFW passes (`5e39a1f0`, `990bdc7d`, `0166b23e`, `ad3d94f3`; out of this pass's scope, statuses read from their entries)
+- KI-158 RESOLVED @ `fdf6452f` (2026-11-10, prior session)
+- KI-159 OPEN - filed this pass (`cd42c151`): deck-step six `title=` on `SupportSlot.vue:173/:240`, pre-existing since `569f47e3`; fix owed to a later slice (out of scope here by dispatch)
+
+**Pre-flight verdicts this close-out measured (S-RS-REMAINING-1-CLOSE):** commit inventory reconciled (22 commits in `f60e0ea8..HEAD`: this pass's 20 plus two peer Round-25 commits `50e09715`/`cc0ea0c7` that landed mid-range from a concurrent session - the session summary's "19" undercounted its own two-SHA rows and the peer pair; every SHA and subject otherwise matches). Three failed-write claims all `LANDED_AS_CLAIMED`: the ledger holds 0 NULs at worktree, at `d662864b` and at HEAD; the CandidateForm retirement is at HEAD (0 `variant=` occurrences, 165-line stat) - the failed writes were first drafts (`build_03.py`, `reencode_04.py` v1, `candidateform-final.txt` v1) whose tools refused overwrite and whose valid successors ran; nothing shipped through a failed draft. `run-import.spec.ts:123` `PRE-EXISTING-CONFIRMED` (fails identically against `8f45e552^`'s spec on a parent-tree run, `preflight-C.log`). Pint claim on `TrainingRun.php` was a FALSE POSITIVE in the session summary ("pre-existing three fixers"; the parent file passes clean, the fixers came from this pass's docblock rows) - repaired at `76590c6d` and the tree now passes `pint --test`. KI-159 `FILED` (`KNOWN-ISSUES.md:4742` heading measured). The scratch-script refusal pattern itself is recorded as the dispatch suggests: a refused overwrite tells the reader nothing about whether the first version ran, so every such claim must be verified against blobs, as this block did.
+
 **Register correction 2026-11-10 (S-RS-REMAINING-1 slice 0.2):** four duplicate blocks measured and removed. The later copies of `KI-144`, `KI-145`, `KI-146` and `KI-147` (heading rows at the pre-edit lines 4348, 4400, 4426 and 4445) were byte-identical to their earlier copies and were deleted as accidental pastes; the earlier copies carry the entries unchanged. The measurement table, including the md5 pair per duplicate and the classification of every remaining duplicate-numbered pair (`identical` or `differing`, with the specific fields that differ), is `docs/research-scratch/SLICE-RECORDS.md`, section `## register-duplicates-2026-11-10.md`. No entry was renumbered. Every remaining duplicate pair differs (KI-70, KI-71, KI-101 through KI-104 from the two same-number filing days, plus the near-identical KI-142 and KI-148 pairs handled in slices 0.4b), and none of those was removed here.
 
 **2026-11-10 register pass (S-RS-REMAINING-1, slice 0.3):** measured against HEAD `f60e0ea8` and the tree as it stood on 2026-11-10. Dispositions landed in this pass, each carrying its proving command in the entry:
