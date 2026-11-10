@@ -60,6 +60,8 @@ interface Objective {
     source: string;
     badge: Badge;
     title: string;
+    /** `shared` rows come from `scenario_key IS NULL` and belong to every scenario's calendar. */
+    scope: 'shared' | 'scenario';
 }
 
 interface RecordedRow {
@@ -144,8 +146,10 @@ const props = withDefaults(
          * been due ("55 turns ago" in the wireframe); null prints no arithmetic.
          */
         currentTurn?: number | null;
+        /** The run's scenario name, resolved by the server, for the scenario-scoped group's heading. */
+        scenarioLabel?: string | null;
     }>(),
-    { timelineUrl: null, currentTurn: null },
+    { timelineUrl: null, currentTurn: null, scenarioLabel: null },
 );
 
 const refusal = computed(() => props.decision.refusal);
@@ -161,6 +165,15 @@ const due = computed(() => objectives.value.find((row) => row.state === 'current
 // An empty list is a real state, not a missing one: a scenario whose matrix turns the calendar off
 // composes no obligations, and saying so beats an empty box.
 const hasObjectives = computed(() => objectives.value.length > 0);
+
+/**
+ * The obligations split by who owns them. `scope` is composed on the server from
+ * `race_catalog_slots.scenario_key` and travels with each row; a row this component cannot classify is
+ * treated as the run's own, because naming it under the scenario is the lesser error than implying the
+ * whole career inherits it.
+ */
+const sharedObjectives = computed(() => objectives.value.filter((row) => row.scope === 'shared'));
+const scenarioObjectives = computed(() => objectives.value.filter((row) => row.scope !== 'shared'));
 
 /** How long the one due obligation has been due, or null when the page has no position to measure from. */
 const turnsAgo = computed<number | null>(() => {
@@ -312,8 +325,34 @@ const incompleteData = computed(
                 <thead>
                     <tr><th class="text-left">Obligation</th><th class="text-left">State</th><th class="text-right">Due</th></tr>
                 </thead>
-                <tbody>
-                    <tr v-for="row in objectives" :key="row.state + '-' + row.label" :class="row.state === 'current' ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft align-top">
+                <!-- Two bodies, one per scope, each named. `sharedObjectives` are the calendar rows every
+                     scenario inherits (`scenario_key IS NULL`); `scenarioObjectives` are this scenario's
+                     own. One unqualified table let a Unity Cup Trainer read the game's career-wide finals
+                     rail as though it were Unity Cup's, which is what the v3 audit reported as UX-04. -->
+                <tbody v-if="sharedObjectives.length > 0" data-scope="shared">
+                    <tr class="border-b border-rule-soft">
+                        <th colspan="3" scope="colgroup" class="pt-2 pb-1 text-left text-[10px] font-extrabold uppercase tracking-[0.08em] text-ink-muted">
+                            Career finals, every scenario
+                        </th>
+                    </tr>
+                    <tr v-for="row in sharedObjectives" :key="'shared-' + row.state + '-' + row.label" :class="row.state === 'current' ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft align-top">
+                        <td class="py-2 pr-3">
+                            <a v-if="due === row && props.raceUrl !== null" :href="props.raceUrl" class="inline-flex min-h-11 items-center font-semibold text-ink-strong hover:underline">{{ row.label }}</a>
+                            <b v-else class="text-ink-strong">{{ row.label }}</b>
+                            <ProvenanceBadge :state="row.badge" :title="row.title" />
+                            <span v-if="row.consequence !== null" class="mt-0.5 block text-xs text-ink-muted">{{ row.consequence }}</span>
+                        </td>
+                        <td class="py-2 pr-3"><span class="pill" :class="statePill(row.state).cls">{{ statePill(row.state).word }}</span></td>
+                        <td class="py-2 text-right font-mono" :title="row.due_turn === null ? 'The calendar does not date this obligation.' : undefined">{{ row.due_label ?? 'no date' }}</td>
+                    </tr>
+                </tbody>
+                <tbody v-if="scenarioObjectives.length > 0" data-scope="scenario">
+                    <tr class="border-b border-rule-soft">
+                        <th colspan="3" scope="colgroup" class="pt-2 pb-1 text-left text-[10px] font-extrabold uppercase tracking-[0.08em] text-ink-muted">
+                            {{ props.scenarioLabel }} only
+                        </th>
+                    </tr>
+                    <tr v-for="row in scenarioObjectives" :key="'scenario-' + row.state + '-' + row.label" :class="row.state === 'current' ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft align-top">
                         <td class="py-2 pr-3">
                             <a v-if="due === row && props.raceUrl !== null" :href="props.raceUrl" class="inline-flex min-h-11 items-center font-semibold text-ink-strong hover:underline">{{ row.label }}</a>
                             <b v-else class="text-ink-strong">{{ row.label }}</b>

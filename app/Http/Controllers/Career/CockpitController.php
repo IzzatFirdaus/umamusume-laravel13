@@ -870,7 +870,7 @@ class CockpitController extends Controller
      * in the tree names a milestone; both classes stay in the order so a scenario that does have a source
      * for one can supply rows without a component changing.
      *
-     * @return list<array{label: string, state: string, due_turn: int|null, due_label: string|null, consequence: string|null, source: string, badge: string, title: string}>
+     * @return list<array{label: string, state: string, due_turn: int|null, due_label: string|null, consequence: string|null, source: string, badge: string, title: string, scope: string}>
      */
     private function objectiveSection(TrainingRun $run): array
     {
@@ -925,6 +925,15 @@ class CockpitController extends Controller
                         .'the tool cannot date.',
                 },
                 'class' => $class,
+                // The row's scope, carried so the table can say which obligations every scenario shares
+                // and which belong to this one alone. `forScenario()` unions `scenario_key IS NULL` with
+                // the run's own key, and the undated pair (`URA Finals Qualifier`, `URA Finals
+                // Semifinal`) plus `Junior Make Debut` are shared by every scenario's calendar —
+                // `docs/scenarios/02-unity-cup.md:21-24` states Unity Cup draws the same per-turn race
+                // schedule as URA Finale, forking only its final. Without the distinction all six rows
+                // printed under one heading, so a Unity Cup Trainer read three rows that are the game's
+                // career-wide finals rail as though they belonged to Unity Cup alone.
+                'scope' => $slot->scenario_key === null ? 'shared' : 'scenario',
             ];
         }
 
@@ -941,7 +950,13 @@ class CockpitController extends Controller
                     : $rank,
                 $row['due_turn'] ?? PHP_INT_MAX,
             ))
-            ->map(static fn (array $row): array => array_slice($row, 0, 8, true))
+            // The eight FD-3 fields plus the row's scope. `class` is the sorting key alone and is dropped
+            // before the rows cross the wire; `scope` is read by the table's two headings, so it travels.
+            ->map(static function (array $row): array {
+                unset($row['class']);
+
+                return $row;
+            })
             ->values()
             ->all());
 

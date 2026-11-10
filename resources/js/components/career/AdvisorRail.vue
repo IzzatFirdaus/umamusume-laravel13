@@ -22,8 +22,10 @@ const props = withDefaults(
         timelineUrl?: string | null;
         /** Forwarded so an overdue obligation can say how long it has been due. */
         currentTurn?: number | null;
+        /** Forwarded to the objectives table, whose scenario-scoped group is headed with this name. */
+        scenarioLabel?: string | null;
     }>(),
-    { raceUrl: null, timelineUrl: null, currentTurn: null },
+    { raceUrl: null, timelineUrl: null, currentTurn: null, scenarioLabel: null },
 );
 </script>
 
@@ -46,6 +48,7 @@ const props = withDefaults(
             :race-url="props.raceUrl"
             :timeline-url="props.timelineUrl"
             :current-turn="props.currentTurn"
+            :scenario-label="props.scenarioLabel"
         />
 
         <p class="mt-3 text-xs text-ink-muted">

@@ -1035,6 +1035,7 @@ const jumpToShop = (): void => {
                         :race-url="raceDoor"
                         :timeline-url="props.run.timeline_url"
                         :current-turn="props.header.turn === 0 ? null : props.header.turn"
+                        :scenario-label="props.run.scenario_label"
                     />
                 </div>
 

@@ -260,6 +260,15 @@ test('lists the career obligations the calendar states, each as a mark and a wor
     // Every row states its provenance by name, not by glyph alone.
     await expect(advisor.getByRole('img', { name: /^Calculated/ }).first()).toBeVisible();
 
+    // UX-04: the table names which rows every scenario inherits and which belong to this one alone. The
+    // rows themselves are correct either way (Unity Cup draws URA Finale's per-turn calendar, forking only
+    // its final); one unqualified table made the career-wide finals rail read as Unity Cup's own.
+    await expect(advisor.locator('tbody[data-scope="shared"]')).toContainText('Career finals, every scenario');
+    await expect(advisor.locator('tbody[data-scope="scenario"]')).toContainText('only');
+    await expect(
+        advisor.locator('tbody[data-scope="shared"] tr').filter({ hasText: 'Junior Make Debut' }),
+    ).toBeVisible();
+
     // Nothing is due at turn zero, so no door is offered rather than a dead one.
     await expect(advisor.getByRole('link', { name: 'Settle it at Race Decision' })).toHaveCount(0);
 

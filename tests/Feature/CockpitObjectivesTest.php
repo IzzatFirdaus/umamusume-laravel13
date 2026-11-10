@@ -59,7 +59,7 @@ function objectiveRun(string $scenario, int $turns): TrainingRun
     return $run->fresh();
 }
 
-function objectiveSlot(string $scenarioKey, string $title, int $year, int $turn, bool $mandatory = true, ?int $fansNeeded = null): RaceCatalogSlot
+function objectiveSlot(?string $scenarioKey, string $title, int $year, ?int $turn, bool $mandatory = true, ?int $fansNeeded = null): RaceCatalogSlot
 {
     return RaceCatalogSlot::factory()->create([
         'scenario_key' => $scenarioKey,
@@ -124,17 +124,41 @@ it('carries objectives as a seventh key of the same contract in every Global sce
     }
 });
 
-it('gives every objective row the eight declared fields and a state the vocabulary allows', function (): void {
+it('gives every objective row the declared fields and a state the vocabulary allows', function (): void {
     $run = objectiveRun('unity_cup', 6);
     objectiveSlot('unity_cup', 'Saihai Sho', RaceCatalogSlot::YEAR_JUNIOR, 12);
 
     foreach (objectiveRows($run) as $row) {
-        expect(array_keys($row))->toBe(['label', 'state', 'due_turn', 'due_label', 'consequence', 'source', 'badge', 'title'])
+        expect(array_keys($row))->toBe(['label', 'state', 'due_turn', 'due_label', 'consequence', 'source', 'badge', 'title', 'scope'])
             // The five documented states, minus `missed`, which nothing in this build may claim.
             ->and(['upcoming', 'current', 'completed', 'unknown'])->toContain($row['state'])
             ->and(['confirmed', 'calculated'])->toContain($row['badge'])
+            ->and(['shared', 'scenario'])->toContain($row['scope'])
             ->and($row['title'])->not->toBe('');
     }
+});
+
+it('separates the career-wide finals rail from the scenario\'s own obligation (UX-04)', function (): void {
+    // `scopeForScenario()` unions `scenario_key IS NULL` with the run's own key, so every scenario's rail
+    // held the shared rows and its own final under one heading. Unity Cup draws the same per-turn race
+    // schedule as URA Finale (`docs/scenarios/02-unity-cup.md:21-24`), so its facts were right and only
+    // the grouping was missing: a Trainer read three career-wide rows as though Unity Cup owned them.
+    $run = objectiveRun('unity_cup', 6);
+    // A row every scenario inherits (`scenario_key IS NULL`) and Unity Cup's own forked final.
+    objectiveSlot(null, 'URA Finals Qualifier', RaceCatalogSlot::YEAR_FINALE, null);
+    objectiveSlot('unity_cup', 'URA Finals Final (Aoharu)', RaceCatalogSlot::YEAR_FINALE, null);
+
+    $rows = collect(objectiveRows($run));
+
+    $shared = $rows->where('scope', 'shared')->pluck('label')->all();
+    $scenario = $rows->where('scope', 'scenario')->pluck('label')->all();
+
+    expect($shared)->toContain('URA Finals Qualifier')
+        ->and($scenario)->toContain('URA Finals Final (Aoharu)')
+        // The fork is the only structural difference between the two scenarios' calendars: Unity Cup's own
+        // final is scenario-scoped, and the qualifier every scenario inherits is not.
+        ->and($shared)->not->toContain('URA Finals Final (Aoharu)')
+        ->and($scenario)->not->toContain('URA Finals Qualifier');
 });
 
 it('marks a mandatory race that has not arrived as upcoming, with the turn the calendar states', function (): void {
