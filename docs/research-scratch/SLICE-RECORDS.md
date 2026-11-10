@@ -19675,3 +19675,30 @@ npx playwright test tests/browser/career-inheritance-event.spec.ts
 **The premise no longer holds; the spec itself was re-baselined.** The current fixture does not touch `veterans` or the legacy-picker select at all: `openInheritanceEvent()` (the file's own helper at :40) now builds its run through `/training-runs/create` into the run-scoped Legacy Lab at `/legacy/{runId}`, records three turns through the POST API, and drives `#rank-parent_a` / `#rank-letter-parent_a` / `#ancestor-parent_a-0` / combobox roles - the `:id` contract KI-69's own closure asked for, which `Builder.vue` does render. All nine cases, including the axe scan and the 44px sweep, pass against the current shape; nothing waits on a veterans roster.
 
 **Register consequence (recorded, no entry edited here beyond this section).** KI-69's class-3 half is STALE at HEAD: the re-measured file passes on a fresh scratch database with no veterans seeded. The class-1/2/4 halves of KI-69 are separate halves (playwright config database, the artwork-mirror case, the trainee-step flash) and this slice re-measured only class 3; the class-3 status-flip on the entry itself belongs to the owner or a later register pass that re-reads the other three halves, because KI-69 is one entry and its other classes were not re-measured here.
+
+## ki-101-refresh-trace-2026-11-10.md
+
+**Date:** 2026-11-10. **Pass:** S-RS-REMAINING-1 slice 2.3. **Branch:** `owner-decisions/KI-101-refresh` (created from master at `ade1e5f9`+; NOT merged, per the runbook's owner-decision discipline). **Commits on branch:** `b006016d` then amended to `31be0555` (one commit net, carrying the traced case and the counter fix).
+
+**Question (KI-101, the 2026-10-19 quartet entry).** `navigation-determinism.spec.ts:75` counted 2 `framenavigated` events across one `page.reload()`; the KI asks for a trace that classifies the second event: (a) one full reload plus one same-document address change (test-side; fix the counter) or (b) two full navigations (app-side; separate diagnosis).
+
+**Method.** The refresh case on this branch first records `performance.getEntriesByType("navigation")` types beside the framenavigated count, in one run:
+
+```text
+PLAYWRIGHT_PORT=8163 ... npx playwright test tests/browser/navigation-determinism.spec.ts --grep refreshing
+-> KI101_TRACE framenavigated=2 navigationTypes=["reload"]
+-> 1 failed at the old counter assertion (Expected 1, Received 2)
+```
+
+**Trace classification: (a) test-side.** Navigation Timing reports exactly ONE entry, typed `reload`; the second `framenavigated` event is a same-document address change, which is precisely the documented ambiguity of the event the old counter read.
+
+**Fix landed on this branch.** The case now asserts on the Navigation Timing entries (`expect(navTypes).toEqual(['reload'])`) instead of the framenavigated count: a reload counts exactly once by type, and a redirect loop or a version-mismatch reload still shows up as more than one entry, so the guard the case exists for is unweakened. The full file after the fix:
+
+```text
+PLAYWRIGHT_PORT=8165 ... npx playwright test tests/browser/navigation-determinism.spec.ts
+-> 4 passed (25.3s), EXIT=0
+```
+
+(The same run passed 4/4 once more at `31be0555` after removing a stray `eslint-disable` the trace variant had needed; zero suppressions remain in the file.)
+
+**Register consequence.** KI-101 (2026-10-19)'s blocker resolves as disposition (a); the fix itself sits on this branch awaiting the owner, and merging is NOT done by this pass. The KI-101 2026-10-16 entry (harness staleness) is a different entry, measured in slice 2.1's section.
