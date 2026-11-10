@@ -309,7 +309,23 @@ test.describe('Build Target and the provenance badge', () => {
         await page.goto(hfw);
         const wireframe = await capture(page, '.canvas', { markers: BODY_MARKERS, slug: 'target', side: 'hfw' });
 
-        assertStructurallyEqual(app, wireframe, { regions: 'subset', grid: true });
+        // UX-11: the wireframe's third `srow` is the published sample build, whose figure no source in
+        // this repository can produce — every visit printed a permanent `N/A` and taught that `N/A` can
+        // mean "never". The row is cut on the app side, so the third `srow` is dropped from the demanded
+        // set here, the same one-instance pattern `review.spec.ts:353` uses for its cut card. The
+        // disclaimer stays, one line, and the row's own numbers (entered sum and ceilings) remain.
+        let sampleRowDropped = false;
+        const demanded = wireframe.regions.filter((marker) => {
+            if (marker === 'srow' && !sampleRowDropped) {
+                sampleRowDropped = true;
+
+                return false;
+            }
+
+            return true;
+        });
+
+        assertStructurallyEqual(app, { ...wireframe, regions: demanded }, { regions: 'subset', grid: true });
 
         // The 390 pair alongside the 1280 pair, so the side-by-side pass sees both viewports. Gated on
         // the same flag the structural capture uses, so a plain suite run writes no PNGs.

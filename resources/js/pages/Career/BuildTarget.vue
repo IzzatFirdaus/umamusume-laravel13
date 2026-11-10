@@ -551,15 +551,6 @@ function onSkillPrioritySelect(payload: { id: number; name: string }): void {
                             <template v-else>{{ totalTarget }}</template>
                         </span>
                     </div>
-                    <div class="srow">
-                        <span class="k">Published Global sample build <em>Special Week</em></span>
-                        <span class="v font-mono tabular-nums">
-                            <AbsenceValue
-                                compact
-                                reason="This repository stores no sample-build column, so the published sample total cannot be sourced."
-                            />
-                        </span>
-                    </div>
                     <div class="srow" data-field="total-cap">
                         <span class="k">Sum of the entered ceilings</span>
                         <span class="v font-mono tabular-nums">
@@ -570,10 +561,8 @@ function onSkillPrioritySelect(payload: { id: number; name: string }): void {
                 </div>
 
                 <p class="note mt-2">
-                    The published Global sample is one publisher's build, not a requirement and not this
-                    tool's recommendation: it is a figure to compare against, and a career below it is not
-                    a worse career. This repository stores no sample-build column, so the row prints N/A
-                    rather than a number it cannot source.
+                    The published Global sample build is one publisher's build, not a requirement and
+                    not this tool's recommendation.
                 </p>
             </section>
 
