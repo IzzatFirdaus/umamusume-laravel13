@@ -1,3 +1,115 @@
+
+**Status correction (2026-11-10, S-RS-COMPLETE-1 close-out):** every KI the file names, one current
+status each. The tree is the authority; where the body has drifted from it, the line below records
+the tree's state and the body keeps its history. Duplicate-numbered pairs (KI-70/71/101/102/103/104,
+two distinct bodies each, and KI-142's blank-line twin) keep their numbers by design and appear once
+here because the pair shares one status.
+
+KI-57 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-58 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-59 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-60 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-61 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-62 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-63 CLOSED — spa.ts progress:false + VisitProgressBar role="status" replacement (in tree pre-dispatch; verified against tree this session)
+KI-64 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-65 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-66 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-67 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-68 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-69 OPEN — class-3 Veterans half re-measured 2026-11-10 (9/9 green, 34b1a0e2); remaining half not in scope
+KI-70 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-71 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-72 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-73 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-74 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-75 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-76 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-77 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-78 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-79 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-80 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-81 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-82 CLOSED — b637cec2 parser retitles final_live to "Grand Concert" at the normalisation layer (KI-71 precedent); dev row retagged via reparse; engine-owned orphan 409 removed per that precedent; parser test pins the committed body
+KI-83 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-84 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-85 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-86 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-87 CLOSED — b637cec2 both halves: reader selects shared-inclusive via forScenario, label per-scenario from config; deterministic orderByRaw keeps the scenario-own Final the subject
+KI-88 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-89 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-90 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-91 CLOSED — Skills planner door in Where to go, Cockpit.vue:578 (peer landing; verified in tree this session)
+KI-92 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-93 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-94 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-95 CLOSED — 8f45e552 import_label provenance line (S-RS-REMAINING-1 slice 1.9)
+KI-96 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-97 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-98 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-99 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-100 OPEN — 22 undecoded objective rows disclosed on screen; opportunistic capture welcome, not scheduled
+KI-101 CLOSED — both halves: refresh counter 6c1c2b5d (merge of owner-decisions/KI-101-refresh, classification (a) test-side); staleness refusal ddd8c619 (B.1)
+KI-102 CLOSED — bd0a8693 status pass; .env.example half closed 3253b8ea
+KI-103 CLOSED — premise withdrawn: saved?: number[] declared and used in all seven wizard pages (bd0a8693 register correction)
+KI-104 OPEN — UnityCupEditor nested-details fix landed 005561c1 (2026-10-25); ADR-0027 still Proposed, owner signature is the remaining half
+KI-105 CLOSED — (a) push landed this session: origin/master advanced b16a7a50 -> ad3f8f40, `git rev-list --count origin/master..master` = 0 at close; (b) ddd8c619 session-private harness defaults plus stale-bundle refusal
+KI-106 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-107 OPEN — CLAUDE.md dead references; owner docs decision, not dispatched
+KI-108 CLOSED — d662864b + e66d47c7: SLICE-RECORDS NUL region re-encoded, 0 NULs verified byte-exactly at HEAD
+KI-109 CLOSED — 6a1c9227: analysis_output.txt/base_veteran.vue deleted at 5d88a88c; dated note appended
+KI-110 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-111 CLOSED — 1f5f5d76 + 0563f1de: four real mistagged closers stripped; md_fence_check 0 invalid in 209 files
+KI-112 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-113 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-114 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-115 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-116 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-117 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-118 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-119 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-120 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-121 CLOSED-WONTFIX — ruled out at filing; does not reproduce
+KI-122 CLOSED-WONTFIX — ruled out at filing; does not reproduce
+KI-123 CLOSED-WONTFIX — ruled out at filing; does not reproduce
+KI-124 OPEN — travel-note landed (R13); moves wontfix at next audit if unused
+KI-125 CLOSED-WONTFIX — R8 declined; roster reopens only if R8 reopens
+KI-126 CLOSED-WONTFIX — R8 declined; roster reopens only if R8 reopens
+KI-127 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-128 CLOSED — Delete moved to its own footer door /training-runs/{run}/delete (C6b.3 lineage, peer landing); delete flow green in this session's cockpit-forms walk
+KI-129 CLOSED — affirmed 2026-11-10 per owner dispatch: the capsule is intentional on the scenario section, DESIGN.md:497 sanction stands; extension and removal rejected. No code change
+KI-130 OPEN — not dispatched
+KI-131 CLOSED — 9674180d + 20df32a6: run-scoped aria-labels on the two colliding steps; consumers re-pinned (support-deck, section-nav); cockpit-forms pin edited in a peer-dirty file and rides that file's landing
+KI-132 OPEN — two-key split ruled by owner; slice not dispatched here, scheduled separately
+KI-133 CLOSED — b9837da7: current_spirit_proxy column, payload, editor field as a labelled manual proxy; per-member table defers to an R8 reopening if it ever comes
+KI-134 RESOLVED — pre-dispatch register state
+KI-135 RESOLVED — pre-dispatch register state
+KI-136 OPEN — not dispatched
+KI-137 OPEN — not dispatched
+KI-138 RESOLVED — pre-dispatch register state
+KI-139 OPEN — not dispatched
+KI-140 CLOSED — d359e9d9 pre-dispatch: FilterContractTest re-baselined to the 25-row page-size contract (35/35 green, 138 assertions)
+KI-141 CLOSED — fa8c7eec + cd42c151: BuildTarget title= absences became AbsenceValue disclosures with visible reasons
+KI-142 CLOSED — 62f43094 + fb8266d6: word-form range copy restored; the rendered-copy gate decodes named character references; all six pins re-pinned
+KI-143 CLOSED — 76a08984 + 5e7ecf4e: dead CandidateForm row variant retired; review-detail header truthful; adjacent cold-load aria-busy fix
+KI-144 CLOSED — pre-dispatch register state
+KI-145 CLOSED — stale-figure: 202 findings vs 209 baseline, 7 under, exit 0; report at S-RS-COMPLETE-1-lint-remeasure-2026-11-10.md (08a1c69b)
+KI-146 CLOSED — pre-dispatch register state
+KI-147 CLOSED — ad3f8f40: RunRaceStrip mount restored with the pre-C6b.5 wrapper; spec 5/6 green; the 6th case fails on the pre-existing overflow filed as KI-160, proven with the mount reverted
+KI-148 RESOLVED — pre-dispatch register state
+KI-149 CLOSED-MEASURED — report at S-RS-COMPLETE-1-type-scale-measurement-2026-11-10.md (08a1c69b); no wrap regressions; the two overflow readings filed as KI-160
+KI-150 OPEN — not dispatched
+KI-151 CLOSED-MEASURED — same report (08a1c69b); --text-kpi clamp measured 20px/28px, unchanged
+KI-152 CLOSED — base_stats/growth_rates rendered on catalog detail as a labelled Starting line (peer landing; the catalog-detail case green in this session's runs); audit-correction note rides the peer file
+KI-153 CLOSED — pre-dispatch register state
+KI-154 OPEN — not dispatched
+KI-155 OPEN — not dispatched
+KI-156 OPEN — not dispatched
+KI-157 OPEN — not dispatched
+KI-158 SUPERSEDED — pre-dispatch register state
+KI-159 OPEN — deck-step title= x6 (SupportSlot.vue:173/:240, DeckAnalysis.vue); mechanical, separate slice
+KI-160 OPEN — filed this dispatch (ad3f8f40): cockpit 88px overflow at 640px and Races 59px at 320px; proven pre-existing with the strip mount reverted
+
 # Known issues
 
 **Pointer for the historical register, and still the live one. Its full text moved on 2026-10-03 to
