@@ -4873,3 +4873,9 @@ wider-than-viewport boxes at 640x512.
 (`min-w-0` on the failing track, or an explicit `table-layout`/wrap on the obligation row), the
 `:203` reflow case green across the file, and the same probe reading `over<=1` at 320 and 640. 320px
 already holds; only the 640 crossing is broken.
+
+**Companion reading (same pass, same probe).** The Race Decision page (`/training-runs/{run}/races`)
+measures `over=59` at 320px (clean at 768/1280), so the same reflow family holds a second surface:
+one page overflows at the WCAG 1.4.10 reflow width and one at the 640 two-track width. Recorded
+here rather than as a new entry because the probe, the failure class and the closure command are
+one; a fix for either surface that does not re-read the other is incomplete.
