@@ -151,9 +151,15 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                      no inset of its own, and a card's `p-4` plus its border is 17px of inset. The
                      parity comparison does not need the wrapper: its leading `card` marker already
                      resolves to the reference cards below. -->
-                <div class="mt-3 overflow-x-auto rounded-md border border-rule bg-raised">
+                <!-- `min-w-0` is load-bearing: a block-level `overflow-x-auto` still refuses to shrink
+                     below its table's intrinsic width once it sits in a flex or grid item. Without it
+                     the wrapper scrolled its own content but the page scrolled with it (UX-07's mobile
+                     half). `table-fixed` below `md` is the second half: a table's intrinsic width comes
+                     from its longest unbreakable cell, and `w-full` alone cannot beat that, so the page
+                     still reported 431px of scroll on a 390px viewport. -->
+                <div class="mt-3 min-w-0 overflow-x-auto rounded-md border border-rule bg-raised">
                     <h2 id="review-queue-heading" class="text-lg font-semibold text-ink-strong">Pending</h2>
-                    <table class="w-full border-collapse">
+                    <table class="w-full table-fixed border-collapse md:table-auto">
                         <caption class="sr-only">Pending match candidates, with the question each answers and the best match found</caption>
                         <thead>
                             <tr>
@@ -221,8 +227,9 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                 <section class="card" aria-labelledby="review-signals-heading">
                     <h2 id="review-signals-heading">How a match is decided</h2>
 
-                    <table class="t mt-3 w-full text-sm">
-                        <caption class="sr-only">The signals a match is decided on and what each is worth</caption>
+                    <div class="mt-3 overflow-x-auto">
+                        <table class="t w-full text-sm">
+                            <caption class="sr-only">The signals a match is decided on and what each is worth</caption>
                         <thead>
                             <tr class="text-left text-xs text-ink-muted">
                                 <th scope="col" class="pb-1 font-semibold">Signal</th>
@@ -248,6 +255,7 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                             </tr>
                         </tbody>
                     </table>
+                    </div>
 
                     <p class="note mt-3 text-xs text-ink-muted">
                         A fuzzy match is <b>never</b> applied automatically. The importer may offer it;
@@ -283,8 +291,14 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                  declaration promised a pin the browser never painted, so it is gone rather than left
                  as a false expectation. Filed as KI-150.
                  (AUD-20261102-021 F-04) -->
+            <!-- Full-bleed across the shell band, without negative margins. The band sets
+                 `px-4 md:px-[26px]`, so `-mx-4 md:-mx-8` pulled 32px out at `md` where only 26px of
+                 padding existed — 6px of overflow per side, which is what the v3 audit measured as
+                 `/review` scrolling to 1446px in a 1440px viewport (UX-07). The divider and the panel
+                 background still run the band's full inner width; they stop at the padding the shell
+                 actually guarantees. -->
             <div
-                class="z-10 -mx-4 mt-6 border-t border-rule bg-panel px-4 py-3 md:-mx-8 md:px-8"
+                class="z-10 mt-6 border-t border-rule bg-panel py-3"
                 data-testid="review-pager"
             >
                 <Pagination

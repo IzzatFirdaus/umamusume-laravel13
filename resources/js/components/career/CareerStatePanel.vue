@@ -259,10 +259,16 @@ function percent(stat: Stat): number {
             data-region="starting-stats"
         >
             <span class="font-semibold">Starting</span>
-            <span v-for="stat in props.stats" :key="`starting-${stat.key}`" class="ml-2 font-mono tabular-nums">
-                {{ props.startingStats[stat.key] ?? 'N/A' }}
-            </span>
-            <span class="ml-1">(the card's base line, before any training)</span>
+            <!-- A separation, not a margin. Five `<span>`s spaced by `ml-2` copied and read as one
+                 string — `Starting8768917480` — which is what the v3 audit reported as UX-05. The pairs
+                 are joined by ` · ` in the markup so the separator survives a copy, and each carries its
+                 stat name so the number is never bare. -->
+            <span
+                v-for="(stat, index) in props.stats"
+                :key="`starting-${stat.key}`"
+                class="font-mono tabular-nums"
+            >{{ index === 0 ? ' ' : ' · ' }}{{ stat.label }} {{ props.startingStats[stat.key] ?? 'N/A' }}</span>
+            <span class="ml-1"> (the card's base line, before any training)</span>
         </p>
 
         <!-- The HFW's four tiles in a 2x2 grid: `.tiles` + `.tile`, key above value. It was a `dl`

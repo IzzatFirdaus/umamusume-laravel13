@@ -223,6 +223,31 @@ test('summarises a no-match row on one line and links to the page that decides',
     await expect(page.getByTestId('review-detail')).toHaveCount(1);
 });
 
+test('fits the viewport at 390 without a horizontal scroll (UX-07)', async ({ page }) => {
+    // Two separate causes, both measured on the live page before the fix: the pager's
+    // `-mx-4 md:-mx-8` pulled 32px out of a band that guarantees 26px at `md` (6px over at 1440, 1286
+    // and 774), and the Pending table's intrinsic width beat both its `overflow-x-auto` wrapper and
+    // `w-full` (431px of document scroll on a 390px viewport). A table's intrinsic width comes from its
+    // widest unbreakable cell, so `table-fixed` below `md` is what actually bounds it.
+    //
+    // No seeding: this measures the shell and the table, and the wireframe-marker case in this file
+    // asserts the queue's own row vocabulary, which a fixture here would perturb.
+    for (const width of [1440, 1280, 768, 390]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto('/review');
+        await page.locator('#app > *').first().waitFor();
+
+        const measured = await page.evaluate(() => ({
+            scroll: document.documentElement.scrollWidth,
+            body: document.body.scrollWidth,
+            inner: window.innerWidth,
+        }));
+
+        expect(measured.scroll, `/review scrolls horizontally at ${width}px`).toBeLessThanOrEqual(measured.inner);
+        expect(measured.body, `/review body overflows at ${width}px`).toBeLessThanOrEqual(measured.inner);
+    }
+});
+
 test('the summarised queue fits on one screen', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 });
     // 25 rows exactly: the paginator's page size. The fixture now clears the whole table, so the seeded
