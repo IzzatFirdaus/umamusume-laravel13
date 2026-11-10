@@ -4,6 +4,8 @@
 **Directive:** owner ruling 2026-11-10, *"I want visual frontend scenario detail change per HFW, not just in codes."*
 **Outcome:** the Unity Cup Scenario detail page renders in the HFW's order, at its spans, with plain `h2` headings and no capsule chrome. Verified by a live 1280 px render, not by inspection.
 
+**Arc closed at `fb8c8973`** (plus the `S-RS-CLEANUP-2` commits that follow it) — visual overhaul complete, HFW matched. The two baseline reds now carry classifications rather than a shrug: `UiHygieneTest` (§2.2.2 provenance, resolved by `9bd3df7b` — anchor in the comment, source by content in the copy) and `ura-panel.spec.ts:193` (KI-160, stale test corrected at `ba7ea3d0`, code correct). Collision with the concurrent session is on record in the register's §14 (`fb8c8973`).
+
 ---
 
 ## 1. The one thing that must be recorded, because it looks like a regression
