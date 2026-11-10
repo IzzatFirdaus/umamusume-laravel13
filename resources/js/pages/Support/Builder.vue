@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Head, router, useForm, usePage } from '@inertiajs/vue3';
-import { computed, nextTick, ref, watch } from 'vue';
+import { computed, nextTick, onMounted, ref, watch } from 'vue';
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import DeckAnalysis from '../../components/support/DeckAnalysis.vue';
@@ -210,6 +210,7 @@ function go(
     params: Record<string, string | number | undefined>,
     deck: Record<string, string>,
     focusSlot: number,
+    reopenPickerOnFinish = false,
 ): void {
     router.get(
         `/training-runs/${props.run.id}/deck`,
@@ -223,6 +224,14 @@ function go(
             onFinish: () => {
                 loading.value = false;
                 void nextTick(() => {
+                    // The picker reopens itself when the visit carried a filter or a slot; focus
+                    // belongs in its search box then, not on the slot row behind it.
+                    if (reopenPickerOnFinish) {
+                        openPicker(targeted.value);
+
+                        return;
+                    }
+
                     document.getElementById(`deck-slot-${focusSlot}`)?.focus();
                 });
             },
@@ -240,21 +249,63 @@ function applyFilters(): void {
             // The picker's target slot rides the query string (startReplace put it there), and a
             // filter change must keep it: dropping it would reset the target to Slot 1 and the
             // next Equip press would write into a slot the Trainer did not choose.
-            slot: pickerSlot(),
+            slot: targeted.value,
         },
         deckQuery(),
-        pickerSlot(),
+        targeted.value,
+        true,
     );
+}
+
+/** The picker's disclosure. Kept in a ref so a slot click can open it: `go()` runs with
+ *  `preserveState: true`, so the component never remounts and a DOM grab on mount would be stale. */
+const pickerPanel = ref<HTMLDetailsElement | null>(null);
+
+/**
+ * The picker's target. The query string is the server's answer and lags the click by one round trip,
+ * so a click records its own choice here first: `startReplace(2)` followed immediately by `Equip`
+ * must write slot 2, not the slot the previous page carried (the same class as R3-03).
+ */
+const targeted = ref<number>(props.picker.fillingSlot);
+
+/**
+ * Show the picker for a slot. Three things have to happen together or the click reads as a no-op:
+ * the panel opens (it used to stay closed below the fold, so nothing visibly changed), it scrolls
+ * into view (its top lands at the bottom edge of the viewport, so `block: 'center'` is what actually
+ * moves it), and focus lands in its search box.
+ *
+ * The search box is found by query rather than by template ref: `BaseInput` renders a fragment, so a
+ * `ref` on it names the component, not the `<input>`, and this page already reaches for the DOM by id
+ * in `go()`'s focus move.
+ */
+function openPicker(position: number): void {
+    targeted.value = position;
+
+    void nextTick(() => {
+        const panel = pickerPanel.value;
+
+        if (panel === null) {
+            return;
+        }
+
+        panel.open = true;
+        // `start`, not `center`: the panel is taller than the viewport (25 rows), so centring it puts
+        // its heading and filters above the fold and leaves the Trainer looking at the middle of a
+        // card list with no idea which slot they are filling.
+        panel.scrollIntoView({ block: 'start', behavior: 'smooth' });
+        panel.querySelector<HTMLInputElement>('input[type="search"]')?.focus({ preventScroll: true });
+    });
 }
 
 /** The Trainer's first click on a Replace button decides which slot the picker writes to. */
 function startReplace(position: number): void {
-    go({ ...filterQuery(), slot: position }, deckQuery(), position);
+    openPicker(position);
+    go({ ...filterQuery(), slot: position }, deckQuery(), position, true);
 }
 
 /** Equip writes one position and leaves the filters and the other five exactly where they were. */
 function equip(cardId: number): void {
-    const slot = pickerSlot();
+    const slot = targeted.value;
 
     // A different card's level is not this card's; the level starts unrecorded for the new pick.
     form.deck[slot].card_level = '';
@@ -276,8 +327,19 @@ function clearSlot(position: number): void {
 }
 
 function pickerSlot(): number {
-    return props.picker.fillingSlot;
+    return targeted.value;
 }
+
+/*
+ * A direct link that names a slot (`?slot=2`, which is what a paginated picker round trip and the
+ * race strip's own `open_url` both produce) opens the panel on arrival. Without this, landing on the
+ * page mid-pick showed six slots and a closed disclosure, which reads as though the link did nothing.
+ */
+onMounted(() => {
+    if (props.picker.type !== null || props.picker.query !== null) {
+        openPicker(props.picker.fillingSlot);
+    }
+});
 
 function save(): void {
     form.post(props.action);
@@ -355,14 +417,14 @@ function save(): void {
 
             <!-- HFW OVERRIDE (write fields): Swap/Add on a slot opens this picker; the wireframe
                  shows the six cards only, so the picker stays one disclosure below them. -->
-            <details class="card mt-5">
+            <details ref="pickerPanel" class="card mt-5">
                 <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">Choose a card</summary>
             <section aria-labelledby="deck-picker-heading" class="mt-2">
                 <h3 id="deck-picker-heading" class="text-lg font-semibold text-ink-strong">Choose a card</h3>
 
                 <p class="mt-1 text-sm text-ink-muted">
-                    Choose a slot on the left, then equip a card here. A card already in another slot
-                    cannot be equipped twice, because duplicates are spent on breaking it.
+                    Choosing a card for Slot {{ targeted }} writes it there. A card already in another
+                    slot cannot be equipped twice, because duplicates are spent on breaking it.
                 </p>
 
                 <form class="mt-3 flex flex-wrap items-end gap-3 text-sm" @submit.prevent="applyFilters">
@@ -382,7 +444,7 @@ function save(): void {
                         v-model="status"
                         name="status"
                         label="Availability"
-                        :options="[{ value: '', label: 'All' }, ...availabilities.map(option => ({ value: option, label: option }))]"
+                        :options="[{ value: '', label: 'All' }, ...availabilities.map((option: string) => ({ value: option, label: option }))]"
                     />
                     <BaseInput
                         v-model="search"
@@ -462,7 +524,7 @@ function save(): void {
                                     class="min-h-11 rounded-full border border-rule px-3 text-sm font-semibold text-ink hover:bg-sunken focus-visible:outline-2 focus-visible:outline-offset-2 transition-colors duration-150 ease-out"
                                     @click="equip(card.id)"
                                 >
-                                    Equip to {{ slots.find((slot) => slot.position === picker.fillingSlot)?.label }}
+                                    Equip to {{ slots.find((slot) => slot.position === targeted)?.label }}
                                     <span class="sr-only">: {{ card.name }}</span>
                                 </button>
                                 <button

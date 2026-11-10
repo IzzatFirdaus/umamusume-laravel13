@@ -118,6 +118,49 @@ test('sizes every control on the screen to the 44px contract', async ({ page }) 
     }
 });
 
+test('opens the picker from a slot button, without the disclosure being clicked first', async ({ page }) => {
+    // UX-01 regression. Every other test in this file reaches the picker through `builderUrl()`, which
+    // opens the "Choose a card" disclosure itself; that is why twelve specs passed while the real path
+    // — a Trainer clicking a slot's own button — left the panel closed one pixel below the fold and the
+    // page looking unresponsive. This test takes the path a Trainer takes and nothing else.
+    await page.route('**/artwork/**', (route) => route.abort());
+    await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await page.locator('#trainee-combobox').fill(TRAINEE);
+    await page.keyboard.press('Enter');
+    await page.selectOption('select[name="scenario"]', { value: 'ura_finale' });
+    await page.getByRole('button', { name: 'Create run' }).click();
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, { waitUntil: 'domcontentloaded' });
+    const runUrl = page.url().replace(/\/cockpit$/, '');
+    createdRunUrls.push(runUrl);
+
+    await page.goto(`${runUrl}/deck`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const picker = page.locator('details').filter({ has: page.locator('summary', { hasText: 'Choose a card' }) });
+
+    // Closed on arrival, so this test starts from the state the defect lived in.
+    await expect(picker).not.toHaveAttribute('open', '');
+
+    await page.getByRole('button', { name: 'Choose a card for Slot 2' }).click();
+
+    // The click alone opens it — no summary press anywhere in this test.
+    await expect(picker).toHaveAttribute('open', '');
+
+    // The panel moved into view and took focus, so the next keystroke searches rather than scrolls.
+    await expect(picker.locator('input[type="search"]')).toBeFocused();
+
+    // The picker says which slot it writes to, and its Equip buttons name that slot too.
+    await expect(picker).toContainText('Choosing a card for Slot 2');
+    await expect(page.getByRole('button', { name: /^Equip to Slot 2/ }).first()).toBeVisible();
+
+    // Equip lands in slot two, not the slot the previous page happened to carry.
+    await page.getByRole('button', { name: /^Equip to Slot 2/ }).first().click();
+    await expect(page.locator('#deck-slot-2')).toContainText('R');
+    await expect(page.locator('#deck-slot-2')).not.toContainText('Not equipped');
+    await expect(page.locator('#deck-slot-1')).toContainText('Not equipped');
+});
+
 test('replaces a slot with the keyboard alone and returns focus to the slot it changed', async ({ page }) => {
     await builderUrl(page, 'ura_finale');
 
