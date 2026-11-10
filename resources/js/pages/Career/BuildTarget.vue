@@ -529,17 +529,21 @@ function onSkillPrioritySelect(payload: { id: number; name: string }): void {
                     <div class="srow">
                         <span class="k">Your total</span>
                         <span class="v font-mono tabular-nums">
-                            <span
+                            <AbsenceValue
                                 v-if="totalTarget === null"
-                                title="No total is printed because at least one of the five targets is still empty."
-                            >N/A</span>
+                                compact
+                                reason="No total is printed because at least one of the five targets is still empty."
+                            />
                             <template v-else>{{ totalTarget }}</template>
                         </span>
                     </div>
                     <div class="srow">
                         <span class="k">Published Global sample build <em>Special Week</em></span>
                         <span class="v font-mono tabular-nums">
-                            <span title="This repository stores no sample-build column, so the published sample total cannot be sourced.">N/A</span>
+                            <AbsenceValue
+                                compact
+                                reason="This repository stores no sample-build column, so the published sample total cannot be sourced."
+                            />
                         </span>
                     </div>
                     <div class="srow" data-field="total-cap">
