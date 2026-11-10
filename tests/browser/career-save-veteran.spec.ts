@@ -186,8 +186,25 @@ test('gates an overwrite behind the acknowledgement and leaves a first save unga
     await expect(page.locator('#overwrite-acknowledged')).toBeVisible();
     await expect(update).toBeDisabled();
 
+    // The reason is on screen in the same action row, not hidden. The v3 audit filed "disabled with no
+    // reason" by reading the button's attribute and the page-level text dump but never this row; the
+    // gate is a deliberate overwrite acknowledgement (AUD-20261102-007 F-02) and it explains itself.
+    await expect(
+        page.getByText('This replaces the Veteran already filed for this career'),
+    ).toBeVisible();
+
     await page.locator('#overwrite-acknowledged').check();
     await expect(update).toBeEnabled();
+
+    // The acknowledgement is per-visit, not sticky: a reload re-arms the gate closed and the reason is
+    // drawn again. That is the safe direction (an accidental second write cannot ride a stale tick), so
+    // the assertion pins it rather than the optimistic alternative.
+    await page.goto(`${runUrl}/veteran`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.getByRole('button', { name: 'Update Veteran' })).toBeDisabled();
+    await expect(
+        page.getByText('This replaces the Veteran already filed for this career'),
+    ).toBeVisible();
 });
 
 test('sizes the save screen controls to the 44px contract', async ({ page }) => {
