@@ -19704,3 +19704,29 @@ Identical to the entry's 2026-10 stat shape (five of six), so the KI still stand
 **Recommendation for the owner (the package's, not a decision):** (c) with the caveat its own entry names, OR (a) if the removal is judged wrong. Tonight adds one fact: the strip's data plumbing is fully alive while its UI is fully absent, which is the most wasteful of the three states; whichever option, the current in-between is the one state the evidence argues against.
 
 **Disposition:** recorded for the owner; no merge, no code change, no entry-status flip in this slice.
+## ki-101-refresh-trace-2026-11-10.md
+
+**Date:** 2026-11-10. **Pass:** S-RS-REMAINING-1 slice 2.3. **Branch:** `owner-decisions/KI-101-refresh` (created from master at `ade1e5f9`+; NOT merged, per the runbook's owner-decision discipline). **Commits on branch:** `b006016d` then amended to `31be0555` (one commit net, carrying the traced case and the counter fix).
+
+**Question (KI-101, the 2026-10-19 quartet entry).** `navigation-determinism.spec.ts:75` counted 2 `framenavigated` events across one `page.reload()`; the KI asks for a trace that classifies the second event: (a) one full reload plus one same-document address change (test-side; fix the counter) or (b) two full navigations (app-side; separate diagnosis).
+
+**Method.** The refresh case on this branch first records `performance.getEntriesByType("navigation")` types beside the framenavigated count, in one run:
+
+```text
+PLAYWRIGHT_PORT=8163 ... npx playwright test tests/browser/navigation-determinism.spec.ts --grep refreshing
+-> KI101_TRACE framenavigated=2 navigationTypes=["reload"]
+-> 1 failed at the old counter assertion (Expected 1, Received 2)
+```
+
+**Trace classification: (a) test-side.** Navigation Timing reports exactly ONE entry, typed `reload`; the second `framenavigated` event is a same-document address change, which is precisely the documented ambiguity of the event the old counter read.
+
+**Fix landed on this branch.** The case now asserts on the Navigation Timing entries (`expect(navTypes).toEqual(['reload'])`) instead of the framenavigated count: a reload counts exactly once by type, and a redirect loop or a version-mismatch reload still shows up as more than one entry, so the guard the case exists for is unweakened. The full file after the fix:
+
+```text
+PLAYWRIGHT_PORT=8165 ... npx playwright test tests/browser/navigation-determinism.spec.ts
+-> 4 passed (25.3s), EXIT=0
+```
+
+(The same run passed 4/4 once more at `31be0555` after removing a stray `eslint-disable` the trace variant had needed; zero suppressions remain in the file.)
+
+**Register consequence.** KI-101 (2026-10-19)'s blocker resolves as disposition (a); the fix itself sits on this branch awaiting the owner, and merging is NOT done by this pass. The KI-101 2026-10-16 entry (harness staleness) is a different entry, measured in slice 2.1's section.
