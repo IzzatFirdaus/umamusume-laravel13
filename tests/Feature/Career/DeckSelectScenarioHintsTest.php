@@ -34,7 +34,7 @@ final class DeckSelectScenarioHintsTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Career/DeckSelect')
                 ->where('scenarioKey', 'unity_cup')
-                ->where('scenarioHints.0', 'Wit cap is 1800. Consider a Wit-heavy deck.')
+                ->where('scenarioHints.0', "Unity Cup's Wit cap is 1800; the other four stats cap at 1300.")
             );
     }
 
