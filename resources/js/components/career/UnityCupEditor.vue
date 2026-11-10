@@ -43,6 +43,11 @@ const props = defineProps<{
         unity_trainings_count: number | null;
         spirit_bursts_count: number | null;
         extreme_bursts_count: number | null;
+        /**
+         * KI-133's manual proxy: one aggregate for the whole team the Trainer enters, labelled
+         * on the display. Null until they do; blank posts null rather than zero (D-220).
+         */
+        current_spirit_proxy: number | null;
         stat_grades: { key: string; label: string; grade: string | null }[];
     };
 }>();
@@ -60,6 +65,7 @@ const form = useForm({
     unity_trainings_count: numeric(props.team.unity_trainings_count),
     spirit_bursts_count: numeric(props.team.spirit_bursts_count),
     extreme_bursts_count: numeric(props.team.extreme_bursts_count),
+    current_spirit_proxy: numeric(props.team.current_spirit_proxy),
     team_stat_grades: Object.fromEntries(
         props.team.stat_grades.map((grade) => [grade.key, grade.grade ?? '']),
     ) as Record<string, string>,
@@ -84,6 +90,7 @@ const save = (): void => {
                 unity_trainings_count: figure(data.unity_trainings_count),
                 spirit_bursts_count: figure(data.spirit_bursts_count),
                 extreme_bursts_count: figure(data.extreme_bursts_count),
+                current_spirit_proxy: figure(data.current_spirit_proxy),
                 // A blank select is "not recorded"; a letter is the Trainer's reading (D-220).
                 team_stat_grades: Object.fromEntries(
                     Object.entries(data.team_stat_grades).map(([stat, grade]) => [stat, grade === '' ? null : grade]),
@@ -170,6 +177,19 @@ const save = (): void => {
                     v-model="form.extreme_bursts_count"
                     type="number"
                     name="extreme_bursts_count"
+                    min="0"
+                />
+            </label>
+            <!-- KI-133: the Spirit gauge has no per-run column (it is per team member with no
+                 published maximum), so this is the labelled manual proxy the dispatch ruled:
+                 one Trainer-entered aggregate for the whole team, kept apart from zero (D-220). -->
+            <label for="current_spirit_proxy" class="flex flex-col gap-1">
+                <span class="text-ink-muted">Current Spirit (manual proxy)</span>
+                <BaseInput
+                    id="current_spirit_proxy"
+                    v-model="form.current_spirit_proxy"
+                    type="number"
+                    name="current_spirit_proxy"
                     min="0"
                 />
             </label>

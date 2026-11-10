@@ -86,6 +86,12 @@ interface TeamSection {
     unity_trainings_count: number | null;
     spirit_bursts_count: number | null;
     extreme_bursts_count: number | null;
+    /**
+     * The Spirit reading as one Trainer-entered aggregate for the whole team; a manual proxy, not
+     * a game value (the gauge is per team member with no published maximum, KI-133). Null until
+     * the Trainer enters one, and the Spirit card's disclosure states that rather than a zero.
+     */
+    current_spirit_proxy: number | null;
     combined_bursts: number | null;
     burst_band: string | null;
 }
@@ -223,7 +229,7 @@ const current = computed((): { rank: string; level: number | null } | null => (
             <TeamCard :team="team" />
         </div>
         <div v-if="burstsEnabled" class="col-span-1 @3xl:col-span-3 @5xl:col-span-4" data-panel="spirit">
-            <SpiritCard />
+            <SpiritCard :spirit-proxy="team.current_spirit_proxy" />
         </div>
         <div class="col-span-1 @3xl:col-span-3 @5xl:col-span-4" data-panel="team-rank">
             <TeamRankGauge :enabled="true" :current="current" :ladder="team.ladder" />

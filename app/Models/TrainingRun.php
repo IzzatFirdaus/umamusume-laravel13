@@ -78,6 +78,10 @@ use Illuminate\Support\Carbon;
  *                                           null until stated, never counted from turn entries
  * @property int|null $spirit_bursts_count Spirit Bursts earned; null until stated
  * @property int|null $extreme_bursts_count Extreme Spirit Bursts earned; null until stated
+ * @property int|null $current_spirit_proxy the team's Spirit reading as ONE Trainer-entered
+ *                                          aggregate; a manual proxy, not a game value (the
+ *                                          gauge is per team member with no published max,
+ *                                          KI-133); displayed labelled, null until entered
  * @property int|null $current_objective_index the Grade Point period the Trainer
  *                                             reports as live (1..4, US-10); null
  *                                             until they say, which the meter shows
@@ -109,7 +113,7 @@ use Illuminate\Support\Carbon;
  *                                       run with a Legacy selection stays comparable before it is
  *                                       filed)
  */
-#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'trainee_rarity', 'potential_level', 'growth_rate', 'cap_speed', 'cap_stamina', 'cap_power', 'cap_guts', 'team_name', 'team_motto', 'team_league_placement', 'team_preseason_wins', 'unity_trainings_count', 'spirit_bursts_count', 'extreme_bursts_count', 'team_stat_grades', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source', 'career_position', 'career_position_source', 'mode'])]
+#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'trainee_rarity', 'potential_level', 'growth_rate', 'cap_speed', 'cap_stamina', 'cap_power', 'cap_guts', 'team_name', 'team_motto', 'team_league_placement', 'team_preseason_wins', 'unity_trainings_count', 'spirit_bursts_count', 'extreme_bursts_count', 'current_spirit_proxy', 'team_stat_grades', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source', 'career_position', 'career_position_source', 'mode'])]
 class TrainingRun extends Model
 {
     /**
@@ -1245,6 +1249,7 @@ class TrainingRun extends Model
             'unity_trainings_count' => 'integer',
             'spirit_bursts_count' => 'integer',
             'extreme_bursts_count' => 'integer',
+            'current_spirit_proxy' => 'integer',
             'imported_at' => 'datetime',
             'career_position' => CareerPositionCast::class,
             'mode' => RunMode::class,

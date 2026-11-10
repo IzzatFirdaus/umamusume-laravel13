@@ -318,3 +318,44 @@ it('cites edges-versus-criteria for the burst-band conflict, not a Skill Point d
         // The unsourced publisher figure must not come back.
         ->not->toContain('15/15/20/20');
 });
+
+
+it('carries the labelled manual Spirit proxy and keeps its absence distinct from zero (KI-133)', function (): void {
+    // KI-133, ruled 2026-11-10: the gauge is per team member with no published maximum, so this
+    // column stores ONE Trainer-entered aggregate for the whole team and the display labels it
+    // a manual proxy. The two assertions are the contract: a stated figure rides the team payload
+    // unchanged, and nothing entered is null on the payload (never a zero, D-220).
+    $stated = unityCupRun(['current_spirit_proxy' => 33]);
+
+    $this->get(route('runs.cockpit', $stated))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scenario.team.current_spirit_proxy', 33));
+
+    $blank = unityCupRun();
+
+    $this->get(route('runs.cockpit', $blank))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scenario.team.current_spirit_proxy', null));
+
+    // The write path round-trips through the run's own update route: entering the figure via the
+    // team editor stores it, and clearing it stores null rather than zero.
+    $this->put(route('runs.update', $stated), [
+        'umamusume_id' => $stated->umamusume_id,
+        'scenario' => $stated->scenario,
+        'status' => $stated->status->value,
+        'current_spirit_proxy' => 40,
+    ])->assertRedirect();
+
+    expect($stated->fresh()->current_spirit_proxy)->toBe(40);
+
+    $this->put(route('runs.update', $stated), [
+        'umamusume_id' => $stated->umamusume_id,
+        'scenario' => $stated->scenario,
+        'status' => $stated->status->value,
+        'current_spirit_proxy' => null,
+    ])->assertRedirect();
+
+    expect($stated->fresh()->current_spirit_proxy)->toBeNull();
+});

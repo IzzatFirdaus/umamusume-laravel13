@@ -83,6 +83,8 @@ interface TeamSection {
     unity_trainings_count: number | null;
     spirit_bursts_count: number | null;
     extreme_bursts_count: number | null;
+    /** KI-133's labelled manual proxy; one team-wide aggregate, null until entered. */
+    current_spirit_proxy: number | null;
     /** The combined Spirit + Extreme total, and the band it falls in, or null when not both recorded. */
     combined_bursts: number | null;
     burst_band: string | null;

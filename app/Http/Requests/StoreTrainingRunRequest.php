@@ -101,6 +101,9 @@ class StoreTrainingRunRequest extends FormRequest
              */
             'unity_trainings_count' => ['nullable', 'integer', 'min:0'],
             'spirit_bursts_count' => ['nullable', 'integer', 'min:0'],
+            // KI-133's manual proxy: one aggregate for the whole team; `min:0` keeps a negative
+            // mistype out while the D-220 rules keep "not stated" and zero distinct.
+            'current_spirit_proxy' => ['nullable', 'integer', 'min:0'],
             'extreme_bursts_count' => ['nullable', 'integer', 'min:0'],
             /*
              * The Grade Point period the Trainer reports as live (US-10, ADR-0003).

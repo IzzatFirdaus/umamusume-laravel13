@@ -56,6 +56,7 @@ use Illuminate\Support\Collection;
  *     unity_trainings_count: int|null,
  *     spirit_bursts_count: int|null,
  *     extreme_bursts_count: int|null,
+ *     current_spirit_proxy: int|null,
  *     combined_bursts: int|null,
  *     burst_band: string|null
  * }
@@ -646,6 +647,10 @@ final class TeamPanelBuilder
             'unity_trainings_count' => $run->unity_trainings_count,
             'spirit_bursts_count' => $run->spirit_bursts_count,
             'extreme_bursts_count' => $run->extreme_bursts_count,
+            // KI-133: one Trainer-entered Spirit aggregate for the whole team, labelled a manual
+            // proxy on the display because the gauge is per team member with no published maximum.
+            // Null until entered; the Spirit card states the absence rather than printing zero.
+            'current_spirit_proxy' => $run->current_spirit_proxy,
             'combined_bursts' => $combined,
             // The band's own `total` label, so the panel marks the row it already renders rather
             // than carrying a second copy of the bounds.

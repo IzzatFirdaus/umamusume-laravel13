@@ -44,6 +44,8 @@ const props = defineProps<{
         unity_trainings_count: number | null;
         spirit_bursts_count: number | null;
         extreme_bursts_count: number | null;
+        /** KI-133's labelled manual proxy; null until the Trainer enters one. */
+        current_spirit_proxy: number | null;
         stat_grades: { key: string; label: string; grade: string | null }[];
     };
     backUrl: string;

@@ -85,6 +85,7 @@ use Inertia\Response;
  *     unity_trainings_count: int|null,
  *     spirit_bursts_count: int|null,
  *     extreme_bursts_count: int|null,
+ *     current_spirit_proxy: int|null,
  *     combined_bursts: int|null,
  *     burst_band: string|null
  * }
