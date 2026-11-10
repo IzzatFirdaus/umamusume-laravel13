@@ -24,6 +24,7 @@
  * the ladder without the burst machine, and this panel must not claim one it does not have.
  */
 import { computed } from 'vue';
+import AbsenceValue from '../AbsenceValue.vue';
 import CapsuleHeader from '../CapsuleHeader.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import SpiritBurstRoster from '../SpiritBurstRoster.vue';
@@ -324,11 +325,12 @@ const counterSegments = computed((): string[] => {
                             v-if="grade.grade !== null"
                             class="font-mono tabular-nums text-ink-strong"
                         >{{ grade.grade }}</span>
-                        <span
+                        <AbsenceValue
                             v-else
-                            class="font-mono tabular-nums text-ink-strong"
-                            title="No per-stat team grade is recorded for this run yet. Enter it in the team-state editor."
-                        >N/A</span>
+                            compact
+                            class="font-mono tabular-nums"
+                            :reason="`No per-stat team grade is recorded for this run yet. Enter it in the team-state editor.`"
+                        />
                     </li>
                 </ul>
             </div>
