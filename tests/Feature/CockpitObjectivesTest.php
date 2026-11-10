@@ -138,6 +138,61 @@ it('gives every objective row the declared fields and a state the vocabulary all
     }
 });
 
+it('names a scenario-configured finale by its own word, not the row\'s borrowed title (UX-25)', function (): void {
+    // KI-82: the catalogue export's `name_en` for Grand Concert's final reads "URA Finals Final (Grand
+    // Live)", URA's finals vocabulary on a scenario whose own finale the guide names "the Grand Live /
+    // Grand Concert in Senior Year" (`docs/scenarios/07-grand-concert.md`:88). Grand Concert composes
+    // no obligations rail (its `race_calendar` panel is off), so the row the title leaks through is the
+    // race planner's, which lists every scenario-keyed slot.
+    $run = TrainingRun::factory()->create([
+        'scenario' => 'our_grand_concert',
+        'status' => RunStatus::Active,
+        'umamusume_id' => Umamusume::factory()->create()->id,
+    ]);
+
+    $finale = RaceCatalogSlot::factory()->create([
+        'scenario_key' => 'our_grand_concert',
+        'year' => RaceCatalogSlot::YEAR_FINALE,
+        'month' => 6,
+        'half' => 'Late',
+        'turn' => null,
+        'slot_label' => 'URA Finals Final (Grand Live)',
+        'title' => 'URA Finals Final (Grand Live)',
+        'tier' => 'G1',
+        'is_mandatory' => true,
+    ]);
+    RaceCatalogSlot::factory()->create([
+        'scenario_key' => null,
+        'year' => RaceCatalogSlot::YEAR_FINALE,
+        'month' => 6,
+        'half' => 'Late',
+        'turn' => null,
+        'slot_label' => 'URA Finals Qualifier',
+        'title' => 'URA Finals Qualifier',
+        'tier' => 'G1',
+        'is_mandatory' => true,
+    ]);
+
+    /** @var array<string, mixed> $planner */
+    $planner = test()->get(route('runs.races.planner', $run))->assertOk()->inertiaProps('groups');
+
+    // The planner groups its rows (mandatory / upcoming / optional), each group carrying its rows
+    // under a `races` key. The titles are collected across whichever groups a fresh run's slots land
+    // in; a fresh run has no position, so both fixtures sit in `mandatory` and `upcoming` is absent.
+    $titles = collect($planner)
+        ->map(fn ($group) => is_array($group) ? ($group['races'] ?? []) : [])
+        ->flatten(1)
+        ->map(fn ($row) => is_array($row) ? ($row['title'] ?? null) : null)
+        ->filter()
+        ->values();
+
+    expect($titles)->toContain('The Grand Concert')
+        ->and($titles)->not->toContain('URA Finals Final (Grand Live)')
+        // The shared preliminary every URA-derived scenario runs keeps the catalogue's own words, and
+        // its presence proves the planner really listed both rows rather than an empty set.
+        ->and($titles)->toContain('URA Finals Qualifier');
+});
+
 it('separates the career-wide finals rail from the scenario\'s own obligation (UX-04)', function (): void {
     // `scopeForScenario()` unions `scenario_key IS NULL` with the run's own key, so every scenario's rail
     // held the shared rows and its own final under one heading. Unity Cup draws the same per-turn race

@@ -1013,6 +1013,14 @@ return [
 
         'our_grand_concert' => [
             'label' => 'Our Grand Concert',
+            // KI-82: the catalogue row's `name_en` for this scenario's final reads
+            // "URA Finals Final (Grand Live)", which borrows URA's finals vocabulary for a scenario whose
+            // own finale the guide names "the Grand Live / Grand Concert in Senior Year"
+            // (`docs/scenarios/07-grand-concert.md`: the four Promo Lives "then the Grand Live / Grand
+            // Concert"). The obligations rail and any other surface that prints the scenario's own final
+            // read this label instead of the row's title. The song `GIRLS' LEGEND U` is the show's
+            // centrepiece, not the event's name, so it does not travel here.
+            'finale_label' => 'The Grand Concert',
             'metadata' => [
                 'summary' => 'The fourth Global scenario, whose vocabulary names Performance and its five types, Promo Concert, Grand Concert, lessons, songs, concert techniques, Live Performance Expectations and Great Success.',
                 'description' => 'Its guide files itself as a boundary document: the vocabulary is official copy from Global notice 905, while the screen-level text and the song list remain unmeasured.',

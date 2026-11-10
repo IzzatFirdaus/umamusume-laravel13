@@ -898,9 +898,11 @@ class CockpitController extends Controller
             };
 
             $rows[] = [
-                'label' => $slot->hasFanGate()
-                    ? $slot->title.' · '.number_format((int) $slot->fans_needed).' fans'
-                    : $slot->title,
+                // KI-82 / UX-25: the scenario's own final may not use the catalogue row's `name_en`,
+                // which borrows URA's finals vocabulary ("URA Finals Final (Grand Live)"). A config
+                // `finale_label` is the scenario's own name for its finale, and overrides the row's
+                // title for exactly that one row; every other row keeps the catalogue's own words.
+                'label' => $this->obligationLabel($run, $slot),
                 'state' => $state,
                 'due_turn' => $slot->turnNumber(),
                 // A slot the grid cannot date is not necessarily undatable: the finale rows sit outside
@@ -965,6 +967,29 @@ class CockpitController extends Controller
             ->all());
 
         return $rows;
+    }
+
+    /**
+     * A row's label: the fan gate appends its threshold, and the scenario's own finale may read a
+     * config-declared name instead of the catalogue row's `name_en` (KI-82 / UX-25).
+     */
+    private function obligationLabel(TrainingRun $run, RaceCatalogSlot $slot): string
+    {
+        $finaleLabel = config("scenarios.scenarios.{$run->scenarioKey()}.finale_label");
+
+        if (
+            $slot->year === RaceCatalogSlot::YEAR_FINALE
+            && $slot->scenario_key === $run->scenarioKey()
+            && is_string($finaleLabel) && $finaleLabel !== ''
+        ) {
+            $title = $finaleLabel;
+        } else {
+            $title = $slot->title;
+        }
+
+        return $slot->hasFanGate()
+            ? $title.' · '.number_format((int) $slot->fans_needed).' fans'
+            : $title;
     }
 
     /**

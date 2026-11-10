@@ -306,9 +306,21 @@ class RacePlannerController extends Controller
      */
     private function raceRow(TrainingRun $run, RaceCatalogSlot $slot, ?RaceEntry $entry, bool $maidenCleared): array
     {
+        // KI-82 / UX-25: the scenario's own finale may carry a config-declared name that overrides the
+        // catalogue row's `name_en`, which for Grand Concert borrows URA's finals vocabulary ("URA
+        // Finals Final (Grand Live)"). Only the scenario-keyed finale row reads the override; the
+        // shared Qualifier and Semifinal keep the catalogue's own words, because every URA-derived
+        // scenario really does run them.
+        $finaleLabel = config("scenarios.scenarios.{$run->scenarioKey()}.finale_label");
+        $title = $slot->year === RaceCatalogSlot::YEAR_FINALE
+            && $slot->scenario_key === $run->scenarioKey()
+            && is_string($finaleLabel) && $finaleLabel !== ''
+            ? $finaleLabel
+            : $slot->title;
+
         return [
             'id' => $slot->id,
-            'title' => $slot->title,
+            'title' => $title,
             'tier' => $slot->tier,
             'year_label' => $slot->yearLabel(),
             'turn' => $slot->turnNumber(),
