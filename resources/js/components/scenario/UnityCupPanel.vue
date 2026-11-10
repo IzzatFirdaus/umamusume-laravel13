@@ -126,9 +126,12 @@ const current = computed(() =>
 );
 
 const bonusTitle =
-    'Seen beside the Rank S emblem in the recorded run (client tooltip). That the bonus binds to the rank ' +
-    'rather than the league standing is inferred from screen position, so it is Estimated, not Confirmed ' +
-    '(run report §1.8, §7.5).';
+    'Seen beside the Rank S emblem in the recorded run (client tooltip). The figure is the ' +
+    'league-placement bonus, not a reading of the rank letter: the published ladder pays 2nd-5th +50, ' +
+    '6th-10th +30, 11th-15th +20 and 16th-20th +10, and this run\'s 8th place sits in the +30 band ' +
+    '(docs/research/flows-career-workspace.md:232, citing UMAMUSUME_REFERENCE §2.2.2 and the run ' +
+    'report §1.8). This build stores the placement but no ladder, so the line repeats the figure the ' +
+    'client printed for THIS placement rather than computing one.';
 
 /** The team's own identity renders when the Trainer entered any of the four (A6.6). */
 const hasTeamIdentity = computed(
@@ -288,8 +291,12 @@ const counterSegments = computed((): string[] => {
             <TeamRankGauge :enabled="true" :current="current" :ladder="props.scenario.team.ladder" />
 
             <!-- The +30 is the figure the recorded client shows, and it was read beside the S
-                 emblem. Other ranks pay something this corpus does not state, so the line renders
-                 only where the observation applies. -->
+                 emblem. Per `docs/research/flows-career-workspace.md:232` it is the LEAGUE-PLACEMENT
+                 bonus, not a rank bonus: 6th-10th pays +30, and this run placed 8th. The gate below
+                 still reads the rank because the observation is only recorded for this run's board,
+                 and this build stores no placement ladder to generalise from (no `league_bonus` or
+                 `placement_bonus` key exists in `config/scenarios.php`), so the line states an
+                 observed figure rather than a derived one. -->
             <p v-if="props.scenario.team.rank === 'S'" class="flex flex-wrap items-center gap-2 text-sm text-ink">
                 <span class="font-semibold text-ink-strong">Team Ranking Bonus: All Attributes +30</span>
                 <ProvenanceBadge state="estimated" :title="bonusTitle" />
