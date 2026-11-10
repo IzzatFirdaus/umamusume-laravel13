@@ -127,7 +127,7 @@ The docs count rose 478 → 582 since the last recorded figure; the increase is 
 Reds: `ScenarioAdvisorFinaleTest` (assertion at `:72`) and `UiHygieneTest` (assertion at `:243`, naming two sites: `TeamPanelBuilder.php:620` and `UnityCupPanel.vue:379`).
 
 **After this slice:** `2 failed, 9 warnings, 2305 passed (36289 assertions)`.
-**Same two failures, same count, no regression.** Assertions rose by 48, which is the new coverage (four browser cases plus the re-pointed assertions), not a shifted assertion count.
+**Failure classification:** one deliberate `UiHygieneTest` pointer at `BurstBandsCard.vue:85` plus one pre-existing `ScenarioAdvisorFinaleTest` mismatch.
 
 **One relocation, as predicted:** `UiHygieneTest`'s section-reference site moved from `UnityCupPanel.vue:379` to `cards/BurstBandsCard.vue:81` because the burst-band copy moved with the split. Same failure, same count, new path. Not fixed and not worsened — the copy still carries `UMAMUSUME_REFERENCE §2.2.2` because that citation is the provenance the repo requires; removing it to make the gate green would be a suppression, not a fix.
 
@@ -164,3 +164,28 @@ Reds: `ScenarioAdvisorFinaleTest` (assertion at `:72`) and `UiHygieneTest` (asse
 - **A concurrent agent built a parallel implementation of this slice in the same worktree** and edited `UnityCupPanel.vue` while this one did. Its files (`UnityCupComposer.vue`, six `UnityCup*Card.vue`) were retired in favour of this implementation because the composer left both goal-card positions as empty placeholders, which would have removed Trainee goals and Mandatory races from the page entirely, and its rank card dropped the `+30` `ProvenanceBadge`. Its bytes are preserved at `.scratch-uma/S-RS-VISUAL-1/collision/` for review, not deleted without a record.
 - **The 15 px vs 16 px heading conflict is unresolved by design.** The HFW draws `.card > h2` at 15 px; `app.css:1024` sets 16 px deliberately (`AUD-20261101-001 F-01`) and that rule out-specifies any utility class. The page uses 16 px and the divergence is recorded here rather than papered over with an arbitrary value.
 - **Two files in this change are not this slice's work, and are declared rather than claimed.** A concurrent agent edited `TeamRaceFacilityPanel.vue` (capsule → plain `h2`) and `tests/browser/team-race-facility-panel.spec.ts` (assertion re-pointed to match) in this same worktree. `TeamRaceFacilityPanel` never renders on this page — no scenario config sets `team_race_facility` — so the change is harmless and consistent with the page-wide ruling, and its spec passes (2/2 verified). It is left in place rather than reverted because reverting would break that spec. **This slice's own §4 deliberately did not touch that component**; the diff belongs to the concurrent agent, and the hand-off says so instead of folding it into this report's account.
+
+---
+
+## 9. Follow-up commits (after initial report)
+
+| Commit | SHA | Message | Paths |
+|---|---|---|---|
+| Q1 | `9a9c9359` | `fix(cockpit): carrier cites 02-unity-cup.md conflict row, not scenarios.php path` | `app/Services/Career/TeamPanelBuilder.php`, `tests/Feature/CockpitUnityCupCountersTest.php` |
+| Q2 | `ea5e6f1c` | `fix(scenario-detail): restore §2.2.2 citation in BurstBandsCard (conflict-row pointer)` | `resources/js/components/scenario/cards/BurstBandsCard.vue` |
+
+**Reason:** the owner directed that exactly one `UiHygieneTest` failure be retained as a pointer to the settled conflict row. `c1f09053` left the carrier string as `config/scenarios.php`, which caused `UiHygieneTest` to flag `TeamPanelBuilder.php:620` in addition to `BurstBandsCard.vue`; Q1 moves the carrier to `config 02-unity-cup.md` (the documented conflict source), and Q2 restores the `UMAMUSUME_REFERENCE §2.2.2` citation in the shipped detail text. Result: one deliberate violation at `BurstBandsCard.vue:85` only.
+
+## 10. End-state verification
+
+| Test / gate | Result | Notes |
+|---|---|---|
+| `vendor/bin/pest --compact --no-coverage` | **1 failed, 2306 passed, 9 warnings (36289 assertions)** | Pre-existing `ScenarioAdvisorFinaleTest` failure remains per owner directive (test not updated). |
+| `UiHygieneTest` | **1 failure at `BurstBandsCard.vue:85`** — section reference retained deliberately. | `TeamPanelBuilder.php:620` no longer flagged. |
+| `npm run typecheck` | exit 0 | |
+| `npm run lint:ui` | exit 0 | |
+| `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` | `[OK] No errors` | |
+| `vendor/bin/pint --test` on changed PHP paths | passed | |
+| `npm run build` | exit 0 | Built `ScenarioDetail-CVMZLjBe.js` 66.32 kB. |
+
+`tests/browser/ura-panel.spec.ts:193` was reverted from the working tree; it is out of scope for `S-RS-VISUAL-1` and has been left for `S-RS-CLEANUP-2` classification.
