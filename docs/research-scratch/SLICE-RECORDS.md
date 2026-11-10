@@ -19657,3 +19657,21 @@ npx playwright test tests/browser/data-table.spec.ts --grep "pagination names th
 **Proposed one-line refusal (for the owner-gated edit, not applied here).** `tests/browser/global-setup.ts` is a protected path, so this slice proposes rather than lands: before the server boots, compare `public/build/manifest.json`'s mtime against the newest mtime under `resources/js/` and abort with one line - `public/build is older than resources/js; run npm run build` - which confirms the refusal would have caught the scenario measured here (the probe string is absent from the served page's pager sentence precisely because the bundle predates the source). The KI's own text prefers the refusal over an in-harness rebuild for the KI-70 reasons; no merge of that edit happens in this pass.
 
 **Conclusion.** KI-101 STANDS: the harness staleness is live at HEAD, measured in both directions (stale-and-green today; the KI's recorded stale-then-crash precedent). Closure is the owner-approved refusal landing plus a green post-check run; neither happened in this slice.
+
+## ki-69-class3-veterans-2026-11-10.md
+
+**Date:** 2026-11-10. **Pass:** S-RS-REMAINING-1 slice 2.2. **HEAD through ade1e5f9.**
+
+**Question (KI-69, class 3).** The class-3 premise as filed (2026-10-07): `career-inheritance-event.spec.ts` cases fail at `openInheritanceEvent():80` on `select('select[name="legacies.0.legacy_id"]', {label: 'Symboli Rudolf'})`, because no code path populates `veterans`, and `Builder.vue` then never renders `input[name="legacies.0.rank"]` either - so all seven fixture-driven cases time out.
+
+**Re-measured at HEAD, on a session-private harness:**
+
+```text
+PLAYWRIGHT_PORT=8161 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/rs-remaining-1/class3.sqlite
+npx playwright test tests/browser/career-inheritance-event.spec.ts
+->  9 passed (48.9s), EXIT=0
+```
+
+**The premise no longer holds; the spec itself was re-baselined.** The current fixture does not touch `veterans` or the legacy-picker select at all: `openInheritanceEvent()` (the file's own helper at :40) now builds its run through `/training-runs/create` into the run-scoped Legacy Lab at `/legacy/{runId}`, records three turns through the POST API, and drives `#rank-parent_a` / `#rank-letter-parent_a` / `#ancestor-parent_a-0` / combobox roles - the `:id` contract KI-69's own closure asked for, which `Builder.vue` does render. All nine cases, including the axe scan and the 44px sweep, pass against the current shape; nothing waits on a veterans roster.
+
+**Register consequence (recorded, no entry edited here beyond this section).** KI-69's class-3 half is STALE at HEAD: the re-measured file passes on a fresh scratch database with no veterans seeded. The class-1/2/4 halves of KI-69 are separate halves (playwright config database, the artwork-mirror case, the trainee-step flash) and this slice re-measured only class 3; the class-3 status-flip on the entry itself belongs to the owner or a later register pass that re-reads the other three halves, because KI-69 is one entry and its other classes were not re-measured here.
