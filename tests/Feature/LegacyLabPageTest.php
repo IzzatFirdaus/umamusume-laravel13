@@ -351,13 +351,28 @@ it('states no star-roll chance and no priced Affinity, and names both absences',
         );
 });
 
-it('opens the builder only on a run that is still being planned', function (RunStatus $status): void {
-    // D-260 fixes the Legacy Select result for the life of the run, and `RecordVeteran` applies the
-    // same lifecycle rule at the other end. A finished or abandoned run has no builder, and the
-    // refusal is a 404 rather than a disabled page, so the URL cannot be shared as if it worked.
+it('sends a finished run\'s builder read to the record that owns its frozen Legacy (UX-22)', function (RunStatus $status): void {
+    // D-260 fixes the Legacy Select result for the life of the run, so a finished career has no builder
+    // to open: the page could only show a form whose write is refused. It answered 404, which reads as
+    // "this career does not exist" for a run the Trainer can see in the library. The READ now lands on
+    // the record that holds the frozen result, with the reason stated.
     $run = TrainingRun::factory()->create(['status' => $status]);
 
-    test()->get("/legacy/{$run->id}")->assertNotFound();
+    $response = test()->get("/legacy/{$run->id}");
+
+    $response->assertRedirect();
+    $response->assertSessionHas('status', fn (string $message): bool => str_contains($message, 'Legacy is fixed'));
+})->with([
+    'Completed' => RunStatus::Completed,
+    'Retired' => RunStatus::Retired,
+]);
+
+it('refuses a write to a run that is no longer being planned', function (RunStatus $status): void {
+    // The WRITE keeps the 404. A 404 tells a caller the endpoint is not there, which is what a form
+    // posting to a finished career should hear; nothing is silently dropped and no redirect invites a
+    // second attempt at a field that cannot change.
+    $run = TrainingRun::factory()->create(['status' => $status]);
+
     test()->put("/legacy/{$run->id}", [])->assertNotFound();
 })->with([
     'Completed' => RunStatus::Completed,

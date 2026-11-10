@@ -215,9 +215,23 @@ class LegacyController extends Controller
      * Refusing both here means the builder is only ever open on a run a Trainer is still planning, and
      * it is the same rule `RecordVeteran` applies to the other end of the lifecycle.
      */
-    public function builder(TrainingRun $run): Response
+    public function builder(TrainingRun $run): Response|RedirectResponse
     {
-        abort_unless($run->status === RunStatus::Active, 404);
+        // A finished career has no builder to open: `ADR-0010` fixes its Legacy for the life of the run,
+        // so the page could only ever show a form whose write is refused. It used to answer 404, which
+        // reads as "this career does not exist" for a run the Trainer can see in the library (UX-22).
+        // Send the read to the record that owns the frozen result instead, and say why.
+        if ($run->status !== RunStatus::Active) {
+            $veteran = $run->veteran;
+
+            return $veteran === null
+                ? redirect()
+                    ->route('runs.result', $run)
+                    ->with('status', 'This career is finished, so its Legacy is fixed. Its result is the record.')
+                : redirect()
+                    ->route('veterans.show', $veteran)
+                    ->with('status', 'This career is finished, so its Legacy is fixed. Its Veteran is the record.');
+        }
 
         $run->loadMissing(['umamusume', 'inheritanceParentA', 'inheritanceParentB']);
 
