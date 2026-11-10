@@ -28,6 +28,16 @@ test.afterEach(async ({ page }) => {
 
 const STEPS = ['Cockpit', 'Training', 'Races', 'Skills', 'Events', 'Inheritance', 'Deck', 'Timeline', 'Result'];
 
+// KI-131: two steps' accessible names carry the run scope where their visible labels collide
+// with the global rail's mobile words (`Legacy Lab` -> `Legacy`, `Support Cards` -> `Deck`). The
+// visible text never changed; the loop needs the name a screen reader hears.
+const STEP_NAMES: Record<string, string> = {
+    Inheritance: "This run's Inheritance",
+    Deck: "This run's Deck",
+};
+
+const stepName = (label: string): string => STEP_NAMES[label] ?? label;
+
 test('draws the nine steps as the career walks them, with the live one marked', async ({ page }) => {
     createdRunUrls.push(await startCareer(page, 'unity_cup'));
 
@@ -37,7 +47,7 @@ test('draws the nine steps as the career walks them, with the live one marked', 
     // Nine steps. Every one but Result is a real link on an active career; Result is the one section a
     // run earns only by ending, and the case below owns that shape in full.
     for (const label of STEPS.filter((step) => step !== 'Result')) {
-        await expect(nav.getByRole('link', { name: label, exact: true })).toHaveCount(1);
+        await expect(nav.getByRole('link', { name: stepName(label), exact: true })).toHaveCount(1);
     }
     await expect(nav.getByRole('link')).toHaveCount(STEPS.length - 1);
 
@@ -67,25 +77,28 @@ test('an unreachable Result step is a named absence, not a focusable link', asyn
     await expect(page.getByText(/Available when the career is completed/)).toBeVisible();
 });
 
-test('a completed career reaches its Result step', async ({ page }) => {
-    // The positive half of the reachability rule the case above asserts in the negative. The fixture is
-    // the seeded URA run, not a wizard walk — the same fixture the completed-run cases in
-    // career-cockpit.spec.ts use, and for the same reason: rebuilding a finished career through the
-    // wizard turn by turn is a second suite, not a fixture.
-    await page.goto(`/training-runs/${uraCompletedRun()}/cockpit`, { waitUntil: 'domcontentloaded' });
+test('a completed career retires the stepper and keeps the Result page itself reachable', async ({ page }) => {
+    // The reachability rule's completed-run half, re-measured after R7-38/R7-62 landed (68015d36,
+    // 2026-11-08): `CareerLayout` mounts the stepper only on an active run, so a completed career
+    // draws no nav at all and the Result step it used to link is reached by the run's own
+    // `result_url` door. The pre-R7-38 shape this case pinned (a live `Result` link inside the
+    // nav on a completed run) is retired behavior and had been red since that commit.
+    // The fixture is the seeded URA run, not a wizard walk — the same fixture the completed-run
+    // cases in career-cockpit.spec.ts use, and for the same reason: rebuilding a finished career
+    // through the wizard turn by turn is a second suite, not a fixture.
+    const runId = uraCompletedRun();
+    await page.goto(`/training-runs/${runId}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    const result = page
-        .getByRole('navigation', { name: 'Career', exact: true })
-        .getByRole('link', { name: 'Result', exact: true });
+    // The stepper is an active-run surface: a completed career carries no nav to a step it has
+    // already earned, so this asserts the retirement rather than a link the layout no longer draws.
+    await expect(page.getByRole('navigation', { name: 'Career', exact: true })).toHaveCount(0);
 
-    // A real link, not the span the active state renders: an href ending in /result, no aria-disabled,
-    // and an <a> element rather than a <span role="link">. These four mirror the four the negative case
-    // asserts, one state apart.
-    await expect(result).toBeVisible();
-    await expect(result).toHaveAttribute('href', /result$/);
-    await expect(result).not.toHaveAttribute('aria-disabled');
-    expect(await result.evaluate((el) => el.tagName)).toBe('A');
+    // And the Result page is still the finished career's own screen: the run's result URL loads
+    // and names the trainee, so retirement removed a duplicate door, not the destination.
+    await page.goto(`/training-runs/${runId}/result`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
 });
 
 test('an unreachable step cannot be activated by pointer or keyboard', async ({ page }) => {
@@ -115,9 +128,11 @@ test('renders on the run deck page with a run-scoped Inheritance link', async ({
     await expect(nav).toBeVisible();
 
     // The step must be run-scoped, not the global `/inheritance` or `/legacy`: a career screen may only
-    // ever open the section of the run it belongs to.
-    const inheritance = nav.getByRole('link', { name: 'Inheritance', exact: true });
-    await expect(inheritance).toHaveAttribute('href', `/training-runs/${runId}/inheritance`);
+    // ever open the section of the run it belongs to. KI-131 scopes the accessible name where the
+    // visible word collides with the global rail's mobile label; the href guard matches its
+    // run-scoped tail because Inertia v2 renders the `Link` href absolute.
+    const inheritance = nav.getByRole('link', { name: "This run's Inheritance", exact: true });
+    await expect(inheritance).toHaveAttribute('href', new RegExp('/training-runs/' + runId + '/inheritance$'));
 });
 
 test('the old per-screen door pair is gone and Training marks its own step', async ({ page }) => {
