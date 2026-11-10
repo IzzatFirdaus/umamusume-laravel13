@@ -100,7 +100,11 @@ const whoPill = computed(() => {
     }
 
     return {
-        label: turn ? `Turn ${turn} · Active` : 'Active',
+        // The frame is stated, not implied. `position` is where the run stands (the last logged turn);
+        // the Training screen's button counts the one being recorded (`Record turn 68` at position 67).
+        // Both numbers were correct and the pair read as an off-by-one, which is what the v3 audit filed
+        // as UX-16 before the arithmetic checked out.
+        label: turn ? `Turn ${turn} logged · Active` : 'Active',
         tone: 'positive' as const,
     };
 });

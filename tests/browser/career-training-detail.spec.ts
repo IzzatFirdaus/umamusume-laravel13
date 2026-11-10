@@ -60,6 +60,15 @@ async function recordFirstTurn(page: import('@playwright/test').Page, runUrl: st
     await page.getByRole('button', { name: /^Record turn \d+$/ }).click();
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
     await expect(page.getByText('Turn 1 logged.')).toBeVisible(WRITE);
+
+    // UX-16: the topbar pill and the Training screen's button count different things, and both numbers
+    // are right — the pill states the position the run stands at (turn 1, now logged), the button names
+    // the turn about to be recorded (turn 2). The pill says "logged" so the pair reads as a sequence
+    // rather than as an off-by-one. The audit filed the arithmetic as a defect; it was the frame.
+    await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await expect(page.getByText(/Turn 1 logged/)).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Record turn 2' })).toBeVisible();
 }
 
 async function openTrainingDetail(page: import('@playwright/test').Page): Promise<string> {
