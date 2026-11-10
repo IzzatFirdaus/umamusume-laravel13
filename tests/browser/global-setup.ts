@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -129,7 +129,74 @@ export function resolvedScratchDatabase(env: NodeJS.ProcessEnv = process.env): s
  */
 export const DEVTOOLS_ENV = { INERTIA_DEVTOOLS_ENABLED: 'false' } as const;
 
+/**
+ * The newest mtime under a source tree, for the staleness refusal in `globalSetup()` (KI-101).
+ * Walks the tree once; directory mtimes are not read (a directory's own mtime moves on rename
+ * operations that leave file content unchanged, which would refuse an honest bundle).
+ */
+function newestSourceMtime(root: string): number {
+    let newest = -1;
+
+    const walk = (dir: string): void => {
+        for (const entry of readdirSync(dir, { withFileTypes: true })) {
+            const full = join(dir, entry.name);
+
+            // `._DS_Store`-class noise and Vite's own caches never ship; reading them would make
+            // the check refuse on files no bundle carries.
+            if (entry.isDirectory()) {
+                if (entry.name === 'node_modules' || entry.name === '.vite') {
+                    continue;
+                }
+
+                walk(full);
+
+                continue;
+            }
+
+            newest = Math.max(newest, statSync(full).mtimeMs);
+        }
+    };
+
+    walk(root);
+
+    return newest;
+}
+
 export default async function globalSetup(): Promise<void> {
+    // KI-101 (2026-10-16 half, S-RS-COMPLETE-1 slice B.1): refuse to run against a stale bundle.
+    // The harness serves whatever `public/build` holds; a Vue change that lands after the last
+    // `npm run build` is invisible to every spec, which then report the old bundle's behaviour as
+    // green (measured 2026-11-10: a mutated pager line passed its own spec against a pre-mutation
+    // bundle). The refusal costs only the session that needed the rebuild — an in-harness rebuild
+    // would serialise every concurrent session behind one Vite build, which is the KI-70 hazard.
+    // `PLAYWRIGHT_FRESH_BUILD=1` skips the check for a session that just rebuilt and knows it.
+    if (process.env.PLAYWRIGHT_FRESH_BUILD !== '1') {
+        const manifestPath = resolve(repoRoot, 'public/build/manifest.json');
+
+        let manifestTime = -1;
+
+        try {
+            manifestTime = statSync(manifestPath).mtimeMs;
+        } catch {
+            throw new Error(
+                'public/build is absent; run npm run build before the browser suite'
+                + ' (or set PLAYWRIGHT_FRESH_BUILD=1 to override).',
+            );
+        }
+
+        // The newest source file under resources/js decides staleness. A peer's in-flight edit is
+        // exactly the case this check exists for: the bundle cannot contain it either.
+        const newest = newestSourceMtime(resolve(repoRoot, 'resources/js'));
+
+        if (newest > manifestTime) {
+            throw new Error(
+                `public/build is older than resources/js (manifest ${Math.round(manifestTime)}, `
+                + `newest source ${Math.round(newest)}); run npm run build `
+                + '(or set PLAYWRIGHT_FRESH_BUILD=1 to override).',
+            );
+        }
+    }
+
     // Fail if a cached config would override the harness environment and point the server
     // at the canonical development database instead of the scratch file.
     try {
