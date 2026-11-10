@@ -271,7 +271,7 @@ test.describe('Setup step 4 — Legacy', () => {
 
         // Two empty slots are a legitimate build and a stored record, not an error.
         await page.locator('#affinity').selectOption('◎');
-        await page.getByRole('button', { name: 'Save Legacy' }).click();
+        await page.getByRole('button', { name: 'Save and stay' }).click();
         await expect(page.getByText('Legacy recorded.')).toBeVisible();
 
         // The stored state is read from the draft on the way back, not kept in client memory.
@@ -308,7 +308,7 @@ test.describe('Setup step 4 — Legacy', () => {
         await page.locator('#legacy-rank-letter-0').fill('A');
         await page.locator('#legacy-rank-0').fill('3');
 
-        await page.getByRole('button', { name: 'Save Legacy' }).click();
+        await page.getByRole('button', { name: 'Save and stay' }).click();
         await expect(page.getByText('Legacy recorded.')).toBeVisible();
 
         // The round-trip is the half a fresh page cannot prove: the name comes back, the picker
@@ -339,7 +339,7 @@ test.describe('Setup step 4 — Legacy', () => {
         await expect(parentA.locator('div.font-extrabold').first()).toContainText('Vodka');
 
         // And it survives a save and a cold reload, now from the server payload rather than the form.
-        await page.getByRole('button', { name: 'Save Legacy' }).click();
+        await page.getByRole('button', { name: 'Save and stay' }).click();
         await expect(page.getByText('Legacy recorded.')).toBeVisible();
 
         await hydrate(page, '/career/setup/legacy');
@@ -380,7 +380,7 @@ test.describe('Setup step 4 — Legacy', () => {
         await page.locator('#legacy-spark-stars-0-0').fill('3');
         await category.selectOption('Stat');
 
-        await page.getByRole('button', { name: 'Save Legacy' }).click();
+        await page.getByRole('button', { name: 'Save and stay' }).click();
 
         // The refusal is on screen, in the field's own error node, and it quotes the value that arrived.
         const message = page.locator('#legacy-spark-target-0-0-error');
@@ -448,7 +448,7 @@ test.describe('Setup step 4 — Legacy', () => {
     test('keeps the page to one primary action and the card ceiling', async ({ page }) => {
         await hydrate(page, '/career/setup/legacy');
 
-        // `Save Legacy` is a secondary write control beside the fields it writes; the single primary
+        // `Save and stay` is a secondary write control beside the fields it writes; the single primary
         // is the head band's `Continue to deck`.
         await expect(page.locator('main .bg-primary-action, main a.bg-primary-action')).toHaveCount(1);
 
@@ -675,7 +675,7 @@ test.describe('Setup step 5 — Support deck', () => {
         // step's editor (Phase D); the draft key it now proves carries is the Affinity grade.
         await hydrate(page, '/career/setup/legacy');
         await page.locator('#affinity').selectOption('◎');
-        await page.getByRole('button', { name: 'Save Legacy' }).click();
+        await page.getByRole('button', { name: 'Save and stay' }).click();
         await expect(page.getByText('Legacy recorded.')).toBeVisible();
 
         // Step 5 through the page's own primary action: one equipped card. The card is whichever the

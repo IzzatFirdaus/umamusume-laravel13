@@ -710,7 +710,7 @@ const pickOptions = (): { value: string; label: string }[] => [
 
             <p v-if="!props.hasSelection" class="mt-2 text-sm text-ink-muted">
                 No Legacy is recorded for this setup yet. Nothing is stored until you save, and a figure you have
-                not read is left blank rather than filled in.
+                not read is left blank rather than filled in. Continuing to the deck saves it on the way.
             </p>
             <p v-else class="mt-2 text-sm text-ink-muted">
                 This setup already holds a Legacy. Saving below replaces it whole; a Spark you remove here is
@@ -725,6 +725,13 @@ const pickOptions = (): { value: string; label: string }[] => [
                 {{ form.errors.legacies }}
             </p>
 
+            <!-- Two writes, and each says which one it is. This used to read "Save Legacy" beside the
+                 fields it writes, while the head-band "Continue to deck" posted the same payload and
+                 moved on; a Trainer who filled a parent could not tell which door advanced the step
+                 (UX-15). The label now names the difference: this one records and stays, the head band
+                 records and continues. Removing it instead would delete the only way to save a
+                 half-finished ancestry without leaving, which four cases in
+                 `career-legacy-deck-steps.spec.ts` exercise. -->
             <div class="mt-5 flex flex-wrap items-center gap-3">
                 <button
                     id="legacy-save"
@@ -733,7 +740,7 @@ const pickOptions = (): { value: string; label: string }[] => [
                     class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:bg-panel disabled:cursor-wait disabled:opacity-60"
                     @click="saving"
                 >
-                    {{ form.processing ? 'Saving…' : 'Save Legacy' }}
+                    {{ form.processing ? 'Saving…' : 'Save and stay' }}
                 </button>
 
                 <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving the Legacy…</p>

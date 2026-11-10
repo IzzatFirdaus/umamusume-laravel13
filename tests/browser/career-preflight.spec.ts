@@ -168,7 +168,7 @@ test('marks the Legacy row by the count its own summary prints (R6-10)', async (
     await walkWizard(page, 'ura_finale', {
         onLegacy: async (legacyPage) => {
             await legacyPage.locator('#legacy-pick-0').selectOption('__manual__');
-            await legacyPage.getByRole('button', { name: 'Save Legacy' }).click();
+            await legacyPage.getByRole('button', { name: 'Save and stay' }).click();
             await expect(legacyPage.getByText('Legacy recorded.')).toBeVisible();
         },
     });
