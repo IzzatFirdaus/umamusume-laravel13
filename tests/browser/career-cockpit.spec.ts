@@ -207,7 +207,9 @@ test('names every absent value and refuses to rank until Energy is entered', asy
     // to — a marker printed while the advisor declines is exactly what this catches.
     const steps = page.getByRole('navigation', { name: 'Career' });
     await expect(steps.getByRole('link', { name: 'Training', exact: true })).toBeVisible();
-    await expect(steps.getByRole('link', { name: 'Inheritance', exact: true })).toBeVisible();
+    // 2026-11-10 (KI-131): the step's accessible name is scoped where the visible label collides
+    // with the global rail's mobile word, so the name a screen reader hears names the run.
+    await expect(steps.getByRole('link', { name: "This run's Inheritance", exact: true })).toBeVisible();
     await expect(page.getByText(/RECOMMENDED/)).toHaveCount(0);
 });
 
@@ -1076,6 +1078,11 @@ test('prints the card base stats as a labelled Starting line beneath the stat ra
 
     // Five numbers, one per stat: the rail's five rows are the readings and this is one sentence.
     await expect(line.locator('span.font-mono')).toHaveCount(5);
+    // UX-05: each figure carries its stat name and the pairs are joined by a separator in the markup, so
+    // the line reads as five facts rather than one number. It used to be five bare values spaced by
+    // `ml-2`, which copied and read as `Starting8768917480`.
+    await expect(line).toContainText('Speed 96 · Stamina');
+    await expect(line).not.toContainText(/\d{6,}/);
     // Vodka `[Wild Top Gear]`'s base line, measured from the database in proposal P-01 §2.
     await expect(line).toContainText('96');
     await expect(line).toContainText('105');
