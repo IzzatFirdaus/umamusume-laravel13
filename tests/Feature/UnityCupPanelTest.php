@@ -279,3 +279,25 @@ it('keeps the team section out of a fifth scenario unless its config entry asks 
             ->where('scenario.team.race_guidance', null)
             ->where('scenario.team.bands', []));
 });
+
+it('attributes the +30 to league placement, not to the team rank (KI-155)', function (): void {
+    // KI-155. The panel's provenance note used to say the bonus "binds to the rank rather than the
+    // league standing", "inferred from screen position". `docs/research/flows-career-workspace.md:232`
+    // refutes that: the client's `Team Ranking Bonus: All Attributes +30` is the LEAGUE-PLACEMENT
+    // bonus (2nd-5th +50, 6th-10th +30, 11th-15th +20, 16th-20th +10), and the recorded run's 8th
+    // place is the +30 band.
+    //
+    // Asserted as source text because the line is not browser-reachable: it renders only when the
+    // team rank is `S`, and no trainer form writes a team rank (R6-48), so a browser case cannot put
+    // it on screen. `scenario-panel.spec.ts:329` asserts the other half — that it is absent where no
+    // rank was recorded.
+    $source = (string) file_get_contents(base_path('resources/js/components/scenario/UnityCupPanel.vue'));
+
+    expect($source)
+        ->toContain('league-placement bonus, not a reading of the rank letter')
+        ->toContain('6th-10th +30')
+        ->toContain('docs/research/flows-career-workspace.md:232')
+        // The refuted claim must not come back.
+        ->not->toContain('binds to the rank')
+        ->not->toContain('inferred from screen position');
+});
