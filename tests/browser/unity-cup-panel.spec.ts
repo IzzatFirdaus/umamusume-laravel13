@@ -56,7 +56,10 @@ test('renders the configured burst bands, their payout timing and the Extreme ca
     const table = section.getByRole('table', { name: /Reward by combined Spirit Burst/ });
     await expect(table).toBeVisible();
     await expect(table.getByRole('row').getByText('4–6', { exact: true })).toBeVisible();
-    await expect(table.getByText('Gold hint Lv3, +40 matching stat, +40 SP')).toBeVisible();
+    // Verbatim from `config/scenarios.php`'s `spirit_burst_bands`, last band: the config reads
+    // "Gold hint Lv3, +40 to the matching stat, +40 SP". The spec used to omit the "to the", which
+    // made this case fail against copy the app never printed.
+    await expect(table.getByText('Gold hint Lv3, +40 to the matching stat, +40 SP')).toBeVisible();
 
     // The caveat names all three publisher conflicts, in words: state never rides the ⚠ mark alone.
     await expect(section.getByText(/Three parts of this table are publisher conflicts/)).toBeVisible();
