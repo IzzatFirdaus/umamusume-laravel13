@@ -211,24 +211,17 @@ const careerNote = computed<string | null>(() => {
 
     if (career === null) return null;
 
-    const missing: string[] = [];
-    if (career.energy === null) missing.push('Energy');
-    if (career.team_rank.value === null) missing.push('a team rank');
+    // The two readings a snapshot run carries: how many turns are logged, and where the run was
+    // imported at. Both are correct (the UX-16 correction established the pair is a frame question,
+    // not an arithmetic one), so the line states them without apologising for the tool.
+    // `known defect`/`not a rendering choice` used to live here; the v3 audit filed the apology
+    // itself as UX-08, because a Trainer does not need the HFW's changelog on their dashboard.
+    const logged = `Turn ${career.turn} logged`;
+    const imported = career.cockpit_turn === null
+        ? null
+        : ` · imported at turn ${career.cockpit_turn}`;
 
-    const absence =
-        missing.length === 0
-            ? ''
-            : `No logged turn has reported ${missing.length === 1 ? missing[0] : `${missing[0]} or ${missing[1]}`} yet. `;
-
-    const recorded = career.turn;
-    const cockpit = career.cockpit_turn;
-
-    const numbers =
-        cockpit === null
-            ? `recorded turns: ${recorded}; imported position: none.`
-            : `recorded turns: ${recorded}; imported position: ${cockpit}.`;
-
-    return `${absence}A turn is counted from the turns recorded, not from the position the run was imported at. ${numbers} Both are labelled, and the disagreement is a known defect, not a rendering choice.`;
+    return `${logged}${imported ?? ''}.`;
 });
 
 // How many Veterans the table is actually showing, for the footer's "7 veterans · 3 shown"

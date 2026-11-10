@@ -235,9 +235,10 @@ test('an active career draws the resume card the wireframe draws', async ({ page
     const rank = card.locator('[data-tile="team_rank"] [data-tile-value]');
     await expect(rank).not.toHaveText('');
 
-    // index.html:102-107: the labelled defect, naming both numbers.
-    await expect(card.getByText(/A turn is counted from the turns recorded/)).toBeVisible();
-    await expect(card.getByText(/imported position: \d+/)).toBeVisible();
+    // index.html:102-107: both turn readings are stated, without the HFW's changelog narrative
+    // (UX-08 removed `known defect` / `not a rendering choice`; the numbers themselves stay).
+    await expect(card.getByText(/Turn \d+ logged( · imported at turn \d+)?\./)).toBeVisible();
+    await expect(card.getByText(/known defect|rendering choice|recorded turns:/)).toHaveCount(0);
 
     // index.html:84: "Open cockpit" is the card's filled action, and the page's only one.
     await expect(card.getByRole('link', { name: 'Open cockpit' })).toBeVisible();
