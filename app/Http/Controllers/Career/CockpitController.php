@@ -423,6 +423,20 @@ class CockpitController extends Controller
             ],
             'scenarios' => $this->scenarioLabels(),
             'current_objective_index' => $run->current_objective_index,
+            // KI-95: an imported run's header names the pasted body it came from
+            // (`SCREEN_SPEC.md`'s "import provenance line when `imported_at` is set", wording
+            // `Imported {date} from {import_source}`). Derived here rather than in the component so
+            // the date format has one owner; null for every run nobody imported, and the header
+            // renders nothing rather than an absence for the common case. `imported_at` is a string
+            // in the model's declared shape and a Carbon instance at runtime, so the date is read
+            // through the cast's own accessor rather than assumed either way.
+            'import_label' => $run->imported_at === null
+                ? null
+                : sprintf(
+                    'Imported %s from %s',
+                    $run->imported_at->toDateString(),
+                    $run->import_source,
+                ),
         ];
     }
 

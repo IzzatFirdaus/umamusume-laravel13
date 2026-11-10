@@ -159,6 +159,33 @@ it('normalises an empty scenario so an imported run renders instead of 500ing', 
     test()->get(route('runs.cockpit', $imported))->assertOk();
 });
 
+it('names the pasted body in the cockpit header the imported run lands on', function (): void {
+    // KI-95: the provenance line is a header fact, so the payload the Cockpit renders carries
+    // it derived (`Imported {date} from {import_source}`) and a run nobody imported carries null.
+    // The payload row, not the rendered string, is this file's half; the browser file owns the
+    // sentence a Trainer reads.
+    $source = importRun();
+    $source->turnEntries()->create(importTurn());
+
+    $csv = test()->get("/training-runs/{$source->id}/export/csv")->getContent();
+    test()->post(route('runs.import.store'), importPayload($source, ['csv' => $csv]))->assertRedirect();
+
+    $imported = importedRun($source->id);
+    $label = 'pasted CSV ('.substr(md5($csv), 0, 8).')';
+
+    test()->get(route('runs.cockpit', $imported))->assertOk()->assertInertia(
+        fn ($page) => $page
+            ->where('run.import_label', "Imported {$imported->imported_at->toDateString()} from {$label}")
+            ->where('run.trainee', $imported->umamusume->name),
+    );
+
+    // A run an import did not write renders no line at all: the common case owes no absence.
+    $typed = importRun();
+    test()->get(route('runs.cockpit', $typed))->assertOk()->assertInertia(
+        fn ($page) => $page->where('run.import_label', null),
+    );
+});
+
 it('measures every imported stat against the ceiling its own scenario sets', function (): void {
     $source = importRun('unity_cup');
     $before = TrainingRun::count();

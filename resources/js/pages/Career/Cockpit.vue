@@ -146,6 +146,12 @@ interface Performance {
 
 const props = defineProps<{
     run: { id: number; trainee: string; trainee_ja: string | null; umamusume_id: number; scenario: string | null; status: string; status_label: string; scenario_label: string; run_url: string; skills_url: string; index_url: string; timeline_url: string; result_url: string; training_url: string; deck_url: string; status_labels: Record<string, string>; scenarios: Record<string, string>; update_url: string; destroy_url: string; export_csv_url: string; export_json_url: string; current_objective_index: number | null;
+        /**
+         * KI-95: the import provenance line, `Imported {date} from {source}`, derived by the
+         * controller only for runs an import wrote; a career someone started here carries null and
+         * the header renders nothing rather than an absence.
+         */
+        import_label: string | null;
         /** The run-identity door and the delete door, both rendered by this page (`C6b.1`, `C6b.3`). */
         settings_url: string; confirm_delete_url: string };
     header: Header;
@@ -449,6 +455,18 @@ const lede = computed((): string => {
     return parts.join(' · ');
 });
 
+/**
+ * KI-95: the import provenance line, `Imported {date} from {source}`, derived by the controller for
+ * the runs an import wrote. Appended to the lede's own join inside `ledeWithImport`, so one
+ * `<p data-region="lede">` still carries the whole head description and the header's shape is
+ * unchanged for the run that was never imported.
+ */
+const ledeWithImport = computed((): string => {
+    const base = lede.value;
+
+    return props.run.import_label === null ? base : `${base}. ${props.run.import_label}`;
+});
+
 interface RecommendedAction {
     action: string;
     action_url: string;
@@ -726,7 +744,7 @@ const jumpToShop = (): void => {
              `role="banner"` region through `#head`, so the shell's own fallback title band is not
              drawn and the document keeps exactly one heading of each level. -->
         <template #head>
-            <PageHeader eyebrow="Cockpit" :title="props.run.trainee" :description="lede">
+            <PageHeader eyebrow="Cockpit" :title="props.run.trainee" :description="ledeWithImport">
                 <template #actions>
                     <LinkButton :href="props.run.index_url" variant="secondary" size="sm">
                         All careers
