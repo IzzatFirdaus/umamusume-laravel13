@@ -301,3 +301,20 @@ it('attributes the +30 to league placement, not to the team rank (KI-155)', func
         ->not->toContain('binds to the rank')
         ->not->toContain('inferred from screen position');
 });
+
+it('cites edges-versus-criteria for the burst-band conflict, not a Skill Point disagreement (KI-156)', function (): void {
+    // KI-156. The caveat used to say "two other publishers report 15/15/20/20 with no stat component",
+    // and the visible line listed "the Skill Point figures" among the conflicts. Neither is what the
+    // reference corpus records: `UMAMUSUME_REFERENCE.md` conflict row 57 says GameTora prints four
+    // numbered bands (4 to 9, 7 to 9, 10 to 12, 13+) and the Wiki prints the same four reward tiers
+    // with a *criterion* on the gold rows instead of numbered edges. The disagreement is edges versus
+    // criteria; the SP figures are the same on both. GameTora's own first two bands also overlap.
+    $source = (string) file_get_contents(base_path('resources/js/components/scenario/UnityCupPanel.vue'));
+
+    expect($source)
+        ->toContain('edges versus criteria, not about the Skill Point figures')
+        ->toContain("where the low bands' edges fall")
+        ->toContain('overlap and cannot both hold')
+        // The unsourced publisher figure must not come back.
+        ->not->toContain('15/15/20/20');
+});
