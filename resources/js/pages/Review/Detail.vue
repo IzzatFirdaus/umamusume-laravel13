@@ -375,9 +375,6 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                     ref="candidateForm"
                     :candidate="props.candidate"
                     :alias-languages="props.aliasLanguages"
-                    :accented="true"
-                    :default-expanded="true"
-                    variant="savebar"
                 />
 
                 <div v-else class="mt-4">

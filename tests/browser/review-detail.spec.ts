@@ -18,10 +18,11 @@ import {
  * asks one question should offer one answer rather than a control strip. Its keybox is explicit that
  * this is not cosmetic: "A queue that only offers 'confirm' is not a review; it is a rubber stamp."
  *
- * So this file now pins the savebar. The row-shape assertions were not deleted — the row shape still
- * ships, on the QUEUE, where `CandidateForm` renders `variant="row"`; those cases moved to
- * `review.spec.ts` (see the block at its foot). Deleting them would have weakened the suite, which
- * the dispatch forbids.
+ * So this file pins the savebar, which since the FQ-10 cut is the only shape `CandidateForm`
+ * renders anywhere: the queue lists candidates and links to this page, its own spec asserts
+ * that no queue row carries a form (`review.spec.ts`, "no queue row carries a verdict form"),
+ * and the `variant="row"` branch was retired with KI-143 (2026-11-10) after a tree-wide grep
+ * found no caller rendering it.
  *
  * Two properties survive unchanged from the old file and are still asserted below: exactly one
  * accented primary on the page (6A.4), and nothing busy on a cold load (6A.10).
