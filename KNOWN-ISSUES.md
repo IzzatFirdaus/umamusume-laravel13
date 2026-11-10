@@ -3219,6 +3219,9 @@ doc scope.
 
 ### KI-111 Markdown closing fences carry info strings, so blocks that should end do not and the prose after them renders as code - FILED 2026-10-20 (fence-class close-out), OPEN
 
+**2026-11-10 status pass (S-RS-REMAINING-1 slice 0.5):** fixed at HEAD. Measured with a fence state machine over the two named files plus the third instance found by the same sweep: `docs/UMAMUSUME_REFERENCE.md` carried closers with the `text` info string at lines 137, 2905 and 2913 (pairs opened at 130, 2899 and 2907), and `docs/imports/Umamusume_Progress_Tracker_Runs.md:2392` opened a `text` block that never closed, so the run-17 transcript and the provenance notes rendered as one code block. The runbook's named `PROCESS-PLANS.md:576`/`:921` sites were re-measured first and are NOT fences at current line numbers (a table row and a blank line; the fence checker reports no unbalanced block in that file), so they were left alone. Edits are the mechanical swap the KI describes: the three mis-tagged closers became bare ``` and the unclosed 2392 block gained its ``` closer before the `## Provenance notes` heading. `python tools/md_fence_check.py` reads `0 invalid closing fence(s) in 209 file(s)`; a state-machine scan reports every fence in both files balanced; `php tools/lore.php` delta is 0 (583 docs hits before and after).
+
+
 **Status: OPEN, reduced to two files.** A closing fence must be bare. CommonMark 0.31 section 4.5 says the
 line that ends a block is the run of backticks and nothing else, so a fence carrying an info string is
 always an opening. Where one sat where a closer belonged, the block never closed, and every line after it
