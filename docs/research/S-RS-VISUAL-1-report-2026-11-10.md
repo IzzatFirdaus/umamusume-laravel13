@@ -191,3 +191,11 @@ Reds: `ScenarioAdvisorFinaleTest` (assertion at `:72`) and `UiHygieneTest` (asse
 | `npm run build` | exit 0 | Built `ScenarioDetail-CVMZLjBe.js` 66.32 kB. |
 
 `tests/browser/ura-panel.spec.ts:193` was reverted from the working tree; it is out of scope for `S-RS-VISUAL-1` and has been left for `S-RS-CLEANUP-2` classification.
+
+---
+
+## 11. Post-report drift and correction
+
+Between the report's authorship (`6c114527`) and dispatch close, the conflict-row pointer drifted: the `detail` string of `AlertRow` was rewritten to name `UMAMUSUME_REFERENCE.md` (file name, no section marker), which removed the `§2.2.2` reference from shipped copy and made `UiHygieneTest` pass — 0 violations, contra the directive to retain exactly one section-reference failure. The drift was traced to commit `9bd3df7b`.
+
+Restored at `f2f0a8e5`: `resources/js/components/scenario/cards/BurstBandsCard.vue:87` now carries `UMAMUSUME_REFERENCE §2.2.2, conflict row 57` in the shipped `detail` prop, and `UiHygieneTest` reports **1 failure** at that line. Full suite is now **2 failed / 2305 passed / 9 warnings**, exactly as the original target stated: reds are `ScenarioAdvisorFinaleTest` (label ships as-is) and `UiHygieneTest` (one remaining deliberate section-reference at `BurstBandsCard.vue:87`).
