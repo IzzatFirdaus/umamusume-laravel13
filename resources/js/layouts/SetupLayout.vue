@@ -24,7 +24,7 @@
  * of its own screen needs it, and because a named absence is the honest answer rather than a dead link.
  */
 import AppLayout from './AppLayout.vue';
-import { onMounted, nextTick } from 'vue';
+import { computed, onMounted, nextTick } from 'vue';
 import { useLayout } from '../composables/useLayout';
 
 const props = defineProps<{
@@ -65,6 +65,15 @@ const steps = [
     { label: 'Deck' },
     { label: 'Preflight' },
 ];
+
+/*
+ * The scenario the draft names, for the step rail's Preflight chip (UX-21). Choosing the scenario is
+ * the one irreversible decision in the wizard — every later step's caps, obligations and deck hints
+ * read it — and the rail carried no trace of it once step 1 was behind the Trainer. `choices` is the
+ * draft's own summary, already sent by every controller that renders this layout, so no new server
+ * work is involved. Null before a pick, so step 1's own chip stays uncluttered.
+ */
+const scenarioName = computed<string | null>(() => props.choices?.[0]?.value ?? null);
 
 /*
  * The two draft states a chip reads, kept apart because the legend names them apart: a step with
@@ -263,6 +272,15 @@ onMounted(async () => {
                                 :aria-label="`${item.label}, ${stateWord(index + 1)}`"
                             >
                                 <span class="n" aria-hidden="true">{{ index + 1 }}</span>{{ item.label }}
+                                <!-- UX-21: the scenario is the wizard's one irreversible choice, and the rail said
+                                     nothing about it past step 1. Only the final review step names it, because that
+                                     is the chip a Trainer re-reads before creating the run. The aria-label above
+                                     does not carry it: the chip is a reminder, not the step's identity. -->
+                                <span
+                                    v-if="index === 5 && scenarioName !== null"
+                                    class="ml-1 rounded bg-sunken px-1.5 py-0.5 text-[10px] font-semibold text-ink"
+                                    aria-hidden="true"
+                                >{{ scenarioName }}</span>
                             </span>
                         </div>
 
@@ -284,8 +302,9 @@ onMounted(async () => {
                          expired session restarts the wizard. Stated here so a Trainer learns the scope
                          before data loss can occur. -->
                     <p class="text-xs text-ink-muted">
-                        One draft per session. Opening this wizard in another tab replaces this one
-                        (last write wins); an expired session restarts the wizard.
+                        One draft per session. Opening this wizard in another tab uses the same draft,
+                        and the newest write replaces the older one; an expired session restarts the
+                        wizard.
                     </p>
                 </div>
             </div>

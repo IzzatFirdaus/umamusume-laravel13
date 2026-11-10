@@ -43,6 +43,11 @@ test('a user can complete the setup wizard from scenario to a created run', asyn
     // Step 1 — scenario.
     await page.locator('input[type="radio"][name="scenario"]').first().check({ force: true });
     await expect(page.getByText('Scenario set.')).toBeVisible();
+    // The name of the scenario this walk chose, kept for the Preflight chip assertion below (UX-21).
+    const scenarioName = (await page.locator('input[type="radio"][name="scenario"]').first()
+        .evaluate((el) => (el.closest('label')?.innerText ?? el.getAttribute('aria-label') ?? '').trim()))
+        .split('\n')[0];
+    expect(scenarioName, 'the walk read a scenario name off the radio it checked').not.toBe('');
     await clickPrimary(page, 'Continue to trainee');
     await expect(page).toHaveURL(/\/career\/setup\/trainee$/);
 
@@ -59,6 +64,11 @@ test('a user can complete the setup wizard from scenario to a created run', asyn
     const currentChip = page.locator('[data-setup-steps] .step[aria-current="step"]');
     await expect(currentChip).toHaveClass(/is-done/);
     await expect(currentChip).toHaveAttribute('aria-label', 'Trainee, current step');
+
+    // UX-21: the scenario is the wizard's one irreversible choice, and the rail used to carry no trace
+    // of it past step 1. The Preflight chip names it once, mirroring the radio the walk checked.
+    await expect(page.locator('[data-setup-steps] .step').nth(5)).toContainText('Preflight');
+    await expect(page.locator('[data-setup-steps] .step').nth(5)).toContainText(scenarioName);
 
     await clickPrimary(page, 'Continue to build target');
     await expect(page).toHaveURL(/\/career\/setup\/target$/);
@@ -90,7 +100,10 @@ test('a user can complete the setup wizard from scenario to a created run', asyn
     await clickPrimary(page, 'Continue to preflight');
     await expect(page).toHaveURL(/\/career\/setup\/preflight$/);
 
-    // Step 6 — preflight creates the run and lands on its cockpit.
+    // Step 6 — preflight creates the run and lands on its cockpit. The finality acknowledgement gates
+    // the write (`AUD-20261102-005 F-01`); `startCareer()` ticks it for its own callers, and this walk
+    // does the same for itself.
+    await page.locator('#confirmed').check();
     await clickPrimary(page, 'Create the run');
     await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, { timeout: 60_000 });
     createdRunUrls.push(page.url());
