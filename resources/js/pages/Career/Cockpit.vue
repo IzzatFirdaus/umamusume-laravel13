@@ -49,6 +49,7 @@ import CareerStatePanel from '../../components/career/CareerStatePanel.vue';
 import AdvisorRail from '../../components/career/AdvisorRail.vue';
 import Section from '../../components/ui/Section.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
+import RunRaceStrip from '../../components/career/RunRaceStrip.vue';
 import BaseInput from '@/components/Form/BaseInput.vue';
 import BaseSelect from '@/components/Form/BaseSelect.vue';
 import BaseRadio from '@/components/Form/BaseRadio.vue';
@@ -1069,6 +1070,48 @@ const jumpToShop = (): void => {
                 </section>
             </div>
         </div>
+
+        <!-- KI-147: the race strip is back on the Cockpit. `3d8c5ee2` (C6b.5) removed this section with
+             the `Career tools` retirement, and the 2026-11-10 re-measure found the strip rendered
+             nowhere on this screen while the payload carried it (career-race-strip.spec.ts green
+             1/6). The wrapper is the pre-C6b.5 shape verbatim minus the delete disclosure and the
+             Career Result door, which C6b.3 had already given homes of their own (the footer's
+             `Delete this run` door and "Where to go"), so nothing here duplicates them. -->
+        <section
+            class="mt-4 rounded-lg border border-rule bg-panel p-4"
+            aria-labelledby="career-timeline-heading"
+        >
+            <h2 v-if="isActive" id="career-timeline-heading" class="text-lg font-semibold text-ink-strong">
+                Races in this run
+            </h2>
+
+            <!-- Once the career has ended the race list is history, not a decision, so it collapses
+                 below the fold. The heading id moves onto the `summary` so the section keeps the one
+                 accessible name it has while open. -->
+            <details v-else data-region="races-in-this-run" class="mt-1 rounded-lg border border-rule bg-raised p-4">
+                <summary
+                    id="career-timeline-heading"
+                    class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong"
+                >
+                    Races in this run
+                </summary>
+                <RunRaceStrip class="mt-2" :strip="props.raceStrip as never" />
+            </details>
+
+            <RunRaceStrip v-if="isActive" :strip="props.raceStrip as never" />
+
+            <p class="mt-3 text-xs text-ink-muted">
+                This region carries the run's own races. Every logged turn, race and event, in order,
+                is on the Career Timeline.
+            </p>
+
+            <a
+                :href="props.run.timeline_url"
+                class="mt-2 inline-flex min-h-11 items-center text-xs font-medium text-ink-strong underline"
+            >
+                Career Timeline
+            </a>
+        </section>
 
         <!-- HFW-OVERRIDE (structure: one footer door). No cockpit HFW draws a delete affordance: the
              HFW has no write surfaces at all. `C6b.3` gives the destructive write a door of its own

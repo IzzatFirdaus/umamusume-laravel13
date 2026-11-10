@@ -4841,3 +4841,35 @@ excludes the working tree's uncommitted alert-vocabulary change as the cause.
 **Evidence.** `npx playwright test tests/browser/wizard-parity.spec.ts` (session-private harness, fresh build) -> `1 failed, 27 passed`; the failed case is "deck: no artifact vocabulary, no dark variants, no horizontal overflow" with `Expected: 0, Received: 6` at `wizard-parity.spec.ts:104`. The two source sites are committed at HEAD (`git show HEAD:resources/js/components/support/SupportSlot.vue | grep -c 'title='` reads 2).
 
 **Closure.** Move both reasons off the `title` attribute the way KI-141 did for the target step (the `sr-only` spans already carry the sentences for readers; the `title` can simply go), then re-run the wizard-parity deck case. Not fixed in slice 1.6: `SupportSlot.vue` is a shared deck component another surface composes, and the six-count needs a per-render inventory (which slots render which span) before deleting either attribute.
+
+
+## KI-160 The Cockpit overflows its viewport by 88px at 640px: NextDecision's Obligations table and its grid column don't stop at the canvas edge
+
+**State:** OPEN. Filed 2026-11-10 (S-RS-COMPLETE-1 slice C.4) from the career-race-strip re-green; not
+caused by the strip restore, and not fixed by it.
+
+**Defect.** `tests/browser/career-race-strip.spec.ts`'s reflow case
+(`holds the left column at 320px and at a 200-percent width without sideways scroll`, line 203) measures
+88px of horizontal overflow at a 640x512 viewport (`scrollWidth 728
+ vs clientWidth 640`). The scratch diagnostic of the same date
+(`.scratch-uma/complete-1/diag5.log`, probe built at HEAD with and without the strip mount) attributes
+every overflowing box to one subtree: `NextDecision.vue`'s Obligations table
+(`table.t`, `right=728`), whose grid column extends past the canvas. The same 88px reading is present
+with the strip mount reverted byte-identically, so the overflow predates KI-147's fix and is a
+separate defect, filed here per the dispatch's second-defect stop rule rather than suppressed or
+bundled.
+
+320px reads clean (`over=0`), so the failure is specific to the 640-width two-track `.g-side`
+regime (`resources/css/layout-grid.css:33`). Root cause not yet diagnosed: the table's own width is
+261px but its left edge sits at 467px, which points at the track sizing rather than the table's
+content.
+
+**Proving command** (scratch probe, session-private):
+`PLAYWRIGHT_PORT=<own> PLAYWRIGHT_SCRATCH_DB=.scratch-uma/<session>/probe.sqlite npx playwright test`
+with a probe that prints `document.documentElement.scrollWidth - clientWidth` and the
+wider-than-viewport boxes at 640x512.
+
+**What closure needs:** a layout fix in the cockpit grid or `NextDecision.vue`'s table wrappers
+(`min-w-0` on the failing track, or an explicit `table-layout`/wrap on the obligation row), the
+`:203` reflow case green across the file, and the same probe reading `over<=1` at 320 and 640. 320px
+already holds; only the 640 crossing is broken.

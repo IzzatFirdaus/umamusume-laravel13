@@ -99,20 +99,20 @@ test('keeps an entered race in the run region and out of the list ahead of it', 
     const runUrl = await newRun(page, 11);
 
     // Enter the debut through the screen that owns the decision, leaving the turn link alone so the
-    // recorded row has to print the KI-17 absence rather than a guessed turn.
+    // recorded row has to print the KI-17 absence rather than a guessed turn. The R7 rewrite of the
+    // Race Decision page replaced RaceCard's drawer with a direct `Enter` button on each row
+    // (`enterFormFor`), so the case walks the shipped flow: the row button posts the calendar entry,
+    // and the page's own `role="status"` visit line is the write's acknowledgment.
     await page.goto(`${runUrl}/races`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
 
-    const opener = page.getByRole('button', { name: /^Details and actions for/ }).first();
+    const opener = page.getByRole('button', { name: 'Enter', exact: true }).first();
     await expect(opener).toBeVisible();
     await opener.click();
-    await expect(page.locator('dialog[open]')).toBeVisible();
-    await page.getByRole('button', { name: 'Enter Race' }).click();
-
-    // The write's own proof. The card that offers the slot starts printing what the run recorded
-    // against it, and the locator is unique on the page; a heading match would not be, because the
-    // drawer is still mounted while the visit is in flight.
-    await expect(page.getByText('Recorded: Entered')).toBeVisible(WRITE);
+    // The R7 page never reprints a row's recorded status, so the case's write proof is the
+    // request settling: networkidle is the calendar post finishing, and the cockpit region
+    // below is the read-back that says the write landed.
+    await page.waitForLoadState('networkidle', WRITE);
 
     await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
