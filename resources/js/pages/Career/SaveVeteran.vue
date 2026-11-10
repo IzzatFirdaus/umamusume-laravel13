@@ -461,14 +461,17 @@ function save(): void {
 
             <!-- Step 3 is the save itself: the button above posts to `runs.veteran.store` and the library row
                  lands or rewrites in one step, so there is no second confirmation to click through. -->
-            <section aria-labelledby="absences-heading" class="mt-4 rounded-md border border-rule bg-panel p-4">
-                <h2 id="absences-heading" class="text-lg font-semibold text-ink-strong">NOT IN THIS BUILD</h2>
+            <!-- UX-19: the absence list is honest but it is a footnote, and an always-open "NOT IN THIS
+                 BUILD" heading took first-viewport space the save action owns. Collapsed by default,
+                 reachable in one click, same content. -->
+            <details class="mt-4 rounded-md border border-rule bg-panel p-4">
+                <summary id="absences-heading" class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong">NOT IN THIS BUILD</summary>
                 <ul class="mt-2 space-y-2 text-sm">
                     <li v-for="absence in props.absences" :key="absence.label">
                         <span class="text-ink">{{ absence.label }}</span>: {{ absence.reason }}
                     </li>
                 </ul>
-            </section>
+            </details>
         </template>
     </CareerLayout>
 </template>

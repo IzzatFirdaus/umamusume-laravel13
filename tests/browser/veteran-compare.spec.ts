@@ -98,7 +98,11 @@ test('lines careers up with one property per row, reached from the library row',
     await expect(page.getByText('No note recorded for this career.').first()).toBeVisible();
 
     // And the rows the brief asks for that no column answers are named once, not scored per career.
-    await expect(page.getByRole('heading', { name: 'NOT IN THIS BUILD' })).toBeVisible();
+    // UX-19: the list moved from an always-open section into a collapsed disclosure, so the first
+    // viewport belongs to the comparison. Collapsed on load; openable in one click.
+    const absences = page.locator('details').filter({ has: page.locator('summary', { hasText: 'NOT IN THIS BUILD' }) });
+    await expect(absences).not.toHaveAttribute('open', '');
+    await absences.locator('summary').click();
     await expect(page.getByText(/Inheritance usefulness and a compatibility calculation/)).toBeVisible();
 });
 

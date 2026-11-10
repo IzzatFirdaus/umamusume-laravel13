@@ -293,16 +293,19 @@ const noStatsRecorded = computed((): boolean =>
                     <a :href="props.sourcesUrl" :class="doorClass" class="mt-3">Source ledger</a>
                 </section>
 
-                <section aria-labelledby="veteran-absences" class="card mt-4">
-                    <h2 id="veteran-absences" class="text-lg font-semibold text-ink-strong">
+                <!-- UX-19: the same footnote treatment the save screen and the compare screen take. The
+                     list stays honest and reachable; the first viewport belongs to the Veteran's own
+                     facts. -->
+                <details class="card mt-4">
+                    <summary id="veteran-absences" class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong">
                         Not in this build
-                    </h2>
+                    </summary>
                     <ul class="mt-2 space-y-2 text-sm text-ink-muted">
                         <li v-for="absence in props.absences" :key="absence.label">
                             <span class="text-ink">{{ absence.label }}</span>: {{ absence.reason }}
                         </li>
                     </ul>
-                </section>
+                </details>
             </div>
         </div>
     </AppLayout>

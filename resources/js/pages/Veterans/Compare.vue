@@ -803,14 +803,16 @@ watch(orderedColumns, () => {
             </div>
         </section>
 
-        <section aria-labelledby="compare-absences" class="mt-4 rounded-md border border-rule bg-panel p-4">
-            <h2 id="compare-absences" class="text-lg font-semibold text-ink-strong">NOT IN THIS BUILD</h2>
+        <!-- UX-19: same treatment as the other two screens — the absences are a footnote, collapsed by
+             default, one click to read, content unchanged. -->
+        <details class="mt-4 rounded-md border border-rule bg-panel p-4">
+            <summary id="compare-absences" class="flex min-h-11 cursor-pointer items-center text-lg font-semibold text-ink-strong">NOT IN THIS BUILD</summary>
             <ul class="mt-2 space-y-2 text-sm">
                 <li v-for="absence in props.absences" :key="absence.label">
                     <span class="text-ink">{{ absence.label }}</span>: {{ absence.reason }}
                 </li>
             </ul>
-        </section>
+        </details>
     </AppLayout>
 </template>
 
