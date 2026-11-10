@@ -285,3 +285,18 @@ the next pass:
  4. The sparks proposal body cites `docs/audits/rice-shower-cup-round7-reconciliation.md:956` as the
     source wrote it; the disk form of that name is `rice-shower-unity-cup-round7-reconciliation.md`.
     The citation was quoted verbatim, not repaired.
+ 5. Decomposition addendum (run after the commit, owner-approved): the commit message's
+    working-tree split ("+13 this round / +11 peer") was a harness artifact and is superseded
+    by the census's own dead_links() at the two refs. Definitive figures: 586 GONE at
+    `62f43094` -> 609 GONE at `50e09715`, +23 net (+29 added, -6 removed), all of it this
+    fold's, in five classes: 6 fold banners quoting the deleted full paths; 12 ledger `from`
+    rows inside `SLICE-RECORDS.md` (sparks x3, autofill x3, remodel x4, memos x2; dated
+    records kept verbatim by design, live before the delete and dead after it); 2 Round 24
+    dated rows (`INDEX.md` and this file) naming the autofill path, live before the delete;
+    2 mentions of the untracked peer survey/audit files in this note (UNTRACKED at the working
+    tree, GONE in ref mode); and 1 embedded upgrade-body citation of the peer audit file.
+    Everything else moved with its body netting zero (the walk-7 pairs, `08-unity-cup.md`, and
+    the memos' survey citation). The peer contribution on the HEAD path is +1, from their
+    committed `KNOWN-ISSUES.md` edit between the freeze point and the fold (585 -> 586), not
+    from uncommitted work; at the working tree the round reads +24 = that +1 plus the fold's
+    +23, five of which read UNTRACKED there.
