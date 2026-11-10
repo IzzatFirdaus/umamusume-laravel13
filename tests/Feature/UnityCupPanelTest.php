@@ -291,7 +291,7 @@ it('attributes the +30 to league placement, not to the team rank (KI-155)', func
     // team rank is `S`, and no trainer form writes a team rank (R6-48), so a browser case cannot put
     // it on screen. `scenario-panel.spec.ts:329` asserts the other half — that it is absent where no
     // rank was recorded.
-    $source = (string) file_get_contents(base_path('resources/js/components/scenario/UnityCupPanel.vue'));
+    $source = (string) file_get_contents(base_path('resources/js/components/scenario/ScenarioCardGrid.vue'));
 
     expect($source)
         ->toContain('league-placement bonus, not a reading of the rank letter')
@@ -309,7 +309,7 @@ it('cites edges-versus-criteria for the burst-band conflict, not a Skill Point d
     // numbered bands (4 to 9, 7 to 9, 10 to 12, 13+) and the Wiki prints the same four reward tiers
     // with a *criterion* on the gold rows instead of numbered edges. The disagreement is edges versus
     // criteria; the SP figures are the same on both. GameTora's own first two bands also overlap.
-    $source = (string) file_get_contents(base_path('resources/js/components/scenario/UnityCupPanel.vue'));
+    $source = (string) file_get_contents(base_path('resources/js/components/scenario/cards/BurstBandsCard.vue'));
 
     expect($source)
         ->toContain('edges versus criteria, not about the Skill Point figures')

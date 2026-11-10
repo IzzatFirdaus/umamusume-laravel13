@@ -37,7 +37,6 @@
 import type { Component } from 'vue';
 import { computed } from 'vue';
 import AbsenceValue from '../AbsenceValue.vue';
-import CapsuleHeader from '../CapsuleHeader.vue';
 import ProvenanceBadge from '../ProvenanceBadge.vue';
 import AlertRow from './AlertRow.vue';
 import RaceCalendarNote from './RaceCalendarNote.vue';
@@ -184,6 +183,20 @@ const onPanels = computed<{ flag: string; label: string }[]>(() =>
 );
 
 /**
+ * Whether the team grid draws this scenario's cards, so the goals must not be drawn twice.
+ *
+ * The grid is registered by `UnityCupPanel` under `team_rank_ladder`, and it places the goal groups
+ * itself at the HFW's positions 4 and 5 (`ScenarioCardGrid`). `career_goals` is a separate flag, and
+ * three scenarios set it, so the grid drawing the goals and `CareerGoalsPanel` drawing them again is
+ * reachable. The condition reads the flags that compose the grid, never a scenario name (G-33): the
+ * same rule that lets a fifth scenario reach these panels for one config entry.
+ */
+const gridDrawsGoals = computed<boolean>(
+    () => props.scenario.panels['team_rank_ladder']?.on === true
+        && props.scenario.panels['career_goals']?.on === true,
+);
+
+/**
  * Whether the scenario composes the career-goals ladder.
  *
  * That panel is a goal list, not a replacement for the published caps, so the baseline strip still
@@ -219,7 +232,12 @@ const emptyText = computed<string>(() =>
              system the scenario does not use. -->
         <ul v-if="onPanels.length > 0" data-region="scenario-panels" class="flex flex-col gap-3">
             <li v-for="panel in onPanels" :key="panel.flag">
+                <!-- When the team grid composes this scenario's cards it draws the goal groups itself,
+                     at the HFW's positions 4 and 5, so the `career_goals` registration stands down
+                     rather than printing Trainee goals and Mandatory races a second time. The grid is
+                     one 12-track bento; a nested `li` wrapper would break its own spans. -->
                 <component
+                    v-if="!(panel.flag === 'career_goals' && gridDrawsGoals)"
                     :is="panelRenderer(panel.flag)"
                     :scenario="props.scenario"
                     :label="panel.label"
@@ -235,8 +253,8 @@ const emptyText = computed<string>(() =>
              scenario's own rule family is a different fact, printed under that name on the setup
              wizard's card (R2-05); this strip holds only the version, which no source defines. -->
         <div data-region="scenario" class="card p-3">
-            <CapsuleHeader :title="props.scenario.label" class="mb-3" />
-            <div class="flex flex-wrap items-baseline gap-2">
+            <h2 class="text-lg font-semibold text-ink-strong">{{ props.scenario.label }}</h2>
+            <div class="mt-2 flex flex-wrap items-baseline gap-2">
                 <ScenarioStatusBadge :documented="props.scenario.documented" />
             </div>
         </div>
@@ -307,8 +325,7 @@ const emptyText = computed<string>(() =>
                  a scenario the run declared, because lending an undeclared run the baseline entry's
                  caps would state a composition nobody chose. -->
             <section v-if="props.scenario.declared" class="card flex flex-col gap-2 p-3">
-                <CapsuleHeader title="Published stat caps" class="mb-3" />
-                <h3 class="sr-only">Published stat caps</h3>
+                <h2 class="text-lg font-semibold text-ink-strong">Published stat caps</h2>
                 <!-- W.3 = C (owner ruling 2026-11-10): the Team Race rule line lives here, in the
                      reference block, rather than in the banner. It moved out of
                      `TeamRacePanel.vue` because it is scenario mechanics — the same class of fact

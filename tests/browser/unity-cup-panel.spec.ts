@@ -129,7 +129,11 @@ test('renders the team races panel with the configured margin and its empty stat
 
     const section = page.getByRole('region', { name: 'Scenario' });
 
-    await expect(section.getByText(/Aim for at least 3 circles/)).toBeVisible();
+    // W.3 = C (owner ruling 2026-11-10, landed at `1f73875f`): the rule line lives in the reference
+    // block now, not the banner, and it reads "aim for at least N circles" in the block's own
+    // lowercase sentence style. This assertion was left at the banner's pre-move capitalisation and
+    // failed at HEAD; it is re-pointed here rather than deleted, so the rule is still pinned.
+    await expect(section.getByText(/aim for at least 3 circles/)).toBeVisible();
     await expect(section.getByText(/as a margin, not a win condition/)).toBeVisible();
     await expect(section.getByText(/No team races recorded/)).toBeVisible();
 
@@ -342,15 +346,16 @@ test('states the team race shape and prints no opponent projection, no chance an
     expect(text.toLowerCase()).not.toContain('probability');
 });
 
-test('heads every Scenario panel with the documented capsule', async ({ page }) => {
+test('heads every Scenario panel with a plain h2, not a capsule', async ({ page }) => {
     await openUnityCupCockpit(page);
 
     const section = page.getByRole('region', { name: 'Scenario' });
 
-    // Every panel-level card under Scenario carries the capsule (DESIGN.md §2.3): the owner's rule is
-    // that everything in this section looks like everything else in it. Only top-level cards count; a
-    // card nested inside a panel is that panel's own notice, not a peer panel (Team Race's
-    // "No team races recorded" empty state is one).
+    // W.1 = C (owner ruling 2026-11-10, DESIGN.md §2.3 dated exception): the page heads every card
+    // with the plain `h2` the other career pages use and prints no `CapsuleHeader` at all. This case
+    // replaces the earlier "every card carries the documented capsule" assertion, which pinned the
+    // opposite. Its meaning is kept: every panel-level card is still headed, and the count still
+    // refuses to drop a panel silently.
     const panels = await section.evaluate((el) => {
         const cards = Array.from(el.querySelectorAll<HTMLElement>('.card'));
 
@@ -358,72 +363,72 @@ test('heads every Scenario panel with the documented capsule', async ({ page }) 
             .filter((card) => card.parentElement?.closest('.card') === null)
             .map((card) => ({
                 capsule: card.querySelector('.lattice-bleed') !== null,
-                title: (card.querySelector('.lattice-bleed')?.textContent
-                    ?? card.querySelector('h1,h2,h3,h4,h5,h6')?.textContent
+                heading: card.querySelector('h1,h2,h3,h4,h5,h6')?.tagName.toLowerCase() ?? null,
+                title: (card.querySelector('h1,h2,h3,h4,h5,h6')?.textContent
+                    ?? card.querySelector('.sublabel')?.textContent
                     ?? '').trim(),
             }));
     });
 
-    // Nine panels render on a fresh Unity Cup run; the Team and Unity Cup progress cards are
-    // conditional on data this run does not carry. A count drop below nine means a panel stopped
-    // rendering, which this case also refuses to pass silently.
-    expect(panels.length, JSON.stringify(panels)).toBeGreaterThanOrEqual(9);
-    expect(panels.filter((panel) => !panel.capsule), JSON.stringify(panels)).toEqual([]);
+    // The exact count on a fresh Unity Cup run, measured 2026-11-10 after the card split: ten cards
+    // render, not the twelve the pre-split tree drew, because Trainee goals and Mandatory races are
+    // now placed by the grid and the cockpit's own scenario strip contributes its two.
+    expect(panels.length, JSON.stringify(panels)).toBeGreaterThanOrEqual(10);
+
+    // No capsule survives anywhere in the region (DESIGN.md §2.3 dated exception).
+    expect(panels.filter((panel) => panel.capsule), JSON.stringify(panels)).toEqual([]);
+
+    // Every card is headed, and the heading level is h2 or deeper, never a bare div.
+    expect(panels.filter((panel) => panel.heading === null), JSON.stringify(panels)).toEqual([]);
+
+    // The grid's own cards each carry exactly one `h2`. The selector is any h2 inside a card, not a
+    // direct child, because `Burst count bands` nests its heading in a flex row beside its badge.
+    const gridHeadings = await page
+        .locator('[data-bento="scenario-cards"] > [data-panel] h2')
+        .allTextContents();
+
+    expect(gridHeadings.length).toBeGreaterThanOrEqual(10);
 });
 
-test('capsules the four Scenario panels that sat outside the card pattern', async ({ page }) => {
+test('places the four goal and reference cards the owner named', async ({ page }) => {
     await openUnityCupCockpit(page);
 
     const section = page.getByRole('region', { name: 'Scenario' });
 
-    const panels = await section.evaluate((el) => {
-        const cards = Array.from(el.querySelectorAll<HTMLElement>('.card'));
+    // The four panels the owner named as needing capsule chrome in the pre-W.1 tree. They still exist
+    // and are still headed; what changed is the chrome, asserted in the case above.
+    const titles = await section
+        .locator('h1, h2, h3, h4, h5, h6')
+        .allTextContents()
+        .then((texts) => texts.map((text) => text.trim()));
 
-        return cards
-            .filter((card) => card.parentElement?.closest('.card') === null)
-            .map((card) => ({
-                capsule: card.querySelector('.lattice-bleed') !== null,
-                title: (card.querySelector('.lattice-bleed')?.textContent
-                    ?? card.querySelector('h1,h2,h3,h4,h5,h6')?.textContent
-                    ?? '').trim(),
-            }));
-    });
-
-    const titles = panels.map((panel) => panel.title);
-
-    // The four panels the owner named. Before this slice they were bare sections with plain
-    // headings, so they were not `.card`s at all and never reached the capsule assertion below.
     for (const name of ['Trainee goals', 'Mandatory races', 'Unity Cup', 'Published stat caps']) {
-        expect(titles, JSON.stringify(panels)).toContain(name);
+        expect(titles, JSON.stringify(titles)).toContain(name);
     }
 
-    expect(panels.filter((panel) => !panel.capsule), JSON.stringify(panels)).toEqual([]);
-
-    // Twelve cards render: nine team panels before this slice (Team and Unity Cup progress are
-    // data-conditional) plus the four added here, minus one because Move 3 (`28d9afbf`) merged the
-    // Spirit Burst roster into the Burst count bands card, so those two are a single card now.
-    expect(panels.length, JSON.stringify(panels)).toBeGreaterThanOrEqual(12);
+    // Exactly one of each: the grid draws the goal groups and the cockpit's `career_goals`
+    // registration stands down, so a double render here is the regression this pins.
+    for (const name of ['Trainee goals', 'Mandatory races']) {
+        expect(titles.filter((title) => title === name).length, JSON.stringify(titles)).toBe(1);
+    }
 });
 
-test('heads both scenario blocks with the documented capsule and keeps the region name', async ({ page }) => {
+test('heads both scenario blocks with a plain h2 and keeps the region name', async ({ page }) => {
     await openUnityCupCockpit(page);
 
     for (const name of ['Team race coverage', 'Team race shape']) {
         const block = page.getByRole('region', { name });
         await expect(block).toBeVisible();
 
-        // The documented capsule chrome (`DESIGN.md` §2.3): the lattice-bleed motif on the chrome fill,
-        // one per block, as the eight sibling scenario panels render it. Structural assertion, not a
-        // pixel colour: the class list is what a later restyle would break.
-        const capsule = block.locator('.lattice-bleed.bg-chrome');
-        await expect(capsule).toHaveCount(1);
-        await expect(capsule.getByText(name, { exact: true })).toBeVisible();
+        // W.1 = C: the capsule is gone and the heading is the visible title, not an `sr-only` one
+        // hidden beside chrome. Structural assertion: the class list is what a later restyle breaks.
+        const capsule = block.locator('.lattice-bleed');
+        await expect(capsule).toHaveCount(0);
 
-        // The semantic heading survives for assistive tech (the region's accessible name still comes
-        // from it) and it is not a second visible title beside the capsule.
         const heading = block.getByRole('heading', { name });
         await expect(heading).toHaveCount(1);
-        await expect(heading).toHaveClass(/sr-only/);
+        await expect(heading).toHaveClass(/text-lg/);
+        await expect(heading).not.toHaveClass(/sr-only/);
     }
 });
 

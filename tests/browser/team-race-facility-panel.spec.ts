@@ -50,7 +50,7 @@ async function openFixture(page: import('@playwright/test').Page): Promise<void>
     await page.locator('#fixture-main').waitFor();
 }
 
-test('wraps the facility panel in .card and renders the capsule header with .lattice-bleed while preserving h3 groups', async ({ page }) => {
+test('wraps the facility panel in .card and renders a plain h2 heading while preserving h3 groups', async ({ page }) => {
     await openFixture(page);
 
     const root = page.locator('#fixture-main > div');
@@ -58,10 +58,12 @@ test('wraps the facility panel in .card and renders the capsule header with .lat
     // The root boundary must be .card (or carry class="card p-3")
     await expect(root).toHaveClass(/\bcard\b/);
 
-    // Capsule header renders the franchise argyle lattice-bleed motif
-    const capsule = root.locator('.lattice-bleed');
-    await expect(capsule).toHaveCount(1);
-    await expect(capsule).toContainText('Team Race Facilities');
+    // W.1=C (owner ruling 2026-11-10): this isolated fixture keeps the component's real template.
+    // The live page never renders the panel because no scenario turns `team_race_facility` on.
+    const heading = root.locator('h2');
+    await expect(heading).toHaveCount(1);
+    await expect(heading).toContainText('Team Race Facilities');
+    await expect(root.locator('.lattice-bleed')).toHaveCount(0);
 
     // Preserves per-facility <section> and <h3> headings untouched
     const sections = root.locator('section');

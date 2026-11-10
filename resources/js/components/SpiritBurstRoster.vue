@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import CapsuleHeader from './CapsuleHeader.vue';
-
 // Unity Cup's widget list carries spirit_bursts; the controller resolves that membership to
 // `enabled` and the component never sees a scenario slug (D-221, gate G-34, G-33).
 // `state` is the SpiritBurstState backing value (a tool identifier, never printed, D-20);
@@ -45,9 +43,9 @@ const treatments: Record<BurstState, { mark: string; treat: string }> = {
 <template>
     <div v-if="enabled" :class="bare ? '' : 'card p-3'">
         <p v-if="bare" class="sublabel mb-2">Spirit Burst</p>
-        <CapsuleHeader v-else title="Spirit Burst" class="mb-3" />
+        <h2 v-else class="text-lg font-semibold text-ink-strong">Spirit Burst</h2>
 
-        <p v-if="roster.length === 0" class="text-sm text-ink-muted" role="status">
+        <p v-if="roster.length === 0" class="mt-2 text-sm text-ink-muted" role="status">
             No teammate burst states recorded. The six states are chargeable, charged, held,
             normal spent, extreme chargeable and extreme spent.
         </p>

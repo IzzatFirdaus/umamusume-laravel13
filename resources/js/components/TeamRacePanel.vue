@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import CapsuleHeader from './CapsuleHeader.vue';
-
 // `enabled` is the resolved composesPanel('team_race') (G-33). The Blade's `$slots ??`
 // fallback was dead twice over (undefined variable, and the value never rendered), so the
 // controller supplies `entries` directly from raceEntries filtered on the team_race slot.
@@ -21,7 +19,7 @@ defineProps<{
 
 <template>
     <div v-if="enabled" class="card p-3">
-        <CapsuleHeader title="Team Race" class="mb-3" />
+        <h2 class="text-lg font-semibold text-ink-strong">Team Race</h2>
 
         <!-- W.3 = C (owner ruling 2026-11-10): the rule line moved to the reference block
              (`ScenarioPanel.vue`'s strip), where the scenario's other mechanics live. The banner

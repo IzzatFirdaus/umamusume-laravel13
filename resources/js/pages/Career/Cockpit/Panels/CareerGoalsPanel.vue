@@ -12,7 +12,6 @@
  */
 
 import AlertRow from '../../../../components/scenario/AlertRow.vue';
-import CapsuleHeader from '../../../../components/CapsuleHeader.vue';
 import ProvenanceBadge from '../../../../components/ProvenanceBadge.vue';
 import SubCell from '../../../../components/SubCell.vue';
 import type { ProvenanceState } from '../../../../types';
@@ -101,13 +100,9 @@ const deadlineTitle = (row: GoalRow): string | undefined =>
             :aria-labelledby="headingId(group.group)"
             :data-ladder-group="group.group"
         >
-            <CapsuleHeader :title="group.group" class="mb-3" />
-            <h3
-                :id="headingId(group.group)"
-                class="sr-only"
-            >
+            <h2 :id="headingId(group.group)" class="text-lg font-semibold text-ink-strong">
                 {{ group.group }}
-            </h3>
+            </h2>
 
             <p v-if="group.rows.length === 0" class="text-sm text-ink-muted">
                 {{ group.empty_note ?? 'No career goals recorded for this scenario yet.' }}

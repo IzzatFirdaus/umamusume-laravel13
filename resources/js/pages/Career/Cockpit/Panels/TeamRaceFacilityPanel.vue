@@ -7,7 +7,6 @@
  */
 
 import AlertRow from '../../../../components/scenario/AlertRow.vue';
-import CapsuleHeader from '../../../../components/CapsuleHeader.vue';
 import StatusPill from '../../../../components/StatusPill.vue';
 import SubCell from '../../../../components/SubCell.vue';
 
@@ -50,7 +49,7 @@ const statusVariant = (state: string | null): 'info' | 'success' | 'warning' | '
 
 <template>
     <div class="card p-3">
-        <CapsuleHeader :title="props.label" class="mb-3" />
+        <h2 class="text-lg font-semibold text-ink-strong">{{ props.label }}</h2>
 
         <div class="flex flex-col gap-4">
             <AlertRow

@@ -24,19 +24,9 @@
  * the ladder without the burst machine, and this panel must not claim one it does not have.
  */
 import { computed } from 'vue';
-import AbsenceValue from '../AbsenceValue.vue';
-import CapsuleHeader from '../CapsuleHeader.vue';
-import ProvenanceBadge from '../ProvenanceBadge.vue';
-import SpiritBurstRoster from '../SpiritBurstRoster.vue';
-import TeamRacePanel from '../TeamRacePanel.vue';
-import TeamRankGauge from '../TeamRankGauge.vue';
 import AlertRow from './AlertRow.vue';
-import ResourceMeter from './ResourceMeter.vue';
-import UnityCupTeamBoard from './UnityCupTeamBoard.vue';
-import UnityCupTournamentReadiness from './UnityCupTournamentReadiness.vue';
-import type { ProvenanceState } from '../../types';
-
-type Badge = ProvenanceState;
+import ScenarioCardGrid from './ScenarioCardGrid.vue';
+import TeamRacePanel from '../TeamRacePanel.vue';
 
 type BurstState =
     | 'Chargeable'
@@ -67,7 +57,7 @@ interface TeamSection {
      */
     coverage: {
         rows: { category: string; asks: string; fielded: string | null }[];
-        badge: Badge;
+        badge: import('../../types').ProvenanceState;
         source_title: string;
         absence_title: string;
     } | null;
@@ -76,7 +66,7 @@ interface TeamSection {
         month_anchors: string[];
         category_count: number;
         clear_all_reward: string | null;
-        badge: Badge;
+        badge: import('../../types').ProvenanceState;
         source_title: string;
         projection: string | null;
         projection_title: string;
@@ -100,7 +90,25 @@ interface TeamSection {
 
 const props = defineProps<{
     /** The shell passes the whole §49 section; this renderer reads its `team` key only. */
-    scenario: { widgets: string[]; team: TeamSection; panels: Record<string, { on: boolean }> };
+    scenario: {
+        widgets: string[];
+        team: TeamSection;
+        panels: Record<string, { on: boolean }>;
+        /** The career-goal groups the grid places at positions 4 and 5 (URA adds a third). */
+        objectives: {
+            group: string;
+            rows: {
+                label: string;
+                state: string | null;
+                year_label: string | null;
+                turn: number | null;
+                race_url: string | null;
+                absence: string | null;
+            }[];
+            summary: string | null;
+            empty_note: string | null;
+        }[];
+    };
     label: string;
     kind: 'panel';
     name: string;
@@ -120,57 +128,13 @@ const composesTeamPanel = computed(() => props.scenario.panels['team_rank_ladder
 /** The burst machine's regions ride the matrix's own widget membership, not a scenario name. */
 const composesBursts = computed(() => props.scenario.widgets.includes('spirit_bursts'));
 
-const current = computed(() =>
-    props.scenario.team.rank === null
-        ? null
-        : { rank: props.scenario.team.rank, level: props.scenario.team.facility_level },
-);
-
-const bonusTitle =
-    'Seen beside the Rank S emblem in the recorded run (client tooltip). The figure is the ' +
-    'league-placement bonus, not a reading of the rank letter: the published ladder pays 2nd-5th +50, ' +
-    '6th-10th +30, 11th-15th +20 and 16th-20th +10, and this run\'s 8th place sits in the +30 band ' +
-    '(docs/research/flows-career-workspace.md:232, citing UMAMUSUME_REFERENCE §2.2.2 and the run ' +
-    'report §1.8). This build stores the placement but no ladder, so the line repeats the figure the ' +
-    'client printed for THIS placement rather than computing one.';
-
-/** The team's own identity renders when the Trainer entered any of the four (A6.6). */
-const hasTeamIdentity = computed(
-    (): boolean =>
-        props.scenario.team.team_name !== null
-        || props.scenario.team.team_motto !== null
-        || props.scenario.team.team_league_placement !== null
-        || props.scenario.team.team_preseason_wins !== null,
-);
-
-/**
- * The Unity Cup counters, as the brief's own line: `Unity Trainings 55 · Spirit Bursts 6 / 5 Extreme`.
- * The burst half pairs the two tallies, so it is drawn whole when both are recorded and named alone
- * when only one is, never as `6 / N/A` (an unrecorded tally is not a zero, D-220).
- */
-const counterSegments = computed((): string[] => {
-    const team = props.scenario.team;
-    const segments: string[] = [];
-
-    if (team.unity_trainings_count !== null) {
-        segments.push(`Unity Trainings ${team.unity_trainings_count}`);
-    }
-
-    if (team.spirit_bursts_count !== null && team.extreme_bursts_count !== null) {
-        segments.push(`Spirit Bursts ${team.spirit_bursts_count} / ${team.extreme_bursts_count} Extreme`);
-    } else if (team.spirit_bursts_count !== null) {
-        segments.push(`Spirit Bursts ${team.spirit_bursts_count}`);
-    } else if (team.extreme_bursts_count !== null) {
-        segments.push(`${team.extreme_bursts_count} Extreme`);
-    }
-
-    return segments;
-});
 </script>
 
 <template>
-    <!-- The `team_race` registration: the ported race panel, guidance and margin word included.
-         A matrix that turns the flag on without a margin gets the absence, never a printed 0. -->
+    <!-- The `team_race` registration on its own, without the ladder: the ported race panel, guidance
+         and margin word included. A matrix that turns the flag on without a margin gets the absence,
+         never a printed 0. When both flags are on this arm draws nothing, because the grid below
+         draws the race card. -->
     <TeamRacePanel
         v-if="isRacePanel && !composesTeamPanel && props.scenario.team.race_guidance !== null"
         :enabled="true"
@@ -184,270 +148,13 @@ const counterSegments = computed((): string[] => {
         detail="The margin is a config fact (`team_race.circles_guidance`). A recorded race list without a stated margin would leave the at-or-below comparison to invent, so the panel is withheld rather than guessed at."
         tone="note"
     />
-    <div v-else-if="isTeamPanel" class="grid grid-cols-1 items-start gap-3 @3xl:grid-cols-6 @5xl:grid-cols-12">
-                <!-- The `team_rank_ladder` registration: the Team Panel itself, as one bento grid. Team
-                     Race leads the grid (it used to be a separate registration rendered above), then the
-                     owner's order: Team, Spirit, Team Rank, Unity Cup progress, stat grades, burst bands,
-                     Spirit Burst, Special Training, and the two team-race blocks.
-                     **Three panels per row on desktop, two on tablet, one on mobile.** The `@3xl`/`@5xl`
-                     variants are container queries against `main`, not viewport widths: `@5xl` is the
-                     64rem container size and `@3xl` the 48rem one, so the three-per-row shape needs a
-                     container at least 64rem wide and the two-per-row band a container at least 48rem
-                     wide. `items-start` keeps every panel at its own content height, so a short panel no
-                     longer inflates to its tallest sibling and the leftover reads as page margin rather
-                     than as a panel that failed to fill (the Dashboard's ruling, DESIGN.md §2.3).
-                     **A panel that renders nothing contributes no cell.** Seven of these cells are
-                     conditional and `v-if` sits on the wrapper, not on the card inside it: a wrapper that
-                     stayed while its card did not holds empty tracks in the row, and at the two-per-row
-                     band it turned the pairing beside it from side by side into stacked. Team, Unity Cup
-                     progress, Spirit, Spirit Burst, Burst count bands, Special Training and Team race
-                     coverage therefore leave the grid entirely when their data is absent, and the row
-                     packs without them.
-                     Spans are chosen so each row's cells sum to the track count, which is what closes a
-                     row. Twelve tracks take Team Race 12; Spirit 4, Team Rank 4, stat grades 4; burst
-                     bands 8, Spirit Burst 4; Special Training 4, coverage 8; shape 12. Six tracks take
-                     Race 6, Spirit 3, Rank 3, grades 3, burst bands 3, Spirit Burst 3, Special 3,
-                     coverage 6, shape 6. A short panel beside a tall one leaves space under the short one
-                     by design; that is `items-start` doing its job, not a hole to be packed away.
-                     Full width at six tracks is deliberate: a panel whose internal layout is a row of
-                     columns (the race table, the coverage board, the shape block) has nothing to gain
-                     from half a two-column row, and bookending them keeps the bands legible.
-                     Every present panel is an even number of tracks, so any subset sums to a multiple of
-                     two: 3 + 3 closes a six-track row, and 6 closes it alone. A row therefore closes
-                     whatever the data state, which is the property the earlier 4/6 hole came from not
-                     having. Do not fix a hole with `grid-auto-flow: dense`: `dense` reorders cells against
-                     the DOM order this panel is required to keep, and with spans that are already exact
-                     there is no sparse flow left for it to pack. -->
-                <div class="@3xl:col-span-6 @5xl:col-span-12">
-                    <TeamRacePanel
-                        v-if="composesRacePanel && props.scenario.team.race_guidance !== null"
-                        :enabled="true"
-                        :guidance="props.scenario.team.race_guidance"
-                        :entries="props.scenario.team.race_entries"
-                    />
-                    <AlertRow
-                        v-else-if="composesRacePanel"
-                        glyph="○"
-                        text="This scenario turns the team race panel on, but its matrix states no circle margin, so none is printed."
-                        detail="The margin is a config fact (`team_race.circles_guidance`). A recorded race list without a stated margin would leave the at-or-below comparison to invent, so the panel is withheld rather than guessed at."
-                        tone="note"
-                    />
-                </div>
-                <div v-if="hasTeamIdentity" class="@3xl:col-span-3 @5xl:col-span-4">
-            <div class="card p-3">
-                <CapsuleHeader title="Team" class="mb-2" />
-                <dl class="flex flex-col gap-1 text-sm">
-                    <div v-if="props.scenario.team.team_name !== null" class="flex items-baseline justify-between gap-3">
-                        <dt class="text-ink-muted">Name</dt>
-                        <dd class="text-ink-strong">{{ props.scenario.team.team_name }}</dd>
-                    </div>
-                    <div v-if="props.scenario.team.team_motto !== null" class="flex items-baseline justify-between gap-3">
-                        <dt class="text-ink-muted">Motto</dt>
-                        <dd class="text-ink">{{ props.scenario.team.team_motto }}</dd>
-                    </div>
-                    <div v-if="props.scenario.team.team_league_placement !== null" class="flex items-baseline justify-between gap-3">
-                        <dt class="text-ink-muted">League placement</dt>
-                        <dd class="font-mono tabular-nums text-ink-strong">{{ props.scenario.team.team_league_placement }}</dd>
-                    </div>
-                    <div v-if="props.scenario.team.team_preseason_wins !== null" class="flex items-baseline justify-between gap-3">
-                        <dt class="text-ink-muted">Preseason rounds won</dt>
-                        <dd class="font-mono tabular-nums text-ink-strong">{{ props.scenario.team.team_preseason_wins }}</dd>
-                    </div>
-                </dl>
-            </div>
-            </div>
-
-            <div v-if="composesBursts" class="@3xl:col-span-3 @5xl:col-span-4">
-            <div class="card p-3">
-                <CapsuleHeader title="Spirit" class="mb-2" />
-                <!-- The value and the bar are the same reading (design-2.0 §45). No column records a
-                     Spirit value and no sourced maximum exists, so the track renders empty and the
-                     number reads N/A with the reason. -->
-                <ResourceMeter
-                    label="Current Spirit"
-                    :value="null"
-                    :max="null"
-                    absence="No column records a Spirit value. The client prints the gauge on its Team Info panel; until an input stores it, there is no reading to show."
-                />
-                <AlertRow
-                    class="mt-2"
-                    glyph="○"
-                    text="Burst readiness is not computed: the bands below are thresholds, but no Spirit reading is recorded, so there is nothing to set against them."
-                    detail="Readiness would be Calculated once a Spirit value has a writer. Until then the burst states in the roster above are the machine this build can see, and a percentage or a band would be invented."
-                    tone="note"
-                />
-                <AlertRow
-                    class="mt-1"
-                    glyph="○"
-                    text="Recommended timing and projected benefit are not built."
-                    detail="Both are advice this build holds: the trigger rule is recorded (a burst fires on the next Special Training once a teammate's gauge is full), but what to do about it and what it would yield are not computed here."
-                    tone="note"
-                />
-            </div>
-            </div>
-
-            <!-- The Unity Cup progression counters (A6.7). Drawn only when the Trainer stated one; the
-                 combined total below reads these two tallies. -->
-            <div class="@3xl:col-span-3 @5xl:col-span-4">
-            <TeamRankGauge :enabled="true" :current="current" :ladder="props.scenario.team.ladder" />
-
-            <!-- The +30 is the figure the recorded client shows, and it was read beside the S
-                 emblem. Per `docs/research/flows-career-workspace.md:232` it is the LEAGUE-PLACEMENT
-                 bonus, not a rank bonus: 6th-10th pays +30, and this run placed 8th. The gate below
-                 still reads the rank because the observation is only recorded for this run's board,
-                 and this build stores no placement ladder to generalise from (no `league_bonus` or
-                 `placement_bonus` key exists in `config/scenarios.php`), so the line states an
-                 observed figure rather than a derived one. -->
-            <p v-if="props.scenario.team.rank === 'S'" class="flex flex-wrap items-center gap-2 text-sm text-ink">
-                <span class="font-semibold text-ink-strong">Team Ranking Bonus: All Attributes +30</span>
-                <ProvenanceBadge state="estimated" :title="bonusTitle" />
-            </p>
-            </div>
-
-            <div v-if="counterSegments.length > 0" class="@3xl:col-span-3 @5xl:col-span-4">
-            <div class="card p-3">
-                <CapsuleHeader title="Unity Cup progress" class="mb-2" />
-                <p class="text-sm text-ink">{{ counterSegments.join(' · ') }}</p>
-            </div>
-            </div>
-
-            <div class="@3xl:col-span-3 @5xl:col-span-8">
-            <div class="card p-3">
-                <CapsuleHeader title="Team stat grades" class="mb-2" />
-                <ul class="flex flex-col gap-1" aria-label="Team stat grades">
-                    <li
-                        v-for="grade in props.scenario.team.stat_grades"
-                        :key="grade.key"
-                        class="flex items-baseline justify-between gap-3 text-sm"
-                    >
-                        <span class="text-ink">{{ grade.label }}</span>
-                        <span
-                            v-if="grade.grade !== null"
-                            class="font-mono tabular-nums text-ink-strong"
-                        >{{ grade.grade }}</span>
-                        <AbsenceValue
-                            v-else
-                            compact
-                            class="font-mono tabular-nums"
-                            :reason="`No per-stat team grade is recorded for this run yet. Enter it in the team-state editor.`"
-                        />
-                    </li>
-                </ul>
-            </div>
-            </div>
-
-            <div v-if="composesBursts && props.scenario.team.bands.length > 0" class="@3xl:col-span-6 @5xl:col-span-12">
-            <div class="card p-3">
-                <div class="mb-2 flex flex-wrap items-baseline gap-2">
-                    <CapsuleHeader title="Burst count bands" />
-                    <ProvenanceBadge
-                        state="estimated"
-                        title="Transcribed from the scenario guide's post-rework table, which rests on one publisher where two report different Skill Point figures, and the guide's own line that Extreme Bursts count toward the total is a live disagreement."
-                    />
-                </div>
-                <table class="w-full text-sm">
-                    <caption class="sr-only">
-                        Reward by combined Spirit Burst and Extreme Spirit Burst count
-                    </caption>
-                    <thead>
-                        <tr class="border-b border-rule text-left text-xs text-ink-muted">
-                            <th scope="col" class="py-1 font-semibold">Total bursts</th>
-                            <th scope="col" class="py-1 font-semibold">Reward</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- The band the run's combined total falls in is marked, so the table reads
-                             the run's own position rather than only the reward reference. -->
-                        <tr
-                            v-for="band in props.scenario.team.bands"
-                            :key="band.total"
-                            class="border-b border-rule last:border-b-0"
-                            :class="band.total === props.scenario.team.burst_band ? 'bg-raised' : ''"
-                        >
-                            <th scope="row" class="py-1.5 pr-2 text-left font-mono font-normal tabular-nums text-ink">
-                                {{ band.total }}
-                                <span v-if="band.total === props.scenario.team.burst_band" class="ml-1 text-xs font-semibold text-ink-strong">(this run)</span>
-                            </th>
-                            <td class="py-1.5 text-ink">{{ band.reward }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <AlertRow
-                    class="mt-2"
-                    glyph="⚠"
-                    text="Three parts of this table are publisher conflicts, not settled facts: whether Extreme Bursts count toward the total, where the low bands' edges fall, and the month of the payout event."
-                    detail="gametora prints four numbered bands (4 to 9, 7 to 9, 10 to 12, 13+) paying 10/20/30/40 SP with the matching stat, and notes that its own low-end values are not known; umamusu.wiki prints the same four reward tiers but attaches a criterion to the gold rows rather than numbered edges, and never says whether Extremes increment. The two disagree about edges versus criteria, not about the Skill Point figures. Gametora's first two bands (4 to 9 and 7 to 9) overlap and cannot both hold, so the edges this table prints are config's resolution of that conflict, not a publisher's. The payout is dated Late November where those publishers print the first half. The client's own Team Info count is the tiebreaker (UMAMUSUME_REFERENCE §2.2.2, conflict row 57)."
-                    tone="note"
-                />
-                <!-- Section 13.6: the carrier and the low-band caveat. The figures were printed with
-                     neither, so a reader could not tell whose bands these are or that the published sets
-                     disagree at the bottom of the table. Both arrive from the payload rather than being
-                     paraphrased here. -->
-                <p v-if="props.scenario.team.bands_source !== null" class="mt-2 text-xs text-ink-muted">
-                    Source: {{ props.scenario.team.bands_source }}
-                </p>
-                <p v-if="props.scenario.team.bands_caveat !== null" class="mt-1 text-xs text-ink-muted">
-                    {{ props.scenario.team.bands_caveat }}
-                </p>
-                <p class="mt-2 text-xs text-ink-muted">
-                    <template v-if="props.scenario.team.payout_timing !== null">
-                        The gold versions arrive from the scripted event in {{ props.scenario.team.payout_timing }}.
-                    </template>
-                    <!-- The run's own position, read off the combined Spirit + Extreme total the
-                         counters above carry. Until both tallies are recorded there is no combined
-                         count to place, so the absence is stated rather than a band guessed. -->
-                    <template v-if="props.scenario.team.combined_bursts !== null">
-                        This run: {{ props.scenario.team.combined_bursts }} bursts combined<template v-if="props.scenario.team.burst_band !== null">, inside the {{ props.scenario.team.burst_band }} band</template>.
-                    </template>
-                    <template v-else>
-                        Where this run sits in the bands is not shown: both burst tallies have not been recorded.
-                    </template>
-                </p>
-
-                <!-- Move 3 (`28d9afbf`, Ruling 2): the roster joins this card as a labelled
-                     sub-block. The two panels state one run's burst position and left 236 px of dead
-                     column when they stood side by side; the divider keeps them readable as two
-                     things while the card, its header and its provenance badge stay single. -->
-                <div class="mt-3 border-t border-rule pt-3">
-                    <SpiritBurstRoster
-                        :enabled="composesBursts"
-                        :roster="props.scenario.team.roster"
-                        bare
-                    />
-                </div>
-            </div>
-            </div>
-
-            <div
-                v-if="props.scenario.team.special_training.energy_penalty_removed !== null
-                    || props.scenario.team.special_training.wit_burst_energy_bonus !== null"
-                class="@3xl:col-span-3 @5xl:col-span-4"
-            >
-            <div class="card p-3">
-                <CapsuleHeader title="Special Training" class="mb-2" />
-                <p v-if="props.scenario.team.special_training.energy_penalty_removed" class="text-sm text-ink">
-                    The extra Energy cost on Special Training was removed on 2026-07-01.
-                </p>
-                <p v-if="props.scenario.team.special_training.wit_burst_energy_bonus !== null" class="mt-1 text-sm text-ink">
-                    A burst on the Wit facility grants
-                    {{ props.scenario.team.special_training.wit_burst_energy_bonus }} Energy recovery.
-                </p>
-                <p class="mt-2 text-xs text-ink-muted" title="No column records facility levels, per-member training state or Special Training gains; the Cockpit's turns carry what the Trainer entered.">
-                    Per-facility levels and per-member training state are not recorded here.
-                </p>
-            </div>
-            </div>
-
-            <!-- G4's surfaces, mounted beside the blocks that already exist rather than folding into
-                 them: the board draws the team race's five categories, which appear nowhere else on the
-                 screen, and the shape block states the cadence and the published reward. Neither adds
-                 a focusable control, which is what the panel's own keyboard case pins. -->
-            <div v-if="props.scenario.team.coverage !== null" class="@3xl:col-span-6 @5xl:col-span-8">
-                <UnityCupTeamBoard :coverage="props.scenario.team.coverage" />
-            </div>
-
-            <div v-if="props.scenario.team.tournament !== null" class="@3xl:col-span-6 @5xl:col-span-12">
-                <UnityCupTournamentReadiness :tournament="props.scenario.team.tournament" />
-            </div>
-    </div>
+    <!-- The `team_rank_ladder` registration: the whole system, as one bento grid in the HFW's
+         ruled order. The order and the spans live in the composer, because it interleaves these
+         cards with the goal groups another component draws. -->
+    <ScenarioCardGrid
+        v-else-if="isTeamPanel"
+        :team="props.scenario.team"
+        :objectives="props.scenario.objectives"
+        :bursts-enabled="composesBursts"
+    />
 </template>
