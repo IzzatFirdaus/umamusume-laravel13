@@ -192,7 +192,7 @@ final class CockpitUnityCupCountersTest extends TestCase
 
                 // The payload carries the carrier, so the renderer never has to invent one.
                 expect($team)->toHaveKey('bands_source');
-                expect($team['bands_source'])->toContain('scenarios.php');
+                expect($team['bands_source'])->toContain('config');
 
                 // And the low-band caveat, which is what makes the table a reference rather than a
                 // placement. It names the overlap rather than saying "may differ".

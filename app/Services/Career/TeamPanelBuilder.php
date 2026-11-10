@@ -617,7 +617,7 @@ final class TeamPanelBuilder
             // bottom of the table. Both travel as payload keys so the renderer prints them rather than
             // paraphrasing, the same way every other derived figure here carries its provenance.
             'bands_source' => $composesBursts
-                ? 'config/scenarios.php, transcribed there from GameTora'
+                ? 'config 02-unity-cup.md, transcribed there from GameTora'
                 : null,
             'bands_caveat' => $composesBursts
                 ? 'The two publishers put the low bands in different places: GameTora prints an overlapping '
