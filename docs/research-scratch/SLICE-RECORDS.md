@@ -19675,3 +19675,32 @@ npx playwright test tests/browser/career-inheritance-event.spec.ts
 **The premise no longer holds; the spec itself was re-baselined.** The current fixture does not touch `veterans` or the legacy-picker select at all: `openInheritanceEvent()` (the file's own helper at :40) now builds its run through `/training-runs/create` into the run-scoped Legacy Lab at `/legacy/{runId}`, records three turns through the POST API, and drives `#rank-parent_a` / `#rank-letter-parent_a` / `#ancestor-parent_a-0` / combobox roles - the `:id` contract KI-69's own closure asked for, which `Builder.vue` does render. All nine cases, including the axe scan and the 44px sweep, pass against the current shape; nothing waits on a veterans roster.
 
 **Register consequence (recorded, no entry edited here beyond this section).** KI-69's class-3 half is STALE at HEAD: the re-measured file passes on a fresh scratch database with no veterans seeded. The class-1/2/4 halves of KI-69 are separate halves (playwright config database, the artwork-mirror case, the trainee-step flash) and this slice re-measured only class 3; the class-3 status-flip on the entry itself belongs to the owner or a later register pass that re-reads the other three halves, because KI-69 is one entry and its other classes were not re-measured here.
+
+## ki-147-disposition-2026-11-10.md
+
+**Date:** 2026-11-10. **Pass:** S-RS-REMAINING-1 slice 2.5. **HEAD through 34b1a0e2.** A decision package, not a fix: the choice between the KI's three dispositions is the Career owner's, and this slice measures so the owner decides on evidence.
+
+**Re-measured at HEAD, session-private harness (fresh `npm run build` exit 0):**
+
+```text
+PLAYWRIGHT_PORT=8166 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/rs-remaining-1/ki147.sqlite
+npx playwright test tests/browser/career-race-strip.spec.ts
+->  1 passed (5.3m): only "passes an axe scan at WCAG A and AA" (which names no strip landmark)
+->  5 failed (KIs own five: :61 regions, :98 entered-race, :147 no-turn sentence, :180 keyboard walk [3.0m timeout], :203 320px column)
+```
+
+Identical to the entry's 2026-10 stat shape (five of six), so the KI still stands.
+
+**The payload the entry's option (a) hinges on, now verified (the entry marked these NOT verified):**
+- `CockpitController:306` still composes `'raceStrip' => $this->raceStrip->raceStripSection($run, $this->obligationSlots($run))`.
+- `RaceStripBuilder` (`app/Services/Career/RaceStripBuilder.php`) is consumed by exactly ONE controller (`grep -rn RaceStripBuilder app/Http/Controllers/` names only `Career/CockpitController.php`), and its section continues to build `run` (the recorded races, :160), `recorded` (:132), and the no-turn absence sentence the :147 case pins, plus `decision_url`/`run_url` links. Option (a)'s "the cockpit still receives the payload it renders" is TRUE at HEAD, pins and all.
+- `RunRaceStrip.vue` remains intact but imported by nothing (`grep -rn "import RunRaceStrip" resources/js` empty; `grep -rln raceStrip resources/js` names `Cockpit.vue` only), and `raceCount` at `Cockpit.vue:574-575` reads `props.raceStrip.run`, printed at `:807`.
+
+**Options, restated with tonight's measurements:**
+- **(a) Restore the mount.** Verified feasible: payload keys live, component intact, one import + one `<RunRaceStrip ...>` in the left column. Cost: reverses the C6b.5 removal (`3d8c5ee2` deleted it from the cockpit deliberately).
+- **(b) Repoint the spec** to the surface that now owns this data. Neither candidate is established tonight: the Timeline and the Scenario detail page were not measured in this slice, so (b) stays "candidate surfaces, unverified".
+- **(c) Delete the facility.** Must move `raceCount` first (live reader of `raceStrip.run` at :807), then delete `RunRaceStrip.vue`, the `raceStrip` payload key, `RaceStripBuilder`'s only caller and the spec together. Largest blast radius: touches controller, service, component and six spec cases at once.
+
+**Recommendation for the owner (the package's, not a decision):** (c) with the caveat its own entry names, OR (a) if the removal is judged wrong. Tonight adds one fact: the strip's data plumbing is fully alive while its UI is fully absent, which is the most wasteful of the three states; whichever option, the current in-between is the one state the evidence argues against.
+
+**Disposition:** recorded for the owner; no merge, no code change, no entry-status flip in this slice.
