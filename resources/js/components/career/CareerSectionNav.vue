@@ -89,6 +89,22 @@ const reachable = (key: string): boolean => {
 
 const UNAVAILABLE_REASON = 'Available when the career is completed';
 
+/**
+ * The link's accessible name where the visible label collides with the global rail at mobile
+ * width (KI-131). At mobile the global bar prints its `mobileLabel`s, and two of them collide
+ * with a stepper label: the bar's `Deck` (`/support-cards`, the catalogue) and this row's `Deck`
+ * (`/deck`, the run's own six-card deck). The run-scoped steps say which one keeps the Trainer
+ * inside this career, so their names carry the scope and the visible text stays the HFW's single
+ * word. `undefined` for every step whose visible label is already one-of-a-kind, so nothing about
+ * the other steps' announcements changes.
+ */
+const SCOPED_NAMES: Record<string, string> = {
+    deck: 'This run\'s Deck',
+    inheritance: 'This run\'s Inheritance',
+};
+
+const ariaName = (key: string, label: string): string | undefined => SCOPED_NAMES[key] ?? undefined;
+
 /** The reason an unavailable step is unavailable. It differs by which way the step is unavailable. */
 const unavailableReason = (key: string): string =>
     key === 'training' ? 'The career has ended, so no turns are left to decide' : UNAVAILABLE_REASON;
@@ -107,6 +123,7 @@ const unreachableSteps = computed<{ key: string; label: string }[]>(() =>
                 :href="step.href(base)"
                 class="step"
                 :aria-current="props.current === step.key ? 'step' : undefined"
+                :aria-label="ariaName(step.key, step.label)"
             >{{ step.label }}</Link>
             <!-- DESIGN.md §5 (a): an unreachable destination is non-focusable text, never an anchor
                  with `aria-disabled`, a `role="link"` or a `title`. `.step.is-empty` is the ported

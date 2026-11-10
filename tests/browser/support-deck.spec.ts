@@ -345,12 +345,15 @@ test('carries the career stepper with a run-scoped Inheritance link', async ({ p
     // 2026-10-28: the step is `Inheritance`, not `Legacy`. The cockpit HFWs name this step after the
     // career's inheritance event (`cockpit-unity-cup.html:77`) and `/training-runs/{run}/inheritance`
     // is that screen, so the run-scoped property this case guards still holds; only the label moved.
-    const inheritance = nav.getByRole('link', { name: 'Inheritance', exact: true });
+    // 2026-11-10 (KI-131): the two labels that collide with the global rail's mobile words carry
+    // run-scoped aria-labels, so the accessible name says which one stays inside the career.
+    const inheritance = nav.getByRole('link', { name: "This run's Inheritance", exact: true });
     // route() renders an absolute URL; the guard matches its run-scoped tail.
     await expect(inheritance).toHaveAttribute('href', new RegExp('/training-runs/' + runId + '/inheritance$'));
 
-    // Deck is the live section on the deck screen.
-    await expect(nav.getByRole('link', { name: 'Deck', exact: true })).toHaveAttribute('aria-current', 'step');
+    // Deck is the live section on the deck screen, and its accessible name is scoped the same way
+    // (the global bar's `Deck` is the support-card catalogue, a different door entirely).
+    await expect(nav.getByRole('link', { name: "This run's Deck", exact: true })).toHaveAttribute('aria-current', 'step');
 });
 
 test('stores the per-run card level on the run deck and reads it back', async ({ page }) => {
