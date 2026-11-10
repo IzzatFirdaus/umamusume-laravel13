@@ -127,6 +127,10 @@ function scenarioSectionKeys(): array
         'caps',
         'panel_absence',
         'panel_absence_title',
+        // W.3 = C (owner ruling 2026-11-10): the Team Race rule sentence moved out of the banner and
+        // into the reference strip, so the strip's payload carries the margin it prints. Null for a
+        // scenario that declares no `team_race.circles_guidance`, which keeps the shape uniform.
+        'race_guidance',
         // Phase G's decision surfaces (G3). Named here because the pin exists to make a contract
         // change a test-visible event: a scenario whose entry declares none of these keys gets `[]`
         // or `null`, which is why the three travel with the section rather than with one renderer.
