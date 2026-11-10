@@ -4643,7 +4643,16 @@ tile a defect in the drawing rather than reproducing the absence as if it were h
 
 ## KI-155 — The `Team Ranking Bonus: All Attributes +30` line attributes the figure to the team rank; the corpus says it is the league-placement bonus
 
-**State:** OPEN, filed 2026-11-09 during the Scenario detail HFW reference pass.
+**State:** **RESOLVED at `990bdc7d`** (2026-11-10). Filed 2026-11-09 during the Scenario detail HFW reference pass.
+
+**Closure.** The provenance note now says the figure is the **league-placement** bonus, names the
+published ladder's +30 band for 6th-10th, cites `docs/research/flows-career-workspace.md:232`, and
+states that this build stores the placement but no ladder, so the line repeats the client's observed
+figure rather than computing one. The render gate still keys on `rank === 'S'` — that is where the
+observation was recorded, not a claim that the rank causes the bonus — and the comment above it says
+so. Pinned by `tests/Feature/UnityCupPanelTest.php` ("attributes the +30 to league placement"): the
+case asserts the new wording and asserts the refuted phrases cannot return, verified red-on-revert
+(`1 failed, 9 passed`) and green after (`10 passed, 235 assertions`).
 
 **Defect.** `resources/js/components/scenario/UnityCupPanel.vue:128-131` carries the provenance note
 for the `+30` line:
@@ -4681,7 +4690,17 @@ row 13), where the HFW's own copy was corrected.*
 
 ## KI-156 — The burst-band caveat names a `15/15/20/20` publisher figure the reference corpus does not carry
 
-**State:** OPEN, filed 2026-11-09 during the Scenario detail HFW reference pass.
+**State:** **RESOLVED at `0166b23e`** (2026-11-10). Filed 2026-11-09 during the Scenario detail HFW reference pass.
+
+**Closure.** The visible line no longer lists "the Skill Point figures" among the conflicts — it now
+names "where the low bands' edges fall", which is what conflict row 57 records. The detail
+paragraph spells that out: GameTora prints four numbered bands with the matching stat and disclaims
+its own low-end values, the Wiki prints the same four reward tiers with a *criterion* on the gold rows
+instead of numbered edges, "the two disagree about edges versus criteria, not about the Skill Point
+figures", GameTora's first two bands overlap and cannot both hold, and the printed edges are config's
+resolution. The `15/15/20/20` claim is gone. Pinned by `tests/Feature/UnityCupPanelTest.php` ("cites
+edges-versus-criteria"): asserts the new wording and the absence of `15/15/20/20`, verified
+red-on-revert (`1 failed, 10 passed`) and green after (`11 passed, 239 assertions`).
 
 **Defect.** `resources/js/components/scenario/UnityCupPanel.vue:370` renders the band table's
 provenance note:
@@ -4720,7 +4739,7 @@ row 14), where the HFW's own caveat was corrected to the corpus wording.*
 
 ## KI-157 — The Unity Cup panel prints a bare `N/A` in a `title` attribute instead of the shared absence pattern
 
-**State:** OPEN, filed 2026-11-10. Surfaced by the KI-154 sweep's adjacent-defect audit (B.1 item 4),
+**State:** **RESOLVED at `ad3d94f3`** (2026-11-10). Filed 2026-11-10. Surfaced by the KI-154 sweep's adjacent-defect audit (B.1 item 4),
 which determined it is **not** the same code path as KI-154 and must not be bundled with it.
 
 **Defect.** `resources/js/components/scenario/UnityCupPanel.vue:324` renders an unrecorded figure as
@@ -4743,10 +4762,23 @@ vocabulary vs a `null` written over a recorded value), and no shared accessor. F
 put a template change inside a service fix's commit, which is the mistake the dispatch's B.1.4
 instruction exists to prevent.
 
-**Closure.** Route `:324` through the shared absence component with its `title` preserved, matching
-the sibling panels. Acceptance is a rendered assertion that the absence renders as the shared
-component's output (not a bare `N/A` text node) plus a copy assertion that the explanation still
-travels. Not fixed here: this pass is a registration, not a slice.
+**Closure (landed `ad3d94f3`, 2026-11-10).** `:324` now renders `AbsenceValue` with `compact`, the
+same shared disclosure `CareerStatePanel.vue:287` uses, and the reason string is the old `title` text
+verbatim, so nothing the Trainer could read before is lost. Verified in the rendered page on run 7:
+five stat-grade rows each render a `<details>`/`<summary>` disclosure reading
+`N/A , No per-stat team grade is recorded for this run yet. Enter it in the team-state editor.`
+
+**What this closure does not cover — four bare `N/A` spans remain on the same page.** Measured in the
+same render: they are *not* this defect's sites, and repairing them is a different slice in different
+files:
+
+| Site | File | Why it is a separate item |
+|---|---|---|
+| `Current Spirit` absence | `resources/js/components/scenario/UnityCupPanel.vue:270` | It is a `ResourceMeter` `absence` prop, not a bare span — the component owns the rendering, so the fix belongs in `ResourceMeter` (if anywhere), not here. |
+| three mandatory-ladder rows | `resources/js/pages/Career/Cockpit/Panels/TeamRankLadderPanel.vue:67` and `.../UraMandatoryLadder.vue:67` | Different components on a different surface (the ladder panels), each with its own `row.absence` fallback. |
+
+Recorded rather than fixed: the dispatch that closed this KI scoped it to `:324`, and widening it
+would have put two foreign components into the same commit.
 
 *Determination recorded in `docs/research/ki-154-scenario-widget-sweep-2026-11-10.md` §1.5.*
 
