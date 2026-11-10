@@ -4583,7 +4583,7 @@ reading absent. Two tests pin it in `tests/Feature/UnityCupPanelTest.php`: one a
 with both tallies (and that the bands placement agrees), the other asserts the absence when only one
 tally is recorded. Both were verified non-vacuous — the first fails on the pre-fix code at exactly
 the fixed line. The full call-site sweep that produced this shape is
-`docs/research/ki-154-scenario-widget-sweep-2026-11-10.md`; it also records that **six of the seven
+section `## ki-154-scenario-widget-sweep-2026-11-10.md` of `docs/research-scratch/SLICE-RECORDS.md`; it also records that **six of the seven
 labelled widget keys** were `null`, and that only this one had a recorded value behind it
 (`grade_points` and `shop_coins` have no stored reading, so they stay absent by design).
 
@@ -4780,7 +4780,7 @@ files:
 Recorded rather than fixed: the dispatch that closed this KI scoped it to `:324`, and widening it
 would have put two foreign components into the same commit.
 
-*Determination recorded in `docs/research/ki-154-scenario-widget-sweep-2026-11-10.md` §1.5.*
+*Determination recorded in section `## ki-154-scenario-widget-sweep-2026-11-10.md` of `docs/research-scratch/SLICE-RECORDS.md`, §1.5.*
 
 ## KI-158 — `UraPanelTest` pins the superseded `missed` state for a past objective with no record, so it fails against the behaviour `27a3d374` deliberately shipped
 

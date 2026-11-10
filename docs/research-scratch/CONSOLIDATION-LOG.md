@@ -243,3 +243,26 @@ scenario guide, and only a 12-line block existed nowhere else. `gen_calendar.py`
 because its four cached GameTora JSON bodies are gitignored scratch; it now exits with that stated rather
 than raising `FileNotFoundError`, and the fetch recipe stays at `docs/scenarios/09-global-race-calendar.md`
 §To reproduce.
+
+## Round 24 coordination notes (2026-11-10)
+
+Round 24 (2026-11-10, owner-ordered) is recorded in full in `INDEX.md` §Round 24: thirteen dated
+`docs/research/` dispatch records of the 2026-11-10 scenario-detail arc, appended to
+`SLICE-RECORDS.md` as thirteen `## <name>` sections and deleted from `docs/research/` after
+line-by-line verification (1,370/1,370 non-blank lines, 0 missing; pure append of 124,690 bytes with
+the master's 6,571 NUL bytes carried through unchanged). Two notes belong here beside the INDEX entry:
+
+1. The `docs/research/` tree retains files this round does not touch, by the owner's own list:
+   `SYSTEM-FLOWS.md`, the eleven `flows-*.md`, `ui-ux-application-context-brief.md` (Round
+   14-embedded but not deleted), `scenario-detail-design-language-survey-2026-11-09.md`, and the
+   RS-UC set and directory, which is untracked peer in-flight work. A future pass must not read an
+   empty directory as leftover consolidation debt. The flows files and SYSTEM-FLOWS.md are likewise
+   unconsolidated strays on purpose; `INDEX.md` §Rounds 14 records the brief's live-embed status.
+2. Five live citations were repointed before the delete, each at the master and its section anchor:
+   `app/Services/Career/TeamPanelBuilder.php` (the S-A-P01.OG resolution comment),
+   `docs/design-research/scenario-detail-hfw-2026-11-09/README.md` (the KI-154 sweep pointer),
+   `docs/proposals/2026-11-08-trainee-preset-autofill.md` (the S-A-P01.OG ledger row), and
+   `KNOWN-ISSUES.md` twice (the KI-154 and KI-157 entries). The `KNOWN-ISSUES.md` edits were
+   byte-safe binary splices preserving its 399 NUL bytes. Outside those five sites, every remaining
+   reference to the thirteen deleted paths is either the round's own dated record or an embedded
+   body's quoted `git status` snapshot — the tolerated historical class of Rounds 18/22/23.

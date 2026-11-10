@@ -306,6 +306,7 @@ moved, 13 buckets, the two executor defects fixed first) is the dated status not
 | The 68-frame `[Global]` client capture note behind the Rice Shower walk: cap readings, run-surface evidence, and the hint-ladder provenance                                                                                 | `RACE-AND-SLICE-RESEARCH.md`, section `## [Rosy_Dreams]Rice_Shower_Unity-Cup.md` (Round 14, augment-only)                                                                                                            |
 | The G1/G2 capability-audit, reconciliation and FD-4 slice records (slice verification class)                                                                                                                                | `SLICE-RECORDS.md`, sections `## G1-DECISION-CONTRACT-2026-10-10.md`, `## G2-RECONCILIATION-2026-10-10.md`, `## G2-FD4-PLAN-2026-10-10.md`, `## G2-FD4-RULINGS-2026-10-10.md`, `## G2-FD4-SLICEPLAN-2026-10-10.md` (Round 14) |
 | The 2026-10-12 Gemini Deep Research reconciliation: the claim ledger (A–F), the 12 peer-check resolutions, and the corrected Max-Stat cap layer | `AUDIT-AND-VERIFICATION.md`, section `## Gemini Deep Research reconciliation, 2026-10-12` |
+| The 2026-11-10 scenario-detail arc: the span-hole fix (`S-RS-SPAN-1`), the KI-154 sweep and fix (`S-RS-KI154-1`), the Our Grand Concert `goal_source` resolution (`S-A-P01-OG-1`), the remodel plan, Move-3 and Phase 1/2 dispatches (`S-RS-REMODEL-B1/B2/C1/C2`), the cleanup and ruling-prep dispatches, the HFW visual overhaul (`S-RS-VISUAL-1`), its arc close-out, and the four-workstream summary; all thirteen Round 24 sections | `SLICE-RECORDS.md`, sections `## S-RS-SPAN-1-report-2026-11-10.md` through `## S-RS-CLEANUP-2-report-2026-11-10.md` (Round 24) |
 
 ### Round 13 (2026-10-07, owner-named) — two scratch files into the files that owned their subject
 
@@ -700,6 +701,66 @@ plan-of-record pointer inside `2026-11-02-ui-ux-audit-implementation.md` naming 
 on; `CHANGELOG.md`'s
 2026-10-19 rows about the `SKILL.md` → `SKILL_REGISTRY.md` rename are dated history and were left alone. <!-- census: quoted-original -->
 
+
+### Round 24 (2026-11-10, owner-ordered) — thirteen `docs/research/` dispatch records into the slice-records master
+
+The owner named thirteen 2026-11-10 files under `docs/research/`, ordered them consolidated into this
+directory and the originals deleted. All thirteen are dated dispatch reports, checkpoints, research
+records and close-outs of the scenario-detail arc and its adjacent slices, so they route as one set
+into the slice-records master, whose `§s-a-p01` ledger sections already carry this thread's earlier
+slices. None had been embedded by an earlier round. They are appended in the arc's own chronological
+order, from the 02:15 span fix to the 17:12 close-out.
+
+| Absorbed file                                        | Lines | New home                                                                       | Recoverable after delete? |
+| ---------------------------------------------------- | ----- | ------------------------------------------------------------------------------ | ------------------------- |
+| `S-RS-SPAN-1-report-2026-11-10.md`                   | 152   | `SLICE-RECORDS.md`, section `## S-RS-SPAN-1-report-2026-11-10.md`              | **No** — untracked at the fold; the section is the only copy (Round 13 E2 precedent) |
+| `ki-154-scenario-widget-sweep-2026-11-10.md`         | 178   | `SLICE-RECORDS.md`, section `## ki-154-scenario-widget-sweep-2026-11-10.md`    | Yes — tracked and clean at HEAD |
+| `s-rs-ki154-1-report-2026-11-10.md`                  | 140   | `SLICE-RECORDS.md`, section `## s-rs-ki154-1-report-2026-11-10.md`             | Yes — tracked and clean at HEAD |
+| `s-a-p01-og-goal-source-2026-11-10.md`               | 147   | `SLICE-RECORDS.md`, section `## s-a-p01-og-goal-source-2026-11-10.md`         | Yes — tracked and clean at HEAD |
+| `s-a-p01-og-1-report-2026-11-10.md`                  | 86    | `SLICE-RECORDS.md`, section `## s-a-p01-og-1-report-2026-11-10.md`            | Yes — tracked and clean at HEAD |
+| `S-RS-REMODEL-B1-summary-2026-11-10.md`               | 101   | `SLICE-RECORDS.md`, section `## S-RS-REMODEL-B1-summary-2026-11-10.md`        | Yes — tracked and clean at HEAD |
+| `s-rs-remodel-b1-report-2026-11-10.md`               | 83    | `SLICE-RECORDS.md`, section `## s-rs-remodel-b1-report-2026-11-10.md`          | Yes — tracked and clean at HEAD |
+| `S-RS-REMODEL-B2-report-2026-11-10.md`               | 205   | `SLICE-RECORDS.md`, section `## S-RS-REMODEL-B2-report-2026-11-10.md`         | Yes — tracked and clean at HEAD |
+| `S-RS-CLEANUP-1-and-RULING-PREP-1-report-2026-11-10.md` | 166 | `SLICE-RECORDS.md`, section `## S-RS-CLEANUP-1-and-RULING-PREP-1-report-2026-11-10.md` | Yes — tracked and clean at HEAD |
+| `S-RS-REMODEL-C1-phase1-2026-11-10.md`               | 134   | `SLICE-RECORDS.md`, section `## S-RS-REMODEL-C1-phase1-2026-11-10.md`         | Yes — tracked and clean at HEAD |
+| `S-RS-REMODEL-C2-report-2026-11-10.md`               | 158   | `SLICE-RECORDS.md`, section `## S-RS-REMODEL-C2-report-2026-11-10.md`         | Yes — tracked and clean at HEAD |
+| `S-RS-VISUAL-1-report-2026-11-10.md`                 | 201   | `SLICE-RECORDS.md`, section `## S-RS-VISUAL-1-report-2026-11-10.md`          | Yes — tracked and clean at HEAD |
+| `S-RS-CLEANUP-2-report-2026-11-10.md`                | 141   | `SLICE-RECORDS.md`, section `## S-RS-CLEANUP-2-report-2026-11-10.md`         | Yes — tracked and clean at HEAD |
+
+Verification, per the discipline's line-by-line rule, ran twice: once against the built fragments
+before the splice and again against the appended regions after it, comparing every non-blank source
+line against its section in order, allowing the one-level heading demotion with the source's own `#`
+title re-levelled to `###` per the banner convention (1,370/1,370 non-blank lines; 0 missing in each
+of the thirteen). Each fragment was fence-checked (`tools/md_fence_check.py`, 0 invalid) before the
+splice, and the spliced master's existing bytes were asserted unchanged: the splice is a pure append
+of 124,690 bytes, the master's 6,571 NUL bytes are carried through unchanged, and the appended region
+read back byte-identical.
+
+**Departures from verbatim, all mechanical and recorded per the round's banners:** the one-level
+heading demotion with the `#` title re-levelled to `###` (Round 22 banner precedent); a fold banner
+at each section head quoting the source path and its disposition; CRLF line endings normalised to
+LF inside the appended region for the five sources that carried them (`S-RS-REMODEL-B1-summary`,
+`s-rs-remodel-b1-report`, `S-RS-REMODEL-B2-report`, `S-RS-REMODEL-C2-report`,
+`S-RS-VISUAL-1-report`), the same normalisation the master's own mixed-endings state already forces
+on any append (Round 22 precedent, stated in each banner); and the sources' own backticked
+cross-references to their soon-deleted siblings repointed at this master's sections, the Round 18
+approved departure, applied to five references across three sources. The dated `git status` snapshots
+inside the embedded bodies quote paths as they sat on the day and stay verbatim as history.
+
+**References.** Five live citations outside the set were repointed before the delete, each at the
+master and its section anchor: `app/Services/Career/TeamPanelBuilder.php` (the S-A-P01.OG resolution
+comment), `docs/design-research/scenario-detail-hfw-2026-11-09/README.md` (the KI-154 sweep pointer),
+`docs/proposals/2026-11-08-trainee-preset-autofill.md` (the S-A-P01.OG ledger row) and
+`KNOWN-ISSUES.md` (two pointers in the KI-154 and KI-157 entries). The `KNOWN-ISSUES.md` edits were
+byte-safe splices preserving its 399 NUL bytes (399 before, 399 after). The other `docs/research/`
+files outside the owner's list (`SYSTEM-FLOWS.md`, the eleven `flows-*.md`,
+`ui-ux-application-context-brief.md` — already Round 14-embedded,
+`scenario-detail-design-language-survey-2026-11-09.md`, and the RS-UC set and directory) stay at
+their own paths.
+
+**Disposition of the originals.** Deleted from the working tree in this round, after the verification
+above. Twelve are tracked, so each is recoverable at the commit the delete lands on; one,
+`S-RS-SPAN-1-report-2026-11-10.md`, was untracked, so its section is the only copy.
 ### Deliberate exceptions, outside the masters
 
 Three entries stay outside `docs/research-scratch/` on purpose. They are listed here so a future pass

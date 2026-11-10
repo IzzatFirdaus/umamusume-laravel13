@@ -222,8 +222,9 @@ final class TeamPanelBuilder
          * **S-A-P01.OG resolved 2026-11-10.** This comment used to say Our Grand Concert "declares no
          * `goal_source` while P-01 §7 decision 7 is open", and pointed at `config/scenarios.php` for the
          * unresolved sentence. Both halves are now false: decision 7 is answered, the scenario declares
-         * `'trainee_goals'` explicitly, and the resolution is recorded in
-         * `docs/research/s-a-p01-og-goal-source-2026-11-10.md`. What settled it: the scenario "returns
+         * `'trainee_goals'` explicitly, and the resolution is recorded in section
+         * `## s-a-p01-og-goal-source-2026-11-10.md` of `docs/research-scratch/SLICE-RECORDS.md`
+         * (consolidation Round 24; the former `docs/research/` path is quoted history). What settled it: the scenario "returns
          * the standard trainee career features of race goals and career events"
          * (`docs/scenarios/07-grand-concert.md:92-95`; Game8 `archives/607337` says the same with "for
          * each Umamusume"), and the ladder's grain is the trainee rather than the scenario

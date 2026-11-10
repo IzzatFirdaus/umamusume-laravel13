@@ -87,7 +87,8 @@ so a run that recorded both tallies was told it had none.
 
 **Filed as KI-154 and fixed at `5e39a1f0`.** The tile now reads **11**, the combined normal + Extreme
 total the bands panel already owns, and stays absent when only one tally is recorded. Research and
-the full call-site sweep: `docs/research/ki-154-scenario-widget-sweep-2026-11-10.md` — the sweep
+the full call-site sweep: section `## ki-154-scenario-widget-sweep-2026-11-10.md` of
+`docs/research-scratch/SLICE-RECORDS.md` — the sweep
 found six of the seven widget keys were `null`, and that only this one had a recorded reading behind
 it. Not fixed by this artifact: the Vue-side bare `N/A` at `UnityCupPanel.vue:324`, and the `+30` /
 `15/15/20/20` copy corrections, which are separate register rows.
