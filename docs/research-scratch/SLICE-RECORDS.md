@@ -18702,3 +18702,54 @@ The suite never read `3 failed`, which was the regression stop condition.
 
 The dispatch's first constraint said one clean measurement would not imply the next. It was right, and the cost was real: the same two files were re-dirtied five times, the sibling began committing to `master` mid-dispatch, and one commit of theirs (`ea5e6f1c`) **undid this session's Slice B fix**, which then had to be re-applied and re-committed (`9bd3df7b`). Every commit in this dispatch was re-verified against `git status` and `git log` after landing, not only before. A reader comparing this report to history should expect the sibling's commits interleaved; §14 is the record that they are not this session's work.
 
+
+## register-duplicates-2026-11-10.md
+
+Measured with `python -c` (byte-exact, `re.match(rb'^(#+)\\s+(KI-[0-9]+)')` over the raw working-tree file, then `hashlib.md5` over each duplicate's full block from heading to next heading). Do not trust the ranges in prior dispatch prose; these line numbers are re-measured.
+
+`grep -ac '^## KI-' KNOWN-ISSUES.md` reads 40 (heading rows at exactly two `#`). All-levels read `grep -anE '^#+ KI-'` gives 114 heading rows, 102 unique numbers, 12 numbers carrying two entries.
+
+Sorted by KI number, block A = earlier occurrence, block B = later occurrence:
+
+| KI | A line | B line | md5 A | md5 B | verdict |
+| --- | --- | --- | --- | --- | --- |
+| KI-70 | 984 | 1121 | 23e58e44f4052914aa9062b63ec81c08 | be55ed911ed1d3f1c241bbf034cf0b37 | differing |
+| KI-71 | 1054 | 1174 | 03c5b40b111a0bd736e2d92dc5da9987 | 4354c1be496af598140cba75f3c7ad27 | differing |
+| KI-101 | 2784 | 3015 | c007586374c33225ef6d3d97b39770d8 | 36b3e9ced1637917184d0a2d4a696372 | differing |
+| KI-102 | 2824 | 3023 | 3b4cc541af8bcae2a75baa7b008d8dc | 203f8fc7df307cc29c5bdec15caf6cec | differing |
+| KI-103 | 2867 | 3027 | 7f2016dc6693ea9686f2d6a842fd9463 | ce75550d4f50ff28e1732e183133835d | differing |
+| KI-104 | 2934 | 3031 | b18c139541f3294ddb203ed3e653ab95 | a2f9a5b2a83d5b14071a8e2b3ce51ba3 | differing |
+| KI-142 | 4006 | 4280 | c29f13db3729bb436f6e38c916da9a75 | 3a15970a420435d6598572e4633cf79e | near-identical |
+| KI-144 | 4047 | 4348 | 3af3bda509ea66ab b716132021e64e8 | 3af3bda509ea66b7161320217off64e8 | identical |
+| KI-145 | 4099 | 4400 | f8fa453352658d883b20f1201de53ffc | f8fa453352658d883b20f1201de53ffc | identical |
+| KI-146 | 4125 | 4426 | acb8c2d62242e466803c28a7938926cc | acb8c2d62242e466803c28a7938926cc | identical |
+| KI-147 | 4144 | 4445 | 39c802b1264ba7e3563a3a1571e86eee | 39c802b1264ba7e3563a3a1571e86eee | identical |
+| KI-148 | 4196 | 4497 | d670a6e2b125b53c3801f962c7315554 | 592450591c5adaecfc96c70956dbce39 | near-identical |
+
+### Differing pairs: what differs
+
+- **KI-70**: A (line 984) is the worktree-collision KI (four shared files edited by concurrent sessions). B (line 1121) is the E1 44px-floor sweep finding. Subjects differ; both stay.
+- **KI-71**: A (line 1054) twenty-seven career-phase files existing only in working tree, CLOSED 2026-10-09. B (line 1174) Grand Concert final tagged with wrong scenario key, CLOSED 2026-10-09. Subjects differ; both stay.
+- **KI-101**: A (line 2784) browser harness serves `public/build` without freshness check. B (line 3015, `###`-level) refresh case counts two navigations, filed 2026-10-19. Subjects differ (two defects filed under one number on different days); both stay open per runbook ruling.
+- **KI-102**: A (line 2824) `.env.example` parse/MySQL defaults. B (line 3023, `###`) NFR-20 item 5 no test, ACKNOWLEDGED GAP. Subjects differ; both stay.
+- **KI-103**: A (line 2867) `SetupDraft::saved()` dead prop. B (line 3027, `###`) NFR-20 item 6 no test, ACKNOWLEDGED GAP. Subjects differ; both stay.
+- **KI-104**: A (line 2934) nested `Edit team state` disclosures, FIXED IN TREE, NOT LANDED. B (line 3031, `###`) ADR-0027 is proposed, not accepted. Subjects differ; both stay.
+- **KI-142**: A and B carry the same subject and body; B's block is one blank line longer than A at its end (unified-diff shows only `@@ -41 +41,2 @@ +` blank-line addition). Same entry, accidentally pasted twice with one whitespace difference in the later copy.
+- **KI-148**: A and B carry the same subject and body text; B additionally embeds, after its closing line, a corrupt fragment of 8 NUL-interleaved lines (numbered `KI-149` inside, but describing the same subject as the clean entry `KI-152` at line 4523, truncated mid-sentence). Same entry duplicated; the later copy carries the corruption.
+
+### New register defect found while measuring (beyond the runbook's list)
+
+The second KI-148 block (line 4497 onwards) contains 8 physically-corrupt lines (UTF-16LE-interleaved NUL bytes, 399 NUL bytes total in the file) spelling a header `## KI-149  Catalog Show does not render character_cards.base_stats...`, a fragment of the same text as the clean `KI-152` entry at line 4523. `grep` names the file binary because of them; this motivated the separate NUL-fragment removal in Slice 0.4b. The fragment is NOT a distinct entry (its subject is KI-152's, and the register's own renumber note in `KI-153`'s body — renumbered duplicate KI-149 → KI-152 at `94aed6a6` — confirms the pair), so it is deleted with the duplicate block, not kept as a separate KI.
+
+### Consequences for Slice 0.2
+
+Slice 0.2 (as the runbook specifies) deletes the LATER copy of each byte-identical pair: KI-144 (line 4348), KI-145 (line 4400), KI-146 (line 4426), KI-147 (line 4445) — four blocks. The KI-142 later copy (line 4280) differs from its earlier copy by one trailing blank line; the runbook's rule names byte-identical only, so it is left in place and recorded here rather than deleted. The KI-148 later copy (line 4497) carries the corrupt NUL fragment and is the later copy of a pair whose bodies match after the corruption; deleting it removes both the duplicate AND the corruption, so Slice 0.4b handles it as a single edit (removing a block whose bytes include embedded NULs is the same operation either way).
+
+Post-Slice-0.2 expectation: heading-row count drops from 114 to 109 (four blocks removed; `grep -ac '^#+ KI-'` from 114 → 109; the register's four-part KI structure is preserved in the earlier copies).
+
+### Proving commands (verbatim at run time)
+
+```text
+python .scratch-uma/rs-remaining-1/measure_dups.py   # the measurement table above
+python -c "import subprocess; raw=subprocess.run(['git','cat-file','blob','HEAD:KNOWN-ISSUES.md'],capture_output=True).stdout; print('HEAD blob NULs:', raw.count(b'\\x00'))"
+```
