@@ -79,7 +79,7 @@ defineProps<{
         v-if="url && href"
         :href="href"
         :aria-label="alt === '' ? (linkLabel ?? undefined) : undefined"
-        :class="[size, 'block']"
+        :class="[size, 'block shrink-0']"
         data-artwork-slot
     >
         <img :src="url" :alt="alt" loading="lazy" decoding="async" :class="`${size} rounded-md object-cover`">

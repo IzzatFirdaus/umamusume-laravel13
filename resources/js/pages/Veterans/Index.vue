@@ -438,9 +438,9 @@ const factorGrades: { family: string; note: string }[] = [
                                             </span>
                                             <span v-if="veteranResultClause(veteran.notes)" class="w-full">{{ veteranResultClause(veteran.notes) }}</span>
                                             <span class="flex flex-wrap items-center gap-x-3">
-                                                <a v-if="veteran.builder_url" :href="veteran.builder_url" class="underline">Legacy builder</a>
+                                                <a v-if="veteran.builder_url" :href="veteran.builder_url" class="inline-flex min-h-11 items-center underline">Legacy builder</a>
                                                 <span v-else>No Legacy selection yet</span>
-                                                <a :href="veteran.compare_url" class="underline">Compare</a>
+                                                <a :href="veteran.compare_url" class="inline-flex min-h-11 items-center underline">Compare</a>
                                             </span>
                                         </span>
                                     </span>
@@ -532,7 +532,7 @@ const factorGrades: { family: string; note: string }[] = [
         </div>
 
         <details class="mt-8">
-            <summary id="library-absences" class="text-lg font-semibold text-ink-strong cursor-pointer list-none">
+            <summary id="library-absences" class="flex min-h-11 cursor-pointer list-none items-center text-lg font-semibold text-ink-strong">
                 Not in this build
                 <span class="text-sm font-normal text-ink-muted ml-2">({{ props.absences.length }} notes)</span>
             </summary>

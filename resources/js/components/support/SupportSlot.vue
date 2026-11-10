@@ -182,7 +182,7 @@ function focusRow(): void {
                      slot states. It stays reachable in a disclosure so the six-slot grid keeps the
                      wireframe's density instead of growing a wall of numbers per card. -->
                 <details v-if="card.effects.length > 0" class="text-xs text-ink-muted">
-                    <summary class="cursor-pointer">Card effects ({{ card.effects.length }})</summary>
+                    <summary class="flex min-h-11 cursor-pointer items-center">Card effects ({{ card.effects.length }})</summary>
                     <p class="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 font-mono">
                         <!-- D-20: an absent dictionary row is marked by the source's own id, never labelled
                              with an invented word. -->
