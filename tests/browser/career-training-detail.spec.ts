@@ -93,6 +93,13 @@ test('renders the HFW region model, one primary, and one savebar', async ({ page
     await expect(page.locator('input[name="pick"]')).toHaveCount(8);
     await expect(page.locator('.savebar')).toHaveCount(1);
     await expect(page.locator('.btn-primary')).toHaveCount(1);
+
+    // UX-06: the savebar's fallback label read `No action selected` next to a literal ` selected`,
+    // printing `No action selected selected` until a discipline was picked. The fallback is now
+    // `No action`, so the composed line reads `No action selected · 1-5 pick · …`.
+    const bar = page.locator('.savebar');
+    await expect(bar).toContainText(/No action\s+selected/);
+    await expect(bar).not.toContainText('selected selected');
 });
 
 test('prints the five disciplines with their published gains and a signed Energy figure', async ({ page }) => {

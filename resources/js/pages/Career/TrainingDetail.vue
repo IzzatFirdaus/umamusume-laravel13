@@ -720,7 +720,7 @@ const energyBandNote = computed(() =>
 
                     <div class="savebar">
                         <span class="text-xs text-ink-muted">
-                            {{ chosenLabel ?? 'No action selected' }} selected ·
+                            {{ chosenLabel ?? 'No action' }} selected ·
                             <span class="kbd">1</span>-<span class="kbd">5</span> pick ·
                             <span class="kbd">Enter</span> records ·
                             <span class="kbd">Esc</span> back
