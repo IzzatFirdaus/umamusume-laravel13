@@ -46,10 +46,19 @@ final class FinaleReader
     {
         $slot = $run->hasScenario()
             ? RaceCatalogSlot::query()
+                // Shared-inclusive, the same scope the strip reads: `URA Finals Qualifier` and
+                // `URA Finals Semifinal` carry a NULL `scenario_key` and the block is one read on
+                // both surfaces (KI-87 half one). The mandatory+finale filters below keep the
+                // subject the scenario's own Final: the shared rows are `Early` preliminaries
+                // that satisfy neither.
                 ->forScenario($run->scenarioKey())
                 ->where('is_mandatory', true)
                 ->where('year', RaceCatalogSlot::YEAR_FINALE)
-                ->where('scenario_key', $run->scenarioKey())
+                // Deterministic subject: the scenario's own Final, then anything the corpus
+                // also marks mandatory in the finale block. The real corpus never holds two
+                // (the shared preliminaries are `is_mandatory = 0`), but a future corpus that
+                // does must not make the reader's subject depend on storage order.
+                ->orderByRaw('CASE WHEN scenario_key = ? THEN 0 ELSE 1 END', [$run->scenarioKey()])
                 ->first()
             : null;
 

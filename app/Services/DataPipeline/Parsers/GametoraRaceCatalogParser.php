@@ -79,6 +79,19 @@ final class GametoraRaceCatalogParser implements RaceCatalogSourceParser
     ];
 
     /**
+     * KI-82. The export's own `name_en` for `final_live` reads "URA Finals Final (Grand Live)":
+     * the first scenario's finale pasted onto the fourth, plus GameTora's bracket rendering. The
+     * `[Global]` launch notice for the fourth scenario prints "Grand Concert"
+     * (`UMAMUSUME_REFERENCE.md` §7 row 52), and `docs/UMAMUSUME_REFERENCE.md` §4.6 is the
+     * evidence trail. The other three finals' export names are their client nouns already, so
+     * only this row is retitled here, at the same normalisation layer that already corrects the
+     * row's `scenario_key` (KI-71). The committed body keeps the export verbatim for audit.
+     */
+    private const CLIENT_TITLES_BY_SLOT = [
+        'final_live' => 'Grand Concert',
+    ];
+
+    /**
      * Slots the game will not let a career pass without. This is scenario-scoped
      * and is *not* the per-character Goal: ADR-0003 R3 and `09` both keep those
      * ideas apart, and the debut is mandatory for every trainee while carrying no
@@ -170,7 +183,7 @@ final class GametoraRaceCatalogParser implements RaceCatalogSourceParser
             },
             'turn' => $month === null ? null : (($month - 1) * 2) + ($half === 2 ? 2 : 1),
             'slot_label' => $this->label($month, $half),
-            'title' => (string) ($details['name_en'] ?? ''),
+            'title' => self::CLIENT_TITLES_BY_SLOT[$slotId] ?? (string) ($details['name_en'] ?? ''),
             'tier' => self::TIER_BY_GRADE[$grade] ?? null,
             'grade_code' => $grade,
             'distance' => $this->intOrNull($details['distance'] ?? null, 1, 20000),

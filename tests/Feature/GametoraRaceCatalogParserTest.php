@@ -123,6 +123,23 @@ it('tags every final with a scenario key config declares, so the row is reachabl
         ->and(array_keys(config('scenarios.scenarios')))->toContain($row['scenario_key']);
 })->with(['final', 'final_aoharu', 'final_mant', 'final_live']);
 
+it('carries the committed body for the fourth scenario\'s finale and titles it by the client noun', function (): void {
+    // KI-82. The committed export read "URA Finals Final (Grand Live)" on the `final_live` row:
+    // GameTora's rendering with the first scenario's finale name pasted on, while the `[Global]`
+    // launch notice for the fourth scenario prints "Grand Concert" (`UMAMUSUME_REFERENCE.md` §7
+    // row 52). The data file is where the title lives (`name_en` -> `title`, never a stored-row
+    // edit), so this case reads the committed body itself: if the file regresses to the borrowed
+    // name, the parse goes red here before any screen inherits it.
+    $body = file_get_contents(base_path('database/seeders/data/race_instances.json'));
+    expect($body)->toBeString();
+
+    $rows = (new GametoraRaceCatalogParser)->parse($body);
+    $finale = collect($rows)->firstWhere('external_ref', 'final_live');
+
+    expect($finale)->not->toBeNull()
+        ->and($finale['title'])->toBe('Grand Concert');
+});
+
 it('turns the export sentinels into null rather than storing a fake measurement', function (): void {
     $row = parseRaceRow(['id' => 'debut', 'year' => 1, 'month' => 6, 'half' => 2, 'fans_needed' => null], [
         'id' => 999999,
