@@ -22,7 +22,7 @@ test.afterEach(async ({ page }) => {
 
 test.describe.configure({ timeout: 240_000 });
 
-async function clickPrimary(page: import('@playwright/test').Page, name: string): Promise<void> {
+async function clickPrimary(page: import('@playwright/test').Page, name: string | RegExp): Promise<void> {
     const button = page.getByRole('button', { name }).first();
     const link = page.getByRole('link', { name }).first();
 
@@ -46,10 +46,11 @@ test('a user can complete the setup wizard from scenario to a created run', asyn
     await clickPrimary(page, 'Continue to trainee');
     await expect(page).toHaveURL(/\/career\/setup\/trainee$/);
 
-    // Step 2 — trainee. The card click stores the pick; the forward door opens the profile.
+    // Step 2 — trainee. The card click stores the pick; the forward door opens the profile, and its
+    // label says so (UX-02: the roster door no longer claims to continue to the target it does not open).
     await page.locator('[data-trainee-card]').first().click();
     await expect(page.getByText(/Trainee set:/)).toBeVisible();
-    await clickPrimary(page, 'Continue to build target');
+    await clickPrimary(page, /^Review .* aptitudes and choose a form$/);
     await expect(page).toHaveURL(/\/career\/setup\/trainee\/\d+$/);
 
     // Step 2's read screen. Its chips read the same draft: step 1 saved, step 2 current and saved, so

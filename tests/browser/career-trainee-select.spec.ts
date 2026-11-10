@@ -70,14 +70,14 @@ test.describe('Trainee Selection and Profile', () => {
         await page.goto('/career/setup/trainee');
         await page.locator('#app > *').first().waitFor();
 
-        // No trainee is picked on a fresh visit, so the forward door is disabled and says why. It opens
-        // the step's read screen once a pick exists; the flow case below asserts that href.
-        const forward = page.getByRole('button', { name: 'Continue to build target' });
+        // No trainee is picked on a fresh visit, so the forward door is disabled and states its own
+        // reason (UX-02: the reason lives in the control, not in a hint span beside it). It opens the
+        // step's read screen once a pick exists; the flow case below asserts that href.
+        const forward = page.getByRole('button', { name: 'Select a trainee to continue' });
         await expect(forward).toBeVisible();
         await expect(forward).toBeDisabled();
-        await expect(forward).toHaveAttribute('aria-describedby', 'trainee-continue-hint');
-        await expect(page.getByText('Choose a trainee to continue.')).toBeVisible();
         await expect(forward).toHaveClass(/bg-primary-action/);
+        await expect(page.getByText('Choose a trainee to continue.')).toHaveCount(0);
 
         const back = page.getByRole('link', { name: 'Back', exact: true });
         await expect(back).toBeVisible();
@@ -470,7 +470,7 @@ test.describe('Trainee Selection and Profile', () => {
         await page.locator('[data-trainee-card]').first().click();
         await expect(page.getByText(/Trainee set:/)).toBeVisible();
 
-        const forward = page.getByRole('link', { name: 'Continue to build target' });
+        const forward = page.getByRole('link', { name: /^Review .* aptitudes and choose a form$/ });
         await expect(forward).toHaveAttribute('href', /\/career\/setup\/trainee\/\d+$/);
         await forward.click();
         await page.waitForURL(/\/career\/setup\/trainee\/\d+$/);

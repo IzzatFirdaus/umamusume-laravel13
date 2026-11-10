@@ -484,18 +484,19 @@ const sortLabel = computed(
           two facts `eca5a628` left open when it cut the shell's extra exit link.
 
           The wireframe sends this door to the trainee profile (`career-trainee.html:64`), and the profile's
-          own primary continues to the target: the read screen is step 2's middle, not a side page. The
-          label is the wireframe's on both screens.
+          own primary continues to the target: the read screen is step 2's middle, not a side page.
+          HFW-OVERRIDE (copy: two destinations, two labels) - the roster door opens the profile, not the
+          target (`career-trainee.html:64`), so it now says what it does: "Review {name}'s aptitudes and
+          choose a form". The wireframe's "Continue to build target" label is kept where it is true — the
+          profile's own primary, which does continue to the target (`career-profile.html:67`). The earlier
+          note here recorded an owner ruling that both screens carry the wireframe's label; that ruling
+          named the consistency cost itself (same words, two destinations one step apart) and the audit
+          re-opened it, so the labels now differ instead.
 
-          HFW-OVERRIDE (copy: same label, two destinations) - "Continue to build target" opens the profile
-          here and the build target there (`career-trainee.html:64`, `career-profile.html:67`), so the same
-          words lead to two screens one step apart. The owner ruled the wireframe's label stands; the
-          framework's consistency heuristic (H4/TOG-8) is recorded here rather than fixed by renaming one
-          of the pair.
-
-          Until a trainee holds, the same door is native-disabled with the reason printed beside it
-          (`NRM-2`): the wireframe's mock always has a pick, and a Continue that lands on a page with
-          nothing to read is worse than a disabled button that says why.
+          Until a trainee holds, the same door is native-disabled and states its own reason ("Select a
+          trainee to continue"), because a disabled control whose label promises progress is the thing
+          `NRM-2` exists to prevent. The reason used to sit in a separate hint span beside it; one
+          sentence, in the control the Trainer is looking at, is the smaller surface.
 
           The pair carries the house button scale (`buttonStyles.ts`) rather than the wireframe's `.btn`
           numbers (13.5px, 15px inline, 10px corner): the wizard's own `BaseButton` rows use the house
@@ -509,19 +510,15 @@ const sortLabel = computed(
             >
                 Back
             </Link>
-            <span v-if="props.profileUrl === null" id="trainee-continue-hint" class="text-xs text-ink-muted">
-                Choose a trainee to continue.
-            </span>
             <LinkButton v-if="props.profileUrl" :href="props.profileUrl" variant="primary">
-                Continue to build target
+                Review {{ props.selectedName ?? 'her' }}'s aptitudes and choose a form
             </LinkButton>
             <BaseButton
                 v-else
                 variant="primary"
                 disabled
-                aria-describedby="trainee-continue-hint"
             >
-                Continue to build target
+                Select a trainee to continue
             </BaseButton>
         </template>
 

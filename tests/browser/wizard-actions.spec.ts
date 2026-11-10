@@ -33,7 +33,7 @@ type Step = {
  */
 const STEPS: Step[] = [
     { slug: 'scenario', route: '/career/setup/scenario', step: 1, back: /^\s*Cancel\s*$/, forward: /^\s*Continue to trainee\s*$/i },
-    { slug: 'trainee', route: '/career/setup/trainee', step: 2, back: /^\s*Back\s*$/, forward: /^\s*Continue to build target\s*$/i },
+    { slug: 'trainee', route: '/career/setup/trainee', step: 2, back: /^\s*Back\s*$/, forward: /^\s*Select a trainee to continue\s*$/i },
     { slug: 'target', route: '/career/setup/target', step: 3, back: /^\s*Back\s*$/, forward: /^\s*Continue to legacy\s*$/i },
     { slug: 'legacy', route: '/career/setup/legacy', step: 4, back: /^\s*Back\s*$/, forward: /^\s*Continue to deck\s*$/i },
     { slug: 'deck', route: '/career/setup/deck', step: 5, back: /^\s*Back\s*$/, forward: /^\s*Continue to preflight\s*$/i },
@@ -84,10 +84,9 @@ test.describe('wizard head band actions', () => {
             await expect(filled).toHaveText(step.forward);
 
             if (step.slug === 'trainee') {
-                // A fresh visit has no pick, so the forward door is disabled and prints why it is
-                // (`NRM-2`). The label stays the wireframe's.
+                // A fresh visit has no pick, so the forward door is disabled and states its own reason
+                // (UX-02: `NRM-2`'s explanation moved into the control the Trainer is looking at).
                 await expect(doors.last()).toBeDisabled();
-                await expect(page.getByText('Choose a trainee to continue.')).toBeVisible();
             }
         });
     }
