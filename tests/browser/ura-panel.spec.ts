@@ -190,18 +190,27 @@ test('raises the Critical alert as rendered copy when the debut turn has arrived
     await expect(region.getByRole('link', { name: 'Record this race' }).first()).toBeVisible();
 });
 
-test('marks the debut missed once its turn has passed with no race recorded', async ({ page }) => {
-    // Twelve logged turns and no race entry: turn 12 is behind the run, so this is the `missed`
-    // state. `completed` needs a race written through the race screen, which is D10's own surface;
-    // the props test covers that arm, and this one covers the three states the turn writes reach.
+test('reads the debut as not reached once its turn has passed with no race recorded', async ({ page }) => {
+    // Twelve logged turns and no race entry: turn 12 is behind the run, and this run holds no entry
+    // for the debut at all.
+    //
+    // **`Not reached`, not `Missed`** — the semantics this case pins changed at `27a3d374` (R7-82,
+    // R7-22, R7-25, R7-61). A past objective with no record is `not_reached`, because `TOG-3`
+    // (`ADR-0007`: "status may be stale or absent, but never wrong") forbids calling an absence a
+    // failure: "missed" is a verdict on an attempt the run never made. The props-level pin lives at
+    // `TraineeGoalsPanelTest.php:265` ("reads a past objective the run never played as not reached,
+    // not as missed"). This browser case kept the superseded word and had been red since that commit.
     const region = await openUraCockpit(page, DEBUT_TURN);
 
-    // Both groups read the debut as missed, and each says it in its own list: the calendar's
+    // Both groups read the debut the same way, and each says it in its own list: the calendar's
     // obligation and one of her own rungs are two facts about one race, so the assertion is scoped
     // twice rather than counted once across the region.
-    await expect(region.getByRole('region', { name: 'Trainee goals' }).getByText('Missed')).toBeVisible();
-    await expect(region.getByRole('region', { name: 'Mandatory races' }).getByText('Missed')).toBeVisible();
+    await expect(region.getByRole('region', { name: 'Trainee goals' }).getByText('Not reached')).toBeVisible();
+    await expect(region.getByRole('region', { name: 'Mandatory races' }).getByText('Not reached')).toBeVisible();
     await expect(region.getByText('Junior Make Debut is due and not recorded')).toBeVisible();
+
+    // The superseded word must not come back: `missed` now means an entry exists and fell short.
+    await expect(region.getByRole('region', { name: 'Trainee goals' }).getByText('Missed')).toHaveCount(0);
 });
 
 test('gives the finale block an N/A deadline instead of an invented turn', async ({ page }) => {
