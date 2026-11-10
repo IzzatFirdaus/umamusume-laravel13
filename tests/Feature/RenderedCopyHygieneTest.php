@@ -92,6 +92,24 @@ function shippedCopyText(string $source): string
 }
 
 /**
+ * Decode the numeric character references a source line can hide a glyph behind, before the dash
+ * sweep reads it. `&#8211;` and `&#8212;` render as the banned characters and match nothing as bytes
+ * (KI-142: the entity spelling was exactly the hole the rule's first instrument had).
+ */
+function decodedCharacterReferences(string $source): string
+{
+    return (string) preg_replace_callback(
+        '/&#(?<code>x?[0-9a-fA-F]+);/u',
+        static function (array $m): string {
+            $code = str_starts_with($m['code'], 'x') ? (int) hexdec(substr($m['code'], 1)) : (int) $m['code'];
+
+            return IntlChar::chr($code);
+        },
+        $source,
+    );
+}
+
+/**
  * @return array<string, list<int>> file => line numbers holding a rendered dash
  */
 function renderedDashLines(): array
@@ -101,7 +119,7 @@ function renderedDashLines(): array
     foreach (shippedCopySources() as $path => $source) {
         $lines = [];
 
-        foreach (preg_split('/\R/', shippedCopyCode($source)) ?: [] as $index => $line) {
+        foreach (preg_split('/\R/', decodedCharacterReferences(shippedCopyCode($source))) ?: [] as $index => $line) {
             if (preg_match('/[\x{2013}\x{2014}]/u', $line) === 1) {
                 $lines[] = $index + 1;
             }

@@ -163,7 +163,7 @@ test('pagination names the range, the page count, and marks the current page', a
     const pager = page.getByRole('navigation', { name: 'Pagination' });
     await expect(pager).toBeVisible();
 
-    await expect(pager).toContainText('Showing 26–50 of 67 races');
+    await expect(pager).toContainText('Showing 26 to 50 of 67 races');
     await expect(pager).toContainText('Page 2 of 3');
 
     await expect(pager.locator('[aria-current="page"]')).toHaveText('2');

@@ -3,7 +3,7 @@
  * The pager under a table (plan 1.5). Three facts, always, in this order, because each answers a
  * different question a reader has after scanning a table:
  *
- *   - "Showing 1–25 of 67" — where am I in the whole set? Without it a reader cannot tell whether the
+ *   - "Showing 1 to 25 of 67" — where am I in the whole set? Without it a reader cannot tell whether the
  *     table they are looking at is the whole answer or a slice of it.
  *   - "Page 1 of 3" — how much further is there? The current page is `aria-current="page"`, which is
  *     how a screen reader says "here" rather than leaving the reader to compare colours.
@@ -59,7 +59,7 @@ const hasNext = (pages: number, page: number): boolean => page < pages;
         <p class="text-ink-muted" role="status">
             <template v-if="variant === 'compact'">{{ total }} {{ noun }} · page {{ page }} of {{ pages }}</template>
             <template v-else>
-                Showing {{ from }}&#8211;{{ to }} of {{ total }} {{ noun }}
+                Showing {{ from }} to {{ to }} of {{ total }} {{ noun }}
                 <span class="ml-2">Page {{ page }} of {{ pages }}</span>
             </template>
         </p>

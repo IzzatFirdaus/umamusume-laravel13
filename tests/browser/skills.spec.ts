@@ -157,7 +157,7 @@ test('the skill index states the page it is showing', async ({ page }) => {
     // The canonical pager states the range and the page. The pager it replaced was a set of links
     // and, on a short list, rendered nothing at all.
     const status = page.locator('nav[aria-label="Pagination"] [role="status"]');
-    await expect(status).toContainText(/Showing \d+–\d+ of \d+ skills/);
+    await expect(status).toContainText(/Showing \d+ to \d+ of \d+ skills/);
     await expect(status).toContainText(/Page 1 of \d+/);
 });
 
