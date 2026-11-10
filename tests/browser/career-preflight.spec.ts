@@ -226,6 +226,23 @@ test('reviews the five entered steps as one checklist row each', async ({ page }
     ).toContainText('N/A');
 });
 
+test('counts a saved-but-incomplete deck as attention, not as recorded (UX-03)', async ({ page }) => {
+    // The heading and the table had two owners. The heading counted `rows.filter(r => !r.entered)` on the
+    // client, and `entered` for the deck is `deck !== null`: a six-slot deck saved with one card equipped
+    // is `entered`, so the page printed "All 5 entered steps are recorded" above a row reading
+    // `Deck Warning · 1 of six positions carry a card`. This walk lands exactly that state — one card in
+    // slot 1 — and asserts the two agree.
+    await walkWizard(page, 'ura_finale');
+    await openPreflight(page);
+
+    const deckRow = page.locator('#preflight-step-deck');
+    await expect(deckRow).toContainText('Warning');
+
+    const status = page.getByRole('status').filter({ hasText: /steps? needs? attention/ });
+    await expect(status).toHaveText('1 step needs attention');
+    await expect(page.getByRole('status').filter({ hasText: 'entered steps are recorded' })).toHaveCount(0);
+});
+
 test('draws the eight tiles and the single caution, and no Career mode switch (Phase E2)', async ({ page }) => {
     await walkWizard(page, 'ura_finale');
     await openPreflight(page);

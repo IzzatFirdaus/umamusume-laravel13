@@ -354,21 +354,30 @@ const rows = computed<ChecklistRow[]>(() => [
     },
 ]);
 
-/** The steps the draft has nothing for, in the checklist's own order. */
-const missing = computed<ChecklistRow[]>(() => rows.value.filter((row) => !row.entered));
-
 /**
  * The heading's count. `role="status"` on it (in the template) is the announcement: the number is the
  * page's answer to "can I start", and it changes only when the draft does.
+ *
+ * The count comes from the server's warning list, which is the same list the `Checks` table renders, so
+ * the two cannot disagree. The removed version counted `rows.filter(row => !row.entered)`, and `entered`
+ * is `deck !== null` — a six-slot deck saved with nothing equipped is `entered`, so it printed "All 5
+ * entered steps are recorded" over a table reading `Deck Warning · 0 of six positions carry a card`. A
+ * `Warning` is not an `entered` flag and a client boolean cannot express it.
  */
-const attention = computed((): string => {
-    const count = missing.value.length;
+const attention = computed((): { sentence: string; tone: 'clear' | 'attention' } => {
+    const warnings = props.contract.warnings;
 
-    if (count === 0) {
-        return `All ${rows.value.length} entered steps are recorded.`;
+    if (warnings.length === 0) {
+        return { sentence: `All ${rows.value.length} entered steps are recorded.`, tone: 'clear' };
     }
 
-    return count === 1 ? '1 step needs attention' : `${count} steps need attention`;
+    // Only the sections count toward the heading's number; the filled sections' own gaps ("the deck is
+    // not full") are already visible on their row and would double the count if listed by name here.
+    const sections = warnings.filter((warning) => warning.key.startsWith('missing_section.'));
+    const count = sections.length > 0 ? sections.length : warnings.length;
+    const noun = count === 1 ? 'step needs' : 'steps need';
+
+    return { sentence: `${count} ${noun} attention`, tone: 'attention' };
 });
 
 /** What `StartCareerRequest` refuses without, and nothing else: a scenario and a trainee. */
@@ -635,7 +644,7 @@ const CAREER_TURNS = 72;
                      screen's own deep links use. -->
                 <section class="card" aria-labelledby="checks-heading">
                     <h2 id="checks-heading">Checks</h2>
-                    <p role="status" class="mt-1 text-sm text-ink">{{ attention }}</p>
+                    <p role="status" class="mt-1 text-sm text-ink">{{ attention.sentence }}</p>
 
                     <table class="mt-2.5 w-full text-left text-sm">
                         <caption class="sr-only">The five setup steps and whether each is recorded</caption>
