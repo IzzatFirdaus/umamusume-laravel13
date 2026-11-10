@@ -343,7 +343,8 @@ final class TeamPanelBuilder
                 // The heading is the row's own word, not a severity this tool cannot support: the row
                 // renders `Not reached`, `Due now` or `Missed` from the same `$state`, and the alert
                 // vocabulary is `CareerGoalsPanel`'s own map, so the two cannot drift. `Critical` for
-                // this group was retired by round-7 `F-02` (plan `2026-11-09-scenario-detail-upgrade`
+                // this group was retired by round-7 `F-02` (plan `2026-11-09-scenario-detail-upgrade`,
+                // now section `## 2026-11-09-scenario-detail-upgrade.md` of `docs/research-scratch/PROCESS-PLANS.md`;
                 // §2.2): the only states reachable here hold no completed race, and a Level 1 claim
                 // needs one. The mandatory-races group keeps its `Critical` heading, whose copy
                 // already says "not recorded" and whose obligation is the calendar's own.

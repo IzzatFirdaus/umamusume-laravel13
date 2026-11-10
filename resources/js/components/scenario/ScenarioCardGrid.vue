@@ -6,7 +6,8 @@
  * `UnityCupPanel` drew ten cards as one contiguous bento, `CareerGoalsPanel` drew two as a flex column,
  * and `ScenarioPanel` drew the reference strip. The owner's ruling W.2 = run-state primary requires an
  * order that interleaves cards from all three, and no arrangement of three contiguous blocks can
- * produce it (`docs/proposals/2026-11-10-scenario-detail-remodel.md` §A.7 recorded exactly this as an
+ * produce it (section `## 2026-11-10-scenario-detail-remodel.md` of
+ * `docs/research-scratch/PROCESS-PLANS.md` §A.7 recorded exactly this as an
  * open consequence). The composer is the answer: the page owns the order, each card draws itself.
  *
  * **The order and the spans are the HFW's, transcribed rather than derived.** Measured from

@@ -505,7 +505,8 @@ external fonts (offline constraint + C-8 dependency gate).
   *Dated exception 2026-11-10 (Scenario detail only).* The **Career Scenario detail** page
   (`SCR-CAR-029`, `/training-runs/{run}/scenario`) heads its cards with the plain `h2` the
   other twenty-one career pages use, and prints no `CapsuleHeader` anywhere. Owner ruling
-  **W.1 = C** (`docs/proposals/2026-11-10-scenario-detail-remodel.md`, "Addendum — 2026-11-10",
+  **W.1 = C** (section `## 2026-11-10-scenario-detail-remodel.md` of
+  `docs/research-scratch/PROCESS-PLANS.md`, "Addendum — 2026-11-10",
   §A.4) applied page-wide, on the target drawing
   `docs/design-research/scenario-detail-hfw-2026-11-09/scenario-detail-hfw.html`, which renders
   fourteen `h2` and zero capsule elements. The reason is measured rather than aesthetic: the
@@ -1256,7 +1257,7 @@ than re-reads.
   `d55927cd`). The "89" above is superseded, as are "81", "60" and "59" before it.
 
 *Dated update 2026-11-10 (Scenario detail W.1=C implementation, `S-RS-VISUAL-1`).*
-- The **Career Scenario Detail** page (`SCR-CAR-029`, `/training-runs/{run}/scenario`) now heads every card with the plain `<h2>` the app's other career pages use and prints no `CapsuleHeader` anywhere. The exception is the reference strip's scenario label, which sits outside the grid. The implementation uses the existing `.card > h2` style (`app.css:1022`), keeps the 16px base tier, and applies to the Unity Cup cards extracted for this pass and to the Career Goals groups. Owner ruling **W.1 = C** (`docs/proposals/2026-11-10-scenario-detail-remodel.md`, Addendum, §A.4) and the HFW drawing at `docs/design-research/scenario-detail-hfw-2026-11-09/scenario-detail-hfw.html` are the sources. `CapsuleHeader.vue` and the argyle lattice utility (`lattice-bleed`) are unchanged and remain available on other surfaces.
+- The **Career Scenario Detail** page (`SCR-CAR-029`, `/training-runs/{run}/scenario`) now heads every card with the plain `<h2>` the app's other career pages use and prints no `CapsuleHeader` anywhere. The exception is the reference strip's scenario label, which sits outside the grid. The implementation uses the existing `.card > h2` style (`app.css:1022`), keeps the 16px base tier, and applies to the Unity Cup cards extracted for this pass and to the Career Goals groups. Owner ruling **W.1 = C** (section `## 2026-11-10-scenario-detail-remodel.md` of `docs/research-scratch/PROCESS-PLANS.md`, Addendum, §A.4) and the HFW drawing at `docs/design-research/scenario-detail-hfw-2026-11-09/scenario-detail-hfw.html` are the sources. `CapsuleHeader.vue` and the argyle lattice utility (`lattice-bleed`) are unchanged and remain available on other surfaces.
 
 ## 11. Open questions for the owner
 

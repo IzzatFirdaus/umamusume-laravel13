@@ -266,3 +266,22 @@ the master's 6,571 NUL bytes carried through unchanged). Two notes belong here b
    byte-safe binary splices preserving its 399 NUL bytes. Outside those five sites, every remaining
    reference to the thirteen deleted paths is either the round's own dated record or an embedded
    body's quoted `git status` snapshot — the tolerated historical class of Rounds 18/22/23.
+
+## Round 25 coordination notes (2026-11-10)
+
+Absorbed files and their destinations are above, in the Round 25 row of the routing table. Notes for
+the next pass:
+
+ 1. The scenario-detail design-language survey (`docs/research/scenario-detail-design-language-survey-2026-11-09.md`)
+    and the RS-UC audit set (`docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md`, `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09/`,
+    `docs/research/RS-UC-SCENARIO-DETAIL-2026-11-09/`) are untracked peer in-flight work and stay at their
+    paths by design; their citations inside the folded upgrade plan are quoted verbatim as history.
+ 2. Twelve live citations were repointed before the delete (the twelve named in the INDEX Round 25
+    section). The ledger `from` rows inside `SLICE-RECORDS.md` that name the six absorbed files are
+    dated records and stay verbatim as history.
+ 3. `docs/research/ui-ux-application-context-brief.md` carries a peer session's uncommitted additions
+    that cite the upgrade plan; the file is peer-owned and was not touched. When that session lands,
+    its citations should be repointed at the `PROCESS-PLANS.md` section anchor.
+ 4. The sparks proposal body cites `docs/audits/rice-shower-cup-round7-reconciliation.md:956` as the
+    source wrote it; the disk form of that name is `rice-shower-unity-cup-round7-reconciliation.md`.
+    The citation was quoted verbatim, not repaired.

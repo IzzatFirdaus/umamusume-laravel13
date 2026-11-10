@@ -207,7 +207,9 @@ test('keeps the no-panels sentence off a scenario that composes panels', async (
 
     const section = page.getByRole('region', { name: 'Scenario' });
 
-    // Round-7 F-01 (plan `2026-11-09-scenario-detail-upgrade` §2.1). `5e7da543` widened the strip's
+    // Round-7 F-01 (plan `2026-11-09-scenario-detail-upgrade` §2.1, now section
+    // `## 2026-11-09-scenario-detail-upgrade.md` of `docs/research-scratch/PROCESS-PLANS.md`).
+    // `5e7da543` widened the strip's
     // gate to `careerGoalsOn ||` so the published caps would stop hiding behind the goals ladder, and
     // the "composes no panels of its own" sentence rode along inside the widened branch. Unity Cup
     // draws Team races, the Team Rank ladder and Career goals, so the sentence contradicted the page

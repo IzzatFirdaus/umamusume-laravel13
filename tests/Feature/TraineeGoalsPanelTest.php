@@ -334,7 +334,9 @@ it('composes the trainee own ladder for an Our Grand Concert run', function (): 
 });
 
 it('speaks the row state in the alert, so no objective says "not met" without an attempt', function (): void {
-    // Round-7 F-02 (plan `2026-11-09-scenario-detail-upgrade` §2.2). A past objective this run never
+    // Round-7 F-02 (plan `2026-11-09-scenario-detail-upgrade` §2.2, now section
+    // `## 2026-11-09-scenario-detail-upgrade.md` of `docs/research-scratch/PROCESS-PLANS.md`).
+    // A past objective this run never
     // played reads `not_reached` on its row; the alert beside it said "is due and not met", a verdict
     // on an attempt the run never made (`TOG-3`: status may be stale or absent, but never wrong). The
     // two codings of one state now travel together: the level key is the row's own word and the copy

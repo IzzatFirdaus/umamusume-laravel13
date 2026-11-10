@@ -16,7 +16,7 @@ no component, token, test or copy string changed to produce it.
 **On 2026-11-10 four owner rulings superseded the "one visual decision" framing this file used to
 carry.** The page is no longer a proposal with a single change in it; it is the consequence of four
 rulings, and the annotation's first item says so. The rulings live in
-`docs/proposals/2026-11-10-scenario-detail-remodel.md` ("Addendum — 2026-11-10"), which also records
+section `## 2026-11-10-scenario-detail-remodel.md` of `docs/research-scratch/PROCESS-PLANS.md` ("Addendum — 2026-11-10"), which also records
 the classification basis the order is derived from.
 
 ## What is real in it

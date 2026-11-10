@@ -307,6 +307,7 @@ moved, 13 buckets, the two executor defects fixed first) is the dated status not
 | The G1/G2 capability-audit, reconciliation and FD-4 slice records (slice verification class)                                                                                                                                | `SLICE-RECORDS.md`, sections `## G1-DECISION-CONTRACT-2026-10-10.md`, `## G2-RECONCILIATION-2026-10-10.md`, `## G2-FD4-PLAN-2026-10-10.md`, `## G2-FD4-RULINGS-2026-10-10.md`, `## G2-FD4-SLICEPLAN-2026-10-10.md` (Round 14) |
 | The 2026-10-12 Gemini Deep Research reconciliation: the claim ledger (A–F), the 12 peer-check resolutions, and the corrected Max-Stat cap layer | `AUDIT-AND-VERIFICATION.md`, section `## Gemini Deep Research reconciliation, 2026-10-12` |
 | The 2026-11-10 scenario-detail arc: the span-hole fix (`S-RS-SPAN-1`), the KI-154 sweep and fix (`S-RS-KI154-1`), the Our Grand Concert `goal_source` resolution (`S-A-P01-OG-1`), the remodel plan, Move-3 and Phase 1/2 dispatches (`S-RS-REMODEL-B1/B2/C1/C2`), the cleanup and ruling-prep dispatches, the HFW visual overhaul (`S-RS-VISUAL-1`), its arc close-out, and the four-workstream summary; all thirteen Round 24 sections | `SLICE-RECORDS.md`, sections `## S-RS-SPAN-1-report-2026-11-10.md` through `## S-RS-CLEANUP-2-report-2026-11-10.md` (Round 24) |
+| The 2026-11-02 race-catalog/JP-only verification close-out, the two 2026-11-08 implemented proposals (Sparks skill picker; trainee preset auto-fill) whose `S-A-P02`/`S-A-P01` ledger rows sit above, the 2026-11-09 scenario-detail upgrade plan (round-7 `F-01`/`F-02` fixes), the 2026-11-10 `S-RS-REMODEL-B1` remodel plan with its W-ruling Addendum, and the 2026-11-10 rulings-owed memos the owner settled the same day | `SLICE-RECORDS.md`, sections `## 2026-11-02-race-enrichment-jp-only-completion-report.md`, `## 2026-11-08-sparks-skill-picker.md`, `## 2026-11-08-trainee-preset-autofill.md`; `PROCESS-PLANS.md`, sections `## 2026-11-09-scenario-detail-upgrade.md`, `## 2026-11-10-scenario-detail-remodel.md`; and `PLANS-AND-BRIEFS.md`, section `## 2026-11-10-ruling-memos-scenario-detail.md` (Round 25) |
 
 ### Round 13 (2026-10-07, owner-named) — two scratch files into the files that owned their subject
 
@@ -761,6 +762,61 @@ their own paths.
 **Disposition of the originals.** Deleted from the working tree in this round, after the verification
 above. Twelve are tracked, so each is recoverable at the commit the delete lands on; one,
 `S-RS-SPAN-1-report-2026-11-10.md`, was untracked, so its section is the only copy.
+
+### Round 25 (2026-11-10, owner-ordered) — one report, two implemented proposals, two plans and one rulings-owed brief into three masters
+
+The owner named six dated files — one `docs/reports/` completion report, four `docs/proposals/` documents
+and one untracked plan — ordered them consolidated into this directory and the originals deleted. Routing
+followed the class rules the earlier rounds set: the dated close-out report and the two implemented
+proposals (whose `S-A-P02`/`S-A-P01` ledger sections and close-outs already sit in the slice-records
+master) route to `SLICE-RECORDS.md`; the scenario-detail upgrade plan and the `S-RS-REMODEL-B1` remodel
+plan are plans of record and route to `PROCESS-PLANS.md`; the rulings-owed memos route to
+`PLANS-AND-BRIEFS.md`, the rulings class Round 23's `2026-11-03-owner-decisions.md` section set. None had
+been embedded by an earlier round.
+
+| Absorbed file | Lines | New home | Recoverable after delete? |
+| --- | --- | --- | --- |
+| `2026-11-02-race-enrichment-jp-only-completion-report.md` | 38 | `SLICE-RECORDS.md`, section `## 2026-11-02-race-enrichment-jp-only-completion-report.md` | Yes — tracked and clean at HEAD |
+| `2026-11-08-sparks-skill-picker.md` | 365 | `SLICE-RECORDS.md`, section `## 2026-11-08-sparks-skill-picker.md` | Yes — tracked and clean at HEAD |
+| `2026-11-08-trainee-preset-autofill.md` | 471 | `SLICE-RECORDS.md`, section `## 2026-11-08-trainee-preset-autofill.md` | Yes — tracked and clean at HEAD |
+| `2026-11-09-scenario-detail-upgrade.md` | 211 | `PROCESS-PLANS.md`, section `## 2026-11-09-scenario-detail-upgrade.md` | **No** — untracked at the fold; the section is the only copy (Round 13 E2 precedent) |
+| `2026-11-10-ruling-memos-scenario-detail.md` | 216 | `PLANS-AND-BRIEFS.md`, section `## 2026-11-10-ruling-memos-scenario-detail.md` | Yes — tracked and clean at HEAD |
+| `2026-11-10-scenario-detail-remodel.md` | 312 | `PROCESS-PLANS.md`, section `## 2026-11-10-scenario-detail-remodel.md` | Yes — tracked and clean at HEAD |
+
+Verification, per the discipline's line-by-line rule, ran twice: once against the spliced worktree
+master and once from the landed blob after commit. The first pass proved each rebuilt section
+byte-identically present in its master and the worktree master equal to HEAD content plus exactly
+the appended regions (911/546/227 insertions, zero deletions across the three). The untracked
+upgrade plan's only-copy containment was proven before its delete (141 non-blank body lines, 0
+missing) and is re-proven from the landed blob below.
+
+**Departures from verbatim, all mechanical and recorded per the round's banners:** the one-level
+heading demotion with the `#` title re-levelled to `###` (Round 22 banner precedent); a fold banner
+at each section head quoting the source path and its disposition; CRLF normalised to LF inside the
+appended region for the SLICE-RECORDS and PROCESS-PLANS sections (the race-enrichment report's single
+CRLF terminator), while the `PLANS-AND-BRIEFS.md` appended region keeps that master's CRLF, matching
+its Round 23 fold sections; and the two sources' own citations to their soon-deleted siblings
+repointed at the sibling's new master section, the Round 18 approved departure, applied to two
+references across the memos and remodel.
+
+**References.** Twelve live citations outside the set were repointed before the delete, each at the
+master and its section anchor: `DESIGN.md` twice (the W.1 = C dated exception and the
+`S-RS-VISUAL-1` dated update), `SCREEN_SPEC.md` twice (the round-7 `F-02`/`F-01` and `F-02` dated
+corrections), `app/Services/Career/TeamPanelBuilder.php` (the round-7 `F-02` comment),
+`tests/browser/scenario-panel.spec.ts` (the round-7 `F-01` comment),
+`tests/Feature/TraineeGoalsPanelTest.php` (the round-7 `F-02` comment),
+`resources/js/components/scenario/ScenarioCardGrid.vue` (the W.2 order note), and
+`docs/design-research/scenario-detail-hfw-2026-11-09/README.md` and its companion
+`scenario-detail-hfw.html` twice more (the pre-roll keybox and the superseded annotation). The
+ledger `from` rows inside `SLICE-RECORDS.md` that name these files are dated records and stay
+verbatim as history. A peer session's uncommitted draft added two mentions of the upgrade plan to
+`docs/research/ui-ux-application-context-brief.md`; that file is peer-owned and untouched by this
+round, and its mentions must be settled by that session, not this fold.
+
+**Disposition of the originals.** Deleted from the working tree in this round, after the verification
+above. Five are tracked, so each is recoverable at the commit the delete lands on; one,
+`2026-11-09-scenario-detail-upgrade.md`, was untracked, so its section is the only copy.
+
 ### Deliberate exceptions, outside the masters
 
 Three entries stay outside `docs/research-scratch/` on purpose. They are listed here so a future pass

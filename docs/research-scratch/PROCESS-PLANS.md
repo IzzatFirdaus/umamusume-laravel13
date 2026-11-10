@@ -24263,3 +24263,549 @@ a named follow-up commit: the four PNGs plus the spec line. The AGENTS.md §9 se
 dirties the tree is not a gate") is owner-authored and handed over separately.
 
 
+## 2026-11-09-scenario-detail-upgrade.md
+
+> **Folded into this master in consolidation Round 25 (owner-ordered, 2026-11-10) from**
+> `docs/proposals/2026-11-09-scenario-detail-upgrade.md`. It is the scenario-detail page upgrade
+> plan (the round-7 `F-01`/`F-02` fixes), the plan of record the 2026-11-10 remodel sections that
+> follow it priced their moves against. The source was untracked at the fold, so this section is its
+> only copy (the Round 13 E2 precedent). Its dated `git status` snapshots quote paths as they sat on
+> the day and stay verbatim as history. It cites no sibling of this round
+> `docs/proposals/` set, so no intra-set repoint was needed inside it. The source carried no UTF-8
+> byte-order mark. The source file was deleted from its original location after this section was
+> verified present and byte-identical; it is not recoverable from any commit.
+
+
+**Status:** plan, not dispatch. Awaiting owner ruling on §7's decisions.
+**Date opened:** 2026-11-09
+**Audit input:** `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md`
+**Audit corrections applied:** six (`§1.3` of the brief), each with a disposition in §0 below.
+**Reference corpus:** `docs/UMAMUSUME_REFERENCE.md` §1.3.4, §1.6, §1.8; `docs/scenarios/02-unity-cup.md`
+**Framework rules cited:** `SHR-1` (shneiderman-golden-rules-2026-10-21.md:135), `TOG-3` (tognazzini-first-principles-2026-10-21.md:253), `NRM-2`/`NRM-3` (norman-interaction-principles-2026-10-21.md:144-145), `GP-2`/`GP-3` (gerhardt-powals-principles-2026-10-21.md:118-119), `IA-5` (information-architecture-principles-2026-10-21.md:146)
+**Owner decisions required:** 4 (§7)
+
+---
+
+### §0 Pre-flight reads
+
+#### §0.1 ADR-0025 read (settles F-03)
+
+`docs/adr/0025-per-run-ceilings-entered-not-derived.md`, Decision, first bullet:
+
+> **A ceiling the run recorded outranks the ceiling the scenario publishes.** `forRun()` answers the effective bound — an entered figure where one exists, `ADR-0015`'s arithmetic otherwise — and `scenarioCaps()` answers the published arithmetic alone. … Every validator, band and advisor keeps calling `forRun()`, so a form bound and a drawn ceiling cannot disagree; **the single surface whose own source line names `config/scenarios.php` (the cockpit's *Published stat caps* table) calls `scenarioCaps()`, because a Trainer's reading is not in that file.**
+
+And Consequences §2:
+
+> When a cap is entered, the number the Trainer read outranks the arithmetic. Two figures stay visible beside the field that holds it: the form's bound follows the entered number, and the published scenario figure is printed next to it, so an entered ceiling reads as a reading rather than as something the matrix states.
+
+**Disposition: F-03 is `Ruled out`.** ADR-0025 rules the published/in-force separation *by design*: the published table's own source line names `config/scenarios.php`, and the in-force figure is a Trainer-entered reading that belongs to the Cockpit's identity form (the two entry surfaces the ADR names). The scenario page's "Published stat caps" table is the surface the ADR itself names as the published one. What F-03 observed is the ADR's intended separation, not a gap. The one legitimate residue — "a reader of this page alone cannot see the in-force number" — is covered by the ADR's Consequences §2: the entered figure is printed beside its entry field on the surfaces where it is entered. No change recommended. **C-4 resolved: the ADR was read this time; the audit's citation was directionally right but unverified.**
+
+Note: `EnteredStatCapsTest` and `StatCeilingsTest` pin the ADR's shape; any future "show both figures" work is an ADR amendment, not a slice in this plan.
+
+#### §0.2 The strip's git history (settles F-01 + F-04)
+
+```
+git log --oneline --all -S'composes no panels of its own' -- resources/js/components/scenario/ScenarioPanel.vue
+  6a74f857 feat(scenarios): land the panel shell and its four panels (E1-E4, E6)   ← introduction
+  (+ three agent-host baseline checkpoints)
+git log --oneline --all -S'careerGoalsOn' -- resources/js/components/scenario/ScenarioPanel.vue
+  5e7da543 fix(scenario): career-goals caps render; spec asserts the Verified span   ← the guard change
+```
+
+**6a74f857 (2026-10-08, slice E6):** the strip was introduced as `v-else` on the panels `<ul>` — i.e. **`onPanels.length === 0`**, keyed to composition, not to a config flag. Commit message: *"E6 is the branch the shell draws where every flag is off: the Grand Concert baseline strip plus the published caps."* In-tree comment (then and now): *"The baseline strip: the render for a scenario that composes no panel at all (plan §9 E6, D-241, gate G-41)."* `panel_absence` was designed as the **content** of the strip for the one scenario that declares a reason (Our Grand Concert), not as the strip's **gate**.
+
+**5e7da543 (2026-10-21):** the gate moved from `onPanels.length === 0` to `careerGoalsOn || onPanels.length === 0`. The in-tree comment explains why: the career-goals panel is a goal list, not a replacement for the published caps, so the strip's **caps table** was being hidden behind the goals panel — the defect `grand-concert-panel.spec.ts:49` pinned. The fix widened the strip's gate to make the caps table reachable for URA/Unity Cup/OGC (all three now have `career_goals => true`).
+
+**Consequence (the regression the audit caught):** widening the gate made the strip's *other* children render on scenarios that have panels — including the `emptyText` sentence "This scenario composes no panels of its own", which is false for all three of those scenarios, and the `Unity Cup · Documented` identity card, which duplicates the bento's Team Rank/Spirit widgets one block above it. The copy was written for the zero-panel branch and was never re-worded when the branch stopped meaning "zero panels."
+
+**Reading adopted: the second of the brief's three.** The strip is a **composition-absence card whose caps table was deliberately rescued for career-goals scenarios by a guard that over-reached.** It is not an independent identity card (nothing in `SCREEN_SPEC.md` names it for URA/Unity Cup; SCR-CAR-024 names it only as OGC's whole surface), and it is not dead UI (the caps table is used by three scenarios and pinned by `grand-concert-panel.spec.ts`). F-01's fix is therefore a **guard split, not a gate revert**: the caps table and the identity/absence furniture need different conditions. F-04's "dual representation" dissolves for the identity card once the guard is corrected; the caps table stays for career-goals scenarios by 5e7da543's own rationale (the goals ladder does not replace the published caps).
+
+#### §0.3 `SCREEN_SPEC.md` / `DESIGN.md` grep (settles C-3)
+
+`SCREEN_SPEC.md` names the strip exactly once, as **OGC's surface**:
+
+- `:88` — `SCR-CAR-024 | Our Grand Concert baseline strip (SCR-017) … mounted by SCR-CAR-019 inside the Cockpit's scenario region, drawn where every panel flag is off; no route of its own`.
+- `:2781` — state table, "Empty — no panel is on": *"a scenario that composes no panel of its own (Our Grand Concert) is told that, and the baseline strip still renders."*
+- `:3213-3300` — SCR-CAR-024's own section; Gap 2 records **"The caps render twice on one screen. … That is deliberate (G-41's own wording is 'baseline strip plus known caps'), and dropping either is a later decision rather than an oversight."** Gap 3: **"The strip is the extension point, and it is one config key."**
+- `:2805` — the 2026-10-07 badge ruling: `partially_documented` drives the badge.
+
+`DESIGN.md` does not name the strip (grep returns no hit for `baseline`/`composes no panels` in a strip context).
+
+**C-3 disposition: the strip's purpose IS documented — but only as OGC's own screen (SCR-CAR-024).** What is *not* documented is the strip's rendering on a scenario that has panels, because before 5e7da543 that state did not exist. The plan treats the post-5e7da543 condition as the undocumented part: the spec's state table (`:2781`) still describes the gate as "no panel is on," which the code no longer implements (`careerGoalsOn ||`). That is a **spec-vs-code divergence**, recorded in §1 as part of F-01's shape; `SCREEN_SPEC.md` §7 gains a conflict row in the dispatch that lands the fix, per the repo's record-then-resolve rule.
+
+#### §0.4 The fuller run (settles the audit's §7 gap)
+
+Option (a) failed: `training_runs` held one run (id 3, sparse). Option (b) succeeded **without any new code**: the committed seeder `RosyDreamsRiceShowerSeeder` (built by Phase C's cockpit work, ledger `:5950`) imports exactly the canonical walk — Rice Shower · Unity Cup · Senior Early October turn 67, card-backed (`character_card_id=33`), the three cleared goals as `race_entries` (Nikkei Sho, Tenno Sho (Spring) 1st, Takarazuka Kinen), team identity (Blue Bloom / Dreaming Big / 8th / 4 wins), 55 trainings, 6+5 bursts, entered caps 1325/1322/1368/1308.
+
+- Run id: **6** (new; the seeder is idempotent by `import_source`, additive by design).
+- The seeder writes no team-rank turn event (the corpus states Rank S in notes prose only), so the audit fixture attached **one** `turn_events` row (`deltas = {rank: 'S'}` at turn 67) to exercise `latestTeamRank()` → facility level 5. Total state added to the dev database: one seeded run (a committed seeder's own product) + one turn event.
+- Restorability: the run is removable by deleting run id 6 and its events; the seeder re-creates it deterministically. The turn event is the only non-seeder row and is named `League board read (audit fixture)` in `source_name`.
+
+#### §0.5 Viewport/theme captures (settles C-6)
+
+Server: existing `127.0.0.1:8000` (owner instruction; no new port). Captures land in `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09/`:
+
+| File | State | Viewport | Theme | Result |
+|---|---|---|---|---|
+| `shot-127.0.0.1-8000-scenario-764x4379.png` | empty (run 3) | 764 | light | working — audit's baseline capture |
+| `fuller-run6-764.png` | populated (run 6) | 764 | light | working — all team panels populate |
+| `fuller-run6-dark-764.png` | populated (run 6) | 764 | dark | working — dark ramp renders, no contrast failure observed at capture resolution |
+
+Theme switching verified through the app's own mechanism (`Preference::resolvedTheme()` → `data-theme` attr; confirmed `data-theme="dark"` in DOM during capture, then restored to `light`). **Not captured: 320/390/768/1280 reflows and the 24-combination matrix.** The harness's window is host-fixed at 764 px and `window.resizeTo` is refused; Playwright's viewport control lives inside the repo's own browser suite, which this plan does not run (no dispatch). **C-6 correction accepted: the audit's single-viewport capture was a scope reduction, not an environment limit — and so is this plan's. The reflow question stays `UNMEASURED` and rides each slice's acceptance criteria (the repo's own specs already sweep 320px + 44px per screen).** No layout break was found at the two widths × two themes actually captured; nothing in §1 grows a fifth finding from the captures.
+
+---
+
+### §1 The findings, as corrected
+
+| ID | Rule(s) | Panel | Corrected observation | Corrected severity | Corrected register_ref |
+|---|---|---|---|---|---|
+| **F-01** | `SHR-1`, `TOG-3` | 4.11 baseline strip | Post-5e7da543, the strip renders on career-goals scenarios; its `emptyText` still asserts "composes no panels of its own," false on every scenario that now reaches it. The guard split §0.2 derives: caps table keeps `careerGoalsOn \|\| onPanels.length===0`; identity card + `emptyText` + panel_absence line revert to `onPanels.length===0`. | **2 (copy/state)** — the sentence is a wrong status claim, but it is a fallback branch's copy, not a computed status figure | — (new) |
+| **F-02** | `TOG-3`, `NRM-2` | 4.8 Critical alerts | **C-1 accepted: known-open debt, not a new surface.** Ledger `§s3` §10 (SLICE-RECORDS.md:14350-14353) recorded the alert path as unchanged when the row states moved. **C-2 adjudicated below (§2.2): severity 3.** The `Critical:` heading + "due and not met" assert both a severity and a failure the tool cannot know when no record exists. | **3 (wrong status assertion)** | **R7-22/R7-25 (alert path, open since §s3 §10)** |
+| **F-03** | `GP-2` | 4.12 Published stat caps | **`Ruled out` by ADR-0025 (§0.1).** The published/in-force separation is the ADR's design; the surface is the one the ADR itself names. | — (ruled out) | R7-66 adjacent; no finding |
+| **F-04** | `IA-5`, `UX-2` | 4.11 baseline strip | **Dissolves under the §0.2 reading.** The identity card's presence on Unity Cup is F-01's guard over-reach, not an independent redundancy. After the split, a panel-composing scenario sees no identity card; the caps table remains by 5e7da543's rationale. One residue moves to F-01's slice: the `Unity Cup` widget block (Team Rank / Spirit Bursts N/A rows) also renders from the strip and needs the same re-gate. | — (merged into F-01) | — |
+
+**Spec-vs-code divergence (new finding, folded into F-01's slice):** `SCREEN_SPEC.md:2781` describes the strip's gate as "no panel is on"; the code gates on `careerGoalsOn ||`. The fix slice must update the spec row (and SCR-CAR-024's gaps if the owner rules the strip retired on panel-composing scenarios), per `SCREEN_SPEC.md` §8's authority rule.
+
+**C-5 disposition (drift-narrowing):** the audit's §4 verdicts of "absence honest" for run 3 are re-anchored by §6's fuller-run verification — the same panels were re-measured populated. The plan's §1 carries the corrected severity only where the fuller run changed it (none did); the audit's §4 table is not edited (closed record), and this plan's §6 is the correction of record.
+
+**C-6 disposition:** accepted in §0.5. The audit's §7 framing is corrected here; the reflow question rides slice acceptance criteria, not this plan's captures.
+
+---
+
+### §2 Grounding per finding
+
+#### §2.1 F-01 — the strip's guard and copy
+
+- **Reference corpus:** not a corpus claim — this is a self-consistency claim. The page's own lede (`ScenarioDetail.vue:51-52`) promises "Every panel reads what the run recorded and names what it has not"; the strip's sentence claims the opposite of what the page shows. The closest corpus anchor is the client's goal-panel shape (`UMAMUSUME_REFERENCE.md:883`: one active target + status enum + footer ratio) — the strip sits outside that shape and belongs to the app's own composition vocabulary (`config/scenarios.php` header: "What each `panels` key is called on screen. A panel that is off is simply not printed").
+- **Framework rule:** `SHR-1` (a consistency exception must be named and few — this one is unnamed) and `TOG-3` (status never wrong — the sentence asserts "no panels" as a state of the scenario).
+- **Design precedent:** `SCREEN_SPEC.md:88` (SCR-CAR-024: "drawn where every panel flag is off") — the documented gate; and `:2781`'s state table row.
+- **Recommendation (one sentence):** split the strip's gate — render the caps table under `careerGoalsOn || onPanels.length === 0`, and the identity card + `emptyText` + `panel_absence` line + widgets under `onPanels.length === 0` only — so the "composes no panels" sentence can only ever render where it is true.
+- **Rejected alternative:** revert 5e7da543's gate entirely (`onPanels.length === 0` for the whole strip). Rejected because it re-creates the pinned defect `grand-concert-panel.spec.ts:49` — the caps table would vanish behind the goals ladder on all three career-goals scenarios — and the caps table's rescue was deliberate.
+
+#### §2.2 F-02 — the alert vocabulary and the `Critical` heading (C-2 adjudication)
+
+- **Reference corpus:** `UMAMUSUME_REFERENCE.md:388` — a missed mandatory placing is retried with an Alarm Clock; `:883` — the client marks goals `CLEAR!`/current/later, never "critical"; `02-unity-cup.md:155` — the trainee's objectives run on their normal schedule inside Unity Cup (so a past placement goal is a normal URA-shape obligation, not a scenario emergency). The fuller run proves the tool *can* distinguish the states: run 6 renders Nikkei Sho and Takarazuka Kinen as `Missed` (record exists, requirement unmet — honest) and Tenno Sho as `Recorded` (§0.4), while run 3 renders the same three as `Not reached` + `Critical` alerts. The alert fires identically for both shapes, so the heading does not carry the state distinction the rows already carry.
+- **Framework rule:** `TOG-3` (status may be stale or absent, but never wrong) — "Critical: … is due and not met" is wrong when the tool holds no record; `NRM-2` (an unavailable surface says why) — the honest why is "no record of this race exists in the run's entries."
+- **Design precedent:** `AlertRow.vue:5-14` — the `critical` tone is design-2.0 §4's Level 1 and *"the level's own word travels in the text"*; and `CareerGoalsPanel.vue:52-62` — the row words already distinguish `Missed` from `Not reached`.
+- **C-2 adjudication: severity 3.** `Critical` is a legitimate severity *only* for the `missed` shape (a record exists and the requirement failed — the obligation is real and the failure is known). For the `not_reached` shape it asserts a failure the tool does not know. Since the alert path cannot currently tell the two apart, and since it fires on `not_reached` runs (run 3 proves it), the heading is a wrong status assertion as shipped. F-02 is **severity 3**, two facets:
+  1. **Copy:** "is due and not met" → align with the row vocabulary the builder already computes (`not_reached` → "is past due and unrecorded" / "has no recorded result"; `missed` → may keep "was due and not met" because a record exists and the requirement failed).
+  2. **Heading:** the alert should either (a) inherit the state's own word (`Not recorded: Nikkei Sho…` / `Missed: Takarazuka Kinen…`), or (b) keep `Critical` only for the `missed` shape and demote `not_reached` alerts to the note tone. The plan recommends (a) — one vocabulary, state-led — with (b) as the fallback if the owner wants urgency preserved.
+- **Rejected alternative:** fix only the trailing copy ("due and not met" → "due and not recorded") and keep `Critical`. Rejected: C-2's stronger reading survives — the heading still asserts severity on an unknown state, and the fuller run shows the same alert text for two different row states, which is exactly the two-codings-of-one-state shape `GP-4`/`UI-3` forbid.
+
+#### §2.3 F-03 — ruled out
+
+No grounding section required; §0.1 is the disposition. The audit's `register_ref` for R7-66 remains accurate on its own row: the caps *storage* facet (in-force caps have no writer until entered) is open and owned by the ADR's entry surfaces, not by this page.
+
+#### §2.4 F-04 — merged into F-01
+
+Grounding is F-01's; the identity card's widgets (`Team Rank`, `Spirit Bursts` N/A rows) duplicate the bento's Team Rank gauge and burst regions on Unity Cup. The guard split removes the duplication; no separate decision is needed. `IA-5`'s "empty state shows an example" is satisfied by the strip where it truly belongs (zero-panel scenarios), which the split restores.
+
+---
+
+### §3 Slicing
+
+**Slice 1 — the strip's guard split (closes F-01, absorbs F-04).** Landable now.
+- Files: `resources/js/components/scenario/ScenarioPanel.vue`; `SCREEN_SPEC.md` (:2781 state row + SCR-CAR-024 gaps note); no controller/config change (the payload already carries `panels` and the builder's keys — the guard is purely client-side).
+- Tests: extend `tests/Feature/ScenarioPanelTest.php` (payload carries `panel_absence === null` + `panels.career_goals.on === true` for unity_cup — the condition the split reads); extend `tests/browser/unity-cup-panel.spec.ts` with the rendered assertion below; `grand-concert-panel.spec.ts` must stay green (it pins the caps table on the zero-panel scenario).
+- Acceptance A (rendered): on a Unity Cup run, `"composes no panels of its own"` does **not** exist in the DOM, and the `Unity Cup · Documented` identity card does not render; on a zero-panel scenario (OGC), the sentence renders as before.
+- Acceptance B (payload): `ScenarioSectionBuilder::scenarioSection()` still composes `panels`, `panel_absence`, `caps` with unchanged keys — asserted by the existing `ScenarioPanelTest` shape pin, which must not move.
+- Acceptance C (regression): `grand-concert-panel.spec.ts:49`'s caps case stays green; `unity-cup-panel.spec.ts:393`'s card census adjusts only if the identity card's removal changes the count (it does — update the census with a comment naming this plan).
+- Includes a 320px render check in the browser case (the shell's existing sweep pattern).
+
+**Slice 2 — the alert vocabulary (closes F-02, both facets).** Landable now, independent of Slice 1.
+- Files: `app/Services/Career/TeamPanelBuilder.php` (the two alert builders at :141 and :328); `tests/Feature/TraineeGoalsPanelTest.php` (+ the mandatory-races test file that pins :141's copy).
+- Tests: a Pest case asserting the alert `text` and the row `state` derive from the same state branch — for a run with no record at a past deadline, alert text must not contain "not met"; for a run with a record and a failed requirement, "Missed"-family copy is permitted.
+- Acceptance A (rendered): on run 3's shape (no entries), no alert on the page contains the substring "not met"; the visible word matches the row's state word for the same goal.
+- Acceptance B (payload): `careerGoalSections()['alerts']` carries `level` + text where text's verb family agrees with the objectives rows' `state` for the same slot/goal (assert per goal id).
+- Acceptance C (regression): the cockpit's goal panel (R7-82's fix) still shows `not_reached`/`missed` as today — the row path is untouched by this slice; `TraineeGoalsPanelTest`'s existing cases must pass unchanged.
+
+**Slice 3 — the spec conflict row.** Lands with Slice 1 (same files' doc surface) or immediately after; not independent.
+- Files: `SCREEN_SPEC.md` only. Records the :2781 divergence, the owner ruling taken in §7-D1, and SCR-CAR-024's gap note update.
+- Acceptance: the spec's state table agrees with the shipped gate; `md_fence_check.py` clean.
+
+**Blocked/ruled out:** F-03 (ruled out by ADR-0025, no slice). The reflow matrix (§0.5) is not a slice; it rides Slices 1-2's browser cases.
+
+---
+
+### §4 Cross-finding coherence
+
+- **F-01 + F-04 are one slice** (Slice 1): both are the guard over-reach; splitting them would land a half-fixed strip. Order within the slice: guard first, then copy, then the spec row (Slice 3 same-landing).
+- **F-02 is independent** (Slice 2): different file, different failure mode, no ordering constraint with Slice 1. It may land in either order; if both land in one series, alert copy review should follow the strip copy review so the lore gate runs once for both.
+- **F-03 has no slice.** The ADR citation is the record.
+
+---
+
+### §5 What this plan does not do
+
+- Not a fix, not a dispatch, not a slice. No file under `app/`, `resources/`, `database/`, `tests/`, `config/`, `routes/` changes in this session.
+- No re-audit; the audit report is input, corrected here but not edited.
+- No reopening of the closed register (`ce204885`) or the closed `AUD-20261108-R7-A/B/C` reports; R7-22/R7-25's alert-half status is cited from the ledger, not reclassified.
+- No owner ruling made; §7 recommends, the owner disposes.
+- No `SHR-8` (undefined), no `WCAG 4.1.1` (withdrawn), no 2.5.8-conformance phrasing for the 44px house rule.
+- No scenario name in any component recommendation; the guard reads `panels`/`career_goals` flags only (`AGENTS.md` §7, gate G-33).
+- No peer path touched; `git status --short -- docs/audits/ docs/proposals/` was clean at write time apart from this plan's own file.
+
+---
+
+### §6 Verification this plan ran
+
+#### Fuller-run panels (§0.4's run 6, populated state, rendered at 764 light + dark)
+
+| Panel | Populated correctly? | Renders what the reference says? | Any new finding? |
+|---|---|---|---|
+| 4.2b Team stat grades ×5 | Renders ×5 N/A — correct: no writer exists (`team_stat_grades` null even on the canonical import; `UnityCupPanelTest` pins the five named absences) | Yes — editor-pointing `title`, never a zero | No |
+| 4.3 Burst count bands | Yes — combined 11 renders "inside the 10–12 band", the `(this run)` marker on the correct row, both tallies in the progress line | Yes — band table verbatim from config; caveat and source present | No |
+| 4.4 Spirit Burst | Absence holds — no burst payload was ever recorded on any run; roster empty is the honest state | Yes — six-state vocabulary matches config `spirit_burst_states` | No |
+| 4.6 Team race coverage | Renders 5 rows × "3 fielded", fielded N/A — correct: no column stores who fields a category | Yes — categories verbatim per `02-unity-cup.md:151` incl. Dirt | No |
+
+Additional populated-state observations that confirm the audit's honesty verdicts: Team identity card populates (Blue Bloom / Dreaming Big / 8 / 4); Team Rank gauge fills "S / facility level 5" with the ladder's `S current` marker and the +30 bonus line (Estimated); goal rows derive `Missed` ×2 (records exist, requirements unmet — honest), `Recorded` ×1, `Not reached` ×4, `Upcoming` ×1; **"Goals Achieved 1 of 8"** — the count follows the met-goal arithmetic (Tenno Sho 1st recorded), and the run-3 "0 of 8" reading the audit questioned is confirmed correct for a no-record run: the count counts *recorded achievements*, not the client's CLEAR! states, and the rows say so. **The audit's four "absence honest" verdicts are confirmed on populated data; no fifth finding arises.**
+
+#### Viewport/theme captures (§0.5)
+
+- Captured: populated × 764 × light, populated × 764 × dark, empty × 764 × light (the audit's own baseline). All working; no break.
+- Not captured: 320/390/768/1280 reflows, the error state beyond run 3's card-less 200 (the card-less error state **does** render — run 3 is card-less and returned 200 with the full board, so the page has no 500 path on null card; that observation is `OBSERVED_RENDERED`), and the remaining matrix combinations. **UNMEASURED**, riding Slice 1/2 acceptance criteria.
+
+---
+
+### §7 Owner decisions required
+
+1. **D1 (F-01, the strip):** adopt the guard split as recommended in §2.1? Alternative offered: retire the strip on panel-composing scenarios entirely (would contradict G-41's "baseline strip plus known caps" wording for OGC only if applied there — the split does not). **Plan recommends: the split.**
+2. **D2 (F-02, the heading):** state-led vocabulary (`Not recorded: …` / `Missed: …`) or keep `Critical` for the `missed` shape only and demote `not_reached` alerts to note tone? **Plan recommends: state-led (a).**
+3. **D3 (F-03):** confirm the `Ruled out` disposition against ADR-0025 (§0.1). No change follows either way; this is a sign-off, not a fork.
+4. **D4 (fixture):** keep seeded run 6 + the one audit-fixture turn event on the dev database as the standing verification fixture for Slices 1-2, or delete both after the slices land? The seeder re-creates run 6 deterministically; the turn event does not survive deletion. **Plan recommends: keep run 6, delete the fixture event at slice close-out** (it exists to prove `latestTeamRank()`; the seeder's own prose covers the rest).
+
+---
+
+### §8 Change log
+
+| Date | Change | Reason |
+|---|---|---|
+| 2026-11-09 | Plan opened from the audit + reviewer's six corrections; pre-flight reads §0.1-0.5 executed; findings re-graded (F-02 → severity 3, F-03 → ruled out, F-04 → merged); fuller-run verification and two-theme captures recorded. | Pre-flight baseline per the brief's §4 structure. |
+| 2026-11-09 | **Implemented.** Slices 1 and 2 landed (`ScenarioPanel.vue`, `TeamPanelBuilder.php`, `CareerGoalsPanel.vue`, `SCREEN_SPEC.md`, three test files). | Owner instruction: implement the plan. |
+| 2026-11-09 | **Correction to §2.1 / §3 Slice 1, from code.** The plan's recommendation re-gated "the identity card + `emptyText` + `panel_absence` line + widgets" on `onPanels.length === 0`. Read against the template, only the `emptyText` sentence lives inside the strip's branch: the scenario identity card (`ScenarioPanel.vue:227`), the ruleset version line, the ruleset-date line and the widget row all sit *outside* it and carry no `v-if` at all — they are the shell's always-rendered floor, pinned by `scenario-panel.spec.ts:131`, `scenario-panel.spec.ts:168` and `career-cockpit-forms.spec.ts:239-240`. Acting on the plan's sentence would have deleted scenario identity from every panel-composing scenario. What shipped is the narrower, correct guard: `v-if="props.scenario.panel_absence === null && onPanels.length === 0"` on the `emptyText` `AlertRow` alone. F-04 needed no separate work: the dual-representation concern was about the identity card, which was never duplicated inside the strip. | Code beats the plan; recorded per `AGENTS.md` §2. |
+| 2026-11-09 | **Correction to §2.2 / §3 Slice 2, from owner-facing behaviour.** The plan recommended state-led alert vocabulary (D2 option a). Shipped as recommended, with one addition the plan did not name: the alert's `level` key now carries the row's own word (`Not reached`, `Due now`, `Missed`) and `CareerGoalsPanel.vue` derives both the glyph (`▲`/`○`) and the `AlertRow` tone from it. With the level no longer always `Critical`, a hardcoded `▲` + `tone="critical"` would have kept asserting severity after the key stopped claiming it. The mandatory-races alert arm is unchanged and still prints `Critical`, matching `SCREEN_SPEC.md:2853`. | The plan's D2 named the copy; the tone/glyph coupling is the same defect one layer down. |
+| 2026-11-09 | **Verification recorded.** Focused Pest: `TraineeGoalsPanelTest` 25 passed / 265 assertions (incl. two new acceptance cases); `CockpitAlertScopeTest` + `ScenarioPanelTest` + neighbours 57 passed / 792 assertions. Browser: `scenario-panel.spec.ts` + `grand-concert-panel.spec.ts` **17 passed** (includes the new F-01 red-before-green case and the 320px reflow sweep). Full Feature suite: **2236 passed, 3 failed / 35819 assertions** — all three attributed to `HEAD 142bb171` by re-running them from a clean `git archive` of HEAD (identical failures: `UraPanelTest`'s stale `missed` pin, `UiHygieneTest`'s `bands_source` path string, `ScenarioAdvisorFinaleTest`'s `finals` label). Pint clean, PHPStan level 6 clean, `npm run typecheck` clean, `lint:ui` exits 0 with zero hits in the changed files, lore docs 576 / code 318 with **zero hits in every file this change touched**. | Evidence rule. |
+
+## 2026-11-10-scenario-detail-remodel.md
+
+> **Folded into this master in consolidation Round 25 (owner-ordered, 2026-11-10) from**
+> `docs/proposals/2026-11-10-scenario-detail-remodel.md`. It is the `S-RS-REMODEL-B1` consolidation
+> plan, priced against the tree and stopped where the owner's rulings were owed; its Addendum
+> records the four W-rulings the shipped page follows, and its `S-RS-REMODEL-B1` dispatch report
+> sits in the slice-records master. One citation to the ruling-memos sibling was repointed at this
+> round's PLANS-AND-BRIEFS section before the fold. The source's own `#` title follows verbatim as
+> `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched. The
+> source file was deleted from its original location after this section was verified present and
+> byte-identical; it remains recoverable from the commit that deleted it.
+
+
+**Slice:** `S-RS-REMODEL-B1` (Workstream A). **Mode:** consolidate (owner Ruling 2).
+**Base:** `5e39a1f0` (after Workstreams C and B).
+
+**Verdict: the plan is written, and it stops at Move 4 for a named fork. Moves 1, 2 and 3 are
+priced and ready; Move 4 is not implementable without Ruling 3.**
+
+The stop is not a drafting failure. Move 4 asks the Team Race banner's *rule text* to move into the
+*identity card*, and this repository has never decided which panel is the identity card on this page
+— `GRID-REVIEW.md` records that the last card is a **reference** block, not the identity, and the
+page's real identity is the `h1` + lede + stepper above the grid. So Move 4 requires a panel-priority
+answer ("what is this page's identity object?") that is exactly the question Ruling 3 reserves, and
+A.1's own stop condition fires on it.
+
+---
+
+### 1. The five moves, priced against the tree as measured
+
+Every path below was verified with `git ls-files --error-unmatch` before being named, and every
+file's dirty state was measured, because a move whose file carries a peer's uncommitted work cannot
+be committed by pathspec without sweeping it.
+
+| Move | Files touched | Clean? | Mode | Ruling needed |
+|---|---|---|---|---|
+| **1** — Reflow regroup (team 2–4 contiguous, run-state 5) | `resources/js/components/scenario/UnityCupPanel.vue` | **clean** | reflow | **Ruling 3** (panel priority) |
+| **2** — Split Unity Cup strip (status → row 1; caps → reference row) | `ScenarioPanel.vue` (+ payload plumbing) | **DIRTY** | consolidation | Ruling 2 (given) |
+| **3** — Merge Spirit Bursts into Burst bands | `UnityCupPanel.vue`, `SpiritBurstRoster.vue`, `TeamPanelBuilder.php` | clean | consolidation | Ruling 2 (given) |
+| **4** — Absorb Team Race banner rule text into identity card | `TeamRacePanel.vue`, `ScenarioPanel.vue`, `TeamPanelBuilder.php` | DIRTY | content move | **Ruling 3** (identity question) |
+| **P4 residual** | falls out of Move 3 | — | consolidation | covered by Move 3 |
+
+**The dirtiness matters and is not incidental.** `ScenarioPanel.vue` carries this session's
+uncommitted F-01 guard split (10 insertions, 2 deletions, shown in full in §5). Moves 2 and 4 both
+touch it. Committing either with `git commit -- <path>` would carry the F-01 fix into a consolidation
+commit, which is the peer-sweep hazard the dispatch's commit rule exists to prevent — except here the
+"peer" is this same session's earlier, separately-authorized work. The resolution is procedural, not
+technical: **land F-01 as its own commit first**, then the consolidation moves have a clean file.
+
+---
+
+### 2. Move-by-move specification
+
+#### Move 1 — Reflow regroup
+
+**Before** (measured at 1280 px, 12 tracks, `5e39a1f0`):
+
+| Row | Panels | Spans |
+|---|---|---|
+| 1 | Team Race | 12 |
+| 2 | Team · Spirit · Team Rank | 4 + 4 + 4 |
+| 3 | Unity Cup progress · Team stat grades | 4 + 8 |
+| 4 | Burst count bands · Spirit Burst | 8 + 4 |
+| 5 | Special Training · Team race coverage | 4 + 8 |
+| 6 | Team race shape | 12 |
+
+**After:** the team block becomes contiguous. Team · Spirit · Team Rank stay row 2; Team stat grades
+and Team race coverage join them as a second team row; burst bands, Spirit Burst and Special Training
+form the run-state row. **This is the one move that needs Ruling 3**, because it decides that
+"team" outranks "run state" on the page — and the page is titled *Scenario detail*, where a reader
+could equally argue run state leads.
+
+**Stop condition A.1 fires here too:** the dispatch says stop if the plan "requires panel-priority
+ordering (Ruling 3)". Move 1 is by definition that. It is priced and stated, not implemented.
+
+#### Move 2 — Split the Unity Cup strip
+
+The strip (`ScenarioPanel.vue`) currently renders, in one `s12`-equivalent card: the scenario label,
+a `Documented` badge, two ruleset lines, the two widget tiles, the `Published stat caps` table, the
+finale line and the advisor note.
+
+**Proposed split:** status half (label, badge, ruleset lines, tiles) stays where it is; the caps
+table and finale move to a reference row after the trainee block.
+
+**Cost that the review did not price:** the caps table is not a data-independent block — it reads
+`scenario.caps` and `scenario.caps_absence`, and the strip's own gate is
+`careerGoalsOn || onPanels.length === 0`, widened by `5e7da543` specifically so the caps would stop
+hiding behind the goals ladder (pinned by `grand-concert-panel.spec.ts:49`). **Splitting the strip
+re-opens that gate question**: a caps block moved out of the strip needs its own gate, and the
+narrowest correct one is "the scenario declares caps", not "the scenario composes career goals".
+That is a payload change (`ScenarioPanel` would need a separate flag), not a pure template move.
+
+**Verdict: priced, ready, needs F-01 landed first.**
+
+#### Move 3 — Merge Spirit Burst into Burst bands
+
+**This is the move the KI-154 fix was sequenced ahead of, and the sequencing was right.** Before
+`5e39a1f0`, stacking the two panels would have placed `N/A` next to `11`; now both read 11 and the
+merged card says one consistent thing.
+
+**Before:** two cards — `Burst count bands` (`s8`) and `Spirit Burst` (`s4`, a
+`SpiritBurstRoster` child).
+
+**After:** one card carrying the bands table (with `10–12 (this run)` marked) and the roster's six
+state rows beneath it. The `Estimated` badge stays on the bands half only, because it marks that
+figure's provenance, not the roster's.
+
+**P4 residual:** the review measured 236 px of slack under Spirit Burst beside the 402 px bands card.
+Merging closes it by construction — there is no second card left to leave a gap under.
+
+**Verdict: priced, ready. Highest value per unit of risk of the four.** No ruling fork.
+
+#### Move 4 — Absorb the Team Race banner's rule text — **STOP**
+
+`TeamRacePanel.vue:27` prints *"Aim for at least {{ guidance }} circles"* as the team-race banner.
+The move is to lift that sentence into an identity card at the top of the page.
+
+**The fork:** where the sentence goes depends on what the page's identity object is, and the tree has
+two defensible answers:
+
+- **The `h1` + lede + stepper** above the grid is the page identity (this is what `GRID-REVIEW.md`
+  §P2 measured, and it is why that review's "identity inversion" premise was judged wrong).
+- **The last card** — the scenario reference block — is what the review *called* the identity panel,
+  incorrectly.
+
+So Move 4's destination does not exist yet as a named object. Creating one means deciding that the
+scenario reference block outranks the run state, which is Move 1's question again in another form.
+
+**Additional cost:** the banner is a *live rule read from config* (`circles_guidance`), rendered by
+a panel that also lists the run's recorded races with at-or-above-margin verdicts. Lifting the
+sentence separates the rule from the rows that apply it, which is a `CLOSURE`-class readability loss
+(the rule and its instances stop travelling together) unless the rows move too — and moving the rows
+is not a content move, it is a panel merge.
+
+**Verdict: not implementable under Ruling 2 alone. A.1's stop condition fires. Owner rules; A.2
+does not run for this move.**
+
+---
+
+### 3. The capsule question, in miniature (A.1 requires a stated treatment)
+
+Move 3 merges two panels that today both carry a `CapsuleHeader`. The plan's choice, stated so it is
+a plan decision and not a hidden ruling:
+
+**Preserve the surviving panel's own header treatment unchanged; the merged card carries one header,
+the bands', and the roster becomes a labelled sub-block inside it.** Rationale: the alternative
+(two headers in one card) produces a card with two competing titles, and the third alternative
+(dropping both) would silently answer Ruling 1 for the whole page, which the plan may not do.
+
+This choice overrides Ruling 1 **for the merged case only** — it says nothing about the other panels,
+which keep whatever chrome they have until Ruling 1 lands.
+
+---
+
+### 4. Content corrections — named here, implemented separately
+
+The dispatch requires these as discrete items, not bundled into consolidation commits.
+
+| Item | Site | Defect | Register |
+|---|---|---|---|
+| `+30` attribution | `UnityCupPanel.vue:128-131` | Binds the figure to team rank; corpus says league placement | **KI-155** |
+| `15/15/20/20` caveat | `UnityCupPanel.vue:370` | Names a publisher figure the corpus does not carry | **KI-156** |
+| Bare `N/A` | `UnityCupPanel.vue:324` | Absence not through the shared component | **KI-157** |
+
+All three are filed and confirmed absent from `HEAD`'s history as fixes. **None is implemented by
+this dispatch.** They are content-correctness fixes in a file consolidation also touches, which is
+precisely why they must be separate commits: a reviewer reading "merge two panels" should not have
+to also review three copy corrections.
+
+### 5. The uncommitted F-01 work this plan depends on
+
+`ScenarioPanel.vue` (DIRTY, 10+/2−) carries the guard split that stops the "composes no panels"
+sentence printing over a populated page:
+
+```diff
+-                v-if="props.scenario.panel_absence === null"
++                v-if="props.scenario.panel_absence === null && onPanels.length === 0"
+```
+
+It is a landed-and-verified fix from the earlier slice (17/17 browser specs green, F-01 verified on
+runs 3 and 7), but it is not yet committed. **Moves 2 and 4 both touch this file.** Landing it first
+is a precondition of either, and it is this session's own work, not a peer's.
+
+---
+
+### 6. What A.2 can run if the owner clears it
+
+| Move | Runnable now | Blocker |
+|---|---|---|
+| 3 (merge Spirit Bursts into bands) | **yes**, after F-01 lands | none — no ruling fork, highest value |
+| 2 (split the strip) | yes, after F-01 lands | needs its own caps gate decided (stated above) |
+| 1 (reflow regroup) | **no** | Ruling 3 panel priority |
+| 4 (absorb the banner) | **no** | Ruling 3 identity question |
+
+**Recommendation: run Move 3 only.** It is the move with a measured defect behind it (P4's 236 px
+slack), no ruling fork, and a file that is clean. Moves 1, 2 and 4 each need an answer only the owner
+can give.
+
+---
+
+### Addendum — 2026-11-10: owner rulings W.1–W.4, and the classification basis
+
+**This section is appended, not edited into the text above.** The historical sections stand as written,
+including the two facts `S-RS-REMODEL-C1` proved stale (§5 below). Where this addendum and an earlier
+section disagree, **this addendum governs for implementation**; the earlier text remains as the record
+of what was known when the plan was priced.
+
+### A.1 The four rulings
+
+Received from the owner 2026-11-10, recorded in section `## 2026-11-10-ruling-memos-scenario-detail.md` of `docs/research-scratch/PLANS-AND-BRIEFS.md`:
+
+| Ruling | Question | Answer |
+|---|---|---|
+| **W.1** | Capsule chrome on the merged Move 3 card | **C** — plain `h2`, no capsule |
+| **W.2** | Ruling 3 fork 1: page primary | **Run-state primary** |
+| **W.3** | Ruling 3 fork 2: the Team Race banner's rule text | **C** — moves to the reference block |
+| **W.4** | Move 2's caps block | **C** — labelled "Published stat caps", one table, no move |
+
+### A.2 The classification basis — fresh, and it supersedes both prior tables
+
+STOP 1 of `S-RS-REMODEL-C1` established that the plan's Move 1 "After" and memo §W.2's classification
+table **contradict each other on three panels and cover all panels in neither**. Neither document
+defines "run-state", so neither could settle the reorder. The owner supplied the missing definition,
+and it is the definition that makes "run-state primary" mean anything at all:
+
+> **Run-state** — the panel describes *this run's current state*: what has accumulated, what has
+> arrived, what is currently in progress. **Team** — the panel describes *who the roster is* and *what
+> its members' attributes are*, irrespective of turn. **Reference** — the panel describes scenario
+> mechanics independent of the run's state.
+
+**This table classifies from that basis. It supersedes the plan's §"Move 1 — After" and memo §W.2's
+classification table.** It is not a correction of either: neither stated a basis, so neither table was
+derivable, and this is the first one that is.
+
+| # | Panel | Category | Reason |
+|---|---|---|---|
+| — | **Team Race banner** | **Header** — not a data panel | Carries the rule line plus the run's absence state; classified by neither scheme |
+| 1 | Unity Cup progress | **Run-state** | The run's current Unity Cup counters |
+| 2 | Burst count bands (merged with the Spirit Burst roster) | **Run-state** | The run's combined burst total and where it lands |
+| 3 | Special Training | **Run-state** | This run's Special Training facts — the penalty's removal and the Wit bonus |
+| 4 | Trainee goals | **Run-state** | The run's goal progress |
+| 5 | Mandatory races | **Run-state** | Race-arrival status for this run |
+| 6 | Team race coverage | **Run-state** | Which categories this run's team fields — a run-specific composition, not a member attribute |
+| 7 | Team race shape | **Run-state** | Cadence plus this run's race status |
+| 8 | Team | **Team** | Roster names, motto, placement records |
+| 9 | Spirit | **Team** | The per-character Spirit gauge — a member attribute |
+| 10 | Team Rank | **Team** | The current rank; career-wide, not run-specific |
+| 11 | Team stat grades | **Team** | Member grades — attributes |
+| 12 | Unity Cup reference strip | **Reference** | Scenario mechanics, caps and finale, independent of run state |
+
+#### Where this differs from the two prior tables
+
+| Panel | Plan said | Memo said | This basis says |
+|---|---|---|---|
+| Special Training | run-state | **both** (`:97` run-state, `:105` team-gated) | **run-state** — the plan was right |
+| Team race coverage | team | run-state | **run-state** — the memo was right |
+| Unity Cup progress | *omitted* | team | **run-state** — both wrong |
+| Team race shape | *omitted* | run-state | **run-state** — the memo was right |
+
+### A.3 The new order — run-state → team → reference
+
+| Position | Panel | Was |
+|---|---|---|
+| 1 | Unity Cup progress | 5 |
+| 2 | Burst count bands (merged) | 7 |
+| 3 | Special Training | 8 |
+| 4 | Trainee goals | 11 |
+| 5 | Mandatory races | 12 |
+| 6 | Team race coverage | 9 |
+| 7 | Team race shape | 10 |
+| 8 | Team | 2 |
+| 9 | Spirit | 3 |
+| 10 | Team Rank | 4 |
+| 11 | Team stat grades | 6 |
+| 12 | Unity Cup reference strip | last |
+
+The Team Race banner keeps its **header** position above the panels: it is not a data panel and is not
+classified.
+
+### A.4 Q2 — page-wide plain `h2`
+
+**Ruling: page-wide.** The app's scenario-detail card takes a plain `h2` on every card and drops
+`CapsuleHeader` from the page. The HFW already draws this (14 `<h2>`, 0 capsule elements, the four
+"capsule" matches are prose), so W.1 = C **ratifies the wireframe** rather than diverging from it. A
+card-only removal would create the inconsistency the HFW does not show.
+
+### A.5 Q3 — the banner keeps its title and state; only the rule line moves
+
+`TeamRacePanel.vue:26-30` renders three things: the title, the rule line ("at least N circles as a
+margin, not a win condition…"), and — when nothing is recorded — the state line. W.3 = C moves the
+**rule line** to the reference block. The banner survives with its title and its state guidance, because
+the state line is this run's current team-race status and the banner is the page's top-of-run
+announcement.
+
+### A.6 Two staleness facts this addendum records rather than acts on
+
+1. **The plan's Move 1 "After" lists eleven panels including "Spirit Burst"**, which Move 3
+   (`64c37c4f`) merged into Burst count bands. Measured after that merge:
+   `grep -c 'CapsuleHeader title="Spirit Burst"' UnityCupPanel.vue` → **0**; the page renders **10**
+   Unity Cup cards, not 11. The order above is the corrected 12-position list.
+2. **The plan omits `Unity Cup progress` and `Team race shape` from its "After" order entirely**
+   (`grep` of that paragraph returns 0 for each). Both are placed above.
+
+### A.7 One open consequence, flagged not resolved
+
+**The owner's order interleaves two components.** Positions 1–7 (run-state) include Trainee goals and
+Mandatory races, which `CareerGoalsPanel` renders, while positions 1–3 and 6–7 are drawn by
+`UnityCupPanel`. The page composes one `<li>` per registered flag, so `UnityCupPanel`'s 10 cards arrive
+as a single block and `CareerGoalsPanel`'s two as another:
+
+```
+li0  AlertRow (the scenario's absent-panel line)
+li1  (comment node — a flag that draws nothing)
+li2  UnityCupPanel — 11 cards at this commit
+li3  CareerGoalsPanel — 2 cards
+```
+
+Reaching the stated order therefore requires either (a) splitting one component's output across
+another's, (b) one component per panel (a larger refactor than any move priced), or (c) accepting a
+**two-block approximation**: run-state block first (Unity Cup progress, bands, Special Training,
+coverage, shape) then team block (Team, Spirit, Team Rank, grades), with the two goals cards placed
+where the block boundary allows. This is recorded as a consequence for the implementation dispatch; it
+is not resolved here.

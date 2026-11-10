@@ -18722,3 +18722,914 @@ Post-Slice-0.2 expectation: heading-row count drops from 114 to 109 (four blocks
 python .scratch-uma/rs-remaining-1/measure_dups.py   # the measurement table above
 python -c "import subprocess; raw=subprocess.run(['git','cat-file','blob','HEAD:KNOWN-ISSUES.md'],capture_output=True).stdout; print('HEAD blob NULs:', raw.count(b'\\x00'))"
 ```
+
+## 2026-11-02-race-enrichment-jp-only-completion-report.md
+
+> **Folded into this master in consolidation Round 25 (owner-ordered, 2026-11-10) from**
+> `docs/reports/2026-11-02-race-enrichment-jp-only-completion-report.md`. It is the race-catalog
+> enrichment and JP-only-trainee verification completion report, the dated close-out class the
+> 2026-11-02 rows above follow. The source's own `#` title follows verbatim as `###`, and its
+> remaining headings keep one level of demotion; the body is otherwise untouched. The source held a
+> UTF-8 byte-order mark, which is not carried into this section, and its single CRLF line terminator
+> is normalized to LF in the appended region. The source file was deleted from its original location
+> after this section was verified present and byte-identical; it remains recoverable from the commit
+> that deleted it.
+
+
+**Date:** 2026-11-02
+**Task:** Enrich race catalog with track names, fan payouts, race master data, and rewards; promote Japan-only trainees and forms into the database; refresh verification dates; fetch fresh catalog data
+
+### Summary
+
+Completed all steps across multiple sub-tasks:
+
+1. **Scenario matrix verification date** — updated `config/scenarios.php` from `2026-09-27` to `2026-11-02` (re-verified against GameTora scenarios.json). Updated 5 test files with the new literal.
+
+2. **Additional verification dates** — updated `config/advisor.php` (rest_recovery, wit_cost, advisory_threshold) and `config/uma.php` (hint_discount_measured_at, race_payouts) to `2026-11-02`. `session_cost` left intentionally stale (2023-02-25).
+
+3. **Catalog data fetch** — ran `php artisan uma:fetch` (8 sources, 410 race slots + 1910 skills + 559 support cards + 67 trainees) and `php artisan uma:fetch-art` (109 card portraits + 566 support thumbs). Fixed stale pinned hash `e9e9ee6d` → `897e63ea` (KI-24 trap). All artwork on disk, 0 unresolved.
+
+4. **Japan-only trainees and forms** — promoted all 135 trainees (was 67) via `UmamusumeRosterSeeder::inScope()` change. Made `character_cards.global_release_date` nullable (migration). Updated `GametoraCharacterCardParser` to parse JP-only cards. Fixed 2 pre-existing match_key bugs (Air Groove, Mejiro Ryan). Manually promoted Admire Groove and Mejiro Ardan. Auto-promoted JP-only trainees in `PipelineRunner`. Excluded JP-only from career setups via `TraineeSelectController`. JP-only images now display (267 card portraits on disk).
+
+5. **Stale review candidates** — marked 68 pending `match_candidates` as `Rejected` (all proposed trainees now in database).
+
+6. **Race catalog enrichment** — added 4 new sources (racetracks, race-fans, races, race-rewards), 4 new parsers, enrichment command (`uma:enrich-races`), 11 new columns on `race_catalog_slots`. Populated track names (402/410), fan payouts (402/410), decoded direction/course/season labels (397/410), rewards (48/410), entries, factor effects. Added `RaceDetail.vue` page + route `/database/races/{id}`. Updated `RaceFacts`, `RaceDecisionController`, `RacePlannerController`, `DatabaseController`, `Database/Races.vue`.
+
+### Verification
+
+| Check | Result |
+|---|---|
+| `php artisan migrate:status` | All migrations applied, no Pending |
+| `php artisan test --compact` (filtered) | All affected tests pass |
+| `npm run typecheck` | Clean |
+| `vendor/bin/pint --test` | Clean |
+| Lore gate | 536 hits (docs), 75 exempt (advisory, within expected range) |
+| Database: trainees | 135 (68 GlobalReleased + 67 JapanOnly) |
+| Database: character_cards | 267 (109 Global + 158 JP-only) |
+| Database: race_catalog_slots | 410 (402 track names, 402 fan payouts, 397 decoded labels, 48 rewards) |
+| Artwork mirror | 267 card portraits + 566 support thumbs, 0 unresolved |
+
+### Outcome
+
+All requested features implemented and verified. All tests, typecheck, and lint pass.
+
+## 2026-11-08-sparks-skill-picker.md
+
+> **Folded into this master in consolidation Round 25 (owner-ordered, 2026-11-10) from**
+> `docs/proposals/2026-11-08-sparks-skill-picker.md`. It is the Sparks skill-picker proposal, whose
+> `S-A-P02` slices and close-out the ledger sections above already record. Its body cites
+> `docs/audits/rice-shower-cup-round7-reconciliation.md:956` exactly as the source wrote it, a path
+> whose disk form is `rice-shower-unity-cup-round7-reconciliation.md`; the citation is quoted verbatim
+> as history and was not repaired. The
+> source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
+> demotion; the body is otherwise untouched. The source file was deleted from its original location
+> after this section was verified present and byte-identical; it remains recoverable from the commit
+> that deleted it.
+
+
+**Status:** proposal, not slice. **Decisions 1-7 ruled and implemented as `S-A-P02.1`-`.5`** — `7fb232e3`, `195c39d4`, `cb0d4943`, `b33084f2`, `662a0a42`. Decision 4's `name_ja` half landed in `.5` (§0.3). Awaiting review, not further rulings.
+**Date opened:** 2026-11-08
+**Implemented:** 2026-11-08, same session
+**Source:** user's session, 2026-11-08; screenshot `/umamusume/vodka` profile page and the Legacy step's `Kind` / `Category` / `Target` row; user's words quoted in §1.
+**Register reference:** none (not a Round 7 row).
+**Audit reference:** none (`AUD-20261108-R7-A`, `-B`, `-C` did not name this).
+**Ownership:** proposal recommends; §7 lists the decisions the owner makes.
+
+> **This document is now both the record and the progress log.** §1-§8 are the proposal as it stood before any code landed; their measurements and reasoning are unchanged. **§0 records what was built**, and §9/§10 carry dated notes because both said "no code" and are now historical. §11 logs each revision.
+
+---
+
+### §0 Implementation status
+
+#### §0.1 Slices landed
+
+| Slice | Commit | Files | What it delivered |
+| --- | --- | --- | --- |
+| `S-A-P02.1` | `7fb232e3` | `LegacySelectController.php`, `LegacyController.php`, `SparkTargetValidationTest.php` | Both doors' `sparkTargets.Skill` now read `Skill::query()->availableOnGlobal()`. **1,910 → 623 options.** Two feature cases assert a `JapanOnly` name is excluded and a `GlobalReleased` one included, on the wizard **and** the run-scoped builder |
+| `S-A-P02.2` | `195c39d4` | `SparkTargetPicker.vue` (new, 250 lines), `LegacySelect.vue`, `career-legacy-deck-steps.spec.ts` | The combobox: `role="combobox"` + `role="listbox"` + `aria-activedescendant`, type-to-filter, ArrowUp/Down, Enter, Escape, Tab, `Current: <name>` guard row, `No targets match "…"` empty state, caller-supplied id. Wizard parent rows wired. Browser case proves typing `Cut and` narrows to one option and Enter selects it |
+| `S-A-P02.3` | `cb0d4943` | `AncestorEditor.vue`, `Legacy/Builder.vue`, `legacy.spec.ts` | The four grandparent editors (shared by both surfaces) and the run-scoped Builder's parent row. **The Builder's parent row gained the `Category` control it did not have** — see §0.3 |
+| `S-A-P02.4` | `b33084f2` | `legacy-index.spec.ts`, `career-inheritance-event.spec.ts` | `fill()`-based selection helpers for the two specs that drive the Builder's field |
+| `S-A-P02.5` | `662a0a42` | `LegacySelectController.php`, `LegacyController.php`, `SparkTargetPicker.vue`, three prop declarations, `SparkTargetValidationTest.php`, `career-legacy-deck-steps.spec.ts` | **Decision 4's `name_ja` half.** The option list carries `{name, name_ja}`; the list prints the Japanese name in a `lang="ja"` span; search matches either name. 605 of the 623 Global-client skills have a Japanese name that differs from the English one |
+
+Ledger: `§s-a-p02-1` … `§s-a-p02-4` and `§s-a-p02-close-out` in `docs/research-scratch/SLICE-RECORDS.md`, each with pre-flight, RED, GREEN, non-vacuity, regression, gates, commit and what it did not close.
+
+#### §0.2 Decision-by-decision disposition
+
+| # | Decision | Ruling | Landed |
+| --- | --- | --- | --- |
+| 1 | Filter to `availableOnGlobal()` + current-value guard | Yes | `.1` (filter, both doors) · `.2` (guard, in the component) |
+| 2 | Inline combobox, not modal | Inline | `.2` |
+| 3 | Picker inherits the row's Category | Yes | `.2` — `targets` arrives already scoped; the component filters nothing by category |
+| 4 | Search matches `name` (+ `name_ja` if cheap) | Name only, `name_ja` where cheap | `.2` (English) · `.5` (**the `name_ja` half landed** — it was one column, not a widening; see §0.3) |
+| 5 | Preserve the keyboard contract | Yes | `.2` — type, ArrowUp/Down, Enter, Escape, Tab |
+| 6 | Reuse `SearchableSkillPicker` or sibling | **Sibling** | `.2` — decided at pre-flight; the shapes differ (`{id,name}` in/out vs `string` in/out) and generalising meant a union at 3 call sites |
+| 7 | Both surfaces | Yes | `.2` (wizard parents) · `.3` (Builder + four grandparents) |
+| 8 | Harden `Skill` server-side | No | not done, as ruled. `assertTargetMatchesCategory()` is unchanged |
+
+#### §0.3 Where implementation diverged from the proposal
+
+Three points, each recorded in its ledger section rather than smoothed over.
+
+1. **Decision 4's `name_ja` was delivered** — `S-A-P02.5`, `662a0a42`. The option list carries `{name, name_ja}`; the list prints the Japanese name in a `lang="ja"` span; search matches either. **Correction to what this section first said:** the cost was described as *"not cheap"* — that was a judgement, not a measurement, and it was wrong. The change is one column on the payload (`pluck('name')` → `get(['name', 'name_ja'])`) in two controllers, with no schema change and no widening. The `name_ja` half of decision 4 is now closed rather than outstanding.
+
+   The rule that settles it is the tree's own, stated at `SkillController.php:515`: *"The rule is search matches what the user can see."* 605 of the 623 Global-client skills carry a `name_ja` that differs from `name`, and `DESIGN.md:573` already lists `name_ja` among the fields a skill row prints. The two existing pickers in this tree already follow the rule — the support-card search matches `name_ja` (`SupportCardController.php:643`) and the skill catalogue matches `match_key_ja` (`SkillController.php:579`). The spark picker now does too.
+
+2. **The Builder's parent Spark row had no Category control.** `SparkDraft.category` existed on the form model and was populated by `inferCategory()`, but the row rendered only Kind / free-text `Applies to` / Stars. A category-scoped picker there required adding the Category select the wizard's row already had. Widened the slice rather than shipping a picker whose list could not be scoped — a second independent filter over one vocabulary is the `IA-3` defect this proposal exists to avoid.
+
+3. **The `fill()` helpers landed in `.2`/`.3`, not `.4`.** The dispatch assigned them to `.4`, but `.2` cannot leave the suite green without them: the component change is what breaks `selectOption()` on that field. Splitting them would have committed a knowingly-red suite.
+
+#### §0.4 What the measurement predicted vs what shipped
+
+| Proposal said (§2) | Shipped |
+| --- | --- |
+| `Skill` list = 1,910, no release scope (M-4, M-5) | `availableOnGlobal()` in both doors → **623** |
+| Rendered `<select>` = 1,911 options (M-6) | Combobox; the same catalogue, filtered, and typed into rather than scrolled |
+| Stat 6 / Aptitude 11 options (M-7) | Same counts, now in a listbox with search present in every mode |
+| Only `career-legacy-deck-steps.spec.ts` drives `#legacy-spark-target-…` | Confirmed. The other two specs named in §8 drive the Builder's `Applies to` field instead |
+| "The three specs need a read before implementation" (§8) | Read at pre-flight: **three** specs drive the field, but **two** of them under a different label, across both surfaces |
+
+#### §0.5 Gates at close-out
+
+```unknown
+Pest            2297 passed, 3 failed  — the 3 are pre-existing, named in ledger §10a
+Browser         career-legacy-deck-steps 18 · legacy 10 · career-inheritance-event 9
+                legacy-index 1 passed, 1 failed (pre-existing fixture 404, ledger §s-a-p02-4 §6)
+PHPStan level 6 [OK] No errors
+Pint            passed on every touched PHP file
+typecheck       clean (vue-tsgo -p tsconfig.vue.json && tsc --noEmit)
+build           ✓ built
+lint:ui         no new arbitrary values — one in the first draft of the component was removed, not baselined
+lore            code 318 hit(s) · docs 574, 75 exempt — delta 0 from this pass
+fences          0 invalid closing fence(s)
+peer set        clean at open and close
+```
+
+#### §0.6 Still open
+
+- **`legacy-index.spec.ts:110` — CLOSED at `S-A-P02.6` (`1c51fd04`).** It was not one fixture bug but three, and the first two made the case unrunnable: the Builder URL was built as `/training-runs/{id}/legacy` instead of the real `legacy/{run}`; the parent name `Gold Ship` resolves on no database this repo can build, because the parent list is the **Veteran library** (`LegacyController::roster()`) and the browser scratch database holds zero veterans; and the final assertion matched eight rows when the table carries one row per field. All three fixed, and the case now runs in **16.3 s** instead of timing out at 3.3 m. See `§s-a-p02-6`.
+- **The `Applies to` / `Target` label split — CLOSED at `S-A-P02.6` (`1c51fd04`).** `LegacySelect.vue` and `AncestorEditor.vue` both said `Target`; only the run-scoped `Builder.vue:654` said `Applies to`. Renamed to `Target` on the outlier, because the tree's own vocabulary is `target` (`LegacySelectionPayload::SPARK_KEYS`, `['kind','target','stars']`) and every field ID there is `spark-target-*`. `SCREEN_SPEC.md:4215` names `Applies to` in passing; that description is now stale and the code is right.
+- Decision 8's hardening — ruled no, and the boundary is unchanged.
+
+#### §0.8 Decision 6, explained — why a sibling picker and not a generalised one
+
+The owner's review asked for the reasoning to be stated against `docs/UMAMUSUME_REFERENCE.md` and the framework files. This is that statement.
+
+**The decision.** Build `SparkTargetPicker.vue` as a **sibling** of `SearchableSkillPicker.vue` — sharing the pattern, not the component. The alternative was to generalise `SearchableSkillPicker` into a multi-purpose control.
+
+**What the two components actually are.** `SearchableSkillPicker.vue` takes `{id, name, type}[]` and emits `{id, name}`: it searches the **skill catalogue**, where a skill is an entity with an id, and the caller needs the id back to write its row. The spark target is **not** that entity. It is a **string** written into `LegacySelectionPayload`'s spark list, and the field it fills is free text over three vocabularies — the five stat names, the aptitude names, and the skill names — with no id anywhere. `ADR-0010` (the payload decision) is why the spark target is a string, and it is not the shape a catalogue-backed picker carries.
+
+**The cost of generalising, measured.** `SearchableSkillPicker` has two call sites today (`Career/BuildTarget.vue:632`, `Career/SkillsPlanner.vue:907`) and its prop and emit types are both closed over `id`. Making it serve the spark target means either a discriminated-union prop with two shapes and a branch in the component, or a second emit shape — and the component would then have to know that one of its two vocabularies has no `id` and no `type`. That is a component carrying a type-system truth only one of its callers has. The sibling costs one file.
+
+**What the tree already demonstrates.** The tree has three pickers, not one, and they are not variants of a single abstraction: `TraineeSelect.vue` (search a roster), `CardPicker.vue` (browse a catalogue into six slots), `SearchableSkillPicker.vue` (search the skill catalogue). Each solves a different question with a different data shape. **A fourth question with a fourth shape is a fourth component.** `UX-5` — *"Two elements that look alike behave alike"* — cuts the other way here and is satisfied: both search-and-select pickers behave alike (type to filter, arrows to move, Enter to choose, Escape to close, Tab leaves), while differing in the data they carry.
+
+**The framework rules this answers to.**
+
+| Rule | What it requires | How the sibling satisfies it |
+| --- | --- | --- |
+| `WCAG 2.1.1` | *"All functionality operable from a keyboard."* | The spark picker implements the contract the tree already documents for `SearchableSkillPicker`: type, ArrowUp/Down, Enter, Escape, Tab closes. The native `<select>` it replaced was keyboard-operable, so the replacement had to be too. |
+| `WCAG 4.1.2` | *"Every component exposes name, role and value."* | The control is a labelled `role="combobox"` with `aria-expanded`, `aria-controls` and `aria-activedescendant` pointing at the highlighted option; the list is `role="listbox"` and its rows are `role="option"` with `aria-selected`. The current value is the input's value, and the `Current:` guard row keeps a stored value visible when the row's category no longer offers it. |
+| `UX-2` (choice overload) | The fix reduces the decision, not the data. | The list still holds 623 Global-client skills; the Trainer searches instead of scrolling. |
+| `IA-3` | *"A library is browsable by more than one axis."* | Two axes are already present and both are inherited: the row's **Category** (`Stat` / `Aptitude` / `Skill`) scopes the vocabulary, and the **search text** narrows within it. The picker adds no third, competing filter, so the axes do not disagree with one another. |
+| `NRM-2` | *"A control that is unavailable says why, rather than disappearing."* | The `Current:` guard row is exactly this: a stored target the category no longer offers stays visible and selected, with the reason in its own label, rather than the field silently emptying and losing the value on save. |
+| `SHR-1` | *"A consistency exception must be named in a document and be few."* | Four pickers, four shapes, one shared keyboard contract. The contract is named and shared; the components are not forced into one abstraction to satisfy a consistency rule that is about *behaviour*, not about *code shape*. |
+
+**The reference corpus bears on the data, not the architecture.** `docs/UMAMUSUME_REFERENCE.md` §1.4's support-card material and the Global terminology policy are why the option list is the **Global client's** 623 skills and not the table's 1,910: `Skill::scopeAvailableOnGlobal()` (`app/Models/Skill.php:126`) records the reason in its own docblock — *"`ADR-0011` §2 records availability at write time and applies it at read time, so every Trainer-facing surface … starts here"* — and the shipped client cannot award a Japan-only skill, so offering one would be offering an impossibility. §1.2's race-goal material is the same class of fact: quoted source data is kept verbatim, and the tool's own vocabulary is what the UI prints.
+
+**The honest part.** The first draft of this proposal recorded the `name_ja` half of decision 4 as *"not cheap"*. That was a judgement, not a measurement, and it was wrong: the change is one column on the payload in two controllers. `S-A-P02.5` landed it, and §0.3 carries the correction rather than quietly dropping the original claim.
+
+
+---
+
+### §1 Problem
+
+The Sparks editor renders its `Target` field as a native `<select>` bound to the whole skill catalogue. On the Legacy setup step the `Skill` category offers **1,910 options in one flat list** (measured, §2 M-6). Scrolling it is the only way to reach a name you already know.
+
+The user's words, verbatim:
+
+> *"i manually try input all sparks each legacy/veterans, skills need scrolled manually not enter input and listed and trainer can just choose list like trainee list parents and grandparents. so many skills. UX issue solved."*
+
+Two surfaces carry this row:
+
+| Surface | File | `Target` selects on the page |
+| --- | --- | --- |
+| Legacy setup step (wizard) | `resources/js/pages/Career/LegacySelect.vue` | 1 per parent spark, 1 per grandparent spark (via `AncestorEditor`) |
+| Legacy Lab builder (run-scoped) | `resources/js/pages/Legacy/Builder.vue` | 1 per parent spark, 1 per grandparent spark (via `AncestorEditor`) |
+| Shared grandparent editor | `resources/js/components/legacy/AncestorEditor.vue` | 1 per spark, both surfaces |
+
+The user's comparison is exact: `TraineeSelect.vue` and `CardPicker.vue` already solve the same shape of problem on the same wizard.
+
+---
+
+### §2 Evidence
+
+Pre-flight baseline: `e7e0c5b22e93758f76e0716d9bdbb32ac4e8ab4e`, dirty paths 7 (all untracked audit/import files, none in scope).
+`RENDERED_EVIDENCE = TRUE` — `playwright.chromium.launch()` returned `launched 153.0.8010.12`; every rendered figure below is a live DOM read against `php artisan serve --port=8177`.
+
+| # | Measurement | Result |
+| --- | --- | --- |
+| M-1 | `select count(*) from skills` | **1910** |
+| M-2 | `select count(distinct name) from skills` | **1897** (10 names duplicated; e.g. `Carnival Bonus` ×5) |
+| M-3 | `skills where release_status = 'GlobalReleased'` | **623** rows, **621** distinct names |
+| M-4 | Server option list `LegacySelectController.php:197` | `Skill::query()->orderBy('name')->pluck('name')->all()` — **no `availableOnGlobal()` scope**, so all 1,910 rows, including 1,287 `JapanOnly` |
+| M-5 | Same assembly in `LegacyController.php:270` | identical — both doors send the same 1,910 |
+| M-6 | **Rendered** option count, `<select id="ancestor-spark-target-a-0-0">` with Category = `Skill` | **1911** (`1` placeholder + `1910` skills). First five: `#BeautifulSprint`, `#CuteChaos♪`, `#GotYouDownBad♪`, `#LookatCurren`, … Last three: `α-star*`, `∴win Q.E.D.`, `♡ 3D Nail Art` |
+| M-7 | Rendered option count with Category = `Stat` / `Aptitude` | **6** / **11** — the wall is `Skill` only |
+| M-8 | Existing searchable skill picker in the tree | `resources/js/components/Form/SearchableSkillPicker.vue`, **278 lines**, already used by `BuildTarget.vue:632` and `SkillsPlanner.vue:907` |
+| M-9 | What `SearchableSkillPicker` exposes | props `options: {id,name,type}[]`, `placeholder`, `label`, `disabled`, `error`, `hint`; emit `select: {id, name}`. Combobox with `role="listbox"`/`role="option"`, `aria-activedescendant`, ArrowUp/Down, Enter, Escape, outside-click, no-match message (`:245-273`, `:108-141`) |
+| M-10 | Skill fields carrying searchable text | `name` 1910/1910, `name_ja` 1910/1910, `description` 985/1910, `type` ∈ {Recovery, Speed, Passive, null} |
+| M-11 | `AncestorEditor.vue` `Target` options bind | `props.sparkTargets[spark.category]` — the **string list** (`:181`), no id, no type |
+| M-12 | `LegacySelect.vue` `Target` options bind | same string list (`:576`) |
+| M-13 | Server-side category boundary | `StoreLegacySelectionRequest::assertTargetMatchesCategory()` (`:203-226`) validates `Stat` and `Aptitude` against config lists and **leaves `Skill` unvalidated** — "the UI offers only catalogue rows, and the stored target is the string the Trainer read, not an id" |
+| M-14 | Are any stored spark targets `JapanOnly`? | **None.** `training_runs` with a non-null `legacy_selection`: **1** (run 3). Its two legs record `"sparks":[]` and no `ancestors_sparks`; `veterans` table: **0** rows; `import_source` non-null runs: **0**. No stored target exists to be orphaned by the `availableOnGlobal()` filter, so §7 decision 1's guard is preventive — but today's `<select>` offers all 1,910, so a `JapanOnly` target is reachable through the current UI and the guard becomes load-bearing the moment one is saved |
+
+#### What the tree does *not* have
+
+`SearchableSkillPicker` is the mechanism the user is asking for, and it exists. What does not exist is a picker that:
+- accepts a **string** target rather than `{id, name}` (the spark payload stores a name, under no foreign key);
+- carries a **category-scoped** option list (Stat/Aptitude/Skill are three different vocabularies behind one control);
+- renders **inside a row of four sibling controls** (Kind, Category, Target, Stars) rather than as a full-width block.
+
+---
+
+### §3 What current code does
+
+`LegacySelectController::show()` (`app/Http/Controllers/Career/LegacySelectController.php:194-198`):
+
+```php
+'sparkTargets' => [
+    'Stat' => array_values((array) config('scenarios.stat_order')),
+    'Aptitude' => LegacySelectionPayload::SPARK_APTITUDES,
+    'Skill' => Skill::query()->orderBy('name')->pluck('name')->all(),
+],
+```
+
+`LegacyController::show()` (`:270-274`) composes the identical array, deliberately — the comment says both surfaces post against the one request, so a separate copy would let the two offer different options for one validated field.
+
+`AncestorEditor.vue:177-182` renders it:
+
+```vue
+<BaseSelect
+    :id="sparkId('ancestor-spark-target', sparkIndex)"
+    v-model="spark.target"
+    label="Target"
+    :options="[{ value: '', label: 'Not recorded' }, ...(props.sparkTargets[spark.category as 'Stat' | 'Aptitude' | 'Skill'] || []).map((target) => ({ value: target, label: target }))]"
+/>
+```
+
+`LegacySelect.vue:572-578` renders the same, with `:error="errorFor(index, `sparks.${sparkIndex}.target`)"` added.
+
+`BaseSelect.vue` is a genuine `<select>` (template lines 1-60): one `<option>` per list entry. Chromium renders 1,910 options as one scrolling popup — type-ahead works on a native select, but only as a jump-to-prefix, not as a filter, and the user's report is that they scroll.
+
+`AncestorEditor.vue:5-9` carries a load-bearing warning that bounds any fix:
+
+> *"**The field-id contract is load-bearing and cannot be renamed.** Three specs locate these nodes by id and label — `legacy.spec.ts`, `legacy-index.spec.ts` and `career-inheritance-event.spec.ts` — so the shape is fixed at `ancestor-${slot}-${index}`, `ancestor-rank-letter-${slot}-${index}`, `ancestor-rank-${slot}-${index}`, `ancestor-spark-kind-${slot}-${index}-${sparkIndex}` (and `-category-`, `-target-`, `-stars-`). Renaming an id here is a spec break, not a refactor."*
+
+---
+
+### §4 Proposal recommends
+
+**Extend the existing `SearchableSkillPicker` into a variant the spark row can use, rather than building a second picker.**
+
+Specifically:
+
+1. **One new component**, `resources/js/components/legacy/SparkTargetPicker.vue`, modelled on `SearchableSkillPicker.vue` and **not** a fork of it if the generalisation is small. It takes the *category-scoped* list as a prop (`targets: string[]`) plus `category: 'Stat' | 'Aptitude' | 'Skill'`, and emits `select: string`.
+2. **Three input modes behind one control.** Stat (5 options) and Aptitude (10 options) stay a picker-shaped list because the component handles them without special-casing; Skill (623 Global / 1,910 all) gets the search box. The control's own shape does not change with the category, so the row's layout is stable (`SHR-1`, one component per role).
+3. **Filter the Skill list to `availableOnGlobal()`.** The current list offers 1,287 `JapanOnly` skills a `[Global]` client cannot produce. This is the single highest-value change and it is **independent of the picker**: 1,910 → 623 options, a 67% cut, by adding one scope call in two controllers. This is `UX-2`'s "survivable count" applied at the source rather than in the widget. **One guard rides with it:** the picker must always include the row's own current value even when that value falls outside the filtered list, or a spark recorded against a `JapanOnly` target (a Veteran's imported run, say) would render its Target as unset and the stored value would become invisible on the next edit. The guard is stated in §7 decision 1.
+4. **Id is preserved.** `id="ancestor-spark-target-${slot}-${index}-${sparkIndex}"` moves onto the picker's `<input>`, and the three specs that locate `getByLabel('Target')` + the id keep working. Where `SearchableSkillPicker` uses `useId()`, this variant must accept the caller's id — the contract is external.
+
+**Rules cited:** `UX-2` (option count survivable — 1,910 in a flat list is not), `SHR-2` (a novice can type a name; an expert is not slowed — a flat `<select>` serves neither), `IA-3` (the library is browsable by more than one axis; today Skill is one alphabetical axis with no filter), `WCAG 4.1.2` (name/role/value on the replacement).
+
+**Related, not filed:** `H6` (recognition over recall) is the same defect stated heuristically; `UX-2` is the narrower citation and `H6` travels as the secondary reading.
+
+#### §4.5 Framework adherence
+
+This section grounds §4's four items in `docs/framework-ui-ux/`. It is design reasoning, not an audit: it states which rules a recommendation would satisfy, which constrain it, what it knowingly gives up, and which do not apply. No finding, severity, confidence or evidence status appears here, and §2's M-series is not re-measured.
+
+**Where a rule's provenance is partial, the caveat travels rather than being presented as settled.** Norman's book was not fetched; the `NRM-` rules are cited from `norman-interaction-principles-2026-10-21.md`'s own text and that file's caveat applies. Brown's eight IA principles are a mirrored enumeration with the prose discussion unread. Gerhardt-Powals' primary is paywalled and its 9-vs-10 count is unconfirmed at items 5 and 6. Tognazzini's 2014 revision truncated. `WCAG 4.1.1` is withdrawn in 2.2 and is not cited anywhere in this proposal; the 44px house rule is a house rule **exceeding** 2.5.8 (24×24), never 2.5.8 conformance. The two law collections are separate files and the attribution table in `design-framework-index-2026-10-21.md` governs which publishes what.
+
+##### §4.5.1 Rules justifying the recommendations
+
+| Recommendation | Rule ID(s) | Reasoning |
+| --- | --- | --- |
+| **§4 item 1** — one new `SparkTargetPicker` replacing the native `<select>` | `SHR-1`, `SHR-2`, `UX-2` | `SHR-1` requires a consistency exception to be named and few; a field that is a picker everywhere else in this wizard and a raw `<select>` here is an unnamed exception, and replacing it removes the exception rather than documenting it. `SHR-2` says nothing offered to an expert may make the first run harder: the search box serves the expert who knows the name and the novice who does not, while a 1,910-row `<select>` serves neither past the first few dozen. `UX-2` states the option count on a decision surface must be survivable, and 1,910 in a flat list is not. |
+| **§4 item 2** — three input modes, one control shape | `SHR-1` | The rule's mechanism is that exceptions be few and named. Letting the control's shape change with the Category would create a second and third control shape for one field, all unnamed. Holding one shape across Stat, Aptitude and Skill keeps the field one role with one behaviour. |
+| **§4 item 3** — filter the Skill list to `availableOnGlobal()` | `UX-2`, `H6` | `UX-2` is the count rule again, applied at the source rather than in the widget: 1,910 → 623 is the largest single reduction available and it costs one scope call. `H6` (recognition rather than recall) is the reason the filtered list is also the *correct* list: a `[Global]` run can only produce Global skills, so offering 1,287 Japan-only names asks the Trainer to recognise which of them the client will refuse. |
+| **§4 item 4** — the field id and the `Target` label carry across | `WCAG 4.1.2`, `WCAG 2.5.3` | `4.1.2` requires every component to expose name, role and value; the id and label are how this field's accessible name is assembled today and a replacement that drops either loses the value's association. `2.5.3` requires the visible label text to appear in the accessible name, so `Target` must remain both the visible label and part of the name. |
+
+##### §4.5.2 Rules constraining the implementation
+
+| Constraint | Rule | Why it binds this change |
+| --- | --- | --- |
+| The picker must not lose name/role/value when it stops being a `<select>` | `WCAG 4.1.2` | A native `<select>` carries its role for free. A combobox supplies `role="listbox"` / `role="option"`, `aria-expanded`, `aria-activedescendant` explicitly, and `SearchableSkillPicker.vue:185-266` is the working model. A replacement that renders a bare `<input>` with a `<ul>` beneath it has removed the role it had. |
+| The visible label must equal the accessible name | `WCAG 2.5.3` | The field is labelled `Target` on screen; the accessible name must contain that word, or speech input and screen-reader users name a control that does not answer. |
+| A no-match state must say so, not render an empty box | `NRM-2` | The rule is that a control which is unavailable says why rather than disappearing. `SearchableSkillPicker.vue:268-273` already prints `No skills match "…"`; the new component must keep an equivalent, because an empty list under a live search reads as a broken control. |
+| The row's control shape must not change with the Category | `GT-4` | Two elements that look alike must behave alike. If Stat rendered a `<select>` and Skill a combobox, two controls occupying the same position in the same row would behave differently for a reason the Trainer cannot see. |
+| The picker must not duplicate the Category filter as a second, conflicting axis | `IA-3` | The rule is that a library is browsable by more than one axis. This picker filters on the Category the row already carries; adding a second independent filter would give the same list two competing dimensions and let the two disagree. |
+| A spark's already-stored target must render even when the filter excludes it | `TOG-3` | Status may be stale or absent, but never wrong. A stored `JapanOnly` target that the filtered list omits would render as unset — a state claim that is false about the record. |
+| No scenario name may enter the picker or its parent | `AGENTS.md` §7 | Repository rule, not a framework one: scenario names live only in `config/scenarios.php`, and a component that branches on one is a defect. The picker is scenario-agnostic by construction. |
+
+##### §4.5.3 Rules the recommendation accepts a limitation against
+
+**`UX-2` against `H6`, via §4 item 3's filter.** The filter removes 1,287 `JapanOnly` skills from the offer. A Trainer who wants to plan a spark against a Japan-only skill — because they play the JP client, or because they are reading ahead — can no longer find it in this picker. That is a real reduction, and it is accepted because the run this picker feeds is a `[Global]` career and the shipped client cannot award a skill it does not have. §7 decision 1's guard is the half that is *not* given up: a spark already stored against such a target still shows its value, so the loss is confined to new selections and never to recorded data.
+
+**`IA-5` against `SHR-1`, via §4 item 2's one-shape rule.** A category-aware control could have shown a plain `<select>` for the five Stat targets and a search box only where search is needed — proportionate, and arguably the smaller change. That would make the field's shape depend on its Category, which is the sameness failure `GT-4` names and a new unnamed exception under `SHR-1`. The recommendation declines the proportion and takes the consistency instead. This is also why §5 alternative E is rejected on the same grounds rather than on cost.
+
+**`H7` is deliberately not claimed.** The picker is keyboard-operable, and that operand is `4.1.2`'s name/role/value contract plus the D-55 keyboard path the existing picker already implements — not `H7`'s accelerators. The heuristics file's own gap register records that accelerators are absent from this repository; a search box on one field does not change that, and claiming `H7` here would overstate what the change delivers.
+
+**`SHR-2`'s cost is the one accepted without a matching gain.** A Trainer who has entered the same spark target many times loses the muscle memory of a native `<select>`'s type-ahead, which is fast for a known prefix. The search box is slower for that one case and faster for every case where the Trainer does not remember the exact opening characters. `SHR-2` does not forbid that trade — it forbids making the first run harder, and the first run is the one where a name is not yet known.
+
+##### §4.5.4 Rules that do not apply, and why
+
+Eleven derived-rule families exist across ten files; this section names only the ones a reader of §4.5.1–§4.5.3 might expect to see and does not.
+
+| Rule | Why N/A here |
+| --- | --- |
+| `WCAG 1.2` (time-based media) | The tool carries no audio or video. Nothing in this change introduces any. |
+| `WCAG 2.5.7` (dragging movements) | The picker adds no drag interaction; selection is click and keyboard. |
+| `WCAG 3.3.7` (redundant entry) | The picker asks for nothing the row already holds — it inherits the Category rather than re-asking it. The rule is satisfied by construction, not waived. |
+| `SHR-4` (closure statement) | This change alters one field inside the Legacy step; the wizard's own closure statement at Preflight is untouched. |
+| `SHR-6` (reversibility of a committed turn) | No turn is committed or altered by the picker. The spark payload is a draft write with its own edit path. |
+| `TOG-6` (undo or named confirmation) | No destructive control is added or moved. Removing a spark keeps its existing `Remove Spark` button. |
+| `GT-2` (partial-indicator honesty) | No indicator is added. The picker's "no match" line is a state message, not a partial indicator. |
+| `UX-1` (44px target, primary action nearest) | The picker reuses `SearchableSkillPicker`'s `min-h-11` (44px) option rows and its existing focus ring. **The 44px figure is this repository's house rule exceeding 2.5.8's 24×24 minimum; it is not 2.5.8 conformance and is not described as such.** The settlement is recorded in `design-framework-index-2026-10-21.md`. |
+| `GP-3` (summation labelling) | Nothing here is summed. The one count-bearing statement — the option total — is a list length, not an arithmetic result presented as one. |
+
+**Attribution.** Closure and Continuity are published by `uilaws-2026-10-21.md`, not by `laws-of-ux-2026-10-21.md`; Common Fate is Gestalt only and is not a law in either collection; there is no "Law of Experience" — the concept is Mental Model, entry 17 of the Laws of UX; Fitts, Hick and Jakob are cited from `laws-of-ux-2026-10-21.md` because that is the more specific collection for them even though both carry them. None of those five appears in this section, which is precisely why the table is stated once here rather than assumed.
+
+**Conflicts.** One of the index's seven settled conflicts bears on this change: **target size**, where the 44px house rule exceeds 2.5.8's 24×24 minimum and must never be described as conformance. The settlement above follows the index and does not re-open it. **Consistency versus exceptions** also runs through §4.5.3, and its settlement — Shneiderman governs, exceptions must be comprehensible and few — is what makes "remove the exception" the right answer here rather than "document the exception."
+
+---
+
+### §5 Rejected alternatives
+
+| Alternative | Why rejected |
+| --- | --- |
+| **A. Inline searchable `<datalist>` on a plain text input** | Native, zero component cost, but the browser's autocomplete popup is not styleable, does not report a count, announces nothing (`4.1.2`), and in Chromium caps its visible list at ~10 rows. It also accepts free text, which the server's `Skill` branch permits (M-13) but which lets a typo through as a stored target. |
+| **B. `CardPicker`'s modal dialog** | `CardPicker.vue` is a `<dialog>` that fetches its own options and keeps a filter bar (269 lines). Sparks arrive up to **6 rows per legacy × 2 legs**, each with its own Kind/Category/Target/Stars. Six modals on one screen is worse than six selects, and the spark row's target is a small field beside three siblings, not a deck-slot decision. |
+| **C. Leave `<select>`, add type-ahead only** | Native `<select>` type-ahead already exists and already fails the user's report. It jumps to a prefix; it does not filter. |
+| **D. Replace `BaseSelect` globally** | 27+ call sites, most of them 3-11 option lists where a `<select>` is correct. The defect is on one field at one cardinality. |
+| **E. Conditional control — keep `<select>` for Stat (6 options) and Aptitude (11 options), swap in the picker only for Skill (623)** | Proportionate to each count, and it is the smallest possible surface change: two thirds of the row's categories keep the control they already have. **Rejected** because the row's control shape would then depend on the category the Trainer picked. Changing Kind or Category from `Skill` to `Aptitude` would swap a combobox for a native `<select>` under the cursor — `SHR-1`'s "the same thing behaves the same everywhere" failing from the other direction, and the swap lands mid-edit with focus to lose. `SearchableSkillPicker` handles a 5-item list as well as a 623-item one for no extra cost, so the proportion argument buys nothing and the inconsistency costs a re-learn. This is the alternative the one-unified-shape recommendation in §4 item 2 exists to refuse. |
+
+**Recommended over all five:** the focused variant in §4, because it reuses a picker the tree already ships and already passes the accessibility contract (`SearchableSkillPicker.vue:10-14` documents listbox semantics, 2.5.3, 44px, and the D-55 keyboard contract).
+
+---
+
+### §6 Fix would not change
+
+- **No bulk spark entry.** Typing/pasting a whole spark set at once is `R7-36` facet (b)'s territory (`docs/audits/rice-shower-cup-round7-reconciliation.md:956`) and is a separate proposal.
+- **No change to what a spark stores.** The payload keeps `{kind, target, stars}`, target a string. No foreign key, no id column, no migration.
+- **No change to the category boundary.** `assertTargetMatchesCategory()` stays as-is; the picker narrows what is offered, the request still refuses a mismatched pair.
+- **No change to `Skill` validation.** Adding `assertTargetMatchesCategory`'s `Skill` branch to validate against the catalogue is a *possible* hardening, but it is a trust-boundary change the user did not ask for and it would refuse targets already stored by older runs. Recorded as an owner decision in §7, not done here.
+- **No change to the Kind or Category controls.** They keep `BaseSelect` — 5 and 3 options.
+- **No change to `BaseSelect.vue`.** 27 call sites stay on the native control.
+- **No scenario name** enters a component (`AGENTS.md` §7, gate G-33).
+
+---
+
+### §7 Owner decisions required
+
+| # | Question | Recommendation | Why |
+| --- | --- | --- | --- |
+| 1 | **Filter the Skill list to `availableOnGlobal()`?** 1,910 → 623 | **Yes.** Do it in both controllers, in the same change. **The picker must include the row's current value even when the filter excludes it** — a `Current: <name>` row prepended to the list, or an equivalent fallback, so a spark already recorded against a `JapanOnly` target still renders its stored value on re-edit rather than showing empty and silently losing it on save | A `[Global]` run cannot produce a `JapanOnly` skill. Offering 1,287 impossible targets is the larger half of the defect and costs one scope call. Note the two doors must change together (M-5). **Measured: no such row exists in the dev database today** — one run carries `legacy_selection`, its two legs record `sparks: []` and no ancestor sparks, and there are zero Veterans (M-14). The guard is therefore preventive against future imported or Veteran-sourced data, and it is load-bearing the moment one exists: today's `<select>` offers all 1,910, so a stored `JapanOnly` target is reachable by the current UI, not just by an import. |
+| 2 | **Inline combobox or modal dialog?** | **Inline** (combobox over the row) | The row already carries four controls; a modal per spark is 6 dialogs on one screen. `CardPicker`'s modal answers a different question (browse a catalog, pick one of six slots). |
+| 3 | **Does the picker inherit the row's Category?** | **Inherits** — it is the same `spark.category` that already drives the list | The current `<select>` is already category-cascaded (`@change="spark.target = ''"` on the Category select, `LegacySelect.vue:570`). A picker that filtered independently would offer the wrong vocabulary and the server would refuse the write. |
+| 4 | **What does search match on?** | **Name only**, with `name_ja` as a secondary match if it is cheap | `description` is populated for 985/1,910 (M-10) and the option list is built from `name` alone today (M-4); matching a field the payload does not carry means sending a second array. Name-only is what the user asked for ("choose list like trainee list"). **Landed in full at `S-A-P02.5`:** the payload now carries `name_ja` beside `name`, the list prints the Japanese name in a `lang="ja"` span, and search matches either. The rule behind it is the tree's own, at `SkillController.php:515` — *"search matches what the user can see"* — and it is what the support-card search and the skill catalogue already do. |
+| 5 | **Keyboard contract** | **Preserve `SearchableSkillPicker`'s**: type, ArrowUp/Down, Enter, Escape, Tab closes | `SearchableSkillPicker.vue:108-141` already implements it and documents it as the D-55 contract. A new hand-rolled picker would have to re-earn it. |
+| 6 | **Reuse `SearchableSkillPicker` or build a sibling?** | **Build a sibling that shares the pattern**, unless the generalisation proves under ~30 lines | `SearchableSkillPicker` takes `{id, name, type}[]` and emits `{id, name}`; sparks need `string[]` → `string`. Generalising means either a discriminated union prop or a second emit shape at 3 call sites. Decide at implementation time; §9 shapes both. |
+| 7 | **Where does it land?** | **Both surfaces** — `LegacySelect.vue` (wizard) and `Legacy/Builder.vue` (run-scoped), through `AncestorEditor.vue` for the four grandparent nodes | `AncestorEditor` is shared by both (`LegacySelect.vue:36`, `Legacy/Builder.vue:53`), so one edit covers four of the six editors; the two parent rows are the page's own markup. |
+| 8 | **Harden the `Skill` category server-side?** | **No, not in this change** | Out of the user's ask; would refuse stored targets from older runs. Record as a follow-up if the owner wants it. |
+
+---
+
+### §8 Risk and reversibility
+
+- **Blast radius.** Three `.vue` files, two `.php` controllers (the `availableOnGlobal()` scope and, if decision 6 goes the generalisation route, `SearchableSkillPicker.vue`). No migration, no model, no route.
+- **Reversibility.** The picker is a leaf component behind one prop contract. Reverting means restoring the `<BaseSelect>` block in `AncestorEditor.vue:177-182` and `LegacySelect.vue:572-578` — the string list, the `v-model`, and the error bind are all unchanged, so the revert is the two original blocks. The `availableOnGlobal()` scope is one call and reverts independently.
+- **What breaks if removed.** The spark target field stops filtering. Nothing else reads it.
+- **Spec risk.** `AncestorEditor.vue:5-9` names three browser specs that locate these fields by id and label. The ids are preserved (`§4` item 4), but `getByLabel('Target')` against an `<input>` instead of a `<select>` changes what Playwright's `selectOption()` can do. **The three specs need a read before implementation** and likely a `fill()`-based helper. This is the one real cost of the change and it should be measured, not assumed.
+- **Duplicate-name risk.** 10 names exist twice (M-2), including `Carnival Bonus` ×5. A name-based picker will show five identical rows. The current `<select>` has the same problem, so this is not a regression, but a picker with a count label would make it visible.
+
+---
+
+### §9 Proposed slice shape (not commitment)
+
+**As written before implementation.** Naming a shape, not a slice id, commit or phase. *Dated note 2026-11-08: realised as `S-A-P02.1`-`.4` — four slices rather than the "one or two" contemplated below, because the two spec-contract repairs could not share a commit with the wiring that broke them. See §0.1 for what actually shipped.*
+
+- **One commit or two.** Decision 1 (`availableOnGlobal()`) is a server-only change and could land alone with its own test; the picker is the frontend half. Two commits if the owner wants the count reduction immediately. *→ It did land alone, as `S-A-P02.1`.*
+- **Files.** `resources/js/components/legacy/SparkTargetPicker.vue` (new), `resources/js/components/legacy/AncestorEditor.vue`, `resources/js/pages/Career/LegacySelect.vue`, `app/Http/Controllers/Career/LegacySelectController.php`, `app/Http/Controllers/LegacyController.php`; `resources/js/pages/Legacy/Builder.vue` only if the parent rows differ from `LegacySelect`'s. *→ They did differ: the Builder's row lacked the Category control entirely, so it changed and gained one.*
+- **Test file.** A feature test asserting `sparkTargets.Skill` excludes a `JapanOnly` name and includes a `GlobalReleased` one, pinning the count drop; a browser spec on the Legacy step asserting the Target control is a combobox, that typing `Xceleration` narrows it, and that ArrowDown + Enter selects. *→ Both landed, in `SparkTargetValidationTest.php` and `career-legacy-deck-steps.spec.ts`. The typed probe is `Cut and` rather than `Xceleration`, for the reason given in the spec: three characters is enough to narrow without risking a prefix that sorts ahead of the target.*
+- **RED looks like.** The feature test fails with `Expected [623 rows] but got [1910]` before the scope lands. The browser spec fails locating a `role="listbox"` beside the Target label, because a `<select>` exposes `role="combobox"` with no listbox child. *→ The feature RED was `Expecting […] not to contain 'Japan Only Sample Two'`; the browser RED was `Expected: "combobox" / Received: null`, since a native `<select>` carries no `role` attribute at all.*
+- **Pint/PHPStan/typecheck** per the hand-off sequence; `npm run lint:ui` will flag any new arbitrary Tailwind value, and the picker should reuse `SearchableSkillPicker`'s existing classes rather than invent any. *→ `lint:ui` did flag one (`min-w-[12rem]`, the first draft); replaced with the token scale's `min-w-48` rather than added to the baseline.*
+
+---
+
+### §10 Proposal does not do
+
+**Dated note 2026-11-08: this list described the planning session that wrote §1-§9. Code has since landed under a separate dispatch — `S-A-P02.1`-`.4`, §0.1.** The items below stay true of the proposal *as authored*; they are no longer true of the tree. What the implementation still does not do is §0.6.
+
+- No code. No file under `app/`, `resources/`, `database/`, `tests/`, `config/`, `routes/` is changed by this session. *(True of the proposal session; those files changed under the dispatch.)*
+- No slice opened. No RED, no GREEN, no pre-flight gate. *(True of the proposal session.)*
+- No dispatch. No slice id, commit SHA or phase named. *(True of the proposal session; the dispatch named four slices and this document now cites their commits as the record.)*
+- No re-opening of Round 7. This defect is not `R7-36`, `R7-68`, `R7-78`, `R7-79` or `R7-80`: those record sparks being **absent or unrepresented**; the editors exist and store correctly (`R7-36` is `Does not reproduce` at `cdd0083a`, recon `:926`). This is the picker's ergonomics, which no register row names. *(Still true; no register row was opened by the implementation either.)*
+- No claim that the audits named this. `AUD-20261108-R7-A/B/C` did not. *(Still true.)*
+- No third issue. One observation worth recording: `Skill` targets are unvalidated server-side (M-13). Noted in §6 and §7 decision 8, not proposed. *(Still true; decision 8 ruled no and the boundary is unchanged. The implementation surfaced two further observations, both in §0.6.)*
+
+---
+
+### §11 Change log
+
+| Date | Change |
+| --- | --- |
+| 2026-11-08 | Opened. Pre-flight baseline `e7e0c5b22e93758f76e0716d9bdbb32ac4e8ab4e`, `git status --short` = 7 untracked (`docs/audits/RS-UC-2026-10/`, `RS-UC-2026-11-snapshot-door/`, `RS-UC-2026-12/`, `rice-shower-unity-cup-ux-walk-6.md`, `-walk-7-snapshot-door.md`, `-walk-7.md`, `docs/imports/ura-finale-runs.md.bak`). `RENDERED_EVIDENCE = TRUE` (`launched 153.0.8010.12`). Measurements M-1..M-13 taken against `database/database.sqlite` and a live `php artisan serve --port=8177`. |
+| 2026-11-08 | Refinement — §5 alternative E: conditional picker (`<select>` for Stat/Aptitude, picker only for Skill) rejected on `SHR-1` |
+| 2026-11-08 | Refinement — §7 decision 1 guard: the picker includes the row's current value even when the `availableOnGlobal()` filter excludes it; M-14 added recording that no such value exists yet |
+| 2026-11-08 | Refinement — duplicate check against `docs/proposals/` run (title filter + body grep for `character_cards.*base.?stat`, `spark.?target`, `1,?910`, `JapanOnly`); the only hits are this proposal's own text. No prior proposal covers this surface. |
+| 2026-11-08 | §4.5 — framework adherence section: justifying/constraining/accepted/N-A rules, attribution table cited, target-size settlement cited for the picker's 44px options |
+| 2026-11-08 | §4.5 — `4.1.1` appears once, as the mandated withdrawal caveat (§4.5 opening); no rule grounding rests on it. No `SHR-8` citation in this proposal (the ID is not defined in `shneiderman-golden-rules-2026-10-21.md`, whose rules stop at `SHR-7`). |
+| 2026-11-08 | Implemented — `S-A-P02.1` (`7fb232e3`) filters both doors' Skill list to `availableOnGlobal()`: 1,910 → 623. `S-A-P02.2` (`195c39d4`) adds `SparkTargetPicker.vue` with the current-value guard and wires the wizard's parent rows. `S-A-P02.3` (`cb0d4943`) wires the run-scoped Builder and the four grandparent editors; the Builder's parent row gained the Category control it was missing. `S-A-P02.4` repairs the three specs that drove the field with `selectOption()`. |
+| 2026-11-08 | Implementation note — the `fill()`-based helpers landed in `.2`/`.3` rather than `.4`, because those slices cannot leave the suite green without them. `.4` then covered `legacy-index.spec.ts` and `career-inheritance-event.spec.ts`, which do drive the field (`fill('Speed')` on `Applies to`) and which the dispatch expected to be untouched. |
+| 2026-11-08 | **`S-A-P02.5` (`662a0a42`) — decision 4's `name_ja` half landed, and §0.3's cost claim was wrong.** The option list now carries `{name, name_ja}`; the list prints the Japanese name in a `lang="ja"` span; search matches either name. **Correction:** §0.3 first recorded the `name_ja` half as *"not cheap"*. That was a judgement, not a measurement. The change is one column on the payload (`pluck('name')` → `get(['name', 'name_ja'])`) in two controllers, with no schema change and no widening. The rule that settles it is the tree's own, at `SkillController.php:515` — *"search matches what the user can see"* — and it is what the support-card search (`SupportCardController.php:643`) and the skill catalogue (`SkillController.php:579`) already do; the spark picker was the outlier. 605 of the 623 Global-client skills have a `name_ja` that differs from `name`, and `DESIGN.md:573` already lists `name_ja` among the fields a skill row prints. **The browser case was proved non-vacuous twice:** the first version passed against a build with the Japanese match removed, because the row's `innerText` included the English name and the test sliced an English prefix; the corrected case reads the `lang="ja"` span itself, and with only the Japanese match reverted it fails with `Expected substring: "十万バリキ"`. |
+| 2026-11-08 | **§0 added — implementation status.** §0.1 slices landed and their commits · §0.2 decision-by-decision disposition · §0.3 the three divergences from the proposal · §0.4 measurement-vs-shipped · §0.5 gates at close-out · §0.6 still open. §9 and §10 carry dated notes marking them historical; their content is unchanged. |
+
+## 2026-11-08-trainee-preset-autofill.md
+
+> **Folded into this master in consolidation Round 25 (owner-ordered, 2026-11-10) from**
+> `docs/proposals/2026-11-08-trainee-preset-autofill.md`. It is the trainee preset auto-fill
+> proposal, whose `S-A-P01` slices and close-out the ledger sections above already record. Its
+> 2026-11-10 resolution row already cites the `s-a-p01-og-goal-source` section of this master in
+> the form Round 24 repointed it to; the row is a dated ledger entry and stays verbatim. The
+> source's own `#` title follows verbatim as `###`, and
+> its remaining headings keep one level of demotion; the body is otherwise untouched. The source
+> file was deleted from its original location after this section was verified present and
+> byte-identical; it remains recoverable from the commit that deleted it.
+
+
+**Status:** proposal, not slice. **Decisions 1-7 ruled and implemented as `S-A-P01.1`-`.4`** — `955ff4f2`, `39804efe`, `4072042c`, `f434b41a`. **Decision 7 is now settled by the corpus, not by a new ruling** (§0.4), and §4.3's Unity Cup gating was **corrected** at `.4` because it rested on a misreading of the ladder's grain (§0.3). Awaiting review.
+**Date opened:** 2026-11-08
+**Implemented:** 2026-11-08, same session
+**Source:** user's session, 2026-11-08; screenshot `/umamusume/vodka` profile page (base stats `96 / 61 / 105 / 75 / 88`, growth row `10 / 0 / 20 / 0 / 0`); user's words quoted in §1.
+**Register reference:** none (not a Round 7 row).
+**Audit reference:** none (`AUD-20261108-R7-A`, `-B`, `-C` did not name this).
+**Ownership:** proposal recommends; §7 lists the decisions the owner makes.
+
+> **This document is now both the record and the progress log.** §1-§8 are the proposal as it stood before any code landed; their measurements and reasoning are unchanged. **§0 records what was built**, and §9/§10 carry dated notes because both said "no code" and are now historical. §11 logs each revision.
+
+---
+
+### §0 Implementation status
+
+#### §0.1 Slices landed
+
+| Slice | Commit | Files | What it delivered |
+| --- | --- | --- | --- |
+| `S-A-P01.1` | `955ff4f2` | `config/scenarios.php`, `TeamPanelBuilder.php`, `TraineeGoalsPanelTest.php` | A per-scenario `goal_source` key. `TeamPanelBuilder::traineeGoalRows()` returns no rows when the key is `null`. **Its Unity Cup half was wrong and was corrected at `.4`** — see §0.3 item 0. The gate mechanism itself stands |
+| `S-A-P01.2` | `39804efe` | `SeedRunSkills.php` (new), `PreflightController.php`, `TrainingRunController.php`, `CareerPreflightTest.php` | `app/Actions/SeedRunSkills.php` is now the **one** seeding owner; `TrainingRunController::prePopulateSkills()` delegates to it and the wizard door calls it inside the same transaction. The stale "No start skills are seeded" sentence at `PreflightController:51` is corrected. Two cases: a wizard-started run holds the card's `innate ∪ unique` as `Suggested`; a card-less draft seeds nothing |
+| `S-A-P01.3` | `4072042c` | `CockpitController.php`, `CareerStatePanel.vue`, `Cockpit.vue`, `CareerCockpitTest.php`, `career-cockpit.spec.ts`, `start-career.ts` | `state.starting_stats` on the payload and a labelled `Starting:` line beneath the stat rail: `96 61 105 75 88` with the words *"the card's base line, before any training"*. **Absent entirely for a run with no card** — not `N/A`, not five zeroes |
+| `S-A-P01.4` | `f434b41a` | `config/scenarios.php`, `TraineeGoalsPanelTest.php`, `07-grand-concert.md`, `ADR-0026` | **The correction.** `unity_cup`'s `goal_source` restored to `'trainee_goals'` and `our_grand_concert`'s named `'trainee_goals'`; Trackblazer stays `null`. The ladder is **the character's own goals**, so every scenario that asks for it composes it. `07-grand-concert.md:242` gains a dated note and `ADR-0026` a dated roster-growth note |
+
+Ledger: `§s-a-p01-1` … `§s-a-p01-3` and `§s-a-p01-close-out` in `docs/research-scratch/SLICE-RECORDS.md`.
+
+#### §0.2 Decision-by-decision disposition
+
+| # | Decision | Ruling | Landed |
+| --- | --- | --- | --- |
+| 1 | Seed starting skills on the wizard door | Yes | `.2` — `SeedRunSkills` action, called from `PreflightController::store()` |
+| 2 | Base stats as a reference, not an input | Yes — reference | `.3` — `state.starting_stats` + the `Starting:` line |
+| 3 | Extend the snapshot door | No | not done, as ruled. `CreateSnapshotRun` names no card, so there is nothing to seed from |
+| 4 | Gate the goal ladder per scenario | Yes — but the gate's *scope* was wrong and was corrected at `.4` | `.1` — the `goal_source` key. **Corrected at `.4`**: the ladder is the character's own, so the gate now applies only to Trackblazer, whose `panels.career_goals` is already absent. See §0.3 item 1 |
+| 4a | Hidden panel or empty state | Hidden | `.1` — the panel composes no rows, following `ScenarioPanel.vue`'s off-flag behaviour and Trackblazer's precedent. `.4` kept the mechanism and the precedent; only the value changed |
+| 5 | Add `scenario` to `trainee_goals` | No | not done, as ruled. A schema change for data that does not exist |
+| 6 | Editability after seeding | Already supported | nothing built — `SkillsPlannerController` writes `Acquired`/`Skipped`/`Suggested`; `RunSettings.vue` edits `growth_rate` and the caps |
+| 7 | Our Grand Concert's ladder | **Settled by the corpus, not by a new ruling** — see §0.4 | `.4` — `our_grand_concert`'s `goal_source` is `'trainee_goals'`, named explicitly |
+
+#### §0.3 Where implementation diverged from the proposal
+
+0. **The biggest divergence: §4.3's premise was wrong, and the fix shipped its correction at `.4`.** §4.3 called `trainee_goals` *"URA-only data"* (M-12, M-13) and gated Unity Cup off on that basis. **The data is not URA's.** Three sources, read after the owner review:
+
+   - `ADR-0026` (Accepted, owner-ratified 2026-10-13): *"**Trainee grain, no run scope.** `trainee_goals` keys on `umamusume_id`"*.
+   - `docs/scenarios/09-global-race-calendar.md:641`: *"The goals are the character's own, per trainee rather than per scenario"*.
+   - `docs/scenarios/02-unity-cup.md:169`: *"Your trainee's own individual race goals still apply on their normal schedule (same as URA Finale) … Unity Cup adds Team Races on top; it does not remove the underlying career race-goal structure"*, and `:289`: *"your trainee's individual race goals are unchanged from URA Finale and still run in parallel — Unity Cup adds a layer on top, it doesn't remove the underlying goal-race structure"*.
+
+   So the ladder is the character's own goals, and Unity Cup composing Vodka's race demands was **never wrong data** — those are Vodka's goals, on races every scenario shares. §4.3's reasoning used the same mislabelling that produced the false "URA ladder" binary, and the owner review is what caught it: *"If the ladder is the character's, not URA's, then Unity Cup rendering Vodka's ten race demands is not wrong data."*
+
+   **Measured, precisely** (`select … from trainee_goals left join race_catalog_slots`): of 1,677 goal rows, **1,201 carry a `race_catalog_slot_id` and every one of the 1,201 joins a slot whose `scenario_key` is `null`** — a shared race. **Zero** goal rows point at any of the four scenario-scoped slots (`ura_finale` 410, `unity_cup` 408, `trackblazer` 407, `our_grand_concert` 409). The remaining **476 carry a NULL `race_catalog_slot_id`**: 399 `FinalRound`, 63 `Fan`, 11 `Undecoded`, 3 `Placement`. The 399 finals are the per-scenario fork, and `TeamPanelBuilder:243` already excludes them from the ladder; the 63 `Fan` rows are the fan-threshold goals that carry no slot by construction.
+
+   **The correction, landed at `S-A-P01.4` (`f434b41a`):** `unity_cup`'s `goal_source` restored to `'trainee_goals'`, `our_grand_concert`'s named `'trainee_goals'`, and **Trackblazer stays `null`** — it has no `panels.career_goals` at all (M-17), so it composes no panel whatever the key says. The gate mechanism from `.1` stands; only its values changed.
+
+   **A number in the owner's own review is corrected here, because the proposal now carries it.** The review recorded *"1,677 of 1,677 rows point at shared races"*. The **conclusion** is right — no goal row names a scenario — but the **denominator** was wrong: it is **1,201 of 1,677** that carry a slot at all, and it is those 1,201 that all point at shared slots. The other 476 hold no slot id and so cannot name a scenario either way. The proposal states the corrected figure because it is the figure a reader can reproduce with one query.
+
+1. **A fourth test had to move.** `CockpitGoalFromCompletedRaceTest` asserted a `unity_cup` run composes a trainee ladder — precisely the behaviour `.1` was ruled to remove. The case is about the derivation from a completed race, so it now runs on `ura_finale`, the scenario whose ladder exists. Fixed at `04b9b092`, with the reason written into the test. It was the **fourth** Pest failure of the full suite and the only one this work caused.
+
+2. **`TeamPanelBuilder` needed no `CockpitController` change.** §9's Piece 1 predicted both files would read the new key. Only `TeamPanelBuilder::traineeGoalRows()` does: the existing `panels.career_goals` flag already decides whether the *panel* composes, and the new key decides *whose rows* it draws. Two questions, two keys, one file changed.
+
+3. **The browser case needed a fixture the tree did not have.** `tests/utils/start-career.ts` picks the first roster row and never sets a costume form, so every run it creates is card-less and could only assert the absent branch. Rather than duplicate the walk, an `onTrainee` hook was added beside the existing `onLegacy` hook — the same additive shape that helper's own docblock records for round 4.1. The case then picks Vodka, who has two forms in the fixture.
+
+#### §0.4 Decision 7 — settled by the corpus, and it settled more than OGC
+
+`config/scenarios.php:1118-1119` reads: *"the trainee's own objective ladder is a career fact, not a concert mechanic"* and calls it "the one panel this entry composes". It did not say whether that ladder is the URA list `trainee_goals` holds or a concert-specific one no table carries.
+
+**The corpus answers the question, and the answer is "neither".** The ladder is **the character's own**, and that is a third thing the two branches did not contain:
+
+- `ADR-0026` (Accepted): *"Trainee grain, no run scope. `trainee_goals` keys on `umamusume_id`"*.
+- `docs/scenarios/09-global-race-calendar.md:641`: *"The goals are the character's own, per trainee rather than per scenario"*.
+- `docs/scenarios/07-grand-concert.md:242`: *"The scenario has character race goals, which is what the panel is for"*.
+- `docs/scenarios/02-unity-cup.md:169` and `:289`: Unity Cup *"adds Team Races on top; it does not remove the underlying career race-goal structure"*.
+
+**The owner's review is what forced the read, and it was right to force it:** the review noted that landing OGC's half alone *"produces an asymmetry the corpus does not support: OGC composes the ladder, Unity Cup does not, both on identical evidence, no distinguishing source cited. A future reader of `config/scenarios.php` will not be able to explain it from the file."* That is exactly what happened, and the two candidate files named in the review settled it — with one correction: the Unity Cup file is `docs/scenarios/02-unity-cup.md`, not `08-unity-cup.md` (`08` is Grand Masters, `[JP]`-only).
+
+**What landed, at `S-A-P01.4` (`f434b41a`) — the unified fix, not the OGC half:**
+
+| Scenario | `goal_source` | Why |
+| --- | --- | --- |
+| `ura_finale` | `'trainee_goals'` | unchanged — it was always right |
+| `unity_cup` | `'trainee_goals'` | **restored.** `02-unity-cup.md:169,289` — the character goals still apply |
+| `our_grand_concert` | `'trainee_goals'` | **named.** `07-grand-concert.md:242` — the scenario has character race goals |
+| `trackblazer` | `null` | **stays off.** No `panels.career_goals` at all (M-17), so no panel composes whatever the key says |
+
+Two owner decisions are now closed that were not open before: decision 7, and decision 4's Unity Cup half, whose original reasoning did not survive the read.
+
+**The documents moved with the code.** `07-grand-concert.md:242` gained a dated note recording that the decision named there *"is an owner decision, not a fact to flip"*, that it has since been made, and that it went the other way from what the cell expected — the ladder **is** composed, and what stays off is the race *calendar*, a separate surface with a separate absence. `ADR-0026` gained a dated note recording that the roster grew from 67 trainees and 829 objectives to **133 and 1,677**, with the finals from 201 to **399** — the same shape at nearly twice the size (399 is exactly 3 × 133, as 201 was exactly 3 × 67), so the two figure sets are consistent rather than contradictory, and the decision's grain is unaffected.
+
+#### §0.5 What the measurement predicted vs what shipped
+
+| Proposal said (§2) | Shipped |
+| --- | --- |
+| `growth_rate` already seeds (M-7) | Confirmed and left alone — `StartCareerRequest.php:165-177` |
+| Skills seed on one door only (M-9) | Confirmed — the wizard door now seeds too, through one shared action |
+| `trainee_goals` has **no** `scenario` column, is URA-only (M-12, M-13) | **The column half is confirmed** — the gate is a config key, not a column. **The "URA-only" half was wrong** — the rows are the character's own (ADR-0026; `09-global-race-calendar.md:641`), and `.4` corrected the recommendation that rested on it. See §0.3 item 0 |
+| `panels.career_goals` is `true` for three scenarios (M-17) | Confirmed — and after `.4` all three compose the ladder, because it is theirs. Trackblazer, the fourth, has no such panel |
+| `run_skills` was 0 rows across the dev database (M-6) | Still 0 for existing runs — the seeding applies to **new** runs only, which is the point |
+| The base five are a **card fact, not run state** | Enforced: the reference is read from the card at read time and written nowhere |
+
+#### §0.6 Gates at close-out
+
+```unknown
+Pest            2297 passed, 3 failed  — the 3 are pre-existing, named in ledger §10a
+Browser         career-cockpit 32 passed · career-legacy-deck-steps 18 · legacy 10
+                career-inheritance-event 9 · legacy-index 1 passed, 1 pre-existing failure
+PHPStan level 6 [OK] No errors
+Pint            passed on every touched PHP file
+typecheck       clean (vue-tsgo -p tsconfig.vue.json && tsc --noEmit)
+build           ✓ built
+lint:ui         no new arbitrary values in the touched components
+lore            code 318 hit(s) · docs 574, 75 exempt — delta 0 from this pass
+fences          0 invalid closing fence(s)
+migrate:status  76 Ran, 0 Pending
+peer set        clean at open and close
+```
+
+#### §0.7 Still open
+
+- **Nothing from decision 7.** It is closed by §0.4's corpus read.
+- **The `Applies to` / `Target` label split — CLOSED at `S-A-P02.6` (`1c51fd04`).** The Builder's row said `Applies to`; the wizard and the four grandparent editors said `Target`. Renamed to `Target`, the tree's own word for the field (`LegacySelectionPayload::SPARK_KEYS` is `['kind','target','stars']`).
+- **`legacy-index.spec.ts:110`'s fixture 404 — CLOSED at `S-A-P02.6` (`1c51fd04`).** Two fixture defects, not one: a wrong Builder URL and a parent name no buildable database holds. The case now runs in 16.3 s. See P-02 `§0.6` and ledger `§s-a-p02-6`.
+- **The three pre-existing Pest failures** named in ledger §10a: `ScenarioAdvisorFinaleTest`, `UraPanelTest`, `UiHygieneTest`. The third is `TeamPanelBuilder.php:577` shipping a source-file path in payload copy — the line was 552 before this work's 25-line insertion above it and is **not in this work's diff**. Re-confirmed against the full suite this pass: the same three, nothing new.
+
+#### §0.8 Decision 7, explained — why the ladder is the character's own
+
+The owner's review asked for the reasoning to be stated against `docs/UMAMUSUME_REFERENCE.md` and the framework files. This is that statement.
+
+**The claim, in one sentence.** `trainee_goals` holds **the character's own career goals**, so a run composes them because the run is *that character's*, not because the scenario happens to be URA.
+
+**The reference corpus says so, in the client's own words.** `docs/UMAMUSUME_REFERENCE.md` §1.2 (`:388`) records what a race goal is and who owns it: *"The Debut Race is mandatory for **every character**"*; *"Campaign objectives are 'getting a minimum placing in a specific race or acquiring a set amount of fans before a set date'"*. **Every character.** Not every URA run — every character. The reference document attributes it to the export and to the career-mode wiki, and the subject of the goals is the character.
+
+**What the reference says about the scenarios that re-shape the career.** §2.2 (`:1260`) records for Our Grand Concert: *"**The standard career is back.** Race goals, career events and per-character hidden events all return, including New Year events and the hot spring lottery, so a Runaway-style gate is reachable here in a way it is not in Trackblazer."* The sentence's shape is the answer: the scenarios are not competing vocabularies for the goal concept; each one **keeps or removes the standard career**, and where the standard career is present the character's race goals are present with it. §2.2 (`:1124`) records the opposite case for the scenario that drops it: *"Open career, no race goals, no scenario link … What replaces career goals is four shared …"* — Trackblazer, which is the one scenario whose `goal_source` is `null`.
+
+**The scenario corpus confirms it for Unity Cup specifically.** `docs/scenarios/02-unity-cup.md:169`: *"Your trainee's own individual race goals still apply on their normal schedule (same as URA Finale) … Unity Cup adds Team Races on top; it does not remove the underlying career race-goal structure."* And `:289`: *"your trainee's individual race goals are unchanged from URA Finale and still run in parallel — Unity Cup adds a layer on top, it doesn't remove the underlying goal-race structure."* Unity Cup **adds a layer**. That is the opposite of "a different ladder replaces this one".
+
+**The measurement agrees, and it is the check that settles it.** Of 1,677 goal rows, 1,201 carry a `race_catalog_slot_id` and **every one of the 1,201 joins a slot whose `scenario_key` is `null`** — a race every scenario shares. **Zero** rows point at any of the four scenario-scoped slots. A ladder that belonged to URA would point at URA's slots. It points at shared ones.
+
+**What follows from it, per scenario.** URA, Unity Cup and Our Grand Concert all keep the standard career, so all three compose the character's goals. Trackblazer replaces the career with a different shape, so it composes none. **That is what `config/scenarios.php` now says**, with every key named explicitly rather than relying on a default.
+
+**The framework rules this answers to.**
+
+| Rule | What it requires | How the fix satisfies it |
+| --- | --- | --- |
+| `NRM-3` | *"A rule the system enforces is expressed by the control, not by a message after it."* | The enforced rule is "the ladder belongs to the character". The panel expresses that rule by drawing the character's own rows. The old gate expressed the opposite rule — "this ladder is URA's" — by drawing it under Unity Cup, which is why it read as a false claim. |
+| `H5` (error prevention) | Do not show the user a fact that is false for their run. | Under the corrected reading, Vodka's ten race demands under Unity Cup are **not** a false fact; they are her demands. The correction removes a defect that was created by the mislabelling, rather than introducing one. |
+| `IA-6` | *"Adding a scenario must cost configuration, not layout."* | The rule is expressed as one config key per scenario. A scenario that carries the standard career composes the ladder; one that replaces the career does not. Adding a fifth scenario costs a config row, not a branch. |
+| `SHR-1` | *"A consistency exception must be named in a document and be few."* | Trackblazer is the only scenario that does not compose the ladder, and it is the only one whose `panels.career_goals` is absent. One exception, named, and the reason is a corpus quote. |
+| `GP-1` | *"The product computes a figure the user would otherwise compute."* | The ladder is the product's own stored fact, joined by `umamusume_id`. Rendering it is the product computing; the Trainer never reconstructs her own objectives. |
+
+**The honest part.** The first draft of this proposal called the same table *"URA-only data"* and gated two scenarios off on that basis. That was the proposal's mislabelling, and the owner review caught it: *"If the ladder is the character's, not URA's, then Unity Cup rendering Vodka's ten race demands is not wrong data."* The shipped fix is the corrected reading, and §0.3 records the correction rather than quietly rewriting the original reasoning.
+
+---
+
+### §1 Problem
+
+The tool holds every trainee's preset facts on `character_cards`. The trainee profile page renders them. **The career-start flow carries three of the five into the run and drops two.**
+
+The user's words, verbatim:
+
+> *"is possible auto apply goals, stats and skills each trainee umamusume (innate and unique) chosen career, but trainers (users) option edit values and skills. but each umamusume already preset."*
+
+The screenshot anchors it: Vodka `[Wild Top Gear]` prints base stats `96 / 61 / 105 / 75 / 88` and growth `10 / 0 / 20 / 0 / 0` on her profile page. A career started on that card lands on a Cockpit whose stat rail reads `N/A` until the Trainer types those five numbers into a turn entry.
+
+**The brief this proposal answers assumed more was missing than actually is.** Measurement (§2) shows growth rate and the card's skill lists already seed. The genuine gaps are narrower and one of them is not a preset problem at all — it is a two-doors problem.
+
+---
+
+### §2 Evidence
+
+Pre-flight baseline: `e7e0c5b22e93758f76e0716d9bdbb32ac4e8ab4e`, dirty paths 7 (all untracked audit/import files, none in scope).
+`RENDERED_EVIDENCE = TRUE` — `playwright.chromium.launch()` returned `launched 153.0.8010.12`; rendered figures are live DOM reads against `php artisan serve --port=8177`.
+
+#### The card row (Vodka `[Wild Top Gear]`, `card_id = 100801`, `character_cards.id = 11`)
+
+```sql
+select base_stats, growth_rates, skills_unique, skills_innate
+from character_cards where card_id = 100801;
+```
+
+```
+base_stats   = {"Speed":96,"Stamina":61,"Power":105,"Guts":75,"Wit":88}
+growth_rates = {"Speed":10,"Stamina":0,"Power":20,"Guts":0,"Wit":0}
+skills_unique = [10081, 100081]
+skills_innate = [200382, 200702, 200602]
+```
+
+Resolved: uniques → `Xceleration` (`is_unique=1`), `Cut and Drive!` (`is_unique=1`); innate → `Straightaway Recovery`, `Updrafters`, `Slick Surge`.
+The profile page's third unique, `Into High Gear!` (`export_id=110081`), belongs to the *other* Vodka form `[Fiery Aqua Vitae]` (`card_id=100802`), where it is that card's sole unique. The screenshot showed one form's block; the tree holds both.
+
+**Rendered, against the live app** (`/career/setup/trainee/8`):
+
+```
+base-stats  Speed 96 · Stamina 61 · Power 105 · Guts 75 · Wit 88   (has_base_na: false)
+growth      Speed 10% · Stamina 0% · Power 20% · Guts 0% · Wit 0%
+h1          Vodka ウオッカ
+```
+
+DB and renderer agree exactly.
+
+#### What the tree holds
+
+| # | Measurement | Result |
+| --- | --- | --- |
+| M-1 | `select count(*) from character_cards` | **263** |
+| M-2 | `whereNotNull('base_stats')` / `whereNotNull('growth_rates')` / `whereNotNull('skills_unique')` | **263 / 263 / 263** — the preset is complete, not partial |
+| M-3 | `character_cards` columns | `base_stats`, `growth_rates`, `skills_innate`, `skills_unique`, `skills_awakening`, `skills_event`, `skills_evo` all first-class json columns (`2026_11_02_141639_add_base_stats_and_growth_rates_to_character_cards.php`, `2026_09_30_073029_add_skill_lists_to_character_cards_table.php`) |
+| M-4 | `training_runs` columns | has `growth_rate`, **has no base-stat or starting-stat column**; the five stat values live only on `turn_entries` (`speed, stamina, power, guts, wit`, all non-null) |
+| M-5 | `turn_entries` for run 3 | **1** row, at turn 67, `speed 607 / stamina 577 / power 549 / guts 736 / wit 397` |
+| M-6 | `select count(*) from run_skills` | **0** across the whole dev database (one run exists, created without a card) |
+| M-7 | `StartCareerRequest::runAttributes()` `:165-177` | **copies `growth_rate` from the card** — `$attributes['growth_rate'] = $card->growth_rates;` |
+| M-8 | `PreflightController::store()` `:147-186` | creates the run from those attributes, writes deck slots, **calls nothing that seeds skills** |
+| M-9 | `TrainingRunController::prePopulateSkills()` `:261-283` | seeds `skills_innate ∪ skills_unique` as `SkillAcquisition::Suggested`, inside `DB::transaction` with the create (`:230-237`) — **the legacy run-create door, not the wizard door** |
+| M-10 | `PreflightController` class docblock `:51` | *"No start skills are seeded (the same shape `runs.import` has, and for the same reason)"* — the absence is deliberate and documented |
+| M-11 | `CockpitController::stateSection()` `:683-700` | `'current' => $latest?->statValue($stat)` — reads the **latest turn entry only**; a run with no entries has no stat to print |
+| M-12 | `select count(*) from trainee_goals` | **1677** rows, **133** of 136 trainees, all from one source: `gametora.com/data/umamusume/ura-objectives.*.json` |
+| M-13 | `trainee_goals` columns | **no `scenario` column.** Columns: `umamusume_id, race_catalog_slot_id, goal_type, required_placement, fan_threshold, career_year, turn, source_order, …`. The table is **URA-only by construction**, not per-scenario |
+| M-14 | Vodka's goals | **13** rows — `Participate` ×2, `Placement` ×8, `FinalRound` ×3; turns 12…78, years 1-4 |
+| M-15 | `TeamPanelBuilder::traineeGoalRows()` `:214-231` | queries `TraineeGoal::where('umamusume_id', $run->umamusume_id)` — **no scenario filter** |
+| M-16 | `CockpitController::scenarioSectionContext()` `:335-336` | gates the panel on `config('scenarios.scenarios.'.$run->scenarioKey().'.panels.career_goals')` |
+| M-17 | `config('scenarios.scenarios.*.panels.career_goals')` | `ura_finale` **true**, `unity_cup` **true**, `our_grand_concert` **true**, `trackblazer` **absent** |
+| M-18 | Config key for a goal-shape distinction | **none exists.** `facility_level_source` distinguishes facility rules (`repetition` / `team_rank` / `repetition_plus_purchases`), not goals. No config key says "this scenario carries character goals" |
+| M-19 | `CreateSnapshotRun::handle()` `:72-83` | creates the run with `umamusume_id, scenario, status, mode, notes, career_position, career_position_source` — **no `character_card_id`, no `growth_rate`, no skill seeding** |
+
+#### Live cockpit, run 3 (`unity_cup`, Rice Shower, `character_card_id = null`)
+
+```
+Speed 607 / 1,300 floor   Stamina 577 / 1,300 floor   Power 549 / 1,300 floor
+Guts 736 / 1,300 floor    Wit 397 / 1,800 floor
+```
+
+607 is a *recorded mid-career reading* at turn 67, not a start line. It is printed because `turn_entries` has a row. A freshly started career with no entries has `current: null` for all five (M-11).
+
+---
+
+### §3 What current code does
+
+**The wizard door** (`PreflightController::store()`, `:147`):
+
+```php
+$run = DB::transaction(function () use ($request): TrainingRun {
+    $run = TrainingRun::create($request->runAttributes());   // growth_rate rides in here (M-7)
+    // deck slots written
+    return $run;
+});
+// no skill seeding
+```
+
+**The legacy door** (`TrainingRunController::store()`, `:230-237`):
+
+```php
+$run = DB::transaction(function () use ($validated): TrainingRun {
+    $run = TrainingRun::create($validated);
+    $this->prePopulateSkills($run);      // seeds innate ∪ unique as Suggested
+    return $run;
+});
+```
+
+So: **a career started from the dashboard run form gets its starting skills; a career started from the wizard does not.** The wizard's docblock records the absence as intentional; `prePopulateSkills`'s docblock records the seeding as intentional. Both are defensible in isolation and they contradict each other.
+
+**Base stats** are not carried by either door, because there is nowhere to carry them to: `training_runs` has no base-stat column (M-4), and `turn_entries` is a per-turn log with non-null stat columns — a row there is a *reading*, and `CockpitController` reads the latest one (M-11). Writing a synthetic turn-0 entry would fabricate a recorded turn.
+
+**Goals** are read scenario-agnostically. `TeamPanelBuilder` filters by `umamusume_id` alone (M-15); the panel's *visibility* is gated per scenario (M-16) but its *rows* are not. For Vodka in Unity Cup the cockpit would compose her 13 URA objectives — including three `FinalRound` rows filtered out at `:217`, leaving ten URA race demands — under a panel config that says `career_goals: true` for Unity Cup (M-17). Her URA ladder is not Unity Cup's obligation set.
+
+---
+
+### §4 Proposal recommends
+
+Four changes, ranked by evidence strength. **Only the first two are what the user asked for; the third is a defect the measurement found; the fourth is the part that needs an owner ruling.**
+
+#### 4.1 Seed the starting skills on the wizard door (clear, small)
+
+Call `prePopulateSkills` on the wizard's create, or lift it into a shared action both doors call. The card's `skills_innate ∪ skills_unique` becomes `Suggested` rows on the new run.
+
+Rules cited: `SHR-1` (the same thing behaves the same everywhere — two create doors seeding differently is exactly that failure), `GP-1` (the product holds the list; making the Trainer re-enter it is arithmetic left in their head).
+
+#### 4.2 Show the card's base stats on the decision surfaces, without inventing a stored column
+
+The base five are a **starting line, not a recorded turn**. Recommendation: render them beside the Cockpit's stat rail as a labelled reference (`Starting: 96 / 61 / 105 / 75 / 88`), read from `run->characterCard->base_stats`, and **do not** write them into `turn_entries` or add a `training_runs` column.
+
+Rules cited: `SHR-7` (the value a decision needs is on the decision screen — the numbers a turn-1 training decision compares against belong there), `GP-1`, `H2` (client vocabulary: these are the client's own five base values, not a tool derivation).
+
+This is deliberately *not* "auto-fill the stat input". Pre-filling turn 1's stat fields with the base line would make the first recorded reading indistinguishable from a typed one, which is the fabrication the snapshot flow explicitly refuses (`CreateSnapshotRun` `:96-104`: "filling the gap with a zero would print a number the Trainer never read"). A reference strip states the same five numbers without claiming they were read.
+
+#### 4.3 Gate the goal ladder on the scenario actually carrying character goals (defect)
+
+> **Dated correction 2026-11-08 (`S-A-P01.4`).** The paragraph below is kept as this proposal was written and reviewed, because it is the reasoning the owner ruled on. **Its central premise was wrong, and the shipped fix corrects it.** `trainee_goals` is **not** URA-only data: it is **the character's own goals**, which `ADR-0026` (*"Trainee grain, no run scope"*) and `docs/scenarios/09-global-race-calendar.md:641` (*"the goals are the character's own, per trainee rather than per scenario"*) both state, and which `docs/scenarios/02-unity-cup.md:169` states for Unity Cup in its own words (*"Unity Cup adds Team Races on top; it does not remove the underlying career race-goal structure"*). Measured: **1,201 of the 1,677 goal rows carry a `race_catalog_slot_id`, and every one of the 1,201 joins a slot whose `scenario_key` is `null`** — a shared race. **Zero** goal rows point at any of the four scenario-scoped slots. So a Unity Cup run composing Vodka's race demands was **never wrong data**: those are Vodka's own goals, on races every scenario shares. The gate's *mechanism* survives; its *values* changed — `unity_cup` restored to `'trainee_goals'`, `our_grand_concert` named `'trainee_goals'`, Trackblazer left `null`. The original reasoning and its rejected alternative are preserved below; §0.3 records the correction in full.
+
+`trainee_goals` is URA-only (M-12, M-13). `panels.career_goals` is `true` for three scenarios (M-17). Those two facts together mean Unity Cup and Our Grand Concert cockpits compose a URA ladder as if it were theirs.
+
+Two ways to close it, and the choice is the owner's:
+- **(a) Config.** Add a key per scenario naming the goal source (`'goal_source' => 'trainee_goals'` for URA, `'goal_source' => null` elsewhere), and gate the ladder read on it. This is `IA-6`'s shape (adding a scenario costs configuration, not layout) and it is what the config already does for facility rules via `facility_level_source` (M-18).
+- **(b) Data.** Add a `scenario` column to `trainee_goals`, populate it from per-scenario sources as they are fetched. This is a schema change and needs its own ADR.
+
+**Recommendation: (a) now for Unity Cup; (a), or (b) later, for Our Grand Concert pending §7 decision 7.** (a) states the truth the tool holds; (b) invents a column for data nobody has fetched.
+
+**Rendered outcome of the gate.** A scenario whose goal source is null must not draw a ladder. The tree has one established behaviour for a panel flag that is off, and this follows it rather than inventing a second: `ScenarioPanel.vue` draws nothing at all for an off flag — *"an OFF flag still draws nothing at all, because the region names the composition, never the absence of a system the scenario does not use."* Trackblazer is the live precedent (`panels.career_goals` absent, M-17), and its cockpit already renders no career-goals panel. So the gate's outcome is **(ii) panel hidden entirely**, which is the pattern the tree already uses — not a new empty state.
+
+That choice is worth stating because `IA-5` (an empty state shows an example of what would fill it) would argue for a named absence instead. It does not apply here: the panel is not empty for Unity Cup, it is **not that scenario's panel at all**. The team races Unity Cup does carry are a different panel (`team_race`), already composed for that scenario.
+
+**Not `KI-122`, not `R7-18`, not `R5-12`.** A reader who knows Round 7 reaches for `R7-18` — *"URA Finals obligations on a Unity Cup run"* — and for `R5-12`'s first half, the same claim from Round 5. Both are **`Ruled out`**, and `KI-122` (CLOSED, does not reproduce) is the ruling that closed them: the three URA Finals rounds are shared across scenarios by design, only the Final forks per scenario, and filtering by scenario key would have deleted legitimate obligations from every run. That ruling is about **`race_catalog_slots`** — the mandatory-race rows, keyed by a real `scenario_key` column with `null` meaning shared.
+
+§4.3 is a different table under a different column. `trainee_goals` has **no `scenario` column** at all (M-13) and holds **URA-only** data (M-12). The question here is not whether shared rounds should be filtered — they should not, and `KI-122` settles that — but whether a URA-only per-character ladder should render under a scenario it does not describe. **`KI-122` does not settle §4.3; it settles a different table under a different column.**
+
+Rules cited: `NRM-3` (a rule the system enforces is expressed by the control, not a message after it — the panel should not render a ladder it cannot honour), `H5` (error prevention: a Unity Cup Trainer reading URA goals is being told a wrong fact), `IA-6`.
+
+#### 4.4 Goals seeding — what "seed the trainee's goals" would even mean
+
+The brief asked whether a run should seed the trainee's goals. Measurement changes the question: **goals are not seeded, they are joined.** `TeamPanelBuilder` queries `trainee_goals` by `umamusume_id` at read time (M-15); there is no run-side goal row, no `current_objective_index` write at creation, and no per-run copy. The ladder is already "auto-applied" — for every run of that trainee, in every scenario.
+
+So 4.4 is not a seeding task. It is 4.3: making the join scenario-correct. **Recommendation: do nothing beyond 4.3.**
+
+#### Scenario-by-scenario disposition (the brief's §5.1 decision 4)
+
+| Scenario | `panels.career_goals` | `trainee_goals` holds | Recommendation |
+| --- | --- | --- | --- |
+| **URA Finale** | `true` | her ladder (13 rows for Vodka) | Keep as-is. This is the one scenario the data fits. |
+| **Unity Cup** | `true` | **her own ladder** — the goal rows are the character's | **Composes the ladder.** `02-unity-cup.md:169`: the trainee's individual race goals *"still apply on their normal schedule (same as URA Finale)"*; `:289`: *"unchanged from URA Finale and still run in parallel"*. Team Races are the layer Unity Cup adds, not a replacement for the character's goals. The panel's team-race content stays, under its own `team_race` flag. **This row was "gate off" in the first draft; §0.3 records the correction.** |
+| **Trackblazer** | absent | her ladder | **Composes no panel** — `panels.career_goals` is absent, so no ladder is drawn whatever `goal_source` says. The key is `null` to say so explicitly rather than by omission. |
+| **Our Grand Concert** | `true` | **her own ladder** | **Composes the ladder.** `07-grand-concert.md:242`: *"The scenario has character race goals, which is what the panel is for"*; `09-global-race-calendar.md:641` gives the grain. The key is named `'trainee_goals'` explicitly rather than left to a default. **What stays off is the race *calendar*** — a separate surface, with its own absence. |
+
+#### §4.5 Framework adherence
+
+This section grounds §4's four recommendations in `docs/framework-ui-ux/`. It is design reasoning, not an audit: it states which rules a recommendation would satisfy, which constrain it, what it knowingly gives up, and which do not apply. No finding, severity, confidence or evidence status appears here, and §2's M-series is not re-measured.
+
+**Where a rule's provenance is partial, the caveat travels rather than being presented as settled.** Norman's book was not fetched, so `NRM-` rules are cited from `norman-interaction-principles-2026-10-21.md`'s own text with that file's caveat. Brown's eight IA principles are a mirrored enumeration with the prose discussion unread. Gerhardt-Powals' primary is paywalled, with items 5 and 6 unconfirmed as separate principles. Tognazzini's 2014 revision truncated. `WCAG 4.1.1` is withdrawn in 2.2 and is not cited anywhere here; the 44px house rule exceeds 2.5.8 (24×24) and is never called 2.5.8 conformance. The two law collections are separate files and `design-framework-index-2026-10-21.md`'s attribution table governs which publishes what.
+
+##### §4.5.1 Rules justifying the recommendations
+
+| Recommendation | Rule ID(s) | Reasoning |
+| --- | --- | --- |
+| **§4.1** — seed the starting skills on the wizard door | `SHR-1`, `GP-1` | `SHR-1` permits a consistency exception only when it is named and few. Today the two create doors differ and neither documents the difference: `PreflightController:51` says no skills are seeded, `prePopulateSkills`'s docblock says they are, and both are written as if unremarkable. The fix does not document that exception, it removes it — both doors then behave alike, which is what the rule prefers. `GP-1` is the arithmetic half: the product already holds the card's `innate ∪ unique` list, so requiring the Trainer to type it back on turn 1 is work the tool could have done and left in the user's head. |
+| **§4.2** — a labelled reference strip for the card's base stats | `SHR-7`, `GP-1`, `H2` | `SHR-7` is the direct one: the five numbers a turn-1 training decision is weighed against belong on the decision screen, not one screen back on the trainee profile the Trainer has already left. `GP-1` covers the reading: the product holds `base_stats`, so printing it is a figure the user would otherwise recompute or re-open a tab to copy. `H2` bounds the naming — these are the client's own five base values under the client's own words, so the strip must print them as the client does rather than inventing a tool-specific label. |
+| **§4.3** — gate the goal ladder on the scenario that carries character goals | `NRM-3`, `H5`, `IA-6` | `NRM-3` says a rule the system enforces is expressed by the control rather than by a message after it. The system's actual rule is "this ladder is URA's"; the panel expresses the opposite by rendering it under Unity Cup. Gating the panel makes the control agree with the rule. `H5` is the consequence: a Unity Cup Trainer reading ten URA race demands is being told a fact that is false for their run, which is an error the screen prevents only by not drawing it. `IA-6` is why the fix is a config key rather than a layout change — adding or correcting a scenario's composition must cost configuration, and `facility_level_source` (M-18) is the config's own precedent for stating a per-scenario rule this way. |
+| **§4.4** — no separate goal-seeding work | `GP-3` | No new rule is needed, and that is the honest grounding. `GP-3` is the only nearby one: a labelled summation tells the reader the parts exist. Reading the ladder by join already keeps the parts visible — each row is its own sourced goal — so a seeded copy would create a second presentation of one fact without adding a label. The recommendation is "do nothing beyond §4.3," and the rule-citation reason is that no framework rule asks for a stored copy of a derived list. |
+| **Disposition table** | — | `N/A — §4.3's rule grounding is the gate's; the table is a factual disposition of four scenarios, not a separate recommendation.` |
+
+##### §4.5.2 Rules constraining the implementation
+
+| Constraint | Rule | Why it binds this change |
+| --- | --- | --- |
+| A run with no card must render no reference strip, not a zeroed or invented one | `TOG-3` | Status may be stale or absent, but never wrong. `character_cards.base_stats` is nullable in principle even though all 263 rows carry it (M-2). A run whose `character_card_id` is null has no card to read, and printing `96 / 61 / 105 / 75 / 88` or five zeros there would be a wrong claim about a record that does not exist. The strip must be absent. |
+| The reference must be labelled as a starting line, not five bare numbers | `NRM-2` | The rule is that a control states what it is rather than relying on position. Five numbers beside a stat rail that already prints five numbers are otherwise indistinguishable from a second reading of the same five stats. `Starting:` is the label that keeps the two apart. |
+| Seeding must not produce a state the Trainer cannot distinguish from one they entered | `H9` | Error recovery in this file means an error states the cause and what is still saved. The adjacent concern is the reverse: a seeded row must not read as a Trainer-entered one, or clearing it later looks like undoing their own work. `SkillAcquisition::Suggested` is the status that carries the distinction, and the seeding must use it rather than `Acquired`. |
+| The gate must be one shape for every scenario it applies to | `SHR-1` | Two scenarios gated by two different mechanisms — a config key for Unity Cup, a hardcoded check for something else — would be a second unnamed exception. The key must be the only mechanism. |
+| The absent ladder must not read as a failure | `GT-2` | A partial indicator may look complete but must not claim completeness. Inverted here: the panel's absence must not be dressed as an error or a load failure. The tree's existing off-flag behaviour draws nothing and says nothing, which is the correct silence; adding a "goals unavailable" notice would claim a fault where the composition is deliberate. |
+| No scenario name may enter a component or a controller branch | `AGENTS.md` §7 | Repository rule: scenario names live only in `config/scenarios.php`, and `CockpitController:336` already gates on the config flag rather than a name. The new key must be read the same way. |
+
+##### §4.5.3 Rules the recommendation accepts a limitation against
+
+**`IA-5` against `SHR-1`, via §4.3's hidden panel.** `IA-5` says an empty state shows an example of what would fill it. Gating the panel off draws nothing at all, so a Unity Cup Trainer sees no career-goals surface and no explanation of why. That is a genuine loss of signposting. It is accepted because the tree already has exactly one behaviour for an off panel flag — `ScenarioPanel.vue` draws nothing, and Trackblazer is the live precedent — and introducing a second treatment for one panel would be the unnamed exception `SHR-1` forbids. §7 decision 4 carries the owner's override if they prefer the named absence.
+
+**`H6` against `SHR-7`, via §4.2's reference strip rather than an editable field.** The Trainer's stated wish was "auto apply … but trainers option edit values." A field pre-filled with `96` that they could overwrite would satisfy the edit half more literally than a read-only strip does. It is declined because pre-filling the turn-1 stat inputs makes the first recorded reading indistinguishable from a typed one, which is the fabrication `CreateSnapshotRun` refuses in the same terms. The recommendation accepts a narrower reading of "edit": the Trainer edits the *reading*, on the turn form, and the strip only states the baseline it started from. §7 decision 2 records that reading rather than leaving it implicit.
+
+**`GP-2` is not claimed, and that is deliberate.** `GP-2` asks a derived figure to state the rule that produced it and whether the rule is the client's or ours. The reference strip is not derived — it is a copied card fact — so the rule does not apply and no provenance badge is owed. Claiming `GP-2` would imply a computation this proposal does not perform.
+
+**The seeded skill list costs a Trainer who clears it.** §8's risk paragraph names this: a workflow that enters the sheet's real state first will find `Suggested` rows to remove. The mitigation is the status distinction, not an absence of seeding, and the trade is accepted rather than hidden.
+
+##### §4.5.4 Rules that do not apply, and why
+
+Eleven derived-rule families exist across ten files; this section names only the ones a reader of §4.5.1–§4.5.3 might expect to see and does not.
+
+| Rule | Why N/A here |
+| --- | --- |
+| `WCAG 1.2` (time-based media) | The tool carries no audio or video; nothing here introduces any. |
+| `WCAG 2.5.7` (dragging movements) | No drag interaction is added. |
+| `UX-2` (survivable option count) | No option list is added or resized by any of §4.1–§4.4. The picker-shaped defect is P-02's surface, not this one. |
+| `WCAG 4.1.2` (name, role, value) | The reference strip is text, not a control; the seeded skill rows reuse the existing planner's semantics. Neither introduces a component that needs a role it does not have. |
+| `SHR-6` (reversibility of a committed turn) | No turn is created, altered or made irreversible. §4.1 seeds a run's *pre-turn* state; §4.2 adds a read-only strip. |
+| `SHR-4` (closure statement) | The wizard's closure statement at Preflight is unchanged; §4.1 changes what the run holds when it is created, not what the last screen says. |
+| `TOG-6` (undo or named confirmation) | No destructive control is added or moved. |
+| `WCAG 3.3.7` (redundant entry) | Worth naming because it is *nearly* on point: the rule forbids asking again for information already provided. §4.1 and §4.2 both cite `GP-1` for the same phenomenon. `3.3.7` is scoped to data the user has entered in a process; a card's preset was fetched, not entered, so the criterion does not reach it and `GP-1` is the applicable ground. |
+
+**Attribution.** Closure and Continuity are published by `uilaws-2026-10-21.md`, not by `laws-of-ux-2026-10-21.md`; Common Fate is Gestalt only and is not a law in either collection; there is no "Law of Experience" — the concept is Mental Model, entry 17 of the Laws of UX; Fitts, Hick and Jakob are cited from `laws-of-ux-2026-10-21.md` as the more specific collection even though both carry them. This proposal cites none of the five, which is why the table is stated once rather than assumed.
+
+**Conflicts.** Two of the index's seven settled conflicts bear on this change, and it cites both settlements rather than re-opening either. **Consistency versus exceptions** runs through §4.2 and §4.3: the base-stat reference is a named exception to the rail's normal `N/A` state, and the goal gate is a named exception to a panel that otherwise composes. Shneiderman governs, and the settlement's bound — exceptions must be "comprehensible and limited in number" — is why both are named here in §4.5 rather than left to the code. **Closure versus honesty** bears on §4.3's hidden panel: visual closure is permitted, informational closure is not, so the gate may leave no visible gap while it may not claim the ladder was empty.
+
+---
+
+### §5 Rejected alternatives
+
+| Alternative | Why rejected |
+| --- | --- |
+| **A. Seed base stats into turn 1 as a synthetic `turn_entries` row** | Fabricates a reading. `turn_entries` requires all five stats non-null and the cockpit prints the latest row as *the run's state*; a seeded row would be indistinguishable from a typed one, and `CreateSnapshotRun` documents this exact refusal for the snapshot door. |
+| **B. Add `training_runs.base_stats` json column** | A migration to store what `character_cards` already stores, keyed by a card the run already points at. `SHR-7`/`GP-1` say read it, do not duplicate it. Rejected on the ladder's first rung: it does not need to exist. |
+| **C. Copy the card's skill ids into the draft at step 2, so Preflight sees them** | The draft is a wizard scratch bag; putting seeded skills in it makes "skills the Trainer chose" and "skills the card implies" the same field. `prePopulateSkills` already distinguishes them by status (`Suggested` vs `Acquired`), which is the correct split. |
+| **D. Seed goals as run rows at creation** | There is no run-side goal table and the ladder is derived at read time (`TeamPanelBuilder` docblock: "Progress is **derived, never stored**"). Adding one would create a second owner for a fact the query already answers. |
+| **E. Add `scenario` to `trainee_goals` now** | Schema change for data not yet fetched. Only URA publishes a per-character objective list in this tool (`ura-objectives.ead4bbfe.json`, M-12). 4.3(b) holds it open for when a second source lands. |
+
+---
+
+### §6 Fix would not change
+
+- **Not the run's position.** Turn/year/month seeding is `R7-20` / `R7-32`'s problem, closed. This proposal does not touch `CareerPosition` or `CareerCalendar`.
+- **Not the goal derivation logic.** `TeamPanelBuilder`'s `objectiveMet()`, `objectiveHasRecord()`, `TraineeGoal::obligationLine()` and `CockpitController::objectiveSection` are untouched. 4.3 gates *whether* the ladder composes, not *how* a row is judged.
+- **Not the snapshot door** unless the owner explicitly widens decision 3. `CreateSnapshotRun` has no card id (M-19); making it seed skills would require the snapshot to ask for a form, which is `R7-99`-adjacent scope.
+- **Not the trainee picker or the profile page.** `TraineeSelect.vue` and `TraineeProfile.vue` already render all five preset facts correctly (M-rendered); they stay.
+- **Not the scenario matrix's other keys.** `facility_level_source`, `cap_bonus`, `panels.*` beyond `career_goals` all stay.
+- **Not `growth_rate`.** It already seeds (M-7).
+- **No scenario name** enters a component (`AGENTS.md` §7, gate G-33); 4.3 goes through config, which is the same shape the existing `career_goals` gate already uses.
+
+---
+
+### §7 Owner decisions required
+
+| # | Question | Recommendation | Why |
+| --- | --- | --- | --- |
+| 1 | **Seed starting skills on the wizard door?** | **Yes** — call `prePopulateSkills` (or a shared action) from `PreflightController::store()` | Two doors create a run; one seeds, one does not. `prePopulateSkills` is already idempotent and already scoped to `availableOnGlobal()` skill rows, so a duplicate is impossible. `PreflightController:51`'s "no start skills are seeded" note becomes stale and must be corrected in the same change. |
+| 2 | **What does "base stats" mean for a run?** | **A labelled reference beside the rail, never a stored column, never a seeded turn entry** | The card holds them; the run has nowhere honest to put them. A reference states the starting line without claiming a reading. Rejected alternatives A and B. **On the user's "trainers option edit values":** the base five are a **card fact, not state** the run owns, so there is nothing on the run to edit. What the Trainer edits is the **turn-1 reading** — the base line plus whatever the first turns produced — entered on the turn form, which the run records. The reference strip states what the card started at; it does not itself accept edits, because editing a card fact on a run screen would create a second owner for a value `character_cards` already holds. "Edit values" is satisfied by the existing turn form and `RunSettings.vue`, not by a new editable base-stat field. |
+| 3 | **Does the snapshot door also seed?** | **No, not in this change** | `CreateSnapshotRun` names no card (M-19), so there is nothing to seed from. Widening it means asking the snapshot for a costume form, which is its own question. |
+| 4 | **Gate the goal ladder per scenario via config?** | **Yes — add a per-scenario goal-source key; `trainee_goals` only for URA.** Unity Cup confirmed; Our Grand Concert held behind decision 7 | `trainee_goals` is URA-only by construction (M-12, M-13) and the panel flags three scenarios on (M-17). Unity Cup currently renders a URA ladder as its own. This is the measurement-found defect, and it is the strongest finding in this proposal. Our Grand Concert's own config note (`:1118-1119`) may already claim the URA ladder as its intent, so its gate waits on decision 7. |
+| 5 | **Add `scenario` to `trainee_goals` now?** | **No** — hold until a second scenario's goal list is fetched | A schema change for data that does not exist. Needs an ADR when it does. |
+| 6 | **Editability after seeding** | **Already supported; nothing to build** | Seeded skills land as `Suggested`; `SkillsPlannerController` writes `Acquired`/`Skipped`/`Suggested` per skill (`ADR-0029`). `RunSettings.vue:107-141` edits `growth_rate` and the four caps. The user's "trainers have option to edit" is satisfied by the existing status editor and settings page. |
+| 7 | **Our Grand Concert's ladder** | **Owner confirms which ladder `config/scenarios.php:1118-1119` means** before 4.3 ships for OGC | The config note says *"the trainee's own objective ladder is a career fact, not a concert mechanic"* and that it is "the one panel this entry composes" — without saying whether that is the URA list or a concert-specific one. If the URA list, the panel is correct for OGC and 4.3 only closes Unity Cup. If a concert-specific ladder, the panel must gate off. This is a copy-vs-data question the tool cannot settle alone. **Unity Cup does not wait on this.** |
+
+---
+
+### §8 Risk and reversibility
+
+- **Blast radius.** 4.1: one controller method call plus a stale docblock correction. 4.2: one controller payload key plus one component block, no schema. 4.3: one config key per scenario plus a gate in `CockpitController::scenarioSectionContext` and `TeamPanelBuilder::traineeGoalRows`. No migration in any of the three.
+- **Reversibility.** 4.1 reverts by deleting one call and restoring the docblock sentence. 4.2 reverts by deleting a prop and its block — nothing reads it. 4.3 reverts by removing the key and the gate, which restores today's behaviour exactly (the ladder composes for any trainee whose goals exist).
+- **Highest risk is 4.1, and it is a behaviour change the user did not literally ask for.** Seeding skills on the wizard door means every new career starts with 3-7 `Suggested` skill rows a Trainer did not enter. If a Trainer's workflow is to enter the sheet's real skill state first, the seeded rows are noise they must clear. Mitigation: they are `Suggested`, not `Acquired`, and the Skills Planner already groups by status. **If the owner rules against 4.1, 4.2 and 4.3 stand on their own.**
+- **4.3 changes what an existing run's cockpit shows.** Runs already created under Unity Cup will lose their goal ladder. That is the intended correction, but it is a visible regression to anyone who was reading those rows. Worth stating in the change note.
+- **Spec risk.** No browser spec pins the wizard's post-start skill count today (`CareerPreflightTest` asserts `contract.target.skills.names` is `[]` at `:168` — the *draft's* priority list, not the run's seeded rows). 4.1 needs a new assertion; nothing existing breaks.
+
+---
+
+### §9 Proposed slice shape (not commitment)
+
+**As written before implementation.** Naming a shape, not a slice id, commit or phase. *Dated note 2026-11-08: realised as `S-A-P01.1`-`.3`, one slice per piece, in the order below. See §0.1 for what actually shipped.*
+
+Three separable pieces, in evidence strength order. They need not ship together. *(They did not: piece 1 is the evidence-strongest and shipped first.)*
+
+- **Piece 1 (4.3, the defect).** `config/scenarios.php` gains one key per scenario; `CockpitController::scenarioSectionContext()` and `TeamPanelBuilder::traineeGoalRows()` read it. Files: `config/scenarios.php`, `app/Http/Controllers/Career/CockpitController.php`, `app/Services/Career/TeamPanelBuilder.php`. Test: a feature test creating a Unity Cup run on a trainee with `trainee_goals` rows and asserting the `career_goals` panel composes no ladder rows, plus the URA counterpart asserting it still does. RED: today the Unity Cup run gets Vodka's ten URA rows. *→ Shipped as `S-A-P01.1` (`955ff4f2`). `CockpitController` needed **no** change: the existing `panels.career_goals` flag already decides whether the panel composes, and the new key decides whose rows it draws. The RED was `expect($group['rows'])->toBe([])` — the Unity Cup run composed row 0 from Vodka's URA ladder. **Historical — this slice's Unity Cup half was wrong and was corrected at `S-A-P01.4` (§0.3 item 0): the ladder is the character's own, so a Unity Cup run composing Vodka's race demands was never wrong data. The shape below is right and the key's value for `unity_cup` is now `'trainee_goals'`, not `null`.*
+- **Piece 2 (4.1, the parity gap).** `PreflightController::store()` seeds skills; the `:51` docblock sentence is corrected. Files: `app/Http/Controllers/Career/PreflightController.php` (and `TrainingRunController` if `prePopulateSkills` is lifted into an action). Test: extend `CareerPreflightTest` asserting `run_skills` holds the card's `innate ∪ unique` as `Suggested` after a wizard start. RED: 0 rows today. *→ Shipped as `S-A-P01.2` (`39804efe`), with the lifting done: `app/Actions/SeedRunSkills.php` is the one owner, `TrainingRunController::prePopulateSkills()` delegates to it, and the wizard door calls it inside the same transaction. The RED was `expect($run->skills()->pluck('skills.id')->all())->toHaveCount(2)` against 0.*
+- **Piece 3 (4.2, the reference strip).** `CockpitController::identitySection()` or `stateSection()` gains `starting_stats`; the rail component renders it. Files: `app/Http/Controllers/Career/CockpitController.php`, the cockpit stat component under `resources/js/`. Test: a browser spec asserting the five numbers render beside the rail for a run with a card, and render nothing (not `N/A`) for a run without one — the distinction `DESIGN.md` §4.7 and `AGENTS.md` §13 make between `N/A` and an absent slot. *→ Shipped as `S-A-P01.3` (`4072042c`). It is `stateSection()`, and the component is `resources/js/components/career/CareerStatePanel.vue`. The strip is **one labelled sentence**, not five more rows: `Starting 96 61 105 75 88 (the card's base line, before any training)`. The browser case needed a card-backed run, so `tests/utils/start-career.ts` gained an `onTrainee` hook (§0.3 item 3).*
+- **Pint / PHPStan / typecheck / lint:ui** per the hand-off sequence. `lint:ui` will flag any arbitrary Tailwind value in the new strip; reuse the rail's existing tile classes. *→ `lint:ui` flagged none. Pint flagged `line_ending` twice — once on `config/scenarios.php` and once on `TrainingRunController.php` — because the edits wrote CRLF into files `HEAD` holds as LF. Both were re-normalised rather than waived, and the real `ordered_imports` finding (one import out of alphabetical position) was fixed by Pint.*
+
+---
+
+### §10 Proposal does not do
+
+**Dated note 2026-11-08: this list described the planning session that wrote §1-§9. Code has since landed under a separate dispatch — `S-A-P01.1`-`.3`, §0.1.** The items below stay true of the proposal *as authored*; they are no longer true of the tree. What the implementation still does not do is §0.7.
+
+- No code. No file under `app/`, `resources/`, `database/`, `tests/`, `config/`, `routes/` is changed by this session. *(True of the proposal session; those files changed under the dispatch.)*
+- No slice opened. No RED, no GREEN, no pre-flight gate. *(True of the proposal session.)*
+- No dispatch. No slice id, commit SHA or phase named. *(True of the proposal session; the dispatch named three slices plus one held, and this document now cites their commits as the record.)*
+- No re-opening of Round 7. This defect is not `R7-78` / `R7-79` (those record *owned/acquired* skills and per-skill level as unrepresented source data; `R7-78`'s note "No wizard skills step; nothing seeds the acquired set" describes the same absence but is a *source-data* row, not a preset question). It is not `R7-20` / `R7-32` (turn convention). It is not `R7-99` (snapshot read-back). *(Still true; no register row was opened by the implementation either.)*
+- No claim that the audits named this. `AUD-20261108-R7-A/B/C` did not.
+- No third proposal. Two observations recorded but not proposed: (i) the 10 duplicate skill names (P-02 §2 M-2) affect goal and skill matching generally; (ii) three `[Global]` trainees have no `trainee_goals` rows (133 of 136, M-12). Neither is in scope here.
+- **No claim that the user's screenshot is the whole card set.** It showed one form's block; Vodka has two forms in the tree. Recorded in §2 so no reader mistakes the screenshot for an inventory.
+
+---
+
+### §11 Change log
+
+| Date | Change |
+| --- | --- |
+| 2026-11-08 | Opened. Pre-flight baseline `e7e0c5b22e93758f76e0716d9bdbb32ac4e8ab4e`, `git status --short` = 7 untracked (`docs/audits/RS-UC-2026-10/`, `RS-UC-2026-11-snapshot-door/`, `RS-UC-2026-12/`, `rice-shower-unity-cup-ux-walk-6.md`, `-walk-7-snapshot-door.md`, `-walk-7.md`, `docs/imports/ura-finale-runs.md.bak`). `RENDERED_EVIDENCE = TRUE` (`launched 153.0.8010.12`). Measurements M-1..M-19 taken against `database/database.sqlite` and a live `php artisan serve --port=8177`. **Three measurements contradicted the planning brief** and are recorded as such: growth rate already seeds (brief assumed it did not); the card's skill lists already seed on one door only (brief assumed neither door); `trainee_goals` has no `scenario` column and is URA-only by construction (brief assumed per-scenario rows exist). |
+| 2026-11-08 | Refinement — §4.3 distinguishes `R7-18`/`R5-12` (`KI-122` settles shared `race_catalog_slots` obligations, not the `trainee_goals` ladder) |
+| 2026-11-08 | Refinement — §7 decision 2 clarifies that the user's "edit values" means the turn-form reading, not an editable base-stat field |
+| 2026-11-08 | Refinement — §4.3 scoped to Unity Cup confirmed; Our Grand Concert held pending §7 decision 7 |
+| 2026-11-08 | Refinement — §4.3 states the gate's rendered outcome: the panel is hidden entirely, following `ScenarioPanel.vue`'s existing off-flag behaviour and Trackblazer's precedent |
+| 2026-11-08 | Refinement — duplicate check against `docs/proposals/` run (title filter + body grep for `character_cards.*base.?stat`, `spark.?target`, `1,?910`, `JapanOnly`); no prior proposal covers this surface. |
+| 2026-11-08 | §4.5 — framework adherence section: justifying/constraining/accepted/N-A rules, attribution table cited, seven settled conflicts referenced (consistency-exceptions for §4.2 and §4.3; closure-honesty for §4.3) |
+| 2026-11-08 | §4.5 cited `SHR-7` per `shneiderman-golden-rules-2026-10-21.md` (rules stop at `SHR-7`); the planning brief's §3.3 `SHR-8` ID is not defined in that file (round-6 §11.4 records the derived-table off-by-one). §5 alternative B's `SHR-8` substituted too. |
+| 2026-11-08 | §4.5 — `4.1.1` appears once, as the mandated withdrawal caveat (§4.5 opening); no rule grounding rests on it. The adherence brief's §7 grep expecting zero did not account for the caveat. |
+| 2026-11-08 | Implemented — `S-A-P01.1` (`955ff4f2`) adds a per-scenario `goal_source` key and gates `TeamPanelBuilder::traineeGoalRows()` on it; Unity Cup composes no URA ladder, OGC keeps its behaviour pending decision 7. `S-A-P01.2` (`39804efe`) lifts the seeding into `app/Actions/SeedRunSkills.php` and calls it from the wizard door, correcting the stale `PreflightController:51` docblock. `S-A-P01.3` (`4072042c`) adds `state.starting_stats` and the labelled `Starting:` line; absent entirely for a run with no card. |
+| 2026-11-08 | Decision 7 still open. `S-A-P01.OG` is held and named in `§s-a-p01-1`'s §9. Our Grand Concert's `goal_source` is deliberately **unset** rather than guessed, so the default keeps today's behaviour until the owner rules which ladder `config/scenarios.php:1118-1119` means. |
+| 2026-11-08 | **Decision 7 settled by the corpus; §4.3's premise corrected.** The owner review forced the read of the Unity Cup corpus file, and the read showed the ladder is **the character's own** goals (`ADR-0026`: "Trainee grain, no run scope"; `09-global-race-calendar.md:641`: "the goals are the character's own, per trainee rather than per scenario"; `02-unity-cup.md:169,289`: Unity Cup "adds Team Races on top; it does not remove the underlying career race-goal structure"). **Consequence: §4.3's Unity Cup gating was wrong and was corrected at `S-A-P01.4` (`f434b41a`)** — `unity_cup` restored to `'trainee_goals'`, `our_grand_concert` named `'trainee_goals'`, Trackblazer left `null`. The unified fix landed rather than the OGC half alone, which is what the review required. **A figure in the review is corrected in §0.3: it is 1,201 of 1,677 goal rows that carry a race slot, and all 1,201 point at shared slots — not "1,677 of 1,677".** The conclusion the review drew holds; the denominator did not. |
+| 2026-11-08 | **§0 added — implementation status.** §0.1 slices landed and their commits · §0.2 decision-by-decision disposition (decision 7 still open) · §0.3 the three divergences · §0.4 the held `S-A-P01.OG` slice and what the owner must decide · §0.5 measurement-vs-shipped · §0.6 gates at close-out · §0.7 still open. §9 and §10 carry dated notes marking them historical; their content is unchanged. |
+| 2026-11-10 | **`S-A-P01.OG` resolved and closed** (`S-A-P01-OG-1`). The held slice asked which ladder `config/scenarios.php:1118-1119` means for Our Grand Concert; the answer is **`'trainee_goals'`**, which the entry has carried since `S-A-P01.4` and which needs **no config change**. Resolution evidence, read fresh this pass rather than inherited: `docs/scenarios/07-grand-concert.md:92-95` ("returns the standard trainee career features of race goals and career events") and `:242` (the `S-A-P01.4` dated note); `ADR-0026:71` ("Trainee grain, no run scope", Accepted); `docs/scenarios/09-global-race-calendar.md:643` (goal races exist "in the URA sense", ladder is per trainee); plus two web sources — Game8 `archives/607337` ("race goals and career events … for each Umamusume") and uma.guide `guides/grand-concert` (silent on goals, and its unique-skill table is "the same as the URA Finale Scenario"). Full write-up: section `## s-a-p01-og-goal-source-2026-11-10.md` of `docs/research-scratch/SLICE-RECORDS.md`. What was actually stale was `TeamPanelBuilder.php:222-227`, whose comment still asserted the scenario "declares no `goal_source` while P-01 §7 decision 7 is open"; that comment is corrected in place with no behavior change. The goal-race **calendar** stays off and remains a surface decision (`09-global-race-calendar.md:643`; `UMAMUSUME_REFERENCE.md:1673-1675`), untouched here. |
