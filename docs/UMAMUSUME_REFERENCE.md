@@ -133,8 +133,7 @@ gain = (training base value + bonus value)
      × mood term (1 + mood bonus × Mood Effect / 100)
      × Training Effectiveness (トレーニング効果アップ)
      × Friendship Bonus (友情ボーナス)
-     × participant bonus (+5% per additional trainer on the tile)
-```text
+```
 
 Growth rate (成長率) is the per-stat correction that makes one Umamusume cheaper to train in Speed and another cheaper in Wit: 「成長率は「育成モード」時における、トレーニング効果にかかる補正値です」 [Game8 (2026-09-24)](https://game8.jp/umamusume/372949). The `[Global]` client displays the same figures as percentages on a build sheet, for example "STA: 20%" and "WIT: 10%" [Game8.co (2026-09-25)](https://game8.co/games/Umamusume-Pretty-Derby/archives/536322).
 
@@ -2902,7 +2901,7 @@ Impact: the brief's Databases category reduces to GameTora alone for Sections 3 
 Mitigation: Section 3 gained a whole-roster set diff against Kamigame (3.5) and a cell-level diff
 against game8.co and Kamigame (3.4); Section 5 cross-checked every active item against an official
 page plus one wiki, and the three items that had rested on one domain were lifted to two or three.
-```text
+```
 
 ```text
 BLOCKER: neither server publishes gacha pull rates on a web page; both route to an in-app tab.
@@ -2910,7 +2909,7 @@ Impact: Section 5.4 rates cannot reach S-tier sourcing at any amount of effort.
 Mitigation: rates computed from the export's weights, shown summing to 100.00% on every banner
 sampled, corroborated by two tier-A guides, labeled tier B at the point of use. The Global guide's
 contradictory 79 against 97 percent for the common tier is logged rather than resolved in silence.
-```text
+```
 
 ### 8.8 What a lore-gate run will report on this file
 
