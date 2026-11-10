@@ -3171,6 +3171,9 @@ metadata carries no attribution signal at all. Attribution has to come from the 
 from the commit metadata.
 ### KI-109 `analysis_output.txt` and `base_veteran.vue` are UTF-16LE with BOM and NUL - FILED 2026-10-20 (citation-fix batch close-out), OPEN, OWNER DECISION REQUIRED
 
+**2026-11-10 status pass (S-RS-REMAINING-1 slice 0.4b):** confirmed that neither file is tracked at current HEAD; disposition unchanged (owner); no action taken here beyond recording it. `git ls-files --error-unmatch analysis_output.txt base_veteran.vue` fails for both, and `git log --all --oneline -- analysis_output.txt base_veteran.vue` names `5d88a88c` ("fix(skills): Gate 1 - release_status fix for 7 JapanOnly skills + reconciliation record", 2026-10-20) as the deleting commit (its stat shows `base_veteran.vue` going to 0 bytes and the `analysis_output.txt` path leaving the tree). The entry's "OPEN, OWNER DECISION REQUIRED" stands as history: the `git rm` review question is now moot because the owner's own Gate 1 commit removed both; if either name reappears it re-enters through a new change, not through this register entry. No file was modified.
+
+
 **Status: OPEN.** Both files are UTF-16LE with byte order mark (first bytes `FF FE`) and contain NUL
 bytes. git treats both as binary: `git diff --stat` and `git grep` return no matches for either.
 
@@ -4392,32 +4395,6 @@ branches if `FQ-10` meant the queue shape is gone for good — then re-run
 another page's behaviour, and choosing between "keep a dead variant" and "delete it" is a decision rather than a
 typo fix. The `variant` prop added by this pass does not create a caller and does not settle the question.
 
-## KI-148 — Four Form Counted rows leaked into the dev DB (data-hygiene, purged)
-
-**State:** RESOLVED (purged) 2026-11-02. Four rows (Form Counted 1..4, ids 68-71, external_ref null,
-no pipeline source) leaked into the dev database from a test run and rendered at
-/database/trainees?search=Form%20Counted with live detail URLs. The screens did not distinguish them
-from real trainees.
-
-**Why not a code defect.** The read path is correct: CatalogRosterTreeTest.php:219 intentionally creates
-trainees without external_ref via factory and asserts they render. A read-path filter on
-external_ref IS NOT NULL would break that test and any legitimate trainee-creation flow. The audit's
-proposed remedy (F-08) was therefore wrong; the correct remedy is data-hygiene (purge the rows), which
-was applied in this pass (4 deleted, 0 remaining).
-
-**Closure.** Purged via direct delete on the dev DB. No code change. Read path unchanged. Entry recorded
-for durability so a future reader understands why the read-path filter cannot be used.
-
-
-
- 
- # #   K I - 1 4 9      C a t a l o g   S h o w   d o e s   n o t   r e n d e r   ` c h a r a c t e r _ c a r d s . b a s e _ s t a t s `   /   ` . g r o w t h _ r a t e s `   e v e n   w h e n   p o p u l a t e d 
- 
- 
- 
- * * S t a t e : * *   O P E N   2 0 2 6 - 1 1 - 0 2 .   ` c h a r a c t e r _ c a r d s `   n o w   s t o r e s   ` b a s e _ s t a t s `   a n d   ` g r o w t h _ r a t e s `   ( A D R - 0 0 3 0 ,   m i g r a t i o n   ` 2 0 2 6 _ 1 1 _ 0 2 _ 1 4 1 6 3 9 ` ) ,   p o p u l a t e d   b y   t h e   r e p a r s e .   T h e   t r a i n e e   p r o f i l e   ( ` / c a r e e r / s e t u p / t r a i n e e / { i d } ` )   r e n d e r s   t h e m .   T h e   c a t a l o g   d e t a i l   p a g e   ( ` / u m a m u s u m e / { s l u g } ` )   s t i l l   p r i n t s   N o t 
- 
- 
 ## KI-152 — Catalog Show does not render character_cards.base_stats / .growth_rates even when populated
 
 **State:** OPEN 2026-11-02. `character_cards` now stores `base_stats` and `growth_rates` (ADR-0030, migration `2026_11_02_141639`), populated by the reparse. The trainee profile (`/career/setup/trainee/{id}`) renders them. The catalog detail page (`/umamusume/{slug}`) still prints "Not recorded" for both, because `CatalogController` and `Catalog/Show.vue` were not updated in that slice.
