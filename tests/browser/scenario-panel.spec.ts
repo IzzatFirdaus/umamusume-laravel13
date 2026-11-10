@@ -153,7 +153,10 @@ test('states the scenario, its documentation and the ruleset absence in the base
     // "N/A" and a keyboard user got nothing. It is now `AbsenceValue`'s `<details>`, whose summary
     // carries the reason as its accessible name and which opens with no script. Red before this case:
     // the strip rendered no `<summary>` at all.
-    const marker = section.locator('summary').first();
+    // Filtered by the reason it carries, not by position: KI-157 moved the team stat-grade absences
+    // onto `AbsenceValue` too, so the region now renders several `<summary>` elements and the ruleset
+    // one is no longer first in document order. The assertion is about *this* absence, so it says so.
+    const marker = section.locator('summary').filter({ hasText: 'No source defines a Global ruleset version' }).first();
     await expect(marker).toContainText('N/A');
     await expect(marker).toHaveAccessibleName(/No source defines a Global ruleset version/);
 
