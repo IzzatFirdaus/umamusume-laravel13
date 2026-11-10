@@ -139,7 +139,9 @@ test('says the library holds nothing filed rather than showing a blank list', as
         // Expand the details to check the absence notes
         await page.locator('details summary:has-text("Not in this build")').click();
         await expect(page.getByText(/Favorite, archive, delete/)).toBeVisible();
-        await expect(page.getByText(/no sourced table/i).or(page.getByText(/No sourced table/))).toBeVisible();
+        // UX-13's vocabulary pass: the absence reason states what this build holds, not what a table
+        // schema does. The old literal (`no sourced table`) is the pin this case replaced.
+        await expect(page.getByText(/this build holds no source/i)).toBeVisible();
     });
 
     test('orders the library through the bar rather than the filter form', async ({ page }) => {

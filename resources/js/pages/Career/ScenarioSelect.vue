@@ -350,7 +350,7 @@ function continueStep(): void {
                     <tr class="align-top">
                         <td class="py-2 pr-3 font-semibold text-ink-strong">Legacy and deck</td>
                         <td class="pr-3"><span class="pill pill-positive">Yes</span></td>
-                        <td class="text-ink-muted">Both are run-scoped selections with their own editors.</td>
+                        <td class="text-ink-muted">Both belong to this run and have their own editors.</td>
                     </tr>
                 </tbody>
             </table>

@@ -354,9 +354,9 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                             </div>
                         </div>
                         <p class="mt-2 text-xs text-ink-muted">
-                            No column holds an event's Energy, Mood, Skill-Point or stat delta, so those four state
-                            "not recorded" rather than a zero. The note and the bond change are the two outcome
-                            fields this tool can store.
+                            This build does not record an event's Energy, Mood, Skill-Point or stat delta,
+                            so those four state "not recorded" rather than a zero. The note and the bond
+                            change are the two outcome fields this tool can store.
                         </p>
                         <div class="mt-3 grid gap-2.5 g-2">
                             <label class="flex flex-col gap-1">

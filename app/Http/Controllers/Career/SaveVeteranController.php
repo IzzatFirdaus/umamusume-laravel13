@@ -170,7 +170,7 @@ class SaveVeteranController extends Controller
         return [
             [
                 'label' => 'Factor analysis, a legacy value, a best use',
-                'reason' => 'Held computation, and no table in this repository prices a Spark or scores a career.',
+                'reason' => 'Held computation, and this build holds no source that prices a Spark or scores a career.',
             ],
             [
                 'label' => 'A name for the Veteran apart from her trainee',
@@ -178,7 +178,7 @@ class SaveVeteranController extends Controller
             ],
             [
                 'label' => 'Favorite, archive, delete',
-                'reason' => 'No column holds any of the three on a library row, and adding one is a stored-shape change the schema owner decides.',
+                'reason' => 'This build does not record any of the three on a library row, and adding one is a stored-shape change this build does not store yet.',
             ],
         ];
     }

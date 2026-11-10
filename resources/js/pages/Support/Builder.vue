@@ -361,7 +361,8 @@ function save(): void {
 
         <div class="mt-1 flex flex-wrap items-start justify-between gap-3">
             <p class="max-w-3xl text-sm text-ink">
-                The deck is run-scoped: changing it here does not touch any other career. Effects apply from the next turn.
+                This is this run's own deck; changing it here does not touch any other career. Effects
+                apply from the next turn.
             </p>
             <a :href="run.run_url" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">Back to cockpit</a>
         </div>

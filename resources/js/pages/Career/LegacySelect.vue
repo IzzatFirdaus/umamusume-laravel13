@@ -643,7 +643,7 @@ const pickOptions = (): { value: string; label: string }[] => [
                 <h2 id="projected-start">Projected start</h2>
                 <p class="sub">
                     What the two parents add to this run, before a single turn is played. The recorded Blue
-                    Spark against a stat is what a parent column prints; the projected sum is never
+                    Spark against a stat is each parent's own figure; the projected sum is never
                     computed, because an inheritance outcome is not this tool's to derive.
                 </p>
 
@@ -945,8 +945,8 @@ const pickOptions = (): { value: string; label: string }[] => [
               two nullable ids, so a Trainer can record what they have not read off the client yet.
             -->
             <p class="note mt-3 max-w-3xl text-sm text-ink-muted">
-                Leaving both slots empty is this screen's choice, not the client's: the run carries two
-                nullable parent ids so a Trainer can record what they do not know yet, and no screen
+                Leaving both slots empty is this screen's choice, not the client's: a parent can be left
+                unset so a Trainer can record what they do not know yet, and no screen
                 invents a default pair.
             </p>
         </section>

@@ -311,7 +311,7 @@ const factorGrades: { family: string; note: string }[] = [
                         type="button"
                         variant="ghost"
                         :class="props.order === 'oldest' ? 'bg-raised font-bold text-ink-strong' : ''"
-                        title="Order of the library's own records. No column holds the date a career finished, so this is not a completion date."
+                        title="Order of the library's own records. This build does not record the date a career finished, so this is not a completion date."
                         :aria-current="props.order === 'oldest' ? 'true' : undefined"
                         @click="visitOrder('oldest')"
                     >

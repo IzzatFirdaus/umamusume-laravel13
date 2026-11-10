@@ -345,8 +345,8 @@ const verdictPill = (verdict: string): string =>
             v-if="columns.length === 0"
             class="mt-8 rounded-md border border-dashed border-rule bg-panel p-6 text-sm text-ink-muted"
         >
-            Nothing selected to compare. Pick at least one run above; a comparison needs two columns to
-            be a comparison, and one column is the builder's own page.
+            Nothing selected to compare. Pick at least one run above; a comparison needs two sides to
+            be a comparison, and one side is the builder's own page.
         </p>
 
         <template v-else>

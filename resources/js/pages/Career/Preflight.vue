@@ -842,7 +842,7 @@ const CAREER_TURNS = 72;
                     <ul class="mt-2 list-disc space-y-1 pl-5 text-xs text-ink-muted">
                         <li>Per-discipline facility training counts are not recorded, so no facility level can be shown.</li>
                         <li>
-                            No column records a Global ruleset version, so the version is stated as an absence
+                            This build does not record a Global ruleset version, so the version is stated as an absence
                             beside the ruleset it would qualify.
                         </li>
                         <li>

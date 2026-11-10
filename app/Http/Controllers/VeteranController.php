@@ -239,7 +239,7 @@ final class VeteranController extends Controller
         return [
             [
                 'label' => 'Inheritance usefulness and a compatibility calculation',
-                'reason' => 'Held computation: the library stores and compares what was entered and derives no outcome, and no table in this repository prices a parent combination.',
+                'reason' => 'Held computation: the library stores and compares what was entered and derives no outcome, and this build holds no source that prices a parent combination.',
             ],
             [
                 'label' => 'A factor comparison',
@@ -262,11 +262,11 @@ final class VeteranController extends Controller
         return [
             [
                 'label' => 'Favorite, archive, delete',
-                'reason' => 'No column holds any of the three on a library row, and adding one is a stored-shape change the schema owner decides.',
+                'reason' => 'This build does not record any of the three on a library row, and adding one is a stored-shape change this build does not store yet.',
             ],
             [
                 'label' => 'Sort by Spark quality, aptitude, skill coverage, race history or overall usefulness',
-                'reason' => 'No sourced table in this repository prices a Spark or scores a build, so the library cannot order by a figure it does not hold.',
+                'reason' => 'This build holds no source that prices a Spark or scores a build, so the library cannot order by a figure it does not hold.',
             ],
             [
                 'label' => 'The Factors view',

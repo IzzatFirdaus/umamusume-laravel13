@@ -30,7 +30,7 @@ const props = defineProps<{
             label="Current Spirit (manual proxy)"
             :value="props.spiritProxy"
             :max="null"
-            :absence="'No column records a Spirit value. The client prints the gauge on its Team Info panel; until an input stores it, there is no reading to show.'"
+            :absence="'This build does not record a Spirit value. The client prints the gauge on its Team Info panel; until an input stores it, there is no reading to show.'"
         />
         <!-- KI-133's honesty line: a figure here is one Trainer-entered aggregate for the whole team,
              not a game reading, and the client's gauge has no published maximum for it to sit against. -->

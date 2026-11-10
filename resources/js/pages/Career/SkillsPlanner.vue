@@ -683,8 +683,8 @@ const coverageConstants = computed(() =>
                             >
                                 <span aria-hidden="true" class="font-mono font-bold text-goal-line">!</span>
                                 {{ props.coverage.text }} The total prices every skill at its base; the client pays
-                                less when a hint level is on the skill, and no column holds hint levels, so the
-                                sum is the honest one.
+                                less when a hint level is on the skill, and this build does not record hint
+                                levels, so the sum is the honest one.
                             </p>
                             <p v-else-if="props.coverage.text !== ''" class="mt-2 text-sm text-ink">
                                 {{ props.coverage.text }}
