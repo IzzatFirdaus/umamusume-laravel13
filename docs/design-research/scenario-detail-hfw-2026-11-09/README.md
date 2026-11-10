@@ -1,6 +1,6 @@
 # Scenario detail HFW — 2026-11-09
 
-**Redrawn per W.1=C, W.2=run-state-primary, W.3=C, W.4=C; supersedes the earlier "one visual decision" annotation; current as of `TBD_SHA`.**
+**Redrawn per W.1=C, W.2=run-state-primary, W.3=C, W.4=C; supersedes the earlier "one visual decision" annotation; current as of `45ed5534`.**
 
 One page: [`scenario-detail-hfw.html`](./scenario-detail-hfw.html). Open it in a browser (static, no
 server needed; it links the v2 set's `assets/shell.css` by relative path, so keep the folder beside
