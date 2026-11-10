@@ -1537,6 +1537,9 @@ future gate in the sequence that writes rather than reads inherits the same haza
 
 ### KI-76 With a Vite dev server hot, every Inertia render POSTs to the SSR endpoint with no timeout, so a page blocks 30s and answers 500 - FILED 2026-10-08 (F1 residual, on the owner's instruction), CLOSED 2026-10-09
 
+**2026-11-10 status pass (S-RS-REMAINING-1 slices 1.4/0.3):** the .env.example half is closed at HEAD. `INERTIA_SSR_ENABLED=false` is present in `.env.example` (line 80, carried by ancestor `8b2ab3d7`, "fix(ssr): disable Inertia SSR (KI-76 remedy)") with the comment naming the reason (client-rendered app, framework default true, hot-dev-server timeout hang). The optional `INERTIA_SSR_TIMEOUT=3` half was measured and deliberately NOT added: the installed `vendor/inertiajs/inertia-laravel/config/inertia.php` does read `'timeout' => env('INERTIA_SSR_TIMEOUT')` so the key is supported, but with SSR disabled the timeout is unreachable, and the entry's own text names the enabled=false line as the remedy. A line that cannot fire is noise in a file every fresh clone copies; the config default (null) and the disabled flag together cover the KI-76 scenario. The live-DEV-environment question (what `.env` on this host carries) is out of scope for this pass per the runbook (`.env` is never written).
+
+
 **Closed 2026-10-09.** `.env.example:74` sets `INERTIA_SSR_ENABLED=false` with the reason, and `AGENTS.md` §18 carries the trap. What closure does not cover: `config/inertia.php` stays unpublished, so a local `.env` that omits the key inherits the package default; the fix is the documented env var, not a published timeout.
 
 **Status: OPEN.** Not caused by F1, not fixed by it, and not fixed in the slice that filed it. The remedy is
