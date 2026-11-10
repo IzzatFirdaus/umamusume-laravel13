@@ -393,35 +393,49 @@ function onSkillPrioritySelect(payload: { id: number; name: string }): void {
                 <h2 id="target-purpose-heading">What the career is for</h2>
 
                 <div class="mt-2 grid g-2 gap-4">
-                    <BaseSelect
-                        v-model="form.purpose"
-                        :id="controlId('purpose')"
-                        name="purpose"
-                        label="Purpose"
-                        :options="[{ value: '', label: 'Not chosen yet' }, ...props.purposeOptions]"
-                        :aria-describedby="describedBy('purpose')"
-                    />
-                    <BaseSelect
-                        v-model="form.surface"
-                        :id="controlId('surface')"
-                        name="surface"
-                        label="Surface"
-                        :options="[{ value: '', label: 'Not chosen yet' }, ...props.surfaces.map(s => ({ value: s, label: s }))]"
-                        :aria-describedby="describedBy('surface')"
-                    />
-                    <BaseSelect
-                        v-model="form.style"
-                        :id="controlId('style')"
-                        name="style"
-                        label="Style"
-                        :options="[{ value: '', label: 'Not chosen yet' }, ...props.styles.map(s => ({ value: s, label: s }))]"
-                        :aria-describedby="describedBy('style')"
-                    />
+                    <div>
+                        <BaseSelect
+                            v-model="form.purpose"
+                            :id="controlId('purpose')"
+                            name="purpose"
+                            label="Purpose"
+                            :options="[{ value: '', label: 'Not chosen yet' }, ...props.purposeOptions]"
+                            :aria-describedby="describedBy('purpose')"
+                        />
+                        <p v-if="errorOf('purpose')" role="alert" class="mt-1 text-sm text-risk">{{ errorOf('purpose') }}</p>
+                    </div>
+                    <div>
+                        <BaseSelect
+                            v-model="form.surface"
+                            :id="controlId('surface')"
+                            name="surface"
+                            label="Surface"
+                            :options="[{ value: '', label: 'Not chosen yet' }, ...props.surfaces.map(s => ({ value: s, label: s }))]"
+                            :aria-describedby="describedBy('surface')"
+                        />
+                        <p v-if="errorOf('surface')" role="alert" class="mt-1 text-sm text-risk">{{ errorOf('surface') }}</p>
+                    </div>
+                    <div>
+                        <BaseSelect
+                            v-model="form.style"
+                            :id="controlId('style')"
+                            name="style"
+                            label="Style"
+                            :options="[{ value: '', label: 'Not chosen yet' }, ...props.styles.map(s => ({ value: s, label: s }))]"
+                            :aria-describedby="describedBy('style')"
+                        />
+                        <p v-if="errorOf('style')" role="alert" class="mt-1 text-sm text-risk">{{ errorOf('style') }}</p>
+                    </div>
                 </div>
 
-                <p v-if="errorOf('purpose')" role="alert" class="mt-2 text-sm text-risk">{{ errorOf('purpose') }}</p>
-                <p v-if="errorOf('surface')" role="alert" class="mt-2 text-sm text-risk">{{ errorOf('surface') }}</p>
-                <p v-if="errorOf('style')" role="alert" class="mt-2 text-sm text-risk">{{ errorOf('style') }}</p>
+                <!-- The three refusals used to print as one run of alerts below the whole grid, so an
+                     error under 'Style' sat directly beneath a control it did not describe (UX-10). Each
+                     message now sits in its own select's cell. The group also states that it is required:
+                     `StoreBuildTargetRequest` refuses the write without all three the moment any stat
+                     carries a number, and the form gave no sign of that until the refusal came back. -->
+                <p class="mt-2 text-xs text-ink-muted">
+                    All three are required once any stat target carries a number.
+                </p>
             </section>
 
             <section data-region="card" class="card" aria-labelledby="stat-targets-heading">

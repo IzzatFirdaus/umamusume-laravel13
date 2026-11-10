@@ -135,6 +135,36 @@ test.describe('Build Target and the provenance badge', () => {
         await expect(totalRow).not.toContainText('7000');
     });
 
+    test('prints each purpose-group refusal in its own control\'s cell (UX-10)', async ({ page }) => {
+        await page.goto('/career/setup/target');
+        await page.locator('#app > *').first().waitFor();
+
+        // Stats but no purpose/surface/style: `StoreBuildTargetRequest` refuses all three at once, because
+        // a stat list with no purpose behind it is a target the write cannot store.
+        await page.locator('input[name="distance"][value="Medium"]').check();
+        await page.getByLabel('Speed', { exact: true }).fill('800');
+        await page.getByRole('button', { name: 'Continue to legacy' }).click();
+
+        // Each message sits under the select it describes, not in one run of alerts below the grid where
+        // a reader had to guess which control the last line belonged to.
+        const purposeCard = page.locator('section[aria-labelledby="target-purpose-heading"]');
+        const alerts = purposeCard.getByRole('alert');
+        await expect(alerts).toHaveCount(3);
+
+        // Position, not just presence: each alert's top sits below its own select and above the next one.
+        const geometry = await purposeCard.evaluate((card) => {
+            const selects = [...card.querySelectorAll('select')].map((s) => s.getBoundingClientRect().top);
+            const messages = [...card.querySelectorAll('[role="alert"]')].map((a) => a.getBoundingClientRect().top);
+
+            return { selects, messages };
+        });
+
+        expect(geometry.messages).toHaveLength(3);
+        geometry.messages.forEach((top, index) => {
+            expect(top, `alert ${index} is not below its own select`).toBeGreaterThan(geometry.selects[index]);
+        });
+    });
+
     test('refuses a stat above the cap, ties the message to its input and moves focus there', async ({ page }) => {
         await page.goto('/career/setup/target');
         await page.locator('#app > *').first().waitFor();
