@@ -85,9 +85,9 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property Carbon|null $imported_at when a pasted or uploaded import wrote this run, read through
- *                                     the `datetime` cast (the docblock declaration exists because
- *                                     the column otherwise reads as string to the analyser); null
- *                                     for every run an import did not write
+ *                                    the `datetime` cast (the docblock declaration exists because
+ *                                    the column otherwise reads as string to the analyser); null
+ *                                    for every run an import did not write
  * @property string|null $import_source the imported body's provenance label, e.g. a pasted CSV's
  *                                      digest or an uploaded file's name (`KI-95`)
  * @property int|null $shop_resets_in turns until the shop rotation, as the Trainer
