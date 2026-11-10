@@ -23,12 +23,11 @@ defineProps<{
     <div v-if="enabled" class="card p-3">
         <CapsuleHeader title="Team Race" class="mb-3" />
 
-        <p class="text-sm text-ink">
-            <span class="font-bold text-ink-strong">Aim for at least {{ guidance }} circles </span>
-            <span class="text-ink-muted">as a margin, not a win condition. A loss lowers the league
-                rank, and after the 2026-07-01 rework a loss can be retried with an Alarm Clock.</span>
-        </p>
-
+        <!-- W.3 = C (owner ruling 2026-11-10): the rule line moved to the reference block
+             (`ScenarioPanel.vue`'s strip), where the scenario's other mechanics live. The banner
+             keeps its title and the run's recorded-absence state below, because that state is this
+             run's current team-race status and this card is the page's top-of-run announcement.
+             `guidance` still arrives: the rows below read it for their at/above-margin verdicts. -->
         <p v-if="entries.length === 0" class="card mt-3 px-3 py-2 text-sm text-ink-muted" role="status">
             No team races recorded. Circles are entered on the race form as the number the
             client showed before you committed.

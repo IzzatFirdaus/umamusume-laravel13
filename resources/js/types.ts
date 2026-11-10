@@ -289,6 +289,7 @@ export interface ScenarioPanelSection {
     panel_absence: string | null;
     /** Where that reason is recorded, for the `title`. Null with `panel_absence`. */
     panel_absence_title: string | null;
+    race_guidance: number | null;
 }
 
 /**

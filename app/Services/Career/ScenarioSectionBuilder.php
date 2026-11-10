@@ -174,6 +174,14 @@ final class ScenarioSectionBuilder
             'caps' => $this->capsSection($run),
             'panel_absence' => isset($def['panel_absence']) ? (string) $def['panel_absence'] : null,
             'panel_absence_title' => isset($def['panel_absence_title']) ? (string) $def['panel_absence_title'] : null,
+            // W.3 = C (owner ruling 2026-11-10): the Team Race rule sentence moved out of the banner
+            // (`TeamRacePanel.vue`) and into the reference strip, because it is scenario mechanics
+            // rather than this run's state. The strip needs the number to print it, and it does not
+            // receive `team` — so the figure rides here, read from the same config key the banner's
+            // row verdicts use, never a second source.
+            'race_guidance' => is_numeric($def['team_race']['circles_guidance'] ?? null)
+                ? (int) $def['team_race']['circles_guidance']
+                : null,
             // Phase G's three decision surfaces. Each reads the scenario's own config entry, so a
             // scenario that declares none of these keys gets `[]` or `null` and draws nothing: the
             // empties are the matrix's shape, not a branch on a scenario name (gate G-33).

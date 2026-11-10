@@ -163,6 +163,16 @@ const props = defineProps<{
         panel_absence: string | null;
         /** Where that reason is recorded, for the `title`. */
         panel_absence_title: string | null;
+        /**
+         * The scenario's published team-race circle margin, or null where it states none.
+         *
+         * W.3 = C (2026-11-10) moved the Team Race rule sentence out of the banner and into this
+         * strip, because it is scenario mechanics rather than this run's state. The strip needs the
+         * number to print it, and `ScenarioPanel` does not receive `team` (only `UnityCupPanel`
+         * does), so the figure rides the strip's own payload — read from the same
+         * `config('…team_race.circles_guidance')` the banner reads, never a second source.
+         */
+        race_guidance: number | null;
     };
 }>();
 
@@ -299,6 +309,17 @@ const emptyText = computed<string>(() =>
             <section v-if="props.scenario.declared" class="card flex flex-col gap-2 p-3">
                 <CapsuleHeader title="Published stat caps" class="mb-3" />
                 <h3 class="sr-only">Published stat caps</h3>
+                <!-- W.3 = C (owner ruling 2026-11-10): the Team Race rule line lives here, in the
+                     reference block, rather than in the banner. It moved out of
+                     `TeamRacePanel.vue` because it is scenario mechanics — the same class of fact
+                     this block already carries (caps, finale, ruleset date) — while the banner keeps
+                     the run's own recorded-absence state. `race_guidance` is the same number the
+                     banner's row verdicts read, so the rule and its instances cannot disagree. -->
+                <p v-if="props.scenario.race_guidance !== null" class="text-xs text-ink-muted">
+                    <span class="text-xs font-bold normal-case tracking-normal text-ink">Team race rule:</span>
+                    aim for at least {{ props.scenario.race_guidance }} circles as a margin, not a win condition.
+                    A loss lowers the league rank, and after the 2026-07-01 rework a loss can be retried with an Alarm Clock.
+                </p>
                 <p class="text-xs text-ink-muted">
                     <span
                         class="text-xs font-normal normal-case tracking-normal"
