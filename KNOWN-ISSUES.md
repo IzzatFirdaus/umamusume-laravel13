@@ -16,6 +16,21 @@ those entries' current status; this line names them, it does not restate them.
 
 **Register correction 2026-11-10 (S-RS-REMAINING-1 slice 0.2):** four duplicate blocks measured and removed. The later copies of `KI-144`, `KI-145`, `KI-146` and `KI-147` (heading rows at the pre-edit lines 4348, 4400, 4426 and 4445) were byte-identical to their earlier copies and were deleted as accidental pastes; the earlier copies carry the entries unchanged. The measurement table, including the md5 pair per duplicate and the classification of every remaining duplicate-numbered pair (`identical` or `differing`, with the specific fields that differ), is `docs/research-scratch/SLICE-RECORDS.md`, section `## register-duplicates-2026-11-10.md`. No entry was renumbered. Every remaining duplicate pair differs (KI-70, KI-71, KI-101 through KI-104 from the two same-number filing days, plus the near-identical KI-142 and KI-148 pairs handled in slices 0.4b), and none of those was removed here.
 
+**2026-11-10 register pass (S-RS-REMAINING-1, slice 0.3):** measured against HEAD `f60e0ea8` and the tree as it stood on 2026-11-10. Dispositions landed in this pass, each carrying its proving command in the entry:
+
+- `KI-94` -> **CLOSED** (`npm audit --omit=dev` clean; source-map-js 1.2.2 in the HEAD lockfile via ancestor `80025efe`).
+- `KI-102` (2026-10-16 entry) -> **CLOSED** (`.env.example` parses under the vendor dotenv reader; quoted `APP_NAME` and the SQLite block landed via ancestors `032b0c02` + `c91458f4`).
+- `KI-140` -> **CLOSED** (`vendor/bin/pest tests/Feature/FilterContractTest.php --compact` -> `35 passed`; `d359e9d9` restored the 25 default, in HEAD ancestry).
+- `KI-84` -> **CLOSED** (R-1/R-2 owner approvals on record in the F2 close-out; both landing commits `91494a14` and `b30906a6` in HEAD ancestry).
+- `KI-118` -> **CLOSED** (`005561c1` in HEAD ancestry; migration present).
+- `KI-120` -> **CLOSED** (`b102581a` in HEAD ancestry; migration present).
+- `KI-125`, `KI-126` -> **CLOSED** (entry bodies already record the R8 decline; status lines flipped to match).
+- `KI-103` (2026-10-16 entry) -> **OPEN, premise withdrawn**: `saved: number[]` is declared on all seven wizard pages at HEAD, so the dead-prop finding is stale; the saved-vs-visited semantic question stays open for its owner.
+- `KI-104` (2026-10-16 entry) -> **FIXED IN TREE, LANDED**: the nested-disclosure fix is committed at HEAD (empty diff vs HEAD; form is component root); the browser re-run instruction stands for the next browser pass.
+- `KI-119` -> **SUPERSEDED-BY KI-133** (already recorded in the entry body; status line unchanged).
+- `KI-101`+`KI-102`+`KI-103`+`KI-104` (2026-10-19 quartet) -> **distinct entries, both stay**: the two same-number filing days carry different subjects (2026-10-16: harness staleness / `.env.example` parse / wizard `saved` prop / nested `Edit team state`; 2026-10-19: refresh double-navigation trace / NFR-20 item 5 gap / NFR-20 item 6 gap / ADR-0027 proposed). No renumbering; this block is the explicit classification the measurement table in `docs/research-scratch/SLICE-RECORDS.md` section `## register-duplicates-2026-11-10.md` names.
+- `KI-125`/`KI-126` status tokens match their bodies now; `KI-148` duplicate pair and the corrupt NUL fragment inside its later copy are handled in slice 0.4b, not here.
+
 **Status (2026-10-06, at `ab53861`):** this file carries KI-57, KI-58, KI-59 and KI-60, and all four are
 OPEN. KI-60's dev-database half was remediated on 2026-10-06 and stays open for its prevention half; the
 entry records which is which. The count is stated as composition rather than a total, because the
@@ -1894,9 +1909,12 @@ produces; it does not cover the other artefacts under `superseded/`, which the g
 
 **Closed 2026-10-09.** The repair is on `HEAD` at `a3f0795` ("fix(gates): point the design gate at the corpus master and align three prototypes to shipped tokens"), where the four hexes were replaced at their declaration or use sites with the current value of the token that owns their role. `python tools/gate.py` now exits 0 with `GATE PASS: 3 prototype(s), all machine-checkable gates green`. What closure does not cover is unchanged from the paragraph above: the prototypes remain standalone artefacts, KI-58's dead guard is not restored, and the `README.md:306` stale reference to KI-58 stays.
 
-### KI-84 A concurrent session staged the deletion of ten feature-test files, three of which are Our Grand Concert's own absence guards, with no owner approval on record - FILED 2026-10-09 (Slice 20 pickup, on the owner's instruction), OPEN
+### KI-84 A concurrent session staged the deletion of ten feature-test files, three of which are Our Grand Concert's own absence guards, with no owner approval on record - FILED 2026-10-09 (Slice 20 pickup, on the owner's instruction), CLOSED 2026-11-10 (status pass)
 
-**Status: OPEN.** Found while staging the cockpit baseline-strip pickup, which could not be
+**2026-11-10 status pass (S-RS-REMAINING-1 slice 0.3):** status -> CLOSED (dispositions R-1/R-2 landed at 91494a14, in HEAD ancestry). The two dated errata in the entry already record the approval (the F2 close-out of 2026-10-09: "R-1 approve retirement; R-2 move assertions and retire the flow-only remainder") and its execution. This pass re-verified the endpoint the second erratum relied on: the tenth file tests/Feature/RunGoalsPanelTest.php, which that erratum said survived 91494a1 and lived in HEAD, is gone at current HEAD; it was deleted by b30906a6 (2026-10-09, the peer cutover pickup), which is also in HEAD ancestry, and its assertions moved with the same R-2 pattern. Nothing is restored; the erratum's "still in HEAD" clause is stale at current HEAD and this note supersedes it on that point alone.
+
+
+**Status: CLOSED 2026-11-10 (S-RS-REMAINING-1 slice 0.3 status pass). CLOSED (dispositions R-1/R-2 landed at 91494a14, in HEAD ancestry).** Found while staging the cockpit baseline-strip pickup, which could not be
 committed without either sweeping these entries under an unrelated message or mutating another
 session's staged state. The owner ruled the index entries unstaged on 2026-10-09 so the pickup could
 land; **ruling the index entries unstaged is not a ruling on the deletions**, and no session owns a
@@ -2469,9 +2487,12 @@ not by the typecheck. Closing that would mean `vue-tsc`, a dependency decision o
 is outside PHPStan as well, whose `phpstan.neon` analyses `app` alone, so any TypeScript added elsewhere under
 `tests/` would be outside every static gate.
 
-### KI-94 `npm audit --omit=dev` reports one high in source-map-js, which predates this session - FILED 2026-10-10 (slice 15 dependency change), OPEN
+### KI-94 `npm audit --omit=dev` reports one high in source-map-js, which predates this session - FILED 2026-10-10 (slice 15 dependency change), CLOSED 2026-11-10 (status pass)
 
-**Status: OPEN.** Noticed while running the audit that AGENTS.md §5 requires after a dependency change. Pre-existing
+**2026-11-10 status pass (S-RS-REMAINING-1 slice 0.3):** status -> CLOSED (80025efe ancestor of HEAD). slice 1.1 proof: npm audit --omit=dev -> found 0 vulnerabilities (exit 0), and the HEAD lockfile resolves node_modules/source-map-js 1.2.2. The advisory GHSA-68fv-2mgg-jv7q against 1.0.0-1.2.1 no longer has a matching installed version. Closure per the entry's own "What closure needs": the lockfile advanced source-map-js beyond the vulnerable range, landed at 80025efe (ancestor of HEAD), and the audit reading is clean.
+
+
+**Status: CLOSED 2026-11-10 (S-RS-REMAINING-1 slice 0.3 status pass). CLOSED (80025efe ancestor of HEAD).** Noticed while running the audit that AGENTS.md §5 requires after a dependency change. Pre-existing
 and unrelated to the change that surfaced it.
 
 `npm audit --omit=dev` exits 1 with one high: `source-map-js` 1.0.0–1.2.1,
@@ -2823,7 +2844,10 @@ does not cover the KI-70 tension beyond what the refusal shape already answers, 
 retroactively gate any run made before the check lands — including every green browser line recorded
 against a stale bundle in this file's earlier entries.
 
-## KI-102 `.env.example` cannot be parsed by the repo's own dotenv reader and ships MySQL defaults into a SQLite-only project, so a fresh clone's first boot dies twice - FILED 2026-10-16 (close-out pass, on a prior pass's measurements), OPEN
+## KI-102 `.env.example` cannot be parsed by the repo's own dotenv reader and ships MySQL defaults into a SQLite-only project, so a fresh clone's first boot dies twice - FILED 2026-10-16 (close-out pass, on a prior pass's measurements), CLOSED 2026-11-10 (status pass)
+
+**2026-11-10 status pass (S-RS-REMAINING-1 slice 0.3):** status -> CLOSED (032b0c02 + c91458f4 ancestors of HEAD). slice 1.3 proof: the repo's own dotenv reader parses .env.example (Dotenv::createImmutable load exits 0); line 1 reads APP_NAME="Trainer Desk", the DB block is the SQLite pair with DB_DATABASE deliberately unset and the documented config fallback, and the Sail block survives as a comment per option (b). Both fix commits are ancestors of HEAD (git merge-base --is-ancestor exits 0 for each).
+
 
 **Symptom.** A fresh clone follows the standard bring-up — copy `.env.example` to `.env`, then
 `composer install` — and the install dies in `package:discover`, because the first artisan boot parses the
@@ -2867,6 +2891,9 @@ agreements (`AGENTS.md` §18).
 
 
 ## KI-103 `SetupDraft::saved()` reaches six wizard pages and none of them declares the prop, so the saved half of the step bar is dead code and two written rules about it disagree - FILED 2026-10-16 (findings capture pass), OPEN
+
+**2026-11-10 status pass (S-RS-REMAINING-1 slice 0.3):** premise no longer holds at HEAD; entry -> STALE, SUPERSEDED BY THE DECLARED PROP. Every wizard page that binds `:saved="props.saved"` now declares `saved: number[]` in its own `defineProps` (measured: `grep -A10 'defineProps<{' resources/js/pages/Career/{ScenarioSelect,TraineeSelect,TraineeProfile,BuildTarget,LegacySelect,DeckSelect,Preflight}.vue` each carry `saved: number[]` beside the docblock `The steps that have data stored in the draft (SetupDraft::saved())`), so the dead-prop half of this entry is false at HEAD and the ruling-disagreement half is the only live question. The prop is live on all seven pages, not six: TraineeProfile binds and declares it too. No fix was needed here; the entry is left OPEN for its semantic question (which of `saved` or `visited` governs the step bar) but its "none of the six declares the prop" finding is withdrawn as stale, not fixed by this pass.
+
 
 **Symptom.** The layout that draws the wizard's step bar declares an optional `saved` prop and ORs it
 with `visited` when deciding whether a step reads as done. Six pages bind it, and not one of the six
@@ -2934,6 +2961,9 @@ adding it is a dependency decision, not a fix) would flag the undeclared read; u
 `SetupLayout` that declares a `saved` prop is the check.
 
 ## KI-104 The Cockpit nested two `Edit team state` disclosures under one label, so the team-editor browser cases hit a strict-mode collision; the fix is written but uncommitted - FILED 2026-10-16 (findings capture pass), FIXED IN TREE, NOT LANDED
+
+**2026-11-10 status pass (S-RS-REMAINING-1 slice 0.3):** fix LANDED, status line corrected. `git diff HEAD -- resources/js/components/career/UnityCupEditor.vue` is empty (no uncommitted fix remains), and the HEAD blob carries the fix this entry described: `<form>` is the component root and the comment above it states the disclosure belongs to the caller (the former inner `<details>`/`<summary>` pair is gone; HEAD retains two `<details` mentions, both in that comment). The fix landed through the UnityCupEditor commits that followed (the file's last commits are `005561c1` and `7c3907e2`, both ancestors of HEAD). This pass did not re-run `career-cockpit-forms.spec.ts` (a browser build is out of scope for a docs slice); the entry's "re-run after a build on a quiet tree" instruction stands for the next browser pass. The two strict-mode cases this entry named at :161 and :225 are the only outstanding half, and they belong to that browser pass, not to this register edit.
+
 
 Measured 2026-10-16 05:18, from `cockpit-unity-cup-no-crash.png` and `git show HEAD:`.
 
@@ -3425,7 +3455,10 @@ would have caught it, and no such gate exists.
 
 ### KI-118 Team stat grades have no column (Group B / B-0.5, R4-12) - FILED 2026-10-24 (Group A + B audit pass)
 
-**Status: OPEN - blocked: ADR.** A team-grades column is a migration.
+**2026-11-10 status pass (S-RS-REMAINING-1 slice 0.3):** status -> CLOSED (005561c1, 2026-10-25, in HEAD ancestry). The entry already records "2026-10-25 - landed. Deployed at 005561c1" under a status line that still reads OPEN. This pass flips the status line to match the entry's own body: git merge-base --is-ancestor 005561c1 HEAD exits 0, the migration 2026_10_25_140000_add_team_stat_grades_to_training_runs_table is in database/migrations/, and TeamPanelBuilder no longer hard-codes the grade nulls (the editor writes per-stat grades).
+
+
+**Status: CLOSED 2026-11-10 (S-RS-REMAINING-1 slice 0.3 status pass). CLOSED (005561c1, 2026-10-25, in HEAD ancestry).** A team-grades column is a migration.
 
 **Current state.** `TeamPanelBuilder::teamSection()` hard-codes `grade => null` for every stat (`app/Services/Career/TeamPanelBuilder.php:501-506`); `UnityCupPanel.vue` prints the five-row absence. Ruling B-0.5 (2026-10-24): accepted; ADR first. See `docs/research-scratch/PLANS-AND-BRIEFS.md`, section `## group-ab-rulings-owed.md`, item `B-0.5`.
 
@@ -3453,7 +3486,10 @@ would have caught it, and no such gate exists.
 
 ### KI-120 Skill levels have no column or table (Group B / B-0.7, R4-16) - FILED 2026-10-24 (Group A + B audit pass)
 
-**Status: OPEN - blocked: ADR.** Skill levels are a migration.
+**2026-11-10 status pass (S-RS-REMAINING-1 slice 0.3):** status -> CLOSED (b102581a, 2026-10-26, in HEAD ancestry). Same shape as KI-118: the body already records "landed. Deployed at b102581a" while the status line still reads OPEN. git merge-base --is-ancestor b102581a HEAD exits 0 and migration 2026_10_25_150000_create_skill_levels_table is in database/migrations/.
+
+
+**Status: CLOSED 2026-11-10 (S-RS-REMAINING-1 slice 0.3 status pass). CLOSED (b102581a, 2026-10-26, in HEAD ancestry).** Skill levels are a migration.
 
 **Current state.** `SkillsPlannerController` carries acquisition state only (`app/Http/Controllers/Career/SkillsPlannerController.php:216-228`); no level column exists and `SkillAcquisition` has no level member. Ruling B-0.7 (2026-10-24): accepted; ADR first. See `docs/research-scratch/PLANS-AND-BRIEFS.md`, section `## group-ab-rulings-owed.md`, item `B-0.7`.
 
@@ -3521,7 +3557,10 @@ code.
 
 ### KI-125 The 20/20 team-members counter has no stored roster to count (Group A / A-0.13) - FILED 2026-10-24 (audit addendum)
 
-**Status: OPEN - blocked: ADR.** The counter rides the stored-roster blocker A-0.6 was ruled to derive around.
+**2026-11-10 status pass (S-RS-REMAINING-1 slice 0.3):** status -> CLOSED (declined per R8, 2026-10-25). The body already records "2026-10-25 - declined per R8" under an OPEN status line. Status flipped to match the entry's own recorded decision; no new decision is made here.
+
+
+**Status: CLOSED 2026-11-10 (S-RS-REMAINING-1 slice 0.3 status pass). CLOSED (declined per R8, 2026-10-25).** The counter rides the stored-roster blocker A-0.6 was ruled to derive around.
 
 **Current state.** The landed A-0.6 roster (`Cockpit.vue:862-869`, `CockpitController::rosterSection()`)
 renders the six deck cards' names and states with no "N of 20" counter; `TeamPanelBuilder.php:442-507`
@@ -3537,7 +3576,10 @@ roster is 6, not 18).
 
 ### KI-126 Guest skill lists on the roster are not stored or derivable (Group A / A-0.14) - FILED 2026-10-24 (audit addendum)
 
-**Status: OPEN - blocked: ADR.** A member's skill list needs a character-to-skill link or stored per-roster skills.
+**2026-11-10 status pass (S-RS-REMAINING-1 slice 0.3):** status -> CLOSED (declined per R8, 2026-10-25). Same as KI-125: the body already records the R8 decline; the status line is the only stale half.
+
+
+**Status: CLOSED 2026-11-10 (S-RS-REMAINING-1 slice 0.3 status pass). CLOSED (declined per R8, 2026-10-25).** A member's skill list needs a character-to-skill link or stored per-roster skills.
 
 **Current state.** The A-0.6 derived roster carries each member's name and state only. `app/Models/Skill.php:39,58`
 marks `is_unique` as a bare boolean with no character link, so a roster member's own skills cannot be
@@ -3983,6 +4025,9 @@ Green in a session-private pair: `PLAYWRIGHT_PORT=8187`, JSON reporter `1 passed
 moves 2 of 5 to 3 of 5; the standing gaps are snapshot, import and save-veteran, which have
 page-level specs only.
 ## KI-140 — FilterContractTest pins a support-card page size the controller stopped passing
+
+**2026-11-10 status pass (S-RS-REMAINING-1 slice 0.3):** status -> CLOSED (d359e9d9 ancestor of HEAD). slice 1.2 proof: vendor/bin/pest tests/Feature/FilterContractTest.php --compact --no-coverage -> Tests: 35 passed (138 assertions), exit 0. d359e9d9 (2026-11-05, honour and clamp pageSize instead of narrowing it) reverted the default to SUPPORT_CARDS_PER_PAGE = 25 (SupportCardController) and the file's own page-size cases are green again. The assertion this entry named (cards.per_page 25) passes against the committed default.
+
 
 **State:** OPEN. Filed 2026-10-31 while running the skill-detail slice's focused tests; survived two slices
 (the Skills alignment `7454f29e` and this one) as an attributed pre-existing red.
