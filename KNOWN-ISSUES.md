@@ -4312,6 +4312,9 @@ matrix cells in `Veterans/Compare.vue` rely on exactly that and still work.
 (AUD-20261102-021 F-04).
 ## KI-141 — the Build target step carries two `title`-only reasons the wizard parity gate bans
 
+**2026-11-10 fix landed (S-RS-REMAINING-1 slice 1.6):** both `title=` reasons moved to the shipped pattern. `BuildTarget.vue`'s totals block now renders `AbsenceValue compact` with the same sentences as the old tooltips' `reason` props ("No total is printed because at least one of the five targets is still empty." and "This repository stores no sample-build column, so the published sample total cannot be sourced."), so the reasons are the disclosures' accessible names rather than mouse-only strings; the only remaining `title=` in the file is the `<Head title>` (the document title, which the parity case does not count). Proving commands: `npx playwright test tests/browser/wizard-parity.spec.ts` on the session-private harness (`PLAYWRIGHT_PORT=8154 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/rs-remaining-1/browser-8154.sqlite`, fresh `npm run build` exit 0) -> `27 passed, 1 failed`, the one failure no longer the target step (case 8, "target: no artifact vocabulary, no dark variants, no horizontal overflow", is `ok` in the run) but a NEW deck-step finding filed as KI-159 below; `npm run typecheck` (vue-tsgo && tsc) exit 0. The KI's own named failure mode is closed; the deck red is a different surface, pre-existing since `569f47e3` (2026-11-07), not touched by this slice.
+
+
 **State:** OPEN. Filed 2026-10-31 while running the trainee-profile browser gate (`5cb6eeb9`) in the frozen worktree
 `D:\Projects\td-5cb6eeb9`. The gate ran the six wizard specs; this is its only failure and it is not this slice's.
 
@@ -4728,3 +4731,16 @@ vendor/bin/pest tests/Feature/UraPanelTest.php --compact
 
 Reproduced identically with `git show HEAD:app/Services/Career/TeamPanelBuilder.php` in place, which
 excludes the working tree's uncommitted alert-vocabulary change as the cause.
+
+
+## KI-159 The wizard-parity deck step counts six `title=` reasons on non-interactive spans, from the deck components that landed after the spec last ran
+
+**State:** OPEN. Filed 2026-11-10 (S-RS-REMAINING-1 slice 1.6) from the wizard-parity run that closed KI-141; not caused by that slice (its diff touches `BuildTarget.vue` only, and the target case passes in the same run).
+
+**Defect.** `tests/browser/wizard-parity.spec.ts:85` sweeps each wizard step for `title=` on non-interactive elements and requires zero. The deck step now counts 6, all from committed deck-surface components: `resources/js/components/support/SupportSlot.vue:173` puts the Scenario Link absence reason in a `title` on a `<span>` ("The Scenario Link badge cannot be derived for this card."), and `:240` puts the ownership absence reason in a `title` on another `<span>` ("No ownership has been recorded for this slot yet."). Both rows already carry `sr-only` copies of the same sentence, so the `title` attribute is redundant with an accessible channel, and `DeckAnalysis.vue:107` passes a `title` PROP to `ProvenanceBadge` (which forwards to `ProvenanceMark`, whose output carries no `title` attribute and an interactive `role="img"`, so it is not an offender).
+
+**Why.** `569f47e3` (2026-11-07, "fix(deck): label slot six Friends, not Pal (R6-23, S3.2)") landed the SupportSlot rows carrying these two `title=` attributes, and the wizard-parity spec last ran 2026-10-29 (`4b09b1b6`), so the deck step had not been swept since the deck components changed. The sweep is the gate working as designed; nothing re-ran it in between.
+
+**Evidence.** `npx playwright test tests/browser/wizard-parity.spec.ts` (session-private harness, fresh build) -> `1 failed, 27 passed`; the failed case is "deck: no artifact vocabulary, no dark variants, no horizontal overflow" with `Expected: 0, Received: 6` at `wizard-parity.spec.ts:104`. The two source sites are committed at HEAD (`git show HEAD:resources/js/components/support/SupportSlot.vue | grep -c 'title='` reads 2).
+
+**Closure.** Move both reasons off the `title` attribute the way KI-141 did for the target step (the `sr-only` spans already carry the sentences for readers; the `title` can simply go), then re-run the wizard-parity deck case. Not fixed in slice 1.6: `SupportSlot.vue` is a shared deck component another surface composes, and the six-count needs a per-render inventory (which slots render which span) before deleting either attribute.
