@@ -76,13 +76,15 @@ defineProps<{
 
         <!-- Provenance, kept out of the shipped detail string because a section reference is opaque
              to a Trainer. The exact anchor lives here instead, which is where a maintainer re-checks
-             the claim: `umamusume_reference.conflict_row_57` names the client's Team Info panel as
-             the tiebreaker for this table's edge-versus-criterion disagreement. -->
+             the claim: `UMAMUSUME_REFERENCE.md` §2.2.2, conflict row 57 — the client's own Team Info
+             panel is the tiebreaker for this table's edge-versus-criterion disagreement. The shipped
+             detail names the source by content for the same reason `TrackblazerPanel.vue` keeps its
+             §2.2.3 anchor in a comment rather than the copy. -->
         <AlertRow
             class="mt-2"
             glyph="⚠"
             text="Three parts of this table are publisher conflicts, not settled facts: whether Extreme Bursts count toward the total, where the low bands' edges fall, and the month of the payout event."
-            detail="gametora prints four numbered bands (4 to 9, 7 to 9, 10 to 12, 13+) paying 10/20/30/40 SP with the matching stat, and notes that its own low-end values are not known; umamusu.wiki prints the same four reward tiers but attaches a criterion to the gold rows rather than numbered edges, and never says whether Extremes increment. The two disagree about edges versus criteria, not about the Skill Point figures. Gametora's first two bands (4 to 9 and 7 to 9) overlap and cannot both hold, so the edges this table prints are the scenario settings' resolution of that conflict, not a publisher's. The payout is dated Late November where those publishers print the first half. The client's own Team Info count is the tiebreaker (UMAMUSUME_REFERENCE §2.2.2, conflict row 57)."
+            detail="gametora prints four numbered bands (4 to 9, 7 to 9, 10 to 12, 13+) paying 10/20/30/40 SP with the matching stat, and notes that its own low-end values are not known; umamusu.wiki prints the same four reward tiers but attaches a criterion to the gold rows rather than numbered edges, and never says whether Extremes increment. The two disagree about edges versus criteria, not about the Skill Point figures. Gametora's first two bands (4 to 9 and 7 to 9) overlap and cannot both hold, so the edges this table prints are the scenario settings' resolution of that conflict, not a publisher's. The payout is dated Late November where those publishers print the first half. The client's own Team Info count is the tiebreaker."
             tone="note"
         />
 
