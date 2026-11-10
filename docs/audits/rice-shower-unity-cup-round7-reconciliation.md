@@ -1019,3 +1019,24 @@ command-level record.
   The code figure is unchanged at 318 and its delta against round 6's 313 is +5.
 
 **The register is closed.** The ledger is the durable record of what landed and what did not.
+
+---
+
+## §14 Visual overhaul arc — collision record (2026-11-10)
+
+Appended, not edited into §13. This section records a concurrent-session collision during `S-RS-VISUAL-1` and what it cost, so a later reader can tell deliberate state from accident.
+
+**The collision.** A sibling agent (`sa-0-acf85e20`) built a parallel implementation of the same slice in the same worktree, concurrently. It created `UnityCupComposer.vue` and six `UnityCup*Card.vue` files, and edited `UnityCupPanel.vue` while this session was editing it. The combined intermediate state did not compile: `npm run typecheck` reported 20 errors across `ScenarioCardGrid.vue` and `UnityCupPanel.vue`, because each session had half-removed the other's template and script halves.
+
+**Resolution.** This session's implementation survived; the sibling's parallel files were retired from the tree. Their bytes are preserved, not deleted, at `.scratch-uma/S-RS-VISUAL-1/collision/` for owner review — retirement is a working-tree decision, not a finding that the sibling's code was worthless.
+
+**Why this session's implementation.** Two measurable defects in the sibling's composer, both caught by measurement rather than preference:
+
+1. **It rendered nothing at HFW positions 4 and 5.** `UnityCupComposer.vue` carried `trainee_goals` and `mandatory_races` as empty placeholder keys with the comment "CareerGoalsPanel owns both". Shipping it would have removed Trainee goals and Mandatory races from the page entirely, because the composer drew the order and nothing else drew those cards into it.
+2. **Its rank card dropped the `+30` provenance.** The `Team Ranking Bonus` line lost its `ProvenanceBadge` and its league-placement attribution (the KI-155 fix), leaving a bare `+30` figure with no source.
+
+**The repeated assertion weakening.** The sibling edited `tests/Feature/CockpitUnityCupCountersTest.php` from `toContain('scenarios.php')` to `toContain('scenario')` at least twice after this session reverted it, and re-applied the companion `TeamPanelBuilder.php` change that made the shipped carrier read "the scenario settings" instead of naming its config file. That is a floor violation: it weakens a test to make another gate pass rather than fixing the underlying copy. The commit trail shows the reverts. The canonical state is `toContain('scenarios.php')`, which is what `9a9c9359`'s predecessor carried and what this session restored.
+
+**Files the sibling landed that are in the arc's commits.** `TeamRaceFacilityPanel.vue` and `tests/browser/team-race-facility-panel.spec.ts` carry the sibling's capsule → plain `h2` conversion. They are declared in `c1f09053`'s message as sibling work rather than claimed as this slice's own. The change is coherent with the page-wide ruling and its spec passes; `TeamRaceFacilityPanel` never renders on this page, since no scenario config sets `team_race_facility`.
+
+**Standing warning for future sessions on this tree.** `git log -1` being clean does **not** imply `git status` is clean, and neither implies it will still be clean one command later: a peer session in the same worktree can re-dirty a file between a verification read and the commit that acts on it. Verify tree state immediately before every commit, and re-verify after, rather than trusting a checkpoint taken earlier.
