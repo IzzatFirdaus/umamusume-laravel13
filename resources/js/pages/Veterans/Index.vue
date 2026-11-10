@@ -198,11 +198,15 @@ const hasSharedAncestryNote = computed(() =>
 const teamSentence = computed<string>(() => {
     const registered = props.totalCount;
 
+    // `requires 3 (game rule)`, not `needs 3`: the sentence was read as this tool demanding a
+    // third Veteran before it would do something. The rule is the game's, and naming whose rule it
+    // is the difference between a requirement and a fact (UX-24). Source:
+    // `docs/UMAMUSUME_REFERENCE.md`'s Champions Meeting entry.
     if (registered < NEEDED_FOR_TEAM) {
-        return `Entering a Champions Meeting needs three Veteran Umamusume registered as a team. This library holds ${registered}, so the requirement is not met yet.`;
+        return `A Champions Meeting team requires 3 Veteran Umamusume (game rule). This library holds ${registered}, so the requirement is not met yet.`;
     }
 
-    return `Entering a Champions Meeting needs three Veteran Umamusume registered as a team. This library holds ${registered}, so the requirement is met.`;
+    return `A Champions Meeting team requires 3 Veteran Umamusume (game rule). This library holds ${registered}, so the requirement is met.`;
 });
 
 /** A page move is a visit, not a client-side slice: the filters and the order ride along (`withQueryString`). */
@@ -517,7 +521,10 @@ const factorGrades: { family: string; note: string }[] = [
                  how many are registered and how many whole teams that makes. -->
             <Card as="section" aria-labelledby="veteran-team-eligibility">
                 <h2 id="veteran-team-eligibility">Team eligibility</h2>
-                <p class="mt-1.5 text-[12.5px] leading-[1.55] text-ink-muted">{{ teamSentence }}</p>
+                <p
+                    class="mt-1.5 text-[12.5px] leading-[1.55] text-ink-muted"
+                    title="Source: docs/UMAMUSUME_REFERENCE.md"
+                >{{ teamSentence }}</p>
                 <div class="tiles mt-2.5 grid-cols-1 sm:grid-cols-3" data-field="team-eligibility">
                     <Tile label="Registered" :value="String(totalCount)" />
                     <Tile label="Needed for a team" :value="String(NEEDED_FOR_TEAM)" />
