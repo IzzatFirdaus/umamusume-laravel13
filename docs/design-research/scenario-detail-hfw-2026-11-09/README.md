@@ -1,5 +1,7 @@
 # Scenario detail HFW — 2026-11-09
 
+**Redrawn per W.1=C, W.2=run-state-primary, W.3=C, W.4=C; supersedes the earlier "one visual decision" annotation; current as of `TBD_SHA`.**
+
 One page: [`scenario-detail-hfw.html`](./scenario-detail-hfw.html). Open it in a browser (static, no
 server needed; it links the v2 set's `assets/shell.css` by relative path, so keep the folder beside
 `frontend-v2-wireframes/`).
@@ -10,6 +12,12 @@ The updated Scenario detail screen (`SCR-CAR-029`, `/training-runs/{run}/scenari
 app's majority visual language, answering the design-language survey
 (`docs/research/scenario-detail-design-language-survey-2026-11-09.md`). It is a design artifact:
 no component, token, test or copy string changed to produce it.
+
+**On 2026-11-10 four owner rulings superseded the "one visual decision" framing this file used to
+carry.** The page is no longer a proposal with a single change in it; it is the consequence of four
+rulings, and the annotation's first item says so. The rulings live in
+`docs/proposals/2026-11-10-scenario-detail-remodel.md` ("Addendum — 2026-11-10"), which also records
+the classification basis the order is derived from.
 
 ## What is real in it
 
@@ -32,27 +40,44 @@ survey's §5 would act on, not the ruling itself.
 `class="…bg-chrome"` each appear zero times. The remaining pills are data (status badges, ladder
 rungs, provenance marks), never heading chrome.
 
-## Panel set, order and cards — unchanged from the component
+## Panel order — the owner's 2026-11-10 ruling, not the component's DOM order
 
-**Rendered/current as `42d91678`; Move 3 (Spirit Bursts → Burst bands) reflected.** Ten team panels in
-`UnityCupPanel.vue`'s own DOM order and spans (Team Race s12 → Team s4 → Spirit s4 → Team Rank s4 →
-Unity Cup progress s4 → Team stat grades s8 → Burst count bands + Spirit Burst roster **s12** →
-Special Training s4 → Team race coverage s8 → Team race shape s12), then Trainee goals and Mandatory
-races as **two** cards (`CareerGoalsPanel.vue:97` renders one `<section>` per group), then the
-baseline strip.
+**Superseded heading:** this section was "Panel set, order and cards — unchanged from the component".
+It is no longer unchanged. W.2 = run-state primary reorders the page, and the order below is the
+addendum's classification applied, not a transcription of `UnityCupPanel.vue`.
 
-Two dated corrections to that list, both measured in a browser at 1280 px on a 977 px grid:
+| Position | Panel | Category | Span |
+|---|---|---|---|
+| — | Team Race banner | header, unclassified | s12 |
+| 1 | Unity Cup progress | run-state | s4 |
+| 2 | Burst count bands (+ Spirit Burst roster) | run-state | s12 |
+| 3 | Special Training | run-state | s4 |
+| 4 | Trainee goals | run-state | s12 |
+| 5 | Mandatory races | run-state | s12 |
+| 6 | Team race coverage | run-state | s8 |
+| 7 | Team race shape | run-state | s12 |
+| 8 | Team | team | s4 |
+| 9 | Spirit | team | s4 |
+| 10 | Team Rank | team | s4 |
+| 11 | Team stat grades | team | s8 |
+| 12 | Unity Cup reference strip | reference | full width |
 
-- **`6493326a`** — Team stat grades moved `s4` → `s8`, closing a 341 px hole (8/12 tracks → 12/12)
-  without moving a single panel.
-- **Move 3** (`28d9afbf`, owner Ruling 2) — the Spirit Burst roster merged into the Burst count bands
-  card and that card widened `s8` → `s12`, because its `s4` sibling no longer exists. Panel count
-  **11 → 10**; the 236 px of dead column the review measured under the shorter card is gone, and the
-  worst remaining hole anywhere on the page is row 2's pre-existing 23 px.
+**Why this differs from the component.** `UnityCupPanel.vue` draws positions 1–3 and 6–11; both goals
+cards are `CareerGoalsPanel`'s. The app renders one block per registered flag, so positions 1–7 cannot
+be contiguous in the shipped page without splitting a component — recorded as an open consequence in
+the addendum (§A.7), not resolved by this redraw.
 
-The roster keeps its own words inside the merged card, under a rule, as a labelled sub-block; its
-`CapsuleHeader` becomes a `.sublabel` paragraph, so the card carries one header rather than two. In
-the app that is `SpiritBurstRoster`'s new `bare` prop.
+**Chrome:** zero capsules. W.1 = C applied page-wide, which ratifies what this file already drew.
+
+**Banner:** W.3 = C moved the rule line ("at least 3 circles as a margin…") to the reference strip
+(position 12). The banner keeps its title and the run's recorded-absence state.
+
+**Caps:** W.4 = C — already labelled "Published stat caps" in the reference strip, one table, no move
+needed.
+
+Two earlier dated corrections still hold and are not undone by the reorder: `6493326a` widened Team
+stat grades `s4` → `s8` (closing a 341 px hole), and Move 3 merged the Spirit Burst roster into the
+bands card (panel count 11 → 10).
 
 ## The one real defect this drawing surfaced — now fixed
 
