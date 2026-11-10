@@ -258,6 +258,24 @@ it('composes no mandatory-race obligation for a scenario whose matrix turns the 
     expect(collect(objectiveRows($run))->firstWhere('label', 'A Race That Should Not Rank'))->toBeNull();
 });
 
+it('dates an undated finale row from the advisor\'s distance instead of printing no date (UX-09)', function (): void {
+    // The finale rows sit outside the per-turn grid (`race_catalog_slots.turn` is null), so they printed
+    // `no date` while the Scenario strip on the same screen printed `5 turns away`. The figure is a
+    // distance, not a grid position: `due_turn` stays null and only `due_label` borrows the count.
+    //
+    // Placed at Senior turn 21 because the advisor's finale window is the last five turns: further out it
+    // returns no context at all and the row correctly keeps `null`.
+    $run = objectiveRun('unity_cup', RaceCatalogSlot::YEAR_SENIOR * TrainingRun::TURNS_PER_YEAR - 3);
+    objectiveSlot('unity_cup', 'URA Finals Final (Aoharu)', RaceCatalogSlot::YEAR_FINALE, null);
+
+    $row = collect(objectiveRows($run))->firstWhere('label', 'URA Finals Final (Aoharu)');
+
+    expect($row)->not->toBeNull()
+        ->and($row['due_turn'])->toBeNull()
+        ->and($row['due_label'])->toMatch('/turns? away|This turn|Passed/')
+        ->and($row['due_label'])->not->toContain('no date');
+});
+
 it('reports unknown where the calendar states no turn, rather than ranking it as turn zero', function (): void {
     // The finale block is a slot whose `turn` column is null: it sits outside the 24-turn year grid. An
     // arithmetic comparison against a null turn would read it as year x 24 + 0 and place it in front of

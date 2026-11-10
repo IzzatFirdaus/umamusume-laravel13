@@ -850,7 +850,7 @@ class CockpitController extends Controller
     private function advisorSection(Advice $advice, TrainingRun $run): array
     {
         return [
-            'decision' => app(NextDecision::class)->build($advice, $run, $this->objectiveSection($run)),
+            'decision' => app(NextDecision::class)->build($advice, $run, $this->objectiveSection($run, $advice)),
             'finale' => $advice->finale_context,
         ];
     }
@@ -873,7 +873,7 @@ class CockpitController extends Controller
      *
      * @return list<array{label: string, state: string, due_turn: int|null, due_label: string|null, consequence: string|null, source: string, badge: string, title: string, scope: string}>
      */
-    private function objectiveSection(TrainingRun $run): array
+    private function objectiveSection(TrainingRun $run, ?Advice $advice = null): array
     {
         // A class the scenario's matrix does not compose produces no row. `race_calendar` is off for
         // Trackblazer (whose own note says no mandatory race goals exist) and for Our Grand Concert, so
@@ -903,9 +903,12 @@ class CockpitController extends Controller
                     : $slot->title,
                 'state' => $state,
                 'due_turn' => $slot->turnNumber(),
-                'due_label' => $slot->turnNumber() === null
-                    ? null
-                    : $slot->yearLabel().' Year · Turn '.$slot->turnNumber(),
+                // A slot the grid cannot date is not necessarily undatable: the finale rows sit outside
+                // the per-turn grid (`race_catalog_slots.turn` is null) and the advisor already counts how
+                // far away the finale is. Without this the rail printed `no date` for a row while the
+                // Scenario strip on the same screen printed `5 turns away` (UX-09). `due_turn` stays null
+                // because the figure is a distance, not a grid position.
+                'due_label' => $this->dueLabel($slot, $advice),
                 // No source in this repository states what changes when an obligation is not met, so the
                 // field stays null rather than carrying an invented consequence.
                 'consequence' => null,
@@ -962,6 +965,34 @@ class CockpitController extends Controller
             ->all());
 
         return $rows;
+    }
+
+    /**
+     * The row's due cell: a dated slot states its grid position, an undated one borrows the finale
+     * distance when the row is the finale, and neither invents a figure.
+     *
+     * The borrow is narrow on purpose. Only a finale slot (`year === YEAR_FINALE`) reads the advisor's
+     * count; every other undated row keeps `null` and prints `no date`, which is the truth for it.
+     */
+    private function dueLabel(RaceCatalogSlot $slot, ?Advice $advice): ?string
+    {
+        if ($slot->turnNumber() !== null) {
+            return $slot->yearLabel().' Year · Turn '.$slot->turnNumber();
+        }
+
+        if ($slot->year !== RaceCatalogSlot::YEAR_FINALE || $advice?->finale_context === null) {
+            return null;
+        }
+
+        $finale = $advice->finale_context;
+
+        return match ($finale['state']) {
+            'passed' => 'Passed, no outcome recorded',
+            'next' => 'This turn',
+            default => $finale['turns_away'] === null
+                ? null
+                : $finale['turns_away'].' turns away',
+        };
     }
 
     /**
