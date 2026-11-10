@@ -184,3 +184,129 @@ is a precondition of either, and it is this session's own work, not a peer's.
 **Recommendation: run Move 3 only.** It is the move with a measured defect behind it (P4's 236 px
 slack), no ruling fork, and a file that is clean. Moves 1, 2 and 4 each need an answer only the owner
 can give.
+
+---
+
+# Addendum — 2026-11-10: owner rulings W.1–W.4, and the classification basis
+
+**This section is appended, not edited into the text above.** The historical sections stand as written,
+including the two facts `S-RS-REMODEL-C1` proved stale (§5 below). Where this addendum and an earlier
+section disagree, **this addendum governs for implementation**; the earlier text remains as the record
+of what was known when the plan was priced.
+
+## A.1 The four rulings
+
+Received from the owner 2026-11-10, recorded in `docs/proposals/2026-11-10-ruling-memos-scenario-detail.md`:
+
+| Ruling | Question | Answer |
+|---|---|---|
+| **W.1** | Capsule chrome on the merged Move 3 card | **C** — plain `h2`, no capsule |
+| **W.2** | Ruling 3 fork 1: page primary | **Run-state primary** |
+| **W.3** | Ruling 3 fork 2: the Team Race banner's rule text | **C** — moves to the reference block |
+| **W.4** | Move 2's caps block | **C** — labelled "Published stat caps", one table, no move |
+
+## A.2 The classification basis — fresh, and it supersedes both prior tables
+
+STOP 1 of `S-RS-REMODEL-C1` established that the plan's Move 1 "After" and memo §W.2's classification
+table **contradict each other on three panels and cover all panels in neither**. Neither document
+defines "run-state", so neither could settle the reorder. The owner supplied the missing definition,
+and it is the definition that makes "run-state primary" mean anything at all:
+
+> **Run-state** — the panel describes *this run's current state*: what has accumulated, what has
+> arrived, what is currently in progress. **Team** — the panel describes *who the roster is* and *what
+> its members' attributes are*, irrespective of turn. **Reference** — the panel describes scenario
+> mechanics independent of the run's state.
+
+**This table classifies from that basis. It supersedes the plan's §"Move 1 — After" and memo §W.2's
+classification table.** It is not a correction of either: neither stated a basis, so neither table was
+derivable, and this is the first one that is.
+
+| # | Panel | Category | Reason |
+|---|---|---|---|
+| — | **Team Race banner** | **Header** — not a data panel | Carries the rule line plus the run's absence state; classified by neither scheme |
+| 1 | Unity Cup progress | **Run-state** | The run's current Unity Cup counters |
+| 2 | Burst count bands (merged with the Spirit Burst roster) | **Run-state** | The run's combined burst total and where it lands |
+| 3 | Special Training | **Run-state** | This run's Special Training facts — the penalty's removal and the Wit bonus |
+| 4 | Trainee goals | **Run-state** | The run's goal progress |
+| 5 | Mandatory races | **Run-state** | Race-arrival status for this run |
+| 6 | Team race coverage | **Run-state** | Which categories this run's team fields — a run-specific composition, not a member attribute |
+| 7 | Team race shape | **Run-state** | Cadence plus this run's race status |
+| 8 | Team | **Team** | Roster names, motto, placement records |
+| 9 | Spirit | **Team** | The per-character Spirit gauge — a member attribute |
+| 10 | Team Rank | **Team** | The current rank; career-wide, not run-specific |
+| 11 | Team stat grades | **Team** | Member grades — attributes |
+| 12 | Unity Cup reference strip | **Reference** | Scenario mechanics, caps and finale, independent of run state |
+
+### Where this differs from the two prior tables
+
+| Panel | Plan said | Memo said | This basis says |
+|---|---|---|---|
+| Special Training | run-state | **both** (`:97` run-state, `:105` team-gated) | **run-state** — the plan was right |
+| Team race coverage | team | run-state | **run-state** — the memo was right |
+| Unity Cup progress | *omitted* | team | **run-state** — both wrong |
+| Team race shape | *omitted* | run-state | **run-state** — the memo was right |
+
+## A.3 The new order — run-state → team → reference
+
+| Position | Panel | Was |
+|---|---|---|
+| 1 | Unity Cup progress | 5 |
+| 2 | Burst count bands (merged) | 7 |
+| 3 | Special Training | 8 |
+| 4 | Trainee goals | 11 |
+| 5 | Mandatory races | 12 |
+| 6 | Team race coverage | 9 |
+| 7 | Team race shape | 10 |
+| 8 | Team | 2 |
+| 9 | Spirit | 3 |
+| 10 | Team Rank | 4 |
+| 11 | Team stat grades | 6 |
+| 12 | Unity Cup reference strip | last |
+
+The Team Race banner keeps its **header** position above the panels: it is not a data panel and is not
+classified.
+
+## A.4 Q2 — page-wide plain `h2`
+
+**Ruling: page-wide.** The app's scenario-detail card takes a plain `h2` on every card and drops
+`CapsuleHeader` from the page. The HFW already draws this (14 `<h2>`, 0 capsule elements, the four
+"capsule" matches are prose), so W.1 = C **ratifies the wireframe** rather than diverging from it. A
+card-only removal would create the inconsistency the HFW does not show.
+
+## A.5 Q3 — the banner keeps its title and state; only the rule line moves
+
+`TeamRacePanel.vue:26-30` renders three things: the title, the rule line ("at least N circles as a
+margin, not a win condition…"), and — when nothing is recorded — the state line. W.3 = C moves the
+**rule line** to the reference block. The banner survives with its title and its state guidance, because
+the state line is this run's current team-race status and the banner is the page's top-of-run
+announcement.
+
+## A.6 Two staleness facts this addendum records rather than acts on
+
+1. **The plan's Move 1 "After" lists eleven panels including "Spirit Burst"**, which Move 3
+   (`64c37c4f`) merged into Burst count bands. Measured after that merge:
+   `grep -c 'CapsuleHeader title="Spirit Burst"' UnityCupPanel.vue` → **0**; the page renders **10**
+   Unity Cup cards, not 11. The order above is the corrected 12-position list.
+2. **The plan omits `Unity Cup progress` and `Team race shape` from its "After" order entirely**
+   (`grep` of that paragraph returns 0 for each). Both are placed above.
+
+## A.7 One open consequence, flagged not resolved
+
+**The owner's order interleaves two components.** Positions 1–7 (run-state) include Trainee goals and
+Mandatory races, which `CareerGoalsPanel` renders, while positions 1–3 and 6–7 are drawn by
+`UnityCupPanel`. The page composes one `<li>` per registered flag, so `UnityCupPanel`'s 10 cards arrive
+as a single block and `CareerGoalsPanel`'s two as another:
+
+```
+li0  AlertRow (the scenario's absent-panel line)
+li1  (comment node — a flag that draws nothing)
+li2  UnityCupPanel — 11 cards at this commit
+li3  CareerGoalsPanel — 2 cards
+```
+
+Reaching the stated order therefore requires either (a) splitting one component's output across
+another's, (b) one component per panel (a larger refactor than any move priced), or (c) accepting a
+**two-block approximation**: run-state block first (Unity Cup progress, bands, Special Training,
+coverage, shape) then team block (Team, Spirit, Team Rank, grades), with the two goals cards placed
+where the block boundary allows. This is recorded as a consequence for the implementation dispatch; it
+is not resolved here.
