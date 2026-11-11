@@ -5,6 +5,10 @@
  * from. The wireframe's `.keybox` annotation block and its "Static wireframe" chip are document
  * apparatus and do not ship.
  *
+ * A fifth answer is app-local: About this build prints the version from the shared `app` props.
+ * `help.html` has no counterpart card, and the shell keeps an implementation detail off every
+ * screen (the topbar ruling `AppLayout.vue:11-20`), so this card is where the build names itself.
+ *
  * Two rules the page holds itself to. Nothing links to a route that does not exist: the decision,
  * timeline and cockpit screens are all scoped to one career, so the turn loop names them as text and
  * links only the screens a Trainer can open from here. And nothing claims a control the build does
@@ -45,8 +49,17 @@
  */
 import AppLayout from '../layouts/AppLayout.vue';
 import PageHeader from '../components/ui/PageHeader.vue';
+import AbsenceValue from '../components/AbsenceValue.vue';
 import { LinkButton } from '../components/Form';
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
+
+// The build's own version, from the shared `app` props (`HandleInertiaRequests::appVersion()` reads
+// `VERSION.md`, its single source). The shell does not print it: the topbar ruling
+// (`AppLayout.vue:11-20`) keeps an implementation detail off every screen, so Help is where a
+// Trainer reads it. Null is a real state the middleware can produce (missing file, unparsed line),
+// and it renders as a named absence rather than a guessed number.
+const appVersion = usePage().props.app.version;
+
 
 // The trust vocabulary, in the order a Trainer meets it. `confirmed` is deliberately absent: an
 // unmarked figure IS the confirmed state, which is why the card says so above the table.
@@ -181,6 +194,33 @@ const keys: { key: string; does: string }[] = [
                             this avoids.
                         </span>
                     </p>
+                </div>
+
+                <div class="card" role="region" aria-labelledby="help-build">
+                    <h2 id="help-build">About this build</h2>
+                    <p class="sub">What this copy of Trainer Desk is.</p>
+                    <table class="t" aria-label="Facts about this build">
+                        <tbody>
+                            <tr>
+                                <th scope="row" class="w-28">Version</th>
+                                <td>
+                                    <span v-if="appVersion !== null" class="font-mono">v{{ appVersion }}</span>
+                                    <AbsenceValue
+                                        v-else
+                                        compact
+                                        reason="The version line could not be read from this copy of the build."
+                                    />
+                                </td>
+                            </tr>
+                            <tr>
+                                <th scope="row">Global ruleset</th>
+                                <td>
+                                    No source defines a Global ruleset version, so none is printed. The
+                                    rules this build follows are the ones the cards on this page state.
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
                 </div>
 
                 <div class="card" role="region" aria-labelledby="help-wrong">

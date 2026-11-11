@@ -255,7 +255,7 @@ it('shares the app props every page reads, with the ruleset as a named absence',
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('app.name', config('app.name'))
-            ->has('app.version')
+            ->where('app.version', '3.0.0')
             // No source defines a Global ruleset version (design-2.0 §48), so the page prints N/A
             // with a reason rather than a version it does not hold.
             ->where('app.ruleset', null));

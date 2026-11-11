@@ -33,6 +33,12 @@ truth for mechanics; the two ADRs that contradicted it were amended rather than 
 
 ### Added
 
+- **App version on the Help screen** - the page gained a seventh card, About this build, which
+  prints the version from the shared `app` props (`HandleInertiaRequests::appVersion()` reads
+  `VERSION.md`, its single source). The shell does not print one: the topbar ruling recorded in
+  `AppLayout.vue:11-20` keeps an implementation detail off every screen, so Help is where a
+  Trainer reads it. The Global-ruleset absence is stated beside it, and an unreadable version
+  line renders as a named absence rather than a default.
 - **Independent Training** (§1.1.7) - the idle mode: `independent_training_runs` schema,
   `IndependentTrainingPolicy` (Balanced / Stamina focus / Sprint focus), `Lifecycle` (start / one-at-a-
   time / complete / abandon / completeExpired), `Simulator` (a calibrated approximation matching the
