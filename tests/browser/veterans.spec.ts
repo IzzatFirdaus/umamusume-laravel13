@@ -34,7 +34,7 @@ test.describe('Mobile navigation', () => {
         // The four destinations, and More as the disclosure. The brief's word for the slot is the
         // accessible name, so the count is the claim rather than a label list kept in two places. `More`
         // is a native summary, not a link, so it is asserted by text rather than by role.
-        for (const slot of ['Home', 'Career', 'Legacy', 'Deck']) {
+        for (const slot of ['Home', 'Career', 'Legacy', 'Cards']) {
             await expect(bar.getByRole('link', { name: slot, exact: true })).toBeVisible();
         }
 

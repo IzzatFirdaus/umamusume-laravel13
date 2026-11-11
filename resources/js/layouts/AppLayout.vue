@@ -200,7 +200,7 @@ const groups: NavGroup[] = [
     {
         label: 'Library',
         items: [
-            { label: 'Support Cards', mobileLabel: 'Deck', to: '/support-cards', spa: true, inBar: true, prefetches: true, icon: 'cards' },
+            { label: 'Support Cards', mobileLabel: 'Cards', to: '/support-cards', spa: true, inBar: true, prefetches: true, icon: 'cards' },
             { label: 'Skills', mobileLabel: null, to: '/skills', spa: true, inBar: false, prefetches: true, icon: 'spark' },
         ],
     },

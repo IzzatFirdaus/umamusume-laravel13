@@ -116,7 +116,7 @@ test('the mobile bar offers the wireframe four slots plus More', async ({ page }
 
     const mobile = page.getByRole('navigation', { name: 'Primary mobile' });
     await expect(mobile).toBeVisible();
-    for (const slot of ['Home', 'Career', 'Legacy', 'Deck']) {
+    for (const slot of ['Home', 'Career', 'Legacy', 'Cards']) {
         await expect(mobile.getByRole('link', { name: slot, exact: true })).toBeVisible();
     }
     await expect(mobile.locator('summary')).toContainText('More');
