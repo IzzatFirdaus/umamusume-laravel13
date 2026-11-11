@@ -28,6 +28,7 @@ import Section from '../../components/ui/Section.vue';
 import { Head } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
+import { isPoorFit } from '../../lib/raceSuitability';
 
 interface Cell {
     key: string;
@@ -166,6 +167,32 @@ const disciplineLabel = (race: Race): string => {
 
 const aptitudePill = (race: Race): string => race.aptitude.distance ?? race.aptitude.surface ?? 'N/A';
 
+/*
+ * UX-17, the planner's half: the same poor-fit read the Race Decision table takes, on the surface a
+ * Trainer plans from. The chip states the grade it rests on and gates nothing — the drawer's write is
+ * the Trainer's decision to make. Absent letters read as gaps, not judgements.
+ */
+const poorFitChip = (race: Race): { text: string; title: string } | null => {
+    const distance = race.aptitude.distance;
+    const surface = race.aptitude.surface;
+
+    if (isPoorFit(distance)) {
+        return {
+            text: 'Poor fit',
+            title: `${props.run.trainee}'s distance aptitude is ${distance} on this race's distance.`,
+        };
+    }
+
+    if (isPoorFit(surface)) {
+        return {
+            text: 'Poor fit',
+            title: `${props.run.trainee}'s surface aptitude is ${surface} on this race's surface.`,
+        };
+    }
+
+    return null;
+};
+
 const racesUrl = computed(() => props.run.races_url);
 
 </script>
@@ -266,6 +293,13 @@ const racesUrl = computed(() => props.run.races_url);
                                 {{ disciplineLabel(race) }}
                                 <span class="pill pill-neutral ml-1 align-[1px]">{{ aptitudePill(race) }}</span>
                                 <span class="sr-only">, the race's aptitude letter for this distance and surface</span>
+                                <!-- UX-17: same read as the Race Decision table. Muted, never danger;
+                                     the drawer's write stays the Trainer's. -->
+                                <span
+                                    v-if="poorFitChip(race) !== null"
+                                    class="ml-1 rounded bg-raised px-1.5 py-0.5 align-[1px] text-[10px] font-semibold text-ink"
+                                    :title="poorFitChip(race)!.title"
+                                >{{ poorFitChip(race)!.text }}</span>
                             </td>
                             <td class="py-2 pr-3 text-right font-mono">{{ race.turn ?? 'N/A' }}</td>
                             <td class="py-2 pr-3 text-right font-mono">{{ race.fans_needed ?? 'N/A' }}</td>

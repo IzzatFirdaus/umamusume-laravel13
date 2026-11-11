@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';
+import { setTraineeAptitudes, removeGradedMandatorySlot, seedGradedMandatorySlot } from '../utils/trainee-aptitude';
 
 /*
  * Rendered evidence for SCREEN-011, the Race Decision, re-baselined at the HFW's region model after
@@ -73,6 +74,45 @@ test('states each row\'s grade, surface, band, aptitude letter and 1st-place ski
     expect(grades.length).toBeGreaterThan(0);
     for (const grade of grades) {
         expect(grade.trim()).toMatch(/^(G1|G2|G3|OP|Pre-OP|Debut|Maiden|N\/A)$/);
+    }
+});
+
+test('marks a C-or-below aptitude as a poor fit and gates nothing (UX-17)', async ({ page }) => {
+    // The mandatory group is the only planner group no position gate can empty, so the graded row is
+    // seeded as mandatory at the run's own turn. The trainee is graded A on turf and G on dirt, so
+    // the row's two axes split: a good surface, a poor distance band.
+    const graded = seedGradedMandatorySlot();
+    const runUrl = await openDecision(page);
+    setTraineeAptitudes(runUrl.match(/(\d+)$/)![1], { turf: 'A', dirt: 'G' });
+
+    try {
+        await page.goto(`${runUrl}/races/planner`, { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
+
+        const row = page.locator('main table tbody tr').filter({ hasText: 'Fixture Graded Stakes' });
+
+        await expect(row).toBeVisible();
+
+        // The chip is present and states both facts: the grade and the axis it rests on. The seeded
+        // row is Dirt/Sprint; the sprint grade the roster carries is F, so the distance-axis read
+        // is the one that fires.
+        await expect(row).toContainText('Poor fit');
+        await expect(row.getByTitle(/aptitude is F on this race's distance/)).toBeVisible();
+
+        // The chip is muted, never danger: the row keeps its neutral pill styling and no risk colour.
+        await expect(row.locator('.text-risk')).toHaveCount(0);
+
+        // And it gates nothing: the row's own Compare control stays enabled, and every other row
+        // without a poor grade carries no chip.
+        await expect(row.getByRole('button', { name: 'Compare' })).toBeEnabled();
+
+        const debutRow = page.locator('main table tbody tr').filter({ hasText: 'Junior Make Debut' });
+
+        if (await debutRow.count()) {
+            await expect(debutRow).not.toContainText('Poor fit');
+        }
+    } finally {
+        removeGradedMandatorySlot(graded);
     }
 });
 

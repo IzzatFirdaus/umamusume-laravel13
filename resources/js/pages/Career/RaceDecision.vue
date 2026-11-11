@@ -25,6 +25,7 @@ import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
 import { latestLoggedTurn } from '../../lib/career/turnDisplay';
+import { isPoorFit } from '../../lib/raceSuitability';
 import { BaseButton, BaseInput, BaseSelect } from '../../components/Form';
 
 interface Fact {
@@ -241,6 +242,33 @@ const aptitudePill = (race: Race): string => {
     return letter;
 };
 
+/*
+ * UX-17: a grade of C or below on either axis is a poor fit for this trainee, and the row says so
+ * where the Enter button lives. The chip is muted on purpose (design-2.0 §17: a caution is a word, not
+ * an alarm), Enter stays enabled — the choice is the Trainer's — and an absent letter reads as a gap,
+ * not a judgement.
+ */
+const poorFitChip = (race: Race): { text: string; title: string } | null => {
+    const distance = race.aptitude.distance;
+    const surface = race.aptitude.surface;
+
+    if (isPoorFit(distance)) {
+        return {
+            text: 'Poor fit',
+            title: `${props.run.trainee}'s distance aptitude is ${distance} on this race's distance.`,
+        };
+    }
+
+    if (isPoorFit(surface)) {
+        return {
+            text: 'Poor fit',
+            title: `${props.run.trainee}'s surface aptitude is ${surface} on this race's surface.`,
+        };
+    }
+
+    return null;
+};
+
 </script>
 
 <template>
@@ -318,6 +346,14 @@ const aptitudePill = (race: Race): string => {
                                 {{ race.surface ?? 'Surface not recorded' }} · {{ race.distance_band ?? 'band not recorded' }}
                                 <span class="pill pill-neutral ml-1 align-[1px]">{{ aptitudePill(race) }}</span>
                                 <span class="sr-only">, the race's aptitude letter for this distance and surface</span>
+                                <!-- UX-17: the poor-fit chip states the grade it rests on, muted, never
+                                     danger; Enter stays enabled below, because the choice stays the
+                                     Trainer's. -->
+                                <span
+                                    v-if="poorFitChip(race) !== null"
+                                    class="ml-1 rounded bg-raised px-1.5 py-0.5 align-[1px] text-[10px] font-semibold text-ink"
+                                    :title="poorFitChip(race)!.title"
+                                >{{ poorFitChip(race)!.text }}</span>
                             </td>
                             <td class="py-2 pr-3 text-right font-mono">
                                 <template v-if="race.fans_needed !== null">{{ race.fans_needed }}</template>
