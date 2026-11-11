@@ -313,6 +313,29 @@ const cardFor = (index: number): ParentCard | null => {
     const card = (index === 0 ? props.parentA : props.parentB) ?? null;
 
     if (!manual.value[index]) {
+        const picked = String(form.legacies[index]?.legacy_id ?? '');
+
+        // RTX-01: a library pick lives only in the form until the step is saved, so a card resolved
+        // from the server props alone kept printing `Not chosen` over a picker that already held a
+        // veteran. Resolve the picked row from the roster the picker itself offered, and fall back to
+        // the server card when the slot has no pick (or the pick is not in the loaded roster page).
+        if (picked !== '') {
+            const row = props.roster.find((candidate) => String(candidate.id) === picked);
+
+            if (row !== undefined) {
+                return {
+                    veteranId: row.id,
+                    runId: card?.runId ?? null,
+                    name: row.name,
+                    japanese: card?.japanese ?? null,
+                    scenario: card?.scenario ?? null,
+                    stars: card?.stars ?? null,
+                    savedAt: card?.savedAt ?? null,
+                    sparks: card?.sparks ?? [],
+                };
+            }
+        }
+
         return card;
     }
 
