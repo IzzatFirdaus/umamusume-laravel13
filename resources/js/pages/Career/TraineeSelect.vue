@@ -24,6 +24,7 @@
 import SetupLayout from '../../layouts/SetupLayout.vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
+import ReferenceDataNotice from '../../components/ReferenceDataNotice.vue';
 import { BaseInput, BaseSelect, BaseButton, LinkButton } from '../../components/Form';
 import { useLayout } from '../../composables/useLayout';
 import { Head, Link, router, useForm, usePage } from '@inertiajs/vue3';
@@ -122,6 +123,9 @@ const props = defineProps<{
     scenarioUrl: string;
     /** `route('career.trainee.profile')` for the stored trainee, or null before a pick. */
     profileUrl: string | null;
+    /** Fresh install (UX-23): false while the catalogue holds no sourced row, so the empty roster
+     *  names its cause instead of offering filter recovery. */
+    catalogueLoaded: boolean;
 }>()
 
 const page = usePage();
@@ -472,9 +476,15 @@ const sortLabel = computed(
              mock's number: `career-trainee.html:75` prints "71 trainees are catalogued", and this roster
              prints however many rows the catalog holds today (the same rule the pager line follows). -->
         <template #lede>
-            {{ props.trainees.total }} {{ props.trainees.total === 1 ? 'trainee is' : 'trainees are' }} catalogued.
-            Filter by aptitude if you are building toward a specific race, then pick the card you are
-            running.
+            <template v-if="catalogueLoaded">
+                {{ props.trainees.total }} {{ props.trainees.total === 1 ? 'trainee is' : 'trainees are' }} catalogued.
+                Filter by aptitude if you are building toward a specific race, then pick the card you are
+                running.
+            </template>
+            <template v-else>
+                The trainee catalogue is empty. Pick the scenario first, then fetch the reference data
+                and come back; the roster fills from the catalogue the fetch builds.
+            </template>
         </template>
 
         <!--
@@ -667,9 +677,17 @@ const sortLabel = computed(
 
         <!-- The empty state carries the recovery action, not just a description of it. The wireframe has no
              empty state at all, so this block is the app's own: a Trainer who filtered the roster down to
-             nothing should not have to find the row's `Clear` above the grid to get back (H9, IA-5). -->
+             nothing should not have to find the row's `Clear` above the grid to get back (H9, IA-5).
+             UX-23 splits it: a fresh install's emptiness is a named state with the fetch command, not a
+             filter problem - the two recovery actions are different and the block said the wrong one. -->
+        <ReferenceDataNotice
+            v-if="props.trainees.data.length === 0 && !loading && !catalogueLoaded"
+            class="mt-8"
+            reason="The trainee catalogue is empty because no source has been fetched yet."
+        />
+
         <div
-            v-if="props.trainees.data.length === 0 && !loading"
+            v-else-if="props.trainees.data.length === 0 && !loading"
             data-region="empty"
             class="mt-8 rounded-card border border-dashed border-rule bg-raised p-4 text-sm text-ink-muted"
         >

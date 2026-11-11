@@ -8,6 +8,7 @@ import { useVisitState } from '../composables/useVisitState';
 import { useLayout } from '../composables/useLayout';
 import ArtworkSlot from '../components/ArtworkSlot.vue';
 import AbsenceValue from '../components/AbsenceValue.vue';
+import ReferenceDataNotice from '../components/ReferenceDataNotice.vue';
 import Pill from '../components/ui/Pill.vue';
 import Tile from '../components/ui/Tile.vue';
 import Note from '../components/ui/Note.vue';
@@ -104,6 +105,9 @@ const props = defineProps<{
         skills: number;
         supportCards: number;
     };
+    /** Fresh install (UX-23): false while no catalogue row exists, and the KPI row trades its three
+     *  zero tiles for one named state with the fetch command. */
+    catalogueLoaded: boolean;
     dataStatus: DataStatus;
 }>();
 
@@ -492,6 +496,16 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                     </p>
                 </section>
 
+                <!-- UX-23: on a fresh install the three catalogue tiles all read 0, which answers
+                     nothing a new Trainer is asking. One named state replaces the row's zeros: why
+                     the app looks empty, and the one command that fills it. The careers tile stays,
+                     because a career needs no catalogue to start. -->
+                <ReferenceDataNotice
+                    v-if="!catalogueLoaded"
+                    reason="Nothing has been fetched yet, so the trainee, skill and support-card catalogues are empty. Nothing is wrong; the reference data has not been loaded."
+                />
+                <template v-else>
+
                 <section class="card" aria-labelledby="kpi-trainees-heading" data-card="kpi_trainees">
                     <h2 id="kpi-trainees-heading" class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Trainees catalogued</h2>
                     <!-- The catalogue figure, not the app counter: the wireframe's 71 is what the
@@ -519,6 +533,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                         <Link href="/support-cards" class="inline-flex min-h-11 shrink-0 items-center underline underline-offset-2 hover:decoration-2">Browse cards</Link>
                     </div>
                 </section>
+                </template>
             </div>
 
             <!-- ROW TWO: Recent veterans | Quick actions (index.html:156-186) -->

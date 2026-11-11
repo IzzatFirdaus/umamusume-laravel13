@@ -106,6 +106,14 @@ class DashboardController extends Controller
                 'skills' => Skill::count(),
                 'supportCards' => SupportCard::count(),
             ],
+            // Fresh install orientation (UX-23): three zero tiles tell a new Trainer nothing about
+            // why the app looks empty, so while no source row exists the Dashboard (and the wizard's
+            // trainee step) show one named state with its fix instead. Composed from the counts this
+            // page already reads; a partially-fetched install still counts as loaded, because the
+            // zero a Trainer meets is one the fetch routes around.
+            'catalogueLoaded' => Umamusume::query()->whereNotNull('external_ref')->exists()
+                && Skill::exists()
+                && SupportCard::exists(),
             'dataStatus' => $this->dataStatus(),
         ]);
     }

@@ -9,6 +9,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Career\StoreTraineeRequest;
 use App\Http\Requests\Career\TraineeSearchRequest;
 use App\Models\CharacterCard;
+use App\Models\Skill;
+use App\Models\SupportCard;
 use App\Models\Umamusume;
 use App\Services\Career\SetupDraft;
 use App\Services\DataPipeline\ArtworkMirror;
@@ -123,6 +125,12 @@ class TraineeSelectController extends Controller
             // written into this page or this controller (D-240, gate G-33).
             'scenarioLabel' => SetupDraft::scenarioLabel(),
             'scenarioPending' => $draft['scenario'] === null,
+            // Fresh install (UX-23): the empty roster's recovery depends on why it is empty, so the
+            // page reads the same loaded flag the Dashboard composes - one owner for the read, and
+            // `Skill::exists()`/`SupportCard::exists()` are the catalogue's own truth here too.
+            'catalogueLoaded' => Umamusume::query()->whereNotNull('external_ref')->exists()
+                && Skill::exists()
+                && SupportCard::exists(),
             'filters' => [
                 'search' => $request->validated('search'),
                 'surface' => $request->validated('surface'),

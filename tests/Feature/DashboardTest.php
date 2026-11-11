@@ -39,6 +39,31 @@ function runWithTurns(array $runState, int $turns, ?int $energy = null): Trainin
     return $run;
 }
 
+it('states a fresh install as reference data not loaded, with the fetch command (UX-23)', function (): void {
+    // The suite's database is migrated but unseeded, which is exactly the fresh-install state this
+    // composes from: no sourced trainee row, no skill, no support card. The Dashboard hands the page
+    // a false `catalogueLoaded` so the KPI row trades its three zero tiles for one named state, and
+    // the trainee step does the same for its empty roster.
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('catalogueLoaded', false));
+
+    $this->get(route('career.trainee'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('catalogueLoaded', false));
+
+    // And the flag reads the catalogue's own truth rather than a config literal: one sourced
+    // trainee row is not enough while the skill and support-card catalogues are still empty.
+    Umamusume::factory()->create(['name' => 'Sourced One', 'external_ref' => 'game-tora-1']);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('catalogueLoaded', false));
+});
+
 it('renders the dashboard with no active career, an empty Veteran list and the data-status badge', function (): void {
     $this->get('/')
         ->assertOk()

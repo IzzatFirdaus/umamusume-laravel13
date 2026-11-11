@@ -145,6 +145,10 @@ test('the KPI strip draws four cards in one row at 1280', async ({ page }) => {
         await expect(page.getByRole('heading', { name })).toBeVisible();
     }
 
+    // UX-23's other half: a seeded database keeps all four tiles and draws no fresh-install notice.
+    // The notice and the tiles are the same row's two states; only one may render.
+    await expect(page.getByText('Reference data not loaded')).toHaveCount(0);
+
     // index.html:133-154 -- `.g-4` is four across on desktop, not two by two.
     const cards = await page
         .locator('[data-dashboard-row="kpi"] [data-card]')
