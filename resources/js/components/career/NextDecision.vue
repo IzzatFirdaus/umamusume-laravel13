@@ -343,7 +343,7 @@ const incompleteData = computed(
                             <span v-if="row.consequence !== null" class="mt-0.5 block text-xs text-ink-muted">{{ row.consequence }}</span>
                         </td>
                         <td class="py-2 pr-3"><span class="pill" :class="statePill(row.state).cls">{{ statePill(row.state).word }}</span></td>
-                        <td class="py-2 text-right font-mono" :title="row.due_turn === null ? 'The calendar does not date this obligation.' : undefined">{{ row.due_label ?? 'no date' }}</td>
+                        <td class="py-2 text-right font-mono" :title="row.due_label === null ? 'The calendar does not date this obligation.' : (row.due_turn === null ? 'The calendar does not place this obligation on the turn grid; the figure is the finale distance the Scenario panel reports.' : undefined)">{{ row.due_label ?? 'no date' }}</td>
                     </tr>
                 </tbody>
                 <tbody v-if="scenarioObjectives.length > 0" data-scope="scenario">
@@ -360,7 +360,7 @@ const incompleteData = computed(
                             <span v-if="row.consequence !== null" class="mt-0.5 block text-xs text-ink-muted">{{ row.consequence }}</span>
                         </td>
                         <td class="py-2 pr-3"><span class="pill" :class="statePill(row.state).cls">{{ statePill(row.state).word }}</span></td>
-                        <td class="py-2 text-right font-mono" :title="row.due_turn === null ? 'The calendar does not date this obligation.' : undefined">{{ row.due_label ?? 'no date' }}</td>
+                        <td class="py-2 text-right font-mono" :title="row.due_label === null ? 'The calendar does not date this obligation.' : (row.due_turn === null ? 'The calendar does not place this obligation on the turn grid; the figure is the finale distance the Scenario panel reports.' : undefined)">{{ row.due_label ?? 'no date' }}</td>
                     </tr>
                 </tbody>
             </table>
