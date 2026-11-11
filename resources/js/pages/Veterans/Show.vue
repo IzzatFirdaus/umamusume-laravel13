@@ -48,6 +48,8 @@ const props = defineProps<{
     stats: Record<string, number | null>;
     counts: { skills: number; races: number };
     parents: { a: string | null; b: string | null };
+    /** C3: the careers that named this Veteran's trainee as an inheritance parent. */
+    usedAsParent: { trainee: string; scenario_label: string; status_label: string; run_url: string }[];
     runUrl: string;
     /** `route('veterans.index')`, the back door. */
     libraryUrl: string;
@@ -262,6 +264,31 @@ const noStatsRecorded = computed((): boolean =>
                     </a>
                     <p v-else class="note">
                         This run has no Legacy read-back recorded, so there is nothing to open in the builder.
+                    </p>
+                </section>
+
+                <!-- C3, the continuity trail: which careers named this trainee as an inheritance
+                     parent. Read from the two stored columns a run owns; nothing here computes a
+                     "value as parent", which the absences card already refuses. -->
+                <section aria-labelledby="veteran-used-as-parent" class="card mt-4">
+                    <h2 id="veteran-used-as-parent" class="text-lg font-semibold text-ink-strong">
+                        Used as parent in
+                    </h2>
+                    <p v-if="props.usedAsParent.length > 0" class="note">
+                        The careers that named this trainee as an inheritance parent, as their own
+                        runs record it.
+                    </p>
+                    <ul v-if="props.usedAsParent.length > 0" class="mt-3 space-y-2 text-sm">
+                        <li v-for="child in props.usedAsParent" :key="child.run_url" class="min-h-11 flex items-center gap-2">
+                            <a :href="child.run_url" class="font-semibold text-ink-strong underline underline-offset-2 hover:decoration-2">
+                                {{ child.trainee }}
+                            </a>
+                            <span class="text-ink-muted">&middot; {{ child.scenario_label }} &middot; {{ child.status_label }}</span>
+                        </li>
+                    </ul>
+                    <p v-else class="note">
+                        This Veteran has not been used as a parent in any career yet. Start a career
+                        from the Legacy Lab and pick this trainee as a parent to record one.
                     </p>
                 </section>
 

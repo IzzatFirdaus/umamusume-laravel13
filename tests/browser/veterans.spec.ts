@@ -423,3 +423,47 @@ test.describe('Veteran rows', () => {
         expect(texts.some((text) => text.includes('Unity Cup'))).toBe(true);
     });
 });
+
+/*
+ * C3, the continuity trail on the Veteran detail: which careers named this trainee as an
+ * inheritance parent. Filed through the create form's own parent selects, because that is the one
+ * browser path that writes `inheritance_parent_a_id`; the trail then reads it back on the detail.
+ * The empty state is the library's own fresh shape (no child career), so it is pinned first on
+ * the same Veteran before the child run is filed.
+ */
+test('the veteran detail lists the careers that used the trainee as a parent (C3)', async ({ page }) => {
+    createdRunUrls.push(await fileCareer(page, 'Agnes Digital', 'Speed', 'Filed for the parent trail.'));
+
+    await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    const row = page.locator('[data-veteran-row]').filter({ hasText: 'Agnes Digital' });
+    await expect(row).toHaveCount(1);
+
+    const detailUrl = await row.locator('a').first().getAttribute('href');
+    expect(detailUrl).toMatch(/\/veterans\/\d+$/);
+
+    // The empty state names the absence while no career has used the trainee.
+    await page.goto(detailUrl!, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    const section = page.locator('section[aria-labelledby="veteran-used-as-parent"]');
+    await expect(section).toBeVisible();
+    await expect(section).toContainText('This Veteran has not been used as a parent in any career yet.');
+
+    // The child career: names Agnes Digital as parent A through the create form's own select.
+    await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await page.locator('#trainee-combobox').fill('Eishin Flash');
+    await page.keyboard.press('Enter');
+    await page.selectOption('select[name="scenario"]', { value: 'ura_finale' });
+    await page.selectOption('select[name="inheritance_parent_a_id"]', { label: 'Agnes Digital' });
+    await page.getByRole('button', { name: 'Create run' }).click();
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, { timeout: 60_000 });
+    createdRunUrls.push(page.url().replace(/\/cockpit$/, ''));
+
+    await page.goto(detailUrl!, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await expect(section).toContainText('Eishin Flash');
+    await expect(section).toContainText('URA Finale');
+    const childLink = section.getByRole('link', { name: 'Eishin Flash' });
+    await expect(childLink).toHaveAttribute('href', /\/training-runs\/\d+\/cockpit$/);
+});

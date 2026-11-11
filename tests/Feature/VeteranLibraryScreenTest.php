@@ -290,3 +290,74 @@ it('passes a null portrait url when the trainee card is not mirrored', function 
             ->component('Veterans/Index')
             ->where('veterans.data.0.portrait_url', null));
 });
+
+/*
+ * C3, the continuity trail on the Veteran detail. The two stored parent columns carry Umamusume
+ * ids, so the trail is "careers that named this trainee as a parent", read from
+ * `inheritance_parent_a_id` / `inheritance_parent_b_id` against the filed run's trainee. One
+ * child run naming the trainee as parent A appears once even though both columns were read (the
+ * query is an OR); an unrelated trainee's run does not appear; and a Veteran nobody used yet
+ * renders the named empty state rather than an absent prop.
+ */
+it('lists the careers that named the veteran trainee as an inheritance parent (C3)', function (): void {
+    $parent = Umamusume::factory()->create(['name' => 'Ancestral Mare']);
+    $veteran = veteranScreenFiled($parent, 'ura_finale');
+
+    // The child career: names the veteran's trainee as parent A, in its own scenario.
+    $childTrainee = Umamusume::factory()->create(['name' => 'Young Runner']);
+    $child = TrainingRun::factory()->create([
+        'umamusume_id' => $childTrainee->id,
+        'scenario' => 'unity_cup',
+        'status' => RunStatus::Active,
+        'inheritance_parent_a_id' => $parent->id,
+    ]);
+    // A decoy: a run with a different parent on the same column, which the trail must not read.
+    $otherParent = Umamusume::factory()->create(['name' => 'Unrelated Sire']);
+    TrainingRun::factory()->create([
+        'umamusume_id' => $childTrainee->id,
+        'scenario' => 'ura_finale',
+        'status' => RunStatus::Completed,
+        'inheritance_parent_a_id' => $otherParent->id,
+    ]);
+
+    test()->get(route('veterans.show', $veteran))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Veterans/Show')
+            ->has('usedAsParent', 1)
+            ->where('usedAsParent.0.trainee', 'Young Runner')
+            ->where('usedAsParent.0.scenario_label', 'Unity Cup')
+            ->where('usedAsParent.0.status_label', 'Active')
+            ->where('usedAsParent.0.run_url', route('runs.cockpit', $child)));
+});
+
+it('renders the used-as-parent trail as a named empty state when no career used the trainee (C3)', function (): void {
+    $parent = Umamusume::factory()->create(['name' => 'Unbred Mare']);
+    $veteran = veteranScreenFiled($parent, 'ura_finale');
+
+    test()->get(route('veterans.show', $veteran))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Veterans/Show')
+            ->has('usedAsParent', 0));
+});
+
+it('reads a parent from either column, so parent B carries the trail as well (C3)', function (): void {
+    $parent = Umamusume::factory()->create(['name' => 'Second Parent Mare']);
+    $veteran = veteranScreenFiled($parent, 'trackblazer');
+
+    $childTrainee = Umamusume::factory()->create(['name' => 'Another Runner']);
+    TrainingRun::factory()->create([
+        'umamusume_id' => $childTrainee->id,
+        'scenario' => 'ura_finale',
+        'status' => RunStatus::Completed,
+        'inheritance_parent_b_id' => $parent->id,
+    ]);
+
+    test()->get(route('veterans.show', $veteran))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Veterans/Show')
+            ->has('usedAsParent', 1)
+            ->where('usedAsParent.0.trainee', 'Another Runner'));
+});

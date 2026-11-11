@@ -8,6 +8,7 @@ use App\Actions\ListVeterans;
 use App\Actions\ShowVeteran;
 use App\Http\Requests\VeteranCompareRequest;
 use App\Http\Requests\VeteranSearchRequest;
+use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Models\Veteran;
 use App\Services\Legacy\VeteranRow;
@@ -133,6 +134,30 @@ final class VeteranController extends Controller
                 'a' => $run->inheritanceParentA?->name,
                 'b' => $run->inheritanceParentB?->name,
             ],
+            /*
+             * C3, the continuity trail. Which careers named this Veteran's trainee as an inheritance
+             * parent, read from the two stored columns a run owns. The columns carry Umamusume ids,
+             * not Veteran ids (`inheritance_parent_a_id` -> `umamusume.id`), so the trail follows the
+             * trainee this Veteran was filed from rather than the Veteran row itself: two filed
+             * careers of one trainee would be one Legacy answer, and the record the Trainer reads is
+             * "used this trainee", not "used this filing". Every cell is a stored column - trainee
+             * name, the scenario label the config resolves, the run status - and nothing here
+             * computes a "value as parent", which `compare()`'s absence row already refuses.
+             */
+            'usedAsParent' => TrainingRun::query()
+                ->with('umamusume')
+                ->where(fn ($query) => $query
+                    ->where('inheritance_parent_a_id', $run->umamusume_id)
+                    ->orWhere('inheritance_parent_b_id', $run->umamusume_id))
+                ->orderBy('id')
+                ->get()
+                ->map(fn (TrainingRun $child): array => [
+                    'trainee' => $child->umamusume->name,
+                    'scenario_label' => VeteranRow::scenarioLabel($child),
+                    'status_label' => $child->status->label(),
+                    'run_url' => route('runs.cockpit', $child),
+                ])
+                ->all(),
             'runUrl' => route('runs.cockpit', $run),
             // The two doors the detail page carries, supplied server-side so the page spells no URL.
             // (AUD-20261102-028 F-01)
