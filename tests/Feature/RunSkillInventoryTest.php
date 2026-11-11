@@ -26,6 +26,7 @@ use App\Enums\ReleaseStatus;
 use App\Enums\SkillAcquisition;
 use App\Models\Skill;
 use App\Models\TrainingRun;
+use App\Models\TurnEntry;
 use Inertia\Testing\AssertableInertia as Assert;
 
 function inventoryRun(): TrainingRun
@@ -128,4 +129,76 @@ it('refuses a state outside the three-state vocabulary', function (): void {
 it('pins the acquisition vocabulary to the three states that ship', function (): void {
     expect(array_map(static fn (SkillAcquisition $case): string => $case->value, SkillAcquisition::cases()))
         ->toBe(['Suggested', 'Acquired', 'Skipped']);
+});
+
+/*
+ * UX-18a (P1 = planning state), the server half. The planner computes and gates its plan client-side,
+ * but the write is the authority on whether the plan fits the run's recorded Skill Points, exactly as
+ * the audit's budget-guard acceptance asks. These cases pin the three behaviours the guard owns:
+ * refusal with both numbers named, Suggested rows costing nothing, and a run with no recorded SP
+ * refusing nothing (the page already prints that absence rather than a zero).
+ */
+it('refuses an over-budget plan with both numbers named and writes no row', function (): void {
+    $run = inventoryRun();
+    $skill = inventorySkill('Over Budget Skill');
+
+    TurnEntry::factory()->create(['training_run_id' => $run->id, 'sp' => 99]);
+
+    $this->post(route('runs.skills.sync', $run), [
+        'skills' => [['skill_id' => $skill->id, 'status' => 'Acquired', 'turn_acquired' => 12]],
+    ]);
+
+    // The default bag: the planner's picker reads any error whose key starts with `skills`, so the
+    // refusal reaches the Trainer beside the control they pressed, not on a second surface. The test
+    // session stores the bag's own array under its name (`default`).
+    /** @var array<string, mixed> $errors */
+    $errors = session('errors');
+
+    expect($errors)->not->toBeNull()
+        ->and((string) $errors['default']['messages']['skills'][0])
+        ->toBe("The plan exceeds this run's Skill Points: 100 planned against 99 recorded.");
+
+    // The refusal left the inventory untouched: the skill was never attached.
+    expect($run->refresh()->skills()->count())->toBe(0);
+});
+
+it('accepts a plan the recorded Skill Points cover, taking the hint discount the planner prices', function (): void {
+    $run = inventoryRun();
+    $skill = inventorySkill('Hinted Skill');
+
+    TurnEntry::factory()->create(['training_run_id' => $run->id, 'sp' => 80]);
+
+    // Hint level 3 prices the skill's 100-sp base at 70 (`HintDiscount::price` floor), the same
+    // figure the planner's Cost column prints, so the bar and the refusal quote one number.
+    $this->post(route('runs.skills.sync', $run), [
+        'skills' => [['skill_id' => $skill->id, 'status' => 'Acquired', 'turn_acquired' => 12, 'hint_level' => 3]],
+    ])->assertSessionHasNoErrors();
+
+    expect($run->refresh()->skills()->count())->toBe(1);
+});
+
+it('prices a Suggested row at nothing, because the client charges nothing for a plan', function (): void {
+    $run = inventoryRun();
+    $skill = inventorySkill('Planned Only Skill');
+
+    // Ten sp recorded, a 100-sp skill marked Suggested: the write takes it, because the plan is the
+    // state P1 approved and the client's own bar spends nothing on it.
+    TurnEntry::factory()->create(['training_run_id' => $run->id, 'sp' => 10]);
+
+    $this->post(route('runs.skills.sync', $run), [
+        'skills' => [['skill_id' => $skill->id, 'status' => 'Suggested', 'turn_acquired' => null]],
+    ])->assertSessionHasNoErrors();
+
+    expect($run->refresh()->skills()->count())->toBe(1);
+});
+
+it('refuses nothing on a run with no recorded Skill Points, naming no invented budget', function (): void {
+    $run = inventoryRun();
+    $skill = inventorySkill('No Budget Yet Skill');
+
+    $this->post(route('runs.skills.sync', $run), [
+        'skills' => [['skill_id' => $skill->id, 'status' => 'Acquired', 'turn_acquired' => 1]],
+    ])->assertSessionHasNoErrors();
+
+    expect($run->refresh()->skills()->count())->toBe(1);
 });

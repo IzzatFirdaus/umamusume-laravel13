@@ -336,3 +336,44 @@ test('moves the budget bar after each add and each remove', async ({ page }) => 
     await page.getByRole('checkbox', { name: 'Plan Unstoppable' }).first().uncheck();
     await expect(savebar).toContainText('No skill planned');
 });
+
+/*
+ * UX-18a (P1 = planning state), the write side. The client's bar gates what its own commit button
+ * sends, so the reachable end-to-end flow is the plan state itself: add a skill through the
+ * picker's own form, which posts a Suggested row - the state P1 approved - and read it back after a
+ * cold reload. The over-budget refusal the server adds is pinned in `RunSkillInventoryTest`; it is
+ * reachable only from a post this screen cannot produce (a bypassed bar, or a spend the bar never
+ * saw), so no legitimate UI path of this page drives it.
+ */
+test('an added plan skill survives the write and a cold reload (UX-18a)', async ({ page }) => {
+    await openPlanner(page);
+    const runUrl = page.url().replace(/\/skills$/, '');
+
+    // The picker's add form posts a Suggested row - the plan state P1 approved - through the same
+    // sync the savebar's commit uses, and the sibling double-click case pins the dedup half. This
+    // case pins the persistence half: the row is in the database, so a cold reload still shows it
+    // and the picker no longer offers it.
+    const disclosure = page.locator('details').filter({ hasText: 'Build target, recorded skills and the add form' }).first();
+    if ((await disclosure.getAttribute('open')) === null) {
+        await disclosure.locator('summary').first().click();
+    }
+
+    const picker = page.getByRole('textbox', { name: 'Skill to add' });
+    await picker.fill('Gourmand');
+    await page.getByRole('option', { name: /Gourmand/ }).first().click();
+    await page.getByRole('button', { name: 'Add to run' }).click();
+
+    await page.goto(`${runUrl}/skills`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // The recorded groups list the skill, and the picker excludes what the run already holds.
+    await expect(page.getByText('Gourmand').first()).toBeVisible();
+
+    const reopened = page.locator('details').filter({ hasText: 'Build target, recorded skills and the add form' }).first();
+    if ((await reopened.getAttribute('open')) === null) {
+        await reopened.locator('summary').first().click();
+    }
+
+    await page.getByRole('textbox', { name: 'Skill to add' }).fill('Gourmand');
+    await expect(page.getByRole('option', { name: /Gourmand/ })).toHaveCount(0);
+});

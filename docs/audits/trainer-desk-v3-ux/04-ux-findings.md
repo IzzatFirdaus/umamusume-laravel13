@@ -30,6 +30,22 @@ index) would change correct behaviour. Six paths in the plan are phantom and the
 live at `tests/browser/*.spec.ts`; the plan-verification note in `.scratch-uma/v3-ux-audit/` lists all
 of them.
 
+**UX-18 re-measured 2026-11-11 (P1 = planning state).** Two premises in the audit's UX-18 did not
+survive measurement before implementation. First, the "nine empty `<h2>` elements" were not empty
+headings: all eleven live inside the collapsed *"Build target, recorded skills and the add form"*
+disclosure, and a text scan of `innerText` reads an unrendered (`display:none`) subtree as empty while
+the accessibility tree correctly exposes nothing to a user who has not opened it. Every one of the
+eleven carries real, visible text (`Add a skill`, `Your target`, `Purchasable skills`, ...). No
+defect exists; the a11y half of UX-18 is withdrawn. Second, the audit's premise "no plan-skill
+endpoint exists" was false in substance: `run_skills` has carried `Suggested` — *"a skill the Trainer
+marked for this run before it happened"*, the exact planning state P1 approved — since rev 0.2, with a
+write path (`POST /training-runs/{run}/skills`, `runs.skills.sync`) that the planner's picker and
+budget bar already drive. Building a second `planned_skills` table would have been a second owner for
+one fact, which `ARCHITECTURE-ESSENTIALS.md`'s planner line and the cut-systems ruling both refuse.
+The one genuinely missing piece — the server priced nothing, so the write trusted the client's
+budget arithmetic — is what shipped: `budgetRefusal()` on the existing sync, pricing the hint-adjusted
+figure the bar prints (`HintDiscount::price`, floored identically) against the run's recorded SP.
+
 ---
 
 ## UX-01 — The support-deck picker is unreachable from the action that asks for it

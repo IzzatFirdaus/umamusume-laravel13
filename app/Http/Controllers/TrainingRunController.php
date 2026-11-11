@@ -42,6 +42,7 @@ use App\Services\Career\CareerPositionLabel;
 use App\Services\CareerCalendar;
 use App\Services\DataPipeline\ArtworkMirror;
 use App\Services\DeckAnalysis;
+use App\Services\HintDiscount;
 use App\Services\IndependentTraining\Lifecycle;
 use App\Services\Legacy\VeteranRow;
 use App\Services\PageSize;
@@ -1167,6 +1168,22 @@ class TrainingRunController extends Controller
      */
     public function syncSkills(StoreRunSkillRequest $request, TrainingRun $run): RedirectResponse
     {
+        // UX-18a, the server half of P1's planning state. The planner computes and gates its plan
+        // client-side (`SkillsPlanner.vue`'s `plannedSpend`/`canCommit`), but a write that trusts the
+        // client's arithmetic is a gate the client can simply omit; the same refusal the commit
+        // button guards belongs on the write. Priced as the planner prices: the hint-adjusted figure
+        // the Cost column prints (`HintDiscount::price`, floored the same way), summed over the
+        // skills this post marks Acquired. Skipped and Suggested rows cost nothing, because the
+        // client charges nothing for them. The three rule-bearing parts are one method so the
+        // planner's bar, this refusal and any future reader cannot drift apart in three files.
+        $refusal = $this->budgetRefusal($request, $run);
+
+        if ($refusal !== null) {
+            return redirect()
+                ->route('runs.skills.planner', $run)
+                ->withErrors(['skills' => $refusal]);
+        }
+
         foreach ($request->validated()['skills'] as $entry) {
             // The same scope the request rule applies, so the two cannot disagree about which rows
             // are writable. The request is what refuses an ineligible skill; this is the second
@@ -1198,6 +1215,53 @@ class TrainingRunController extends Controller
         }
 
         return redirect()->route('runs.skills.planner', $run)->with('status', 'Skill status saved.');
+    }
+
+    /**
+     * The over-budget refusal for a skills sync, or null when the plan fits.
+     *
+     * Priced exactly as the planner's bar prices: each skill the post marks `Acquired` at its
+     * hint-adjusted cost (`HintDiscount::price`, floor, as `getHintAdjustedCost` in the page), so
+     * the bar and the refusal quote one number. A run with no recorded Skill Points has never met a
+     * budget, and the page already prints its absence rather than a zero; the write refuses nothing
+     * there rather than inventing a zero-budget reading (`ADR-0003`).
+     *
+     * @param  StoreRunSkillRequest  $request  the validated sync payload
+     * @param  TrainingRun  $run  the run whose recorded SP is the budget
+     */
+    private function budgetRefusal(StoreRunSkillRequest $request, TrainingRun $run): ?string
+    {
+        $sp = $run->turnEntries
+            ->sortByDesc('turn')
+            ->first(static fn (TurnEntry $entry): bool => $entry->sp !== null)
+            ?->sp;
+
+        if ($sp === null) {
+            return null;
+        }
+
+        $spend = 0;
+
+        foreach ($request->validated()['skills'] as $entry) {
+            if ($request->acquisitionFor($entry) !== SkillAcquisition::Acquired) {
+                continue;
+            }
+
+            $skill = Skill::availableOnGlobal()->find((int) $entry['skill_id']);
+            $hintLevel = $entry['hint_level'] ?? null;
+
+            $spend += $skill === null || $skill->sp_cost === null
+                ? 0
+                : ($hintLevel === null
+                    ? (int) $skill->sp_cost
+                    : HintDiscount::price((int) $skill->sp_cost, (int) $hintLevel));
+        }
+
+        if ($spend <= $sp) {
+            return null;
+        }
+
+        return "The plan exceeds this run's Skill Points: {$spend} planned against {$sp} recorded.";
     }
 
     /**
