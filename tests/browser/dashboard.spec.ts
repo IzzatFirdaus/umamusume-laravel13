@@ -208,6 +208,39 @@ test('the quick actions are four outline destinations and a note', async ({ page
     await expect(why.getByText(/Quick actions group the destinations the sidebar lists/)).toBeVisible();
 });
 
+/*
+ * C6, the get-running panel. The Dashboard owns the gate: the panel renders while a step is
+ * outstanding and the reference-data notice (UX-23) keeps priority on a fully fresh install, so
+ * the two states pinned here are the ones past that door - a career with no recorded turn yet
+ * (step 3 outstanding, its door following the active run), and the same career after one turn
+ * (the checklist gone). Seeded catalogues are the harness's own state, so `fetch_done` is true in
+ * both; that step's gate is the UX-23 feature test's, not re-asserted here.
+ */
+test('the get-running panel names the outstanding step and follows the active run (C6)', async ({ page }) => {
+    const url = await startCareer(page, 'unity_cup');
+    const runId = url.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+    expect(runId).not.toBe('');
+
+    await ready(page);
+    // `data-region` rather than the region role: the panel is a plain section whose accessible
+    // name comes from its heading, and the bound attribute is the stable hook across hydration.
+    const panel = page.locator('[data-region="get-running"]');
+    await expect(panel).toBeVisible();
+
+    // Steps 1 and 2 are done by the harness state and the career just started; step 3 is the
+    // outstanding one, and its link is the run's own training screen.
+    await expect(panel.getByText('Fetch reference data')).toBeVisible();
+    await expect(panel.locator('[data-step-state="done"]')).toHaveCount(2);
+    const step = panel.locator('li').filter({ hasText: 'Record your first turn' });
+    await expect(step.locator('[data-step-state="todo"]')).toHaveCount(1);
+    await expect(step.getByRole('link', { name: 'Record your first turn' })).toHaveAttribute('href', new RegExp('/training-runs/' + runId + '/training'));
+
+    // One recorded turn retires the checklist entirely.
+    await recordTurns(page, runId, 1);
+    await ready(page);
+    await expect(page.locator('[data-region="get-running"]')).toHaveCount(0);
+});
+
 test('with no active career the resume card names the absence and keeps its actions', async ({ page }) => {
     await ready(page);
 

@@ -9,6 +9,7 @@ import { useLayout } from '../composables/useLayout';
 import ArtworkSlot from '../components/ArtworkSlot.vue';
 import AbsenceValue from '../components/AbsenceValue.vue';
 import ReferenceDataNotice from '../components/ReferenceDataNotice.vue';
+import GetRunningPanel from '../components/GetRunningPanel.vue';
 import Pill from '../components/ui/Pill.vue';
 import Tile from '../components/ui/Tile.vue';
 import Note from '../components/ui/Note.vue';
@@ -108,6 +109,13 @@ const props = defineProps<{
     /** Fresh install (UX-23): false while no catalogue row exists, and the KPI row trades its three
      *  zero tiles for one named state with the fetch command. */
     catalogueLoaded: boolean;
+    /** First-run checklist (C6): the three stored facts the get-running panel prints. */
+    firstRun: {
+        fetch_done: boolean;
+        career_exists: boolean;
+        turn_recorded: boolean;
+        training_url: string | null;
+    };
     dataStatus: DataStatus;
 }>();
 
@@ -481,6 +489,15 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                     </div>
                 </section>
             </div>
+
+            <!-- C6 first-run checklist: while a step is outstanding the dashboard opens with a
+                 route, not three zero tiles. The reference-data notice (UX-23) keeps priority for a
+                 fully fresh install because its one command starts the only step that unlocks the
+                 rest; the panel answers "what now" once past that door. -->
+            <GetRunningPanel
+                v-if="catalogueLoaded && (!firstRun.career_exists || !firstRun.turn_recorded)"
+                :first-run="firstRun"
+            />
 
             <!-- KPI strip: the wireframe's `.g-4` (index.html:133-154). Four figures, each a door to
                  the screen that owns its list where the wireframe draws one. "Careers running" leads

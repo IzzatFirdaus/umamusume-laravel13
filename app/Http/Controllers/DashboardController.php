@@ -13,6 +13,7 @@ use App\Models\RaceCatalogSlot;
 use App\Models\Skill;
 use App\Models\SupportCard;
 use App\Models\TrainingRun;
+use App\Models\TurnEntry;
 use App\Models\Umamusume;
 use App\Models\Veteran;
 use App\Services\Career\CareerPositionLabel;
@@ -53,6 +54,12 @@ class DashboardController extends Controller
 
     public function index(ListVeterans $veterans): Response
     {
+        // One read, two consumers: the KPI row's zero-tile replacement and the first-run checklist's
+        // step 1 both ask whether the reference data is loaded, so the page composes it once.
+        $catalogueLoaded = Umamusume::query()->whereNotNull('external_ref')->exists()
+            && Skill::exists()
+            && SupportCard::exists();
+
         return Inertia::render('Dashboard', [
             'activeCareer' => $this->activeCareer(),
             // More than one Active run is reachable and this screen resumes only the newest, so the
@@ -111,9 +118,30 @@ class DashboardController extends Controller
             // trainee step) show one named state with its fix instead. Composed from the counts this
             // page already reads; a partially-fetched install still counts as loaded, because the
             // zero a Trainer meets is one the fetch routes around.
-            'catalogueLoaded' => Umamusume::query()->whereNotNull('external_ref')->exists()
-                && Skill::exists()
-                && SupportCard::exists(),
+            'catalogueLoaded' => $catalogueLoaded,
+            /*
+             * C6 first-run checklist: the three honest states a fresh install is in (no reference
+             * data, no career, no recorded turn), each rendered with its live completion by the
+             * page's get-running panel. Only stored existence reads: `fetch_done` reuses the
+             * catalogue composition above, `career_exists` counts any run at all (Active or
+             * Completed - a finished run means a Trainer did start, so the step is done), and
+             * `turn_recorded` is a turn entry row, not a `turns` row: `turns` holds no
+             * Trainer-written fact (`ADR-0003` keeps the entry, not the turn, the record), so
+             * `TurnEntry::exists()` is the premise-checked form the plan's own correction names.
+             * Composed here rather than in the component so the prop prints, not a query.
+             */
+            'firstRun' => [
+                'fetch_done' => $catalogueLoaded,
+                'career_exists' => TrainingRun::exists(),
+                'turn_recorded' => TurnEntry::exists(),
+                // Step 3's door, because no fixed href reaches "the run you just started": the
+                // checklist receives the active run's training screen from the run this page
+                // already loaded, and null means the step has no run to link yet.
+                'training_url' => ($active = TrainingRun::query()
+                    ->where('status', RunStatus::Active)
+                    ->latest('id')
+                    ->first()) !== null ? route('runs.training', $active) : null,
+            ],
             'dataStatus' => $this->dataStatus(),
         ]);
     }

@@ -6,6 +6,8 @@ use App\Domain\Career\CareerPosition;
 use App\Enums\RunMode;
 use App\Enums\RunStatus;
 use App\Enums\TurnEventType;
+use App\Models\Skill;
+use App\Models\SupportCard;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvent;
@@ -294,4 +296,53 @@ it('keeps the sourced catalogue count distinct from the operational trainee coun
             // The stale flag is the tile's risk border, so it travels as a bool rather than being
             // read back out of the displayed state word.
             ->where('dataStatus.stale', false));
+});
+
+/*
+ * C6, the first-run checklist's three stored facts. The suite's migrated-but-unseeded database is
+ * the fresh install, so the first read pins all three as undone. Each step's completion is a
+ * stored existence, asserted one step at a time: a sourced catalogue row completes step 1, any run
+ * at all completes step 2 (a Finished run still means a Trainer started), and one `turn_entries`
+ * row - not a `turns` row, which holds no Trainer-written fact (ADR-0003) - completes step 3. The
+ * training door follows the active run, and is null while no run exists.
+ */
+it('derives the first-run checklist from stored existence, one step at a time (C6)', function (): void {
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('firstRun.fetch_done', false)
+            ->where('firstRun.career_exists', false)
+            ->where('firstRun.turn_recorded', false)
+            ->where('firstRun.training_url', null));
+
+    // Step 1: one sourced trainee alone is not a loaded catalogue (the UX-23 composition), so the
+    // fetch step completes only when all three catalogues carry a row.
+    Umamusume::factory()->create(['name' => 'Sourced One', 'external_ref' => 'game-tora-1']);
+    Skill::factory()->create(['name' => 'Fixture Skill']);
+    SupportCard::factory()->create(['char_name' => 'Fixture Card']);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('firstRun.fetch_done', true)
+            ->where('firstRun.career_exists', false));
+
+    // Step 2: a run exists, so the career step is done and the training door follows that run.
+    $run = TrainingRun::factory()->create(['scenario' => 'ura_finale', 'status' => RunStatus::Active]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('firstRun.career_exists', true)
+            ->where('firstRun.turn_recorded', false)
+            ->where('firstRun.training_url', route('runs.training', $run)));
+
+    // Step 3: one turn entry row completes the checklist, and the entry is the record, not the
+    // turn (`ADR-0003`): the row the Trainer wrote is the one the existence read counts.
+    TurnEntry::factory()->create(['training_run_id' => $run->id, 'turn' => 1]);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('firstRun.turn_recorded', true));
 });
