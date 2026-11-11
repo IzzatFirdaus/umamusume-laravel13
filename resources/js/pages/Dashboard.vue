@@ -228,6 +228,21 @@ const careerNote = computed<string | null>(() => {
     // not an arithmetic one), so the line states them without apologising for the tool.
     // `known defect`/`not a rendering choice` used to live here; the v3 audit filed the apology
     // itself as UX-08, because a Trainer does not need the HFW's changelog on their dashboard.
+    //
+    // RTX-02: a career the wizard has just created has **no** logged turn, and printing
+    // `Turn 0 logged` over that state claimed a position the run does not have — the cockpit says
+    // `No turn recorded yet` for the same run. Zero is the absence of a logged turn here, not a
+    // position, so the sentence takes the cockpit's wording instead of counting from zero.
+    // `AGENTS.md` §13's rule is the same one: an unrecorded value renders as an absence, never a
+    // default.
+    if (career.turn === 0) {
+        const imported = career.cockpit_turn === null
+            ? null
+            : ` It was imported at turn ${career.cockpit_turn}.`;
+
+        return `No turn has been logged for this career yet.${imported ?? ''}`;
+    }
+
     const logged = `Turn ${career.turn} logged`;
     const imported = career.cockpit_turn === null
         ? null
@@ -349,9 +364,10 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                     <div class="mt-1.5 grid gap-2.5 g-3">
                         <Tile
                             label="Turn"
-                            :value="group(props.activeCareer.turn)"
+                            :value="props.activeCareer.turn === 0 ? 'not recorded' : group(props.activeCareer.turn)"
+                            :absent="props.activeCareer.turn === 0"
                             :suffix="'of ' + totalTurns"
-                            :hint="props.activeCareer.cockpit_turn !== null && props.activeCareer.cockpit_turn !== props.activeCareer.turn ? `Imported position: ${props.activeCareer.cockpit_turn}` : undefined"
+                            :hint="props.activeCareer.turn === 0 ? 'No turn has been logged for this career yet.' : (props.activeCareer.cockpit_turn !== null && props.activeCareer.cockpit_turn !== props.activeCareer.turn ? `Imported position: ${props.activeCareer.cockpit_turn}` : undefined)"
                             data-tile="turn"
                         />
                         <Tile
