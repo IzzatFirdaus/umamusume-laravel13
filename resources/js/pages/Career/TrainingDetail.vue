@@ -313,6 +313,20 @@ watch(() => form.energy_state, (state) => {
     }
 });
 
+/*
+ * F-08's guard. The `Race` action is a link rendered as a radio, and leaving for the race desk is a
+ * hard `window.location.href` — which destroys every value above with the JS context. Choosing an
+ * action and abandoning the turn must not be the same gesture, so a departure is only allowed once
+ * the Trainer has been told what it costs.
+ *
+ * The snapshot is taken once, at mount, so "dirty" means "differs from how the form opened" rather
+ * than "differs from empty": `turn` and the facility ladder open pre-filled from the last logged
+ * turn, and prompting on those untouched defaults would be worse than the defect.
+ */
+const initialSnapshot = JSON.stringify(form.data());
+
+const isDirty = (): boolean => JSON.stringify(form.data()) !== initialSnapshot;
+
 const placeholder = (name: string): string | undefined =>
     props.write.previous?.[name] === null || props.write.previous?.[name] === undefined
         ? 'no logged turn'
@@ -521,6 +535,13 @@ const otherActions = computed(() => [
 
 const chooseAction = (value: string, href: string | null): void => {
     if (href !== null) {
+        // F-08: the departure is the destructive act, so it is the thing that needs consent. A clean
+        // form goes straight through; a dirty one is asked first, and a refused prompt leaves every
+        // entered value where it was.
+        if (isDirty() && !window.confirm('Leave for the race desk? The values entered on this form will be lost.')) {
+            return;
+        }
+
         window.location.href = href;
 
         return;
