@@ -58,6 +58,10 @@ const emit = defineEmits<{
     'update:modelValue': [value: string | number | string[] | null];
     blur: [event: FocusEvent];
     focus: [event: FocusEvent];
+    // Re-emitted so a caller's `@change` works. The component binds its own `onChange` to the native
+    // element, which swallowed the event: three call sites relied on `@change` to clear a dependent
+    // field (`spark.target = ''` when a spark's Category changes) and none of them ever fired.
+    change: [event: Event];
 }>();
 
 const selectId = props.id ?? props.name;
@@ -86,6 +90,9 @@ function onChange(event: Event): void {
     } else {
         emit('update:modelValue', target.value || null);
     }
+    // Re-emit the native event so a caller's `@change` runs. Emitted AFTER the value update so a
+    // handler sees the new `modelValue` and can clear what depended on the old one.
+    emit('change', event);
 }
 
 function onBlur(event: FocusEvent): void {

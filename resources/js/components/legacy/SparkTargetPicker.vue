@@ -65,6 +65,26 @@ const inputRef = ref<HTMLInputElement | null>(null);
 const selectedLabel = computed<string>(() => (props.modelValue === null || props.modelValue === '' ? '' : props.modelValue));
 
 /**
+ * What the input actually prints.
+ *
+ * **F-03's fix.** The input used to be bound to `search` alone, so it displayed the filter text
+ * while the payload stored `modelValue` — two variables that nothing forced to agree before
+ * submit. Typing `Pow`, leaving the option unclicked and saving therefore showed a value and
+ * stored `null`, and a null target passes `assertTargetMatchesCategory`, so no error surfaced.
+ *
+ * The field now prints the committed value except while the Trainer is actively filtering, and
+ * falls back to the committed value when the filter is emptied: it never displays something the
+ * row has not stored.
+ */
+const displayValue = computed<string>(() => {
+    if (!isOpen.value || search.value === '') {
+        return selectedLabel.value;
+    }
+
+    return search.value;
+});
+
+/**
  * The list in one shape, whatever the Category's vocabulary is.
  *
  * The stored value is always the English `name`, because that is the string the payload keeps
@@ -127,6 +147,55 @@ const options = computed<{ value: string; name: string; name_ja: string | null; 
     ];
 });
 
+/**
+ * Resolve typed filter text to its option, or discard it.
+ *
+ * **The second half of F-03's fix.** `displayValue` stops the field from *printing* a value the row
+ * has not stored; this stops the row from *losing* a value the Trainer typed. A prefix that names
+ * exactly one option (`Pow` -> `Power`) is committed on the way out; anything ambiguous or unmatched
+ * is dropped rather than saved as `null`.
+ *
+ * Committing a unique prefix is what a Trainer means by typing it. Refusing was the alternative, but
+ * it would turn every abbreviation into an error where the intent is unambiguous.
+ */
+function commitTypedText(): void {
+    const typed = search.value.trim();
+
+    if (typed === '') {
+        return;
+    }
+
+    const needle = typed.toLowerCase();
+    const exact = options_.value.find((option) => option.value.toLowerCase() === needle);
+    const prefix = options_.value.filter((option) => option.name.toLowerCase().startsWith(needle));
+    const chosen = exact ?? (prefix.length === 1 ? prefix[0] : null);
+
+    if (chosen !== null) {
+        emit('update:modelValue', chosen.value);
+    }
+}
+
+/**
+ * Commit only when the typed text is a complete option name.
+ *
+ * Called on every keystroke, so the narrow rule matters: a unique *prefix* is deliberately not
+ * resolved here, because committing `Sp` while a Trainer is typing `Speed` would rewrite the row
+ * mid-word. `commitTypedText` (on close) is where a prefix is allowed to resolve.
+ */
+function commitExactText(): void {
+    const typed = search.value.trim();
+
+    if (typed === '') {
+        return;
+    }
+
+    const exact = options_.value.find((option) => option.value.toLowerCase() === typed.toLowerCase());
+
+    if (exact !== undefined) {
+        emit('update:modelValue', exact.value);
+    }
+}
+
 function open(): void {
     isOpen.value = true;
 }
@@ -134,6 +203,11 @@ function open(): void {
 function close(): void {
     isOpen.value = false;
     highlighted.value = -1;
+    // F-03: resolve or discard the filter text before the field reverts to `selectedLabel`. Without
+    // this, text that was typed but never clicked vanished on save, which is the other half of the
+    // silent-null defect: `select()` clears `search`, so it is empty on this path by construction.
+    commitTypedText();
+    search.value = '';
 }
 
 function select(value: string): void {
@@ -149,6 +223,11 @@ function onInput(event: Event): void {
     search.value = (event.target as HTMLInputElement).value;
     isOpen.value = true;
     highlighted.value = -1;
+    // F-03: a *complete* name typed and not clicked still counts as the answer, so it is committed
+    // as it is typed. Only an exact match commits here: resolving a unique prefix on every keystroke
+    // would silently rewrite the value while the Trainer is still typing, which is the same class of
+    // surprise this fix exists to remove. Prefixes resolve on close instead (`commitTypedText`).
+    commitExactText();
 }
 
 function onKeydown(event: KeyboardEvent): void {
@@ -205,6 +284,23 @@ function onDocumentClick(event: MouseEvent): void {
     }
 }
 
+/**
+ * Commit on blur.
+ *
+ * F-03 made the *display* honest, but a save can be pressed while the field still has focus, and a
+ * document click on a non-focusable element never moves focus, so the outside-click path is not
+ * enough. Blur is the event the platform always delivers when focus leaves.
+ *
+ * Synchronous, not deferred: an earlier version used `setTimeout(0)`, which ran AFTER the save had
+ * already serialised the form, so the value committed too late to be posted. Deferring is also
+ * unnecessary — pressing an option calls `select()`, which clears `search` first, so `commitTypedText`
+ * sees empty text and cannot overwrite the option the Trainer actually pressed.
+ */
+function onBlur(): void {
+    commitTypedText();
+    close();
+}
+
 watch(isOpen, (open) => {
     if (open) {
         document.addEventListener('click', onDocumentClick);
@@ -227,7 +323,7 @@ watch(isOpen, (open) => {
                 type="text"
                 role="combobox"
                 autocomplete="off"
-                :value="search"
+                :value="displayValue"
                 :placeholder="selectedLabel === '' ? 'Not recorded' : selectedLabel"
                 :aria-expanded="isOpen"
                 :aria-controls="uid"
@@ -239,6 +335,7 @@ watch(isOpen, (open) => {
                 @input="onInput"
                 @focus="open"
                 @keydown="onKeydown"
+                @blur="onBlur"
             />
 
             <button
