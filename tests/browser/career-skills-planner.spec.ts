@@ -88,9 +88,31 @@ test('renders the HFW region model with the budget bar and one savebar', async (
 test('planning a row moves the spend and remaining figures, and the row says why it is unaffordable', async ({ page }) => {
     await openPlanner(page);
 
+    const budget = page.locator('section').filter({ has: page.locator('#skills-budget-heading') }).first();
+
+    // Before: nothing planned, nothing spent.
+    await expect(budget).toContainText(/planned spend/i);
+    const spendBefore = await budget.innerText();
+
     const checkbox = page.locator('main table').first().locator('tbody input[type="checkbox"]:not([disabled])').first();
 
     await checkbox.check();
+
+    // F-13's claim, held to the rendered figures. The walk reported that `PLANNED SPEND` stayed 0 and
+    // `REMAINING` stayed at the run's SP after a skill was added, which would make the bar blind to
+    // its own plans. This case pins the opposite: the two figures move with the plan, and the header
+    // sentence agrees with them. Before this assertion the test's own title claimed to check the
+    // spend and remaining figures while only reading the savebar and the commit button, which is how
+    // the claim could be filed and left standing.
+    await expect(budget, 'the budget bar did not count the planned row').not.toHaveText(
+        spendBefore,
+    );
+
+    const spendAfter = await budget.innerText();
+    await expect(
+        spendAfter,
+        'the planned spend still reads zero after a row was planned',
+    ).not.toMatch(/planned spend\D*0/i);
 
     await expect(page.locator('.savebar')).toContainText('1 skill planned');
     await expect(page.getByRole('button', { name: 'Learn planned skills' }).first()).toBeDisabled();
@@ -99,6 +121,15 @@ test('planning a row moves the spend and remaining figures, and the row says why
     await page.getByRole('button', { name: 'Clear plan' }).click();
 
     await expect(page.locator('.savebar')).toContainText('No skill planned');
+    // And clearing returns the spend to zero rather than leaving the last figure behind. Read the
+    // figure itself: the label and its number are sibling nodes with no separator between them, so a
+    // text regex over the whole bar cannot tell `Planned spend0` from `Planned spend140`.
+    const spendValue = await budget
+        .locator('text=/^Planned spend$/i')
+        .locator('xpath=following-sibling::*[1]')
+        .innerText();
+
+    expect(spendValue.trim(), 'the planned spend survived Clear plan').toBe('0');
 });
 
 test('the search narrows the table and Clear restores it', async ({ page }) => {
