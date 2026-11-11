@@ -508,3 +508,59 @@ test.describe('Legacy Lab builder — the spark Target picker', () => {
         await expect(page.locator('[role="option"]').first()).toContainText('Cut and Drive!');
     });
 });
+
+/*
+ * C4, the spark tally on the builder. One spark recorded on Parent A through the form's own
+ * controls is one row in the summary table on the read-back, with the refusal sentence stating the
+ * tally's boundary and no probability anywhere in the section. The empty state is the fresh
+ * builder's own (no selection recorded), so it is pinned first on the same run.
+ */
+test.describe('Legacy Lab builder — spark summary', () => {
+    test('tallies the recorded sparks once per carrier and refuses to predict yield (C4)', async ({ page }) => {
+        const runId = await createActiveRun(page, 'Special Week');
+
+        await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
+
+        // The disclosure is open by default, and on a run with no selection the table states the
+        // empty tally rather than rendering bare headers.
+        const summary = page.locator('details', { has: page.getByRole('heading', { name: 'Sparks carried by this pair' }) });
+        await expect(summary).toBeVisible();
+        await expect(summary.locator('summary')).toHaveText('Spark summary');
+        await expect(summary).toContainText('This is a tally of sparks carried by the pair. It does not predict what the inheritance will yield.');
+        await expect(summary).toContainText('No sparks are recorded on any of the six nodes yet, so there is nothing to tally.');
+
+        // Record one spark on Parent A through the form's own controls.
+        await page.getByLabel('Assign to Parent A').selectOption({ index: 0 });
+        await page.getByRole('button', { name: 'Add Spark to Parent A' }).click();
+        await page.getByLabel('Kind').first().selectOption('blue');
+        await page.getByLabel('Target').first().click();
+        await page.getByLabel('Target').first().fill('Speed');
+        await page.locator('[role="option"]', { hasText: 'Speed' }).first().click();
+        await page.getByLabel('Stars', { exact: true }).first().fill('2');
+
+        // The confirm flow posts and the read-back lands on the compare surface; the tally is on the
+        // builder, so the case returns to it to read the stored state.
+        page.once('dialog', (dialog) => void dialog.accept());
+        await page.getByRole('button', { name: 'Save legacy' }).click().catch(() => undefined);
+
+        await page.goto(`/legacy/${runId}`, { waitUntil: 'domcontentloaded' });
+        await page.locator('#app > *').first().waitFor();
+
+        await expect(summary).toBeVisible();
+        const rows = summary.getByRole('table').locator('tbody tr');
+        await expect(rows).toHaveCount(1);
+        await expect(rows.first()).toContainText('Speed');
+        await expect(rows.first()).toContainText('Blue');
+        await expect(rows.first()).toContainText('★2');
+        // The carrier is the parent slot's own label when the payload holds no name behind the
+        // assignment (ADR-0010: the foreign key resolves the pick, a typed name has no row), which
+        // is the same named-absence read-back the six-node graph prints.
+        await expect(rows.first()).toContainText('Parent A');
+
+        // The Preview block below is unchanged by the tally, and no percentage or odds prints
+        // anywhere in the summary section.
+        await expect(page.getByRole('heading', { name: 'Preview for a new run' })).toBeVisible();
+        expect(await summary.textContent() ?? '').not.toMatch(/%|odds|chance/);
+    });
+});

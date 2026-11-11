@@ -52,6 +52,7 @@ import BaseSelect from '@/components/Form/BaseSelect.vue';
 import BaseCheckbox from '@/components/Form/BaseCheckbox.vue';
 import AncestorEditor from '@/components/legacy/AncestorEditor.vue';
 import SparkTargetPicker from '@/components/legacy/SparkTargetPicker.vue';
+import SparkSummary from '@/components/legacy/SparkSummary.vue';
 import BaseButton from '@/components/Form/BaseButton.vue';
 import BaseRadio from '@/components/Form/BaseRadio.vue';
 
@@ -741,6 +742,20 @@ const hasAnyNode = computed(() =>
                  </p>
                  <p v-if="form.errors.affinity" class="mt-1 text-xs text-risk">{{ form.errors.affinity }}</p>
              </div>
+
+            <!--
+                C4, the spark tally: one table across the six nodes, above the preview it informs.
+                Open by default because the question it answers - "will this pair carry what I need" -
+                is the builder's own main question, and a collapsed disclosure would hide it behind a
+                click the wireframe never drew. It is outside the form: it reads the recorded state
+                and writes nothing.
+            -->
+            <details open class="card mt-4">
+                <summary class="text-sm font-semibold text-ink-strong">Spark summary</summary>
+                <div class="mt-3">
+                    <SparkSummary :graph="graph" />
+                </div>
+            </details>
 
             <!--
                 The preview card (`legacy-builder.html:100-121`).
