@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 /*
- * F-03 — the spark `Target` combobox must not display a value it has not stored.
+ * F-03 — the spark `Target` combobox must not display a value it has not stored, and typed text
+ * must never become the value without explicit acceptance.
  *
  * The defect (walk 8, `RS-UC-2026-13`, reconciliation row R3-16's surface but a distinct cause):
  * `SparkTargetPicker.vue` bound the input to `search` (the filter text) while the payload stored
@@ -15,6 +16,13 @@ import { test, expect } from '@playwright/test';
  *   3. value accepted      -> after a save AND A COLD RELOAD the field still shows the option
  *
  * State 3 is the one that would have caught this. Typing alone must never satisfy the spec.
+ *
+ * Owner ruling 2026-11-12 (strict revert, amending the first-draft fix in `282e5437`): typed
+ * text — exact matches and unique prefixes included — never becomes the value without explicit
+ * acceptance. The explicit accepts are clicking an option and pressing Enter on a highlighted
+ * one. `Tab`, `Escape`, blur and outside-click restore the previously committed value. The
+ * displayed value and the submitted value are therefore the same committed selection, always.
+ * The early commit cases below pin the paths `282e5437`'s implicit commitment opened.
  *
  * `label in name` (WCAG 2.5.3) is why the field is located by its accessible name `Target` rather
  * than by placeholder: the visible label is the contract this component documents at line 45.
@@ -138,19 +146,24 @@ test('typing a target and saving does not store a target the field did not commi
 
     await page.locator(STARS_ID).fill('1');
 
-    // Save WITHOUT clicking the option, which is exactly what the walk did.
+    // Save WITHOUT clicking the option, which is exactly what the walk did. The owner ruling is
+    // that this must NOT commit `Power`: the field reverts to the committed value (empty) on blur,
+    // and the payload stores what the field displayed — nothing, as a null target — rather than
+    // the typed prefix.
     await page.getByRole('button', { name: /Save and stay/i }).first().click();
     await page.waitForLoadState('domcontentloaded');
     await page.locator('#app > *').first().waitFor();
 
     expect(puts.length, 'no PUT reached /career/setup/legacy').toBeGreaterThan(0);
 
-    // What the component actually sent. This is the assertion F-03 is about: typed text that names
-    // one option must leave the form as a committed target, not as null.
+    // The invariant, stated in the direction that catches both failure shapes: the field never
+    // displays what the payload does not carry, and typed text never becomes a value on its own.
+    // A commit of `Power` here would be implicit commitment — `282e5437`'s behaviour, removed by
+    // the ruling.
     expect(
         puts[0],
-        'the save posted no committed spark target, so the typed text never became a value',
-    ).toContain('"target":"Power"');
+        'the save posted a target the field never explicitly committed (implicit commitment)',
+    ).not.toContain('"target":"Power"');
 });
 
 test('a selected target survives a cold reload', async ({ page }) => {
@@ -166,6 +179,7 @@ test('a selected target survives a cold reload', async ({ page }) => {
     await field.fill('Pow');
 
     // State 2 — commit it the way a Trainer does: click the option.
+    await expect(page.getByRole('option', { name: /^Power/ })).toBeVisible();
     await page.getByRole('option', { name: /^Power/ }).first().click();
     await expect(page.getByRole('listbox')).toHaveCount(0);
 
@@ -198,6 +212,9 @@ test('Clear empties both the field and the payload', async ({ page }) => {
     const field = page.locator(TARGET_ID);
     await field.click();
     await field.fill('Pow');
+    // Wait for the list before clicking it: `fill` opens the listbox through `onInput`, and a click
+    // issued in the same tick can land before the options render.
+    await expect(page.getByRole('option', { name: /^Power/ })).toBeVisible();
     await page.getByRole('option', { name: /^Power/ }).first().click();
 
     // The Clear affordance only renders once a value is committed (SparkTargetPicker.vue:245).
@@ -219,6 +236,9 @@ test('changing Category clears a target chosen under the old vocabulary', async 
     const field = page.locator(TARGET_ID);
     await field.click();
     await field.fill('Pow');
+    // Wait for the list before clicking it: `fill` opens the listbox through `onInput`, and a click
+    // issued in the same tick can land before the options render.
+    await expect(page.getByRole('option', { name: /^Power/ })).toBeVisible();
     await page.getByRole('option', { name: /^Power/ }).first().click();
     await expect(field).toHaveValue(/Power/i);
 
@@ -249,4 +269,101 @@ test('a second spark cannot display the first spark\'s target', async ({ page })
     const second = page.locator('#ancestor-spark-target-a-0-1');
     await expect(second).toBeVisible();
     await expect(second, 'a fresh spark row inherited a sibling target').toHaveValue('');
+});
+
+/*
+ * The four cases below are the owner ruling's own list (2026-11-12), written as the explicit accepts
+ * and the reverts. Every one of them was unexercised before: "Enter on a highlighted option" appeared
+ * only in this file's header comment, and "a previously committed value survives a rejected filter"
+ * had no case at all.
+ */
+
+test('an exact option name typed but not accepted does not become the value', async ({ page }) => {
+    await page.goto('/career/setup/legacy', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await nameParentA(page);
+    await nameGrandparentA1(page);
+    await openParentASparkEditor(page);
+
+    const field = page.locator(TARGET_ID);
+
+    // The FULL name, not a prefix: this is the case `commitExactText` used to accept on keystroke.
+    await field.click();
+    await field.fill('Power');
+    await expect(page.getByRole('option', { name: /^Power/ })).toBeVisible();
+
+    // Leave without accepting. The field must revert, because `Power` was only ever filter text.
+    await field.blur();
+
+    await expect(
+        field,
+        'an exact option name typed without acceptance became the value',
+    ).toHaveValue('');
+});
+
+test('a previously committed value survives a rejected filter', async ({ page }) => {
+    await page.goto('/career/setup/legacy', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await nameParentA(page);
+    await nameGrandparentA1(page);
+    await openParentASparkEditor(page);
+
+    const field = page.locator(TARGET_ID);
+
+    // Commit `Power` explicitly first.
+    await field.click();
+    await field.fill('Pow');
+    // Wait for the list before clicking it: `fill` opens the listbox through `onInput`, and a click
+    // issued in the same tick can land before the options render.
+    await expect(page.getByRole('option', { name: /^Power/ })).toBeVisible();
+    await page.getByRole('option', { name: /^Power/ }).first().click();
+    await expect(field).toHaveValue(/Power/i);
+
+    // Now filter for something else and abandon it. The committed value must come back, not vanish
+    // and not be replaced by the filter text.
+    await field.click();
+    await field.fill('Sta');
+    await field.blur();
+
+    await expect(
+        field,
+        'abandoning a filter lost the value that had been committed before it',
+    ).toHaveValue(/Power/i);
+});
+
+test('Enter on a highlighted option is an explicit accept', async ({ page }) => {
+    await page.goto('/career/setup/legacy', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await nameParentA(page);
+    await nameGrandparentA1(page);
+    await openParentASparkEditor(page);
+
+    const field = page.locator(TARGET_ID);
+    await field.click();
+    await field.fill('Pow');
+    await expect(page.getByRole('listbox')).toBeVisible();
+
+    // Arrow to the first option, then accept with Enter — the ruling's second explicit accept.
+    await field.press('ArrowDown');
+    await field.press('Enter');
+
+    await expect(field, 'Enter on a highlighted option did not commit it').toHaveValue(/Power/i);
+    await expect(page.getByRole('listbox')).toHaveCount(0);
+});
+
+test('Escape reverts and commits nothing', async ({ page }) => {
+    await page.goto('/career/setup/legacy', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await nameParentA(page);
+    await nameGrandparentA1(page);
+    await openParentASparkEditor(page);
+
+    const field = page.locator(TARGET_ID);
+    await field.click();
+    await field.fill('Pow');
+    await expect(page.getByRole('listbox')).toBeVisible();
+
+    await field.press('Escape');
+
+    await expect(field, 'Escape committed the filter text instead of reverting').toHaveValue('');
 });
