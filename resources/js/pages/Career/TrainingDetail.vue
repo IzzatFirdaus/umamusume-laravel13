@@ -37,6 +37,7 @@ import Note from '../../components/ui/Note.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
+import DisciplineComparison from '../../components/career/DisciplineComparison.vue';
 import { undoTurnLabel } from '../../lib/career/turnDisplay';
 import { TURN_ENTRY_ENERGY_BANDS, TURN_ENTRY_ENERGY_STATES, TURN_ENTRY_FACILITY_FIELDS, TURN_ENTRY_PREVIEW_FIELDS, TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
 
@@ -129,6 +130,14 @@ const props = defineProps<{
         previous: Record<string, number | null> | null;
         performance: { enabled: boolean; types: string[] };
     };
+    /** C2: the recorded facts per discipline for the comparison disclosure. */
+    discipline_history: Record<string, {
+        attendance_count: number;
+        recorded_facility_levels: number[];
+        historical_gain: { mean: number; sample_size: number } | null;
+    }>;
+    /** The five disciplines in the client's own order, the same order the option cards print. */
+    stat_order: string[];
 }>();
 
 const { visiting, visitFailed } = useVisitState();
@@ -745,6 +754,19 @@ const energyBandNote = computed(() =>
                     </div>
                 </div>
             </div>
+
+            <!-- C2, the discipline comparison: the recorded facts side by side, collapsed by default
+                 because the five option cards above already answer the primary question and this is
+                 the comparison a Trainer opens when the choice is genuinely close. -->
+            <details class="card mt-4">
+                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">Compare disciplines</summary>
+                <p class="mt-1 text-xs text-ink-muted">
+                    This view shows only what this run has recorded. It does not project future gains.
+                </p>
+                <div class="mt-3 overflow-x-auto" role="region" tabindex="0" aria-label="Discipline comparison, scrollable">
+                    <DisciplineComparison :history="discipline_history" :order="stat_order" />
+                </div>
+            </details>
 
             <!-- HFW OVERRIDE (write fields): the wireframe draws only the four outcome fields, but the
                  request this form posts requires the turn number and the five client-read totals. They

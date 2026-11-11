@@ -513,10 +513,13 @@ it('offers Rest and Recreation as turn choices beside the five trainings', funct
     // the value every already-written row is looked up by.
     $run = decisionRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active], turns: 3, energy: 80);
 
+    // C1: Unity Cup now declares its own two turn actions beside the shared pair, so the run's
+    // write offers four choices. The Rest/recorder assertions keep their indexes 0 and 1; the
+    // scenario's own Unity Training and Spirit Burst ride at 2 and 3, pinned by the C1 case.
     $this->get(route('runs.training', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('write.extra_choices', 2)
+            ->has('write.extra_choices', 4)
             ->where('write.extra_choices.0.value', 'rest')
             ->where('write.extra_choices.0.label', 'Rest')
             ->where('write.extra_choices.0.recommended', false)
@@ -610,7 +613,8 @@ it('offers each turn choice its own outcome words, with the failure flag beside 
     $this->get(route('runs.training', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->has('write.outcomes', 7)
+            // C1: two Unity Cup extras widen the outcomes map to nine keyed choices.
+            ->has('write.outcomes', 9)
             ->where('write.outcomes.training-Speed', ['Success' => false, 'Failure' => true])
             ->where('write.outcomes.rest', ['Success' => false, 'Poor Rest' => true])
             ->where('write.outcomes.mood', ['Lifted' => false, 'No Change' => false]));
@@ -675,3 +679,107 @@ it('writes a failure event for exactly the outcome words that name one', functio
     ['training-Speed', 'Success', false],
     ['training-Speed', 'Failure', true],
 ]);
+
+/*
+ * C2, the discipline comparison history. Three recorded facts per discipline: attendance counts the
+ * deck's own support cards by stored type key (Wit counts `intelligence`, the export key, not the
+ * client word), the facility levels are the distinct non-null readings the entries hold, and the
+ * mean gain reads consecutive turn entries whose choice was that discipline's training. A
+ * discipline with no sample pair carries null, which the component prints as N/A with its reason
+ * rather than a zero that would read as "training does nothing".
+ */
+it('derives the discipline history from the deck, the facility readings and the recorded turns (C2)', function (): void {
+    $run = TrainingRun::factory()->create(['scenario' => 'ura_finale', 'status' => RunStatus::Active]);
+
+    // Two Speed trainings: turn 2 and 3, each against the entry before it, so Speed's mean is over
+    // two samples (+14, +16 => 15.0). Stamina trains once (+10), Guts never.
+    TurnEntry::factory()->create(['training_run_id' => $run->id, 'turn' => 1, 'speed' => 600, 'stamina' => 600, 'power' => 600, 'guts' => 600, 'wit' => 600, 'mood' => MoodTier::Normal]);
+    TurnEntry::factory()->create(['training_run_id' => $run->id, 'turn' => 2, 'speed' => 614, 'stamina' => 600, 'power' => 600, 'guts' => 600, 'wit' => 600, 'mood' => MoodTier::Normal, 'choice' => TurnChoice::TrainSpeed->value, 'facility_speed' => 1]);
+    TurnEntry::factory()->create(['training_run_id' => $run->id, 'turn' => 3, 'speed' => 630, 'stamina' => 610, 'power' => 600, 'guts' => 600, 'wit' => 600, 'mood' => MoodTier::Normal, 'choice' => TurnChoice::TrainSpeed->value, 'facility_speed' => 3]);
+    TurnEntry::factory()->create(['training_run_id' => $run->id, 'turn' => 4, 'speed' => 630, 'stamina' => 620, 'power' => 600, 'guts' => 600, 'wit' => 600, 'mood' => MoodTier::Normal, 'choice' => TurnChoice::TrainStamina->value, 'facility_stamina' => 2]);
+
+    // The deck: one Speed card and one Wit card, counted by their stored type keys.
+    $speedCard = SupportCard::factory()->create(['type' => 'speed']);
+    $witCard = SupportCard::factory()->create(['type' => 'intelligence']);
+    DeckSlot::factory()->create(['training_run_id' => $run->id, 'support_card_id' => $speedCard->id, 'slot_position' => 1]);
+    DeckSlot::factory()->create(['training_run_id' => $run->id, 'support_card_id' => $witCard->id, 'slot_position' => 2]);
+
+    $this->get(route('runs.training', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/TrainingDetail')
+            ->where('stat_order', ['Speed', 'Stamina', 'Power', 'Guts', 'Wit'])
+            ->where('discipline_history.Speed.attendance_count', 1)
+            ->where('discipline_history.Speed.recorded_facility_levels', [1, 3])
+            ->where('discipline_history.Speed.historical_gain.mean', 15)
+            ->where('discipline_history.Speed.historical_gain.sample_size', 2)
+            ->where('discipline_history.Stamina.historical_gain.mean', 10)
+            ->where('discipline_history.Stamina.historical_gain.sample_size', 1)
+            // Guts never trained, and no Wit answer: null, not a zero.
+            ->where('discipline_history.Guts.historical_gain', null)
+            ->where('discipline_history.Guts.historical_gain', null)
+            ->where('discipline_history.Wit.historical_gain', null)
+            ->where('discipline_history.Wit.attendance_count', 1)
+            ->where('discipline_history.Power.recorded_facility_levels', []));
+});
+
+/*
+ * C1, the scenario's own turn actions. The config declares Unity Cup's two (Special/Unity Training
+ * and Spirit Burst, both from `02-unity-cup.md`'s Core Mechanic); every other scenario - and a run
+ * with no scenario - keeps the shared seven alone. The page offers only what the run's scenario
+ * declares, and the write refuses an undeclared extra with the named error rather than storing a
+ * choice the run's scenario never offered.
+ */
+it('offers the scenario-declared training extras on the write and refuses them elsewhere (C1)', function (): void {
+    $unity = decisionRun(['scenario' => 'unity_cup', 'status' => RunStatus::Active]);
+    $finale = decisionRun(['scenario' => 'ura_finale', 'status' => RunStatus::Active]);
+
+    // The Unity Cup page offers four turn choices: Rest, Recreation, Unity Training, Spirit Burst.
+    $this->get(route('runs.training', $unity))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/TrainingDetail')
+            ->has('write.extra_choices', 4)
+            ->where('write.extra_choices.2.label', 'Unity Training')
+            ->where('write.extra_choices.3.label', 'Spirit Burst'));
+
+    // The URA Finale page is unchanged: Rest and Recreation only.
+    $this->get(route('runs.training', $finale))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/TrainingDetail')
+            ->has('write.extra_choices', 2));
+
+    // The write accepts a declared extra on the run whose scenario declares it...
+    $this->post(route('runs.turns.store', $unity), [
+        'turn' => 1,
+        'speed' => 600, 'stamina' => 600, 'power' => 600, 'guts' => 600, 'wit' => 600,
+        'mood' => MoodTier::Normal->value,
+        'stage' => 'confirm', 'previewed' => 1,
+        'choice' => TurnChoice::UnityTraining->value,
+        'outcome' => 'Success',
+    ])->assertSessionHasNoErrors();
+
+    expect(TurnEntry::query()
+        ->where('training_run_id', $unity->id)
+        ->where('choice', TurnChoice::UnityTraining->value)
+        ->exists())->toBeTrue();
+
+    // ...and refuses the same choice on a run whose scenario does not offer it, with the named
+    // error: no row is written and the error names whose turn actions the run offers.
+    $this->post(route('runs.turns.store', $finale), [
+        'turn' => 1,
+        'speed' => 600, 'stamina' => 600, 'power' => 600, 'guts' => 600, 'wit' => 600,
+        'mood' => MoodTier::Normal->value,
+        'stage' => 'confirm', 'previewed' => 1,
+        'choice' => TurnChoice::SpiritBurst->value,
+        'outcome' => 'Success',
+    ]);
+
+    $errors = session('errors');
+    expect($errors)->not->toBeNull()
+        ->and((string) $errors['default']['messages']['choice'][0])
+        ->toBe("The choice is not one of the turn actions this run's scenario offers.");
+
+    expect(TurnEntry::query()->where('training_run_id', $finale->id)->exists())->toBeFalse();
+});

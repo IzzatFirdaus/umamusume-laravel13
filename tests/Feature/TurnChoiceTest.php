@@ -249,8 +249,21 @@ it('accepts every case it declares, including the two the rail names but no card
     // `rest` and `mood` come from `TrainingRunController::turnChoices()`, not from the five training cards.
     // Rest is an action `TrainerAdvisor::ACTIONS` ranks, so a rail that recommends it must be able to store
     // it; a vocabulary that refused it would make the advisor's own suggestion unwritable.
+    //
+    // C1: the scenario-declared extras round-trip on the run whose scenario declares them, which is
+    // Unity Cup for both new cases; the shared seven are valid on the baseline run, so each case
+    // picks a run whose scenario offers it rather than one fixed fixture.
+    $declaredExtra = static fn (TurnChoice $choice): string => in_array(
+        $choice->value,
+        (array) config('scenarios.scenarios.unity_cup.training_extras', []),
+        true,
+    ) || in_array($choice->value, (array) config('scenarios.scenarios.our_grand_concert.training_extras', []), true)
+        || in_array($choice->value, (array) config('scenarios.scenarios.trackblazer.training_extras', []), true)
+            ? 'unity_cup'
+            : 'ura_finale';
+
     foreach (TurnChoice::cases() as $index => $choice) {
-        $run = fd4Run();
+        $run = fd4Run($declaredExtra($choice));
 
         $this->post(route('runs.turns.store', $run), [
             'turn' => 1,

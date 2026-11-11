@@ -28,6 +28,16 @@ enum TurnChoice: string
     case TrainWit = 'training-Wit';
     case Rest = 'rest';
     case Recreation = 'mood';
+    /*
+     * C1, the scenario's own turn actions. Unity Cup's two are the scenario's named, client-vocabularied
+     * actions from its guide's Core Mechanic section (`docs/scenarios/02-unity-cup.md`): Special
+     * (Unity) Training - the training turn taken with the teammates gathered on a facility - and the
+     * Spirit Burst that fires on the next training with a teammate once her gauge is full. Both are
+     * states a Trainer records per turn, like `rest`; neither the burst's effect nor the gauge's fill
+     * is modeled anywhere (ADR-0001 §3, PRD §6), so the value is the record, not the mechanism.
+     */
+    case UnityTraining = 'unity_training';
+    case SpiritBurst = 'spirit_burst';
 
     /** The word the client shows, Global vocabulary only (`AGENTS.md` §13). */
     public function label(): string
@@ -40,6 +50,8 @@ enum TurnChoice: string
             self::TrainWit => 'Wit',
             self::Rest => 'Rest',
             self::Recreation => 'Recreation',
+            self::UnityTraining => 'Unity Training',
+            self::SpiritBurst => 'Spirit Burst',
         };
     }
 

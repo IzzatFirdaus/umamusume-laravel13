@@ -89,8 +89,9 @@ test('renders the HFW region model, one primary, and one savebar', async ({ page
     await expect(page.getByRole('heading', { name: /^Why /, level: 2 })).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Recorded outcome', level: 2 })).toBeVisible();
 
-    // Five disciplines plus Rest, Recreation and Race = eight radios, one savebar, one filled action.
-    await expect(page.locator('input[name="pick"]')).toHaveCount(8);
+    // Five disciplines plus Rest, Recreation and Race, plus the two Unity Training and Spirit
+    // Burst extras the fixture's Unity Cup declares (C1), = ten radios, one savebar, one action.
+    await expect(page.locator('input[name="pick"]')).toHaveCount(10);
     await expect(page.locator('.savebar')).toHaveCount(1);
     await expect(page.locator('.btn-primary')).toHaveCount(1);
 
@@ -250,4 +251,71 @@ test('renders the seven preview readings labelled without a click (R7-57)', asyn
     // All seven at once, so a future half-revert fails here rather than passing on one field.
     await expect(page.locator('[id^="turn-preview_gains-"]')).toHaveCount(6);
     await expect(page.getByLabel('Failure rate')).toBeVisible();
+});
+
+/*
+ * C2, the discipline comparison disclosure. Collapsed by default beside the record form, so the
+ * five option cards keep the primary question; opened, it prints one row per discipline with the
+ * recorded facts and the refusal sentence stating the boundary. The fixture's first turn records
+ * every facility level and no second entry, so facility cells read their recorded level and every
+ * mean-gain cell reads N/A with its reason - which is the disclosure's own named-absence contract,
+ * proven on the exact state the helper leaves.
+ */
+test('the discipline comparison prints the recorded facts and refuses to project (C2)', async ({ page }) => {
+    const runUrl = await openTrainingDetail(page);
+
+    const summary = page.getByText('Compare disciplines', { exact: true });
+    await expect(summary).toBeVisible();
+
+    // Collapsed by default; open it and read the table.
+    const disclosure = page.locator('details').filter({ has: summary });
+    if (!(await disclosure.evaluate((el) => (el as HTMLDetailsElement).open))) {
+        await disclosure.locator('summary').click();
+    }
+
+    await expect(disclosure).toContainText('This view shows only what this run has recorded. It does not project future gains.');
+
+    const table = disclosure.getByRole('table');
+    await expect(table).toBeVisible();
+    const rows = table.locator('tbody tr');
+    await expect(rows).toHaveCount(5);
+
+    // Every discipline's facility cell reads the level the fixture recorded; no discipline has a
+    // sample pair yet, so every mean-gain cell reads N/A with its reason.
+    for (let index = 0; index < 5; index++) {
+        const row = rows.nth(index);
+        await expect(row).toContainText('1');
+        await expect(row).toContainText('N/A');
+    }
+
+    // The disclosure sits inside the record form's own flow: it neither posts nor blocks it.
+    await expect(page.getByRole('button', { name: /^Record turn \d+$/ })).toBeVisible();
+});
+
+/*
+ * C1, the scenario's own turn actions. Unity Cup declares two (Unity Training and Spirit Burst,
+ * both from `02-unity-cup.md`'s Core Mechanic); the URA Finale baseline declares none, so its
+ * radio set is the shared eight. This case walks a fresh career in each scenario through the
+ * wizard's own steps and reads the Other actions group the write renders.
+ */
+test('Unity Cup offers its two scenario turn actions and URA Finale offers none (C1)', async ({ page }) => {
+    const unityUrl = await startCareer(page, 'unity_cup');
+    createdRunUrls.push(unityUrl);
+    await recordFirstTurn(page, unityUrl);
+    await page.goto(`${unityUrl}/training`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.getByRole('radio', { name: 'Unity Training' })).toBeVisible();
+    await expect(page.getByRole('radio', { name: 'Spirit Burst' })).toBeVisible();
+    await expect(page.locator('input[name="pick"]')).toHaveCount(10);
+
+    const uraUrl = await startCareer(page, 'ura_finale');
+    createdRunUrls.push(uraUrl);
+    await recordFirstTurn(page, uraUrl);
+    await page.goto(`${uraUrl}/training`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.getByRole('radio', { name: 'Unity Training' })).toHaveCount(0);
+    await expect(page.getByRole('radio', { name: 'Spirit Burst' })).toHaveCount(0);
+    await expect(page.locator('input[name="pick"]')).toHaveCount(8);
 });

@@ -70,6 +70,30 @@ class StoreTurnEntryRequest extends FormRequest
         $staged = $this->input('stage') !== null;
         $caps = ScenarioCaps::forRun($runModel);
 
+        /*
+         * C1: a scenario's own turn actions are only valid on a run whose scenario declares them,
+         * the same way a panel composes. The config's `training_extras` key carries a `TurnChoice`
+         * value per extra action the scenario's guide names; a run whose scenario names no extras -
+         * or a run with no scenario at all - refuses an extra choice rather than storing one the
+         * run's own scenario never offered. The shared seven are always in the list; the named
+         * error says whose turn actions the run offers.
+         */
+        /** @var list<string> $sharedChoices */
+        $sharedChoices = [
+            TurnChoice::TrainSpeed->value,
+            TurnChoice::TrainStamina->value,
+            TurnChoice::TrainPower->value,
+            TurnChoice::TrainGuts->value,
+            TurnChoice::TrainWit->value,
+            TurnChoice::Rest->value,
+            TurnChoice::Recreation->value,
+        ];
+        /** @var list<string> $declaredExtras */
+        $declaredExtras = $runModel?->hasScenario() === true
+            ? (array) config('scenarios.scenarios.'.$runModel->scenarioKey().'.training_extras', [])
+            : [];
+        $allowedChoices = array_merge($sharedChoices, $declaredExtras);
+
         return [
             'turn' => [
                 'required',
@@ -139,7 +163,7 @@ class StoreTurnEntryRequest extends FormRequest
             // staged submit, because the escape hatch has no step to choose and no
             // outcome to declare: it writes the row the Trainer typed.
             'stage' => ['nullable', Rule::in(['preview', 'confirm'])],
-            'choice' => [Rule::requiredIf(fn (): bool => $staged), 'nullable', Rule::enum(TurnChoice::class)],
+            'choice' => [Rule::requiredIf(fn (): bool => $staged), 'nullable', Rule::in($allowedChoices)],
             'outcome' => [Rule::requiredIf(fn (): bool => $staged), 'nullable', Rule::in(array_keys($this->chosenOutcomes()))],
             'penalty_kind' => [
                 Rule::requiredIf(fn (): bool => ($this->chosenOutcomes()[(string) $this->input('outcome')] ?? false) === true),
@@ -196,6 +220,7 @@ class StoreTurnEntryRequest extends FormRequest
             'outcome.required' => 'Say whether the turn succeeded or failed.',
             'penalty_kind.required' => 'A failure needs its penalty kind: Energy, Mood, or a stat.',
             'performance.delta.not_in' => 'A Performance change of zero is not a change.',
+            'choice.in' => "The :attribute is not one of the turn actions this run's scenario offers.",
         ];
     }
 }

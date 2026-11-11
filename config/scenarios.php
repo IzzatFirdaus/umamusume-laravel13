@@ -172,6 +172,9 @@ return [
             'cap_bonus' => ['Speed' => 200, 'Stamina' => 200, 'Power' => 200, 'Guts' => 200, 'Wit' => 200],
             'widgets' => ['turn', 'energy', 'fans'],
             'steps' => ['training', 'outcome', 'skill'],
+            // C1: the baseline scenario and the concert carry no extra turn actions; their
+            // guides name none, so the shared five trainings, rest and recreation are the set.
+            'training_extras' => [],
             // The two composition tags the HFW's card draws (career-scenario.html:104-105). The card
             // prints these plus the caps; the full matrix stays on Database / Scenarios. Listed here
             // rather than derived from `panels` because the wireframe curates which two it draws — a
@@ -399,6 +402,15 @@ return [
             'cap_bonus' => ['Speed' => 100, 'Stamina' => 100, 'Power' => 100, 'Guts' => 100, 'Wit' => 600],
             'widgets' => ['turn', 'energy', 'fans', 'team_rank', 'spirit_bursts'],
             'steps' => ['facility', 'training', 'team_race', 'outcome', 'skill'],
+            /*
+             * C1, the scenario's own turn actions beyond the shared five trainings, rest and
+             * recreation. Both are the scenario's named, client-vocabularied actions the guide
+             * documents as turn-defining (`02-unity-cup.md` §"Core Mechanic"): Special (Unity)
+             * Training is the training turn taken with teammates, and a Spirit Burst fires on the
+             * next training with a teammate once her gauge is full. Recorded as a `turn_entries`
+             * choice each, never as a simulation: nothing here prices a burst or a gauge.
+             */
+            'training_extras' => ['unity_training', 'spirit_burst'],
             'card_tags' => ['team_race', 'team_rank_ladder'],
             'panels' => [
                 'race_calendar' => true,
@@ -627,6 +639,10 @@ return [
             'cap_bonus' => ['Speed' => 0, 'Stamina' => 700, 'Power' => 0, 'Guts' => 0, 'Wit' => 300],
             'widgets' => ['turn', 'energy', 'fans', 'grade_points', 'shop_coins'],
             'steps' => ['training', 'shop', 'outcome', 'skill'],
+            // C1: Trackblazer's differences are structural (Grade Points, the shop, rival
+            // races), not extra turn actions; the guide names none (`03-trackblazer.md`), so the
+            // shared turn set is the whole set.
+            'training_extras' => [],
             'card_tags' => ['grade_objectives', 'shop'],
             'panels' => [
                 'race_calendar' => false,
@@ -1049,6 +1065,10 @@ return [
             'cap_bonus' => ['Speed' => 400, 'Stamina' => 100, 'Power' => 100, 'Guts' => 300, 'Wit' => 100],
             'widgets' => ['turn', 'energy', 'fans'],
             'steps' => ['training', 'outcome', 'skill'],
+            // C1: the concert's scenario-specific recording is the Performance observation
+            // pair behind `performance_input` above; the guide names no separate turn action,
+            // so the extras list is empty rather than invented (`07-grand-concert.md`).
+            'training_extras' => [],
             // One panel tag here; the card's second tag is the `performance_input` flag below, which the
             // page adds as its own tag because it is deliberately not a `panels` key.
             'card_tags' => ['career_goals'],

@@ -138,6 +138,8 @@ export interface NextDecision {
  * and refuses the suite when the two disagree, which is the same pin `TurnEntryFieldSourceTest` puts on the
  * turn-entry field lists. A mirror nobody checks is a mirror that rots.
  */
+// C1: the scenario-declared turn actions, Unity Cup's own two (`unity_training`,
+// `spirit_burst`), ride at the end so the mirror test's literal scan stays clean.
 export type TurnChoice =
     | 'training-Speed'
     | 'training-Stamina'
@@ -145,7 +147,9 @@ export type TurnChoice =
     | 'training-Guts'
     | 'training-Wit'
     | 'rest'
-    | 'mood';
+    | 'mood'
+    | 'unity_training'
+    | 'spirit_burst';
 
 /**
  * One recorded action and its reconciliation (`plan §9a FD-4`).

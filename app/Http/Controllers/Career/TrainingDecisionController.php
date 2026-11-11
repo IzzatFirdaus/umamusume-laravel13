@@ -149,7 +149,118 @@ class TrainingDecisionController extends Controller
             ],
             'advisor' => $this->advisorSection($advice),
             'write' => $this->writeSection($run, $latest, $advice, $facilityLevels),
+            'stat_order' => $order,
+            /*
+             * C2, the discipline comparison: the recorded facts a Trainer weighs when choosing
+             * between Speed and Guts at turn 40 - attendance, the facility levels this run has
+             * read, and the run's own historical mean gain per discipline - printed beside the
+             * published base the option cards already show. Only recorded data: attendance counts
+             * the deck's support cards whose card type names the discipline (the deck slot's own
+             * column), the facility levels are the distinct non-null readings the entries hold,
+             * and the mean gain is over the turns whose choice was that discipline's training and
+             * whose preceding entry recorded the same stat, so a mean with no samples is null
+             * rather than a zero. Nothing projects: the component's note states the boundary.
+             */
+            'discipline_history' => $this->disciplineHistory($run),
         ]);
+    }
+
+    /**
+     * The three recorded facts per discipline, for the comparison disclosure (C2).
+     *
+     * Attendance is the deck's own support cards counted by card type, the same column the deck
+     * builder filters on; a deck with no card in a discipline is 0, which is a recorded fact here
+     * because the deck is recorded, not an absence. The historical gain reads consecutive turn
+     * entries: a turn whose choice was the discipline's training and whose previous entry recorded
+     * the stat contributes its delta, and a discipline with no such pair carries null, printed as
+     * N/A with its reason rather than as a zero that would read as "training does nothing".
+     *
+     * @return array<string, array{attendance_count: int, recorded_facility_levels: int[], historical_gain: array{mean: float, sample_size: int}|null}>
+     */
+    private function disciplineHistory(TrainingRun $run): array
+    {
+        /** @var array<string, string> $choiceByStat The `TurnChoice` value each discipline's training posts. */
+        $choiceByStat = [
+            'Speed' => TurnChoice::TrainSpeed->value,
+            'Stamina' => TurnChoice::TrainStamina->value,
+            'Power' => TurnChoice::TrainPower->value,
+            'Guts' => TurnChoice::TrainGuts->value,
+            'Wit' => TurnChoice::TrainWit->value,
+        ];
+
+        /** @var array<string, string> $facilityColumn The entry column a discipline's facility level lives in. */
+        $facilityColumn = [
+            'Speed' => 'facility_speed',
+            'Stamina' => 'facility_stamina',
+            'Power' => 'facility_power',
+            'Guts' => 'facility_guts',
+            'Wit' => 'facility_wit',
+        ];
+
+        $entries = $run->turnEntries->sortBy('turn')->values();
+        // The deck's own stored type key, counted per discipline. `getAttribute` rather than the
+        // typed property, because an eager `deckSlots.supportCard` load yields a null model when a
+        // slot's card row is missing and PHPDoc's non-nullable claim does not describe that runtime.
+        $deckTypes = $run->deckSlots
+            ->map(static fn ($slot): ?string => $slot->getAttribute('supportCard') !== null
+                ? (string) $slot->getAttribute('supportCard')->getAttribute('type')
+                : null)
+            ->filter(static fn (?string $type): bool => $type !== null)
+            ->countBy();
+
+        $history = [];
+
+        foreach ($choiceByStat as $stat => $choiceValue) {
+            $deltas = [];
+
+            // The entry's column is the lower-case stat name (`speed`, not `Speed`), which is
+            // the same mapping the request's validated fields use.
+            $column = strtolower($stat);
+
+            for ($i = 1, $count = $entries->count(); $i < $count; $i++) {
+                $entry = $entries[$i];
+                $previous = $entries[$i - 1];
+
+                if ((string) $entry->choice !== $choiceValue
+                    || $previous->getAttribute($column) === null
+                    || $entry->getAttribute($column) === null) {
+                    continue;
+                }
+
+                $deltas[] = (int) $entry->getAttribute($column) - (int) $previous->getAttribute($column);
+            }
+
+            /** @var Collection<int, int|null> $levels */
+            $levels = $entries
+                ->pluck($facilityColumn[$stat])
+                ->filter(static fn ($level): bool => $level !== null)
+                ->unique()
+                ->sort()
+                ->values();
+
+            $history[$stat] = [
+                'attendance_count' => (int) ($deckTypes[$this->deckTypeFor($stat)] ?? 0),
+                'recorded_facility_levels' => $levels->all(),
+                'historical_gain' => $deltas === []
+                    ? null
+                    : [
+                        'mean' => round(array_sum($deltas) / count($deltas), 1),
+                        'sample_size' => count($deltas),
+                    ],
+            ];
+        }
+
+        return $history;
+    }
+
+    /**
+     * The support-card type a discipline's attendance is counted by, the deck builder's own words.
+     */
+    private function deckTypeFor(string $stat): string
+    {
+        // `Wit` is the client's word; the export's type key is `intelligence`
+        // (`SupportCard::TYPES`), and attendance counts the deck's own stored key.
+        return $stat === 'Wit' ? 'intelligence' : strtolower($stat);
     }
 
     /**
@@ -567,7 +678,28 @@ class TrainingDecisionController extends Controller
         $notes = [
             TurnChoice::Rest->value => 'Refills Energy. A poor rest refills less and can leave a stayed-up-late penalty.',
             TurnChoice::Recreation->value => 'Lifts Mood, and the outing may return a little Energy as well.',
+            TurnChoice::UnityTraining->value => 'Special Training with the teammates on a facility. The gains are whatever the client shows.',
+            TurnChoice::SpiritBurst->value => 'A charged teammate bursts on this training. The burst is recorded as it happened.',
         ];
+
+        /*
+         * C1: the two shared turn choices plus the scenario's own declared extras, so the page's
+         * radio set is what the run's `training_extras` composes - the scenario's guide names each
+         * extra, and a scenario that names none keeps the shared pair alone. Declared in
+         * `config/scenarios.php` keyed by `TurnChoice` value, so a third extra is one config line
+         * and one enum case, not a controller edit.
+         */
+        /** @var list<string> $declaredExtras */
+        $declaredExtras = $run->hasScenario()
+            ? (array) config('scenarios.scenarios.'.$run->scenarioKey().'.training_extras', [])
+            : [];
+        $choices = [TurnChoice::Rest, TurnChoice::Recreation];
+        foreach ($declaredExtras as $extraValue) {
+            $extra = TurnChoice::tryFrom((string) $extraValue);
+            if ($extra !== null && ! in_array($extra, $choices, true)) {
+                $choices[] = $extra;
+            }
+        }
 
         return [
             'action' => route('runs.turns.store', $run),
@@ -580,7 +712,7 @@ class TrainingDecisionController extends Controller
                     'note' => $notes[$choice->value],
                     'recommended' => $advice->recommendation?->action === $choice->label(),
                 ],
-                [TurnChoice::Rest, TurnChoice::Recreation],
+                $choices,
             ),
             'outcomes' => $this->outcomeOptions(),
             'previous' => $latest === null ? null : [
