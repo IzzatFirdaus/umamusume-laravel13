@@ -341,10 +341,25 @@ it('reads a scenario-less row as every scenario and scopes only the scenario fin
         ->assertInertia(fn (Assert $page) => $page
             // The scenario-less row is present for this scenario...
             ->where('groups.optional.races', fn ($races): bool => collect($races)->contains('title', 'Chukyo Junior Stakes'))
-            // ...this scenario's own finale is present...
-            ->where('groups.mandatory.races', fn ($races): bool => collect($races)->contains('title', 'Own Final'))
+            // ...this scenario's own finale is present. The row's own title is read back for the three
+            // scenarios that declare no config finale_label; Grand Concert's published catalogue name
+            // is the borrowed "URA Finals Final (Grand Live)" (KI-82), so its row prints its configured
+            // own name instead (UX-25) and the assertion accepts the one this scenario declares.
+            ->where(
+                'groups.mandatory.races',
+                fn ($races): bool => collect($races)->contains(
+                    'title',
+                    (string) config("scenarios.scenarios.{$scenario}.finale_label", 'Own Final'),
+                ),
+            )
             // ...and the other scenario's finale is not.
-            ->where('groups.mandatory.races', fn ($races): bool => ! collect($races)->contains('title', 'Other Final'))
+            ->where(
+                'groups.mandatory.races',
+                fn ($races): bool => ! collect($races)->contains(
+                    'title',
+                    (string) config("scenarios.scenarios.{$other}.finale_label", 'Other Final'),
+                ),
+            )
             ->has('groups.mandatory.races', 1));
 })->with(['ura_finale', 'unity_cup', 'our_grand_concert', 'trackblazer']);
 
