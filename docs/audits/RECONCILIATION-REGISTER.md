@@ -420,3 +420,49 @@ the planned-spend and remaining figures while asserting neither, and it now read
 The other 24 `Confirmed fixed` / `Fixed` rows across R2–R7 remain `present+unverified`, exactly as §6
 states. This pass verified six walk-8 findings; it did not re-open the historical register. §10's
 "4 of 6 D-fixes verified" still describes the **walk-1 D-series**, a different set, and is unchanged.
+
+---
+
+## 12. UX-25 / KI-82 finale wording — `FIXED` 2026-11-12 (`72160eca`)
+
+**Filed as:** UX-25 in the v3.x audit; KI-82 in `KNOWN-ISSUES.md`. **Prior state:** `OPEN`, described as a
+copy decision rather than a test edit, which is why the standing test failure was left red through several
+passes.
+
+**The defect, measured rather than read.** `TrainerAdvisor::finaleContext()` composed `label . ' finals'` for
+the advisor's proximity line. Evaluated across all four scenarios, that produced:
+
+| Scenario | Printed |
+| --- | --- |
+| `ura_finale` | `URA Finale finals` — **a doubled word** |
+| `unity_cup` | `Unity Cup finals` |
+| `trackblazer` | `Trackblazer finals` — config declares `Twinkle Star Climax` |
+| `our_grand_concert` | `Our Grand Concert finals` — config declares `The Grand Concert` |
+
+`URA Finale finals` is the finding that settles it. The composition was wrong, not the test.
+
+**Two wrong answers were in play, and the second one was in a commit message.** `84071ee8` updated the
+assertion to `Our Grand Concert finals` to match the composition, making the suite green without making the
+string right. A prior dispatch also proposed `GIRLS' LEGEND U` as the authoritative event name; it is not,
+and two committed sources say so plainly:
+
+- `config/scenarios.php:1078-1080`: "The song `GIRLS' LEGEND U` is the show's centrepiece, not the event's
+  name, so it does not travel here."
+- `docs/scenarios/07-grand-concert.md`: `Girls' Legend U` is a row in the **Songs** table keyed `Finale`,
+  among 22 other songs. It is a song title.
+
+Adopting it would have named a song where the line means an event — the same conflation KI-82 records on the
+catalogue row.
+
+**The fix.** `TrainerAdvisor::finaleLabel()` reads `config('scenarios.*.finale_label')` where declared and
+falls back to `label . ' finals'` only where it is not, mirroring
+`ScenarioSectionBuilder::finaleOfficialTitle()`, which already reads that key for the same reason. Resolved
+output: `URA Finale finals` / `Unity Cup finals` / `Twinkle Star Climax` / `The Grand Concert`.
+
+**Disposition: `FIXED`** for the advisor line. **Not** `refuted` — a wrong string was shipped.
+
+**What this does not close.** KI-82's own defect is the catalogue row's `title` reading `URA Finals Final
+(Grand Live)`, mapped verbatim from the dataset's `name_en` by
+`GametoraRaceCatalogParser.php:173`. That row is a different surface, still open, and the `finale_label`
+override on the obligations rail is what keeps it off screen. `GIRLS' LEGEND U`'s status as a song is
+unchanged, and no config value moved.
