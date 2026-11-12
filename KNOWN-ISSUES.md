@@ -81,7 +81,7 @@ KI-129 CLOSED — affirmed 2026-11-10 per owner dispatch: the capsule is intenti
 KI-130 OPEN — not dispatched
 KI-131 CLOSED — 9674180d + 20df32a6: run-scoped aria-labels on the two colliding steps; consumers re-pinned (support-deck, section-nav); cockpit-forms pin edited in a peer-dirty file and rides that file's landing
 KI-132 OPEN — two-key split ruled by owner; slice not dispatched here, scheduled separately
-KI-133 DEPLOYED — b9837da7 authored it and KI-161 deployed `current_spirit_proxy` to the dev database 2026-11-12: payload and editor field land as a labelled manual proxy. **The per-member shape question inside this entry stays OPEN** (A-0.13 roster, R8 declined); the proxy is a labelled compromise, not the right model
+KI-133 DEPLOYED — b9837da7 authored it and KI-161 deployed `current_spirit_proxy` to the dev database 2026-11-12: payload and editor field land as a labelled manual proxy. **Option A (event-derived per-member six-state board) is DELIVERED** at `fe9fc421`: derived from `turn_events`, no new persistence, and it lists only members with a recorded burst event. **Option C (numeric per-member gauge) stays BLOCKED** — no source publishes a value or maximum. A-0.13 (full-team enumeration, R8 declined) was never Option A's prerequisite; that attribution is corrected in the entry.
 KI-134 RESOLVED — pre-dispatch register state
 KI-135 RESOLVED — pre-dispatch register state
 KI-136 OPEN — not dispatched
@@ -190,7 +190,7 @@ those entries' current status; this line names them, it does not restate them.
 - KI-130 OPEN - blocked: owner ruling
 - KI-131 OPEN - openable copy fix; not touched
 - KI-132 OPEN - blocked: payload contract change (own pass)
-- KI-133 DEPLOYED (`b9837da7` + migration applied 2026-11-12 via KI-161) - manual proxy column live on dev; the per-member shape question stays blocked: shape decision + roster
+- KI-133 DEPLOYED (`b9837da7` + migration applied 2026-11-12 via KI-161) - manual proxy column live on dev. **Option A is also delivered**: the per-member six-state board is derived from `turn_events` and rendered, pinned by `fe9fc421` (2026-11-12). Remaining gaps are named in the entry: a numeric gauge value/maximum is still unpublished, so Option C stays blocked. A-0.13 is **not** a prerequisite for A or B (corrected 2026-11-12: this line read "blocked: shape decision + roster").
 - KI-134 RESOLVED (previous session)
 - KI-135 RESOLVED 2026-10-30 (standing)
 - KI-136 OPEN, PEER-OWNED - full-career-journey locator; peer file, no touch
@@ -3710,7 +3710,7 @@ would have caught it, and no such gate exists.
 
 **What closure would need.** An ADR, a `current_spirit` column, the digest line, and a writer.
 
-**2026-10-25 — superseded by KI-133.** The B-0.6 run-level `current_spirit` shape was ruled out; KI-133 carries the current shape decision (per-team-member table, blocked on roster). KI-119's "accepted; ADR first" framing for the run-level column no longer holds.
+**2026-10-25 — superseded by KI-133.** The B-0.6 run-level `current_spirit` shape was ruled out; KI-133 carries the current shape decision (per-team-member state, delivered as an event-derived board at `fe9fc421`). KI-119's "accepted; ADR first" framing for the run-level column no longer holds.
 
 **2026-10-25 — B-0.6 ruling superseded.** The "accepted; ADR first" framing for a run-level `current_spirit` column no longer holds. The gauge is per team member, not per run, with no published numeric maximum; the burst is a once-per-member availability (UMAMUSUME_REFERENCE.md §2.2.2). The run-level shape is superseded by KI-133, which files the shape decision (per-member table vs. explicitly-labelled manual proxy) as blocked on the roster table (A-0.13, declined per R8 → B). B-0.6 stays closed as a run-level-column slice.
 
@@ -4010,7 +4010,7 @@ incidental.
 proves complete, partial and absent targets all read back.
 
 ### KI-133 B-0.6 `current_spirit` shape wrong - the Spirit gauge is per team member, not per run - FILED 2026-10-25 (R9)
-**Status: DEPLOYED for the manual proxy, and the shape question inside it stays OPEN - blocked: shape decision + A-0.13.** Corrected 2026-11-12 (this line read `OPEN … No column ships`, which stopped being true on 2026-11-11). Read this entry in three layers, because a single word cannot carry them:
+**Status: DEPLOYED for the manual proxy; Option A (event-derived per-member board) DELIVERED at `fe9fc421`; the numeric-per-member-gauge question (Option C) stays BLOCKED on unpublished client evidence.** Corrected 2026-11-12 (this line read `OPEN … No column ships`, which stopped being true on 2026-11-11). Read this entry in three layers, because a single word cannot carry them:
 
 | Layer | State | Evidence |
 | --- | --- | --- |
@@ -5131,8 +5131,39 @@ succeeds. Post-restore row: `{id: 11, scenario: "unity_cup", status: "Active"}` 
 so the test left nothing behind. `UnityCupPanelTest` (the one suite file that names the column) 12 passed / 261
 assertions.
 
-**What this closure does NOT cover.** The column's existence is not the feature. **KI-133 stays OPEN and blocked**: the
-honest per-member `spirit_gauges` shape is still declined, and `current_spirit_proxy` remains one Trainer-entered
-aggregate labelled as a proxy rather than a game reading. Rollback was **not** tested against the shared database - it
-was verified on the scratch copy earlier, and `down()` drops the column, which would discard entered values.
+**What this closure does NOT cover.** The column's existence is not the feature. `current_spirit_proxy` remains one
+Trainer-entered aggregate labelled as a proxy rather than a game reading. Rollback was **not** tested against the shared
+database - it was verified on the scratch copy earlier, and `down()` drops the column, which would discard entered values.
+
+#### Option A delivered 2026-11-12 - event-derived per-member board
+
+**What shipped.** The per-member six-state board is **derived from `turn_events`** and needs no new persistence:
+`TrainingRun::spiritBurstRoster()` reads `SpiritBurstPayload` rows and emits one entry per teammate,
+`TeamPanelBuilder::teamSection()` publishes them as `roster` (with a `stateLabel` per member), and
+`SpiritBurstRoster.vue` renders them inside `BurstBandsCard`. That composition predates this entry's correction - it
+arrived with `28d9afbf` - so Option A's work here was **pinning it with the regression cases it lacked**, not writing
+the board: `fe9fc421` adds three cases to `UnityCupPanelTest`, and no production code changed.
+
+**The limit, stated precisely because it is the honest part.** `spiritBurstRoster()` is **event-derived**: it answers
+*"which members have a recorded burst state"*, not *"who is on the team"*. A teammate nobody has recorded is
+**absent** from the board, never defaulted to `Chargeable`. The board therefore must not be described as the
+complete 20/20 team, and no surface claims it is - `SpiritBurstRoster.vue` says so in its own empty state, and
+`fe9fc421` pins both the absence and the refusal to synthesize.
+
+**A-0.13 is a different requirement, and this entry misattributed it.** A-0.13 (KI-125's subject) wants a roster that
+**enumerates the whole team** so the 20/20 counter can name a member who has done nothing yet. That enumeration does
+**not** exist, and Option A does not need it: the board reads whatever events exist. R8 declined the enumeration table
+at `c734a280` because no composed surface wanted one. Correcting the earlier framing: **A-0.13 was never Option A's
+prerequisite.** It would become relevant only for a future full-team board that shows absent members too.
+
+**Still unknown, deliberately.** No source publishes a per-member gauge **value** or **maximum** - the client draws a
+bar with a flame icon and prints no number. The six states are an ordered machine and are representable today; a
+numeric reading is not. **Option C (a numeric per-member gauge) stays BLOCKED** until authoritative client evidence
+establishes the scale. Inventing one would replace a single labelled proxy with N labelled proxies, which is worse,
+and no such column is proposed.
+
+**Verification.** `UnityCupPanelTest` 15 passed / 325 assertions; `TurnEventTypePayloadsTest`,
+`ScenarioPanelTest` and `Career/SpiritBurstCountdownTest` 44 passed / 510 assertions. The three new cases were
+**mutation-tested**: making `spiritBurstRoster()` inject a phantom member fails 6 tests, so the assertions bite rather
+than passing vacuously.
 
