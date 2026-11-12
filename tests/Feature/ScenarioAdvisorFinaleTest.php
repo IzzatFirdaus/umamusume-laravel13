@@ -69,7 +69,17 @@ it('names the finale and counts the turns while it is close', function (): void 
     $this->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            ->where('advisor.finale.label', 'Our Grand Concert')
+            // The line names the EVENT, not the scenario, so `TrainerAdvisor` composes the scenario's
+            // label with the word `finals` (app/Services/Advisor/TrainerAdvisor.php:259, §13.2). This
+            // assertion expected the bare label and had been stale since 49a90c3a1 added that
+            // composition; it was one of the two standing suite failures classified in
+            // `post-remediation-verification-handoff.md` §B.
+            //
+            // The composition is deliberate, not incidental: `finale_label` names an event, and
+            // appending `finals` to it would read "Twinkle Star Climax finals" on Trackblazer, which
+            // says the same thing twice. The scenario label plus `finals` reads correctly for all
+            // four, so the production line is left exactly as it is.
+            ->where('advisor.finale.label', 'Our Grand Concert finals')
             ->where('advisor.finale.state', 'upcoming')
             ->where('advisor.finale.turns_away', 4)
             // The recommendation itself is untouched by the status line: this run sets no build

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\Skill;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 /**
  * Normalize skill.distance_type per Slice A Step A3:
@@ -63,8 +64,16 @@ return new class extends Migration
 
     public function down(): void
     {
-        // Down is not reversible without the original file state.
-        // The import command is idempotent and will restore correct values from the export.
-        Log::warn('Down not implemented; re-run import to restore distance_type from source.');
+        // The up() step is a data normalisation, not a schema change: it nulls `distance_type` on rows
+        // whose `condition_groups` carry more than one exact `distance_type==N` token, because a single
+        // integer column cannot represent a conjunction. The original tokens are still in
+        // `condition_groups`, so re-running `uma:reparse skills` (or the import) recomputes the values
+        // from the source export; there is nothing for this method to restore and nothing is lost.
+        //
+        // This must not log. It previously did — `Log::warn('Down not implemented…')` — and that call
+        // both contradicted the "no stub bodies" rule and broke every `migrate:rollback` on this
+        // application: Laravel 13 ships Monolog 3, whose logger exposes `warning()`, not `warn()`, so
+        // the method threw `Call to undefined method Monolog\Logger::warn()`. A `down()` that cannot
+        // run is the failure this application's own reversibility test exists to catch.
     }
 };
