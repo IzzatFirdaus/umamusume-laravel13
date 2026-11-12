@@ -100,6 +100,12 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
 
     await page.goto('/career/setup/preflight', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
+    // The finality acknowledgment gates the button (`Preflight.vue:542`, AUD-20261102-005 F-01), and
+    // a natively `disabled` control fails `click()` on actionability rather than on a wrong value —
+    // the walk hangs for the whole test budget. `tests/utils/start-career.ts:165` was fixed for this
+    // in `00e3cf15`, but that commit touched the helper only, and this spec calls `walkWizard`
+    // directly rather than `startCareer`, so it never inherited the fix.
+    await page.locator('#confirmed').check();
     await page.getByRole('button', { name: 'Create the run' }).click();
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
 
@@ -171,9 +177,11 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     // The Train button this used to click lived inside a training card that the shipped screen no
     // longer draws: the discipline is picked on the screen's own radio list, and the one filled action
     // is the savebar's `Record turn N` (TrainingCard.vue:383-388, KI-138). The write boundary also
-    // requires the five client totals, which stay in one collapsed disclosure.
+    // requires the five client totals, which ship in one disclosure.
+    // The five client totals are REQUIRED to record a turn and that disclosure is open by
+    // default (`TrainingDetail.vue`, `<details ... open>`, since `dcc562b6`). Clicking the summary
+    // would CLOSE it and hide the inputs the next three lines fill, so this walk does not toggle it.
     await page.getByRole('radio', { name: 'Speed training' }).check();
-    await page.getByText('Client totals this turn (required to record)').click();
     await page.locator('input[name="speed"]').fill('650');
     await page.locator('input[name="stamina"]').fill('600');
     await page.locator('input[name="power"]').fill('600');
@@ -185,13 +193,21 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     await page.waitForURL(/\/cockpit$/, { waitUntil: 'domcontentloaded' });
     await expect(page.getByText('Turn 1 logged.')).toBeVisible();
 
-    // Reload: the recorded turn is in the correction selector, which is the Cockpit's own read-back.
-    // The selector renders one option per logged turn and no placeholder (the two-turn case in
-    // `career-cockpit-forms.spec.ts` pins that shape), so one turn is one option.
+    // Reload, then read the recorded turn back from storage on the Timeline's record table — one row
+    // per recorded turn, first column the run's own turn number. Until `c1063c41` (2026-11-01) the
+    // read-back was the Cockpit's `#correction-turn-select`; that commit deleted the Correct-turn
+    // section and moved the door to `/turns/{turn}/edit`, so the walk reads the row where it now lives.
+    // The reload still matters: it proves the value came from storage, not from the form that posted it.
     await page.reload({ waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await expect(page.locator('#correction-turn-select').locator('option')).toHaveCount(1);
-    await expect(page.locator('#correction-turn-select').locator('option')).toHaveText('Turn 1');
+    await page.goto(`${runUrl}/timeline`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    const record = page.locator('section[aria-labelledby="timeline-record-heading"]');
+    await expect(record.locator('tbody tr')).toHaveCount(1);
+    await expect(record.locator('tbody tr').first().locator('td').first()).toHaveText('1');
+    // Back to the Cockpit: the next block navigates from there, and the Timeline is a read screen.
+    await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
 
     // --- The run-scoped deck: six slots, each with its own controls (R2-06's semantics) ---
     //

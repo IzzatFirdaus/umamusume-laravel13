@@ -523,7 +523,6 @@ const factorGrades: { family: string; note: string }[] = [
                 <h2 id="veteran-team-eligibility">Team eligibility</h2>
                 <p
                     class="mt-1.5 text-[12.5px] leading-[1.55] text-ink-muted"
-                    title="Source: docs/UMAMUSUME_REFERENCE.md"
                 >{{ teamSentence }}</p>
                 <div class="tiles mt-2.5 grid-cols-1 sm:grid-cols-3" data-field="team-eligibility">
                     <Tile label="Registered" :value="String(totalCount)" />
