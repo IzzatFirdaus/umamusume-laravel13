@@ -5,7 +5,7 @@ import { resolvedScratchDatabase } from './global-setup';
 /*
  * RTX-01 — the Legacy step's parent card must show the pick as soon as it is made.
  *
- * Authority: `docs/audits/trainer-desk-v3-ux-retest/04-ux-findings-retest.md:44-58`.
+ * Authority: `AUDIT-AND-VERIFICATION.md` section `## 04-ux-findings-retest.md`, lines 44-58 of the folded source.
  * Expected: "the step's own summary (\"Choose a veteran | Not chosen\") reflects the pick."
  * Actual:   "the select's value commits (`#legacy-pick-0.value === \"1\"`) but the visible summary
  *            above the form still reads \"Parent A | Not chosen\" until the step is saved and

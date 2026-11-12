@@ -300,3 +300,35 @@ the next pass:
     committed `KNOWN-ISSUES.md` edit between the freeze point and the fold (585 -> 586), not
     from uncommitted work; at the working tree the round reads +24 = that +1 plus the fold's
     +23, five of which read UNTRACKED there.
+
+## Round 26 coordination notes (2026-11-12)
+
+Absorbed files and their destinations are above, in the Round 26 row of the routing table. Notes
+for the next pass:
+
+ 1. The RS-UC set (`docs/audits/RS-UC-2026-13/`, `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09/`
+    screenshots, `docs/research/RS-UC-SCENARIO-DETAIL-2026-11-09/`) was recorded in the Round 25
+    note as peer in-flight work that stays by design. The 2026-11-12 owner order named the report
+    file and the two bundled sets and supersedes that ruling for the 31 named paths; the un-named
+    neighbours (the `RS-UC-2026-13/` directory, `trainer-desk-v3x-roadmap-baseline-2026-11-12.md`,
+    `scenario-research/`, the design-language survey) stay untouched by design.
+ 2. The bundled sets' prior leave-untouched rulings (audits README dir rows, and the handoff's
+    explicit prohibition list) are superseded by the same order; every fold banner states this.
+ 3. Live citations were repointed before the delete: 21 external sites across README,
+    RECONCILIATION-REGISTER (4), round-6 reconciliation (15 anchor cells), walks 7 (2), walk 8,
+    three browser specs, and the hfw HTML line, plus 8 intra-set live pointers; the dated
+    inventory rows and embedded `git status` listings inside the folded bodies stay verbatim as
+    history.
+ 4. Colliding `00`-`08` basenames between the two bundled sets are disambiguated with
+    parenthetical qualifiers in the anchors, the `CONSTRAINTS.md` precedent. The
+    `04-ux-findings.md` (original) and `04-ux-findings-retest.md` basenames are unique, so they
+    take unqualified anchors.
+ 5. Wait-state: the peer session active during this round (F-series ownership arc) holds
+    uncommitted edits citing the folded paths; those sites are in files this round did not own
+    (`docs/research/ui-ux-application-context-brief.md`, `docs/UMAMUSUME_REFERENCE.md`,
+    `docs/framework-ui-ux/_audit-prompt.md`, and the round-closing +346-line
+    `docs/research-scratch/PLANS-AND-BRIEFS.md` edit whose inventory cites
+    `docs/audits/walk-8-follow-up-plan.md` and
+    `docs/audits/trainer-desk-v3-ux-retest/09-consolidated-remediation-plan.md` in
+    slash form) and were left untouched by design; those slash cites are GONE-class
+    until the peer lands and repoints them.

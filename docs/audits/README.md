@@ -18,15 +18,20 @@ a familiar symptom is recognised instead of re-investigated.
 
 **Rules that follow from the tree, in the order a new pass should apply them.**
 
-1. **The report is a loose `.md`** unless the audit is genuinely multi-part. 19 reports sit at
-   `docs/audits/*.md`; only the v3.x series is bundled, and it is bundled because it is nine
-   documents with a shared executive summary.
+1. **The report is a loose `.md`** unless the audit is genuinely multi-part. 18 reports sit loose
+   under `docs/audits/` (20 loose `.md` files; the other two are this index and
+   `RECONCILIATION-REGISTER.md`). The only genuinely multi-part series, the Trainer Desk v3.x
+   audit (nine documents) and its ten-part retest, was folded into `AUDIT-AND-VERIFICATION.md`
+   master sections on 2026-11-12 (Round 26, owner-ordered); no bundled report `.md` remains
+   on disk.
 2. **Evidence goes in a subdirectory, never beside the report.** `screens/` for a split audit,
    `screenshots/` for a bundled set. Nothing is written to the top level of `docs/audits/` except
    reports.
 3. **The evidence directory is named for the audit ID**, not the report filename:
-   `RS-UC-2026-13/screens/` holds walk 8's 43 PNGs. Three reports also declare an ID they do not
-   own (a reconciliation naming the walk it reconciles); only the walk itself gets a directory.
+   `RS-UC-2026-13/screens/` holds walk 8's 43 PNGs. Two reports on disk also declare an ID they do not
+   own (a reconciliation naming the walk it reconciles); the third such declaration, the round-6
+   slice audits, was folded into the master on 2026-11-12. Only the walk itself gets a
+   directory.
 4. **A report that captured nothing gets no directory.** Do not create an empty `screens/` as a
    placeholder — walks 3 and 4 did, the directories were never populated, and both reports had to
    record the absence in prose. An absent directory is honest; an empty one is noise.
@@ -35,7 +40,7 @@ a familiar symptom is recognised instead of re-investigated.
 
 `lines` and `date` are the file's own length and mtime; `id` is the audit ID the report *declares*
 (a blank cell means the report declares none); `evid` is the evidence directory it actually has on
-disk. Re-derive with `wc -l docs/audits/*.md` and `ls docs/audits/*/screens/ docs/audits/*/screenshots/`.
+disk. Rows whose report was folded keep their pre-fold figures as dated history. Re-derive with `wc -l docs/audits/*.md` and `ls docs/audits/*/screens/ docs/audits/*/screenshots/`.
 
 | Date | Report | Lines | ID | Evidence |
 | --- | --- | --- | --- | --- |
@@ -50,30 +55,31 @@ disk. Re-derive with `wc -l docs/audits/*.md` and `ls docs/audits/*/screens/ doc
 | 2026-11-03 | `rice-shower-unity-cup-round5-reconciliation.md` — round 5 register | 583 | — | none |
 | 2026-11-03 | `rice-shower-unity-cup-ux-walk-5.md` — walk 5 | 756 | — | none |
 | 2026-11-06 | `rice-shower-unity-cup-ux-walk-6.md` — walk 6, wizard door | 1691 | `RS-UC-2026-10` | `RS-UC-2026-10/screens/` (27 PNG) |
-| 2026-11-07 | `rice-shower-unity-cup-round6-reconciliation.md` — round 6 register | 1038 | `RS-UC-2026-10` | names walk 6's directory |
-| 2026-11-07 | `rice-shower-unity-cup-round6-slice-audits.md` — round 6 slice audits | 2050 | `RS-UC-2026-10` | names no directory |
-| 2026-11-07 | `rice-shower-unity-cup-ux-walk-7-snapshot-door.md` — walk 7, snapshot door | 935 | `RS-UC-2026-11` | `RS-UC-2026-11-snapshot-door/screens/` (13 PNG) |
-| 2026-11-07 | `rice-shower-unity-cup-ux-walk-7.md` — walk 7, wizard door (canonical) | 1461 | `RS-UC-2026-12` | `RS-UC-2026-12/screens/` (34 PNG) |
-| 2026-11-08 | `rice-shower-unity-cup-round7-owner-calls.md` — round 7 owner rulings | 160 | — | none |
+| 2026-11-12 | `rice-shower-unity-cup-round6-reconciliation.md` — round 6 register | 1038 | `RS-UC-2026-10` | names walk 6's directory |
+| 2026-11-07 | `rice-shower-unity-cup-round6-slice-audits.md` (folded into `AUDIT-AND-VERIFICATION.md` section `## rice-shower-unity-cup-round6-slice-audits.md`, 2026-11-12) — round 6 slice audits | 2050 | `RS-UC-2026-10` | names no directory |
+| 2026-11-12 | `rice-shower-unity-cup-ux-walk-7-snapshot-door.md` — walk 7, snapshot door | 935 | `RS-UC-2026-11` | `RS-UC-2026-11-snapshot-door/screens/` (13 PNG) |
+| 2026-11-12 | `rice-shower-unity-cup-ux-walk-7.md` — walk 7, wizard door (canonical) | 1461 | `RS-UC-2026-12` | `RS-UC-2026-12/screens/` (34 PNG) |
+| 2026-11-08 | `rice-shower-unity-cup-round7-owner-calls.md` (folded into `AUDIT-AND-VERIFICATION.md` section `## rice-shower-unity-cup-round7-owner-calls.md`, 2026-11-12) — round 7 owner rulings | 160 | — | none |
 | 2026-11-10 | `rice-shower-unity-cup-round7-reconciliation.md` — round 7 register | 1042 | — | names walks 7's two directories |
-| 2026-11-11 | `RS-UC-SCENARIO-DETAIL-2026-11-09.md` — scenario-detail page report | 163 | — | `RS-UC-SCENARIO-DETAIL-2026-11-09/screens/` (4 PNG) |
-| 2026-11-11 | `rice-shower-unity-cup-ux-walk-8.md` — walk 8, wizard door | 1358 | `RS-UC-2026-13` | `RS-UC-2026-13/screens/` (43 PNG) |
-| 2026-11-11 | `RECONCILIATION-REGISTER.md` — cross-walk issue index, walk-8 dispositions, prevention | 332 | — | none (an index, not a walk) |
-| 2026-11-11 | `walk-8-follow-up-plan.md` — PA specs, new-finding triage, scenario coverage | 416 | — | none (a plan, not a walk) |
-| 2026-11-11 | `audit-methodology-and-remediation-specs.md` — capability rule, F-03/F-08 specs, 3 scenario-walk plans | 499 | — | none (specs, not a walk) |
+| 2026-11-11 | `RS-UC-SCENARIO-DETAIL-2026-11-09.md` (folded into `AUDIT-AND-VERIFICATION.md` section `## RS-UC-SCENARIO-DETAIL-2026-11-09.md`, 2026-11-12) — scenario-detail page report | 163 | — | `RS-UC-SCENARIO-DETAIL-2026-11-09/screens/` (4 PNG) |
+| 2026-11-12 | `rice-shower-unity-cup-ux-walk-8.md` — walk 8, wizard door | 1358 | `RS-UC-2026-13` | `RS-UC-2026-13/screens/` (43 PNG) |
+| 2026-11-12 | `RECONCILIATION-REGISTER.md` — cross-walk issue index, walk-8 and F-series ownership dispositions, prevention | 422 | — | none (an index, not a walk) |
+| 2026-11-11 | `walk-8-follow-up-plan.md` (folded into `AUDIT-AND-VERIFICATION.md` section `## walk-8-follow-up-plan.md`, 2026-11-12) — PA specs, new-finding triage, scenario coverage | 416 | — | none (a plan, not a walk) |
+| 2026-11-11 | `audit-methodology-and-remediation-specs.md` (folded into `AUDIT-AND-VERIFICATION.md` section `## audit-methodology-and-remediation-specs.md`, 2026-11-12) — capability rule, F-03/F-08 specs, 3 scenario-walk plans | 499 | — | none (specs, not a walk) |
 
-**19 reports, 4 with evidence, 15 without, 121 PNGs across the five split-audit directories.**
-Re-derive: `ls docs/audits/*.md | wc -l`, `find docs/audits -path '*/screens/*.png' | wc -l`.
+**22 report rows: 17 name reports still on disk under `docs/audits/` (4 with evidence directories, 13 without), and 5 name reports folded into `AUDIT-AND-VERIFICATION.md` master sections on 2026-11-12 (Round 26, owner-ordered), each row pointing at its own section; 121 PNGs sit across the five split-audit `screens/` directories. The two peer `trainer-desk-v3x-*` reports of 2026-11-12 are loose and have no row yet.**
+Re-derive: `ls docs/audits/*.md | wc -l` (20 files; 18 reports with the two indexes set aside), `find docs/audits -path '*/screens/*.png' | wc -l` (121).
 
 ## Bundled sets
 
 | Directory | Contents | State |
 | --- | --- | --- |
-| `trainer-desk-v3-ux/` | nine parts `00 executive summary` … `08 screenshot index`, plus `screenshots/` (59 PNG) | **in flight.** Only `04-ux-findings.md` is tracked; the rest is uncommitted peer work |
-| `trainer-desk-v3-ux-retest/` | `screenshots/` only, 40 PNG, no report | **in flight.** A peer session was writing to it during the last pass (8 files in 90 minutes). Its report does not exist yet |
+| `trainer-desk-v3-ux/` | `screenshots/` (59 PNG) plus the peer-owned `scenario-research/` notes directory; the nine report parts were folded into `AUDIT-AND-VERIFICATION.md` sections `## 00-executive-summary.md (trainer-desk-v3-ux)` … `08-screenshot-index.md (trainer-desk-v3-ux)` on 2026-11-12 (Round 26, owner-ordered) | **folded.** No report `.md` remains at this path |
+| `trainer-desk-v3-ux-retest/` | `screenshots/` (72 PNG) only; the ten report parts were folded into `AUDIT-AND-VERIFICATION.md` sections `## 00-executive-summary.md (trainer-desk-v3-ux-retest)` … `09-consolidated-remediation-plan.md` on 2026-11-12 (Round 26, owner-ordered) | **folded.** No report `.md` remains at this path |
 
-Both are left untouched by the 2026-11-11 organisation pass: a directory under active edit is not
-a directory to rename.
+Both were folded on 2026-11-12 by explicit owner order (Round 26), which supersedes the 2026-11-11
+organisation pass's leave-in-place ruling; the screenshots/ directories keep their PNGs, and the
+report parts live as master sections.
 
 ## Known inconsistencies, recorded rather than silently repaired
 
@@ -82,9 +88,9 @@ Each of these is real, dated, and in a file whose text is append-only history.
 | # | What | Where | Why it is left |
 | --- | --- | --- | --- |
 | 1 | A `screens/` path cited for a directory that never existed | `rice-shower-unity-cup-ux-walk-3.md` (2 citations), `rice-shower-unity-cup-ux-walk-4.md` (1) | both reports already state in prose that the capture failed and no file exists. Deleting the citation would erase the evidence that it was attempted; the correction belongs in a dated erratum, not an edit |
-| 2 | `58 screenshots` claimed, 59 on disk | `trainer-desk-v3-ux/08-screenshot-index.md:3` | the count was taken before one file was added. The directory's own index is uncommitted peer text; correcting a number someone else is still writing is out of scope |
+| 2 | `58 screenshots` claimed, 59 on disk | `AUDIT-AND-VERIFICATION.md` section `## 08-screenshot-index.md (trainer-desk-v3-ux)`, line 3 of the folded body | the count was taken before one file was added. The body is now folded verbatim into the master, so the stale figure survives as dated history; the true disk count is re-derivable with this file's own commands |
 | 3 | Two spellings for the evidence directory, `screens/` and `screenshots/` | split audits vs bundled set | both are in use and both are now stated above, so the pair is a documented convention rather than an accident |
-| 4 | Three reports declare `RS-UC-2026-10` | walks 6 and the two round-6 registers | the registers cite the walk they reconcile. Per rule 3 they get no directory of their own, and the shared ID is correct for them |
+| 4 | Two reports on disk declare `RS-UC-2026-10` | walk 6 and the round-6 reconciliation register | the registers cite the walk they reconcile; the round-6 slice audits, the third such declaration, was folded into the master on 2026-11-12. Per rule 3 they get no directory of their own, and the shared ID is correct for them |
 | 5 | The declared ID and the directory name differ by a suffix | walk 7's snapshot door declares `RS-UC-2026-11`; its directory is `RS-UC-2026-11-snapshot-door/` | the suffix is what distinguishes two walks that share one number, so it is doing real work. Renaming the directory to the bare ID would collide with the wizard-door walk; renaming the declared ID would break three citations in the round-7 register |
 
 ## What a new audit should do
@@ -96,5 +102,5 @@ Each of these is real, dated, and in a file whose text is append-only history.
 4. If the capture fails, write that in the report and create **no** directory.
 5. Add the new row to the table above. Nothing else in the tree needs to know.
 
-*Measured 2026-11-11 against `master` `6c10ff62`. This file is a map; when it and the tree
+*Re-measured 2026-11-12 after the Round 26 fold (12 loose reports and both bundled sets' 19 parts folded into the `docs/research-scratch/` masters, owner-ordered); this supersedes the 2026-11-11 measurement against `6c10ff62`. This file is a map; when it and the tree
 disagree, the tree wins and the map is stale.*

@@ -8,7 +8,7 @@ import { resolvedScratchDatabase } from './global-setup';
 /*
  * RTX-02 — the Dashboard must not state a turn position for a career that has none.
  *
- * Authority: `docs/audits/trainer-desk-v3-ux-retest/04-ux-findings-retest.md:60-78`.
+ * Authority: `AUDIT-AND-VERIFICATION.md` section `## 04-ux-findings-retest.md` (the folded source), lines 60-78 of the source folded 2026-11-12 (Round 26, owner-ordered).
  * Expected: "the resume card states a turn position the cockpit can also show."
  * Actual:   "the card prints `TURN 0 of 72` and `Turn 0 logged` for a run whose cockpit says
  *            `No turn recorded yet`; the cockpit deliberately shows no number ..., so the two

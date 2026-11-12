@@ -55,7 +55,7 @@ Status: **walk complete.** Primary pass through the wizard door, 18 screens, one
   repository's own prior trail (walks 1–6, the round 2–6 registers, `ui-ux-application-context-brief.md`,
   `flows-*.md`, `rice-shower-unity-cup-ux-walk-resolutions.md`, `KNOWN-ISSUES.md`, `docs/framework-ui-ux/`, and
   the peer-landed `rice-shower-unity-cup-round6-reconciliation.md` /
-  `rice-shower-unity-cup-round6-slice-audits.md`). Where a prior finding reproduces, this audit gives its own
+  `AUDIT-AND-VERIFICATION.md` section `## rice-shower-unity-cup-round6-slice-audits.md`). Where a prior finding reproduces, this audit gives its own
   observation; where it does not, that is recorded as a finding in its own right.
 
 ### 8.5a The door verdict (wizard-specific)

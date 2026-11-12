@@ -53,7 +53,7 @@ consults only that sheet once started.
   the round 2–6 registers, `ui-ux-application-context-brief.md`, `flows-*.md`,
   `rice-shower-unity-cup-ux-walk-resolutions.md`, `KNOWN-ISSUES.md`, `docs/framework-ui-ux/`,
   and the peer-landed `rice-shower-unity-cup-round6-reconciliation.md` /
-  `rice-shower-unity-cup-round6-slice-audits.md`). Where a prior finding reproduces, this audit
+  `AUDIT-AND-VERIFICATION.md` section `## rice-shower-unity-cup-round6-slice-audits.md`). Where a prior finding reproduces, this audit
   gives its own observation; where it does not, that is recorded as a finding in its own right.
 
 ## 2.0 Data-sheet provenance

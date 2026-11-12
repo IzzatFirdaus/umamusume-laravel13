@@ -19730,3 +19730,1082 @@ PLAYWRIGHT_PORT=8165 ... npx playwright test tests/browser/navigation-determinis
 (The same run passed 4/4 once more at `31be0555` after removing a stray `eslint-disable` the trace variant had needed; zero suppressions remain in the file.)
 
 **Register consequence.** KI-101 (2026-10-19)'s blocker resolves as disposition (a); the fix itself sits on this branch awaiting the owner, and merging is NOT done by this pass. The KI-101 2026-10-16 entry (harness staleness) is a different entry, measured in slice 2.1's section.
+
+## remediation-phase-progress-report.md
+
+> **Folded into this master in consolidation Round 26 (owner-ordered, 2026-11-12) from**
+> `docs/audits/remediation-phase-progress-report.md` (329 lines). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched; headings inside fenced blocks were never demoted.
+> The source was untracked (a peer session's in-flight work), so this section is its only copy; containment was proven against the bytes being deleted. Live citation repoints were applied to this body before the fold: the two post-remediation-handoff section pointers now name the handoff section of `SLICE-RECORDS.md`. The 2026-11-11 audits organisation pass and the remediation workstream's own leave-untouched lists named this file's directory as peer in-flight; the owner's explicit 2026-11-12 consolidation order supersedes those rulings here. Dated inventories inside the body (embedded `git status` listings, the workstream-ownership tables with their untracked-column rows) are quoted history and stay verbatim; every `leave untouched` row they carry is superseded by the same owner order.
+
+### Progress report — remediation phase
+
+**Date:** 2026-11-12
+**Repository:** `D:\Projects\umamusume-laravel13` @ `b2832ee6`
+**Scope:** walk-8 reconciliation → remediation. Six work items, five commits, one refutation.
+
+---
+
+### 1. Summary
+
+Six items were authorised for remediation in the order F-03, F-08, RTX-01, UX-09, RTX-02, F-13.
+All six are closed. **Four required new code, one was already fixed upstream, one was refuted.**
+
+| # | Item | Outcome | Commit | Evidence |
+| --- | --- | --- | --- | --- |
+| 1 | **F-03** spark target commitment | **fixed**, then **restated** under the 2026-11-12 ruling | `282e5437` + `aaf21cd3` | RED `1 failed, 4 passed` → GREEN **9/9** |
+| 2 | **F-08** Race action destroys the form | **fixed** | `51d78d3e` | GREEN **3/3** |
+| 3 | **RTX-01** parent card shows stale pick | **fixed** | `fc6f775d` | RED 1f/2p, GREEN **3/3** |
+| 4 | **UX-09** finale row says "no date" | **already fixed**; residual fixed | `339035b5` | RED 1f/1p, GREEN **2/2** |
+| 5 | **RTX-02** dashboard prints "Turn 0" | **fixed** | `aba21651` | RED 1f/2p, GREEN **3/3** |
+| 6 | **F-13** planned spend stays 0 | **refuted**; coverage gap closed | `b2832ee6` | **14/14** |
+
+Two of the six did not match the brief, and both were caught by measuring rather than by reading the
+register. That is the finding worth carrying forward; details in §3. Item 1 carries two commits
+because the owner ruling of 2026-11-12 changed the required behaviour after the first landed — the
+earlier commit is preserved, not rewritten (§5.1).
+
+
+---
+
+### 2. What each fix changed
+
+#### F-03 — a spark target shown in the field is now the target stored (`282e5437`)
+
+**Root cause.** `SparkTargetPicker.vue` bound the input to `search` — the filter text — while the
+payload kept `props.modelValue`. Two variables, nothing forcing them to agree before submit. Typing
+`Pow`, leaving the option unclicked and saving displayed one value and stored `null`; a null target
+passes `assertTargetMatchesCategory`, so no error surfaced and `aria-invalid` stayed `false`.
+
+**Change.** The field prints the committed value except while the listbox is open with filter text;
+every close path reverts to the committed value. A complete option name commits as it is typed; a
+unique prefix commits on close.
+
+**A second, independent defect found while fixing this.** `BaseSelect` bound its own handler to the
+native element and **never re-emitted `change`**, so three call sites' `@change="spark.target = ''"`
+had never fired — a spark kept the target of the category it no longer belonged to. Fixed in the same
+commit.
+
+#### F-08 — ask before the Race action discards an entered turn (`51d78d3e`)
+
+**Root cause.** `TrainingDetail.vue`'s `chooseAction` reached the race desk with
+`window.location.href`, a hard document navigation that destroys the 21-field `useForm` state.
+Choosing an action and abandoning the turn were the same gesture.
+
+**Change.** The departure is conditional on the form being clean. The comparison is against the
+values the form opened with, not against empty fields, because `turn` and the facility ladder start
+pre-filled. Actions that stay on the page never prompt.
+
+**Checked for the same fault elsewhere:** `RaceDecision.vue` reaches its own re-render through
+`router.get(..., { preserveState: true })`, so this was the only hard navigation on a form screen.
+
+#### RTX-01 — show a library pick on the parent card before saving (`fc6f775d`)
+
+**Root cause.** `cardFor()` resolved a non-manual slot from the server props alone, while
+`assignParent()` writes only the local `useForm` row. A library pick lived in the model but not in
+the card: the pill printed `Not chosen` over a picker already holding a veteran.
+
+**Change.** The resolver reads the picked id from the form and resolves it against the roster the
+picker itself offered, falling back to the server card when the slot holds no pick.
+
+**Confirmed not a repeat of F-03 or the `BaseSelect` repair.** The spec's own case asserts the picker
+already committed `legacy_id`, so `update:modelValue` and the event forwarding were healthy. Only the
+resolver's precedence was wrong.
+
+#### UX-09 — stop the dated finale row claiming the calendar cannot date it (`339035b5`)
+
+**The finding was already fixed** by `be983f87`, which taught `dueLabel()` to borrow the advisor's
+finale distance. Verified on the rendered screen before writing anything:
+
+```
+URA Finals Qualifier  | unknown | 5 turns away
+URA Finals Semifinal  | unknown | 5 turns away
+URA Finals Final      | unknown | 5 turns away
+```
+
+**What was still broken.** The cell was dated; its tooltip was not. `NextDecision.vue` chose the
+tooltip from `row.due_turn === null` alone, and the finale rows have `due_turn === null` by design —
+they sit outside the per-turn grid. The live DOM read:
+
+```
+text: '5 turns away',  title: 'The calendar does not date this obligation.'
+```
+
+**Change.** The tooltip keys on `due_label`, splitting three states: no label → undated reason; a
+label without a grid position → the finale-distance explanation; a grid position → no tooltip. The
+`unknown` / `no date` behaviour is preserved where the advisor has no context, which is the
+constraint the ordering instruction named.
+
+#### RTX-02 — stop a career with no logged turn printing a position (`aba21651`)
+
+**Root cause.** `Dashboard.vue` printed `Turn ${career.turn} logged` unconditionally and the Turn tile
+printed `0 of 72`, while the Cockpit says `No turn has been recorded yet` for the same run.
+
+**Change.** The zero case takes the Cockpit's wording. The Turn tile passes `absent` — the prop
+`Tile` already owns for this state — instead of a zeroed value, and drops its own suffix.
+
+**Two states deliberately untouched, both pinned:** a logged turn still reads `Turn N logged`, and an
+imported career still states the logged count and the imported position as a pair.
+
+#### F-13 — refuted, and the coverage gap closed (`b2832ee6`)
+
+**The claim.** `PLANNED SPEND` stayed `0` and `REMAINING` stayed `173` after a 140 SP skill was
+added, leaving the planner's headline unable to see its own plans.
+
+**What the screen does**, at the exact row the walk named (`Pace Chaser Straightaways ◎`, 140 SP):
+
+```
+before tick:  PLANNED SPEND 0    REMAINING 173
+after tick:   PLANNED SPEND 140  REMAINING 33    (commit button enables)
+after untick: PLANNED SPEND 0    REMAINING 173
+```
+
+**Why it could stand unchallenged.** The spec already had a case titled *"planning a row moves the
+spend and remaining figures"* — and it asserted **neither figure**. It read the savebar, the commit
+button and the "Too expensive" label. The bar could have been blind and that test would still have
+passed. The title promised a check the body never made.
+
+**What the walk actually hit.** Its own account says it *"clicked and added"* the skill — that is the
+add form's `Add to run`, which records a skill as acquired, not a plan. A plan is the table checkbox.
+Two different controls on one screen, and the finding named the wrong one. Both paths were exercised
+separately before drawing that conclusion.
+
+**Change.** No product code. The case now reads the printed figures rather than the surrounding
+chrome. The label and its number are sibling nodes with no separator, so a text regex over the whole
+bar cannot tell `Planned spend0` from `Planned spend140`; the number is read from the node beside its
+label.
+
+---
+
+### 3. What the six items revealed about the process
+
+**Two of six brief items did not match the tree.** UX-09 was already fixed; F-13 was misdiagnosed.
+Neither was discoverable by reading the register — only by rendering the screen.
+
+**A test can promise a check it does not make.** F-13 survived because a case's title claimed to
+verify the spend and remaining figures while its body asserted adjacent facts. A green suite is
+evidence of what the assertions check, not of what their names say.
+
+**Reasoning about a mechanism produced four wrong findings in the previous walk.** `U-03`, `U-08`,
+`U-11` and `U-14` all claimed a capability was absent when it existed. The capability-verification
+rule (four layers: screen → navigation/disclosure → implementation → data) was written into
+`docs/framework-ui-ux/_audit-prompt.md` §6.4 as a permanent harness rule because of that.
+
+---
+
+### 4. Gates actually run
+
+| Gate | Exact command | Result | Exit |
+| --- | --- | --- | --- |
+| Full Laravel suite | `vendor/bin/pest --compact < /dev/null` | **2324 passed**, 36595 assertions, **3 failed**, 9 warnings | 1 |
+| PHPStan | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` | `[OK] No errors` | 0 |
+| TypeScript | `npm run typecheck` | 0 errors | 0 |
+| UI lint | `npm run lint:ui` | **207** arbitrary values = baseline exactly, 0 added | 0 |
+| Line endings | `vendor/bin/pest --filter=LineEndingGuardTest` | 1 passed (2 assertions) after normalisation | 0 |
+| Browser, F-03 strict | `npx playwright test tests/browser/career-legacy-spark-commit.spec.ts` | **9 passed** (39.6s) | 0 |
+| Browser, F-03 RED | same spec, before the correction | `1 failed, 4 passed` | 1 |
+| Targeted feature suites | `--filter="Legacy|TrainingDetail|Cockpit|Dashboard|Skill"` | **504 passed**, 7503 assertions | 0 |
+| Browser, other five items | F-08, RTX-01, UX-09, RTX-02, skills | 3/3, 3/3, 2/2, 3/3, 14/14 | 0 |
+| KI-74 pre-flight | timed SQLite read before the sweep | 2.34 s — quiet box, admissible | — |
+
+**Not run:** `composer lore` / `composer lore-code`. No PHP leaves were changed by the six fixes; the
+F-03 correction is Vue and TypeScript only. The lore gate is reported as not run rather than assumed
+clean.
+
+**Re-measured 2026-11-12 by the post-remediation verification dispatch:** the full suite now reports
+`2 failed, 9 warnings, 2325 passed (36595 assertions)` — the `LineEndingGuardTest` failure is gone
+because the CRLF correction holds on disk. The two remaining failures are the same two named below,
+with unchanged assertions. PHPStan, typecheck and `lint:ui` were re-run at that time and went red for
+reasons belonging to a peer session's stash application, not to these commits; see
+`SLICE-RECORDS.md` section `## post-remediation-verification-handoff.md` §D and §H (the handoff was folded 2026-11-12, Round 26).
+
+
+#### 4.1 The full suite's three failures, classified
+
+The suite reported `3 failed, 9 warnings, 2324 passed`. Each failure is named, with its owner:
+
+| # | Failure | Classification | Basis |
+| --- | --- | --- | --- |
+| 1 | `LineEndingGuardTest` — CRLF in two spark specs | **mine, fixed** | Both files were written CRLF by editor sessions. Disk normalised to LF; guard now passes. `git diff --ignore-cr-at-eol` is empty across both, so no content moved. `.gitattributes` normalises on add, so nothing needed committing. |
+| 2 | `ScenarioAdvisorFinaleTest` — `'Our Grand Concert'` vs `'Our Grand Concert finals'` | **pre-existing, not mine** | `git diff b2832ee6 HEAD` on this file and the services behind it is empty. The wording was changed deliberately by `0ad93bc7` (`fix(scenario): name Grand Concert's finale by its own word (UX-25, KI-82)`); the test was not updated with it. Reproduces with `--filter=ScenarioAdvisorFinaleTest` independent of any change in this session. |
+| 3 | `UiHygieneTest` — repository identifier in shipped copy | **pre-existing, real product defect** | `BurstBandsCard.vue:87` ships `UMAMUSUME_REFERENCE §2.2.2, conflict row 57` inside the rendered `detail` string; `Veterans/Index.vue:528` ships `title="Source: docs/UMAMUSUME_REFERENCE.md"`. Neither file is allowlisted — `configIdentifierDebt()` covers `config/*.php` only and its own comment says adding an entry is not welcome. |
+
+Failures 2 and 3 are other owners' regressions against changes that landed before this phase. They
+are recorded here and **not fixed** — repairing them would be unrelated cleanup outside this task's
+scope.
+
+**Superseded 2026-11-12 by the post-remediation verification dispatch.** The two surviving failures
+were re-investigated against git history and their dispositions are more specific than this table
+records: failure 2's assertion is stale after `49a90c3a1` but the correct copy is a UX-25 decision,
+and `f2f0a8e5`'s subject claims "UiHygieneTest red by design" while no register entry exists to
+record it. See `SLICE-RECORDS.md` section `## post-remediation-verification-handoff.md` §B (the handoff was folded 2026-11-12, Round 26).
+
+
+
+---
+
+### 5. Open items — both need a decision, neither is a task
+
+#### 5.1 F-03 restated under the 2026-11-12 owner ruling — **resolved**
+
+The first draft of this section described the ruling as unverifiable. **That was wrong and is
+corrected here.** The ruling was established in the owner conversation and is binding:
+
+> **Typed text must never implicitly become a committed Spark Target selection.**
+
+- Clicking an option commits it.
+- Enter on a highlighted option commits it.
+- Typing an exact option name does not commit it.
+- Typing a unique prefix does not commit it.
+- `Tab`, `Escape`, blur, outside-click, or closing the list without acceptance restores the
+  previously committed value.
+- The displayed value and the submitted `modelValue` must always be the same committed selection.
+
+`282e5437` violated this in two places. It committed a unique prefix on close (`commitTypedText`)
+and an exact name on every keystroke (`commitExactText`), on the reasoning that a Trainer who typed
+an unambiguous name meant it. The ruling rejects that reasoning.
+
+**Amended forward in `aaf21cd3`.** Both functions are removed; `close()` now only discards filter
+text and `displayValue` reverts the input to the committed selection. `282e5437` is **not
+rewritten** — it stands as the historical first-draft fix, and this commit amends its behaviour.
+
+**A latent defect the correction exposed.** The listbox closed on the input's `blur`, and mousedown
+into an option fires that blur *before* the click lands. `onBlur` used to call `commitTypedText()`,
+which committed the prefix and thereby masked the race. With implicit commitment gone, clicking an
+option stopped committing at all — four cases went red, including "a selected target survives a
+cold reload", which had been green. The list now carries `@mousedown.prevent`, so pressing an option
+does not steal focus and the click reaches the option it was aimed at. This is not a workaround: it
+is what "click to accept" requires.
+
+**Verification.** RED captured against the peer's own test before any change: the component still
+committed a typed prefix, so their implicit-commitment case failed (`1 failed, 4 passed`). After the
+correction: **9 passed**. The peer's four existing cases were preserved unchanged and five were
+added — the ruling's own list: exact name typed but not accepted, a previously committed value
+surviving a rejected filter, Enter on a highlighted option, Escape reverting, plus the retained
+explicit-click case. The peer's uncommitted test modification was kept, not discarded.
+
+
+#### 5.2 One migration is Pending — **not run, owner authorization not granted**
+
+```
+2026_11_10_010500_add_current_spirit_proxy_to_training_runs_table ... Pending
+```
+
+`current_spirit_proxy` is **absent** from `training_runs` (34 columns verified by
+`PRAGMA table_info`) and **present** in `TrainingRun::#[Fillable]`. Pages return 200 today because
+nothing reads it yet, but the first write that includes it will fail. This is KI-60's pattern: the
+suite builds its own schema from the migration files, so a green run proves nothing about the dev
+file.
+
+The migration is committed (`b9837da7`), additive, nullable, with a working `down()`.
+
+**Not executed.** No `php artisan migrate`, no `migrate:fresh`, no `refresh`, `reset` or `rollback`
+was run against the shared development database, and no schema-changing operation was applied to it.
+**The migration remains pending and awaits owner authorization.**
+
+
+---
+
+### 6. Git state
+
+**New commits in this phase** (all on `master`, explicit paths only, nothing amended or rewritten):
+
+| Commit | Subject |
+| --- | --- |
+| `282e5437` | fix(legacy): commit a spark target the field is showing |
+| `51d78d3e` | fix(training): ask before the Race action discards an entered turn |
+| `fc6f775d` | fix(legacy): show a library pick on the parent card before saving |
+| `339035b5` | fix(cockpit): stop the dated finale row claiming the calendar cannot date it |
+| `aba21651` | fix(dashboard): stop a career with no logged turn printing a position |
+| `b2832ee6` | test(skills): pin the budget bar to the figures it prints, and retire F-13 |
+| `aaf21cd3` | fix(legacy): require explicit acceptance before a spark target commits |
+
+`282e5437` was **not** amended. `aaf21cd3` supersedes its behaviour forward, and the original stands
+as the historical first-draft fix the ruling responded to.
+
+**Remaining modified files** (uncommitted, none of them product code this phase produced):
+
+- `docs/framework-ui-ux/_audit-prompt.md` — the §6.4 four-layer capability rule added earlier in the
+  reconciliation work.
+- `docs/research/ui-ux-application-context-brief.md` — predates this phase; left alone.
+- `docs/audits/remediation-phase-progress-report.md` — this report.
+
+**Remaining untracked files:**
+
+- `docs/audits/RECONCILIATION-REGISTER.md`
+- `docs/audits/walk-8-follow-up-plan.md`
+- `docs/audits/audit-methodology-and-remediation-specs.md`
+- `docs/audits/rice-shower-unity-cup-ux-walk-8.md` + `RS-UC-2026-13/screens/` (43 PNGs)
+- `docs/audits/README.md`, `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md` and its `screens/`
+
+These are the reconciliation and planning artifacts from the preceding workstream, listed so the tree
+is not mistaken for clean. They were not part of the six remediation items and are not folded into
+them.
+
+**Peer-owned work preserved:**
+
+- `docs/audits/trainer-desk-v3-ux/` and `docs/audits/trainer-desk-v3-ux-retest/` — read-only
+  throughout; the finding identities RTX-01, RTX-02 and UX-09 were taken from them and never edited.
+- The peer's uncommitted modification to `tests/browser/career-legacy-spark-commit.spec.ts` was
+  **kept**. Its strict-commitment case was the RED baseline for `aaf21cd3`, and its four existing
+  cases are unchanged in the committed file.
+
+**Working tree: not clean.** No product source carries uncommitted work; the remainder is the
+documentation listed above.
+
+---
+
+### 7. Recommended next steps
+
+1. **Migration** — approve `php artisan migrate` on the dev database when convenient, or point it at a
+   scratch file. It stays pending until then (§5.2).
+2. **Two pre-existing suite failures** — `ScenarioAdvisorFinaleTest` needs its expectation updated to
+   `'Our Grand Concert finals'` after `0ad93bc7`; `UiHygieneTest` names two copy violations from
+   `f2f0a8e5` and `88e7ec42`. Both belong to those changes' owners, not to this phase.
+3. **Commit the documentation artifacts** in §6, or fold them into the register as the reconciliation
+   pass intended.
+4. **`composer lore`** — not run this phase because no PHP leaves changed. Worth running at the next
+   PHP change, or now if the documentation artifacts are committed.
+
+
+## post-remediation-verification-handoff.md
+
+> **Folded into this master in consolidation Round 26 (owner-ordered, 2026-11-12) from**
+> `docs/audits/post-remediation-verification-handoff.md` (275 lines). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched; headings inside fenced blocks were never demoted.
+> The source was untracked (a peer session's in-flight work), so this section is its only copy; containment was proven against the bytes being deleted. The 2026-11-11 audits organisation pass and the remediation workstream's own leave-untouched lists named this file's directory as peer in-flight; the owner's explicit 2026-11-12 consolidation order supersedes those rulings here. Dated inventories inside the body (embedded `git status` listings, the workstream-ownership tables with their untracked-column rows) are quoted history and stay verbatim; every `leave untouched` row they carry is superseded by the same owner order.
+
+### Post-remediation verification handoff
+
+**Date:** 2026-11-12
+**Starting reference HEAD:** `aaf21cd3`
+**Repository:** `D:\Projects\umamusume-laravel13`
+**Status of this dispatch:** verification work complete. All four gates were run against a
+conflict-free tree and are green except the two failures named in §B, which are other owners' work
+and are classified there rather than fixed here.
+
+---
+
+### A. Starting state
+
+- **HEAD at dispatch start:** `aaf21cd3` — confirmed by `git rev-parse --short HEAD`, not assumed.
+- **HEAD at dispatch end:** `a9c2b142` — a peer commit landed during the dispatch
+  (`docs(audits): index the audits directory and file PA-02/PA-01 dispositions`). It touches
+  `docs/audits/README.md` and `docs/audits/RECONCILIATION-REGISTER.md` only: **no product code**.
+  **No commits were created by this dispatch.**
+- **All seven remediation commits remain present and reachable.** Verified with
+  `git merge-base --is-ancestor <sha> HEAD` for each: `282e5437`, `51d78d3e`, `fc6f775d`,
+  `339035b5`, `aba21651`, `b2832ee6`, `aaf21cd3` — all reachable after `a9c2b142` landed.
+- **No commits landed between the report and this dispatch:** `git log aaf21cd3..HEAD` was empty at
+  dispatch start.
+- **Working tree at dispatch start:** 23 paths (2 modified, 21 untracked) — the figure the previous
+  report carried, **re-counted and found still correct at that moment**.
+
+---
+
+### B. Full-suite failures — measured
+
+**Command:** `vendor/bin/pest --compact < /dev/null`
+**Result:** `2 failed, 9 warnings, 2325 passed (36595 assertions)`, exit code `1`, duration 301.17 s.
+
+The third failure the previous report listed — `LineEndingGuardTest` — is **gone**. Both spark specs
+measure `CRLF=0` on disk and the guard passes standalone (`1 passed, 2 assertions`). That correction
+holds; nothing regressed it.
+
+The remaining two are the ones the previous report classified. Both were re-investigated from git
+history rather than taken on trust, and **both dispositions differ in an important way from "the
+implementation is right, so fix the test."**
+
+#### Failure A — `ScenarioAdvisorFinaleTest`
+
+| Field | Evidence |
+| --- | --- |
+| Test | `Tests\Feature\ScenarioAdvisorFinaleTest > it names the finale and counts the turns while it is close`, `tests/Feature/ScenarioAdvisorFinaleTest.php:72` |
+| Failure | `Property [advisor.finale.label] does not match the expected value.` Expected `'Our Grand Concert'`, actual `'Our Grand Concert finals'` |
+| Mechanism | `app/Services/Advisor/TrainerAdvisor.php:259` composes `$finale['label'].' finals'`. `$finale['label']` comes from `config('scenarios.scenarios.our_grand_concert.label')`, which is `'Our Grand Concert'`. |
+| Introducing commit | `49a90c3a1` (2026-11-07, "fix(advisor): name the event each turn-counter counts to (§13.2, S2.4)"). `git blame` attributes lines 246 and 259 to it. |
+| Current owner | The advisor / NextDecision surface (`app/Services/Advisor/`). Not this phase; not any of the seven commits. |
+| Product impact | **None — the implementation is correct.** §13.2 settled deliberately that the line must name the *event* rather than the scenario, because `Unity Cup is 5 turns away` could not be told from the scenario itself. `49a90c3a1` added `tests/Feature/NextDecisionTest.php` with a case that asserts `toContain('finals')` on the same composition, pinning the new behaviour. |
+| Correct disposition | **Test correction, but not yet.** The stale expectation is `ScenarioAdvisorFinaleTest:72`, which `49a90c3a1` did not update — a genuine oversight in that commit. However the delivered value `'Our Grand Concert finals'` composes a scenario name onto the word `finals`, and `0ad93bc7` later added `finale_label => 'The Grand Concert'` *precisely because* the catalogue's borrowed "URA Finals" vocabulary was wrong on this scenario. Whether the advisor line should now read `'The Grand Concert finals'` is a copy decision that belongs to the UX-25 / KI-82 owner, not to a verification dispatch. |
+| Scope | **Outside this dispatch.** Changing it would reopen a settled §13.2 decision or pre-empt a UX-25 one. |
+| Recommendation | UX-25 / KI-82 owner updates `ScenarioAdvisorFinaleTest:72` to the ruled wording, and decides at the same time whether `finale_label` should feed this line. |
+
+**Not fixed. Deliberately.** The assertion is stale, but a passing assertion is not proof the
+implementation is right, and here the two candidate corrections produce different user-visible copy.
+
+#### Failure B — `UiHygieneTest`
+
+| Field | Evidence |
+| --- | --- |
+| Test | `Tests\Feature\UiHygieneTest > it never ships a repository identifier to a Trainer`, `tests/Feature/UiHygieneTest.php:243` |
+| Failure | `BurstBandsCard.vue:87 carries a section reference`; `Veterans/Index.vue:528 carries a docs path` |
+| Offending strings | `BurstBandsCard.vue:87` ships `detail="… (UMAMUSUME_REFERENCE §2.2.2, conflict row 57)."` into a rendered `AlertRow`. `Veterans/Index.vue:528` ships `title="Source: docs/UMAMUSUME_REFERENCE.md"` on a rendered `<p>`. |
+| Introducing commits | `BurstBandsCard.vue:87` — `f2f0a8e5` (2026-11-10). `Veterans/Index.vue:528` — hunk introduced around `78b0f4e43`, with the `title` attribute's own last change at `88e7ec42`. |
+| Current owner | Scenario-detail surface (`BurstBandsCard`), Veterans surface (`Veterans/Index`). Neither is this phase. |
+| Product impact | **Real, and it is a product defect, not a test artefact.** A Trainer reading the burst-bands alert is shown an internal section reference and a conflict-row number; a Trainer hovering the team-eligibility sentence is shown an internal docs path. `AGENTS.md` §5 forbids both outright. |
+| **The exception question** | `f2f0a8e5`'s own subject reads **"… (UiHygieneTest red by design)"**. That is a claim of deliberate exception. **But no exception mechanism exists for it:** `configIdentifierDebt()` covers `config/*.php` only, its comment says *"Adding one is not [welcome]"*, and neither offending file is listed. So a commit *declared* the red intentional while the register that would record it does not carry it. |
+| Correct disposition | **Product fix, owner-held — not a test change and not an allowlist entry.** Weakening the test or adding to the debt list is explicitly forbidden by the dispatch and by the test's own comment. |
+| Scope | **Outside this dispatch** — and additionally blocked, see §H. |
+| Recommendation | Scenario-detail owner moves the §-anchor out of the shipped `detail` string into the HTML comment that already exists immediately above it (`BurstBandsCard.vue:76-82` already carries `UMAMUSUME_REFERENCE §2.2.2, conflict row 57` in a comment, and its own text names `TrackblazerPanel.vue` as the precedent). Veterans owner replaces the `title="Source: docs/…"` with content-level attribution. If `f2f0a8e5`'s "by design" is a real ruling, it needs a written owner ruling and a register entry — it currently has neither. |
+
+**Not fixed.** The `BurstBandsCard` anchor has flipped four times in one day (`42b47c4c` →
+`ea5e6f1c` → `9bd3df7b` → `f2f0a8e5`), the fourth marking it red on purpose. A verification dispatch
+should not become the fifth flip.
+
+---
+
+### C. Working-tree inventory
+
+**Re-counted at dispatch:** **23 paths** — 2 modified, 21 untracked. The previous report's count was
+correct at that moment. **It then changed to 31 during the dispatch**, for the reason in §H.
+
+| Path | Status | Author / owner | Belongs to remediation phase? | Disposition |
+| --- | --- | --- | --- | --- |
+| `docs/framework-ui-ux/_audit-prompt.md` | modified | This workstream (reconciliation pass) | Yes — §6.4 capability rule | **Commit with the audit docs**, preserving §6.4 |
+| `docs/research/ui-ux-application-context-brief.md` | modified | Pre-existing, predates this workstream | No | **Leave untouched** — ownership not established |
+| `docs/audits/README.md` | untracked | This workstream | Yes | **Commit with the audit docs** |
+| `docs/audits/RECONCILIATION-REGISTER.md` | untracked | This workstream | Yes | **Commit with the audit docs** |
+| `docs/audits/remediation-phase-progress-report.md` | untracked | This workstream | Yes | **Commit with the audit docs** |
+| `docs/audits/walk-8-follow-up-plan.md` | untracked | This workstream | Yes | **Commit with the audit docs** |
+| `docs/audits/audit-methodology-and-remediation-specs.md` | untracked | This workstream | Yes | **Commit with the audit docs** |
+| `docs/audits/rice-shower-unity-cup-ux-walk-8.md` | untracked | This workstream | Yes (walk-8 record) | **Commit with the audit docs** |
+| `docs/audits/RS-UC-2026-13/` | untracked | This workstream (43 PNGs) | Yes | **Commit with the audit docs** |
+| `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md` | untracked | Peer (scenario-detail audit) | No | **Leave untouched** |
+| `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09/` | untracked | Peer | No | **Leave untouched** |
+| `docs/audits/trainer-desk-v3-ux/` (8 files + `screenshots/`) | untracked | **Peer-owned** | No | **Leave untouched** — explicit prohibition |
+| `docs/audits/trainer-desk-v3-ux-retest/` | untracked | **Peer-owned** | No | **Leave untouched** — explicit prohibition |
+| `docs/research/RS-UC-SCENARIO-DETAIL-2026-11-09/` | untracked | Peer | No | **Leave untouched** |
+| `docs/research/scenario-detail-design-language-survey-2026-11-09.md` | untracked | Peer | No | **Leave untouched** |
+
+**Nothing was staged or committed by this dispatch.** `git add -A` and `git add .` were not used;
+no path was staged on directory membership alone.
+
+---
+
+### D. Verification gates
+
+| Gate | Exact command | Result | Exit |
+| --- | --- | --- | --- |
+| Full Laravel suite | `vendor/bin/pest --compact < /dev/null` | **2325 passed**, 36595 assertions, **2 failed**, 9 warnings | 1 |
+| Line-ending guard | `vendor/bin/pest --filter=LineEndingGuardTest --compact < /dev/null` | 1 passed (2 assertions) | 0 |
+| PHPStan | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` | `[OK] No errors` | 0 |
+| TypeScript | `npm run typecheck` | 0 errors | 0 |
+| UI lint | `npm run lint:ui` | 207 arbitrary-value findings against a **209** baseline — no `debt-increase` line | 0 |
+
+**One transient interruption, recorded because it produced misleading readings.** Midway through the
+dispatch a peer session applied a stash and left eight unresolved conflicts in the tree. In that
+window PHPStan reported `Application bootstrap failed` (`syntax error, unexpected token "<<",
+expecting "]"` in `config/advisor.php:33` — a conflict marker, not a code defect), typecheck reported
+65 errors centred on the `UU` path `Support/Builder.vue`, and `lint:ui` measured 215 against the 209
+baseline. **None of those were real.** The stash application cleared on its own, and every gate in the
+table above was re-run against the clean tree. §H records the episode and its resolution.
+
+The readings above are therefore the dispatch's actual result. They describe `aaf21cd3` plus this
+dispatch's disk correction, with no conflict markers anywhere in `app/`, `config/`, `resources/` or
+`tests/`.
+
+**Not run:** `composer lore` / `composer lore-code`. No PHP leaves changed in this dispatch.
+
+
+#### Independent verification of the seven commits
+
+Rather than trust "files untouched", each commit's file set was checked against history for later
+edits:
+
+| Commit | Item | Files | Later edits after the commit |
+| --- | --- | --- | --- |
+| `282e5437` | F-03 | `BaseSelect.vue`, `SparkTargetPicker.vue`, spec | `SparkTargetPicker.vue` and the spec — by `aaf21cd3`, the intended supersession |
+| `51d78d3e` | F-08 | `TrainingDetail.vue`, leave-guard spec | **none** |
+| `fc6f775d` | RTX-01 | `LegacySelect.vue`, parent-card spec | **none** |
+| `339035b5` | UX-09 | `NextDecision.vue`, obligation-due spec | **none** |
+| `aba21651` | RTX-02 | `Dashboard.vue`, turn-state spec | **none** |
+| `b2832ee6` | F-13 | skills-planner spec | **none** |
+| `aaf21cd3` | F-03 strict | `SparkTargetPicker.vue`, spec | — (tip) |
+
+The F-03 pair is the only one with later edits, and the later edit is the ruling's own reconciliation.
+The other six are untouched by anything that landed afterwards.
+
+`TrainingDetail.vue` (F-08's file) is one of the peer's eight conflicted paths **in the working tree**,
+but `git show HEAD:resources/js/pages/Career/TrainingDetail.vue` still carries the guard
+(`initialSnapshot` / `isDirty`, 3 occurrences). The conflict is a stash application over my file; my
+committed version is intact in history.
+
+---
+
+### E. Migration — remains pending, not run
+
+```
+2026_11_10_010500_add_current_spirit_proxy_to_training_runs_table ... Pending
+```
+
+- **The migration remains pending.** No authorization has been granted.
+- **The shared development database was not modified.** No `migrate`, `migrate:fresh`,
+  `migrate:refresh`, `migrate:reset` or `migrate:rollback` was executed against it, and no equivalent
+  schema-changing operation was performed.
+- **Owner authorization is still required.**
+- Recorded exactly as a blocker: this dispatch does not authorize the change and does not ask for it.
+
+---
+
+### F. Commits created by this dispatch
+
+**None.** No commit was created by this dispatch. Nothing was staged. The seven remediation commits are
+unchanged and `aaf21cd3` remains reachable; the only commit that landed during the dispatch is the
+peer's `a9c2b142`, which touches two audit documents and no product code.
+
+---
+
+### G. Remaining work
+
+**Completed by this dispatch**
+
+- Reproduced the full suite from the current tree and recorded exact totals.
+- Confirmed the CRLF correction holds on disk and in the working tree.
+- Classified both outstanding failures against git history rather than by reading the code alone, and
+  established that *both* have dispositions that are not "the test is simply wrong".
+- Re-counted the working tree (23 at start, matching the report) and attributed every path.
+- Re-verified all seven remediation commits individually.
+- Identified that `f2f0a8e5`'s "UiHygieneTest red by design" claim has no register entry behind it.
+
+**Requires another feature owner**
+
+- `ScenarioAdvisorFinaleTest:72` — UX-25 / KI-82 owner. Stale after `49a90c3a1`; the copy decision is
+  theirs, not a verification dispatch's.
+- `BurstBandsCard.vue:87` — scenario-detail owner. Real product defect; the fix pattern already sits
+  in the comment above it.
+- `Veterans/Index.vue:528` — Veterans owner. Real product defect.
+- `f2f0a8e5`'s "by design" claim needs a written ruling plus a register entry, or withdrawal.
+
+**Requires owner approval**
+
+- The pending migration (§E).
+
+**Deliberately left untouched**
+
+- `docs/audits/trainer-desk-v3-ux/` and `docs/audits/trainer-desk-v3-ux-retest/` — peer-owned.
+- `docs/research/ui-ux-application-context-brief.md` — pre-existing change, ownership not established.
+- `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md`, its `screens/`, and
+  `docs/research/RS-UC-SCENARIO-DETAIL-2026-11-09/` — peer scenario-detail work.
+- All 8 conflicted paths listed in §H — those were the peer's stash application, and they resolved
+  themselves; nothing in them was touched by this dispatch.
+
+---
+
+### H. Final Git state — **clean of conflicts; blocker was transient and has cleared**
+
+During the dispatch a peer session applied a stash, leaving eight unresolved conflicts:
+
+```
+$ git diff --name-only --diff-filter=U      # during the dispatch
+KNOWN-ISSUES.md
+config/advisor.php
+resources/js/components/support/CardPicker.vue
+resources/js/pages/Career/TrainingDetail.vue
+resources/js/pages/Legacy/Compare.vue
+resources/js/pages/Support/Builder.vue
+tests/browser/career-race-strip.spec.ts
+tests/browser/career-trainee-select.spec.ts
+```
+
+Eight unresolved conflicts, carrying `<<<<<<< Updated upstream` / `>>>>>>> Stashed changes` markers,
+with no `MERGE_HEAD`, `rebase-merge`, `rebase-apply` or `CHERRY_PICK_HEAD` — a stash application, not
+a merge or rebase. That state produced the three red gate readings in §D.
+
+**It has since cleared.** `git diff --name-only --diff-filter=U` now returns nothing, and a scan for
+conflict markers across `app/`, `config/`, `resources/` and `tests/` finds none. `config/advisor.php`
+parses (`php -l`: no syntax errors). The blocker was another session's in-flight work, and it resolved
+without intervention from this dispatch.
+
+**All three previously-unreadable gates were re-run after the clear and are green** — PHPStan
+`[OK] No errors`, typecheck 0 errors, `lint:ui` 207 against a 209 baseline with no `debt-increase`
+line. The full suite was also re-run: **2325 passed, 2 failed, 9 warnings, 36595 assertions**,
+returning **exactly the same two failures** with the same assertions as the earlier run, so neither is
+affected by the peer's stash application:
+
+```
+Tests\Feature\ScenarioAdvisorFinaleTest > it names the finale and counts the turns while it is close
+Tests\Feature\UiHygieneTest > it never ships a repository identifier to a Trainer
+```
+
+The authoritative gate table is §D; this paragraph records only that its readings survived a re-run
+taken after the clear.
+
+
+#### Reproducible baseline, final
+
+```
+vendor/bin/pest --compact < /dev/null
+  → 2325 passed, 2 failed, 9 warnings, 36595 assertions, exit 1
+
+vendor/bin/phpstan analyse --no-progress --memory-limit=1G
+  → [OK] No errors, exit 0
+
+npm run typecheck
+  → 0 errors, exit 0
+
+npm run lint:ui
+  → 207 findings vs baseline 209, exit 0
+```
+
+Every reading above was taken with the tree free of conflict markers, so all four describe `aaf21cd3`
+plus this dispatch's disk correction.
+
+
+## progress-report-2026-11-12.md
+
+> **Folded into this master in consolidation Round 26 (owner-ordered, 2026-11-12) from**
+> `docs/audits/progress-report-2026-11-12.md` (282 lines). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched; headings inside fenced blocks were never demoted.
+> The source was untracked (a peer session's in-flight work), so this section is its only copy; containment was proven against the bytes being deleted. The 2026-11-11 audits organisation pass and the remediation workstream's own leave-untouched lists named this file's directory as peer in-flight; the owner's explicit 2026-11-12 consolidation order supersedes those rulings here. Dated inventories inside the body (embedded `git status` listings, the workstream-ownership tables with their untracked-column rows) are quoted history and stay verbatim; every `leave untouched` row they carry is superseded by the same owner order.
+
+### Progress report — remediation and verification phase
+
+**Date:** 2026-11-12
+**Repository:** `D:\Projects\umamusume-laravel13`
+**HEAD:** `a9c2b142` (`docs(audits): index the audits directory and file PA-02/PA-01 dispositions`)
+**Scope:** walk-8 reconciliation → six-item remediation → post-remediation verification. Nine commits
+across three sessions, two failure dispositions, one blocker that resolved itself.
+
+---
+
+### 1. Summary
+
+Six remediation items were authorised in the order F-03, F-08, RTX-01, UX-09, RTX-02, F-13.
+**All six are closed**, and F-03 was then restated under an owner ruling that reversed part of its
+first implementation. A follow-up verification dispatch reproduced the suite, classified the two
+outstanding failures, and inventoried the working tree.
+
+| # | Item | Outcome | Commits |
+| --- | --- | --- | --- |
+| 1 | **F-03** spark target commitment | fixed, then **restated** under the 2026-11-12 ruling | `282e5437` + `aaf21cd3` |
+| 2 | **F-08** Race action destroys the form | fixed | `51d78d3e` |
+| 3 | **RTX-01** parent card shows stale pick | fixed | `fc6f775d` |
+| 4 | **UX-09** finale row claims it cannot be dated | already fixed upstream; residual tooltip fixed | `339035b5` |
+| 5 | **RTX-02** dashboard prints "Turn 0" | fixed | `aba21651` |
+| 6 | **F-13** planned spend stays 0 | **refuted**; coverage gap closed | `b2832ee6` |
+
+Two of six did not match the brief as written, and both were caught by rendering the screen rather
+than by reading the register. That remains the most useful finding of the phase.
+
+---
+
+### 2. What each item changed
+
+#### F-03 — a displayed spark target is now the target stored (`282e5437`, restated in `aaf21cd3`)
+
+**Root cause.** `SparkTargetPicker.vue` bound the input to `search` — the filter text — while the
+payload kept `props.modelValue`. Typing `Pow`, leaving the option unclicked and saving displayed one
+value and stored `null`; a null target passes `assertTargetMatchesCategory`, so no error surfaced and
+`aria-invalid` stayed `false`.
+
+**A second defect found while fixing it.** `BaseSelect` bound its own handler to the native element
+and **never re-emitted `change`**, so three call sites' `@change="spark.target = ''"` had never fired —
+a spark kept the target of the category it no longer belonged to.
+
+**The ruling then reversed part of it.** `282e5437` committed a unique prefix on close and an exact
+name on every keystroke, on the reasoning that a Trainer who typed an unambiguous name meant it. The
+owner ruling of 2026-11-12 rejects that: **typed text never becomes the value without explicit
+acceptance.** Only clicking an option or pressing Enter on a highlighted one commits. Both implicit
+paths are removed; `close()` now only discards filter text and `displayValue` reverts to the committed
+selection.
+
+**A latent defect the correction exposed.** The listbox closed on the input's `blur`, and mousedown
+into an option fires that blur *before* the click lands. `onBlur` used to call `commitTypedText()`,
+which masked the race. With implicit commitment gone, clicking an option stopped committing at all and
+four cases went red. The list now carries `@mousedown.prevent`, so pressing an option does not steal
+focus. That is not a workaround — it is what "click to accept" requires.
+
+`282e5437` was **not** rewritten. It stands as the historical first-draft fix; `aaf21cd3` amends its
+behaviour forward.
+
+#### F-08 — ask before the Race action discards an entered turn (`51d78d3e`)
+
+`TrainingDetail.vue`'s `chooseAction` reached the race desk with `window.location.href`, a hard
+navigation that destroys the 21-field `useForm` state. Choosing an action and abandoning the turn were
+the same gesture.
+
+The departure is now conditional on the form being dirty, compared against the values the form
+**opened with** rather than against empty fields, because `turn` and the facility ladder start
+pre-filled. Stay-on-page actions never prompt. `RaceDecision.vue` was checked for the same fault and
+does not have it — it uses `router.get(..., { preserveState: true })`.
+
+#### RTX-01 — show a library pick on the parent card before saving (`fc6f775d`)
+
+`cardFor()` resolved a non-manual slot from server props alone while `assignParent()` writes only the
+local `useForm` row, so a library pick lived in the model but not in the card: the pill printed
+`Not chosen` over a picker already holding a veteran. The resolver now reads the picked id from the
+form and resolves it against the roster the picker itself offered.
+
+**Confirmed not a repeat of F-03 or the `BaseSelect` repair** — the spec's own case asserts the picker
+had already committed `legacy_id`, so `update:modelValue` and event forwarding were healthy. Only the
+resolver's precedence was wrong.
+
+#### UX-09 — stop the dated finale row claiming the calendar cannot date it (`339035b5`)
+
+The finding was **already fixed** by `be983f87`, which taught `dueLabel()` to borrow the advisor's
+finale distance. Verified on the rendered screen before writing anything.
+
+What was still broken was the tooltip: `NextDecision.vue` chose it from `row.due_turn === null` alone,
+and finale rows have `due_turn === null` by design because they sit outside the per-turn grid. The
+cell read `5 turns away` while its `title` read `The calendar does not date this obligation.`
+
+The tooltip now keys on `due_label`, splitting three states. The `unknown` / `no date` behaviour is
+preserved where the advisor genuinely has no context.
+
+#### RTX-02 — stop a career with no logged turn printing a position (`aba21651`)
+
+`Dashboard.vue` printed `Turn ${career.turn} logged` unconditionally and the Turn tile printed
+`0 of 72`, while the Cockpit said `No turn has been recorded yet` for the same run. The zero case now
+takes the Cockpit's wording and the tile passes `absent` instead of a zeroed value. A logged turn and
+an imported career are both untouched and pinned by their own cases.
+
+#### F-13 — refuted, and the coverage gap closed (`b2832ee6`)
+
+The claim was that `PLANNED SPEND` stayed `0` after a 140 SP skill was added. At the exact row the walk
+named (`Pace Chaser Straightaways ◎`, 140 SP):
+
+```
+before tick:  PLANNED SPEND 0    REMAINING 173
+after tick:   PLANNED SPEND 140  REMAINING 33    (commit button enables)
+after untick: PLANNED SPEND 0    REMAINING 173
+```
+
+**Why it could stand unchallenged:** the spec already had a case titled *"planning a row moves the
+spend and remaining figures"* — and it asserted **neither figure**. The bar could have been blind and
+that test would still have passed. The title promised a check the body never made.
+
+**What the walk actually hit:** its own account says it *"clicked and added"* the skill — the add
+form's `Add to run`, which records a skill as acquired, not a plan. A plan is the table checkbox. Two
+different controls on one screen, and the finding named the wrong one.
+
+No product code changed. The case now reads the printed figures from the node beside its label,
+because label and number are sibling nodes with no separator and a regex over the whole bar cannot
+distinguish `Planned spend0` from `Planned spend140`.
+
+---
+
+### 3. Verification
+
+All gates were run against a tree free of conflict markers. Every reading below is from an executed
+command.
+
+| Gate | Exact command | Result | Exit |
+| --- | --- | --- | --- |
+| Full Laravel suite | `vendor/bin/pest --compact < /dev/null` | **2325 passed**, 36595 assertions, **2 failed**, 9 warnings | 1 |
+| PHPStan (L6) | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` | `[OK] No errors` | 0 |
+| TypeScript | `npm run typecheck` | 0 errors | 0 |
+| UI lint | `npm run lint:ui` | 207 findings against a **209** baseline, no `debt-increase` | 0 |
+| Line endings | `vendor/bin/pest --filter=LineEndingGuardTest` | 1 passed (2 assertions) | 0 |
+| Browser, F-03 strict | `npx playwright test tests/browser/career-legacy-spark-commit.spec.ts` | **9 passed** | 0 |
+| Browser, F-03 RED | same spec before the correction | `1 failed, 4 passed` | 1 |
+| Targeted features | `--filter="Legacy\|TrainingDetail\|Cockpit\|Dashboard\|Skill"` | **504 passed**, 7503 assertions | 0 |
+| Browser, other items | F-08, RTX-01, UX-09, RTX-02, skills | 3/3, 3/3, 2/2, 3/3, 14/14 | 0 |
+
+**Not run:** `composer lore` / `composer lore-code`. No PHP leaves changed; the F-03 correction is Vue
+and TypeScript only. Reported as not run rather than assumed clean.
+
+#### 3.1 The two remaining suite failures — both other owners'
+
+Neither is this phase's, and neither is "the test is simply wrong".
+
+| Failure | Root cause | Introducing commit | Disposition |
+| --- | --- | --- | --- |
+| `ScenarioAdvisorFinaleTest > it names the finale and counts the turns while it is close` | `TrainerAdvisor.php:259` composes `$finale['label'].' finals'`; `label` is `'Our Grand Concert'`. §13.2 settled deliberately that the line must name the *event*, not the scenario. | `49a90c3a1` (2026-11-07) added the append and `NextDecisionTest.php` to pin it, but did not update this expectation. | **Test correction, but not by this phase.** The delivered `'Our Grand Concert finals'` composes a scenario name onto `finals`, while `0ad93bc7` added `finale_label => 'The Grand Concert'` precisely to kill that borrowed vocabulary. Whether the line should read `'The Grand Concert finals'` is a UX-25 / KI-82 copy decision. |
+| `UiHygieneTest > it never ships a repository identifier to a Trainer` | `BurstBandsCard.vue:87` ships `UMAMUSUME_REFERENCE §2.2.2, conflict row 57` inside a rendered `detail` string; `Veterans/Index.vue:528` ships `title="Source: docs/UMAMUSUME_REFERENCE.md"`. | `BurstBandsCard` — `f2f0a8e5`; `Veterans/Index` — hunk around `78b0f4e43`, `title` last changed at `88e7ec42`. | **Real product defect, owner-held.** `f2f0a8e5`'s subject claims "UiHygieneTest red by design", but no exception records it: `configIdentifierDebt()` covers `config/*.php` only, its own comment says adding an entry is not welcome, and neither file is listed. That anchor has flipped four times in one day — `42b47c4c` → `ea5e6f1c` → `9bd3df7b` → `f2f0a8e5`. |
+
+**Neither was fixed.** Weakening the test, adding a debt entry, or silently updating the assertion would
+each hide a live question about user-visible copy.
+
+#### 3.2 The seven commits verified independently
+
+Rather than trust "files untouched", each commit's file set was checked against history for later edits:
+
+| Commit | Item | Later edits after the commit |
+| --- | --- | --- |
+| `282e5437` | F-03 | `SparkTargetPicker.vue` and its spec — by `aaf21cd3`, the intended supersession |
+| `51d78d3e` | F-08 | none |
+| `fc6f775d` | RTX-01 | none |
+| `339035b5` | UX-09 | none |
+| `aba21651` | RTX-02 | none |
+| `b2832ee6` | F-13 | none |
+| `aaf21cd3` | F-03 strict | tip |
+
+---
+
+### 4. Migration — pending, not run
+
+```
+2026_11_10_010500_add_current_spirit_proxy_to_training_runs_table ... Pending
+```
+
+`current_spirit_proxy` is **absent** from `training_runs` (34 columns, verified by `PRAGMA table_info`)
+and **present** in `TrainingRun::#[Fillable]`. Pages return 200 because nothing reads it yet, but the
+first write including it will fail. This is KI-60's pattern: the suite builds its own schema from the
+migration files, so a green run proves nothing about the dev file.
+
+The migration is committed (`b9837da7`), additive, nullable, with a working `down()`.
+
+**Not executed.** No `migrate`, `migrate:fresh`, `migrate:refresh`, `migrate:reset` or
+`migrate:rollback` was run against the shared development database, and no equivalent schema-changing
+operation was applied. **It awaits owner authorization.**
+
+---
+
+### 5. Git state
+
+**Commits in this phase** (explicit paths only, nothing amended or rewritten):
+
+```
+282e5437  fix(legacy): a spark target shown in the field is now the target stored
+51d78d3e  fix(training): ask before the Race action discards an entered turn
+fc6f775d  fix(legacy): show a library pick on the parent card before the step is saved
+339035b5  fix(cockpit): stop the dated finale row claiming the calendar cannot date it
+aba21651  fix(dashboard): stop a career with no logged turn printing a position
+b2832ee6  test(skills): pin the budget bar to the figures it prints, and retire F-13
+aaf21cd3  fix(legacy): require explicit acceptance before a spark target commits
+```
+
+All seven remain reachable from `HEAD`. Not created by this phase: `a9c2b142` (peer, docs only) and the
+commits that fixed F-03's original defect class upstream.
+
+**Working tree: 23 paths, 0 conflicts, 0 staged.** No product source carries uncommitted work.
+
+| Path | Status | Owner |
+| --- | --- | --- |
+| `docs/framework-ui-ux/_audit-prompt.md` | modified | this workstream (§6.4 capability rule) |
+| `docs/research/ui-ux-application-context-brief.md` | modified | pre-existing, ownership not established |
+| `docs/audits/post-remediation-verification-handoff.md` | untracked | this workstream |
+| `docs/audits/progress-report-2026-11-12.md` | untracked | this workstream (this document) |
+| `docs/audits/remediation-phase-progress-report.md` | untracked | this workstream |
+| `docs/audits/audit-methodology-and-remediation-specs.md` | untracked | this workstream |
+| `docs/audits/walk-8-follow-up-plan.md` | untracked | this workstream |
+| `docs/audits/rice-shower-unity-cup-ux-walk-8.md` + `RS-UC-2026-13/` (43 PNGs) | untracked | this workstream |
+| `docs/audits/trainer-desk-v3-ux/` (8 files + `screenshots/`) | untracked | **peer-owned, untouched** |
+| `docs/audits/trainer-desk-v3-ux-retest/` | untracked | **peer-owned, untouched** |
+| `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md` + `screens/` | untracked | peer, untouched |
+| `docs/research/RS-UC-SCENARIO-DETAIL-2026-11-09/` | untracked | peer, untouched |
+| `docs/research/scenario-detail-design-language-survey-2026-11-09.md` | untracked | peer, untouched |
+
+`a9c2b142` indexed `audit-methodology-and-remediation-specs.md` and `RS-UC-2026-13/` in
+`docs/audits/README.md`, but **not** `remediation-phase-progress-report.md` or
+`post-remediation-verification-handoff.md`. Both are indexed-missing.
+
+---
+
+### 6. What the phase revealed
+
+**Two of six brief items did not match the tree.** UX-09 was already fixed; F-13 was misdiagnosed.
+Neither was discoverable by reading the register — only by rendering the screen.
+
+**A test can promise a check it does not make.** F-13 survived because a case's title claimed to verify
+the spend and remaining figures while its body asserted adjacent facts. A green suite is evidence of
+what the assertions check, not of what their names say.
+
+**A commit message can claim an exception that does not exist.** `f2f0a8e5` says "UiHygieneTest red by
+design", but the register that would make that legitimate has no entry, and the fix pattern already
+sits in the comment immediately above the offending line.
+
+**Reasoning about a mechanism produced four wrong findings in the earlier walk** — `U-03`, `U-08`,
+`U-11` and `U-14` all claimed a capability was absent when it existed. The four-layer capability rule
+(screen → navigation/disclosure → implementation → data) was written into `_audit-prompt.md` §6.4 as a
+permanent harness rule because of it.
+
+**One transient blocker, correctly not acted on.** Midway through verification a peer session applied a
+stash leaving eight unresolved conflicts. PHPStan reported `Application bootstrap failed` — a conflict
+marker is a PHP syntax error — typecheck reported 65 errors, `lint:ui` measured 215 against a 209
+baseline. All three readings were void. The stash cleared on its own and every gate was re-run clean.
+Recording the void readings as defects would have produced three phantom findings.
+
+---
+
+### 7. Remaining work
+
+**Another feature owner**
+
+- `ScenarioAdvisorFinaleTest:72` — UX-25 / KI-82 owner. Stale after `49a90c3a1`; the copy decision is
+  theirs.
+- `BurstBandsCard.vue:87` — scenario-detail owner. Move the §-anchor into the comment above it, which
+  already holds the same reference.
+- `Veterans/Index.vue:528` — Veterans owner. Replace the docs-path `title` with content attribution.
+- `f2f0a8e5`'s "by design" claim needs a written ruling plus a register entry, or withdrawal.
+
+**Owner approval**
+
+- The pending migration (§4).
+
+**This workstream**
+
+- Commit the six documentation artifacts listed in §5 under explicit paths, and add both report rows
+  to `docs/audits/README.md`.
+- `composer lore` / `composer lore-code` on the next PHP change.
+- `docs/research/ui-ux-application-context-brief.md` — ownership still unestablished; leave until
+  someone claims it.
+
+## progress-report-f-series-2026-11-12.md
+
+> **Folded into this master in consolidation Round 26 (owner-ordered, 2026-11-12) from**
+> `docs/audits/progress-report-f-series-2026-11-12.md` (165 lines). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched; headings inside fenced blocks were never demoted.
+> The source was untracked (a peer session's in-flight work), so this section is its only copy; containment was proven against the bytes being deleted. The 2026-11-11 audits organisation pass and the remediation workstream's own leave-untouched lists named this file's directory as peer in-flight; the owner's explicit 2026-11-12 consolidation order supersedes those rulings here. Dated inventories inside the body (embedded `git status` listings, the workstream-ownership tables with their untracked-column rows) are quoted history and stay verbatim; every `leave untouched` row they carry is superseded by the same owner order.
+
+### Progress report — remediation, verification and F-series ownership
+
+**Date:** 2026-11-12
+**Repository:** `D:\Projects\umamusume-laravel13`
+**HEAD:** `f029a806` · branch `master`
+**Scope:** six-item remediation → verification → F-series ownership transfer → F-01/F-02 correction.
+Fourteen commits across the arc, two suite failures owned elsewhere, one migration still blocked.
+
+---
+
+### 1. Summary
+
+| Chain | Items | Outcome |
+| --- | --- | --- |
+| **Six-item remediation** | F-03, F-08, RTX-01, UX-09, RTX-02, F-13 | five fixed or accepted; **F-13 refuted** |
+| **Follow-up corrections** | F-03 strict-commitment restatement, F-08 draft persistence | both closed |
+| **Verification round** | RTX-01, UX-09, RTX-02, F-13 | 3 ACCEPTED, 1 REFUTED — no product defect in the set |
+| **F-series ownership transfer** | all 13 walk-8 + peer F-IDs | F-01 and F-02 **fixed**; F-12 verified already fixed; F-04 not a defect; five remain unmeasured |
+
+**F-series as it stands:** 5 CLOSED · 1 CLOSED-already-fixed · 1 REFUTED · 1 NOT A DEFECT ·
+1 WITHDRAWN · **5 OPEN, unmeasured.**
+
+---
+
+### 2. What each finding's disposition rests on
+
+#### F-01 — the continuation hint outlived its condition (`050da391`)
+
+`ScenarioSelect.vue` rendered `#scenario-continue-hint` ("Choose a scenario to continue.")
+unconditionally while only `aria-describedby` was conditional. Choosing a scenario enabled the primary
+and correctly cleared the description, but left the sentence on screen — describing a state the page had
+left. A sighted Trainer saw a stale instruction a screen reader had already stopped announcing, which
+is why an assertion on the attribute alone would have passed on the broken screen.
+
+**RED** `Expected: hidden, Received: visible`, locator resolving 33× to the same span (the stale
+sentence, not a slow repaint). **GREEN** 1 passed. **Neighbouring** `career-scenario-select` +
+`wizard-flow` **11 passed**. Typecheck 0 errors.
+
+#### F-02 — the catalogue count followed the filter (`f192f75a`)
+
+The lede reads "N trainees are catalogued", and `N` was `trainees.total` — the **filtered** paginator's
+total. Walk 8 opened at `66 trainees are catalogued.`, searched `Rice Shower`, and was told
+`1 trainee is catalogued.` The controller now counts the catalogue from the roster's own base with the
+filter deliberately unapplied, and the lede prints that, adding a second sentence only when a filter is
+active and the numbers differ:
+
+```
+unfiltered : 66 trainees are catalogued.
+filtered   : 66 trainees are catalogued. The current filter matches 2.
+cleared    : back to the opening state
+```
+
+**RED** `Expected: 66, Received: 2`. **GREEN** 1 passed. **Neighbouring** `career-trainee-select`
+**20 passed** (re-run cleanly after two runs appended to one log), `CareerTraineeSelectTest` **24
+passed** (492 assertions). Typecheck 0 errors, `php -l` clean.
+
+**The first attempt at this case passed against the unfixed screen**, and the reason is worth keeping:
+the roster shows six rows a page, so a guard of `rows < 66` was true on load as well as after
+filtering. The case now waits on the pager's own denominator (`page 1 of N`), which only moves when the
+filtered result set does.
+
+#### F-04 — not a defect
+
+`totalEnteredCap` computes from `props.enteredCaps`, the **persisted** values, deliberately (the R6-04
+comment records why). Filling four caps does not move the figure because it is not a live form readout;
+**saving does — 4 × 1200 reads `4800`.** The walk read the figure before the save.
+
+#### F-12 — already fixed
+
+The skill search is not inside a `<details>`, is visible at `top: 555` within `scrollHeight: 1550`,
+focuses on click, and typing `Pace Chaser` narrowed the table from 623 rows to 7. Re-verified after
+`f192f75a`.
+
+#### F-13 — refuted, not fixed
+
+Planned spend `0 → 140 → 0`, remaining `173 → 33 → 173` at the walk's own skill (`Pace Chaser
+Straightaways ◎`, cost 140). The walk pressed **`Add to run`** (records as acquired, clears the plan
+list), not the plan checkbox. The regression gap the finding exposed was real and `b2832ee6` closed it.
+
+---
+
+### 3. Verification of the six original items
+
+| Gate | Result |
+| --- | --- |
+| Full suite (`vendor/bin/pest --compact < /dev/null`) | 2325 passed, **2 failed** (both other owners'), 9 warnings, 36595 assertions |
+| PHPStan L6 | `[OK] No errors` |
+| `npm run typecheck` | 0 errors |
+| `npm run lint:ui` | 207 findings vs 209 baseline, no `debt-increase` |
+| Browser, F-03 strict | 9 passed; RED 1 failed / 4 passed |
+| Browser, F-08 draft | 6 passed; leave-guard 3 passed |
+| Browser, RTX-01 / UX-09 / RTX-02 | 8 passed across the three specs |
+| Browser, skills planner | 14 passed |
+
+**Not run:** `composer lore` / `composer lore-code` — no PHP leaves changed in the F-01 round; F-02 did
+change one controller and the gate is due at the next PHP checkpoint.
+
+---
+
+### 4. Two failures that belong to other owners
+
+Neither is this session's, and neither is "the test is simply wrong":
+
+| Failure | Cause | Owner |
+| --- | --- | --- |
+| `ScenarioAdvisorFinaleTest` | `TrainerAdvisor.php:259` appends `' finals'`; the correct copy is a UX-25 decision because `finale_label` is `'The Grand Concert'` while `label` is `'Our Grand Concert'` | UX-25 / KI-82 |
+| `UiHygieneTest` | `BurstBandsCard.vue:87` ships `UMAMUSUME_REFERENCE §2.2.2` in rendered copy; `Veterans/Index.vue:528` ships `title="Source: docs/…"`. Neither allowlisted; `f2f0a8e5` claims "red by design" with **no register entry** to back it | scenario-detail + Veterans owners |
+
+---
+
+### 5. Commits
+
+```
+f029a806  docs(audits): reconcile F-series ownership and dispositions
+f192f75a  fix(trainees): preserve the catalogue count under filtering (F-02)
+8e46c412  docs(audits): record the F-series ownership transfer and its first closure
+050da391  fix(scenario): drop the continuation hint once a scenario is chosen (F-01)
+04894584  test(skills): assert planned spend and remaining budget
+06a0a8d3  docs(audits): reconcile verified remediation findings
+3aee95e2  fix(training): keep an in-progress turn as a per-tab draft (F-08)
+```
+
+Earlier in the arc: `282e5437` F-03 · `51d78d3e` F-08 guard · `fc6f775d` RTX-01 · `339035b5` UX-09 ·
+`aba21651` RTX-02 · `b2832ee6` F-13 · `aaf21cd3` F-03 strict.
+
+**No historical commit was amended or rewritten.** `282e5437` stands as the first-draft fix that
+`aaf21cd3` supersedes forward, and that is recorded rather than erased.
+
+---
+
+### 6. Remaining work
+
+| Item | Next step |
+| --- | --- |
+| **F-05, F-06, F-07, F-09, F-10** | Each needs a live browser check at current HEAD before classification. F-04 and F-13 both show a finding's own account of what it saw can be wrong, so none should be implemented from the walk's text |
+| **Migration** `2026_11_10_010500_…current_spirit_proxy…` | Still **Pending**, not run, shared DB untouched. The column is absent from `training_runs` (34 columns) but present in `TrainingRun`'s `#[Fillable]`, so the first write including it will fail. Awaiting owner authorization |
+| **`ScenarioAdvisorFinaleTest`** | UX-25 owner decides the wording, then the expectation follows |
+| **`UiHygieneTest`** | Two owner-held copy fixes; `f2f0a8e5`'s claim needs a written ruling or withdrawal |
+| **Documentation** | The six audit artifacts from the reconciliation passes remain untracked alongside the peer's untracked retest directory. Committing them is a bookkeeping round, not remediation |
+
+---
+
+### 7. Final state
+
+- **Working tree:** 25 paths (24 from earlier workstreams plus this report), **0 staged, 0 conflicts**.
+  No product source carries uncommitted work.
+- **Peer-owned work preserved:** `docs/audits/trainer-desk-v3-ux/` and `…-v3-ux-retest/` read only, never
+  staged or modified. Their untracked status is theirs to decide.
+- **Shared database:** untouched. No migration, no `migrate:fresh`, no destructive operation. Reads were
+  read-only SQL and session-private scratch databases on explicit `PLAYWRIGHT_PORT` values.
+- **Explicit-path staging throughout.** No `git add -A` or `git add .` in any commit of this arc.
+
+#### What the arc actually taught
+
+**Two of the original six brief items did not match the tree** — UX-09 was already fixed, F-13 was
+misdiagnosed. Neither was discoverable by reading the register; only by rendering the screen.
+
+**A test can promise a check it does not make.** F-13's case claimed to verify the spend and remaining
+figures while asserting neither, which is how a false finding survived. F-02's first attempt repeated
+the mistake from the other direction: a guard that was true before and after the change it was meant to
+detect.
+
+**A finding's own account of its action can be wrong.** F-13 says "after a 140 SP skill is added" while
+its own values table records `Add to run`. F-04 read a persisted figure as a live one. Both were caught
+by measuring rather than trusting.

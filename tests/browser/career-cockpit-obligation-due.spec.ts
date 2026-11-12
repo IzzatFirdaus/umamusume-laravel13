@@ -6,7 +6,7 @@ import { deleteRun } from '../utils/delete-run';
 /*
  * UX-09, residual — a dated finale row must not carry the "undated" tooltip.
  *
- * Authority: `docs/audits/trainer-desk-v3-ux/04-ux-findings.md:383-417`. The finding was that the
+ * Authority: `AUDIT-AND-VERIFICATION.md` section `## 04-ux-findings.md`, lines 383-417 of the folded source. The finding was that the
  * finale rows printed `unknown / no date` while the Scenario panel on the same screen printed
  * `5 turns away`. `be983f87` fixed the CELL by teaching `CockpitController::dueLabel()` to borrow the
  * advisor's distance.

@@ -308,6 +308,7 @@ moved, 13 buckets, the two executor defects fixed first) is the dated status not
 | The 2026-10-12 Gemini Deep Research reconciliation: the claim ledger (A–F), the 12 peer-check resolutions, and the corrected Max-Stat cap layer | `AUDIT-AND-VERIFICATION.md`, section `## Gemini Deep Research reconciliation, 2026-10-12` |
 | The 2026-11-10 scenario-detail arc: the span-hole fix (`S-RS-SPAN-1`), the KI-154 sweep and fix (`S-RS-KI154-1`), the Our Grand Concert `goal_source` resolution (`S-A-P01-OG-1`), the remodel plan, Move-3 and Phase 1/2 dispatches (`S-RS-REMODEL-B1/B2/C1/C2`), the cleanup and ruling-prep dispatches, the HFW visual overhaul (`S-RS-VISUAL-1`), its arc close-out, and the four-workstream summary; all thirteen Round 24 sections | `SLICE-RECORDS.md`, sections `## S-RS-SPAN-1-report-2026-11-10.md` through `## S-RS-CLEANUP-2-report-2026-11-10.md` (Round 24) |
 | The 2026-11-02 race-catalog/JP-only verification close-out, the two 2026-11-08 implemented proposals (Sparks skill picker; trainee preset auto-fill) whose `S-A-P02`/`S-A-P01` ledger rows sit above, the 2026-11-09 scenario-detail upgrade plan (round-7 `F-01`/`F-02` fixes), the 2026-11-10 `S-RS-REMODEL-B1` remodel plan with its W-ruling Addendum, and the 2026-11-10 rulings-owed memos the owner settled the same day | `SLICE-RECORDS.md`, sections `## 2026-11-02-race-enrichment-jp-only-completion-report.md`, `## 2026-11-08-sparks-skill-picker.md`, `## 2026-11-08-trainee-preset-autofill.md`; `PROCESS-PLANS.md`, sections `## 2026-11-09-scenario-detail-upgrade.md`, `## 2026-11-10-scenario-detail-remodel.md`; and `PLANS-AND-BRIEFS.md`, section `## 2026-11-10-ruling-memos-scenario-detail.md` (Round 25) |
+| The `docs/audits/` consolidation of 2026-11-12: the Rice Shower Unity Cup round-6 slice-audit container and its round-7 owner-calls decision document, the RS-UC scenario-detail page report, the walk-8 follow-up plan, the audit-methodology and F-series remediation specs, the RTX/UX-09/F-13 verification report, the F-series ownership transfer and inventory, the Trainer Desk v3.x nine-part UX audit and its ten-part retest, and the remediation/progress reports of the verification workstream; all thirty-one Round 26 sections | `AUDIT-AND-VERIFICATION.md`, sections `## rice-shower-unity-cup-round6-slice-audits.md` through `## 09-consolidated-remediation-plan.md` (twenty-seven), and `SLICE-RECORDS.md`, sections `## remediation-phase-progress-report.md` through `## progress-report-f-series-2026-11-12.md` (four) (Round 26) |
 
 ### Round 13 (2026-10-07, owner-named) — two scratch files into the files that owned their subject
 
@@ -816,6 +817,66 @@ round, and its mentions must be settled by that session, not this fold.
 **Disposition of the originals.** Deleted from the working tree in this round, after the verification
 above. Five are tracked, so each is recoverable at the commit the delete lands on; one,
 `2026-11-09-scenario-detail-upgrade.md`, was untracked, so its section is the only copy.
+
+### Round 26 (2026-11-12, owner-ordered) — thirty-one `docs/audits/` reports and parts into two masters
+The owner named twelve loose `docs/audits/` reports and every report `.md` of the two Trainer Desk
+v3.x bundled sets — `trainer-desk-v3-ux/` (nine parts, root only; `scenario-research/` and
+`screenshots/` stay) and `trainer-desk-v3-ux-retest/` (ten parts) — thirty-one files in all,
+ordered consolidated into this directory and the originals deleted. Routing followed the family
+precedent: the audit and findings family routes to `AUDIT-AND-VERIFICATION.md`, which already
+carried the Rice Shower walks 1 through 8, the round-2 reconciliation and the `AUD-20261108-R7` batches;
+the remediation workstream's dated progress and handoff records route to `SLICE-RECORDS.md`, the dated
+close-out class Rounds 22, 24 and 25 set. Sixteen of the thirty-one basenames collide between the two
+bundled sets, so those anchors carry a parenthetical qualifier, the same form `GOVERNANCE.md` uses for
+its absorbed `CONSTRAINTS.md`.
+
+| Absorbed file | Lines | New home | Recoverable after delete? |
+| --- | --- | --- | --- |
+| `rice-shower-unity-cup-round6-slice-audits.md` | 2050 | `AUDIT-AND-VERIFICATION.md` | Yes — tracked and clean at HEAD |
+| `rice-shower-unity-cup-round7-owner-calls.md` | 160 | `AUDIT-AND-VERIFICATION.md` | Yes — tracked and clean at HEAD |
+| `RS-UC-SCENARIO-DETAIL-2026-11-09.md` | 163 | `AUDIT-AND-VERIFICATION.md` | **No** — untracked at the fold; the section is the only copy |
+| `verification-rtx-ux09-f13-2026-11-12.md` | 180 | `AUDIT-AND-VERIFICATION.md` | Yes — tracked at HEAD; carried this round's repoints |
+| `walk-8-follow-up-plan.md` | 416 | `AUDIT-AND-VERIFICATION.md` | **No** — untracked at the fold; the section is the only copy |
+| `audit-methodology-and-remediation-specs.md` | 499 | `AUDIT-AND-VERIFICATION.md` | **No** — untracked at the fold; the section is the only copy |
+| `ownership-transfer-f-series-2026-11-12.md` | 111 | `AUDIT-AND-VERIFICATION.md` | Yes — tracked and clean at HEAD |
+| `f-series-ownership-inventory-2026-11-12.md` | 109 | `AUDIT-AND-VERIFICATION.md` | Yes — tracked and clean at HEAD |
+| `trainer-desk-v3-ux/00` … `08` (nine parts) | 2945 | `AUDIT-AND-VERIFICATION.md`, dir-qualified anchors | `04-ux-findings.md` tracked; the other eight **No** — untracked |
+| `trainer-desk-v3-ux-retest/00` … `09` (ten parts) | 1003 | `AUDIT-AND-VERIFICATION.md`, dir-qualified anchors | **No** — all ten untracked at the fold |
+| `remediation-phase-progress-report.md` | 329 | `SLICE-RECORDS.md` | **No** — untracked; carried this round's repoints |
+| `post-remediation-verification-handoff.md` | 275 | `SLICE-RECORDS.md` | **No** — untracked at the fold |
+| `progress-report-2026-11-12.md` | 282 | `SLICE-RECORDS.md` | **No** — untracked at the fold |
+| `progress-report-f-series-2026-11-12.md` | 165 | `SLICE-RECORDS.md` | **No** — untracked at the fold |
+
+Verification ran twice, per the discipline: the containment proof found all thirty-one rebuilt
+bodies byte-identically present, 6,676 non-blank body lines, zero missing, with the appended regions
+proven pure append (prefix byte-identical to the freeze, A&V kept all-CRLF, SLICE-RECORDS kept
+LF-only, NUL counts unchanged); and the same proof is re-run from the landed blob after commit. The
+twenty-five untracked sources' only-copy containment was proven against the exact bytes deleted.
+
+**Departures from verbatim, all mechanical and recorded per the round's banners:** the H1 re-level
+(`##` in `AUDIT-AND-VERIFICATION.md`, which folds at that level; `###` in `SLICE-RECORDS.md`) plus
+one-level demotion of remaining headings, fence-aware so headings inside code fences never moved;
+CRLF normalisation of the twenty LF-terminator sources into the CRLF master; and the live-citation
+repoints listed in References. Dated inventories inside the bodies (embedded `git status` listings,
+workstream ownership tables with their untracked columns) are quoted history and stay verbatim.
+
+**References.** Twenty-nine live citations outside the set were repointed before the delete:
+`docs/audits/README.md` (five report rows now carry their folded-into note; the two bundled-set rows
+state the fold; the totals line and re-derive commands updated), `docs/audits/RECONCILIATION-REGISTER.md`
+four (walk-8 plan pair, verification source, evidence-lives, the `09-consolidated` inventory cite),
+`docs/audits/rice-shower-unity-cup-...` round-6 reconciliation (fifteen numbered-slice anchor cells
+repointed at the master section with slugs preserved), walks 7 and its snapshot door (the peer-landed
+round-6 pair cite), walk 8 (`F-13` reconciliation note's verification cite), three browser spec
+authority lines (`career-cockpit-obligation-due`, `career-legacy-parent-card-sync`,
+`dashboard-turn-state`), the hfw `scenario-detail-hfw.html` content-audit line, and eight intra-set
+live pointers. The `docs/audits/RS-UC-2026-13/` directory, `trainer-desk-v3x-roadmap-baseline-2026-11-12.md`,
+the `scenario-research/` subdirectory and `docs/research/scenario-detail-design-language-survey-2026-11-09.md`
+were not named by the order and stay untouched by design; the peer session owning them was active
+during the fold.
+
+**Disposition of the originals.** Deleted from the working tree after containment proof. Six are
+tracked, recoverable at the delete commit; twenty-five were untracked, and their sections are the
+only copies.
 
 ### Deliberate exceptions, outside the masters
 

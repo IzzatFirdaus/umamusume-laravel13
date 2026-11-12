@@ -122,7 +122,7 @@ vanish.
 meant reading the code behind each one. **Four do not survive that read** — `U-03`, `U-08`, `U-11`
 and `U-14` all claim a capability is absent when it exists and the walk simply did not reach it. The
 dispositions above are preserved unedited; the refutation lives in
-`walk-8-follow-up-plan.md` §2.0 with the file-and-line evidence, and the corrected states are
+`AUDIT-AND-VERIFICATION.md` section `## walk-8-follow-up-plan.md` §2.0 with the file-and-line evidence, and the corrected states are
 `REPRODUCED_EXPECTED` ×2 and `NOT_REPRODUCED` ×2 under the vocabulary in that document's §1.
 
 Effective triage population is therefore **12, not 16**, and it is the second-largest reason a
@@ -358,7 +358,7 @@ rewritten: five of these six findings were carried as open or as `D`-fixes with 
 the current tree, and §6's note that "a closure commit does not prove the current implementation still
 meets its acceptance criteria" is exactly why this pass happened.
 
-Verification source: `docs/audits/verification-rtx-ux09-f13-2026-11-12.md`, measured on `3aee95e2`.
+Verification source: `AUDIT-AND-VERIFICATION.md` section `## verification-rtx-ux09-f13-2026-11-12.md`, measured on `3aee95e2` (folded 2026-11-12, Round 26).
 Each verdict below was reached by reading the regression assertions, driving the behaviour in a real
 browser, and checking the authoritative state source — not by trusting a commit message or a test
 title.
@@ -374,7 +374,7 @@ title.
 
 ### 11.1 The F-08 restore-point inventory, corrected to 29
 
-`docs/audits/trainer-desk-v3-ux-retest/09-consolidated-remediation-plan.md` §9.1 states "15 scalars +
+`AUDIT-AND-VERIFICATION.md` section `## 09-consolidated-remediation-plan.md` §9.1 states "15 scalars +
 6 preview = 21 values, plus the two performance refs (23 restore points)". **That arithmetic omits six
 values.** Measured from `TrainingDetail.vue`:
 
@@ -412,7 +412,7 @@ The finding is preserved above unedited as the historical observation, and the d
 finding exposed was real and is now closed: the spec's case had claimed for its title that it moved
 the planned-spend and remaining figures while asserting neither, and it now reads both printed values.
 
-**Where the corrected browser evidence lives:** `docs/audits/verification-rtx-ux09-f13-2026-11-12.md`
+**Where the corrected browser evidence lives:** `AUDIT-AND-VERIFICATION.md` section `## verification-rtx-ux09-f13-2026-11-12.md`
 §B.4 records the three-state readings taken at the walk's own skill on `3aee95e2`.
 
 ### 11.3 What this section does not claim
