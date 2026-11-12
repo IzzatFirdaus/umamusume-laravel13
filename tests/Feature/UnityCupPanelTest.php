@@ -359,3 +359,107 @@ it('carries the labelled manual Spirit proxy and keeps its absence distinct from
 
     expect($stated->fresh()->current_spirit_proxy)->toBeNull();
 });
+
+it('lists only members with a recorded burst event, and never synthesizes one as Chargeable', function (): void {
+    // KI-133 Option A's honesty boundary. `spiritBurstRoster()` is event-derived: it answers "which
+    // members have a recorded burst state", not "who is on the team". A teammate the Trainer has never
+    // recorded must therefore be ABSENT from the roster rather than defaulted into `Chargeable`, which
+    // would assert a state nobody entered (D-220's rule, applied to a member instead of a meter).
+    $run = unityCupRun();
+
+    // Two members are recorded. A third, "Silence Suzuka", is named nowhere: she is the probe.
+    unityRecorded($run, 1, SpiritBurstPayload::make('Haru Urara', SpiritBurstState::Chargeable)->toArray());
+    unityRecorded($run, 2, SpiritBurstPayload::make('Biko Pegasus', SpiritBurstState::ExtremeSpent)->toArray());
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scenario.team.roster', fn (Collection $roster): bool => $roster->count() === 2)
+            ->where('scenario.team.roster', fn (Collection $roster): bool => $roster->pluck('teammate')->all() === [
+                'Haru Urara',
+                'Biko Pegasus',
+            ])
+            ->where('scenario.team.roster', fn (Collection $roster): bool => $roster
+                ->pluck('teammate')
+                ->doesntContain('Silence Suzuka'))
+            // The recorded `Chargeable` is present because a Trainer entered it, and for no other reason.
+            // This is the assertion that separates "the game says chargeable" from "the tool assumed it".
+            ->where('scenario.team.roster', fn (Collection $roster): bool => $roster
+                ->where('teammate', 'Haru Urara')
+                ->first()['state'] === 'Chargeable'));
+});
+
+it('keeps one row per teammate and lets the latest state win', function (): void {
+    // `spiritBurstRoster()` documents "the latest payload per key wins, because the states replace one
+    // another; an earlier row for the same teammate is history, not a second teammate." This pins that:
+    // three events for two members produce two rows, and the member who moved ends on the later state.
+    $run = unityCupRun();
+
+    unityRecorded($run, 1, SpiritBurstPayload::make('Haru Urara', SpiritBurstState::Chargeable)->toArray());
+    unityRecorded($run, 2, SpiritBurstPayload::make('Matikanetannhauser', SpiritBurstState::Held)->toArray());
+    unityRecorded($run, 3, SpiritBurstPayload::make('Haru Urara', SpiritBurstState::ExtremeChargeable)->toArray());
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scenario.team.roster', fn (Collection $roster): bool => $roster->count() === 2)
+            // Identity order is the roster's own (first appearance by turn), not alphabetical.
+            ->where('scenario.team.roster', fn (Collection $roster): bool => $roster->pluck('teammate')->all() === [
+                'Haru Urara',
+                'Matikanetannhauser',
+            ])
+            // Haru Urara holds her LATER state, and only one row describes her.
+            ->where('scenario.team.roster', fn (Collection $roster): bool => $roster
+                ->where('teammate', 'Haru Urara')
+                ->first()['state'] === 'ExtremeChargeable')
+            ->where('scenario.team.roster', fn (Collection $roster): bool => $roster
+                ->where('teammate', 'Haru Urara')
+                ->count() === 1)
+            // Held survives as its own distinct state rather than collapsing into Charged.
+            ->where('scenario.team.roster', fn (Collection $roster): bool => $roster
+                ->where('teammate', 'Matikanetannhauser')
+                ->first()['state'] === 'Held'));
+});
+
+it('keeps the whole-team manual proxy independent of every per-member burst state', function (): void {
+    // KI-133's central constraint: `current_spirit_proxy` is ONE Trainer-entered aggregate for the whole
+    // team, and the roster is per-member event-derived state. Neither may be read as the other. This
+    // drives both at once and asserts they do not move together.
+    $run = unityCupRun(['current_spirit_proxy' => 40]);
+
+    unityRecorded($run, 1, SpiritBurstPayload::make('Haru Urara', SpiritBurstState::Held)->toArray());
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            // Both readings travel, and they are different facts.
+            ->where('scenario.team.current_spirit_proxy', 40)
+            ->where('scenario.team.roster', fn (Collection $roster): bool => $roster->count() === 1)
+            ->where('scenario.team.roster', fn (Collection $roster): bool => $roster
+                ->first()['state'] === 'Held')
+            // The proxy is not a gauge reading and must never be published as a burst state or a member.
+            ->where('scenario.team.roster', fn (Collection $roster): bool => $roster
+                ->pluck('state')
+                ->doesntContain('40'))
+            ->where('scenario.team.roster', fn (Collection $roster): bool => $roster
+                ->pluck('teammate')
+                ->doesntContain('Current Spirit')));
+
+    // Clearing the proxy leaves every member's state untouched: the two stores are orthogonal.
+    $this->put(route('runs.update', $run), [
+        'umamusume_id' => $run->umamusume_id,
+        'scenario' => $run->scenario,
+        'status' => $run->status->value,
+        'current_spirit_proxy' => null,
+    ])->assertRedirect();
+
+    expect($run->fresh()->current_spirit_proxy)->toBeNull();
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('scenario.team.current_spirit_proxy', null)
+            ->where('scenario.team.roster', fn (Collection $roster): bool => $roster->count() === 1)
+            ->where('scenario.team.roster', fn (Collection $roster): bool => $roster
+                ->first()['state'] === 'Held'));
+});
