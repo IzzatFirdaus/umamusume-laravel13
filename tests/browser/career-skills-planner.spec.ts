@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Locator } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';
@@ -90,30 +90,89 @@ test('planning a row moves the spend and remaining figures, and the row says why
 
     const budget = page.locator('section').filter({ has: page.locator('#skills-budget-heading') }).first();
 
-    // Before: nothing planned, nothing spent.
     await expect(budget).toContainText(/planned spend/i);
-    const spendBefore = await budget.innerText();
 
     const checkbox = page.locator('main table').first().locator('tbody input[type="checkbox"]:not([disabled])').first();
 
-    await checkbox.check();
+    /*
+     * The two figures are siblings of their labels with no separator node, so a regex over the bar's
+     * whole text cannot tell `Planned spend0` from `Planned spend140`. Each is read from its own value
+     * node instead, which is the only way to assert the arithmetic rather than its absence.
+     */
+    const figure = (label: RegExp): Locator => budget
+        .locator('text=' + label)
+        .locator('xpath=following-sibling::*[1]');
 
-    // F-13's claim, held to the rendered figures. The walk reported that `PLANNED SPEND` stayed 0 and
-    // `REMAINING` stayed at the run's SP after a skill was added, which would make the bar blind to
-    // its own plans. This case pins the opposite: the two figures move with the plan, and the header
-    // sentence agrees with them. Before this assertion the test's own title claimed to check the
-    // spend and remaining figures while only reading the savebar and the commit button, which is how
-    // the claim could be filed and left standing.
-    await expect(budget, 'the budget bar did not count the planned row').not.toHaveText(
-        spendBefore,
+    const planned = figure(/^Planned spend$/i);
+    const remaining = figure(/^Remaining$/i);
+
+    /*
+     * The row's own cost is the expected delta. It is read from the row that is about to be planned
+     * rather than hardcoded: this helper creates a fresh run per case, so the run's SP is not the dev
+     * database's 173, but the table's own `Cost` column is the figure the bar must sum. The column is
+     * located by its header rather than by position so a column addition cannot silently retarget it.
+     */
+    const table = page.locator('main table').first();
+    const costColumn = (await table.locator('thead th').allInnerTexts())
+        .findIndex((header) => /^cost$/i.test(header.trim())) + 1;
+
+    expect(costColumn, 'the plan table has no Cost column').toBeGreaterThan(0);
+
+    const rowCost = Number.parseInt(
+        (await table.locator(`tbody tr`).first().locator(`td:nth-child(${costColumn})`).innerText()).trim(),
+        10,
     );
 
-    const spendAfter = await budget.innerText();
-    await expect(
-        spendAfter,
-        'the planned spend still reads zero after a row was planned',
-    ).not.toMatch(/planned spend\D*0/i);
+    expect(rowCost, 'the planned row does not state a numeric cost').toBeGreaterThan(0);
 
+    // Before: nothing planned, nothing spent, remaining equals the run's whole SP.
+    const spendBefore = Number.parseInt((await planned.innerText()).trim(), 10);
+    const remainingBefore = Number.parseInt((await remaining.innerText()).trim(), 10);
+
+    expect(spendBefore, 'the planner opened with a plan already made').toBe(0);
+    expect(remainingBefore, 'the remaining figure did not open at the run SP').toBeGreaterThan(0);
+
+    await checkbox.check();
+
+    /*
+     * F-13's claim, held to the rendered figures. The walk reported that `PLANNED SPEND` stayed 0 and
+     * `REMAINING` stayed at the run's SP after a skill was added, which would make the bar blind to
+     * its own plans. These assertions pin the opposite, numerically: the spend becomes the row's own
+     * cost, and the remaining figure falls by exactly the same amount. Before them the case's title
+     * claimed to check both figures while reading only the savebar and the commit button, which is how
+     * the claim could be filed and left standing.
+     */
+    await expect(planned, 'the planned spend still reads zero after a row was planned').toHaveText(
+        /^\d+$/,
+    );
+
+    const spendAfter = Number.parseInt((await planned.innerText()).trim(), 10);
+    const remainingAfter = Number.parseInt((await remaining.innerText()).trim(), 10);
+
+    expect(spendAfter, 'planning a row did not move the planned spend').toBeGreaterThan(0);
+    expect(
+        spendAfter,
+        'the planned spend does not equal the cost of the one row planned',
+    ).toBe(rowCost);
+    expect(
+        remainingAfter,
+        'the remaining figure did not fall by the amount that was planned',
+    ).toBe(remainingBefore - spendAfter);
+
+    await expect(page.locator('.savebar')).toContainText('1 skill planned');
+
+    // Unchecking the same row reverses both figures exactly. A bar that only ever grows would pass
+    // the assertions above and fail here.
+    await checkbox.uncheck();
+
+    await expect(planned, 'the planned spend did not return to zero on uncheck').toHaveText('0');
+    expect(
+        Number.parseInt((await remaining.innerText()).trim(), 10),
+        'remaining did not return to the run SP on uncheck',
+    ).toBe(remainingBefore);
+
+    // Re-check, then clear the whole plan: the same two figures must return to their opening values.
+    await checkbox.check();
     await expect(page.locator('.savebar')).toContainText('1 skill planned');
     await expect(page.getByRole('button', { name: 'Learn planned skills' }).first()).toBeDisabled();
     await expect(page.getByText('Too expensive')).toBeVisible();
