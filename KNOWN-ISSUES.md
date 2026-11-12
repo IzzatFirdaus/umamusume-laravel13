@@ -30,7 +30,7 @@ KI-78 CLOSED — pre-dispatch register state; outside this dispatch's scope, unc
 KI-79 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-80 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-81 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-82 CLOSED — b637cec2 parser retitles final_live to "Grand Concert" at the normalisation layer (KI-71 precedent); dev row retagged via reparse; engine-owned orphan 409 removed per that precedent; parser test pins the committed body
+KI-82 CLOSED — b637cec2 parser retitles final_live to "Grand Concert" at the normalisation layer (KI-71 precedent); dev row retagged via reparse; engine-owned orphan 409 removed per that precedent; parser test pins the committed body; all three register locations reconciled 2026-11-12 (the phase-3 ledger and the detailed entry both still read OPEN)
 KI-83 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-84 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-85 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
@@ -143,7 +143,7 @@ those entries' current status; this line names them, it does not restate them.
 - KI-72, KI-73, KI-75, KI-77, KI-78, KI-79, KI-80, KI-81 CLOSED (previous sessions)
 - KI-74 OPEN - contention rule; standing, no change
 - KI-76 CLOSED - `.env.example` half closed at HEAD (`8b2ab3d7`); `INERTIA_SSR_TIMEOUT` measured and declined (slice 1.4, `3253b8ea`)
-- KI-82 OPEN - finale catalogue row title; owner-decision (see `owner-decisions/KI-82` per Phase 3), not touched
+- KI-82 CLOSED (2026-11-12) - `b637cec2` retitles `final_live` at the normalisation layer; row 411 reads `Grand Concert`; regression test pins the committed body. This line read OPEN until 2026-11-12, contradicting the status ledger at the top of this file; the tree was already fixed and this corrects the ledger, not the code.
 - KI-83 CLOSED/FIXED IN TREE (previous session)
 - KI-84 CLOSED at `91494a14`+`b30906a6` - R-1/R-2 approvals on record; status flipped this pass (slice 0.3, `bd0a8693`)
 - KI-85 CLOSED (previous session)
@@ -2022,7 +2022,24 @@ and this entry does not claim the Legacy Lab was browser-verified after the fix.
 
 ### KI-82 Our Grand Concert's finale catalogue row is titled "URA Finals Final (Grand Live)", a borrowed URA name plus GameTora's rendering, where the `[Global]` launch notice prints "Grand Concert" - FILED 2026-10-09 (Slice 19 finale state foundation), OPEN
 
-**Status: OPEN.** Found while establishing the finale's read-side foundation in Slice 19; not caused
+**Status: CLOSED 2026-11-12.** The fix shipped at `b637cec2` ("fix(scenario): Grand Concert finale title
+and one shared-inclusive read (KI-82, KI-87)") and is proven three ways: the parser carries
+`CLIENT_TITLES_BY_SLOT = ['final_live' => 'Grand Concert']` and applies it at read time; a regression test
+parses the committed body and asserts the resulting title, refusing a fixture so the real file cannot
+silently regress; and the live row 411 reads `Grand Concert`.
+
+**What closure does not cover.** The committed dataset still carries the export's string
+(`"URA Finals Final (Grand Live)"` under slot `final_live`) *on purpose*: the body stays verbatim so the
+transformation is auditable, and normalisation happens on the read path rather than by rewriting source
+data. The join key `external_ref = 'final_live'` is untouched, and the displayed title is separate from it
+by design - that separation is the general rule conflict row 52 records.
+
+**Not a second instance of this defect.** The `unity_cup` finale row reads `URA Finals Final (Aoharu)`.
+That borrowing is **documented and intentional** (`docs/scenarios/02-unity-cup.md:21-24`): Unity Cup's
+calendar forks from URA Finale's at a final named for the Japanese scenario, Aoharu Hai. It should not be
+re-filed under this entry.
+
+**History.** Found while establishing the finale's read-side foundation in Slice 19; not caused
 by that slice and not fixed by it. It is a second, independent defect on the **same row** that KI-71
 addressed: KI-71 corrected that row's `scenario_key` from `grand_concert` to `our_grand_concert` at
 `480b711`, which made the row belong to the scenario, and this entry records that the row's **title**
