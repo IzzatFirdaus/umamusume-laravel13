@@ -13,8 +13,9 @@ use App\Services\ScenarioCaps;
 
 /**
  * The scenario panel's own section, extracted from `CockpitController::scenarioSection()` and its
- * three helpers `capsSection()`, `finaleOfficialTitleAbsence()` and `finaleAbsence()` (plan §3.1a,
- * F1 4.4).
+ * three helpers `capsSection()`, `finaleOfficialTitle()` and `finaleAbsence()` (plan §3.1a,
+ * F1 4.4). `finaleOfficialTitle()` returned an absence until 2026-11-12, when conflict row 31's
+ * residual was corrected: the English name is committed client-export evidence.
  *
  * **The sections this method composes arrive as arguments, not from the service.** `scenarioSection()`
  * reads `scenarioWidgets()`, `milestoneSection()`, `duelSection()` and `preFinalSection()`, and each of
@@ -167,7 +168,7 @@ final class ScenarioSectionBuilder
             'shop' => $context['shop'],
             'epithet' => $context['epithet'],
             'rival' => $context['rival'],
-            'finale_official_title_absence' => $this->finaleOfficialTitleAbsence($run),
+            'finale_official_title' => $this->finaleOfficialTitle($run),
             // The baseline strip's own content (plan §9 E6, D-241). `caps` is uniform for every
             // scenario; the two absence keys are the scenario's own line about why its panels are
             // off, null wherever the entry declares none, which is the shape `grade` and `shop` use.
@@ -239,18 +240,22 @@ final class ScenarioSectionBuilder
     }
 
     /**
-     * The points-league finale reads as "Trackblazer finale"; any client name is a named absence.
+     * The finale's own English name, where the scenario's config entry declares one.
      *
-     * "Twinkle Star Climax" is a §7 conflict row 31 UNVERIFIED name in the reference guide,
-     * so it is not printed. A screen-reader citation carries the row.
+     * Trackblazer is the first entry to carry `finale_label` (2026-11-12, conflict row 31 erratum):
+     * the Japanese name and the three-race points format are Cygames' own wording on their portal,
+     * and the English string is committed client-export evidence — mission 600414 in
+     * `en/missions/playertitle`, the text the Global client itself renders. Before that erratum this
+     * method returned an absence, because the residual said every page read was third-party.
+     *
+     * The name is a name. It carries no cost, no magnitude, no threshold and no currency figure, and
+     * nothing here reads it as one.
      */
-    private function finaleOfficialTitleAbsence(TrainingRun $run): ?string
+    private function finaleOfficialTitle(TrainingRun $run): ?string
     {
-        if ($run->scenarioKey() !== 'trackblazer') {
-            return null;
-        }
+        $label = config("scenarios.scenarios.{$run->scenarioKey()}.finale_label");
 
-        return 'No published client name. "Twinkle Star Climax" is an unverified entry in the reference guide, so the export label "Trackblazer" stands until the guide publishes a client string.';
+        return is_string($label) && $label !== '' ? $label : null;
     }
 
     /**

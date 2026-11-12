@@ -20,10 +20,14 @@
  * rendered outside the `<label>` so its accessible name stays clean, and `aria-describedby`
  * ties each error to its input.
  *
- * **The "Twinkle Star Climax" finale name is a named absence** (§7 conflict row 31 UNVERIFIED,
- * per the reference guide). The export label "Trackblazer" stands; the absence is carried as
- * `scenario.finale_official_title_absence`, and the section reads it as a `title` citation so
- * a screen reader hears what is missing.
+ * **The "Twinkle Star Climax" finale name is printed** (conflict row 31 erratum, 2026-11-12). The
+ * Japanese name and the three-race points format are Cygames' own wording on their scenario page;
+ * the English string is committed client-export evidence — mission 600414 in
+ * `en/missions/playertitle`, text the Global client renders to a Trainer. It is not a publisher web
+ * page and nothing here claims it is. DotGG's reproduction of the Global announcement corroborates
+ * the prose about `Result Points` and aptitude-dependent thresholds, and is never the publisher of
+ * record for the name. **A printable name is not a verified number**: every cost, magnitude,
+ * threshold and currency figure in this panel keeps the status it already had.
  *
  * **Three epithet states.** `earned`, `open`, `unverifiable`. The third is the load-bearing
  * one: a route this surface cannot see is not a route the Trainer has not earned (D-220, D-256).
@@ -257,7 +261,7 @@ const props = defineProps<{
         shop: ShopSection | null;
         epithet: EpithetSection | null;
         rival: RivalSection | null;
-        finale_official_title_absence: string | null;
+        finale_official_title: string | null;
         finale_structure: unknown;
     };
     label: string;
@@ -836,14 +840,9 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                 </ul>
             </template>
 
-            <p v-if="props.scenario.finale_official_title_absence !== null" class="text-xs text-ink-muted">
-                <span class="font-semibold text-ink">Trackblazer finale</span>: a 3-race points
-                league. The
-                <span
-                    class="font-semibold text-ink"
-                    :title="props.scenario.finale_official_title_absence"
-                >published client name</span>
-                is unverified; the export label stands.
+            <p v-if="props.scenario.finale_official_title !== null" class="text-xs text-ink-muted">
+                <span class="font-semibold text-ink">{{ props.scenario.finale_official_title }}</span>:
+                the finale, a 3-race points league.
             </p>
         </section>
     </div>

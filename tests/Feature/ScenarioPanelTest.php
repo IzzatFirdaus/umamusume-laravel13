@@ -121,7 +121,7 @@ function scenarioSectionKeys(): array
         'shop',
         'epithet',
         'rival',
-        'finale_official_title_absence',
+        'finale_official_title',
         // The baseline strip's own content (plan §9 E6). `caps` is uniform for every scenario; the
         // two absence keys are null wherever the entry declares none.
         'caps',

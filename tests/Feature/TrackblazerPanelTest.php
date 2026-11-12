@@ -66,7 +66,7 @@ it('exposes the panel sections a Trackblazer panel renderer reads', function ():
             ->has('scenario.shop')
             ->has('scenario.epithet')
             ->has('scenario.rival')
-            ->has('scenario.finale_official_title_absence')
+            ->has('scenario.finale_official_title')
             // The Trackblazer matrix flips three flags on; the others stay off.
             ->where('scenario.panels.grade_objectives.on', true)
             ->where('scenario.panels.shop.on', true)
@@ -153,7 +153,7 @@ it('rejects a wrong-priced purchase with a field-bound error, not a 500', functi
 });
 
 it('carries the same null trackblazer shape for non-trackblazer scenarios', function (): void {
-    $expectedKeys = ['grade', 'shop', 'epithet', 'rival', 'finale_official_title_absence'];
+    $expectedKeys = ['grade', 'shop', 'epithet', 'rival', 'finale_official_title'];
 
     foreach (['ura_finale', 'unity_cup', 'our_grand_concert'] as $key) {
         $run = TrainingRun::factory()->create([
@@ -220,10 +220,10 @@ it('prints a points-league finale and the official-title absence with a citation
                 return ($row['kind'] ?? null) === 'points_league'
                     && (int) ($row['races'] ?? 0) === 3;
             })
-            // The brief bans the "Twinkle Star Climax" string under §7 conflict row 31. The
-            // absence is rendered as a `title` citation so a screen reader hears it.
-            ->where('scenario.finale_official_title_absence', fn (string $absence): bool => str_contains($absence, 'Twinkle Star Climax')
-                && (str_contains($absence, 'UNVERIFIED') || str_contains($absence, 'reference guide'))));
+            // The finale's own name is printed (conflict row 31 erratum, 2026-11-12): the English
+            // string is committed client-export evidence — mission 600414 in
+            // `en/missions/playertitle` — not a citation to something unverified.
+            ->where('scenario.finale_official_title', 'Twinkle Star Climax'));
 });
 
 it('prints the grade-points period without an invented total', function (): void {

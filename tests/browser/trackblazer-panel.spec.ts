@@ -18,8 +18,10 @@ import { recordTurns } from '../utils/record-turns';
  * - Shop rotation is not modelled (plan §3 knowledge groundings). No row carries a
  *   "Recommended Purchase" badge; no row is selected or highlighted; the published catalogue
  *   order is the only sort key. The browser asserts the absence of any of those forms.
- * - "Twinkle Star Climax" (§7 conflict row 31 UNVERIFIED) is never printed. The browser sees
- *   the points-league finale and a `title` citation that names the conflict row.
+ * - "Twinkle Star Climax" is printed (conflict row 31 erratum, 2026-11-12). The browser sees the
+ *   points-league finale and the finale's own name. The English string is committed client-export
+ *   evidence — mission 600414 in `en/missions/playertitle` — with the Japanese name on Cygames' own
+ *   scenario page; the assertion that it was invisible rested on a residual the tree contradicts.
  * - The Cockpit's action area gains a "Shop" button (Trackblazer only). The button scrolls
  *   and focuses the Shop heading (WCAG 2.4.11), so a keyboard path lands the user where the
  *   purchase form lives.
@@ -214,18 +216,15 @@ test('draws all three Trackblazer surfaces on one run, so no registry key is sha
     await expect(epithets.getByRole('list', { name: 'Epithet routes' })).toBeVisible();
 });
 
-test('prints the points-league finale and the named absence for the unofficial name', async ({ page }) => {
+test('prints the points-league finale and its published name', async ({ page }) => {
     const section = page.getByRole('region', { name: 'Epithet routes' });
 
-    await expect(section.getByText(/Trackblazer finale: a 3-race points league/i)).toBeVisible();
-
-    // The `title` carries the citation; the visible text says "published client name" and never
-    // prints "Twinkle Star Climax" on the screen.
-    const citation = section.locator('span[title*="Twinkle Star Climax"]');
-    await expect(citation).toBeVisible();
-    // The visible text — `textContent`, not the `title` attribute — must not contain the string.
-    const visibleText = await section.textContent();
-    expect(visibleText ?? '').not.toMatch(/Twinkle Star Climax/);
+    // The finale's own name is printed, not withheld (conflict row 31 erratum, 2026-11-12). The
+    // English string is committed client-export evidence: mission 600414 in
+    // `en/missions/playertitle`. Before the erratum this test asserted the string was invisible;
+    // that assertion rested on a residual whose premise the tree contradicts.
+    await expect(section.getByText(/Twinkle Star Climax/)).toBeVisible();
+    await expect(section.getByText(/3-race points league/i)).toBeVisible();
 });
 
 test('the race plan prints three periods, their published figures and the gap the plan has not filled', async ({ page }) => {

@@ -957,6 +957,26 @@ return [
                 ['route' => 'Dirt Route', 'epithet' => 'Dirt G1 Star', 'aggregate' => 'win 4 dirt G1s', 'reward' => '+10 to 2 stats'],
             ],
             'finale' => ['kind' => 'points_league', 'races' => 3],
+            /*
+            | The finale's own English name, and the first entry in this matrix to carry one.
+            |
+            | Provenance is two-tier and deliberate (UMAMUSUME_REFERENCE.md conflict row 31 erratum,
+            | 2026-11-12). The Japanese name トゥインクルスタークライマックス and the three-race
+            | points format are Cygames' own wording on the scenario's page on their portal
+            | (tier S). The ENGLISH string is first-party client-export evidence: mission id 600414
+            | in the committed `en/missions/playertitle` dataset reads "Win the Twinkle Star Climax
+            | once in 'Make a new track'". It is not a publisher web page and this key does not
+            | claim one; it claims what the Global client itself renders to a Trainer.
+            |
+            | DotGG's reproduction of the Global announcement corroborates the prose but is a
+            | third-party host that states it is unaffiliated, so it is never the publisher of
+            | record for this string.
+            |
+            | The name settles a NAME. It authorizes no cost, no magnitude, no threshold and no
+            | currency figure; the four Grand Concert BLOCKED BY EVIDENCE entries and this
+            | scenario's own unrecorded tallies are untouched by it.
+            */
+            'finale_label' => 'Twinkle Star Climax',
             'notes' => 'No mandatory race goals, so the race calendar is absent rather than empty, and no '
                 .'Scenario Link character exists here. Racing is the strategy in this scenario and is '
                 // D-225: the race advisory is scenario-gated because racing is not this scenario's strategy.

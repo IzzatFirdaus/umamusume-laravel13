@@ -269,10 +269,13 @@ export interface ScenarioPanelSection {
     /** Trackblazer rival races and the catalogue list. Null for any non-Trackblazer scenario. */
     rival: { rows: { title: string; year_label: string | null; turn: number | null; tier: string | null }[]; absence: string | null } | null;
     /**
-     * The "Twinkle Star Climax" finale-name absence (§7 conflict row 31 UNVERIFIED). Null for
-     * any non-Trackblazer scenario; a citation string for Trackblazer.
+     * The finale's own English name where the scenario declares one, null otherwise. Trackblazer
+     * carries `Twinkle Star Climax`: first-party client-export evidence (mission 600414 in
+     * `en/missions/playertitle`), with the Japanese name on Cygames' own scenario page. This is a
+     * name and nothing else — no cost, magnitude or threshold rides on it (conflict row 31 erratum,
+     * 2026-11-12).
      */
-    finale_official_title_absence: string | null;
+    finale_official_title: string | null;
     /**
      * The published stat caps, drawn by the baseline strip (plan §9 E6, D-241). Uniform for every
      * scenario; `cap` is the value `ScenarioCaps` states, and `base` and `bonus` travel separately
