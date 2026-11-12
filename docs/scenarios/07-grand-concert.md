@@ -2,7 +2,7 @@
 
 **Server:** `[Global]`
 **Status:** Sourced guide, refilled 2026-10-05 from a primary read. Was a Known-Gap Stub (2026-09-27).
-**Last Verified:** 2026-10-05
+**Last Verified:** 2026-11-12 (screen-text boundary reconciled item by item; mechanics unchanged since 2026-10-05)
 **Superseded By:** none (this file supersedes the 2026-09-27 stub, whose boundary it still carries in part)
 
 > **What this file is now.** The fourth `[Global]` scenario had its mechanics extracted on 2026-10-05: both Game8
@@ -14,9 +14,13 @@
 > **What this file still is.** A boundary document as much as a guide. Most of the vocabulary is now official copy:
 > `[Global]` notice 905 prints **Performance** and its five types, **Promo Concert**, **Grand Concert**, **lessons**,
 > **songs**, **concert techniques**, **Live Performance Expectations** and **Great Success**. What is *not* measured is
-> the text on the screens: the two bonus layers, the 23 Song titles and their language, the Lesson button labels, and
-> the gauge as displayed. So the boundary stands, narrowed, and the reason is still 0 frames, per
-> `docs/research-scratch/DESIGN-CORPUS.md` (SCREENSHOT-MANIFEST source). **D-165 and D-241 therefore still bind
+> the text on the screens, **and that paragraph used to list four things as one item.** The 2026-11-12 pass split it:
+> the two bonus layers, the 23 Song titles and their language, and the Lesson **confirm** path are now measured from
+> captured `[Global]` frames; the Lesson **reserve** control, the full Hype state ladder and every per-level magnitude
+> are not. The reason the file previously gave for all of it, **0 frames**, still holds for
+> `docs/research-scratch/DESIGN-CORPUS.md` (SCREENSHOT-MANIFEST source) and for `docs/game-screenshots/`: the frames
+> that closed those three items are from a third-party guide and are **not in this repository's corpus**, so the
+> capture backlog is unchanged even though the boundary moved. See the item-by-item table below. **D-165 and D-241 therefore still bind
 > here**: no scenario-specific chrome may be invented from assumption, and what a guide says is not what a client
 > prints. The mechanics below are sourced; the *words* above them are not, and the app may render neither the words
 > nor any widget built from them until a capture exists.
@@ -197,23 +201,38 @@ Unique to this scenario among the four `[Global]` entries, on GameTora's word (t
 
 Not measured, not inferred, and not to be rendered:
 
-- **The screen text, a short list now.** The two bonus layer names (GameTora's Practice Bonus and Live Bonus against
-  Game8's collapsed "Mastery Bonus"), the 23 Song titles and their language, the Lesson confirm and reserve button
-  labels, and the gauge as rendered. The resource noun, its five type names, **Promo Concert**, **Grand Concert**,
-  **lessons**, **songs**, **concert techniques** and **Live Performance Expectations** left this list on 2026-10-05,
-  when notice 905 was read: they are Cygames' English. Rows 48 and 52 closed; rows 49 and 51 stay open.
-- **No per-level magnitude anywhere.** No Lesson cost curve, no Hype value per Song, no Live Bonus percentage
-  ladder, no published range for the inheritance uncaps. A "level 5 Friendship Bonus" is a level the pages say
-  exists and never quantify.
+- **The screen text, split item by item on 2026-11-12.** This bullet used to group four things under one status,
+  which made every later pass guess which of them it meant. Each now has its own line and its own evidence.
+
+  | Item it used to group | State | Evidence |
+  | --- | --- | --- |
+  | **The two bonus layer names** | **CLOSED.** The client's song card prints `Specialty Priority +5`, `Friendship Training Effectiveness +5%` and `Support Chain Event Frequency Lvl +1`. `Specialty Priority` is the client's word and replaces GameTora's `Speciality Rate Up` (`得意率アップ`); the mastery layer prints as a plain effect line (`Speed +22`), not under a named heading | `go_songs.jpg`, and `uma-android-automation`'s string table for the two corroborating forms. Register §5, conflict row 61 |
+  | **The 23 Song titles and their language** | **CLOSED for the titles, and the language is English.** Three appear on captured frames; all 23 are in the automation codebase's strings; the two sources agree where they overlap. The full list is the research register's §5A | `go_songs.jpg`, `go_lessons.jpg`, A14 |
+  | **The Lesson confirm button** | **CLOSED.** The screen reads `Lessons`, instructs `Select a technique or song to learn.`, prices with `Performance Point Cost`, and marks each card `Learn` / `Learnable!` / `Locked`; the refusal is `Not enough performance points` | `go_lessons.jpg`, A14 |
+  | **The Lesson reserve button** | **STILL OPEN, and narrower than before.** No frame and no string table shows the scheduled state's own control. A14 supplies the refusal that leads to it, not its label | Register §5, gaps §1 |
+  | **The gauge as rendered** | **PARTIALLY CLOSED.** The Global frame prints `Hype Level` and the state word `Mild Hype`. The full state ladder and whether a `Special Hype!` variant exists are still unmeasured | `ug_gc_ui_hype_level.webp` |
+
+  The resource noun, its five type names, **Promo Concert**, **Grand Concert**, **lessons**, **songs**, **concert
+  techniques** and **Live Performance Expectations** left this list on 2026-10-05, when notice 905 was read: they
+  are Cygames' English. Rows 48 and 52 closed; row 49 is closed above; **row 51 stays open on the reserve control
+  alone**, which is the one item in this table no source has settled.
+- **No per-level magnitude anywhere, and this pass did not move it.** No Lesson cost curve, no Hype value per
+  Song, no Live Bonus percentage ladder, no published range for the inheritance uncaps. A "level 5 Friendship
+  Bonus" is a level the pages say exists and never quantify. **The 2026-11-12 frames do not help here and must
+  not be read as helping:** a frame shows that `go_songs.jpg` prices three songs in one run state, which is three
+  data points and not a curve. Calling this closed would be the exact error this file exists to prevent.
 - **Three GameTora tables are images.** The facility-to-resource-type table (recovered only as icon file keys, and
   labelled an inference in the master: Speed Dance/Visual, Stamina Passion/Vocal, Power Vocal/Mental, Guts
   Visual/Dance, Wit Mental/Passion), the per-type all-Song cost totals, and the gold-and-common banding in its
   Skills table.
 - **The turn shape of the live events.** Which turns are consumed, whether a live ends a turn, and what the
   backstage menu offers beyond the Lesson step are not published as a turn list, so this file offers no
-  per-turn script the way `02-unity-cup.md` does.
-- **Whether the Song titles are localised on `[Global]` at all.** Row 49, and it is the same single capture away as
-  the rest.
+  per-turn script the way `02-unity-cup.md` does. **Unchanged by this pass, and no frame addresses it:** a
+  screenshot of a Lesson screen is not a turn list.
+- ~~Whether the Song titles are localised on `[Global]` at all.~~ **Closed 2026-11-12: they are English.** Three of
+  the 23 appear on captured `[Global]` frames and all 23 are in the automation string table, so row 49's question
+  is answered for the title text itself. What remains open on this subject is not localisation but **cost**: no
+  per-Song Lesson cost, no Hype value per Song and no Live Bonus magnitude is published anywhere read.
 - **No deck or strategy claim in this file is presented as a mechanic.** The published deck shape (3 Speed / 2 Wit
   / 1 Pal, or 2 / 2 / 1 plus one free, 1 Stamina for Medium and Long), the "Light Hello SSR is a must-have" advice,
   the priority-Song list and the "stop taking Techniques after the fourth Song" tip are publisher guidance at tier A
