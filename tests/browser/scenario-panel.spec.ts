@@ -92,7 +92,12 @@ test('draws a resource the matrix labels through the meter, with the number and 
     // handle that cannot collide: the Spirit meter's position in the reading order is the design.
     await expect(section.getByRole('img', { name: /Team Rank: not recorded/ })).toBeVisible();
     await expect(section.getByRole('img', { name: /Spirit Bursts: not recorded/ })).toBeVisible();
-    await expect(section.getByRole('img', { name: /Current Spirit: not recorded/ })).toBeVisible();
+    // KI-133 (`b9837da7`, 2026-11-11) relabelled this meter to `Current Spirit (manual proxy)`,
+    // because the figure is one Trainer-entered aggregate for the whole team rather than a game
+    // reading, and the client's gauge publishes no maximum for it to sit against. `SpiritCard.vue:30`
+    // is the literal. This assertion pinned the pre-KI-133 name and had been stale since that
+    // commit; the Feature contract (`UnityCupPanelTest`) was updated then and this spec was not.
+    await expect(section.getByRole('img', { name: /Current Spirit \(manual proxy\): not recorded/ })).toBeVisible();
 
     // The baseline three are the header's figures and are not repeated inside the panel.
     await expect(section.getByText('Turn', { exact: true })).toHaveCount(0);
@@ -313,9 +318,18 @@ test('names the band carrier, states the low-band ambiguity, and separates the t
 
     const card = bandsTitle.locator('xpath=ancestor::div[contains(@class,"card")][1]');
 
-    // The carrier is named, and it names the file the figures are transcribed from.
+    // The carrier is named, and it names the guide the figures were transcribed from.
+    //
+    // This assertion used to demand the string `scenarios.php`, and it was wrong twice over. The
+    // payload's own `bands_source` (`TeamPanelBuilder.php:622`) reads "config 02-unity-cup.md,
+    // transcribed there from GameTora", so the file name it expected was never what the screen
+    // printed. And `UiHygieneTest` forbids a `.php` path in shipped copy at all: `f080bb99` removed
+    // the same class of citation from this very card on 2026-11-11, so asserting one here asked the
+    // product to break a rule the test suite enforces. Kept as a content assertion instead: the
+    // carrier names the guide, which is what a Trainer can act on.
     await expect(card).toContainText('Source:');
-    await expect(card).toContainText('scenarios.php');
+    await expect(card).toContainText('02-unity-cup.md');
+    await expect(card).not.toContainText('.php');
 
     // The caveat states the overlap rather than saying the figures may differ.
     await expect(card).toContainText('4 to 9');
