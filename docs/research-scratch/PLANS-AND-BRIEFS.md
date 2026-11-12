@@ -7714,3 +7714,475 @@ decline Move 2 on grounds of low value rather than only high cost.
 Nothing in this file is a plan, a slice, or a dispatch. Each option's acceptance check is named in the
 plan (`28d9afbf`) where one exists; where an option would create new work, the memo says so rather than
 writing the acceptance for it.
+
+## trainer-desk-3x-roadmap-rulings-2026-11-12.md
+
+Dated section, appended 2026-11-12. The owner-facing ruling package for the Trainer Desk 3.x
+remaining-work roadmap, written as the class this master holds: options, evidence, recommendation,
+one line each. Sibling precedent: `## group-ab-rulings-owed.md`, `## remaining-work-rulings-owed.md`,
+`## 2026-11-10-ruling-memos-scenario-detail.md`.
+
+**Provenance.** Commissioned by the 2026-11-12 roadmap review; grounded on
+`docs/audits/trainer-desk-v3x-roadmap-baseline-2026-11-12.md` §7 (decisions A–I), the
+review agent's dispositions of the same date, and `docs/audits/trainer-desk-v3-ux/scenario-research/scenario-information-gaps.md`
+§3 (rulings owed). Every figure below was measured on `f029a806` unless a command is given with it.
+
+**Status vocabulary.** `ACCEPTED` = the owner approves the recommendation as written.
+`RECOMMENDED` = a recommendation with its evidence, awaiting that approval. `MEASURED-CORRECTED` = the
+baseline or the review asserted something the tree contradicts; the correction is recorded here and the
+original sentence stands where it was written.
+
+---
+
+### A — NativePHP desktop scope
+
+**Question.** Desktop work exists only on branch `worktree/cherry-pick` (`7da98984`), which is **not an
+ancestor of `HEAD`** (`git merge-base --is-ancestor worktree/cherry-pick HEAD` fails). `master` carries no
+`config/nativephp.php`, no NativePHP package in `composer.json`, and no `nativephp/` directory. The branch's
+diff is nine files including a committed 8.4 MB `nativephp/electron/dist/win-unpacked/resources/app.asar`
+build artifact.
+
+| Option | Consequence |
+|---|---|
+| **A1 — park** | Desktop work leaves the roadmap. Slices 8.3 and 9.6 drop the NativePHP clause; responsive verification stays. No branch merged, no artifact committed. |
+| **A2 — merge source, exclude artifact** | `config/nativephp.php` + `NativeAppServiceProvider` + the `composer.json`/`package.json` deltas land; `.gitignore` gains the `win-unpacked` path; the artifact is never committed. Requires a dependency addition (`nativephp/electron`), which `AGENTS.md` §5 gates on approval. |
+| **A3 — merge as-is** | Ships an 8.4 MB machine-specific build output into version control and a package the repository has no acceptance work for. |
+
+**Recommendation: A1 (park).** 9.6 has no test suite, no acceptance record and no owner acceptance behind it,
+and `ARCHITECTURE.md` §1's tech-stack table names no desktop dependency. A2 is defensible only once a
+source-only integration proposal exists with its own acceptance criteria; that proposal does not exist today.
+
+---
+
+### B — Grand Concert evidence blocks
+
+**Question.** Lessons, Songs, Live Bonuses and Promo Concerts are `BLOCKED BY EVIDENCE` in four places
+(`SCREEN_SPEC.md` §7-19, §7-21, §7-22, §7-23), each naming a measured blocker and a reopen condition.
+
+**What external evidence does and does not settle.** The Global launch announcement confirms the five
+Performance types, the four Promo Concerts plus one Grand Concert, that Lessons acquire songs and techniques,
+and that Live Performance Expectations determine concert success. It does **not** publish a Lesson cost
+curve, a song catalogue with costs, or bonus magnitudes. So the existence of the mechanics is settled and the
+*values a Trainer Desk field would carry* are not, which is the distinction the four gap entries already draw.
+
+| Option | Consequence |
+|---|---|
+| **B1 — keep the blocks** | 4.4 reduces to verifying the shipped Performance foundation and finale surfaces, and recording the block as the scenario's honest ceiling. |
+| **B2 — authorize a capture pass** | A separately scoped research task reads the Global client's Lesson and concert screens for costs, names and magnitudes; the blocks reopen only where that pass produces a value. New work, new scope, own acceptance. |
+| **B3 — build from the announcement** | Prints invented costs and magnitudes. Forbidden by roadmap §3.7 and `AGENTS.md` §5. |
+
+**Recommendation: B1 now, B2 only as a separately commissioned research task.** The blocks are a
+deliberate boundary and not an unfinished slice; B3 is never available. If B2 is commissioned, its output
+goes through the same evidence gate, not around it.
+
+---
+
+### C — Vue component-test harness
+
+**Question.** Roadmap 9.2 asks for "Vue component tests". `package.json` carries Playwright, `tsc`,
+`vue-tsgo` and Vite. There is **no vitest, no `@vue/test-utils`**; `npm run typecheck` runs
+`vue-tsgo -p tsconfig.vue.json && tsc --noEmit`, which type-checks SFCs but executes nothing.
+
+| Option | Consequence |
+|---|---|
+| **C1 — restate 9.2** | "Frontend suite" means 120 Playwright specs + `vue-tsgo` + `tsc` + `lint:ui`. No dependency. Coverage is behavioural, not unit-level. |
+| **C2 — add vitest + `@vue/test-utils`** | Gains unit-level component tests; adds two dev dependencies and a second runner's config, fixtures and CI-less maintenance. |
+
+**Recommendation: C1.** The browser suite already asserts rendered copy, a11y and one-`h1` structural rules
+that a shallow component mount cannot; nothing measured is reachable only by a unit runner. C2 stays available
+if a component-level regression appears that Playwright cannot express.
+
+---
+
+### D — Implementation backlog shape
+
+**Question.** Roadmap 1.6 asks for one 13-field implementation-ready backlog. Four registers already serve
+that purpose and are maintained: `SCREEN_SPEC.md` §7 (27 numbered entries), `KNOWN-ISSUES.md` (4,993 lines;
+69 OPEN `KI-nn`), `docs/audits/RECONCILIATION-REGISTER.md` (422 lines, cross-walk identity),
+`docs/audits/walk-8-follow-up-plan.md` (416) and `docs/audits/trainer-desk-v3-ux-retest/09-consolidated-remediation-plan.md` (370).
+
+| Option | Consequence |
+|---|---|
+| **D1 — retain the four registers** | The backlog is the registers. The roadmap's 13 fields apply only to items that survive 0.2 and are actually dispatched. No fifth document. |
+| **D2 — one consolidated backlog** | A fifth register that must be kept in step with four others by hand, and `AGENTS.md` §11's append-only ledger rule makes the drift one-directional. |
+
+**Recommendation: D1.** A fifth competing list is the failure mode the reconciliation register was created to
+prevent.
+
+---
+
+### E — Trackblazer point-currency terminology
+
+**Question.** Which word does the desktop print for Trackblazer's point counter?
+
+**Already ruled in the reference guide, row 60 dated 2026-11-12:** `Result Points` adopted, `Grade Points`
+kept as a documented alias, and the 2026-09-27 premise (`Result Points` belongs to Unity Cup) recorded as the
+error it was. **Unity Cup has no point currency at all.** This ruling package therefore does not reopen the
+vocabulary question; it settles the **implementation scope** the reference guide did not.
+
+**Measured surface (10 files, 23 occurrences):**
+
+| Layer | Sites | Under this ruling |
+|---|---|---|
+| `config/scenarios.php:69` `widget_labels['grade_points']` | 1 | **Print `Result Points`.** Key stays `grade_points`. |
+| `config/scenarios.php:82` `panel_labels['grade_objectives']` → `Grade Point objectives` | 1 | **Print `Result Point objectives`.** |
+| Components: `RaceCard.vue:201`, `ResourceStrip.vue:78`, `TrackblazerPanel.vue:305,310,311,613`, `TrackblazerRaceCalendar.vue:12,129`, `ShopItems.vue:276,278` | 10 | Rendered copy → `Result Points`; docblocks → `Result Points`. |
+| `app/` — `RacePlannerController`, `RaceEntry.php`, `TrainingRun.php`, `TrackblazerPanelBuilder.php` | 4 | Code identifiers and PHPDoc: unchanged unless a rendered string. |
+| `tests/` — 9 files, 11 occurrences | 11 | Update only where they assert rendered copy. |
+| **`lang/en/uma.php`** | **0** | The MAJOR semver surface carries neither word. **No version bump** under `VERSION.md`'s three-surface rule. |
+
+**Recommendation: ACQUIESCE to the reference guide — print `Result Points`, keep `grade_*` keys.**
+The publisher's own announcement, the review's independent confirmation and `AGENTS.md` §13 (print the Global
+client vocabulary only) agree. No rename of a database column, a config key or a class.
+
+---
+
+### F — Trackblazer variant point tracks from aptitudes
+
+**Question.** `config/scenarios.php:667-669` carries three yearly-target tracks — `standard` (60/300/300),
+`dirt_leaning` (30/200/300), `limited_turf_range` (60/200/300) — and only `standard` is printed.
+`TrackblazerPanelBuilder.php:175-176` says why: "no column says which trainee belongs on the dirt-leaning or
+limited-turf-range one" (KI-15). `docs/UMAMUSUME_REFERENCE.md` §2.2.3 now carries the aptitude measurement
+that makes this decidable.
+
+**Measured on the committed roster (133 trainees with aptitudes, `database/database.sqlite`):**
+
+| Rule | `dirt_leaning` | `limited_turf_range` | ambiguous | `standard` |
+|---|---|---|---|---|
+| Strict, ordered, highest-aptitude-wins | **9** | **3** | **8** | 113 |
+| Naive, both thresholds met | 12 | 3 | 0 | 118 |
+
+The strict rule's divides are clean and name-accurate: `dirt_leaning` returns Shinko Windy, Smart Falcon,
+**Haru Urara**, Furioso, Transcend, Espoir City, Copano Rickey, Hokko Tarumae, Wonder Acute;
+`limited_turf_range` returns **Curren Chan**, Believe, Calstone Light O. Both named examples in the sources
+resolve to their own track.
+
+**The ambiguity is real and it is measurable:** 8 trainees carry turf ≥ B *and* dirt ≥ B — Agnes Digital,
+El Condor Pasa, Inari One, Oguri Cap, Red Desire, Taiki Shuttle, Victoire Pique, Yukino Bijin. Three are exact
+ties (Agnes Digital A/A, Inari One A/A, Victoire Pisa A/A) with **no field ordering that breaks them**. The
+naive threshold rule reports 0 ambiguous by silently assigning all 8 to `dirt_leaning`, which is the failure
+mode a production rule must not have.
+
+| Option | Consequence |
+|---|---|
+| **F1 — explicit fallback** | Derive only when the rule is unambiguous; the 8 ambiguous trainees get `standard` and a printed reason naming the two aptitudes that tie. Tested. |
+| **F2 — no derivation** | Only `standard` prints; the two variant tracks stay config-only. Zero new behaviour. |
+| **F3 — full derivation, no fallback** | Silently picks a track for 8 trainees on a tie the sources do not break. |
+
+**Recommendation: F1 with the ambiguity printed, not silently resolved.** This is not a prediction — it
+selects which *published* requirement applies — but the 8-tie class must be visible. F3 is forbidden by
+roadmap §3.3.
+
+---
+
+### G — URA Finale duel copy
+
+**Question.** Two shipped strings state a cap raise the reference guide corrects.
+
+| Site | Current text | Evidence |
+|---|---|---|
+| `config/scenarios.php:266` `duel.win.gains` | `stat gains, and one tier on the cap of the stat dueled` | `UMAMUSUME_REFERENCE.md:977` (2026-11-12): "**The cap raise is +4 points, not "a tier"** — the wiki states it directly … and `config/scenarios.php` `duel.win.gains` saying "one tier on the cap of the stat dueled" is the stale half of that pair." |
+| `resources/js/pages/Career/Preflight.vue:812` | `Can appear on any stat-training turn. Win pays 30 SP and +1 cap tier; lose pays 15 SP.` | Same. The 30/15 SP figures are correct and both sources agree. |
+
+`Preflight.vue` is faithful to the config, so the config is the stale layer and the page is a consequence.
+
+| Option | Consequence |
+|---|---|
+| **G1 — fix the config, print `+4`** | `duel.win.gains` → `stat gains, and +4 on the cap of the stat dueled`; `Preflight.vue:812` → `Win pays 30 SP and +4 on the dueled stat's cap; lose pays 15 SP.` Both sites verified together against the same row. |
+| **G2 — edit only the page** | Leaves the config stating a tier while the page says points: two sources of truth, and the next screen reading `duel.win.gains` regresses. |
+| **G3 — leave both** | Prints a figure the reference guide has corrected, in a screen a URA walk reaches. |
+
+**Recommendation: G1.** Both sites in one change, its test extended in the same commit, and the
+`escalation_wins => 6` caveat left untouched (it is a separate contested figure, recorded in the same
+reference paragraph).
+
+---
+
+### H — User documentation destination
+
+**Question.** Roadmap 10.2 proposes `docs/user-guide/`.
+
+| Option | Consequence |
+|---|---|
+| **H1 — `Help.vue` + `README.md`** | No new tree. `AGENTS.md` §3 closes the root and doc set; `HelpController` is a static Inertia page with no `docs/` source, and `README.md` already carries Main Workflows and Common Commands. |
+| **H2 — authorize `docs/user-guide/`** | A sixth documentation tree, outside every master and unreachable from `doc_census.py`'s link checker. |
+
+**Recommendation: H1.** Content that exceeds `Help.vue`'s four-question scope goes into `README.md`'s own
+sections.
+
+---
+
+### I — 3.0.0 tag blockers, both readings verified
+
+`VERSION.md` records two conditions blocking the `3.0.0` tag. Both were re-measured on `f029a806` and **one
+of the two is now confirmed, reclassified, and a third is added.**
+
+**Blocker (a) as written:** "`full-career-journey.spec.ts` is red and peer-owned (its locator matches two
+`details`; the fix is `details[data-region="team-state"]`)".
+
+**MEASURED-CORRECTED, twice over.**
+
+1. `grep -c details tests/browser/full-career-journey.spec.ts` → **0**. The spec carries no `details` locator.
+   The clause describes a file shape that `202e8753` (2026-11-01) removed when the team write moved to its own
+   page.
+2. The spec **is** red — but for a different reason, and I ran it:
+
+```
+PLAYWRIGHT_PORT=8153 PLAYWRIGHT_DB=.scratch-uma/roadmap-0.2/browser-8153.sqlite
+npx playwright test tests/browser/full-career-journey.spec.ts --reporter=list
+→ 1 failed. Test timeout of 300000ms exceeded.
+   locator.click: waiting for getByRole('button', { name: 'Create the run' })
+   locator resolved to <button disabled ...>
+   at tests/browser/full-career-journey.spec.ts:103
+```
+
+**Root cause, measured:** `Preflight.vue:542` gates the button on `!acknowledged` (AUD-20261102-005 F-01),
+and the spec presses it at :103 **without ticking `#confirmed`**. `tests/utils/start-career.ts:165` was fixed
+for exactly this in `00e3cf15` (2026-11-02) — but that commit touched **only the helper**, and this spec calls
+`walkWizard` directly (its own `walkToPreflight`, :74) rather than `startCareer`, so it never inherited the fix.
+`#confirmed` appears in 5 test files and **0** times in this one.
+
+**So blocker (a) is a real, reproducible, one-line test defect at a known site — not the locator defect
+`VERSION.md` describes.** It is this program's to fix (2-line change + the spec re-run), which is the opposite
+of what `VERSION.md` implies by calling it peer-owned.
+
+**Blocker (b) as written:** "the full browser suite has not run because this host failed the quiet-box
+precondition (CPU 57.7%, 1.4 GB free)".
+
+**Confirmed runnable.** The KI-74 pre-flight probe measured `0.002 s` for a trivial SQLite read
+(`php -r` on `select id from training_runs limit 1`). The browser harness built and seeded its own scratch
+database without error (`migrate:fresh --seed`, 3.4 MB), and the one spec ran to its own 300 s budget rather
+than to an infrastructure failure. The precondition this clause failed is met; the suite itself still has not
+been run end-to-end and this ruling does not claim it was.
+
+**Blocker (c), newly measured — not currently recorded in `VERSION.md`.** The spec at :103 is the only
+failure observed, but it is not the only consequence of the same gate: any spec that reaches Preflight outside
+`startCareer` carries the same gap. Verified count of specs referencing `#confirmed`: 5. Whether the other
+four reach it via `startCareer` is unmeasured and belongs to the 9.7 gate, not to this ruling.
+
+**Recommendation:** record all three. Fix (a) as its own small change with the spec run attached; treat (b) as
+satisfied and run the suite at 9.7; measure (c) at 9.7. Update `VERSION.md` as a **dated erratum that preserves
+the original sentence**, per `AGENTS.md` §11 — not a silent rewrite.
+
+---
+
+### J — "Twinkle Star Climax": the same page is cited for one adoption and refused for the other
+
+**Question.** `app/Services/Career/ScenarioSectionBuilder.php:253` refuses to print `Twinkle Star Climax`:
+
+> `No published client name. "Twinkle Star Climax" is an unverified entry in the reference guide, so the export label "Trackblazer" stands until the guide publishes a client string.`
+
+and four test sites pin that refusal (`TrackblazerPanelTest.php:223`, `trackblazer-panel.spec.ts:228`,
+`CockpitFinaleStripTest.php:228`, `RunRaceStripTest.php:307`). Conflict row 31's own residual says why: *"every
+page read for this was third-party, so the exact official title string stays `❌ UNVERIFIED`. Do not print any
+of these as official wording."*
+
+**The inconsistency, measured.** The reference guide cites **one page, twice**, for the `Result Points`
+vocabulary it adopted on 2026-11-12:
+
+- `UMAMUSUME_REFERENCE.md:1186` — "DotGG's reproduction of Cygames' Trackblazer launch announcement"
+- `UMAMUSUME_REFERENCE.md:1207` — same URL, "third-party host, publisher text"
+- Row 60 — `Result Points` **adopted** on the strength of "the term in the launch announcement's own text …
+  reproduced by DotGG from Cygames' announcement"
+
+That page names the finale in the publisher's own sentence, read 2026-11-12:
+
+> "A new race spearheaded by the media... The Twinkle Star Climax. A competition to determine who is truly the
+> greatest!"
+
+**So the same URL is sufficient evidence to adopt `Result Points` and insufficient to print `Twinkle Star
+Climax`.** Both dispositions cannot be right. Either the host's reproduction is publisher text (then the finale
+name is printable), or it is not (then row 60's `Result Points` adoption needs a second basis).
+
+**What that page settles besides the name**, all of it load-bearing for Phase 4:
+
+| Fact | Publisher sentence |
+|---|---|
+| Trackblazer's target is a points counter | "earn a determined amount of Result Points by the final turn in December each year" |
+| Points reset per career goal | "Result Points are reset every time you accomplish a Career goal" |
+| **Thresholds are aptitude-derived** | "**The required number of Result Points is determined based on your trainee's year and aptitudes**" |
+| Finale shape | three races, Victory Points, highest total wins |
+| Shop Coins gate | "Placing" means "finish within 5th place"; amount scales with placement |
+| Finale race derivation | "The length and distance of the race will be determined by the types of races your trainee won during her career" |
+
+**The third row is the material one for ruling F.** Yesterday's `scenario-information-gaps.md` §3.4 asked
+whether aptitude-based track selection is "a prediction the product's non-goals forbid." It is not a derivation
+at all — the publisher states the requirement is aptitude-dependent. F1 remains the recommendation, and its
+evidentiary basis moves from "the sources describe a condition" to "the publisher states the rule."
+
+| Option | Consequence |
+|---|---|
+| **J1 — treat the host as publisher text** | `Twinkle Star Climax` becomes printable as the finale's name; row 31's residual closes with the adoption recorded and the 2026-10-05 `Dissolved` verdict left standing (it was a scenario-vs-finale distinction and remains correct). Four test sites flip from refusal to assertion. |
+| **J2 — treat it as third-party only** | The refusal stays, and row 60's `Result Points` adoption must be downgraded to "two independent third-party sources" and its evidence text corrected. The five other facts above then also stay unadopted. |
+| **J3 — leave the split** | One page, two dispositions, indefinitely. The next walk files it again. |
+
+**Recommendation: J1, and it is the owner's call because it changes printed copy on four surfaces.** The
+repository's own tier policy (`AGENTS.md` §5, `UMAMUSUME_REFERENCE.md` §8.3) ranks "official Global publisher
+evidence" above "reputable maintained references"; a fan host reproducing the publisher's announcement verbatim
+is a hosting question, not an authorship one, and the tree has already accepted it as such once. **This ruling
+package does not flip the four test sites — it records the inconsistency and the recommendation.**
+
+---
+
+### What the external evidence does **not** license (review's first qualification, confirmed)
+
+The 2026-11-12 page read settles nouns, counts and rules. It publishes **no** Lesson cost curve, **no** song
+catalogue with costs, **no** Live Bonus magnitudes, and **no** per-track Result Point threshold table. Ruling
+B1 therefore stands unchanged: the four `BLOCKED BY EVIDENCE` entries stay blocked on **values**, not on
+mechanics. The distinction the review draws is the right one and is now measured rather than assumed:
+
+| Settled by publisher copy | Still gated on a client capture or a data export |
+|---|---|
+| Five Performance types; four Promo Concerts + one Grand Concert | Lesson costs; song list and costs; technique effects |
+| Lessons acquire songs and techniques | Lesson eligibility rules |
+| Live Performance Expectations gate concert success | Hype Level magnitudes; bonus values |
+| Result Points exist, reset per goal, are aptitude-derived | The per-track threshold mapping already in config (60/300/300 etc.) remains one publisher's transcription |
+| Shop Coins earned within 5th place | Pro Shop item prices and rotation |
+
+### Summary
+
+| # | Ruling | Recommendation | State |
+|---|---|---|---|
+| A | NativePHP scope | Park (A1) | RECOMMENDED |
+| B | Grand Concert blocks | Keep; capture pass only as separate research (B1) | RECOMMENDED |
+| C | Vue harness | Restate 9.2 against Playwright + `vue-tsgo` + `tsc` (C1) | RECOMMENDED |
+| D | Backlog shape | Retain the four registers (D1) | RECOMMENDED |
+| E | Result Points | Print it, keep `grade_*` keys, no version bump | RECOMMENDED — reference guide row 60 already rules the word |
+| F | Variant tracks | Derive, with the 8-tie class printed and tested (F1) | RECOMMENDED |
+| G | URA duel copy | Fix config + page together, print `+4` (G1) | RECOMMENDED |
+| H | User docs | `Help.vue` + `README.md` (H1) | RECOMMENDED |
+| I | Tag blockers | (a) is a real one-line test defect at :103, not a locator; (b) precondition met; (c) new | MEASURED-CORRECTED |
+| J | Twinkle Star Climax | Same page cited for the Result Points adoption and used to refuse the finale name | **RESOLVED 2026-11-12** — ACCEPTED: print the name; per-fact provenance (Cygames JP page + committed client export + DotGG as corroboration only). See `## ruling-j-twinkle-star-climax-2026-11-12.md` |
+
+| J | (above) | `Twinkle Star Climax` printable on four surfaces; row 31 residual closes |
+
+**Which slices these unblock once accepted:** A → 8.3 (responsive half only), 9.6 (dropped). B → 4.4 narrows to
+verification. C → 9.2. D → 1.6 (dissolved). E → 2.4 + 4.3 display path. F → 4.3 variant tracks. G → 2.4 copy.
+H → 10.2. I → 9.7. J → 4.3 finale name + row 31 closure.
+
+## ruling-j-twinkle-star-climax-2026-11-12.md
+
+Dated section, appended 2026-11-12. Ruling J of the Trainer Desk 3.x roadmap package
+(`## trainer-desk-3x-roadmap-rulings-2026-11-12.md`, item J), resolved on the owner's disposition and
+re-grounded on first-party evidence the earlier write-up had not located.
+
+**Owner decision:** accept the event name, authorise printing it, but **do not** classify DotGG as a
+publisher. Classify each fact by the source that actually carries it.
+
+**Status:** ACCEPTED for printing the name. Values, costs, thresholds and bonuses remain out of scope —
+see §5, which is the half of this ruling that constrains future slices.
+
+---
+
+### 1. The three sources, ranked by what each actually establishes
+
+| # | Source | Domain owner | Establishes |
+|---|---|---|---|
+| **1** | [`umamusume.jp/contents/game/scenario/climax/`](https://umamusume.jp/contents/game/scenario/climax/) — Cygames' official portal, scenario page for 「Make a new track!! ～クライマックス開幕～」 | **Cygames** | The finale's **Japanese name is `トゥインクルスタークライマックス`**, its three-race points format, and the 「勝利Pt」scoring rule. Read 2026-11-12. |
+| **2** | `docs/research-scratch-source/data/json/en__missions__playertitle.json` — committed Global client export, mission id **600414** | **Cygames client text**, via the export chain | The **English string `Twinkle Star Climax`**, in an in-client mission: `Win the Twinkle Star Climax once in 'Make a new track'`. |
+| **3** | DotGG reproduction of the Global announcement, `umamusume.gg` | **Third-party host** | The announcement's English prose, the English scenario title, the `Result Points` vocabulary, and the aptitude-dependent requirement sentence. Self-declares as not affiliated with Cygames. |
+
+**Source 2 is the one that settles the English name, and it was already in this repository.** Row 31 cited
+`en/missions/trainerexam-limited`, which the tree does **not** hold (`ls docs/research-scratch-source/data/json/
+| grep trainerexam` → 0 files). The same commitment appears in `en/missions/playertitle`, which *is* captured,
+and carries the string verbatim in both directions:
+
+```
+missions__playertitle.json     id 600414  originalText トゥインクルスタークライマックスで優勝しよう
+                                            enText       Win the Twinkle Star Climax once in 'Make a new track'
+en__missions__playertitle.json id 600414  originalText Win the Twinkle Star Climax finals
+                                            enText       Win the Twinkle Star Climax once in 'Make a new track'
+```
+
+So the gap was never "no first-party English string exists". It was **a citation to a dataset entry that was
+never captured, while a sibling entry holding the same fact sat on disk.** That is the real defect, and it is
+a documentation defect, not an evidence one.
+
+### 2. What each source does *not* establish
+
+| Claim | Status | Why |
+|---|---|---|
+| The event exists | **Officially confirmed** | Source 1 (Cygames JP) |
+| Japanese name `トゥインクルスタークライマックス` | **Officially confirmed** | Source 1 |
+| English name `Twinkle Star Climax` | **Client-confirmed** | Source 2 — Global client mission text |
+| Three-race points finale, 「勝利Pt」totals decide | **Officially confirmed** | Source 1 |
+| The scenario is titled 「Make a new track!! ～クライマックス開幕～」 | **Officially confirmed** | Source 1 |
+| The event replaces the URA Finale | Announcement-level | Source 3 only; not restated on the Cygames scenario page |
+| `Result Points` as the counter's English word | Announcement-level | Source 3; corroborated by row 60's own two-source adoption |
+| Points requirement depends on year and aptitudes | Announcement-level | Source 3 sentence: "determined based on your trainee's year and aptitudes" |
+| Pro Shop / Shop Coins / rivals / Best Umamusume Award | **Officially confirmed** | Source 1 names all four (「特別ショップ」, 「ショップコイン」, 「ライバル」, 「最優秀ウマ娘」) |
+| **Lesson and Song costs** | **Unverified** | No source publishes a cost curve |
+| **Live Bonus magnitudes** | **Unverified** | Six names, no values |
+| **Per-track Result Point thresholds** | Single transcription | `config/scenarios.php:667-669` remains one publisher's table |
+
+### 3. The ruling
+
+**Print `Twinkle Star Climax` as the event's English name.**
+
+Concretely, and in one change:
+
+1. `app/Services/Career/ScenarioSectionBuilder.php:253` — `finaleOfficialTitleAbsence()` stops returning the
+   "no published client name" sentence for Trackblazer and stops being an absence at all. The method either
+   returns null or is removed with its callers updated.
+2. `resources/js/components/scenario/TrackblazerPanel.vue` — the named absence becomes the name; `types.ts:272`
+   loses the "absence" framing it carries.
+3. Four test sites flip from refusal to assertion: `TrackblazerPanelTest.php:223-225`,
+   `trackblazer-panel.spec.ts:223-228`, `CockpitFinaleStripTest.php:228`, `RunRaceStripTest.php:307`.
+   The last two already *use* the string as slot data and are unaffected in content; only the panel's
+   refusal surface changes.
+4. Row 31's residual closes with a dated disposition, keeping the 2026-10-05 `Dissolved` verdict intact (it
+   was a scenario-versus-finale distinction and remains correct).
+
+**Row 31's residual sentence is corrected, not rewritten**, per `AGENTS.md` §11:
+
+> ~~every page read for this was third-party, so the exact official title string stays `❌ UNVERIFIED`~~
+
+The premise is now measurably false. Three first-party or client-derived artifacts carry the name, and one of
+them was already committed here.
+
+### 4. Provenance, stated per fact — the discipline the owner asked for
+
+Do **not** write "confirmed by Cygames' Global announcement" and cite DotGG. Write the chain:
+
+- **JP name and finale structure** → Cygames official portal, scenario page, read 2026-11-12. Tier S.
+- **EN name** → committed Global client export, `en/missions/playertitle` id 600414. Client text, tier S by
+  the same rule that makes every other `en/missions/*` row client text.
+- **Announcement prose (replaces URA Finale; Result Points; aptitude dependence)** → DotGG, **third-party
+  host reproducing publisher text**, corroborated where it matters by the committed export and row 60's
+  independent adoption. Recorded as corroboration, not as a publisher citation.
+
+A future citation must name which of the three it is leaning on. One URL does not cover all three tiers.
+
+### 5. What this ruling does not authorise
+
+The name being print-ready says nothing about the numbers. These stay blocked exactly as
+`SCREEN_SPEC.md` §7-19, §7-21, §7-22 and §7-23 have them:
+
+| Mechanic | Status after this ruling |
+|---|---|
+| Lesson costs, eligibility | Still `BLOCKED BY EVIDENCE` |
+| Song catalogue, titles, costs | Still `BLOCKED BY EVIDENCE` |
+| Live Bonus names and magnitudes | Still `BLOCKED BY EVIDENCE` |
+| Promo Concert schedule and lifecycle | Still `BLOCKED BY EVIDENCE` |
+| Per-track Result Point thresholds | Unchanged: one transcription in config, `standard` only printed |
+| Shop Coins amounts, item prices, rotation | Unchanged: no run column, `N/A` by D-220/KI-154 |
+
+**AUTHORISING A NAME IS NOT AUTHORISING A NUMBER.** The scenario's *existence* is officially confirmed, its
+*values* are not, and this ruling moves exactly one string.
+
+### 6. Effect on ruling F
+
+Reinforced, not changed. The announcement's own sentence — "The required number of Result Points is determined
+based on your trainee's year and aptitudes" — is the publisher stating that the requirement is
+aptitude-dependent, which moves F's basis from "the sources describe a condition" to "the publisher states the
+rule". F1 (derive, print the ambiguity) stands, and the 8-tie class stays printed rather than silently
+resolved.
+
+### 7. Open, and smaller than it was
+
+| Item | Status |
+|---|---|
+| Should `CockpitFinaleStripTest:228` and `RunRaceStripTest:307` change? | No — they already pass the string as slot *data*. Verify only. |
+| Does any other surface print the name as an absence? | `types.ts:272` docblock; one docblock at `TrackblazerPanel.vue:23`. Grep `finale_official_title_absence` for the full set at implementation time. |
+| The `trainerexam-limited` dataset entry | Still uncaptured. If a future pass wants it, the manifest lists `en/missions/trainerexam-limited` \u2192 hash `a280f7bb`; capturing it is optional now that `playertitle` carries the fact. |
+| DotGG's "not affiliated with Cygames" | Recorded. It is why the source is cited as *corroboration of announcement text* and never as a publisher. |
