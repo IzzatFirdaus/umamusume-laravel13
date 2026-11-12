@@ -243,7 +243,7 @@ final class TrainerAdvisor
 
         if ($away <= 0) {
             return $finale['outcome'] === null
-                ? ['label' => $finale['label'].' finals', 'state' => 'passed', 'turns_away' => null]
+                ? ['label' => $this->finaleLabel($run), 'state' => 'passed', 'turns_away' => null]
                 : null;
         }
 
@@ -256,10 +256,49 @@ final class TrainerAdvisor
             // away` — the scenario, not the event at the end of it. `FinaleReader` reads
             // `config('scenarios...label')`, and appending `finals` there would have changed every
             // other screen that prints the label. The word belongs on this line's own composition.
-            'label' => $finale['label'].' finals',
+            'label' => $this->finaleLabel($run),
             'state' => $away === 1 ? 'next' : 'upcoming',
             'turns_away' => $away,
         ];
+    }
+
+    /**
+     * The scenario's own name for the event its finale is, composed for one line of prose.
+     *
+     * **Fixed 2026-11-12.** This used to append `finals` to the scenario's label, which read
+     * `URA Finale finals` on the launch scenario — a doubled word — and `Our Grand Concert finals`
+     * on the fourth, where the config already declares that scenario's final as `The Grand Concert`.
+     * `FinaleReader` returns the scenario label because that is what a *scenario* card prints, so the
+     * composition belonged here, but the word alone was the wrong composition.
+     *
+     * Two rules, in order:
+     *
+     * 1. `finale_label` where the config declares one, because that IS the scenario's own name for
+     *    its final — `Twinkle Star Climax` on Trackblazer, `The Grand Concert` on the fourth scenario.
+     *    This mirrors `ScenarioSectionBuilder::finaleOfficialTitle()`, which reads the same key for
+     *    the same reason and is the precedent for doing so.
+     * 2. The scenario's label plus `finals` only where no such name exists, which is how URA Finale
+     *    and Unity Cup are written today. That fallback keeps its old output rather than inventing a
+     *    name for them; `URA Finale finals` is clumsy but correct, and renaming a scenario is not this
+     *    line's decision to make.
+     *
+     * **`GIRLS' LEGEND U` deliberately does not appear here**, despite being the fourth scenario's
+     * finale *song*: `config/scenarios.php` records why in its own comment ("the song `GIRLS' LEGEND U`
+     * is the show's centrepiece, not the event's name"), and `docs/scenarios/07-grand-concert.md` lists
+     * it as a row in the Songs table keyed by `Finale`, not as an event name. Using it would name a
+     * song where the line means an event.
+     */
+    private function finaleLabel(TrainingRun $run): string
+    {
+        $declared = config("scenarios.scenarios.{$run->scenarioKey()}.finale_label");
+
+        if (is_string($declared) && $declared !== '') {
+            return $declared;
+        }
+
+        $label = (string) config("scenarios.scenarios.{$run->scenarioKey()}.label");
+
+        return $label.' finals';
     }
 
     /**

@@ -69,17 +69,24 @@ it('names the finale and counts the turns while it is close', function (): void 
     $this->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
-            // The line names the EVENT, not the scenario, so `TrainerAdvisor` composes the scenario's
-            // label with the word `finals` (app/Services/Advisor/TrainerAdvisor.php:259, §13.2). This
-            // assertion expected the bare label and had been stale since 49a90c3a1 added that
-            // composition; it was one of the two standing suite failures classified in
-            // `post-remediation-verification-handoff.md` §B.
+            // The line names the EVENT at the end of the scenario, so `TrainerAdvisor::finaleLabel()`
+            // prefers the scenario's declared `finale_label` and falls back to the scenario name plus
+            // `finals` only where no such name exists.
             //
-            // The composition is deliberate, not incidental: `finale_label` names an event, and
-            // appending `finals` to it would read "Twinkle Star Climax finals" on Trackblazer, which
-            // says the same thing twice. The scenario label plus `finals` reads correctly for all
-            // four, so the production line is left exactly as it is.
-            ->where('advisor.finale.label', 'Our Grand Concert finals')
+            // For this scenario the config declares `finale_label => 'The Grand Concert'`, so that is
+            // what the line prints. Until 2026-11-12 the advisor composed `label . ' finals'`, which
+            // printed `Our Grand Concert finals` here and — worse — `URA Finale finals` on the launch
+            // scenario, a doubled word. This assertion was updated to `Our Grand Concert finals` in
+            // `84071ee8` to match that composition; it now asserts the declared name instead.
+            //
+            // **`GIRLS' LEGEND U` is deliberately not the expected value**, even though it is the
+            // fourth scenario's finale *song*. `config/scenarios.php` records the reason in its own
+            // comment ("the song `GIRLS' LEGEND U` is the show's centrepiece, not the event's name")
+            // and `docs/scenarios/07-grand-concert.md` lists it as a row in the Songs table keyed by
+            // `Finale`, not as an event name. `GIRLS' LEGEND U` is a song title, and this line names
+            // an event. See KI-82 for the separate catalogue-row defect where that song name and a
+            // borrowed URA title were once conflated.
+            ->where('advisor.finale.label', 'The Grand Concert')
             ->where('advisor.finale.state', 'upcoming')
             ->where('advisor.finale.turns_away', 4)
             // The recommendation itself is untouched by the status line: this run sets no build
