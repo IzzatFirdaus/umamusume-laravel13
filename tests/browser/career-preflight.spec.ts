@@ -243,6 +243,21 @@ test('counts a saved-but-incomplete deck as attention, not as recorded (UX-03)',
     await expect(page.getByRole('status').filter({ hasText: 'entered steps are recorded' })).toHaveCount(0);
 });
 
+test('prints the duel reward the config states, not a hardcoded tier', async ({ page }) => {
+    await walkWizard(page, 'ura_finale');
+    await openPreflight(page);
+
+    // Slice 1.3. This cell used to hardcode "Win pays 30 SP and +1 cap tier" while the config it cited
+    // said "one tier on the cap", and the reference guide's 2026-11-12 correction established the real
+    // figure as +4 points (umamusu.wiki quoting Game8). The row now reads `asks.duel` from the server,
+    // so this assertion pins the rendered copy to the configuration rather than to a literal.
+    const duel = page.getByRole('row', { name: /Happy Meek/ });
+    await expect(duel).toContainText('Win pays 30 SP');
+    await expect(duel).toContainText('+4 on the dueled stat');
+    await expect(duel).toContainText('lose pays 15 SP');
+    await expect(duel).not.toContainText('tier');
+});
+
 test('draws the eight tiles and the single caution, and no Career mode switch (Phase E2)', async ({ page }) => {
     await walkWizard(page, 'ura_finale');
     await openPreflight(page);

@@ -251,6 +251,8 @@ class PreflightController extends Controller
              *     scenarios): how a facility level rises, one word.
              *   - `fan_gates` (`:210`): the fan thresholds, as the config lists them.
              *   - `finale_targets.stamina_by_distance` (`:286-288`): the stamina floor per distance band.
+             *   - `duel` (URA only): the Happy Meek duel's reward rule. The page used to hardcode
+             *     this row at `Preflight.vue:812`, which is how it drifted from the config it cited.
              *
              * A scenario that states none of them yields nulls, and the page prints its absence with a
              * reason rather than an empty row. This is a payload extension from an existing source —
@@ -289,6 +291,38 @@ class PreflightController extends Controller
                 // or an A rank") rather than a rounded number.
                 'speed_phrasing' => isset($config['finale_targets']['speed_to_win']['phrasing'])
                     ? (string) $config['finale_targets']['speed_to_win']['phrasing']
+                    : null,
+                /*
+                 * The duel's reward rule, forwarded from `config('scenarios.scenarios.<key>.duel')`.
+                 *
+                 * The page used to hardcode "Win pays 30 SP and +1 cap tier" while the config it cited
+                 * said `one tier on the cap of the stat dueled`. Both were the stale half of a pair the
+                 * reference guide corrected on 2026-11-12: the cap raise is **+4 points**, not a tier
+                 * (`UMAMUSUME_REFERENCE.md` §2.2.1, quoting umamusu.wiki/Game8). Forwarding the config
+                 * means the screen and the matrix cannot disagree again.
+                 *
+                 * `win_sp`/`loss_sp`/`cap_points` are numbers so a screen can format them; `gains`
+                 * stays the config's own phrase for the part no source quantifies. Null for a scenario
+                 * that declares no duel, which is every scenario but URA.
+                 */
+                'duel' => isset($config['duel']['win']) && is_array($config['duel']['win'])
+                    ? [
+                        'win_sp' => is_numeric($config['duel']['win']['sp'] ?? null)
+                            ? (int) $config['duel']['win']['sp']
+                            : null,
+                        'loss_sp' => is_numeric($config['duel']['lose']['sp'] ?? null)
+                            ? (int) $config['duel']['lose']['sp']
+                            : null,
+                        'cap_points' => is_numeric($config['duel']['win']['cap_points'] ?? null)
+                            ? (int) $config['duel']['win']['cap_points']
+                            : null,
+                        'gains' => isset($config['duel']['win']['gains'])
+                            ? (string) $config['duel']['win']['gains']
+                            : null,
+                        'escalation_wins' => is_numeric($config['duel']['escalation_wins'] ?? null)
+                            ? (int) $config['duel']['escalation_wins']
+                            : null,
+                    ]
                     : null,
             ],
         ];

@@ -141,6 +141,19 @@ it('composes every entered step into one contract', function (): void {
             // The speed half travels in the source's own hedge, so the finale row can print it even
             // before the target step names a distance band.
             ->where('contract.build.scenario.asks.speed_phrasing', 'around 800 Speed, or an A rank')
+            // The duel row (Slice 1.3). The screen used to hardcode "Win pays 30 SP and +1 cap tier"
+            // while the config said "one tier", so the two drifted and neither matched the reference
+            // guide's 2026-11-12 correction that the cap raise is +4 points. This pins the payload to
+            // the config so a future edit to either cannot silently disagree again.
+            ->where('contract.build.scenario.asks.duel.win_sp', 30)
+            ->where('contract.build.scenario.asks.duel.loss_sp', 15)
+            ->where('contract.build.scenario.asks.duel.cap_points', 4)
+            ->where('contract.build.scenario.asks.duel.escalation_wins', 6)
+            ->where(
+                'contract.build.scenario.asks.duel.gains',
+                fn (string $gains): bool => str_contains($gains, '+4')
+                    && ! str_contains($gains, 'tier'),
+            )
             // URA's own record carries no focus sentence, and the reason it says so travels with it.
             ->where('contract.build.scenario.focus', null)
             ->where('contract.build.scenario.focus_reason', 'No repository guide names a planning focus for this scenario. The scenario guides and the mechanics reference were searched. The 2026-10-16 publisher pass found none either: Game8\'s URA Finale guide states a scenario comparison and a Summer camp tip, and the plan\'s advisor hierarchy is this tool\'s own decision order, not a published planning focus.')

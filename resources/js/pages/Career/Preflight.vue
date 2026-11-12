@@ -77,6 +77,18 @@ interface Scenario {
         stamina_by_distance: Record<string, { min: number; max: number } | null>;
         /** The source's own hedge for the speed target, e.g. "around 800 Speed, or an A rank". */
         speed_phrasing: string | null;
+        /**
+         * The duel's reward rule, forwarded from `config('scenarios.scenarios.<key>.duel')`. Null for
+         * every scenario but URA. `cap_points` is the corrected magnitude (2026-11-12: +4, not "one
+         * tier"); `gains` is the config's own phrase for the rest.
+         */
+        duel: {
+            win_sp: number | null;
+            loss_sp: number | null;
+            cap_points: number | null;
+            gains: string | null;
+            escalation_wins: number | null;
+        } | null;
     };
 }
 
@@ -806,11 +818,16 @@ const CAREER_TURNS = 72;
                                 <td class="py-1.5 text-ink">
                                     <!-- The duel is URA Finale's own system (`UMAMUSUME_REFERENCE.md` §2.2.1,
                                          GameTora/Game8/umamusu.wiki; the config keeps `duel` only under
-                                         `ura_finale`), so it prints only for that scenario and states the
-                                         absence elsewhere rather than a rule that does not apply. -->
-                                    <template v-if="props.contract.build.scenario?.key === 'ura_finale'">
-                                        Can appear on any stat-training turn. Win pays 30 SP and +1 cap tier;
-                                        lose pays 15 SP.
+                                         `ura_finale`). The row reads `asks.duel` from the payload rather
+                                         than branching on a scenario key, so the figures printed here are
+                                         the config's and cannot drift from it again — they did: this cell
+                                         said "+1 cap tier" while the config said "one tier", and the
+                                         2026-11-12 reference correction established the real figure is
+                                         +4 points. A scenario declaring no duel states the absence rather
+                                         than a rule that does not apply. -->
+                                    <template v-if="asks?.duel">
+                                        Can appear on any stat-training turn.
+                                        <template v-if="asks.duel.win_sp !== null">Win pays {{ asks.duel.win_sp }} SP</template><template v-if="asks.duel.cap_points !== null"> and +{{ asks.duel.cap_points }} on the dueled stat's cap</template>;<template v-if="asks.duel.loss_sp !== null"> lose pays {{ asks.duel.loss_sp }} SP</template>.
                                     </template>
                                     <AbsenceValue
                                         v-else
