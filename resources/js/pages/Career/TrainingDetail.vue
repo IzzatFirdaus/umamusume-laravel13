@@ -417,7 +417,15 @@ const recordTurn = (): void => {
 
             return { ...data, ...pair };
         })
-        .post(props.write.action, { preserveScroll: true, preserveState: true });
+        // F-08: `preserveState: true` means a successful post does NOT remount, so the draft has to be
+        // cleared here rather than by the mount path. A 422 writes nothing to the server and must not
+        // clear it — the Trainer fixes the field and re-submits with everything still present — which
+        // is why this is `onSuccess` and not `onFinish`.
+        .post(props.write.action, {
+            preserveScroll: true,
+            preserveState: true,
+            onSuccess: () => draftStore.clear(),
+        });
 };
 
 const errorOf = (field: string): string | undefined =>
@@ -479,6 +487,137 @@ function onKeydown(event: KeyboardEvent): void {
 
 onMounted(() => window.addEventListener('keydown', onKeydown));
 onBeforeUnmount(() => window.removeEventListener('keydown', onKeydown));
+
+/*
+ * F-08 — the turn draft (plan §9.1).
+ *
+ * `useForm` lives in memory only, so a hard navigation (`window.location.href` for the race desk, a
+ * reload, or the browser's own back/forward) destroys every entered value. The confirm guard beside
+ * this is defence in depth and does not preserve anything — it stops an accident, it does not undo one.
+ *
+ * The record is keyed on the RUN, not the URL or the tab: `td.turn-draft.<run_id>`. `sessionStorage`
+ * is already partitioned per tab by the platform, so the draft is per-tab by construction and closing
+ * the tab ends it; there is nothing to synchronise and no cross-tab conflict policy to invent.
+ *
+ * `v` gates the schema: a record whose version is missing or unknown is discarded rather than
+ * best-effort migrated, because a transient draft is never the only copy of anything. `fingerprint`
+ * is the server payload the form seeds from — if the career has moved on since the draft was written,
+ * restoring it would show a Trainer numbers from a turn that is no longer the one being recorded, so
+ * the draft is dropped silently and the server's own seed stands.
+ *
+ * Restoration seeds the form only. The server re-validates everything on submit, so a stale draft can
+ * never overwrite persisted career data.
+ */
+interface TurnDraft {
+    v: 1;
+    run_id: number;
+    fingerprint: string;
+    data: Record<string, unknown>;
+    performanceType: string;
+    performanceDelta: string;
+}
+
+const DRAFT_VERSION = 1;
+
+const draftKey = (): string => `td.turn-draft.${props.run.id}`;
+
+/**
+ * What the form was seeded from. Any change here means the page being shown is not the page the draft
+ * was written on, and the draft must not be applied.
+ */
+const draftFingerprint = (): string =>
+    JSON.stringify({
+        turn: props.write.turn,
+        previous: props.write.previous,
+        turn_index: props.careerPosition?.turn_index ?? null,
+    });
+
+/*
+ * Storage can be unavailable (private mode, a locked-down policy, a full quota). Every access is
+ * wrapped and a failure is silent: persistence is an enhancement, and a Trainer must never see an
+ * error about a feature they did not ask for. It must also never block navigation or input.
+ */
+const draftStore = {
+    read(): TurnDraft | null {
+        try {
+            const raw = window.sessionStorage.getItem(draftKey());
+
+            if (raw === null) {
+                return null;
+            }
+
+            const parsed = JSON.parse(raw) as Partial<TurnDraft>;
+
+            // Unknown or missing version: a transient draft is discarded, never migrated.
+            if (parsed.v !== DRAFT_VERSION) {
+                return null;
+            }
+
+            // The career moved on since this was written.
+            if (parsed.fingerprint !== draftFingerprint()) {
+                return null;
+            }
+
+            return parsed as TurnDraft;
+        } catch {
+            return null;
+        }
+    },
+    write(record: TurnDraft): void {
+        try {
+            window.sessionStorage.setItem(draftKey(), JSON.stringify(record));
+        } catch {
+            // Silent by design — see above. No console error, no in-app claim of persistence.
+        }
+    },
+    clear(): void {
+        try {
+            window.sessionStorage.removeItem(draftKey());
+        } catch {
+            // Silent by design.
+        }
+    },
+};
+
+/** Snapshot the whole form plus the two refs that live outside it. */
+function captureDraft(): void {
+    draftStore.write({
+        v: DRAFT_VERSION,
+        run_id: props.run.id,
+        fingerprint: draftFingerprint(),
+        data: form.data() as unknown as Record<string, unknown>,
+        performanceType: performanceType.value,
+        performanceDelta: performanceDelta.value,
+    });
+}
+
+/*
+ * Restore on mount, before anything else can read the form. `props.write.turn` and the facility ladder
+ * open pre-filled from the last logged turn, so this must overwrite rather than merge: a restored
+ * draft is the Trainer's own in-progress answer for THIS turn, and it is only applied when the
+ * fingerprint proved it belongs here.
+ */
+const restoredDraft = draftStore.read();
+
+if (restoredDraft !== null) {
+    for (const [key, value] of Object.entries(restoredDraft.data)) {
+        if (key in form) {
+            (form as unknown as Record<string, unknown>)[key] = value;
+        }
+    }
+
+    performanceType.value = restoredDraft.performanceType;
+    performanceDelta.value = restoredDraft.performanceDelta;
+}
+
+/*
+ * Write on change, not on a timer: every edit to the form or to either ref replaces the record, so a
+ * hard navigation a moment later still finds the latest value. `watch` is deep because
+ * `preview_gains` is an object whose keys mutate in place.
+ */
+watch(() => form.data(), captureDraft, { deep: true });
+watch([performanceType, performanceDelta], captureDraft);
+
 
 /*
  * The HFW's five-discipline list, built from the options the controller already sends. The feeder
@@ -550,7 +689,13 @@ const chooseAction = (value: string, href: string | null): void => {
     choose(value);
 };
 
+/*
+ * F-08: Discard is the explicit "throw this away" gesture, so it clears the draft as well as leaving.
+ * Without this the draft would survive the discard and be re-applied on the next visit, which would
+ * make the button a lie.
+ */
 const discard = (): void => {
+    draftStore.clear();
     window.history.back();
 };
 
