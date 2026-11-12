@@ -100,11 +100,28 @@ class TraineeSelectController extends Controller
             ->withQueryString()
             ->through(fn (Umamusume $umamusume): array => $this->row($umamusume, $mirror));
 
+        /*
+         * F-02: the lede says "N trainees are catalogued", and `$trainees->total()` is the FILTERED
+         * paginator's total — so a search re-worded the catalogue's own size as the result count, and a
+         * Trainer arriving on a filtered URL was told the catalogue held two trainees. The sentence
+         * needs the catalogue's size, which no filtered query can answer, so it is counted here from
+         * the same base the roster is built on: published rows only, and the filter deliberately NOT
+         * applied.
+         */
+        $catalogueTotal = Umamusume::query()
+            ->where('release_status', ReleaseStatus::GlobalReleased->value)
+            ->whereNotNull('external_ref')
+            ->where('external_ref', '!=', '')
+            ->count();
+
         return Inertia::render('Career/TraineeSelect', [
             'visited' => SetupDraft::visited(),
             'choices' => SetupDraft::summary(),
             'saved' => SetupDraft::saved(),
             'trainees' => $trainees,
+            // F-02: the catalogue's own size, unfiltered, so the lede's "N trainees are catalogued"
+            // states a catalogue figure rather than the filtered result count.
+            'catalogueTotal' => $catalogueTotal,
             'selected' => $draft['umamusume_id'],
             // The form the draft already names, so a Trainer who returns to this step sees the choice they
             // made rather than a picker reset to the debut form (the same read-back rule as `selected`).

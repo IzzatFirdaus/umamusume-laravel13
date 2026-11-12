@@ -81,6 +81,12 @@ interface Option {
 
 const props = defineProps<{
     trainees: Paginator<TraineeRow>;
+    /**
+     * F-02: the catalogue's own size, counted unfiltered by the controller. The lede's
+     * "N trainees are catalogued" reads this rather than `trainees.total`, which is the FILTERED
+     * paginator's total and made the sentence describe a search result as the whole catalogue.
+     */
+    catalogueTotal: number;
     /** The steps this session has opened, the step bar's completed marking reads them. */
     visited: number[];
     /** The steps that have data stored in the draft (`SetupDraft::saved()`), read apart from `visited`. */
@@ -162,6 +168,19 @@ const filterValues = ref<Record<string, string>>({
 const sortBy = ref(props.sortBy);
 const direction = ref(props.direction);
 const loading = ref(false);
+
+/*
+ * F-02: how many trainees the ACTIVE filter matched, or null when nothing is filtered.
+ *
+ * `props.trainees.total` is the filtered paginator's total, so it already answers this — the defect was
+ * reading it as the catalogue's size. Named for what it is, and null (rather than the catalogue size)
+ * when no filter is applied, so the lede can stay one sentence in the common case.
+ */
+const filteredCount = computed((): number | null => {
+    const active = Object.values(filterValues.value).some((value) => value !== '');
+
+    return active ? props.trainees.total : null;
+});
 
 /*
  * The roster's shape, read from the shell's width preference.
@@ -472,12 +491,18 @@ const sortLabel = computed(
         <template #eyebrow>New career</template>
         <template #title>Who are you training?</template>
 
-        <!-- The wireframe's lede, in the title band where it draws it, on the live count rather than the
-             mock's number: `career-trainee.html:75` prints "71 trainees are catalogued", and this roster
-             prints however many rows the catalog holds today (the same rule the pager line follows). -->
+        <!--
+             F-02: the sentence says "catalogued", so it prints the catalogue's size. It used to read
+             `trainees.total`, which is the filtered paginator's total, so a search re-worded the whole
+             catalogue as the result count. When a filter is active the two numbers differ, and saying
+             both is the honest reading: the catalogue holds N, the filter matched M.
+        -->
         <template #lede>
             <template v-if="catalogueLoaded">
-                {{ props.trainees.total }} {{ props.trainees.total === 1 ? 'trainee is' : 'trainees are' }} catalogued.
+                {{ props.catalogueTotal }} {{ props.catalogueTotal === 1 ? 'trainee is' : 'trainees are' }} catalogued.
+                <template v-if="filteredCount !== null && filteredCount !== props.catalogueTotal">
+                    The current filter matches {{ filteredCount }}.
+                </template>
                 Filter by aptitude if you are building toward a specific race, then pick the card you are
                 running.
             </template>
