@@ -81,7 +81,7 @@ KI-129 CLOSED — affirmed 2026-11-10 per owner dispatch: the capsule is intenti
 KI-130 OPEN — not dispatched
 KI-131 CLOSED — 9674180d + 20df32a6: run-scoped aria-labels on the two colliding steps; consumers re-pinned (support-deck, section-nav); cockpit-forms pin edited in a peer-dirty file and rides that file's landing
 KI-132 OPEN — two-key split ruled by owner; slice not dispatched here, scheduled separately
-KI-133 CLOSED — b9837da7: current_spirit_proxy column, payload, editor field as a labelled manual proxy; per-member table defers to an R8 reopening if it ever comes
+KI-133 FIXED IN TREE, NOT DEPLOYED — b9837da7: current_spirit_proxy migration authored, payload and editor field landed as a labelled manual proxy; **its migration is Pending on the dev database, so the column does not exist there** (KI-161). Per-member table defers to an R8 reopening if it ever comes
 KI-134 RESOLVED — pre-dispatch register state
 KI-135 RESOLVED — pre-dispatch register state
 KI-136 OPEN — not dispatched
@@ -190,7 +190,7 @@ those entries' current status; this line names them, it does not restate them.
 - KI-130 OPEN - blocked: owner ruling
 - KI-131 OPEN - openable copy fix; not touched
 - KI-132 OPEN - blocked: payload contract change (own pass)
-- KI-133 OPEN - blocked: shape decision + roster
+- KI-133 FIXED IN TREE, NOT DEPLOYED - manual proxy shipped in code (`b9837da7`); migration Pending on dev (KI-161). The per-member shape question stays blocked: shape decision + roster
 - KI-134 RESOLVED (previous session)
 - KI-135 RESOLVED 2026-10-30 (standing)
 - KI-136 OPEN, PEER-OWNED - full-career-journey locator; peer file, no touch
@@ -3993,7 +3993,15 @@ incidental.
 proves complete, partial and absent targets all read back.
 
 ### KI-133 B-0.6 `current_spirit` shape wrong - the Spirit gauge is per team member, not per run - FILED 2026-10-25 (R9)
-**Status: OPEN - blocked: shape decision + A-0.13.** No column ships; both candidate shapes are recorded here.
+**Status: FIXED IN TREE, NOT DEPLOYED - and the shape question inside it stays OPEN - blocked: shape decision + A-0.13.** Corrected 2026-11-12 (this line read `OPEN … No column ships`, which stopped being true on 2026-11-11). Read this entry in three layers, because a single word cannot carry them:
+
+| Layer | State | Evidence |
+| --- | --- | --- |
+| **Code implementation** | **DONE** | `b9837da7` (2026-11-11) landed 11 files: migration, `#[Fillable]`, `StoreTrainingRunRequest` rule, `CockpitController` payload key, `TeamPanelBuilder` shape, `SpiritCard`/`UnityCupPanel`/`ScenarioCardGrid`/`UnityCupEditor`/`TeamEdit` UI, and `UnityCupPanelTest` coverage |
+| **Migration authored** | **DONE** | `database/migrations/2026_11_10_010500_add_current_spirit_proxy_to_training_runs_table.php`; additive, nullable, `down()` drops the column |
+| **Migration applied to the shared dev database** | **NOT DONE** | `php artisan migrate:status` reports it `Pending`; `PRAGMA table_info(training_runs)` omits the column. Filed as **KI-161** |
+
+A committed migration establishes that the column is *authored*. It does not establish that the column *exists* on any given database, and on this one it does not. The suite cannot detect the gap, because `phpunit.xml:64` forces `DB_DATABASE=:memory:` so every test builds its schema from the migration files.
 
 **Current state.** ADR-0029's B-0.6 authorises `current_spirit` integer plus `current_spirit_max` on
 `training_runs`. The verified game model is different: the Spirit gauge is **per team member** (deck
@@ -4014,8 +4022,13 @@ a game value it does not represent. Source: `docs/UMAMUSUME_REFERENCE.md` §2.2.
 **Current classification:** `blocked: shape decision + A-0.13`. R8 declined the roster table; B-0.6 depends
 on it. Reopen R8 only if the roster is reopened at the same time.
 
-**Closure:** none. Closes when the chosen shape lands and a test proves the per-member state (or the
-explicitly-labelled proxy) round-trips.
+**Closure:** none. Two independent things must both hold, and only one is done. (a) **The proxy path:** the
+migration must be applied on the database in use and a test must prove the labelled proxy round-trips - the code
+and the test exist, the migration is Pending, so this half is blocked on KI-161. (b) **The per-member path:** the
+chosen shape lands and a test proves per-member state round-trips - untouched, still blocked on A-0.13's roster.
+Marking this CLOSED on the strength of `b9837da7` alone would repeat KI-60's mistake in the opposite direction:
+there the suite passed while migrations were Pending, here the code would be called shipped while the same thing
+is true.
 
 ## KI-134 The Preferences savebar cannot state the form's condition, so the HFW's disabled-when-clean control is unbuilt - FILED 2026-10-26 (HFW parity S11.1 correction), RESOLVED 2026-10-26 (HFW parity S11.1)
 
@@ -4993,7 +5006,7 @@ here rather than as a new entry because the probe, the failure class and the clo
 one; a fix for either surface that does not re-read the other is incomplete.
 
 ### KI-161 `current_spirit_proxy` ships in code and validates, but its migration is Pending on the dev database - FILED 2026-11-12
-**Status: OPEN - the feature is unshipped on this database, and any Career write that carries the field fails.**
+**Status: OPEN - the feature is unshipped on this database, and any Career write that carries the field fails. Migration reviewed and verified safe on a scratch copy 2026-11-12; applying it to the shared dev file is awaiting explicit owner approval.**
 
 **Current state.** `b9837da7` (2026-11-11) landed KI-133's manual proxy as `current_spirit_proxy` on
 `training_runs`: a migration, a `#[Fillable]` entry, a `StoreTrainingRunRequest` rule
@@ -5027,5 +5040,34 @@ is invisible in the UI: the absence reads as "not recorded" rather than as "this
 **Closure.** Run the migration on the dev database - **needs owner approval, because it writes to the shared
 file** - or drop the field from `#[Fillable]` and the request rule until it ships. This entry does not cover
 the choice between those; it records that the two halves disagree. Closure does **not** cover KI-133's own
-shape question, which stays OPEN and blocked per its body, nor the register inconsistency that KI-133 reads
-CLOSED in one list and OPEN in its own heading.
+shape question, which stays OPEN and blocked per its body; that entry now reads `FIXED IN TREE, NOT DEPLOYED` in
+all three of its status statements, which is the same fact this entry records from the database side.
+
+**Migration review, 2026-11-12, on an isolated scratch copy - the shared file was not touched.**
+`cp database/database.sqlite .scratch-uma/followup-2026-11-12/ki161-scratch.sqlite`, then every step below run with
+`DB_DATABASE` pointing at that copy:
+
+| Check | Result |
+| --- | --- |
+| `up()` shape | `$table->integer('current_spirit_proxy')->nullable()->after('extreme_bursts_count')` - additive and nullable, so no existing row needs a value and no default is invented |
+| Declared dependency | `after('extreme_bursts_count')`, which `2026_10_10_160000_add_unity_cup_counters_to_training_runs.php` created. **Present on the dev DB**, so the ordering holds and there is no silent no-op |
+| Pending migrations on dev | **exactly one** - this one. No queue of earlier work is being quietly pulled in by the same command |
+| `migrate --force` on the copy | `DONE 25.65ms`; column count 34 -> 35 |
+| Existing data after `up()` | `training_runs` still holds its 1 row, `{id: 11, scenario: "unity_cup"}`, unchanged; all `current_spirit_proxy` values NULL |
+| Write path | `update ... set current_spirit_proxy = 5` succeeds and reads back `5`; setting it back to NULL also succeeds |
+| `migrate:rollback --step=1` on the copy | `DONE 80.95ms`; column gone, row still present and unchanged. `down()` is a real `dropColumn`, not a no-op |
+
+**The command awaiting approval**, and the only database it is authorised against:
+
+```
+php artisan migrate --force
+# targets: database/database.sqlite (the shared dev file, per .env DB_CONNECTION=sqlite)
+```
+
+Expected effect: one column added to `training_runs`, nullable, populated NULL for the existing row, with the row
+`{id: 11, scenario: "unity_cup"}` otherwise untouched. **Rollback limitation:** `down()` drops the column, which
+discards every value a Trainer has entered by then - it is reversible in schema and *destructive* in data. That is
+the one irreversible consequence and the reason this entry does not execute it unasked.
+
+**Scratch copy retained** at `.scratch-uma/followup-2026-11-12/ki161-scratch.sqlite` (session-private, gitignored) so
+the result is re-checkable without repeating the run.
