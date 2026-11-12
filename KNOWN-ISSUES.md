@@ -81,7 +81,7 @@ KI-129 CLOSED — affirmed 2026-11-10 per owner dispatch: the capsule is intenti
 KI-130 OPEN — not dispatched
 KI-131 CLOSED — 9674180d + 20df32a6: run-scoped aria-labels on the two colliding steps; consumers re-pinned (support-deck, section-nav); cockpit-forms pin edited in a peer-dirty file and rides that file's landing
 KI-132 OPEN — two-key split ruled by owner; slice not dispatched here, scheduled separately
-KI-133 FIXED IN TREE, NOT DEPLOYED — b9837da7: current_spirit_proxy migration authored, payload and editor field landed as a labelled manual proxy; **its migration is Pending on the dev database, so the column does not exist there** (KI-161). Per-member table defers to an R8 reopening if it ever comes
+KI-133 DEPLOYED — b9837da7 authored it and KI-161 deployed `current_spirit_proxy` to the dev database 2026-11-12: payload and editor field land as a labelled manual proxy. **The per-member shape question inside this entry stays OPEN** (A-0.13 roster, R8 declined); the proxy is a labelled compromise, not the right model
 KI-134 RESOLVED — pre-dispatch register state
 KI-135 RESOLVED — pre-dispatch register state
 KI-136 OPEN — not dispatched
@@ -190,7 +190,7 @@ those entries' current status; this line names them, it does not restate them.
 - KI-130 OPEN - blocked: owner ruling
 - KI-131 OPEN - openable copy fix; not touched
 - KI-132 OPEN - blocked: payload contract change (own pass)
-- KI-133 FIXED IN TREE, NOT DEPLOYED - manual proxy shipped in code (`b9837da7`); migration Pending on dev (KI-161). The per-member shape question stays blocked: shape decision + roster
+- KI-133 DEPLOYED (`b9837da7` + migration applied 2026-11-12 via KI-161) - manual proxy column live on dev; the per-member shape question stays blocked: shape decision + roster
 - KI-134 RESOLVED (previous session)
 - KI-135 RESOLVED 2026-10-30 (standing)
 - KI-136 OPEN, PEER-OWNED - full-career-journey locator; peer file, no touch
@@ -3993,15 +3993,15 @@ incidental.
 proves complete, partial and absent targets all read back.
 
 ### KI-133 B-0.6 `current_spirit` shape wrong - the Spirit gauge is per team member, not per run - FILED 2026-10-25 (R9)
-**Status: FIXED IN TREE, NOT DEPLOYED - and the shape question inside it stays OPEN - blocked: shape decision + A-0.13.** Corrected 2026-11-12 (this line read `OPEN … No column ships`, which stopped being true on 2026-11-11). Read this entry in three layers, because a single word cannot carry them:
+**Status: DEPLOYED for the manual proxy, and the shape question inside it stays OPEN - blocked: shape decision + A-0.13.** Corrected 2026-11-12 (this line read `OPEN … No column ships`, which stopped being true on 2026-11-11). Read this entry in three layers, because a single word cannot carry them:
 
 | Layer | State | Evidence |
 | --- | --- | --- |
 | **Code implementation** | **DONE** | `b9837da7` (2026-11-11) landed 11 files: migration, `#[Fillable]`, `StoreTrainingRunRequest` rule, `CockpitController` payload key, `TeamPanelBuilder` shape, `SpiritCard`/`UnityCupPanel`/`ScenarioCardGrid`/`UnityCupEditor`/`TeamEdit` UI, and `UnityCupPanelTest` coverage |
 | **Migration authored** | **DONE** | `database/migrations/2026_11_10_010500_add_current_spirit_proxy_to_training_runs_table.php`; additive, nullable, `down()` drops the column |
-| **Migration applied to the shared dev database** | **NOT DONE** | `php artisan migrate:status` reports it `Pending`; `PRAGMA table_info(training_runs)` omits the column. Filed as **KI-161** |
+| **Migration applied to the shared dev database** | **DONE 2026-11-12** | Applied under explicit owner approval via `php artisan migrate --force` (17.41ms, exit 0). `PRAGMA table_info(training_runs)` now lists the column, `INTEGER` nullable; `migrations` records batch 2. Deployment and verification detail in **KI-161** |
 
-A committed migration establishes that the column is *authored*. It does not establish that the column *exists* on any given database, and on this one it does not. The suite cannot detect the gap, because `phpunit.xml:64` forces `DB_DATABASE=:memory:` so every test builds its schema from the migration files.
+A committed migration establishes that the column is *authored*. It does not establish that the column *exists* on any given database - and between 2026-11-11 and 2026-11-12 it did not on this one, which is the whole of KI-161. It exists now. The suite still cannot detect that class of gap, because `phpunit.xml:64` forces `DB_DATABASE=:memory:` so every test builds its schema from the migration files rather than reading the dev file; that blindness is unchanged and is why KI-161 was found by hand.
 
 **Current state.** ADR-0029's B-0.6 authorises `current_spirit` integer plus `current_spirit_max` on
 `training_runs`. The verified game model is different: the Spirit gauge is **per team member** (deck
@@ -4023,8 +4023,9 @@ a game value it does not represent. Source: `docs/UMAMUSUME_REFERENCE.md` §2.2.
 on it. Reopen R8 only if the roster is reopened at the same time.
 
 **Closure:** none. Two independent things must both hold, and only one is done. (a) **The proxy path:** the
-migration must be applied on the database in use and a test must prove the labelled proxy round-trips - the code
-and the test exist, the migration is Pending, so this half is blocked on KI-161. (b) **The per-member path:** the
+migration must be applied on the database in use and a test must prove the labelled proxy round-trips - the code and
+the test exist, and both halves are now satisfied: the migration was applied 2026-11-12 (KI-161) and
+`UnityCupPanelTest` exercises the round-trip. (b) **The per-member path:** the
 chosen shape lands and a test proves per-member state round-trips - untouched, still blocked on A-0.13's roster.
 Marking this CLOSED on the strength of `b9837da7` alone would repeat KI-60's mistake in the opposite direction:
 there the suite passed while migrations were Pending, here the code would be called shipped while the same thing
@@ -5005,14 +5006,14 @@ one page overflows at the WCAG 1.4.10 reflow width and one at the 640 two-track 
 here rather than as a new entry because the probe, the failure class and the closure command are
 one; a fix for either surface that does not re-read the other is incomplete.
 
-### KI-161 `current_spirit_proxy` ships in code and validates, but its migration is Pending on the dev database - FILED 2026-11-12
-**Status: OPEN - the feature is unshipped on this database, and any Career write that carries the field fails. Migration reviewed and verified safe on a scratch copy 2026-11-12; applying it to the shared dev file is awaiting explicit owner approval.**
+### KI-161 `current_spirit_proxy` shipped in code and validated, but its migration was Pending on the dev database - FILED 2026-11-12, DEPLOYED 2026-11-12
+**Status: CLOSED 2026-11-12 - migration deployed to `database/database.sqlite` under explicit owner approval; column verified, write path verified, existing data preserved.** Deployment and verification records are in the sections below. **This closure covers the persistence column only**: KI-133's per-member Spirit shape question stays OPEN and blocked, and the manual proxy remains a labelled proxy rather than a game value.
 
 **Current state.** `b9837da7` (2026-11-11) landed KI-133's manual proxy as `current_spirit_proxy` on
 `training_runs`: a migration, a `#[Fillable]` entry, a `StoreTrainingRunRequest` rule
 (`['nullable','integer','min:0']`), a `CockpitController` payload key, a labelled UI field and a Feature test.
 **On `database/database.sqlite` the migration has never run.** `php artisan migrate:status` reports
-`2026_11_10_010500_add_current_spirit_proxy_to_training_runs_table … Pending`, and
+`2026_11_10_010500_add_current_spirit_proxy_to_training_runs_table … Pending` (the state as filed; deployed below), and
 `PRAGMA table_info(training_runs)` does not list the column.
 
 **This is KI-60's failure mode, in the opposite direction.** KI-60 was four committed migrations sitting
@@ -5028,7 +5029,7 @@ php -r '… $run->fill(["current_spirit_proxy"=>5]); $run->save();'
    no such column: current_spirit_proxy (Connection: sqlite, Database: database/database.sqlite)
 ```
 
-Read-only reproduction: `php artisan migrate:status | grep current_spirit_proxy` reports Pending, and
+Read-only reproduction at filing time: `php artisan migrate:status | grep current_spirit_proxy` reported Pending, and
 `PRAGMA table_info(training_runs)` omits the column. **The failed UPDATE was rejected atomically, so no
 row was modified**; `training_runs` still holds its 1 row and no partial write exists.
 
@@ -5040,8 +5041,8 @@ is invisible in the UI: the absence reads as "not recorded" rather than as "this
 **Closure.** Run the migration on the dev database - **needs owner approval, because it writes to the shared
 file** - or drop the field from `#[Fillable]` and the request rule until it ships. This entry does not cover
 the choice between those; it records that the two halves disagree. Closure does **not** cover KI-133's own
-shape question, which stays OPEN and blocked per its body; that entry now reads `FIXED IN TREE, NOT DEPLOYED` in
-all three of its status statements, which is the same fact this entry records from the database side.
+shape question, which stays OPEN and blocked per its body; that entry read `FIXED IN TREE, NOT DEPLOYED` until this
+deployment, and now reads `DEPLOYED` for the proxy with the shape question still open.
 
 **Migration review, 2026-11-12, on an isolated scratch copy - the shared file was not touched.**
 `cp database/database.sqlite .scratch-uma/followup-2026-11-12/ki161-scratch.sqlite`, then every step below run with
@@ -5071,3 +5072,50 @@ the one irreversible consequence and the reason this entry does not execute it u
 
 **Scratch copy retained** at `.scratch-uma/followup-2026-11-12/ki161-scratch.sqlite` (session-private, gitignored) so
 the result is re-checkable without repeating the run.
+
+**Deployed to the shared database, 2026-11-12.** The owner authorised exactly one migration, and this is what ran:
+
+```
+php artisan migrate --force
+  2026_11_10_010500_add_current_spirit_proxy_to_training_runs_table ... 17.41ms DONE
+  exit status 0
+```
+
+**Preflight, all conditions met before execution.** HEAD `2ef286f6`, branch `master`. The migration file was verified
+byte-identical to the reviewed version (`git hash-object` equals `HEAD:` blob; sha256
+`8f06afd4bc82d771abf61d659cf8119726d45bff33849c34f08ac903157bfce6`, 1,311 bytes), so nothing had been edited between
+review and deployment. Exactly one migration was Pending. The `extreme_bursts_count` dependency was present. The target
+resolved to `database/database.sqlite` from `.env` (`DB_CONNECTION=sqlite`). No `-wal`/`-shm` sibling existed, so no
+writer held the file; two `php` processes were running (`artisan serve` and its `php -S` child) but neither holds a
+write transaction, and the migration is a DDL statement that completes in milliseconds.
+
+**Backup, taken before the migration with SQLite's own consistent-snapshot mechanism, not a file copy** -
+`VACUUM INTO '.scratch-uma/followup-2026-11-12/backups/pre-ki161-2026-11-12.sqlite'`, 3,604,480 bytes. Verified
+`PRAGMA integrity_check` = `ok`, 35 tables with a list identical to the live database, and every row count equal
+(`training_runs` 1, `umamusume` 139, `support_cards` 559, `character_cards` 263, `race_catalog_slots` 410, `skills`
+1,910, `migrations` 76). `training_runs` content compared row by row: identical. **The pre-existing
+`database/database.sqlite.bak` (4,096 bytes, 2026-09-28) was left untouched** and is unrelated to this backup.
+
+**Schema after deployment.** `current_spirit_proxy` present, `INTEGER`, `notnull=0`, no default - the declared shape
+exactly. It sits at column position 34 rather than next to `extreme_bursts_count`, which is **not a defect**: SQLite's
+`ALTER TABLE ADD COLUMN` has no `AFTER` clause and always appends, so Laravel's `->after()` is a no-op on this driver.
+Position is cosmetic and nothing reads by ordinal.
+
+**Data preservation, measured against the backup.** `training_runs` still holds its 1 row, and its content is identical
+before and after: `{id: 11, scenario: "unity_cup", status: "Active", current_objective_index: null}`. Every
+`current_spirit_proxy` value is NULL - the migration wrote no data. Across all 35 tables the only column difference is
+the added one, and the only row-count change is `migrations` 76 -> 77, which is the migration recording itself.
+`PRAGMA integrity_check` = `ok`.
+
+**Write path, verified through the application rather than by SQL alone.** The original failure was
+`SQLSTATE[HY000]: no such column`; re-running it now: `$run->current_spirit_proxy = 12; $run->save()` succeeds, a fresh
+`TrainingRun::find()` reads back `12`, raw `DB::selectOne` reads back `12`, and restoring the original `NULL` also
+succeeds. Post-restore row: `{id: 11, scenario: "unity_cup", status: "Active"}` with `current_spirit_proxy` NULL again,
+so the test left nothing behind. `UnityCupPanelTest` (the one suite file that names the column) 12 passed / 261
+assertions.
+
+**What this closure does NOT cover.** The column's existence is not the feature. **KI-133 stays OPEN and blocked**: the
+honest per-member `spirit_gauges` shape is still declined, and `current_spirit_proxy` remains one Trainer-entered
+aggregate labelled as a proxy rather than a game reading. Rollback was **not** tested against the shared database - it
+was verified on the scratch copy earlier, and `down()` drops the column, which would discard entered values.
+
