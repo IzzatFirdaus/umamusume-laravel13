@@ -4991,3 +4991,41 @@ measures `over=59` at 320px (clean at 768/1280), so the same reflow family holds
 one page overflows at the WCAG 1.4.10 reflow width and one at the 640 two-track width. Recorded
 here rather than as a new entry because the probe, the failure class and the closure command are
 one; a fix for either surface that does not re-read the other is incomplete.
+
+### KI-161 `current_spirit_proxy` ships in code and validates, but its migration is Pending on the dev database - FILED 2026-11-12
+**Status: OPEN - the feature is unshipped on this database, and any Career write that carries the field fails.**
+
+**Current state.** `b9837da7` (2026-11-11) landed KI-133's manual proxy as `current_spirit_proxy` on
+`training_runs`: a migration, a `#[Fillable]` entry, a `StoreTrainingRunRequest` rule
+(`['nullable','integer','min:0']`), a `CockpitController` payload key, a labelled UI field and a Feature test.
+**On `database/database.sqlite` the migration has never run.** `php artisan migrate:status` reports
+`2026_11_10_010500_add_current_spirit_proxy_to_training_runs_table … Pending`, and
+`PRAGMA table_info(training_runs)` does not list the column.
+
+**This is KI-60's failure mode, in the opposite direction.** KI-60 was four committed migrations sitting
+Pending for four days while 1,326 tests passed, because `phpunit.xml:64` forces `DB_DATABASE=:memory:` so the
+suite builds its own schema from the migration files and never sees the dev file. Here the suite is *green*
+(it creates the column in memory) and the dev file is *broken*.
+
+**Proving command, and it is not hypothetical.** Persisting the field on the shared dev database throws:
+
+```
+php -r '… $run->fill(["current_spirit_proxy"=>5]); $run->save();'
+-> Illuminate\Database\QueryException: SQLSTATE[HY000]: General error: 1
+   no such column: current_spirit_proxy (Connection: sqlite, Database: database/database.sqlite)
+```
+
+Read-only reproduction: `php artisan migrate:status | grep current_spirit_proxy` reports Pending, and
+`PRAGMA table_info(training_runs)` omits the column. **The failed UPDATE was rejected atomically, so no
+row was modified**; `training_runs` still holds its 1 row and no partial write exists.
+
+**Blast radius.** `StoreTrainingRunRequest` accepts the field, so a request that carries it passes validation
+and then fails at the database layer with a 500 rather than a field error. `CockpitController` puts the key in
+its payload. The scenario-detail surface that renders the proxy renders `N/A` today, which is why the defect
+is invisible in the UI: the absence reads as "not recorded" rather than as "this database has no column".
+
+**Closure.** Run the migration on the dev database - **needs owner approval, because it writes to the shared
+file** - or drop the field from `#[Fillable]` and the request rule until it ships. This entry does not cover
+the choice between those; it records that the two halves disagree. Closure does **not** cover KI-133's own
+shape question, which stays OPEN and blocked per its body, nor the register inconsistency that KI-133 reads
+CLOSED in one list and OPEN in its own heading.
