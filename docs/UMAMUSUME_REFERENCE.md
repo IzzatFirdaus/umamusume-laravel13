@@ -2590,14 +2590,42 @@ below is the state on the wire.
 
 **The instrument, re-read in full on 2026-11-12.** The archive now holds **181 notices** spanning
 2025-06-26 00:30 to **2026-11-10 22:00 UTC**, read end to end rather than sampled. **The prior pass's `154` does
-not reconcile and is recorded as an open instrument question rather than explained away.** Paging
-`announce_label` 0/1 at `limit: 100` returns 181 rows in total, and **72** of them carry a `post_at` later than
-the 2026-10-05 stamp that pass dated itself with, so a same-basis count on 2026-10-05 would have been 109 — not
-154. Either that pass counted a different population (a second `announce_label`, or rows including ones this
-read's paging reaches only past offset 100) or the archive has since been pruned of some pre-2026-10-05
-notices. **This pass cannot distinguish those two possibilities from the data it has**, so the 154 is neither
-trusted nor deleted; the 181 is what the endpoint returns now, and the 47-notice figure below is measured
-directly rather than derived from the 154. Two corrections to the instrument description above, both measured:
+not reconcile, and the `limit: 50` test asked for by the owner on 2026-11-12 has now been run against the live
+endpoint.** What it settles is the instrument; what it does not settle is where 154 came from. Paging
+`announce_label` 0 at **`limit: 50`**, offsets 0 / 50 / 100 / 150, returns **50 / 50 / 50 / 31 rows, 181 distinct
+ids, zero duplicates** — byte-identical to the `limit: 100` walk (100 + 81) and to the harvest this document's
+scenario pass took earlier the same day. So the endpoint does not have an offset-page boundary artefact at the
+50/100 limit split, and **181 is a stable measurement rather than an artefact of the page size.**
+
+Four populations were then tested against the 154, and none of them produces it:
+
+| Population tried | Count | Verdict |
+| --- | --- | --- |
+| `announce_label` 0, whole archive | **181** | current total |
+| `announce_label` 1 | **163** | label 1 is label 0 minus the 18 label-3 rows, verified as a set difference, not a second population |
+| `announce_label` 3 | 18 | a strict subset of label 0, so it adds no rows |
+| Rows with `post_at` at or before the prior pass's own newest notice, 2026-09-29 08:15 | **107** | the count a growing archive would have shown it |
+| Rows with `post_at` at or before the prior pass's stamp, 2026-10-05 | **109** | same, one week later |
+| `post_platform_flag` 62, whole archive | 155 | the closest single number found, and it is **not** 154: one row of it postdates the prior pass |
+
+**The most likely explanation, stated as a likelihood rather than a finding: the 154 was measured on a
+population this document cannot reconstruct, most plausibly a walk that concatenated two label streams or
+counted rows before a de-duplication step.** No de-duplicated population in the current archive equals 154, and
+the archive cannot have *grown* its way to 181 from a larger 154 — so pruning is ruled out as the explanation
+unless 27 or more notices were deleted and 27 others added, which the identical id sets across two independent
+reads make implausible. **The uncertainty stays on the record in the form the owner asked for:** 181 is what the
+endpoint returns, 154 is not reproducible from it, and this file does not overwrite the older figure. A future
+pass that wants to close this has to read the notice count from a committed snapshot taken on 2026-10-05, which
+does not exist in the tree.
+
+The archive is also **not a complete notice history**, which is the part that matters for anything counting from
+it. Content ids run 122 to 1168 with **99 of the 201 ids in the 1000–1200 band absent** (largest contiguous gaps
+1169–1200, 1030–1038, 1080–1085), and the pre-2026-08 months are sparse: 11 notices in 2025-06, then 6, 2, 1, 1,
+2, 2, 4 before the feed thickens to 40 / 38 / 48 / 26 across 2026-08 to 2026-11. Absent ids are ordinary for a
+feed with withdrawn and renumbered items, so this is stated as a limit on **coverage**, not as evidence of
+deletion. The consequence is concrete: a statement of the form "nothing was announced about X" is only as
+strong as this feed's completeness, which is why Section 4's negatives are dated rather than presented as
+permanent. Two corrections to the instrument description above, both measured:
 `pr_info_detail` returns `{"response_code":500}` for every payload shape tried (`{"announce_id":905}`, a string
 id, `{"id":905}`, with and without `Referer` and `User-Agent`), so **the index endpoint is the only one that
 worked** this pass and the detail endpoint should not be relied on; and `announce_label` 0 and 1 both return
@@ -3124,12 +3152,13 @@ That audit also proposes a third state between verified and unverified, for clai
 three.** The narrowings are client- or archive-derived rather than publisher-derived, which is the pattern this
 pass's whole evidence base took. Narrowed in **2.2.4 and §6 only**: the Grand Concert resource name, its five type
 names, the Lesson screen's instruction text, the cost heading, the state pills, and the gauge's `Hype Level`, each
-now carrying the captured frame it rests on. **`docs/scenarios/07-grand-concert.md` was NOT edited and its
-`❌ UNVERIFIED` boundary list still stands as written** — it groups six things together and this pass settled only
-some of them, so a point-by-point reconciliation of that file is outstanding work rather than done work. What that
-file still correctly lists as open, and this pass agrees with: the 23 Song titles and their localisation, the Lesson
-confirm and **reserve** button labels, the two bonus-layer names as *it* words them, and the rendered gauge beyond
-the one state measured. Corrected rather than closed: 2.2.3's currency (row 60), 2.2.4's second bonus layer (row 61), the
+now carrying the captured frame it rests on. **`docs/scenarios/07-grand-concert.md` was reconciled item by item
+later the same day**, after this paragraph first recorded it as outstanding work. The reconciliation splits its
+grouped screen-text bullet into five separately-evidenced rows: the two bonus layers, the 23 Song titles and their
+language, and the Lesson **confirm** path are now closed from captured frames; the Lesson **reserve** control, the
+full Hype ladder and every per-level magnitude remain open. The file's own boundary list is the authority for which
+is which; this paragraph is the record that the work happened, not a second verdict. **A printable label is still
+not a verified number**, and the per-level magnitudes stay open in both files. Corrected rather than closed: 2.2.3's currency (row 60), 2.2.4's second bonus layer (row 61), the
 `0 frames` premise (row 62), and the duel's cap-raise figure, which is **+4 points** and not "a tier". Opened:
 Trackblazer still has no client frame anywhere on this host; every Grand Concert magnitude (Lesson costs, Hype
 values per song, Live Bonus ladder) is still unmeasured; and the prior passes' 154-notice archive figure does not
