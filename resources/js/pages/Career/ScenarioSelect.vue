@@ -169,7 +169,19 @@ function continueStep(): void {
             >
                 Continue to trainee
             </BaseButton>
-            <span id="scenario-continue-hint" class="text-xs text-ink-muted">Choose a scenario to continue.</span>
+            <!--
+                F-01: the sentence names an unmet condition, so it exists only while that condition
+                holds. It used to render unconditionally, and only the `aria-describedby` link was
+                conditional — so once a scenario was chosen the button enabled, the description
+                cleared, and the words "Choose a scenario to continue." stayed on screen describing a
+                state the page had left. Gating both on the same condition is what keeps the sighted
+                reading and the announced one in step.
+            -->
+            <span
+                v-if="props.selected === null"
+                id="scenario-continue-hint"
+                class="text-xs text-ink-muted"
+            >Choose a scenario to continue.</span>
         </template>
 
         <p
