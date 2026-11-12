@@ -332,3 +332,53 @@ for the next pass:
     `docs/audits/trainer-desk-v3-ux-retest/09-consolidated-remediation-plan.md` in
     slash form) and were left untouched by design; those slash cites are GONE-class
     until the peer lands and repoints them.
+
+## Round 26 post-commit evidence note (2026-11-12, adb9d5cc)
+
+Commit adb9d5cc: 20 files, +9094/-3644; six tracked originals deleted (recoverable at
+  adb9d5cc^), 25 untracked originals removed after only-copy containment proof.
+Post-commit verification, each figure measured from the landed blobs:
+  - Anchors: 27/27 A&V + 4/4 SR section anchors present, in embed order.
+  - Only-copy re-proof from landed blobs (fence-aware, with the sanctioned
+    transforms applied: heading re-level/demotion and the 9 intra-set repoints):
+    25/25 untracked source bodies exact-identical in their masters.
+  - Drift-zero: `git diff HEAD` empty on all 14 landed modified paths.
+  - Canonical census, the tool's committed mode via `git worktree` at the two
+    refs (the method both this round's and prior rounds' pins use):
+    dead markdown links 635 GONE at f029a806 -> 635 GONE at adb9d5cc, net zero.
+    The working-tree mode figure (649 pre-commit = 565 GONE + 84 UNTRACKED, then
+    648 post-delete = 589 + 59) is transient bookkeeping for on-disk-but-untracked
+    resolver context; the ref-mode net zero is the figure the pins track. The
+    residual 8 mentions of the deleted RS-UC-SCENARIO-DETAIL path are dated
+    inventory rows and quoted git-status listings inside masters and peer files,
+    enumerated in the round scratch; none is a live pointer.
+  - Lore: docs 595 -> 596 with 75 exempt (net +1: the embedded copy of
+    verification-rtx's "HEAD was stable" line relocated with its body into the
+    tracked master, an ordinary-adjective hit in verbatim record prose, C-4
+    verbatim-source class; the peer's uncommitted PLANS-AND-BRIEFS "Red Desire"
+    list line accounts for +1 more in the working tree, pending the peer's own
+    ruling at landing); code 351 unchanged. Every R26-touched hit carries a
+    ruling.
+  - Fences: 0 invalid closing fences across touched files.
+  - `npm run typecheck` and `npm run lint:ui` exit 0; DocCitationParityTest
+    2 passed and LoreGateParityTest 12 passed at adb9d5cc.
+  - docs/audits/README.md re-derived from measurement after the delete: 22 report
+    rows (17 on disk: 4 with evidence, 13 without; 5 folded rows pointing at
+    master sections), 20 loose .md total (18 reports + this index + the
+    RECONCILIATION-REGISTER), 121 PNGs across the five split-audit screens
+    directories, retest screenshots 72 (row said 40), REGISTER 422 lines (row
+    said 332), v3-ux screenshots 59. Rule-1/rule-3/inconsistency-4 counts updated
+    to the on-disk survivors. The peer v3x reports remain rowless by design.
+  - tests/browser/dashboard-turn-state.spec.ts:11: the repoint had edited the
+    head of the line but left the old-path tail
+    `docs/audits/trainer-desk-v3-ux-retest/04-ux-findings-retest.md:60-78`
+    citing the deleted path; fixed to a folded-source locator in the same commit.
+  - Wait-state remains: the peer session's uncommitted edits cite two deleted
+    paths in slash form (`docs/audits/walk-8-follow-up-plan.md` and
+    `docs/audits/trainer-desk-v3-ux-retest/09-consolidated-remediation-plan.md`
+    inside PLANS-AND-BRIEFS.md) and reference folded paths in
+    ui-ux-application-context-brief.md / UMAMUSUME_REFERENCE.md / _audit-prompt.md;
+    they are peer-owned GONE-class until that session lands and repoints them.
+  - Scratch harness files for this round live under
+    .scratch-uma/round26-consolidation/ (scripts and outputs only; no worksheet
+    files at the scratch root).
