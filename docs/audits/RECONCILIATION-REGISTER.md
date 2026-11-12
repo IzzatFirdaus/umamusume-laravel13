@@ -347,3 +347,76 @@ Tracked per walk, not cumulatively, so a trend is visible.
 
 Two of these five are measurable from this pass; the other three need a walk that also lands fixes,
 which this task does not authorize.
+
+---
+
+## 11. Verified remediation outcomes — the six-item remediation and its follow-ups
+
+Appended 2026-11-12. §5 and §10 record what the walk *found*; this section records what was **built
+and then independently verified**, with the verdict that survived re-measurement. Nothing above is
+rewritten: five of these six findings were carried as open or as `D`-fixes with no live check against
+the current tree, and §6's note that "a closure commit does not prove the current implementation still
+meets its acceptance criteria" is exactly why this pass happened.
+
+Verification source: `docs/audits/verification-rtx-ux09-f13-2026-11-12.md`, measured on `3aee95e2`.
+Each verdict below was reached by reading the regression assertions, driving the behaviour in a real
+browser, and checking the authoritative state source — not by trusting a commit message or a test
+title.
+
+| Finding | Verdict | Implementation | Evidence that carried the verdict |
+| --- | --- | --- | --- |
+| **F-03** spark target commitment | **CLOSED** | `282e5437`, restated forward by `aaf21cd3` | Strict-commitment contract under the owner ruling of 2026-11-12: typed text never becomes the value without explicit acceptance. RED `1 failed, 4 passed` against the peer's own case, GREEN **9 passed**. A latent blur-versus-listbox race was exposed by the correction and fixed with `@mousedown.prevent` on the list |
+| **F-08** turn-form data loss | **CLOSED** | `51d78d3e` (guard) + `3aee95e2` (draft) | The confirm guard alone does not satisfy the contract and is not counted as the fix. The draft is a run-scoped `sessionStorage` record; live round trip restored `777 / 888 / 999` after a cockpit visit; **29 restore points** (see the corrected inventory below) |
+| **RTX-01** stale parent card | **ACCEPTED** | `fc6f775d` | Live: card pill reads `Not chosen` before the pick and `Chosen` after it, **before any save**. Regression case asserts that transition plus the empty-state absence, and a third case covers the persistence round trip |
+| **UX-09** finale row says it cannot be dated | **ACCEPTED** | `be983f87` (dating) + `339035b5` (tooltip) | Live at `/training-runs/11/cockpit`: all three finale rows read `5 turns away`, title reads "the figure is the finale distance the Scenario panel reports", and the Scenario panel says `Finale 5 turns away`. The two surfaces agree; the pre-fix contradiction is gone |
+| **RTX-02** dashboard prints a position for a zero-turn career | **ACCEPTED** | `aba21651` | The zero branch returns the cockpit's own wording; the Turn tile prints an absence rather than `0`. Three states pinned by assertion: zero, logged, imported |
+| **F-13** planned spend allegedly stays zero | **REFUTED, not fixed** | No product code changed. Test coverage improved by `b2832ee6` | Live at the walk's own skill (`Pace Chaser Straightaways ◎`, cost 140): planned spend `0 → 140 → 0`, remaining `173 → 33 → 173`. The bar tracks the plan and reverses on untick. The original walk pressed **`Add to run`**, not the plan checkbox — two different actions on one screen (see §11.2) |
+
+### 11.1 The F-08 restore-point inventory, corrected to 29
+
+`docs/audits/trainer-desk-v3-ux-retest/09-consolidated-remediation-plan.md` §9.1 states "15 scalars +
+6 preview = 21 values, plus the two performance refs (23 restore points)". **That arithmetic omits six
+values.** Measured from `TrainingDetail.vue`:
+
+| Group | Count | Members |
+| --- | --- | --- |
+| Scalars | **21** | `turn`, `speed`, `stamina`, `power`, `guts`, `wit`, `sp`, `energy`, `energy_state`, `energy_band`, `fans`, `mood`, `outcome`, `penalty_kind`, `choice`, `facility_speed`, `facility_stamina`, `facility_power`, `facility_guts`, `facility_wit`, `failure_rate` |
+| `preview_gains` keys | **6** | `speed`, `stamina`, `power`, `guts`, `wit`, `sp` |
+| Refs outside `useForm` | **2** | `performanceType`, `performanceDelta` |
+| **Total restore points** | **29** | |
+
+The plan's §9.1 selector list makes the same omission — it enumerates 14 selectors, leaving out the
+six values above. The implementation is unaffected: `3aee95e2` persists `form.data()` wholesale, so
+every value is covered regardless of how the count is written. Only the documentation was wrong.
+
+### 11.2 F-13 — what the walk claimed, what it did, and why the reading was wrong
+
+The original finding (`rice-shower-unity-cup-ux-walk-8.md:1037`) reads: "`PLANNED SPEND` stays `0`
+and `REMAINING` stays `173` after a 140 SP skill is added; the screen is titled `Spend 173 Skill
+Points` and its budget bar cannot see its own plans."
+
+**What the walk actually performed** is recorded in its own narrative at `:844` and in its values
+table: the skill picker was set to `Pace Chaser Straightaways ◎` and then **`Add to run`** was
+pressed — marked `UI-required` in that table.
+
+**Why that produces `0`.** `Add to run` and the plan checkbox are different actions. `Add to run`
+submits `pickerForm.post(props.run.skills_sync_url, { onSuccess: () => { planned.value = [] } })` — it
+records the skill as **acquired** and deliberately clears the plan list on success. The plan checkbox
+calls `togglePlan(id)`, which is what appends to `planned[]`, and `plannedSpend` sums
+`plannedRows` (those rows whose id is in `planned[]`). Reading the budget bar after an acquire is
+correctly `0`: an acquired skill is not a planned one.
+
+**The correction.** The budget bar does see its own plans; the walk read the wrong control's result.
+The finding is preserved above unedited as the historical observation, and the disposition is
+`REFUTED` rather than `fixed`, because **no product code was ever wrong**. The regression gap the
+finding exposed was real and is now closed: the spec's case had claimed for its title that it moved
+the planned-spend and remaining figures while asserting neither, and it now reads both printed values.
+
+**Where the corrected browser evidence lives:** `docs/audits/verification-rtx-ux09-f13-2026-11-12.md`
+§B.4 records the three-state readings taken at the walk's own skill on `3aee95e2`.
+
+### 11.3 What this section does not claim
+
+The other 24 `Confirmed fixed` / `Fixed` rows across R2–R7 remain `present+unverified`, exactly as §6
+states. This pass verified six walk-8 findings; it did not re-open the historical register. §10's
+"4 of 6 D-fixes verified" still describes the **walk-1 D-series**, a different set, and is unchanged.
