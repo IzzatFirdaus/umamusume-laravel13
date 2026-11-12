@@ -306,13 +306,13 @@ const barLabel = computed((): string => {
     const value = earned.value;
 
     if (period === null) {
-        return 'Grade Points not yet recorded';
+        return 'Result Points not yet recorded';
     }
 
     if (value === null) {
         return props.scenario.grade?.unpriced_count && props.scenario.grade.unpriced_count > 0
-            ? 'Grade Points not totalled'
-            : 'Grade Points not yet recorded';
+            ? 'Result Points not totalled'
+            : 'Result Points not yet recorded';
     }
 
     return `${value} of ${period.required} toward ${period.name}`;
@@ -393,11 +393,11 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
             class="flex flex-col gap-3 card p-4"
         >
             <h3 :id="gradeHeadingId" tabindex="-1" class="text-lg font-semibold text-ink-strong">
-                Grade Point
+                Result Points
             </h3>
 
             <div v-if="props.scenario.grade === null" class="text-sm text-ink-muted" role="status">
-                <p>No scenario is set for this run, so no grade-point meter is composed.</p>
+                <p>No scenario is set for this run, so no result-point meter is composed.</p>
             </div>
             <template v-else>
                 <div class="card p-3">
@@ -453,7 +453,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                             <span class="font-semibold text-ink">not yet totalled</span>:
                             {{ props.scenario.grade.unpriced_count }} logged
                             {{ props.scenario.grade.unpriced_count === 1 ? 'result has' : 'results have' }}
-                            no published Grade Point value, so any total here would count less
+                            no published Result Point value, so any total here would count less
                             than this run earned.
                         </p>
                         <p v-else-if="earned === null" class="mt-2 text-sm text-ink-muted">
@@ -482,7 +482,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                     is not available at the next.
                 </p>
 
-                <ol class="flex flex-col gap-1.5" aria-label="Grade Point objectives">
+                <ol class="flex flex-col gap-1.5" aria-label="Result Point objectives">
                     <li
                         v-for="(objective, index) in props.scenario.grade.objectives"
                         :key="objective.index"
@@ -507,8 +507,8 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
 
                 <!--
                     Rival races from `RaceCatalogSlot` are facts only (per `ADR-0016`), not a
-                    planner. They live under the grade-points region because the two currencies
-                    are joined: every earned Grade Point is a placement. Capped at eight rows
+                    planner. They live under the result-points region because the two currencies
+                    are joined: every earned Result Point is a placement. Capped at eight rows
                     because the Junior-Year seed holds 50+ entries and Miller's Law (§13) keeps
                     the surface at or under eight; the Race Database screen shows the full set.
                 -->
@@ -614,7 +614,7 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
                     <p class="note mt-2">
                         <span class="g" aria-hidden="true">○</span>
                         <span>
-                            <b>Grade Points and Shop Coins are independent.</b> Grade Points scale with
+                            <b>Result Points and Shop Coins are independent.</b> Result Points scale with
                             the race's grade, while Coins scale with placement alone, so a Pre-OP win
                             pays the same Coins as a G1 win and a fraction of the Points.
                         </span>

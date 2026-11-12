@@ -122,7 +122,7 @@ test('draws nothing at all for a panel the scenario leaves off', async ({ page }
     // Unity Cup's OFF flags. An OFF flag is not a missing renderer: the region must not mention a
     // system this scenario does not compose, and a future config edit must not turn OFF into
     // "fallback shown".
-    for (const label of ['Pro Shop', 'Grade Point objectives', 'Epithet routes']) {
+    for (const label of ['Pro Shop', 'Result Point objectives', 'Epithet routes']) {
         await expect(section.getByText(label, { exact: true })).toHaveCount(0);
         await expect(section.getByText(new RegExp(`cannot draw yet: ${label}`))).toHaveCount(0);
     }

@@ -273,9 +273,9 @@ const close = async (): Promise<void> => {
                 <p class="note mt-3">
                     <span class="g" aria-hidden="true">○</span>
                     <span>
-                        Coins scale with placement, 100 for first and less below. Grade Points and Shop Coins
+                        Coins scale with placement, 100 for first and less below. Result Points and Shop Coins
                         are independent counters: a Pre-OP win pays the same coins as a G1 win but a fifth of
-                        the Grade Points.
+                        the Result Points.
                     </span>
                 </p>
             </div>

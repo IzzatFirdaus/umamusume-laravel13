@@ -66,7 +66,24 @@ return [
         'fans' => 'Fans',
         'team_rank' => 'Team Rank',
         'spirit_bursts' => 'Spirit Bursts',
-        'grade_points' => 'Grade Points',
+        /*
+        | The publisher's word for this counter, restored 2026-11-12 under ruling E.
+        |
+        | `Result Points` is the term in Cygames' own launch announcement for
+        | Trackblazer ("earn a determined amount of Result Points by the final turn in
+        | December each year"), reproduced verbatim by a third-party host because the
+        | Global page itself is not reachable from here. The 2026-09-27 revision had
+        | changed it to "Grade Points" on the belief that `Result Points` was a Unity Cup
+        | counter; Unity Cup has no point currency at all, so that premise was false.
+        |
+        | ONLY THE LABEL CHANGES. The key `grade_points`, the database column, the
+        | `priceGradePoints()` method and every `grade_*` config key keep their names:
+        | ~50 assertions and the ingest join rest on them, and a rename is a separate
+        | decision this ruling explicitly does not authorise. `Grade Points` is also a
+        | real alias in the wild (uma.guide uses it), so a reader arriving from an older
+        | guide is not lost.
+        */
+        'grade_points' => 'Result Points',
         'shop_coins' => 'Shop Coins',
     ],
 
@@ -79,7 +96,10 @@ return [
     'panel_labels' => [
         'race_calendar' => 'Race calendar',
         'team_race' => 'Team races',
-        'grade_objectives' => 'Grade Point objectives',
+        /* Same ruling as `widget_labels.grade_points` above: the label moves to the
+           publisher's word, the key stays. "Result Points" takes no hyphen and keeps
+           the plural the publisher uses. */
+        'grade_objectives' => 'Result Point objectives',
         'shop' => 'Pro Shop',
         'epithet_routes' => 'Epithet routes',
         'team_rank_ladder' => 'Team Rank ladder',
@@ -263,7 +283,8 @@ return [
             'duel' => [
                 'options_rule' => 'three options: two random stats and the stat the duel was fought on',
                 'win' => [
-                    'gains' => 'stat gains, and one tier on the cap of the stat dueled',
+                    'gains' => 'stat gains, and +4 on the cap of the stat dueled',
+                    'cap_points' => 4,
                     'sp' => 30,
                     'hint' => true,
                 ],

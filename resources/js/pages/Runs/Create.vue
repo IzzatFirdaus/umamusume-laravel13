@@ -104,7 +104,7 @@ function submit(): void {
             <PageHeader
                 eyebrow="Careers"
                 title="Create a career"
-                description="Trainee and status are required. Scenario, inheritance parents, the Grade Point period, the shop countdown and notes are optional and can be recorded later on the run page."
+                description="Trainee and status are required. Scenario, inheritance parents, the Result Point period, the shop countdown and notes are optional and can be recorded later on the run page."
             >
                 <template #actions>
                     <LinkButton href="/training-runs" variant="secondary">Back to careers</LinkButton>
@@ -205,10 +205,10 @@ function submit(): void {
                          Trainer who picks period 3 on URA Finals sees the message there rather than the
                          value silently dropped. -->
                     <FormField
-                        label="Current Grade Point period"
+                        label="Current Result Point period"
                         :required="false"
                         :error="form.errors.current_objective_index"
-                        :hint="`1 to ${maxObjectiveIndex}, tracked in the Grade Point meter on the run page. Only scenarios that compose the Grade Point panel accept a value here.`"
+                        :hint="`1 to ${maxObjectiveIndex}, tracked in the Result Point meter on the run page. Only scenarios that compose the Result Point panel accept a value here.`"
                         id="create-current_objective_index"
                     >
                         <template #default="{ id, describedBy, invalid, required }">

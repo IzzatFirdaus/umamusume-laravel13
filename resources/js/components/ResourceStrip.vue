@@ -75,7 +75,10 @@ function present(widget: Widget): Box {
             sub = recorded ? 'normal plus Extreme' : 'not yet recorded';
             break;
         case 'grade_points':
-            label = 'Grade Points';
+            // The label is the publisher's word for this counter (ruling E, 2026-11-12).
+            // The widget key stays `grade_points` so the config matrix and the ingest join
+            // keep their names; only what a Trainer reads changes.
+            label = 'Result Points';
             value = recorded ? `${int(raw as number | string)}/300` : 'N/A';
             sub = recorded ? 'surplus does not carry over' : 'not yet recorded';
             break;

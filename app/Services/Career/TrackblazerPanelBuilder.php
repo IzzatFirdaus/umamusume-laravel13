@@ -189,7 +189,7 @@ final class TrackblazerPanelBuilder
                     ? 'An entered race whose grade no published table prices is left out of that total rather '
                         .'than priced at a guess.'
                     : null,
-                'uncounted_title' => 'How many entered races in this period have no published Grade Point value '
+                'uncounted_title' => 'How many entered races in this period have no published Result Point value '
                     .'for their grade, the same wording the meter above uses for a finished race. They are left '
                     .'out of the total rather than guessed at, and a total that silently omitted them would '
                     .'understate the plan.',
@@ -406,7 +406,7 @@ final class TrackblazerPanelBuilder
                 $forgone = [];
 
                 if ($gradePointsWin !== null) {
-                    $forgone[] = 'up to '.number_format($gradePointsWin).' Grade Points';
+                    $forgone[] = 'up to '.number_format($gradePointsWin).' Result Points';
                 }
 
                 if ($firstCoin !== null) {
@@ -436,7 +436,7 @@ final class TrackblazerPanelBuilder
                     'grade_points_win' => $gradePointsWin === null ? null : number_format($gradePointsWin),
                     'grade_points_badge' => $gradePointsWin === null ? null : 'confirmed',
                     'grade_points_title' => $gradePointsWin === null
-                        ? 'No published Grade Point value prices this grade, so no figure is printed for it. '
+                        ? 'No published Result Point value prices this grade, so no figure is printed for it. '
                             .'A race with no tier is common: the catalogue keeps a grade only where a source '
                             .'corroborated it per row.'
                         : 'What a 1st place at this grade pays, from the published per-grade table, '

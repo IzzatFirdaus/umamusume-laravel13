@@ -190,7 +190,7 @@ it('reads the primary resource from the scenario config rather than from a scena
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('activeCareer.run_id', $trackblazer->id)
-            ->where('activeCareer.resource.label', 'Grade Points'));
+            ->where('activeCareer.resource.label', 'Result Points'));
 
     // A scenario that composes no widget beyond the baseline three names no resource at all, rather
     // than defaulting to one of the three every scenario has.

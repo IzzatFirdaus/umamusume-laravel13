@@ -198,7 +198,7 @@ const folds = computed<boolean>(
             Recorded: <span class="font-semibold text-ink-strong">{{ props.race.status }}</span>
             <template v-if="props.race.placement !== null"> · {{ props.race.placement }}</template>
             <template v-if="props.race.fans_gain !== null"> · {{ group(props.race.fans_gain) }} fans</template>
-            <template v-if="props.race.grade_points !== null"> · {{ group(props.race.grade_points) }} Grade Points</template>
+            <template v-if="props.race.grade_points !== null"> · {{ group(props.race.grade_points) }} Result Points</template>
         </p>
         <!-- A-0.4 / B-0.4: a calendar race with no recorded entry is scheduled but not yet run. Derived
              from the slot + the absence of an entry, never stored as a status value. -->

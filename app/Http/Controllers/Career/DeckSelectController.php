@@ -131,7 +131,7 @@ class DeckSelectController extends Controller
             // (`UMAMUSUME_REFERENCE.md` §2.1), and "Consider a Wit-heavy deck" was the tool advising a
             // build — exactly the recommendation FR-F-3 bars the advisor from making (UX-20).
             'unity_cup' => ["Unity Cup's Wit cap is 1800; the other four stats cap at 1300."],
-            'trackblazer' => ['No Race Goals. Focus on Grade Point objectives.'],
+            'trackblazer' => ['No Race Goals. Focus on Result Point objectives.'],
             'our_grand_concert' => ['Speed cap is 1600. Lessons/Songs mechanic active.'],
             'ura_finale' => ['Standard scenario. No extra systems beyond training, racing, and objectives.'],
             default => [],

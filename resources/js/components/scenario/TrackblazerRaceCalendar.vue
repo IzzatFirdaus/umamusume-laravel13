@@ -126,7 +126,7 @@ const groups = computed((): { label: string; rows: CalendarRow[] }[] => {
                             <ProvenanceBadge v-if="row.grade_points_badge !== null" :state="row.grade_points_badge" :title="row.grade_points_title" />
                             <span class="text-ink">
                                 A win pays
-                                <span class="font-mono tabular-nums">{{ row.grade_points_win ?? 'N/A' }}</span> Grade Points
+                                <span class="font-mono tabular-nums">{{ row.grade_points_win ?? 'N/A' }}</span> Result Points
                             </span>
                             <span aria-hidden="true" class="text-ink-muted">·</span>
                             <ProvenanceBadge v-if="row.coins_badge !== null" :state="row.coins_badge" :title="row.coins_title" />

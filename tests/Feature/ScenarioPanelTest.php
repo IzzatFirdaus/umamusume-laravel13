@@ -323,7 +323,7 @@ it('renders a fifth scenario from config alone, drawing only on widget and flag 
             // The scenario's own widgets only; the baseline three are the header's figures and are
             // subtracted by the same rule the Dashboard's resource label uses.
             ->where('scenario.widgets', ['grade_points'])
-            ->where('scenario.widget_labels.grade_points', 'Grade Points')
+            ->where('scenario.widget_labels.grade_points', 'Result Points')
             ->where('scenario.panels.grade_objectives.on', true)
             ->where('scenario.panels.shop.on', false)
         );

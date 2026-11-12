@@ -413,7 +413,7 @@ class ResultController extends Controller
             'composed' => $composed,
             'notice' => $composed
                 ? null
-                : 'This scenario keeps no Grade Point objectives, so there is no objective ladder to read here. Its own panel arrives with the scenario panels.',
+                : 'This scenario keeps no Result Point objectives, so there is no objective ladder to read here. Its own panel arrives with the scenario panels.',
             'periods' => $run->gradePeriods(),
             'earned' => $run->gradeEarned(),
             'unpriced' => $run->gradeUnpricedCount(),

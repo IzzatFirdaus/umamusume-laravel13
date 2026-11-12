@@ -67,7 +67,7 @@ class RacePlannerController extends Controller
         ['key' => 'fan_gain', 'label' => 'Fan gain'],
         ['key' => 'reward', 'label' => 'Reward'],
         ['key' => 'skill_points', 'label' => 'Skill Points'],
-        ['key' => 'grade_points', 'label' => 'Grade Points'],
+        ['key' => 'grade_points', 'label' => 'Result Points'],
         ['key' => 'shop_coins', 'label' => 'Shop Coins'],
     ];
 
@@ -438,7 +438,7 @@ class RacePlannerController extends Controller
             ],
             'grade_points' => [
                 $gradePoints === null ? null : number_format($gradePoints),
-                'This run\'s scenario defines no Grade Point table, or this race\'s grade is not in it, so the payout cannot be read off. Grade Points are a Trackblazer currency.',
+                'This run\'s scenario defines no Result Point table, or this race\'s grade is not in it, so the payout cannot be read off. Result Points are a Trackblazer currency.',
                 null,
             ],
             'shop_coins' => [

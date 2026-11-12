@@ -335,7 +335,7 @@ test('hands the chosen trainee and card back after a failed write, and re-paints
     await page.getByRole('button', { name: 'Create run' }).click();
 
     await expect(page).toHaveURL(/\/training-runs\/create$/);
-    await expect(page.getByText('This scenario has no Grade Point periods, so there is no period to report.')).toBeVisible();
+    await expect(page.getByText('This scenario has no Result Point periods, so there is no period to report.')).toBeVisible();
 
     // The selection survives the round trip: the label is re-derived from the flashed ids, not
     // re-typed, so the visible name and the posted pair agree again. This is the last assertion in the

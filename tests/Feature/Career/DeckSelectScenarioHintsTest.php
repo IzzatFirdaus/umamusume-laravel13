@@ -47,7 +47,7 @@ final class DeckSelectScenarioHintsTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->component('Career/DeckSelect')
                 ->where('scenarioKey', 'trackblazer')
-                ->where('scenarioHints.0', 'No Race Goals. Focus on Grade Point objectives.')
+                ->where('scenarioHints.0', 'No Race Goals. Focus on Result Point objectives.')
             );
     }
 

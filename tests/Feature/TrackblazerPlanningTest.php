@@ -149,7 +149,7 @@ it('counts out an entered race the published grade table does not price and says
             // guessing a value for it would print a figure no source pays.
             ->where('scenario.grade.planning.periods.0.plan', '100')
             ->where('scenario.grade.planning.periods.0.uncounted', 1)
-            ->where('scenario.grade.planning.periods.0.uncounted_title', fn (string $title): bool => str_contains($title, 'no published Grade Point value')));
+            ->where('scenario.grade.planning.periods.0.uncounted_title', fn (string $title): bool => str_contains($title, 'no published Result Point value')));
 });
 
 it('derives the floor from the published placement modifiers, at both placements it names', function (): void {
@@ -276,7 +276,7 @@ it('prints each upcoming race its published win value and what skipping forgoes'
             ->where('scenario.grade.calendar.rows.0.grade_points_win', '80')
             ->where('scenario.grade.calendar.rows.0.coins_win', '100')
             // Coins do not scale with grade, so a Pre-OP win pays the same 100.
-            ->where('scenario.grade.calendar.rows.0.skip_consequence', fn (string $text): bool => str_contains($text, 'up to 80 Grade Points')
+            ->where('scenario.grade.calendar.rows.0.skip_consequence', fn (string $text): bool => str_contains($text, 'up to 80 Result Points')
                 && str_contains($text, '100 Shop Coins'))
             ->where('scenario.grade.calendar.rows.0.skip_badge', 'calculated')
             ->where('scenario.grade.calendar.rows.0.surface', 'Turf')

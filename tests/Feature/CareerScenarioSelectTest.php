@@ -108,8 +108,8 @@ it('names each scenario systems and resources from the matrix rather than from a
             // The goals flag turned on for Unity Cup too (8668d9d), so the matrix names four systems.
             ->where('scenarios.1.systems', ['Race calendar', 'Team races', 'Team Rank ladder', 'Career goals'])
             ->where('scenarios.1.resources', ['Team Rank', 'Spirit Bursts'])
-            ->where('scenarios.2.systems', ['Grade Point objectives', 'Pro Shop', 'Epithet routes'])
-            ->where('scenarios.2.resources', ['Grade Points', 'Shop Coins'])
+            ->where('scenarios.2.systems', ['Result Point objectives', 'Pro Shop', 'Epithet routes'])
+            ->where('scenarios.2.resources', ['Result Points', 'Shop Coins'])
             ->where('scenarios.2.loop', ['training', 'shop', 'outcome', 'skill'])
             ->where('scenarios.2.live_on_global', '2026-03-12'));
 });

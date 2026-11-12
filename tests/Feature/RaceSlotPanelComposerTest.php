@@ -334,7 +334,7 @@ it('names no scenario race for a run that has not chosen one', function (): void
         ->and($run->gradeEarned())->toBeNull()
         ->and(test()->get("/training-runs/{$run->id}")->getContent())
         ->not->toContain('Race calendar')
-        ->not->toContain('Grade Point')
+        ->not->toContain('Result Point')
         ->not->toContain('Oka Sho');
 });
 

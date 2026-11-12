@@ -163,7 +163,7 @@ test('returns a field-bound error when the cost does not match the catalogue', a
 });
 
 test('renders the Grade-Points region as the no-period absence the component prints', async ({ page }) => {
-    const grade = page.getByRole('region', { name: 'Grade Point' });
+    const grade = page.getByRole('region', { name: 'Result Points' });
     await expect(grade).toBeVisible();
 
     // The component renders the bar only when a period is reported (design-2.0 §49: an absent
@@ -173,7 +173,7 @@ test('renders the Grade-Points region as the no-period absence the component pri
     await expect(grade.getByText(/no period reported/)).toBeVisible();
 
     // The ladder prints in declared order with the debut race first.
-    const ladder = grade.getByRole('list', { name: 'Grade Point objectives' });
+    const ladder = grade.getByRole('list', { name: 'Result Point objectives' });
     await expect(ladder.getByText('Debut race')).toBeVisible();
     await expect(ladder.getByText('End of Junior Year')).toBeVisible();
     await expect(ladder.getByText('End of Classic Year')).toBeVisible();
@@ -207,11 +207,11 @@ test('draws all three Trackblazer surfaces on one run, so no registry key is sha
     // retired the arms below and each of the three regions went missing at once. One case, three
     // regions: it fails as soon as any key is shadowed again. The bar inside the grade region needs
     // a reported period and is pinned by the two cases above and the plan case below.
-    const grade = page.getByRole('region', { name: 'Grade Point' });
+    const grade = page.getByRole('region', { name: 'Result Points' });
     const shop = page.getByRole('region', { name: 'Pro Shop' });
     const epithets = page.getByRole('region', { name: 'Epithet routes' });
 
-    await expect(grade.getByRole('list', { name: 'Grade Point objectives' })).toBeVisible();
+    await expect(grade.getByRole('list', { name: 'Result Point objectives' })).toBeVisible();
     await expect(shop.getByRole('list', { name: 'Pro Shop catalogue' })).toBeVisible();
     await expect(epithets.getByRole('list', { name: 'Epithet routes' })).toBeVisible();
 });
@@ -456,7 +456,7 @@ test('sizes every control to the 44px contract and reflows at 320 px', async ({ 
     await openScenarioDetail(page);
 
     for (const heading of [
-        'Grade Point', 'Pro Shop', 'Epithet routes',
+        'Result Points', 'Pro Shop', 'Epithet routes',
         // G5's three surfaces ride in the grade arm, so the narrow screen has to hold them too.
         'Race plan', 'Races ahead', 'Race fatigue',
         // G6's ledger rides in the shop arm, beside the purchases it counts.

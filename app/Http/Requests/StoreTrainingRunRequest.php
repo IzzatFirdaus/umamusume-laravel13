@@ -128,7 +128,7 @@ class StoreTrainingRunRequest extends FormRequest
 
                     if ($scenario === null || $scenario === ''
                         || config('scenarios.scenarios.'.$scenario.'.panels.grade_objectives') !== true) {
-                        $fail('This scenario has no Grade Point periods, so there is no period to report.');
+                        $fail('This scenario has no Result Point periods, so there is no period to report.');
                     }
                 },
             ],

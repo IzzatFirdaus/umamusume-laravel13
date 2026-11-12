@@ -192,7 +192,7 @@ class TrainingRun extends Model
 
         if ($index < 1 || $index > RaceEntry::MAX_OBJECTIVE_INDEX) {
             throw new \InvalidArgumentException(
-                "{$column} [{$index}] is not one of the four Grade Point periods (1..4).",
+                "{$column} [{$index}] is not one of the four Result Point periods (1..4).",
             );
         }
 
@@ -202,7 +202,7 @@ class TrainingRun extends Model
 
         if (! $run->composesGradeObjectives()) {
             throw new \InvalidArgumentException(
-                "Scenario [{$run->scenarioKey()}] composes no Grade Point objectives, so it has no period to record.",
+                "Scenario [{$run->scenarioKey()}] composes no Result Point objectives, so it has no period to record.",
             );
         }
     }

@@ -238,7 +238,7 @@ const saveIdentity = (): void => {
                 </li>
 
                 <li v-if="props.gradeObjectives.length > 0" class="flex flex-col gap-1">
-                    <label for="current_objective_index" class="text-ink-muted">Grade Point period</label>
+                    <label for="current_objective_index" class="text-ink-muted">Result Point period</label>
                     <form @submit.prevent="savePeriod">
                         <BaseSelect
                             id="current_objective_index"

@@ -543,7 +543,7 @@ const bankable = [
 
                     <p v-if="props.scenario.unassigned > 0" class="mt-3 text-xs text-risk" title="These races were completed before a period was chosen for them, so no period's total counts them.">
                         {{ props.scenario.unassigned }} completed race{{ props.scenario.unassigned === 1 ? '' : 's' }}
-                        {{ props.scenario.unassigned === 1 ? 'is' : 'are' }} not assigned to a Grade Point period.
+                        {{ props.scenario.unassigned === 1 ? 'is' : 'are' }} not assigned to a Result Point period.
                     </p>
                 </template>
 

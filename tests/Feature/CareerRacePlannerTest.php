@@ -174,7 +174,7 @@ it('states the reward comparison rows that have a source and names the reason fo
             // Grade Points is a config fact, not a scenario name: this run's scenario defines no
             // `grade_point_by_grade` table, so the row names the absence.
             ->where('groups.optional.races.0.comparison.8.value', null)
-            ->where('groups.optional.races.0.comparison.8.title', fn (string $title): bool => str_contains($title, 'Grade Point'))
+            ->where('groups.optional.races.0.comparison.8.title', fn (string $title): bool => str_contains($title, 'Result Point'))
             // Shop Coins are paid by placement, which is an outcome rather than a fact about the race.
             ->where('groups.optional.races.0.comparison.9.value', null)
             ->where('groups.optional.races.0.comparison.9.title', fn (string $title): bool => str_contains($title, 'placement')));
