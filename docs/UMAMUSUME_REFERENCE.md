@@ -2608,15 +2608,34 @@ Four populations were then tested against the 154, and none of them produces it:
 | Rows with `post_at` at or before the prior pass's stamp, 2026-10-05 | **109** | same, one week later |
 | `post_platform_flag` 62, whole archive | 155 | the closest single number found, and it is **not** 154: one row of it postdates the prior pass |
 
-**The most likely explanation, stated as a likelihood rather than a finding: the 154 was measured on a
-population this document cannot reconstruct, most plausibly a walk that concatenated two label streams or
-counted rows before a de-duplication step.** No de-duplicated population in the current archive equals 154, and
-the archive cannot have *grown* its way to 181 from a larger 154 — so pruning is ruled out as the explanation
-unless 27 or more notices were deleted and 27 others added, which the identical id sets across two independent
-reads make implausible. **The uncertainty stays on the record in the form the owner asked for:** 181 is what the
-endpoint returns, 154 is not reproducible from it, and this file does not overwrite the older figure. A future
-pass that wants to close this has to read the notice count from a committed snapshot taken on 2026-10-05, which
-does not exist in the tree.
+**A second discriminating test, run 2026-11-12 after the first one.** The prior pass left one description of its
+own instrument that the current archive can be checked against: §4.6's paragraph says **"Labels 0 and 1 return the
+same rows here; 2 is empty and 3 carries 20 items."** Two of those four claims are still true (label 0 and label 1
+return the same *rows*, and label 2 is empty), and **two are not**: label 3 carries **18** items today, not 20, and
+label 1 is **not** the same population as label 0 — it is label 0 minus exactly the 18 label-3 rows, verified as a
+set difference. A 20-to-18 fall on a label whose membership is stable is a **direct measurement of archive change**,
+which the count arithmetic alone could not supply. So the archive is not immutable, and the prior pass's own
+description of it no longer holds in two places.
+
+**What that does and does not establish.** It does not reconstruct 154, and no tested population produces it: label 0
+= 181, label 1 = 163, label 3 = 18, label 0 ∪ label 1 = 181, and at the prior pass's own cut date (2026-09-29
+08:15) label 0 = 107, label 1 = 89. It *does* establish that the feed is mutable, so an earlier reading of it can
+legitimately differ from today's without either being wrong. **The 154 is therefore most consistent with a temporal
+snapshot of a feed that has since changed, and that is now a supported reading rather than a guess.** What remains
+unexplained is the size: a snapshot is not the same thing as 154 being right, because on today's records a same-date
+cut gives 107.
+
+**One arithmetic coincidence is recorded and then set aside.** 154 + 27 = 181, and the 27 newest notices all postdate
+2026-10-31 22:00. That is a real boundary in the data, but it produces 154 only by *choosing* the cut to produce it,
+which is fitting rather than measurement; the prior pass's stated stamp is 2026-09-29, where the answer is 107. It is
+named here so a later pass does not rediscover it and mistake the coincidence for a cause.
+
+**The uncertainty stays on the record in the form the owner asked for:** 181 is what the endpoint returns, 154 is not
+reproducible from it, and this file does not overwrite the older figure. **The next discriminating test, if anyone
+wants to close this: find a committed artifact dated 2026-10-05 that records notice ids rather than a count.** None
+exists in this tree — `.scratch-uma/phase0-scenario-research/raw/news_all.json` is this pass's own harvest
+(181 ids, and today's re-fetch is byte-identical to it), and no snapshot from October is on disk. Without such an
+artifact, 154 cannot be checked and should not be trusted or deleted.
 
 The archive is also **not a complete notice history**, which is the part that matters for anything counting from
 it. Content ids run 122 to 1168 with **99 of the 201 ids in the 1000–1200 band absent** (largest contiguous gaps
