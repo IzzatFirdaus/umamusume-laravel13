@@ -464,8 +464,14 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                     <span class="text-xs font-semibold text-ink-muted">{{ equippedCount }} of 6 slots filled</span>
                 </h2>
 
-                <p class="mt-1 text-xs text-ink-muted">
-                    Not equipped. The six cards are the deck the run starts with, so an empty slot here is a
+                <p class="mt-1 text-xs text-ink-muted" data-region="deck-intro">
+                    <!-- Walk-8 F-05 (S07d): the paragraph opened `Not equipped.` unconditionally, so
+                         `Deck 5 of 6 slots filled` sat above a sentence contradicting it. The state
+                         word follows the count; with a card equipped the paragraph describes the
+                         step's contract without claiming the deck is unbuilt. The rest of the
+                         sentence is unchanged, including the short statement that
+                         `career-legacy-deck-steps.spec.ts` pins present. -->
+                    <template v-if="equippedCount === 0">Not equipped. </template>The six cards are the deck the run starts with, so an empty slot here is a
                     gap the Trainer can still fill. Position six is the one the client labels Friends. The role
                     belongs to the position and not to the card parked in it, so any card may sit there. The
                     owned or rented flag is kept in this setup draft, and Preflight writes it onto the run

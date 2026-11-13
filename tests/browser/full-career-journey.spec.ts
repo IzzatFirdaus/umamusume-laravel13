@@ -241,7 +241,7 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
     await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped');
     await page.getByRole('group', { name: 'Ownership of Slot 1' }).getByRole('button', { name: 'Owned', exact: true }).click();
 
-    await page.getByRole('button', { name: 'Save deck' }).click();
+    await page.getByRole('button', { name: 'Save and exit' }).click();
     await page.waitForURL(/\/cockpit$/, WRITE);
     // The savebar answers with `Deck saved.`, but that flash is a client-side banner that clears
     // itself after five seconds (Flash.vue:24), so asserting it here would race the walk. The

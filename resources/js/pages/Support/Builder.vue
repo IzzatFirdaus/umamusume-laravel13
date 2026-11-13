@@ -405,8 +405,11 @@ function save(): void {
                 <div class="savebar mt-4">
                     <span class="dirty" role="status">{{ slots.filter((slot) => slot.card !== null).length }} of 6 slots filled</span>
                     <a :href="run.run_url" class="btn min-h-11 inline-flex items-center">Cancel</a>
+                    <!-- Walk-8 E-21 (R7-95): the button names what it does — this write persists the
+                         whole six-slot deck and leaves for the run page, while the per-slot controls
+                         above only edit the form. `Save deck` read as one more slot-level writer. -->
                     <button type="button" class="btn btn-primary min-h-11" :disabled="form.processing" @click="save">
-                        {{ form.processing ? 'Saving…' : 'Save deck' }}
+                        {{ form.processing ? 'Saving…' : 'Save and exit' }}
                     </button>
                 </div>
                 <p v-if="form.processing" role="status" class="text-sm text-ink-muted">Saving the deck…</p>

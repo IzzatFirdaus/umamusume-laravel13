@@ -115,10 +115,19 @@ test('draws no analysis panel, no page-level save, no ownership prose (Phase E)'
     // panel, no `Save deck` submit, no ownership-flag explanation. The panel lives on the run's
     // deck screen, the forward door writes before it leaves, and the flag's destination is the
     // builder's own copy.
+    //
+    // What is asserted here is the standalone disclosure *paragraph* those sentences belonged to.
+    // `3a4459ca` cut it and left the step's intro line saying, in five words, that the flag lives in
+    // this draft and that Preflight writes it onto the run — a statement that is true
+    // (`PreflightController` writes `deck_slots.ownership` from `ownershipByPosition()`). The
+    // sibling assertion in `career-legacy-deck-steps.spec.ts:551` carries the same reasoning; the
+    // regex below matched the intro line itself and had been red against intended copy.
     await expect(page.getByRole('heading', { name: /deck analysis/i })).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Save deck' })).toHaveCount(0);
-    await expect(page.getByText(/Preflight writes it onto the run\s+as one value per slot/)).toHaveCount(0);
+    await expect(page.getByText(/Preflight writes it onto the run's deck row when/)).toHaveCount(0);
     await expect(page.getByText(/reads\s+as N\/A rather than as Owned/)).toHaveCount(0);
+    // The shorter statement that remains, asserted so the pair cannot drift silently.
+    await expect(page.locator('[data-region="deck-intro"]')).toContainText('Preflight writes it onto the run');
 });
 
 test('the diagnostics table carries five checks', async ({ page }) => {
@@ -271,4 +280,22 @@ test('stores the per-run card level and reads it back after a reload', async ({ 
     await page.goto('/career/setup/deck', { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
     await expect(page.getByLabel('Level for Slot 1')).toHaveValue('35');
+});
+
+test('the intro stops claiming the deck is unbuilt once a card is equipped (walk-8 F-05)', async ({ page }) => {
+    // Walk-8 S07d: `Deck 5 of 6 slots filled` sat above `Not equipped. The six cards are the deck…`,
+    // so the count and the sentence disagreed about whether the deck was built. The prefix follows
+    // the count now; the rest of the sentence is the step's contract and stays.
+    const intro = page.locator('[data-region="deck-intro"]');
+
+    await expect(intro).toContainText('Not equipped.');
+
+    await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
+    const dialog = page.getByRole('dialog');
+    await dialog.getByRole('button', { name: 'Equip', exact: true }).first().click();
+    await expect(page.getByText('Deck saved.')).toBeVisible();
+
+    await expect(page.locator('#draft-slots-heading')).toContainText('1 of 6 slots filled');
+    await expect(intro).not.toContainText('Not equipped.');
+    await expect(intro).toContainText('The six cards are the deck the run starts with');
 });

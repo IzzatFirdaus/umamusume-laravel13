@@ -109,7 +109,7 @@ test('sizes every control on the screen to the 44px contract', async ({ page }) 
 
     for (const [selector, what] of [
         ['button:has-text("Filter")', 'Filter'],
-        ['button:has-text("Save deck")', 'Save deck'],
+        ['button:has-text("Save and exit")', 'Save and exit'],
         ['button:has-text("Owned")', 'an Owned toggle'],
         ['button:has-text("Choose a card")', 'a Choose a card button'],
     ] as const) {
@@ -364,7 +364,7 @@ test('stores the per-run card level on the run deck and reads it back', async ({
     await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped');
 
     await page.getByLabel('Level for Slot 1').fill('35');
-    await page.getByRole('button', { name: 'Save deck' }).click();
+    await page.getByRole('button', { name: 'Save and exit' }).click();
     await page.waitForURL(/\/cockpit$/);
 
     await page.goto(url, { waitUntil: 'domcontentloaded' });
@@ -380,7 +380,7 @@ test('uses the reached effect basis when a level is recorded and the catalogue m
     await expect(page.locator('#deck-slot-1')).not.toContainText('Not equipped');
 
     await page.getByLabel('Level for Slot 1').fill('35');
-    await page.getByRole('button', { name: 'Save deck' }).click();
+    await page.getByRole('button', { name: 'Save and exit' }).click();
     await page.waitForURL(/\/cockpit$/);
 
     await page.goto(url, { waitUntil: 'domcontentloaded' });
@@ -396,7 +396,7 @@ test('uses the reached effect basis when a level is recorded and the catalogue m
 
     // Clearing the level returns the card to the catalogue maximum.
     await page.getByLabel('Level for Slot 1').fill('');
-    await page.getByRole('button', { name: 'Save deck' }).click();
+    await page.getByRole('button', { name: 'Save and exit' }).click();
     await page.waitForURL(/\/cockpit$/);
 
     await page.goto(url, { waitUntil: 'domcontentloaded' });
