@@ -319,3 +319,24 @@ test('Unity Cup offers its two scenario turn actions and URA Finale offers none 
     await expect(page.getByRole('radio', { name: 'Spirit Burst' })).toHaveCount(0);
     await expect(page.locator('input[name="pick"]')).toHaveCount(8);
 });
+
+test('asserts no Energy reading before one is taken (walk-8 E-17/R7-56)', async ({ page }) => {
+    // The form defaulted `Energy state` to `exact` beside an empty ENERGY AFTER, and `Energy band`
+    // to `mid`: both stated a reading nobody took, and the pair contradicted (an exact state with no
+    // figure; a mid band nobody measured). The states now open on `Not recorded`, and the band on an
+    // empty state, so a save without touching them stores the absence rather than an invented level.
+    const runUrl = await startCareer(page, 'unity_cup');
+    createdRunUrls.push(runUrl);
+
+    await page.goto(`${runUrl}/training`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // `unknown` is the explicit not-recorded state; the band is empty until `Band` is chosen.
+    await expect(page.locator('select[name="energy_state"]')).toHaveValue('unknown');
+    await expect(page.locator('select[name="energy_band"]')).toHaveValue('');
+
+    // Picking `Exact` still exists as a choice, and the figure field stays the writer for it.
+    await page.locator('select[name="energy_state"]').selectOption('exact');
+    await page.locator('input[name="energy"]').fill('62');
+    await expect(page.locator('input[name="energy"]')).toHaveValue('62');
+});

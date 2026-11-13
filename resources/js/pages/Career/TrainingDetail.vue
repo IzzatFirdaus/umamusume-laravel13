@@ -280,8 +280,11 @@ const form = useForm({
     wit: '',
     sp: '',
     energy: '',
-    energy_state: 'exact',
-    energy_band: 'mid',
+    // Walk-8 E-17 / R7-56: both fields asserted a reading nobody took — `exact` beside an empty
+    // figure, and a `mid` band. The form opens on the explicit not-recorded state (the same word
+    // the enum's `Unknown` renders), and the band on nothing, until the Trainer reads one.
+    energy_state: 'unknown',
+    energy_band: '',
     fans: '',
     mood: '',
     outcome: '',
@@ -997,7 +1000,7 @@ const energyBandNote = computed(() =>
                     </label>
                     <label class="flex flex-col gap-1">
                         <span class="text-ink-muted">Energy band</span>
-                        <BaseSelect id="turn-energy-band" v-model="form.energy_band" name="energy_band" :options="energyBands" :error="errorOf('energy_band')" />
+                        <BaseSelect id="turn-energy-band" v-model="form.energy_band" name="energy_band" placeholder="Select a band" :options="energyBands" :error="errorOf('energy_band')" />
                     </label>
                     <label v-if="outcomeIsFailure" class="flex flex-col gap-1">
                         <span class="text-ink-muted">Penalty</span>
