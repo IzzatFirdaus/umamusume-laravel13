@@ -659,11 +659,16 @@ const sortLabel = computed(
                 <!-- Only a trainee the catalog holds in more than one form is asked which one: a base form
                      and a seasonal form are a real choice, a single form is not a question. -->
                 <div v-if="(props.selectedTrainee?.forms.length ?? 0) > 1" class="basis-40">
+                    <!-- E-05 / R7-13 (plan v2 slice 3.1 item 3): the field shows what the draft stores.
+                         A stored card renders as the selection (no placeholder is passed); with none
+                         stored, a placeholder holds the empty state rather than letting the browser
+                         pre-select the first option the draft never recorded. -->
                     <BaseSelect
-                        :model-value="selectedHeadlineForm?.id ?? null"
+                        :model-value="props.selectedCard ?? null"
                         id="selected-form"
                         name="selected-form"
                         label="Form"
+                        :placeholder="props.selectedCard === null ? 'Select a form' : undefined"
                         :options="selectedFormOptions"
                         @update:model-value="pickSelectedForm"
                     />

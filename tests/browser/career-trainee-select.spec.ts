@@ -277,11 +277,21 @@ test.describe('Trainee Selection and Profile', () => {
         // form in the name line; the picker is how a Trainer changes the one the draft holds.
         const picker = selected.locator('select#selected-form');
         await expect(picker).toBeVisible();
-        await expect(picker.locator('option')).toHaveCount(2);
 
-        const second = (await picker.locator('option').nth(1).textContent())?.trim() ?? '';
-        const secondValue = (await picker.locator('option').nth(1).getAttribute('value')) ?? '';
-        await picker.selectOption({ index: 1 });
+        // E-05 / R7-13 (plan v2 slice 3.1 item 3): NOTHING is stored yet — the card click posts
+        // `character_card_id: null` — so the control must display the placeholder rather than an
+        // option the draft never recorded. Walk 8 read `[Rosy Dreams]` pre-selected here while the
+        // props said `selectedCard: null`, and the run was created with no costume form.
+        await expect(picker).toHaveValue('');
+        await expect(picker.locator('option[disabled]')).toHaveText('Select a form');
+
+        // Two real forms plus the placeholder.
+        await expect(picker.locator('option')).toHaveCount(3);
+
+        const storedOptions = picker.locator('option:not([disabled])');
+        const second = (await storedOptions.nth(1).textContent())?.trim() ?? '';
+        const secondValue = (await storedOptions.nth(1).getAttribute('value')) ?? '';
+        await picker.selectOption(secondValue);
 
         // The write is the same draft PUT the card row uses, so the run's rarity follows the form stated.
         // The name line is asserted, not the bare words: the option carries the same text, and
