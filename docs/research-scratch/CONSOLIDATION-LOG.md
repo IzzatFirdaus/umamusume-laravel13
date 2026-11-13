@@ -426,3 +426,23 @@ Post-fold addition carried, provenance recorded here (2026-11-13): the change-bo
 the living copy). This fold pass re-verified its arithmetic against the section's own table (49 rows
 parsed; range cells `3.2-3.6`=5, `5.2-5.4`=4, `7.1-7.5`=5 expanded; 36/14/9/1 = 60) and amended this
 round's banner to say the body is 'otherwise untouched except for' that recorded addition.
+Round 27 post-commit evidence note (2026-11-13). Canonical ref-mode census, the tool's own
+dead_links() at both refs in isolated worktrees: 647 GONE at 33c85c54^ = 655 GONE at
+33c85c54, net +8, every entry classed. 3 are the fold banners' provenance lines naming
+the absorbed sources (the tolerated masters-naming-absorbed-sources class every round
+adds). 4 moved with their bodies into PLANS-AND-BRIEFS.md (quoted-history and
+verbatim rows the sources already carried: the baseline's 6.1 'does not exist' row now at
+P&B:8307, its peer-owned-mention list now at P&B:8249, the close record's '(this file)'
+self-reference and staged manifest now at P&B:8819/8872). 1 is docs/audits/README.md's
+rule-1 prose naming uc3-elite-team-boundary-inspection-2026-11-12.md, a peer report still
+untracked at this commit; it is the same class as the pre-existing UNTRACKED mentions and
+converts to live the moment the peer session lands it. Zero live defects. Lore gate, measured
+after the commit against the frozen 599/75 + 351: docs 602/75 (+3, all peer: the
+UMAMUSUME_REFERENCE archive pass's two stable-measurement lines and the newly-tracked
+ki-82-ki-133-resolution-plan), code 351 unchanged; this round's embedded bodies added zero
+hits (pre-checked per-fragment). Parity tests at the landed commit: DocCitationParityTest
+and LoreGateParityTest 14 passed, 34 assertions. Containment re-proved from the landed
+blob: 3/3 regions, 532 non-blank body lines, 0 missing; each region's leftover accounted
+exactly (anchor + banner + blanks +, for change-boundary only, the 9 banner-recorded
+Decision-6 lines). P&B fence parity balanced (210 fence lines; the three folded sources
+contain no fences of their own). Drift-zero on all four landed masters.
