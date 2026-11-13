@@ -101,6 +101,10 @@ const UNAVAILABLE_REASON = 'Available when the career is completed';
 const SCOPED_NAMES: Record<string, string> = {
     deck: 'This run\'s Deck',
     inheritance: 'This run\'s Inheritance',
+    // Walk-8 E-02: the global rail carries `Skills` (`/skills`, the library) and so does this row
+    // (`/training-runs/N/skills`, the run's planner); the walk clicked the wrong one first. Same
+    // mechanism as deck/inheritance: the run-scoped step's accessible name carries the scope.
+    skills: 'This run\'s Skills',
 };
 
 const ariaName = (key: string, label: string): string | undefined => SCOPED_NAMES[key] ?? undefined;

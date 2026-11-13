@@ -30,10 +30,12 @@ const STEPS = ['Cockpit', 'Training', 'Races', 'Skills', 'Events', 'Inheritance'
 
 // KI-131: two steps' accessible names carry the run scope where their visible labels collide
 // with the global rail's mobile words (`Legacy Lab` -> `Legacy`, `Support Cards` -> `Deck`). The
-// visible text never changed; the loop needs the name a screen reader hears.
+// visible text never changed; the loop needs the name a screen reader hears. Walk-8 E-02 adds the
+// third: the global rail's `Skills` (`/skills`, the library) and this row's (`/training-runs/N/skills`).
 const STEP_NAMES: Record<string, string> = {
     Inheritance: "This run's Inheritance",
     Deck: "This run's Deck",
+    Skills: "This run's Skills",
 };
 
 const stepName = (label: string): string => STEP_NAMES[label] ?? label;
@@ -148,4 +150,20 @@ test('the old per-screen door pair is gone and Training marks its own step', asy
     await page.goto(`${createdRunUrls[0]}/training`, { waitUntil: 'domcontentloaded' });
     await expect(page.getByRole('link', { name: 'Career Cockpit' })).toHaveCount(0);
     await expect(nav.getByRole('link', { name: 'Training', exact: true })).toHaveAttribute('aria-current', 'step');
+});
+
+test('the run-scoped Skills step does not collide with the global rail (walk-8 E-02)', async ({ page }) => {
+    // Walk 8 clicked the sidebar `Skills` (`/skills`, the library) when it meant this run's planner
+    // (`/training-runs/N/skills`): two links, one accessible name, one page. The step's name carries
+    // the scope, the same mechanism deck and inheritance already use.
+    const runUrl = await startCareer(page, 'unity_cup');
+
+    await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const nav = page.getByRole('navigation', { name: 'Career' });
+
+    await expect(nav.getByRole('link', { name: "This run's Skills" })).toBeVisible();
+    // The bare name must not resolve inside the career nav any more.
+    await expect(nav.getByRole('link', { name: 'Skills', exact: true })).toHaveCount(0);
 });
