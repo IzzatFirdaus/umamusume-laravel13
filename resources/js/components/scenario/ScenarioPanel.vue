@@ -393,9 +393,13 @@ const emptyText = computed<string>(() =>
                  the same three the Career Result prints, read from one server-side reader (the
                  `FinaleReader`) so no two screens can disagree. The label is notice 905's noun; the
                  catalogue row's own title is KI-82, which is why it does not travel here. -->
-            <p v-if="props.scenario.finale_state !== null" class="mt-2 text-sm text-ink">
+            <p v-if="props.scenario.finale_state !== null" data-field="finale-line" class="mt-2 text-sm text-ink">
                 <span class="font-semibold text-ink-strong">Finale</span>:
-                {{ props.scenario.finale_state.label }}.
+                <!-- Walk-8 E-15 (S09): the sentence printed the scenario's own name here
+                     (`Finale: Unity Cup: not yet reached`) on a card whose heading already reads that
+                     name and a screen that has stated it above. It is the same `label` key the panel
+                     heading carries, so it is dropped rather than restated; the three states below
+                     are unchanged. -->
                 <template v-if="!props.scenario.finale_state.reached">Not yet reached.</template>
                 <template v-else-if="props.scenario.finale_state.outcome === null">Reached; outcome not recorded.</template>
                 <template v-else>

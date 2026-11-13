@@ -347,3 +347,17 @@ test('names the band carrier, states the low-band ambiguity, and separates the t
     // claimed here as rendered.
     expect((await page.locator('body').innerText()).includes('All Attributes +30')).toBe(false);
 });
+
+test('the finale line does not restate the scenario the card is headed with (walk-8 E-15)', async ({ page }) => {
+    // Walk-8 S09: `Finale: Unity Cup: not yet reached` repeated the scenario's own name on a card
+    // whose `h2` already reads `Unity Cup` and a screen that has stated it above. The sentence keeps
+    // the three states and drops only the repeated label.
+    await openUnityCupCockpit(page);
+    await openScenarioDetail(page);
+
+    const line = page.locator('[data-field="finale-line"]');
+    await expect(line).toBeVisible();
+    await expect(line).toContainText('Finale');
+    await expect(line).toContainText('Not yet reached.');
+    await expect(line).not.toContainText('Unity Cup');
+});
