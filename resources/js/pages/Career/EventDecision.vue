@@ -399,7 +399,17 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                         <span class="dirty" role="status">
                             {{ form.choice_label === '' ? 'No option selected' : form.choice_label + ' selected' }}
                         </span>
-                        <button type="button" class="btn btn-quiet min-h-11" title="The build has no undo; this screen proposes one.">Undo turn {{ undoableTurn }}</button>
+                        <!-- R7-21, second occurrence (walk-8 F-09/F-32): disabled, matching what the title
+                             says and matching its three siblings — `TrainingDetail.vue`,
+                             `RaceDecision.vue` and `Timeline.vue` all carry the binding. The label still
+                             names a real turn, the last logged one, because an undo that arrives later
+                             will remove exactly that turn. -->
+                        <button
+                            type="button"
+                            class="btn btn-quiet min-h-11"
+                            disabled
+                            title="The build has no undo; this screen proposes one."
+                        >Undo turn {{ undoableTurn }}</button>
                         <a :href="props.run.run_url" class="btn min-h-11 inline-flex items-center">Skip</a>
                         <button
                             type="submit"

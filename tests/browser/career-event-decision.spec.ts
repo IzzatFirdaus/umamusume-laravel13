@@ -177,3 +177,15 @@ test('prefills the same turn TrainingDetail names, on the same run (R7-32)', asy
     // is what this catches: on a snapshot standing at turn 67 it prefilled 67 here and 68 there.
     expect(eventPrefill).toBe(trainingPrefill);
 });
+
+test('renders the undo disabled, matching what it says about itself (R7-21, walk-8 F-09)', async ({ page }) => {
+    // R7-21 fixed Training detail, Race decision and the Timeline; the Event decision kept the
+    // control live with the same title claiming the build has no undo. Walk 8 (F-09/F-32) is the
+    // second occurrence. The binding matches its three siblings: disabled + the reason in `title`.
+    await openEventDecision(page);
+
+    const undo = page.getByRole('button', { name: /Undo turn \d+/ });
+    await expect(undo).toBeVisible();
+    await expect(undo).toBeDisabled();
+    await expect(undo).toHaveAttribute('title', /no undo/);
+});
