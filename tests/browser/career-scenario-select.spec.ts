@@ -79,6 +79,10 @@ test.describe('Scenario Selection', () => {
         // abbreviates and drops the base on this card (career-scenario.html:145 prints
         // "Caps Sta 1900 · Wit 1500"). The page reads from `ScenarioCaps` and is consistent across all
         // four cards, including URA's "1400 ×5", so the page is not corrected to the mock.
+        // walk-8 U-01 / R7-63: the client's full label renders where a source states one.
+        await expect(card(page, 'Unity Cup').locator('[data-field="full-label"]'))
+            .toHaveText('Unity Cup: Shine On, Team Spirit!');
+
         await expect(card(page, 'URA Finale')).toContainText(/1400\s*×5/);
         await expect(card(page, 'Unity Cup')).toContainText(/1300\s*×4/);
         await expect(card(page, 'Unity Cup')).toContainText(/Wit\s*1800/);

@@ -36,6 +36,8 @@ interface Optimizes {
 interface ScenarioCard {
     key: string;
     label: string;
+    /** The client's own full label where a source states one (`U-01`/`R7-63`); null otherwise. */
+    full_label: string | null;
     documented: boolean | null;
     /** The matrix's baseline entry (`config/scenarios.baseline`); the card states it as a pill. */
     is_baseline: boolean;
@@ -257,6 +259,12 @@ function continueStep(): void {
                          a heading that swallowed them would carry an accessible name longer than the
                          scenario, and `card()` in the spec addresses each card by that exact name. -->
                     <span v-if="card.is_baseline" class="pill pill-neutral">Baseline</span>
+                    <!-- walk-8 U-01 (R7-63): the client's full label, where a source states one.
+                         Outside the radio's `<label>` on purpose: inside it, the control's accessible
+                         name would swallow this line. -->
+                    <p v-if="card.full_label !== null" data-field="full-label" class="basis-full text-xs text-ink-muted">
+                        {{ card.full_label }}
+                    </p>
                     <span
                         v-if="card.live_on_global"
                         data-region="tag"

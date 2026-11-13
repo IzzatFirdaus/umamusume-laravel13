@@ -161,6 +161,12 @@ return [
 
         'ura_finale' => [
             'label' => 'URA Finale',
+            /* The client's own full scenario label, where a source states one (walk-8 U-01 /
+               R7-63). The short `label` above stays what every surface prints; this is the fuller
+               client name the walk found had no home. Sources, verbatim, `UMAMUSUME_REFERENCE.md`
+               §1.6.1: the table's own "(full: ...)" forms for URA Finale and Unity Cup, and the
+               tier-A available-scenarios list in the same section for the other two. */
+            'full_label' => 'The Beginning: URA Finale',
             'metadata' => [
                 'summary' => 'The first and most basic career scenario, and the Global launch baseline: three years of turns between training, rest, recreation and racing, with no team system, no shop and no mid-scenario currency on top.',
                 'description' => 'Take a trainee through three in-game years, alternating training, rest, recreation and racing while managing Energy and Mood, so the career ends with strong stats, a good skill set and a completed Unique Skill. Its guide calls it the purest scenario for learning the fundamentals.',
@@ -409,6 +415,12 @@ return [
 
         'unity_cup' => [
             'label' => 'Unity Cup',
+            /* The client's own full scenario label, where a source states one (walk-8 U-01 /
+               R7-63). The short `label` above stays what every surface prints; this is the fuller
+               client name the walk found had no home. Sources, verbatim, `UMAMUSUME_REFERENCE.md`
+               §1.6.1: the table's own "(full: ...)" forms for URA Finale and Unity Cup, and the
+               tier-A available-scenarios list in the same section for the other two. */
+            'full_label' => 'Unity Cup: Shine On, Team Spirit!',
             'live_on_global' => '2025-11-06',
             // The scenario's Global ruleset date, from the 2026-10-15 scenario-field-metadata artifact.
             // It is the rework instant a source pins the numbering to, not `app.ruleset`, which stays
@@ -640,6 +652,12 @@ return [
 
         'trackblazer' => [
             'label' => 'Trackblazer',
+            /* The client's own full scenario label, where a source states one (walk-8 U-01 /
+               R7-63). The short `label` above stays what every surface prints; this is the fuller
+               client name the walk found had no home. Sources, verbatim, `UMAMUSUME_REFERENCE.md`
+               §1.6.1: the table's own "(full: ...)" forms for URA Finale and Unity Cup, and the
+               tier-A available-scenarios list in the same section for the other two. */
+            'full_label' => 'Trackblazer: Start of the Climax',
             'metadata' => [
                 'summary' => 'Make a New Track, the anniversary scenario whose headline difference is no fixed schedule of mandatory race goals: race timing stays the Trainer\'s own.',
                 'description' => 'Where URA Finale and Unity Cup lock a run into a fixed schedule of mandatory race goals and end the career when too many are missed, Trackblazer publishes no race goals. The guide is marked superseded, so its remaining detail reads from the publisher references.',
@@ -1076,6 +1094,12 @@ return [
 
         'our_grand_concert' => [
             'label' => 'Our Grand Concert',
+            /* The client's own full scenario label, where a source states one (walk-8 U-01 /
+               R7-63). The short `label` above stays what every surface prints; this is the fuller
+               client name the walk found had no home. Sources, verbatim, `UMAMUSUME_REFERENCE.md`
+               §1.6.1: the table's own "(full: ...)" forms for URA Finale and Unity Cup, and the
+               tier-A available-scenarios list in the same section for the other two. */
+            'full_label' => 'Brighter Together: Our Grand Concert',
             // KI-82: the catalogue row's `name_en` for this scenario's final reads
             // "URA Finals Final (Grand Live)", which borrows URA's finals vocabulary for a scenario whose
             // own finale the guide names "the Grand Live / Grand Concert in Senior Year"

@@ -327,3 +327,23 @@ it('gives a planning run to the ceiling owner only once a scenario is chosen', f
         ->and($run?->scenarioKey())->toBe('trackblazer')
         ->and(ScenarioCaps::forRun($run)['Stamina'])->toBe(1900);
 });
+
+it('carries the scenario full label where a source states one (U-01/R7-63)', function (): void {
+    // Walk-8 U-01: the client's own full scenario label never reached a surface, so a card (and a
+    // run built from it) could only ever be named by the short key's label. The four strings are
+    // verbatim from `UMAMUSUME_REFERENCE.md` section 1.6.1 — rows 1 and 2 carry their own
+    // "(full: …)" forms, and rows 3 and 4 take the tier-A available-scenarios list in the same
+    // section ("Brighter Together: Our Grand Concert, Trackblazer: Start of the Climax, Unity Cup:
+    // Shine On, Team Spirit!, and URA Finale"). The short `label` stays what every other surface
+    // prints; nothing here renames a key or a panel.
+    $this->get('/career/setup/scenario')
+        ->assertOk()
+        ->assertInertia(function (Assert $page): void {
+            $byKey = collect($page->toArray()['props']['scenarios'])->keyBy('key');
+
+            expect($byKey['ura_finale']['full_label'])->toBe('The Beginning: URA Finale')
+                ->and($byKey['unity_cup']['full_label'])->toBe('Unity Cup: Shine On, Team Spirit!')
+                ->and($byKey['trackblazer']['full_label'])->toBe('Trackblazer: Start of the Climax')
+                ->and($byKey['our_grand_concert']['full_label'])->toBe('Brighter Together: Our Grand Concert');
+        });
+});

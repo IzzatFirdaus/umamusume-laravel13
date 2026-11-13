@@ -167,6 +167,9 @@ class ScenarioSelectController extends Controller
             $cards[] = [
                 'key' => $key,
                 'label' => (string) ($def['label'] ?? $key),
+                // Walk-8 U-01 / R7-63: the client's full scenario label, null on any entry that
+                // states none (the page then prints nothing rather than restating the short one).
+                'full_label' => isset($def['full_label']) ? (string) $def['full_label'] : null,
                 'documented' => $def['documented'] ?? null,
                 // The baseline entry is the scenario every other card's panel list is subtracted
                 // against, and the card states it as the HFW's "Baseline" pill. Derived from
