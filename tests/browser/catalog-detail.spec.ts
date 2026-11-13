@@ -153,10 +153,12 @@ test('prints the Japanese name in its own language and links the provenance sour
     await page.locator('details#provenance summary').click();
     await expect(page.getByRole('link', { name: /character-cards/ }).first()).toBeVisible();
 
-    // The voice actor's own Japanese name is a language part too (WCAG 3.1.2): without lang="ja"
-    // a screen reader reads the kana as English.
-    const voiceActor = page.getByText('Voice actor').locator('xpath=following-sibling::td');
-    await expect(voiceActor.locator('[lang="ja"]')).toHaveCount(1);
+    // The credit's own Japanese name is a language part too (WCAG 3.1.2): without lang="ja"
+    // a screen reader reads the kana as English. The row's label is `Romanisation`, not
+    // `Voice actor`: `UMAMUSUME_REFERENCE.md` §3.3 (corrected 2026-10-15) holds that `va_en`
+    // is the romanisation of the same single credit, so the label names what the column is.
+    const credit = page.getByText('Romanisation').locator('xpath=following-sibling::td');
+    await expect(credit.locator('[lang="ja"]')).toHaveCount(1);
 
     // The handoff names the trainee it starts, so the button says whose career it begins.
     await expect(page.getByRole('button', { name: /Start career with Special Week/ })).toBeVisible();

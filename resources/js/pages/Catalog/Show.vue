@@ -274,12 +274,12 @@ const cardH2 = 'text-base font-bold text-ink-strong';
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th scope="row" :class="rowLabel">Voice actor</th>
+                                    <th scope="row" :class="rowLabel">Romanisation</th>
                                     <td :class="rowValue">
                                         <template v-if="props.trainee.profile?.va_ja">
                                             <span lang="ja">{{ props.trainee.profile.va_ja }}</span>
                                             <span v-if="props.trainee.profile.va_en" class="text-ink-muted"> ({{ props.trainee.profile.va_en }})</span>
-                                            <span v-else class="block text-xs text-ink-muted">No English voice actor is listed for her.</span>
+                                            <span v-else class="block text-xs text-ink-muted" title="No romanisation recorded for this credit.">N/A</span>
                                         </template>
                                         <span v-else>Not recorded</span>
                                     </td>
