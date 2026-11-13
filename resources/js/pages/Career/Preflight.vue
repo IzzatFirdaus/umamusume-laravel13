@@ -189,6 +189,13 @@ const props = defineProps<{
             stats: { key: string; label: string; value: number | null }[];
             races: { distance: string | null; surface: string | null; style: string | null };
             skills: { names: string[] };
+            /**
+             * Why `build.target` is absent, when it is: null when no target and no ceilings exist
+             * (the "not entered" sentence is the whole truth), a named reason when ceilings exist
+             * without target metadata, or when a stored target can no longer be read. Plan v2 slice
+             * 2.4 (reshaped): walk-8 F-06 was one sentence covering three causes (PA-03).
+             */
+            reason: string | null;
         };
         /**
          * The derivable gaps in the entered data. The controller still composes them and
@@ -638,7 +645,7 @@ const CAREER_TURNS = 72;
                             <p class="k">Distance</p>
                             <p class="v">
                                 <template v-if="props.contract.build.target">{{ props.contract.build.target.distance }}</template>
-                                <AbsenceValue v-else compact reason="The target step has not been entered." />
+                                <AbsenceValue v-else compact :reason="props.contract.target.reason ?? 'The target step has not been entered.'" />
                             </p>
                         </div>
                         <div class="tile">
@@ -658,7 +665,7 @@ const CAREER_TURNS = 72;
                             <p class="k">Target total</p>
                             <p class="v font-mono tabular-nums">
                                 <template v-if="targetTotal !== null">{{ targetTotal.toLocaleString('en-US') }}</template>
-                                <AbsenceValue v-else compact reason="The target step has not been entered." />
+                                <AbsenceValue v-else compact :reason="props.contract.target.reason ?? 'The target step has not been entered.'" />
                             </p>
                         </div>
                         <div class="tile">
@@ -780,7 +787,7 @@ const CAREER_TURNS = 72;
                                 <th scope="row" class="py-1.5 pr-2 font-normal text-ink-muted">Purpose</th>
                                 <td class="py-1.5 text-ink">
                                     <template v-if="props.contract.build.target">{{ props.contract.build.target.purpose_label }}</template>
-                                    <AbsenceValue v-else compact reason="The target step has not been entered." />
+                                    <AbsenceValue v-else compact :reason="props.contract.target.reason ?? 'The target step has not been entered.'" />
                                 </td>
                             </tr>
                             <tr>
@@ -790,7 +797,7 @@ const CAREER_TURNS = 72;
                                         {{ props.contract.build.target.surface }} {{ props.contract.build.target.distance }} ·
                                         {{ props.contract.build.target.style }}
                                     </template>
-                                    <AbsenceValue v-else compact reason="The target step has not been entered." />
+                                    <AbsenceValue v-else compact :reason="props.contract.target.reason ?? 'The target step has not been entered.'" />
                                 </td>
                             </tr>
                             <!--

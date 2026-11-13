@@ -57,6 +57,12 @@ use InvalidArgumentException;
 class PreflightController extends Controller
 {
     /**
+     * Whether a stored target was entered but cannot be read (plan v2 slice 2.4, reshaped).
+     * Set by `targetPayload()`; `targetReason()` names it for the page.
+     */
+    private bool $targetUnreadable = false;
+
+    /**
      * `GET /career/setup/preflight`.
      */
     public function show(): Response
@@ -121,6 +127,8 @@ class PreflightController extends Controller
                         'style' => $target?->style,
                     ],
                     'skills' => ['names' => $target->skillPriorities ?? []],
+                    // Plan v2 slice 2.4 (reshaped): why the target section is absent, when it is.
+                    'reason' => $target === null ? $this->targetReason() : null,
                 ],
                 // The derivable warnings. Phase F keeps them computed because the trigger rules are
                 // domain behavior with their own tests (`CareerPreflightTest`), and the page's Checks
@@ -215,8 +223,32 @@ class PreflightController extends Controller
         try {
             return BuildTargetPayload::fromArray($stored);
         } catch (InvalidArgumentException) {
+            $this->targetUnreadable = true;
+
             return null;
         }
+    }
+
+    /**
+     * Why `build.target` is absent, when it is, or null when absence needs no qualification.
+     *
+     * Plan v2 slice 2.4 (reshaped). Walk-8 F-06 (reconciled to R4-03/PA-03): a draft whose target
+     * step WAS entered printed "The target step has not been entered" because a partial payload
+     * parses to null and one sentence covered three causes. `ADR-0025`'s contract keeps
+     * `build_target` null for a ceilings-only save, and `BuildTargetPayload::assertKeys()` refuses a
+     * seventh key, so the distinction travels as this reason string rather than a payload key.
+     */
+    private function targetReason(): ?string
+    {
+        if ($this->targetUnreadable) {
+            return 'A build target was entered, but it cannot be read. Re-enter step 3.';
+        }
+
+        if (SetupDraft::caps() !== []) {
+            return 'Not entered · ceilings only.';
+        }
+
+        return null;
     }
 
     /**

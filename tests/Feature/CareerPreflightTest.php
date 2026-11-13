@@ -725,3 +725,69 @@ it('seeds nothing when the draft names no costume form', function (): void {
 
     expect($run->skills()->count())->toBe(0);
 });
+
+/*
+ * Plan v2 (post-audit) slice 2.4, reshaped: the walk-8 F-06 defect is the sentence, not the
+ * payload. `StoreBuildTargetRequest` keeps `build_target` null for a ceilings-only save — that is
+ * `ADR-0025`'s implemented contract ("a run may hold ceilings and no target", the request's own
+ * docblock), and `BuildTargetPayload::assertKeys()` refuses a seventh key, so a `ceilings_only`
+ * payload key is not available to distinguish the states. The distinction therefore travels as a
+ * reason the contract states, and Preflight prints that reason where it used to print one sentence
+ * for every cause (PA-03's acceptance: "a draft carrying ceilings but no purpose renders a sentence
+ * naming what is missing").
+ */
+it('names ceilings-only and unreadable target drafts instead of calling them unentered', function (): void {
+    $fixture = preflightFixture();
+    $draft = preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents']);
+    unset($draft['build_target']);
+    $draft['caps'] = ['cap_speed' => 1325];
+    session([SetupDraft::SESSION_KEY => $draft]);
+
+    test()->get(route('career.preflight'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/Preflight')
+            ->where('contract.build.target', null)
+            ->where('contract.target.reason', 'Not entered · ceilings only.'));
+});
+
+it('names an unreadable stored target rather than a step the Trainer never opened', function (): void {
+    $fixture = preflightFixture();
+    $draft = preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents']);
+    $draft['build_target'] = ['purpose' => 'A value the reader refuses'];
+    session([SetupDraft::SESSION_KEY => $draft]);
+
+    test()->get(route('career.preflight'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('contract.build.target', null)
+            ->where('contract.target.reason', 'A build target was entered, but it cannot be read. Re-enter step 3.'));
+});
+
+it('leaves the reason null when no ceilings and no target metadata exist', function (): void {
+    $fixture = preflightFixture();
+    $draft = preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents']);
+    unset($draft['build_target']);
+    session([SetupDraft::SESSION_KEY => $draft]);
+
+    test()->get(route('career.preflight'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('contract.target.reason', null));
+});
+
+it('stores ceilings-only drafts as cap columns with a null build target, per ADR-0025', function (): void {
+    $umamusume = Umamusume::factory()->create();
+
+    SetupDraft::write([
+        'scenario' => 'ura_finale',
+        'umamusume_id' => $umamusume->id,
+        'caps' => ['cap_speed' => 1325],
+    ]);
+
+    $this->put(route('career.preflight.store'))->assertRedirect();
+
+    $run = TrainingRun::query()->where('umamusume_id', $umamusume->id)->sole();
+
+    expect($run->cap_speed)->toBe(1325)
+        ->and($run->build_target)->toBeNull();
+});
