@@ -261,7 +261,7 @@ test('walks the whole career from the wizard to a filed Veteran', async ({ page 
 
     await page.goto(`${runUrl}/skills`, { waitUntil: 'domcontentloaded' });
     await page.locator('#app > *').first().waitFor();
-    await page.locator('summary').filter({ hasText: 'Build target, recorded skills and the add form' }).click();
+    await page.locator('summary').filter({ hasText: 'Build target and recorded skills' }).click();
     await expect(page.getByRole('heading', { name: 'Skill Point coverage' })).toBeVisible();
 
     // --- Finish through the status flow, then file the Veteran from the Result screen ---

@@ -616,8 +616,30 @@ const coverageConstants = computed(() =>
         </div>
         <p v-if="pickerError" role="alert" class="mt-2 text-sm text-risk">{{ pickerError }}</p>
 
+        <!-- Slice 10: the add affordance, ON THE OPEN PAGE (plan v2 slice 2.2, F-12): it used to sit
+             inside the disclosure below and was unreachable until a summary was clicked. The writes are
+             the reason the screen exists; the read-backs stay disclosed. -->
+        <section aria-labelledby="add-skill-heading" class="card mt-3.5">
+            <h2 id="add-skill-heading" class="text-lg font-semibold text-ink-strong">Add a skill</h2>
+            <p v-if="props.picker_skills.length === 0" class="mt-1 text-sm text-ink-muted">
+                Nothing left to add: the catalogue offers no Global skill this run does not already hold.
+            </p>
+            <form v-else class="mt-3 flex max-w-3xl flex-wrap items-end gap-3 text-sm" @submit.prevent="addPickedSkill">
+                <SearchableSkillPicker
+                    :options="props.picker_skills.map(s => ({ id: s.id, name: s.name, type: '' }))"
+                    label="Skill to add"
+                    placeholder="Search and add a skill…"
+                    hint="Pick a skill by name; type to filter. The selected skill is added to the run."
+                    @select="onSkillPicked"
+                />
+                <BaseButton type="submit" variant="secondary" size="md" :disabled="!pickedSkillId || form.processing">
+                    Add to run
+                </BaseButton>
+            </form>
+        </section>
+
         <details class="card mt-3.5">
-            <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">Build target, recorded skills and the add form</summary>
+            <summary class="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-ink-strong">Build target and recorded skills</summary>
             <div class="mt-2">
                 <section aria-labelledby="skills-target-heading" class="rounded-md border border-rule bg-panel p-4">
                             <h2 id="skills-target-heading" class="text-lg font-semibold text-ink-strong">Your target</h2>
@@ -895,28 +917,6 @@ const coverageConstants = computed(() =>
                              the acquisition status is a record of what the run actually has. The two are separate
                              writes on separate routes so one cannot overwrite the other. This form POSTs through
                              `runs.skills.sync`, the same Form Request the 2.0.0 record screen used. -->
-                        <!-- Slice 10: the add affordance. The editor below edits rows that already exist; this is
-                             where a run gains one it has never held, so the write path and the vocabulary stay the
-                             endpoint's own. -->
-                        <section aria-labelledby="add-skill-heading" class="mt-6 rounded-md border border-rule bg-panel p-4">
-                            <h2 id="add-skill-heading" class="text-lg font-semibold text-ink-strong">Add a skill</h2>
-                            <p v-if="props.picker_skills.length === 0" class="mt-1 text-sm text-ink-muted">
-                                Nothing left to add: the catalogue offers no Global skill this run does not already hold.
-                            </p>
-                            <form v-else class="mt-3 flex max-w-3xl flex-wrap items-end gap-3 text-sm" @submit.prevent="addPickedSkill">
-                                <SearchableSkillPicker
-                                    :options="props.picker_skills.map(s => ({ id: s.id, name: s.name, type: '' }))"
-                                    label="Skill to add"
-                                    placeholder="Search and add a skill…"
-                                    hint="Pick a skill by name; type to filter. The selected skill is added to the run."
-                                    @select="onSkillPicked"
-                                />
-                                <BaseButton type="submit" variant="secondary" size="md" :disabled="!pickedSkillId || form.processing">
-                                    Add to run
-                                </BaseButton>
-                            </form>
-                        </section>
-                
                         <AcquisitionStatusEditor
                             v-if="props.run.skills_sync_url !== ''"
                             class="mt-6"

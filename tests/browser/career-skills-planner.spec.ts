@@ -237,10 +237,13 @@ test('prints each hint caption once, never "Hint Lvl Hint Lvl 1" (R6-15)', async
     await expect(ladder.getByText(/Hint Lvl Hint Lvl/)).toHaveCount(0);
 });
 
-test('keeps the build target and add-skill writers reachable in one disclosure', async ({ page }) => {
+test('keeps the build target read-backs in one disclosure, with the writer on the open page (F-12)', async ({ page }) => {
+    // F-12 (plan v2 slice 2.2): the add-skill writer was inside this disclosure and unreachable
+    // without opening it. The writer moved above; the disclosure keeps the read-backs. The new
+    // F-12 case pins the writer's open-page reachability; this case pins what stayed.
     await openPlanner(page);
 
-    const summary = page.getByText('Build target, recorded skills and the add form');
+    const summary = page.getByText('Build target and recorded skills');
 
     await expect(summary).toBeVisible();
     await summary.click();
@@ -281,7 +284,7 @@ test('passes an axe scan at WCAG A and AA', async ({ page }) => {
  */
 async function openRecommendation(page: import('@playwright/test').Page) {
     await openPlanner(page);
-    await page.getByText('Build target, recorded skills and the add form').click();
+    await page.getByText('Build target and recorded skills').click();
 
     const panel = page.locator('section[aria-labelledby="skills-recommended-heading"]');
     await expect(panel).toBeVisible();
@@ -362,7 +365,7 @@ test('adds a picked skill once even when the submit is double-clicked', async ({
 
     // The add form lives inside the writers disclosure ("Build target, recorded skills and the add
     // form"), which is collapsed by default.
-    const disclosure = page.locator('details').filter({ hasText: 'Build target, recorded skills and the add form' }).first();
+    const disclosure = page.locator('details').filter({ hasText: 'Build target and recorded skills' }).first();
     if ((await disclosure.getAttribute('open')) === null) {
         await disclosure.locator('summary').first().click();
     }
@@ -443,7 +446,7 @@ test('an added plan skill survives the write and a cold reload (UX-18a)', async 
     // sync the savebar's commit uses, and the sibling double-click case pins the dedup half. This
     // case pins the persistence half: the row is in the database, so a cold reload still shows it
     // and the picker no longer offers it.
-    const disclosure = page.locator('details').filter({ hasText: 'Build target, recorded skills and the add form' }).first();
+    const disclosure = page.locator('details').filter({ hasText: 'Build target and recorded skills' }).first();
     if ((await disclosure.getAttribute('open')) === null) {
         await disclosure.locator('summary').first().click();
     }
@@ -459,11 +462,32 @@ test('an added plan skill survives the write and a cold reload (UX-18a)', async 
     // The recorded groups list the skill, and the picker excludes what the run already holds.
     await expect(page.getByText('Gourmand').first()).toBeVisible();
 
-    const reopened = page.locator('details').filter({ hasText: 'Build target, recorded skills and the add form' }).first();
+    const reopened = page.locator('details').filter({ hasText: 'Build target and recorded skills' }).first();
     if ((await reopened.getAttribute('open')) === null) {
         await reopened.locator('summary').first().click();
     }
 
     await page.getByRole('textbox', { name: 'Skill to add' }).fill('Gourmand');
     await expect(page.getByRole('option', { name: /Gourmand/ })).toHaveCount(0);
+});
+
+/*
+ * F-12 (walk 8, `RS-UC-2026-13`): the skill search field lived inside a collapsed `<details>` and
+ * sat 274 px below the scrollable area, so it could not be focused or typed into until a `summary`
+ * elsewhere was clicked. Plan v2 (post-audit) slice 2.2: the add-skill writer is the planner's
+ * primary write and must be reachable with no disclosure opened. The `Build target, recorded skills
+ * and the add form` disclosure keeps the read-backs; the writer moves above it.
+ *
+ * This case opens NO disclosure. At the defect it fails because the field is not visible inside a
+ * closed `<details>`; after the fix the field is on the open page and typing filters.
+ */
+test('reaches the add-skill picker with no disclosure opened (F-12)', async ({ page }) => {
+    await openPlanner(page);
+
+    // No summary is clicked in this case. The picker must be visible on first paint.
+    const picker = page.getByRole('textbox', { name: 'Skill to add' });
+    await expect(picker).toBeVisible();
+
+    await picker.fill('Gourmand');
+    await expect(page.getByRole('option', { name: /Gourmand/ }).first()).toBeVisible();
 });
