@@ -533,8 +533,12 @@ test('the Hints filter acts once the run records a hint level (F-29)', async ({ 
     // Record a hint through the same write the acquisition editor posts (`runs.skills.sync`): read
     // the sync URL and a pooled skill id from the page's own payload rather than hard-coding either.
     const { syncUrl, skillId } = await page.evaluate(() => {
+        type Candidate = { id: number | null };
+        type Group = { rows: Candidate[] };
         const el = document.querySelector('script[data-page="app"]');
-        const props = JSON.parse(el?.textContent ?? '{}').props ?? {};
+        const props = (JSON.parse(el?.textContent ?? '{}') as {
+            props?: { groups?: Group[]; run?: { skills_sync_url?: string } };
+        }).props ?? {};
         const groups = props.groups ?? [];
         const row = groups.flatMap((group) => group.rows).find((candidate) => candidate.id !== null);
 
