@@ -28717,3 +28717,399 @@ implicit commitment" as settled, but the landed `282e5437` implements implicit c
 1 needs one word from the owner before it touches that code: **enforce the strict revert
 invariant (remove implicit commitment), or amend §9.6 to accept it.** F-08's slice is unblocked
 (§9.6 settled its mechanism). F-13's observation slice is unblocked (no production code).
+
+## scenario-detail-design-language-survey-2026-11-09.md
+
+> **Folded into this master in consolidation Round 28 (owner-ordered, 2026-11-13) from**
+> `docs/research/scenario-detail-design-language-survey-2026-11-09.md` (121 lines). It is the
+> thirteen-page scenario-detail design-language research of 2026-11-09 whose §2–§3 measurement
+> grounded the W.1 ruling and its three siblings recorded in `DESIGN.md` and in section
+> `## 2026-11-10-scenario-detail-remodel.md` of `docs/research-scratch/PROCESS-PLANS.md`.
+> The source's own `#` title follows verbatim one level demoted as `##`, and its remaining headings keep one level of
+> demotion; headings inside fenced blocks were never demoted; the body is otherwise untouched.
+> Live citation repoints were applied outside this body before the fold: `DESIGN.md`, the
+> scenario-detail HFW `README.md` and `scenario-detail-hfw.html` (two sites), and `PLANS-AND-BRIEFS.md`
+> now name this section. The source was untracked (a peer session's in-flight research), so this
+> section is its only copy; containment was proven against the bytes being deleted. Its predecessor
+> cites (the closed `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md` path and the landed
+> `docs/proposals/2026-11-09-scenario-detail-upgrade.md` path) were already superseded pointers on
+> the day and stay verbatim; its evidence directory `docs/research/RS-UC-SCENARIO-DETAIL-2026-11-09/`
+> stays on disk. The source's 121 LF line terminators were normalised to this master's CRLF
+> working-copy convention; the repository's `.gitattributes` store the result as LF.
+
+## Research — Scenario detail page vs. the app's design language
+
+**Status:** research, not plan, not fix. Awaiting owner ruling on §5's three questions.
+**Date opened:** 2026-11-09
+**Predecessor context:** `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md` (closed); `docs/proposals/2026-11-09-scenario-detail-upgrade.md` (plan landed, slices implemented).
+**Base commit at survey:** `142bb171e902158b8815c1dd3e7f0de0cd85e938` (survey ran on the working tree carrying that commit + this session's landed alert/strip fixes, both of which touch copy only, not visual language).
+**`RENDERED_EVIDENCE = TRUE`** — Playwright Chromium 153.0.8010.12; screenshots at 764 px in `docs/research/RS-UC-SCENARIO-DETAIL-2026-11-09/`.
+
+---
+
+### §0 Pre-flight
+
+```
+git rev-parse HEAD   142bb171e902158b8815c1dd3e7f0de0cd85e938
+git status --short   7 modified (this session's landed plan slices) + 3 untracked doc paths (audit, plan, this survey's dir)
+git stash list       3 foreign stashes, untouched
+probe                launched 153.0.8010.12
+```
+
+Survey set verified against `resources/js/pages/`: all thirteen pages exist. Two wizard pages (`/career/setup/trainee`, `/career/setup/target`) render behind draft state but were reachable; Preflight rendered at 1.9 KB PNG (short page — legal, it is a summary step). Team Edit captured on run 7 (run 3 is gated to scenarios that record a team).
+
+---
+
+### §1 What "the v3.0.0 language" is
+
+The brief's three readings, measured:
+
+1. **A tagged release:** `git tag -l '3.0.*'` is **empty**. `VERSION.md:3`: "Current version: `3.0.0`, pre-release. Tagged: `0.1.0`, `2.0.1`, `2.0.2`, `2.1.0`, `2.1.1`." `VERSION.md:9` states `3.0.0` **is not tagged** and names the two conditions still blocking the tag. **No v3.0.0 artifact exists to point at.**
+2. **The current ship state:** this is what exists. `CHANGELOG.md:62` `## [3.0.0] - unreleased` records the HFW-parity landing (`docs/research-scratch/PROCESS-PLANS.md` § "v3.0.0 parity audit — Task A") and the 2026-10-28 parity audit found "32 divergent, 1 blank and 17 near pages", repaired 2026-10-30 — i.e. **the ship state IS the v3.0.0 language**, repaired toward the wireframes slice by slice.
+3. **`DESIGN.md` intent:** names the motifs (enamel sheen, argyle lattice bleed `DESIGN.md:497`, torn-chip) and says the lattice capsule "identifies a header as chrome rather than as data." No version marker in `DESIGN.md` ties it to 3.0.0; no ADR names a design-system version.
+
+**Answer: reading 2, by the codebase's own record.** "v3.0.0 language" = whatever the repaired majority pages render now. `VERSION.md:9`'s parity-audit sentence is the direct evidence that the app's majority was *deliberately* converged in this release cycle. Where `DESIGN.md` and shipped components disagree, code wins (`AGENTS.md` §2) — and here they agree on the motifs; the divergence is in *where* motifs are applied (§3).
+
+---
+
+### §2 Is the target an outlier, or one of many?
+
+Surveyed (screenshot set in the survey directory, all at 764 px):
+
+| Page | Layout | Card headers | Verdict |
+|---|---|---|---|
+| Dashboard `/` | bento-lite: 2-card asymmetric row | plain bold text (`Pick up where you left off`, `Needs you`) | majority language |
+| Wizard scenario step | flat, no cards | — | majority |
+| Wizard trainee / target / legacy / deck | flat, plain rounded panels, one left-stripe callout | plain | majority |
+| Cockpit | flat single column; `.card` sections (`Cockpit.vue:875,901,1026`) | plain `h2` sections | majority |
+| Training decision | flat, plain cards (`Disciplines`) | plain `h2` | majority |
+| Race decision | two plain cards side by side | plain text headings | majority |
+| Team edit | one `.card` (`TeamEdit.vue:86`), `h2 class="text-lg font-semibold text-ink-strong"` | plain `h2` | majority |
+| Run settings | one `.card` (`RunSettings.vue:190`), same `h2` | plain `h2` | majority |
+| **Scenario detail** | **stacked card column; every card headed by a lime capsule with lattice texture** | **`CapsuleHeader` (chrome pill), 10+ per page** | **target** |
+
+**The app has one majority language** — flat near-black surfaces, `.card` panels (`app.css:916`: `--color-panel` fill, 1px `--color-rule-soft` edge, 10px radius), plain `text-lg font-semibold` headings, chrome living in pills *outside* cards (nav tabs, status badges) — **and one outlier**: the scenario boards, whose every card is topped by the client's chrome capsule.
+
+21 career pages carry `.card`; only `SaveVeteran.vue` and `ScenarioDetail.vue` do not directly (ScenarioDetail's renderer brings its own). **The target is a genuine outlier, not one of several.**
+
+---
+
+### §3 The seven categories, measured
+
+| Category | Target (`file:line`) | App's majority (`file:line`) | Divergence or task-appropriate? |
+|---|---|---|---|
+| **Card shape** | `.card` in `ScenarioPanel.vue:295`, `UnityCupPanel.vue` ×6 — same token fill/edge/radius as every page (`app.css:916`) | `app.css:916` shared by 21 pages | **Not a divergence.** The card primitive is shared; only the header differs. |
+| **Panel header** | `CapsuleHeader.vue` — `h-11 rounded-full bg-chrome lattice-bleed` lime pill with argyle texture. 14 possible renders on a Unity Cup board (6 `UnityCupPanel` + 4 sub-panels + 2 `ScenarioPanel` strip + 2 `Cockpit/Panels`) | plain `h2 class="text-lg font-semibold text-ink-strong"` (`TeamEdit.vue:87`, `RunSettings.vue:191`, `TrainingDetail.vue:574+`); Cockpit sections plain `h2` | **Divergence — the core one.** `lattice-bleed` has exactly one call site: `CapsuleHeader.vue`. No non-scenario page mounts it. |
+| **Spacing scale** | `flex flex-col gap-3` stacks, `.card` padding 14/16 | same `.card` padding; `gap-3`/`gap-4` stacks | Not a divergence. |
+| **Type scale** | `text-sm`/`text-xs` body; capsule `text-lg font-semibold` (`CapsuleHeader.vue`); panel content `text-xs` dense tables | `text-lg font-semibold` headings + `text-sm`/`text-xs` body | Partial: the capsule's `text-lg` heading is heavier than the majority's card headings, but same family/scale. Minor. |
+| **Palette** | lime `--color-lattice #6ABE01` (`app.css:371`) on **every card top**; chrome fill `bg-chrome` | lime reserved for rings/borders/lattice "never behind white text" (`DESIGN.md:141`); majority cards show no lime | **Divergence in density, not in vocabulary.** The colour is a sanctioned token used exactly as `DESIGN.md` prescribes — the target just uses it ten times where the rest of the app uses it zero times. |
+| **Absence rendering** | `AbsenceValue` (`ScenarioPanel.vue:242`); but `UnityCupPanel.vue:324` still prints bare `N/A` in a `<span title>` for stat grades | `CareerStatePanel.vue:14-25` — `AbsenceValue` marker + reason, explicit `title`-alone deprecation | **Divergence, small.** One component (the stat-grades list) renders `N/A` the older way its sibling panel fixed. Same fix family as R7-19's label work. |
+| **Disclosure / expand** | no `<details>` except `AbsenceValue`'s; everything always-open | 7 career pages use `<details>` (`EventDecision`, `InheritanceEvent`, `LegacySelect`, `RaceDecision`, `SkillsPlanner`, `Timeline`, `TrainingDetail`) | **Task-appropriate difference, not divergence.** A board suite is reference material, not a decision flow; always-open matches its job. |
+
+**Bento-vs-flat (the brief's §3.1 question):** at 764 px the target reads stacked, same as everything else. The bento lives *inside* `UnityCupPanel.vue:183` (`grid-cols-1 @3xl:grid-cols-6 @5xl:grid-cols-12`) — a container-query bento that resolves to one column on this host's window. The Cockpit also carries container-query grids (`Cockpit.vue`, `Snapshot/Setup.vue`, `Veterans/Show.vue`). So **both styles are current app styles**; the target's grid is not foreign, merely its widest expression. On this host's 764 px window the bento never resolves, which contributes to the "looks different" impression: at survey width the target is a long single column of lime-capped cards — visually *more* repetitive than any other page, not less.
+
+---
+
+### §4 What this page does that the Cockpit does not
+
+Panel-by-panel uniqueness (grep over `Cockpit.vue`: **zero** hits for `TeamRankGauge`, `SpiritBurstRoster`, `TeamRacePanel`, `UnityCupTeamBoard`, `UnityCupTournamentReadiness`, `CareerGoalsPanel`):
+
+| Panel | Sole host? | Redundant, complementary, or different? |
+|---|---|---|
+| Team Race panel | yes (scenario boards) | different — Cockpit has no team-race form view |
+| Team identity card | yes | different — team editor writes it; this displays it |
+| Spirit / burst-readiness block | yes | different |
+| Team Rank gauge + ladder | yes (rendered), config-hosted | complementary — the *editor* (`TeamEdit`) and this gauge share data, not surface |
+| Unity Cup progress counters | yes | different |
+| Team stat grades | yes | different |
+| Burst count bands table | yes | different — pure scenario reference |
+| Spirit Burst roster | yes | different |
+| Special Training facts | yes | different |
+| Team race coverage board | yes | different |
+| Team race shape | yes | different |
+| Career goals (trainee ladder + mandatory races) | `CareerGoalsPanel` renders in Cockpit payload too — **the one overlap**; but the v3.0.0 surgery comment (`Cockpit.vue` `6f33ffc0..05da0924`, `CHANGELOG.md:196`) moved the panels *out* of the cockpit deliberately: the Cockpit carries a door, not the boards | complementary, by design |
+| Published stat caps | scenario boards only (`grep "Published stat caps"` → `ScenarioPanel.vue` alone) | different — the ADR-0025-published/in-force split gives it a job the Cockpit's entered-cap form does not do |
+
+**Answer: the page is almost entirely unique content.** Ten panels have no Cockpit counterpart; one (career goals) is intentionally complementary after the v3.0.0 move; the caps table is the ADR-0025-designated published surface. **"Surface elimination" is the one "remade" reading the measurement rejects** — there is almost nothing to eliminate. The redundancy the audit's F-04 worried about (identity card + strip) was already resolved in the landed plan slice.
+
+---
+
+### §5 The three questions the owner must rule on
+
+1. **Is the divergence real?** Yes — §2. Is the target the outlier to bring into line, or a second valid language? The measurement says: the *card chrome* is the outlier (one call site, zero other pages); the *bento inside panels* is a current app style; the *density and absence copy* are mostly shared. The cleanest reading: **the page is the app's one "client chrome" surface, matching the game's own Team Info vocabulary, living on an otherwise-house-language page.** Whether that is legitimate (it is a scenario-mechanics reference deliberately styled after the client's own screens) or a defect (the only page a Trainer sees that does not look like Trainer Desk) is the owner's call — both readings are consistent with the measurement.
+2. **If remodel: which reading?** The measurement supports **re-skin** (chrome headers → plain `h2`, keeping every panel) as the reading that changes the observed problem and nothing else. **Reflow** buys little at 764 px (already single column; the bento only resolves on wide hosts). **Consolidation** has no measured basis (§4: panels are unique). **Elimination** is contradicted by §4.
+3. **Which panels are the page's reason to exist?** All ten scenario-only panels (§4's table). The only candidate for removal ever named — the baseline strip's identity card — was already fixed by the landed plan. If the owner wants the page to carry *less*, the decision is about content scope, and §4 says the content is not redundant.
+
+---
+
+### §6 Unmeasured
+
+- **Wide-viewport bento** (`@3xl`/`@5xl` resolves): this host's browser window is fixed at 764 px; the repo's Playwright harness sets viewports but that is a dispatch instrument, not this survey's. The three-container-query claims cite code, not render.
+- **Light theme** for the surveyed pages: captured dark only; the palette claims about lime/chrome cite `app.css` tokens, which are theme-bridged — the *relative* claims (capsule vs plain) hold in both themes by construction, but no light-theme screenshot backs them.
+- **`SaveVeteran.vue`**: exists but was not reachable in the survey pass (needs a finished run); recorded as not surveyed rather than inferred.
+- **Help, Legacy, Veterans, Review, Database hub**: outside the brief's thirteen-page set; not captured.
+
+---
+
+### §7 Change log
+
+| Date | Change | Reason |
+|---|---|---|
+| 2026-11-09 | Research opened; pre-flight, the three v3.0.0 readings, the thirteen-page survey (14 screenshots), the seven-category measurement and the panel-uniqueness survey recorded. | Pre-flight baseline per the brief's §5 structure. |
+| 2026-11-09 | HFW built at `docs/design-research/scenario-detail-hfw-2026-11-09/`. | Draws the survey's re-skin reading for owner review. |
+| 2026-11-09 | **Review corrections, four, each verified against code.** (1) *"Panel headers still carry lime pills"* — **false**: all fourteen panel headings are plain `<h2>`; `class="…lattice-bleed"` and `class="…bg-chrome"` each appear zero times, and the only `pill`/`trust` spans left are data badges. The reading came from the `Documented` and `Estimated` pills riding *inside* two `h2`s, which are values, not chrome. (2) *"Career goals merges two panels"* — **was true in the wireframe, fixed**: it drew one card with two `h3`s; `CareerGoalsPanel.vue:97` renders `<section v-for="group in …">`, so the shipped page has two cards and the wireframe now does too. (3) *"Top-row panels restructured"* — **false**: the order is `UnityCupPanel.vue`'s own DOM order (Team Race s12 → Team s4 → Spirit s4 → Team Rank s4 → Unity Cup progress s4 → Team stat grades s4 → bands s8 → Spirit Burst s4 → Special Training s4 → coverage s8 → shape s12), which the component's comment names verbatim. The audit screenshot differed because its sparse run's `v-if` cells (Team, Spirit, progress, Special Training) were removed, not reordered. (4) *"Spirit Bursts N/A vs bands 11"* — **confirmed real, and a product defect**: `ScenarioSectionBuilder.php:84` is `$values[$widget] = $widget === 'team_rank' ? $team['rank'] : null;`, so every widget but team rank is hardcoded absent. Run 7 records 6 + 5 = 11 and the bands place it in 10–12, so the tile is wrong. Named in the HFW's key (item 10) and in the strip tile; **not fixed** — this artifact changes no code. It is a fifth finding the audit missed: the audit recorded the N/A as "absence honest" against the sparse run, where it was true. Wants a `KNOWN-ISSUES.md` entry or a plan slice; owner's call. | Review pass; three claims refuted, one defect confirmed and surfaced. |
+## uc3-elite-team-boundary-inspection-2026-11-12.md
+
+> **Folded into this master in consolidation Round 28 (owner-ordered, 2026-11-13) from**
+> `docs/audits/uc3-elite-team-boundary-inspection-2026-11-12.md` (238 lines). It is the UC-3
+> Elite Team eligibility boundary inspection of 2026-11-12: inspection only, no code changed, a
+> proposed five-state contract awaiting the owner decisions its §8 names. Every cited file stays
+> on disk: `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md`,
+> `docs/audits/rice-shower-unity-cup-ux-walk-8.md`, `docs/scenarios/02-unity-cup.md`,
+> `docs/UMAMUSUME_REFERENCE.md`, and the app, config, migration and test files it lists.
+> The source's own `#` title follows verbatim one level demoted as `##`, and its remaining headings keep one level of
+> demotion; headings inside fenced blocks were never demoted; the body is otherwise untouched.
+> The source was untracked (a peer session's report that landed after the Round-27 fold), so this
+> section is its only copy; containment was proven against the bytes being deleted. The 2026-11-13
+> fold order supersedes the peer-ownership rowless ruling this master's sibling index recorded for
+> it in Round 27. The source's 238 LF line terminators were normalised to this master's CRLF
+> working-copy convention; the repository's `.gitattributes` store the result as LF.
+
+## UC-3 boundary inspection — Unity Cup Elite Team eligibility
+
+Status: **inspection only. No code, schema or behaviour changed.** No commit. Awaiting approval
+for the proposed contract in §6.
+
+Inspected at HEAD `2ef286f6` (`docs(audits): record the UX-25 / KI-82 disposition as FIXED`),
+branch `master`. Working tree carries the uncommitted UC-1 slice plus peer-owned documentation
+changes; none of them was touched.
+
+---
+
+### 1. What the three recorded conditions actually require
+
+`docs/scenarios/02-unity-cup.md:188-193` states the Elite Team can appear during the **4th Team
+Race** if **all three** hold. `UMAMUSUME_REFERENCE.md:1131-1134` restates the same three in the
+same order. The corpus has no fourth *condition*; the fourth item in the brief's list ("evaluation
+occurs during the fourth Team Race") is the **checkpoint**, not a requirement to be tested. §5
+treats it separately for that reason.
+
+---
+
+### 2. Storage and data flow, condition by condition
+
+#### Condition 1 — Team Rank at least A
+
+| Layer | Location |
+| --- | --- |
+| Storage | `turn_events.deltas` JSON, **not a column**. `TeamRankPayload` (`app/Models/TurnEvents/TeamRankPayload.php`) holds one letter from `LETTERS = G,F,E,D,C,B,A,S,S+` |
+| Read path | `TrainingRun::latestTeamRank()` (`app/Models/TrainingRun.php:1351`) — newest `turn_events` row carrying a rank payload, gated on `composesPanel('team_rank_ladder')` |
+| Config | `team_rank_ladder` maps `GF=1, DE=2, BC=3, A=4, S=5`. **`S+` has no rung** — deliberately, per the payload's own docblock |
+| Surface | `TeamPanelBuilder::teamSection()` → `rank`, `ladder`; `TeamRankGauge`, `TeamRankLadderPanel` |
+| Tests | `CockpitTeamPanelTest`, `ScenarioPanelTest` (`:698-706` for the S+ no-rung case), `TurnEvent` payload round-trip |
+
+**Evaluable: yes, today.** Recorded → `pass` if ladder level ≥ 4, `fail` if ≤ 3. Unrecorded →
+`unknown`. **One wrinkle:** `S+` sits above `S` but carries no ladder level, so a level-based test
+would read `S+` as *no level* rather than as the highest rank. The evaluator must special-case it
+(`S+` passes) or the strongest possible rank would land in `unknown`. This is a real defect trap,
+not a hypothetical: the payload docblock states `S+` "grants a second hint rather than a higher
+facility, so it has no level to map to".
+
+#### Condition 2 — At least one Extreme Spirit Burst
+
+| Layer | Location |
+| --- | --- |
+| Storage | **Two independent sources, and they disagree in kind.** `training_runs.extreme_bursts_count` (`unsignedTinyInteger`, nullable) is an aggregate the Trainer types in; `turn_events` carries per-teammate `SpiritBurstState` payloads (`Chargeable`, `Charged`, `Held`, `NormalBurstSpent`, `ExtremeChargeable`, `ExtremeSpent`) surfaced through `TrainingRun::spiritBurstRoster()` |
+| Read path | `spirit_bursts_count` / `extreme_bursts_count` already reach the panel payload; the roster reaches `teamSection.roster` |
+| Tests | `UnityCupCountersTest`, `CockpitUnityCupCountersTest`, `SpiritBurstCountdownTest` |
+
+**Evaluable: yes, today** — but the evaluator must pick a source and say which. `extreme_bursts_count > 0` is a recorded aggregate; `ExtremeSpent` in the roster is a per-member event. They can disagree (a count of 2 with no `ExtremeSpent` row). **Recommendation: read the aggregate**, because that is the field the bands already read and the field a Trainer fills from the Team Info panel; print the roster-derived reading as a cross-check rather than as the verdict. Neither is a derived guess, so both are legitimate — but one must be named.
+
+#### Condition 3 — League placement
+
+| Layer | Location |
+| --- | --- |
+| Storage | `training_runs.team_league_placement`, `unsignedTinyInteger`, nullable |
+| Validation | `StoreTrainingRunRequest:88` — `nullable, integer, min:1, max:99`. Zero refused, so "unrecorded" and "1st" stay distinct |
+| Surface | `UnityCupEditor.vue`, `TeamEdit.vue` |
+
+**Evaluable: NO — the rule itself is unresolved, and the tree records the contradiction twice.**
+
+`docs/scenarios/02-unity-cup.md:191` writes it as **"your league rank is ≥ 10"** — a floor sign on
+a placement number. `UMAMUSUME_REFERENCE.md:1132` writes **"league rank 10 or better"**. For a
+placement, those invert: 8th satisfies "10 or better" and fails "≥ 10". The Rice Shower research
+already reached this conclusion and escalated it rather than resolving it:
+
+> That reading is not safe: the doc writes the rank as a number with a floor sign, and a league
+> position of 8th satisfies "top 10" while failing "10 or higher". The two readings invert the
+> verdict. Flagged for the owner rather than fixed here, since it is a doc defect in
+> `docs/scenarios/02-unity-cup.md`, not a finding about this run.
+> — `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:851-857`
+
+It is also carried as **P-09** in `docs/audits/rice-shower-unity-cup-ux-walk-8.md:133` ("League
+8th against a '≥ 10' condition reads two ways"), and re-listed as still open at that file's §"Still
+open" item 4 (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:936-938`).
+
+The nearest independent support is the **placement bonus ladder**, which is a *different* mechanic
+and does not settle this one: game8.jp's Aoharu Hai guide prints `2〜5位 +50, 6〜10位 +30,
+11〜15位 +20, 16〜20位 +10, 20〜30位 ボーナス無し`, corroborated by the run's own client tooltip
+reading `+30` at 8th (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:1069-1075`). The ladder treats
+**8th as a small number meaning a good placement**, which is consistent with the "top 10" reading —
+but a bonus band is not the eligibility rule, and inferring one from the other is exactly the
+promotion of an observation into a rule that the brief forbids.
+
+**So the condition stays `unresolved`.** Not `pass`, not `fail`, not `unknown`. The three are
+different facts: `unknown` means *the run has not recorded a placement*; `unresolved` means *the
+run may have recorded one and the rule that would judge it does not exist*.
+
+#### Checkpoint — fourth Team Race
+
+| Layer | Location |
+| --- | --- |
+| Storage | **None.** `scenario_slots` has a `team_race` kind in its schema comment and **zero rows** — the table holds only `free_race` and `goal_race`. `race_entries` has `placement` but no team-race round identity |
+| Progression | `training_runs.team_preseason_wins`, `nullable, between:0,4` — a tally the Trainer types, explicitly "the tally the Trainer reports, not a round modelled here" (`StoreTrainingRunRequest:88`) |
+| Config | `team_race.month_anchors = [Late June, Late December]`, `occurs_every_months = 6`, and the panel already states **"no source publishes the career turn a round falls on, so no turn is printed here"** (`TeamPanelBuilder::teamTournamentSection()`) |
+
+**Evaluable: partially, and only as a proxy.** `team_preseason_wins >= 4` proves all four rounds
+were won, which places the run at or past the check. But a run can reach round 4 having won **three
+of five** (`02-unity-cup.md:161-163` describes a three-of-five win condition), so a tally of 3 does
+**not** prove the checkpoint is in the future. There is no stored round number and no published turn.
+
+So: `pass` when `team_preseason_wins === 4`; otherwise `unknown`. **Never `fail`** — nothing in the
+tree can establish that the window is still open.
+
+---
+
+### 3. Exact files inspected
+
+`app/Models/TrainingRun.php` (`:1351` `latestTeamRank`, `:1527` `spiritBurstRoster`, `:1247` casts,
+`:116` fillable) · `app/Models/TurnEvents/TeamRankPayload.php` · `app/Models/TurnEvent.php`
+(`:108-116`, `:182`) · `app/Services/Career/TeamPanelBuilder.php` (`:509-700` `teamSection`,
+`:718-771` `teamTournamentSection`) · `app/Http/Controllers/Career/CockpitController.php` (`:70-92`
+payload docblock) · `app/Http/Requests/StoreTrainingRunRequest.php` (`:78-100`) ·
+`app/Enums/SpiritBurstState.php` · `config/scenarios.php` (`:499-560`, the unity_cup block) ·
+`database/migrations/2026_10_10_150000_add_team_identity_to_training_runs.php`,
+`2026_10_10_160000_add_unity_cup_counters_to_training_runs.php`,
+`2026_10_25_140000_add_team_stat_grades_to_training_runs_table.php`,
+`2026_09_27_153416_create_scenario_slots_table.php`, `2026_09_27_093950_create_race_entries_table.php` ·
+`resources/js/components/career/UnityCupEditor.vue` · `resources/js/pages/Career/TeamEdit.vue` ·
+`resources/js/components/scenario/UnityCupPanel.vue`, `TeamRankGauge.vue`, `UnityCupTeamBoard.vue`,
+`UnityCupTournamentReadiness.vue` · tests `CockpitTeamPanelTest.php`, `CockpitUnityCupCountersTest.php`,
+`UnityCupCountersTest.php`, `UnityCupPanelTest.php`, `UnityCupSurfacesTest.php`, `RunTeamStateTest.php`,
+`TeamEditTest.php`, `tests/Feature/Career/SpiritBurstCountdownTest.php`, `ScenarioPanelTest.php`.
+
+Evidence read: `docs/scenarios/02-unity-cup.md:184-200` · `docs/UMAMUSUME_REFERENCE.md:1126-1143`
+· `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:845-865`, `:930-942`, `:1066-1076` ·
+`docs/audits/rice-shower-unity-cup-ux-walk-8.md:126-146`, `:1265`.
+
+---
+
+### 4. Evaluability summary
+
+| # | Condition | Today | Blocker |
+| --- | --- | --- | --- |
+| 1 | Team Rank ≥ A | **Evaluable** | `S+` has no ladder rung; must be handled explicitly |
+| 2 | ≥ 1 Extreme Burst | **Evaluable** | Two sources exist; the evaluator must name which one it reads |
+| 3 | League placement | **Not evaluable — rule unresolved** | `02-unity-cup.md:191` "≥ 10" vs `UMAMUSUME_REFERENCE.md:1132` "10 or better" |
+| 4 | Fourth Team Race checkpoint | **Proxy only** | No round number stored, no published turn; `team_preseason_wins === 4` proves *past*, nothing proves *future* |
+
+**Schema change required: none.** Every input already exists as a nullable column or a turn-event
+payload. That is the finding that makes this slice implementable without a migration.
+
+---
+
+### 5. Proposed contract
+
+Five states, not two. `unresolved` is kept apart from `unknown` for the reason in §2.
+
+```text
+ConditionState = 'pass' | 'fail' | 'unknown' | 'unresolved'
+```
+
+```php
+/**
+ * @phpstan-type EligibilityCondition array{
+ *     key: string,                       // 'team_rank' | 'extreme_burst' | 'league_placement' | 'checkpoint'
+ *     label: string,                     // user-facing, from config/lang, never composed in the component
+ *     state: ConditionState,
+ *     recorded: string|null,             // the raw value as entered, for traceability
+ *     requirement: string,               // the rule as the corpus words it, verbatim where quoted
+ *     basis: string,                     // which source/field this reading came from
+ *     note: string|null                  // why unknown/unresolved, in words
+ * }
+ *
+ * @phpstan-type EligibilityVerdict array{
+ *     conditions: list<EligibilityCondition>,
+ *     outcome: 'eligible' | 'not_eligible' | 'undetermined',
+ *     unresolved_keys: list<string>,     // non-empty exactly when a condition is 'unresolved'
+ *     appearance: null                   // ALWAYS null: appearance is an observed game outcome
+ * }
+ */
+```
+
+**Overall outcome is three-valued, and `undetermined` is the normal answer today.** Because the
+league rule is unresolved, *no run can currently be declared `eligible`* — a fact the type makes
+impossible to forget, which a boolean cannot. `not_eligible` requires at least one hard `fail`;
+`eligible` requires all four `pass`; everything else is `undetermined`.
+
+`appearance` is a permanent `null` with a title, not a placeholder: winning the Elite Team is a game
+outcome this tool cannot see, and the brief's §6 stop condition forbids claiming appearance from
+eligibility. Keeping the key at all is a deliberate signal that the question was asked.
+
+#### Truth table
+
+| Rank | Extreme | League | Checkpoint | Outcome | Why |
+| --- | --- | --- | --- | --- | --- |
+| pass | pass | pass | pass | `eligible` | unreachable today; the branch exists for when the rule lands |
+| pass | pass | **unresolved** | pass | **`undetermined`** | the case in the brief: three known-pass, league unresolved |
+| pass | pass | unresolved | unknown | `undetermined` | unresolved dominates |
+| pass | pass | unresolved | pass | `undetermined` | and stays undetermined even with everything else passing |
+| **fail** | pass | unresolved | pass | **`not_eligible`** | a hard fail settles it; the unresolved condition cannot rescue it |
+| pass | **fail** | pass | pass | `not_eligible` | same, with the rule assumed for illustration only |
+| unknown | pass | unresolved | pass | `undetermined` | absence ≠ failure |
+| pass | unknown | unresolved | pass | `undetermined` | `extreme_bursts_count` never entered |
+| pass | pass | **unknown** | pass | `undetermined` | placement not entered — distinct from unresolved |
+| `S+` | pass | unresolved | pass | `undetermined` | `S+` must read `pass`, not `unknown` |
+
+The two `not_eligible` rows are the load-bearing ones: a boolean collapsing everything to
+"not eligible" would be indistinguishable from the seven `undetermined` rows above it, and a Trainer
+cannot tell "you missed a condition" from "we cannot tell". The `fail` rows are also the only ones
+where the outcome is knowable today.
+
+---
+
+### 6. Tests required (once approved)
+
+Unit, no database: state mapping for each condition; the `S+` case; `0` Extreme vs unentered
+(`null`); placement `1` vs `null` vs unresolved; the full truth table above including both dominant
+`fail` rows and the "everything passes but league unresolved" row; assertion that `appearance` is
+always `null`.
+
+Feature: payload reaches the Cockpit under `composesPanel('team_rank_ladder')` and is absent for
+`ura_finale` / `trackblazer` / `our_grand_concert`; a `turn_events` rank at turn 60 overrides an
+earlier one; the payload key set stays uniform across scenarios (gate G-33, the convention
+`teamSection()` already follows).
+
+No browser spec is warranted yet: nothing renders it until the UI decision in §7.
+
+### 7. UI implications
+
+The panel must print **`Undetermined`** as an outcome word, not a dash and not `N/A` — `N/A` already
+means "this run has not recorded a value" (`UiHygieneTest` enforces the bare-`N/A` rule), and here
+the run *has* recorded values; it is the rule that is missing. That is a new display state and it
+needs the disclosure channel the design system requires. `DESIGN.md` owns the wording; I would not
+author it in a component.
+
+### 8. Decisions that need the owner
+
+1. **The league-placement rule.** `02-unity-cup.md:191` "≥ 10" vs `UMAMUSUME_REFERENCE.md:1132`
+   "10 or better". Two readings, opposite verdicts for the same 8th place. This is a doc defect in
+   the corpus, already escalated twice (P-09, Rice Shower §4) and still open. **Nothing in this
+   repository or its cited sources settles it**, and the brief forbids me guessing. Until it is
+   ruled, condition 3 stays `unresolved` and no run can be `eligible`.
+2. **Which Extreme Burst source is authoritative** — the entered aggregate or the per-member
+   `ExtremeSpent` events. Low stakes, but it must be named rather than silently chosen.
+3. **Does `S+` count as "at least A"?** I believe yes on the plain reading (it sits above `S`), but
+   it is a rank vocabulary question, not an arithmetic one, and the ladder deliberately excludes it.
+
+Nothing above requires a schema change, and none of it changes existing behaviour.

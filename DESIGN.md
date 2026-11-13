@@ -510,8 +510,8 @@ external fonts (offline constraint + C-8 dependency gate).
   §A.4) applied page-wide, on the target drawing
   `docs/design-research/scenario-detail-hfw-2026-11-09/scenario-detail-hfw.html`, which renders
   fourteen `h2` and zero capsule elements. The reason is measured rather than aesthetic: the
-  design-language survey (`docs/research/scenario-detail-design-language-survey-2026-11-09.md`
-  §2–§3) found the capsule this page's single divergence from the app's majority — one call
+  design-language survey (section `## scenario-detail-design-language-survey-2026-11-09.md` of
+  `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, §2–§3) found the capsule this page's single divergence from the app's majority — one call
   site, zero other pages — so the page adopts the majority and the motif keeps its remaining
   use elsewhere. This does not amend the argyle row above: the motif stays sanctioned, its
   tokens and `CapsuleHeader.vue` are unchanged, and no other page moves. A scenario panel that

@@ -10,7 +10,8 @@ server needed; it links the v2 set's `assets/shell.css` by relative path, so kee
 
 The updated Scenario detail screen (`SCR-CAR-029`, `/training-runs/{run}/scenario`) drawn in the
 app's majority visual language, answering the design-language survey
-(`docs/research/scenario-detail-design-language-survey-2026-11-09.md`). It is a design artifact:
+(section `## scenario-detail-design-language-survey-2026-11-09.md` of
+`docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## scenario-detail-design-language-survey-2026-11-09.md`). It is a design artifact:
 no component, token, test or copy string changed to produce it.
 
 **On 2026-11-10 four owner rulings superseded the "one visual decision" framing this file used to

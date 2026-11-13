@@ -18,12 +18,14 @@ a familiar symptom is recognised instead of re-investigated.
 
 **Rules that follow from the tree, in the order a new pass should apply them.**
 
-1. **The report is a loose `.md`** unless the audit is genuinely multi-part. 18 reports sit loose
-   under `docs/audits/` (20 loose `.md` files; the other two are this index and
-   `RECONCILIATION-REGISTER.md`). Two of the 18 are peer reports of 2026-11-13 that landed
-   after the Round-27 fold (`uc3-elite-team-boundary-inspection-2026-11-12.md`,
-   `rice-shower-unity-cup-capability-matrix.md`) and carry no row yet, by the peer-ownership
-   doctrine this index keeps for files their session still owns. The only genuinely multi-part series, the Trainer Desk v3.x
+1. **The report is a loose `.md`** unless the audit is genuinely multi-part. 17 reports sit loose
+   under `docs/audits/` (19 loose `.md` files; the other two are this index and
+   `RECONCILIATION-REGISTER.md`). One of the 17 is a peer report of 2026-11-13
+   (`rice-shower-unity-cup-capability-matrix.md`) that carries no row yet, by the peer-ownership
+   doctrine this index keeps for files their session still owns. The second post-Round-27 peer
+   report (`uc3-elite-team-boundary-inspection-2026-11-12.md`) was folded into
+   `AUDIT-AND-VERIFICATION.md` in Round 28 (owner-ordered, 2026-11-13), an owner order that
+   supersedes the peer-ownership rowless ruling for that file. The only genuinely multi-part series, the Trainer Desk v3.x
    audit (nine documents) and its ten-part retest, was folded into `AUDIT-AND-VERIFICATION.md`
    master sections on 2026-11-12 (Round 26, owner-ordered); the three `trainer-desk-v3x-*`
    Phase-0 records went into `PLANS-AND-BRIEFS.md` sections the same day (Round 27,

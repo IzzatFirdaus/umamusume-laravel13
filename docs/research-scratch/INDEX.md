@@ -928,6 +928,52 @@ HEAD showed exactly this round's edits (688/1 on the master, 32/0 on the log) an
 The landed blobs are LF either way, per `.gitattributes`.
 
 
+### Round 28 (2026-11-13, owner-ordered) — seven research, plan, audit and inspection records into three masters
+
+The owner named seven files across three directories: the UC-3 Elite Team boundary inspection, the
+KI-82/KI-133 resolution plan, the four `S-RS-COMPLETE-1`/`S-RS-REMAINING-1` dispatch records of
+2026-11-10, and the scenario-detail design-language survey. Routing followed the class precedents:
+the dispatch records went to the slice-records master that already cites the `S-RS-COMPLETE-1` and
+`S-RS-REMAINING-1` slice ids (the Round-24 `docs/research/` precedent), the owner-approved
+KI-82/KI-133 plan went to the plans-and-briefs master its own document-home note names as its
+natural home, and the audit-class boundary inspection and the design-language research survey went
+to the audit-and-verification master that already owns the scenario-detail arc (the Round-26
+precedent) — the survey is the direct measurement predecessor of the W.1 ruling the HFW wireframe
+and `DESIGN.md` carry. Five sources were tracked (recoverable at the delete commit); the boundary
+inspection and the survey were untracked peer work, so their sections are the only copies, with
+containment proven against the deleted bytes.
+
+| Absorbed file | Lines | New home | Recoverable after delete? |
+| --- | --- | --- | --- |
+| `uc3-elite-team-boundary-inspection-2026-11-12.md` | 238 | `AUDIT-AND-VERIFICATION.md` | No — untracked; section is the only copy |
+| `ki-82-ki-133-resolution-plan.md` | 349 | `PLANS-AND-BRIEFS.md` | Yes — tracked |
+| `S-RS-COMPLETE-1-lint-remeasure-2026-11-10.md` | 46 | `SLICE-RECORDS.md` | Yes — tracked |
+| `S-RS-COMPLETE-1-report-2026-11-10.md` | 116 | `SLICE-RECORDS.md` | Yes — tracked |
+| `S-RS-COMPLETE-1-type-scale-measurement-2026-11-10.md` | 43 | `SLICE-RECORDS.md` | Yes — tracked |
+| `S-RS-REMAINING-1-report-2026-11-10.md` | 119 | `SLICE-RECORDS.md` | Yes — tracked |
+| `scenario-detail-design-language-survey-2026-11-09.md` | 121 | `AUDIT-AND-VERIFICATION.md` | No — untracked; section is the only copy |
+
+Verification ran per the discipline: containment proven 7/7 before the delete (every region solved
+to anchor + banner + demoted body + blanks with zero leftovers, 780 non-blank body lines embedded),
+fences balanced in all three masters, the fence tool green on every touched document, anchors
+unique. Departures from verbatim, all mechanical and banner-stated: the H1 re-level (`###` in the
+LF masters, `##` in the CRLF-convention audit master) plus one-level fence-aware demotion, the
+LF-to-CRLF normalisation of the two audit-master sources' terminators, and the eight live-citation
+repoints below. Dated snapshots inside the bodies (fenced `git status` blocks, harness paths,
+peer-set notes) stay verbatim. The inspection's cited corpus files and the survey's evidence
+directory stay on disk. `docs/plans/` held only the folded plan and no longer exists after it; the
+register's repointed lines
+resolve to the masters.
+
+**References.** Eight live citations were repointed before the delete: `KNOWN-ISSUES.md`
+`KI-145`/`KI-149` (the two reports) and `KI-133` (the plan) now name their `SLICE-RECORDS.md` and
+`PLANS-AND-BRIEFS.md` section anchors; `DESIGN.md`'s W.1 exception, the HFW `README.md`, the HFW
+wireframe's two survey cites, and `PLANS-AND-BRIEFS.md`'s own survey grounding cite now name the
+`AUDIT-AND-VERIFICATION.md` section. Quoted-history survey mentions inside masters (`SLICE-RECORDS.md`
+dated snapshots, `PLANS-AND-BRIEFS.md` marked verbatim inventory rows) were left verbatim.
+
+
+
 ### Deliberate exceptions, outside the masters
 
 Three entries stay outside `docs/research-scratch/` on purpose. They are listed here so a future pass

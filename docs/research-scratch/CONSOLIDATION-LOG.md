@@ -446,3 +446,14 @@ blob: 3/3 regions, 532 non-blank body lines, 0 missing; each region's leftover a
 exactly (anchor + banner + blanks +, for change-boundary only, the 9 banner-recorded
 Decision-6 lines). P&B fence parity balanced (210 fence lines; the three folded sources
 contain no fences of their own). Drift-zero on all four landed masters.
+Round 28 coordination note (2026-11-13). Seven sources folded: the UC-3 boundary inspection, the
+KI-82/133 resolution plan, the four S-RS-COMPLETE-1/REMAINING-1 dispatch records, and the
+scenario-detail design-language survey; three masters; all embedded before delete; five tracked
+(recoverable at the delete commit), two untracked peer works whose sections are the only copies.
+Eight live repoints applied whole-line before the fold. Authoring banner facts were re-grepped
+pre-write. KNOWN-ISSUES.md carries concurrent peer edits on lines outside the repointed ones; the
+repointed lines ride that file's own future landing, the carry doctrine Round 26 recorded. The
+audits README's rule-1 figure was re-measured after the fold. md_fence_check is green on every
+touched document; its default tracked-set run hit a transient FileNotFoundError on a peer session's
+mid-flight move (the capability-matrix working-tree delete), which is infrastructure, not a
+defect of this fold.

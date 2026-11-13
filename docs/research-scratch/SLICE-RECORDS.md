@@ -20809,3 +20809,374 @@ detect.
 **A finding's own account of its action can be wrong.** F-13 says "after a 140 SP skill is added" while
 its own values table records `Add to run`. F-04 read a persisted figure as a live one. Both were caught
 by measuring rather than trusting.
+
+## S-RS-COMPLETE-1-type-scale-measurement-2026-11-10.md
+
+> **Folded into this master in consolidation Round 28 (owner-ordered, 2026-11-13) from**
+> `docs/research/S-RS-COMPLETE-1-type-scale-measurement-2026-11-10.md` (43 lines). It is the
+> S-RS-COMPLETE-1 arc's type-scale measurement pass (E.1) that closed KI-149 and KI-151 and
+> filed KI-160; the register cites it in its new home through this section.
+> The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
+> demotion; the body is otherwise untouched. Its scratch-harness paths quote the tree as it sat
+> on the day and stay verbatim as history. Cites outside this set (`KNOWN-ISSUES.md`) resolve to
+> files that stay.
+> The source was tracked at the fold, so it is recoverable at the delete commit.
+
+### S-RS-COMPLETE-1 type-scale measurement (KI-149, KI-151) — 2026-11-10
+
+**Commands** (session-private harness, `PLAYWRIGHT_FRESH_BUILD=1` where the tree was mid-rebuild):
+probes written under `.scratch-uma/complete-1/` (`type-scale-probe.spec.ts`, `zz-ts2`, `zz-ts3`),
+run at ports 8239-8245, scratch DBs `.scratch-uma/complete-1/ts*.sqlite`. Logs:
+`.scratch-uma/complete-1/ts.log`, `ts2.log`, `ts3.log`.
+
+### `--text-kpi` today
+
+`resources/css/app.css:78`: `--text-kpi: clamp(1.25rem, 2.2vw, 1.75rem)` with `--text-kpi--line-height: 1.2`.
+Computed on Dashboard: **20px at 320/768px, 28px at 1280px** — the clamp band behaves; the four-tier
+scale it should align to per `DESIGN.md` is unchanged from the 2026-11-02 database-audit pass that
+ratified the tiers, and this pass found no screen where the KPI size needs to move.
+
+### Per-surface overflow readings (WCAG 1.4.10 reflow, `scrollWidth - clientWidth`)
+
+| Surface | 320px | 768px | 1280px |
+| --- | --- | --- | --- |
+| Dashboard | 0 | 0 | 0 |
+| Careers | 0 | 0 | 0 |
+| Legacy Index/Compare | 0 | 0 | 0 |
+| Review, Preferences, Help | 0 | 0 | 0 |
+| Veterans, Support Cards, Skills, Database | 0 | 0 | 0 |
+| Career Cockpit | 0 | 0 | 0 |
+| DeckSelect, Timeline | 0 | 0 | 0 |
+| **Race Decision** | **59** | 0 | 0 |
+| **Career Cockpit @640px** (KI-160) | **88** (from race-strip spec probe) | — | — |
+
+### Findings
+
+1. **No row-wrap regressions from the `.card > h2` step**: no surface measured a wrap-induced
+   overflow at any width. The 15->16px step's earlier fix held.
+2. **KI-160 filed** (`KNOWN-ISSUES.md`): Cockpit overflows 88px at 640px (640x512, the
+   200-percent-of-1280x1024 width), attributed to `NextDecision.vue`'s Obligations table and its
+   grid column; plus the companion reading, Race Decision 59px at 320px. Both are layout debts
+   outside this dispatch's slices, recorded rather than fixed here (second-defect stop rule).
+3. **KPI tier**: unchanged and correct; the two KI entries close as measured with one layout KI
+   filed for the two overflow readings.
+
+### What closure does not cover
+
+The 640px crossing of other career screens (Races at 640 was not measured; only 320/768/1280 were),
+and the cockpit at 640 with a completed run rather than an active one.
+## S-RS-COMPLETE-1-lint-remeasure-2026-11-10.md
+
+> **Folded into this master in consolidation Round 28 (owner-ordered, 2026-11-13) from**
+> `docs/research/S-RS-COMPLETE-1-lint-remeasure-2026-11-10.md` (46 lines). It is the
+> S-RS-COMPLETE-1 arc's lint re-measure pass (E.2) that closed KI-145 as a stale figure:
+> 202 findings against the 209 baseline, exit 0.
+> The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
+> demotion; the body is otherwise untouched. Its gate figures quote the tree as it sat on the day
+> and stay verbatim as history. Cites outside this set (`KNOWN-ISSUES.md`,
+> `tools/ui-lint-baseline.json`) resolve to files that stay.
+> The source was tracked at the fold, so it is recoverable at the delete commit.
+
+### S-RS-COMPLETE-1 lint re-measure (KI-145) — 2026-11-10
+
+**Command:** `npm run lint:ui` at `ad3f8f40` (working tree; see peer-set note), logged to
+`.scratch-uma/complete-1/lint.log`.
+
+**Lore gate, same pass:** docs mode 584 hits / 75 exempt (was 583/75 at last recorded figure; delta
++1). The delta is this dispatch's own `tests/browser/career-section-nav.spec.ts:133`
+("run-scoped tail because Inertia v2 renders the `Link` href absolute") — class 2, an ordinary-word
+substring, the same word and class as the already-ruled `support-deck.spec.ts:351` line it mirrors.
+Ruled, not edited. `composer lore-code` 319 hits same-day baseline; this dispatch added no code hit
+(`php tools/lore.php code` greps name no file this pass touched).
+
+**Measured finding count: 202 arbitrary-value findings. Baseline: 209 (`tools/ui-lint-baseline.json`).**
+Exit code 0 — the gate is green and the count sits **7 under** the baseline.
+
+### Classification
+
+All 202 findings are `[arbitrary-value]` (literal `px`/`em`/`rem`/unitless values bypassing the token
+layer). No `[card-in-card]` findings. No new arbitrary values were introduced by this dispatch's own
+commits: the two files the dispatch touched that the lint names — none. Measured with:
+
+```text
+grep -cE 'bypasses the token layer' .scratch-uma/complete-1/lint.log
+  202
+```
+
+Top concentration is unchanged from the last recorded pass: `resources/js/pages/Veterans/Index.vue`
+(`:273`, `:283`, `:520`, each multiple values) — same debt the baseline's `reason` field already
+carries as deferred.
+
+### Drift vs the recorded figure
+
+- `tools/ui-lint-baseline.json` `count: 209`, dated 2026-11-02.
+- The drift 209 -> 202 is **downward** (7 values retired by the database UI/UX audit's type-scale
+  pass and later cleanups, not by this dispatch). Per the dispatch's Slice E.2 rule the count is at
+  or under baseline, so **KI-145 closes as a stale-figure**: the feared over-baseline state does not
+  exist at HEAD.
+- The baseline file is NOT edited: lowering the recorded count is an owner-only action per §5
+  escalation 4, and nothing in this dispatch requires it. The next over-baseline failure threshold
+  remains the 210th finding.
+
+### What closure does not cover
+
+A future slice that adds an arbitrary value to a file this dispatch did not audit still fails at
+210; and the 202 existing findings remain deferred debt with the named intent in the baseline's
+`reason` field, unchanged by this measurement.
+## S-RS-COMPLETE-1-report-2026-11-10.md
+
+> **Folded into this master in consolidation Round 28 (owner-ordered, 2026-11-13) from**
+> `docs/research/S-RS-COMPLETE-1-report-2026-11-10.md` (116 lines). It is the S-RS-COMPLETE-1
+> session report of 2026-11-10: the phase-by-phase SHA ledger, the per-KI verdicts, the
+> gate-output block and the register-vs-tree divergences of that day.
+> The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
+> demotion; the body is otherwise untouched. Its dated peer-set notes and fenced gate block quote
+> the tree as it sat on the day and stay verbatim as history.
+> The source was tracked at the fold, so it is recoverable at the delete commit.
+
+### S-RS-COMPLETE-1 session report — 2026-11-10
+
+### Pre-flight
+
+HEAD at session start: `ad3f8f40` (worktree shared with concurrent UX sibling sessions; peer set
+grew ArtworkSlot.vue, SupportSlot.vue, Veterans/Index.vue, career-cockpit.spec.ts,
+ui-ux-application-context-brief.md during the run — all left untracked-by-this-session and
+untouched). Contention pre-flight clean throughout: `php tools/gate-preflight.php` ->
+`training_runs LIMIT 1 in 1.78 ms (threshold 2000 ms)`.
+
+### Phase-by-phase SHAs
+
+| Phase | Outcome | SHA |
+| --- | --- | --- |
+| A.1 push master (O-1) | **landed**: origin/master advanced `b16a7a50 .. ad3f8f40`; `git rev-list --count origin/master..master` = 0 at close | (push, no commit) |
+| A.2 merge KI-101-refresh | landed by sibling chain as `6c1c2b5d` before this session measured; branch already deleted | `6c1c2b5d` |
+| B.1 harness defaults + staleness refusal | landed as `ddd8c619` (protected-path, owner-approved-via-dispatch); exercised twice this session when peer edits staled the bundle | `ddd8c619` |
+| B.2 NProgress off | in tree pre-session (`spa.ts progress: false` + `VisitProgressBar.vue`); verified, no commit needed | — |
+| C.1 Spirit manual proxy (KI-133) | `b9837da7` (migration, model, builder, requests, controller, SpiritCard/ScenarioCardGrid/UnityCupPanel/UnityCupEditor/TeamEdit, feature test) | `b9837da7` |
+| C.2 career-tab aria-label (KI-131) | `9674180d` + consumer re-pin `20df32a6` | `9674180d`, `20df32a6` |
+| C.3 Grand Concert title + row-set (KI-82/87) | `b637cec2` (parser CLIENT_TITLES map, reader shared-inclusive + deterministic order, parser test pinning the committed body) | `b637cec2` |
+| C.4 race strip mount (KI-147) | `ad3f8f40` (pre-C6b.5 wrapper restored; spec's dead drawer flow rewritten to the shipped Enter button) | `ad3f8f40` |
+| C.5 catalog base_stats (KI-152) | landed by UX sibling chain before this session's re-verify; career-cockpit base-stats case green in this session's runs | sibling chain |
+| D.1 delete move + skills door + capsules | landed by the C6b/UX sibling chain (`/training-runs/{run}/delete` footer door, Skills planner link, capsule affirmation noted in register) | sibling chain |
+| E.1 type-scale measurement | `08a1c69b` (+ KI-160 filed) | `08a1c69b` |
+| E.2 lint re-measure | `08a1c69b` (202 findings vs 209 baseline, exit 0) | `08a1c69b` |
+| F register close-out | `9d9c3ef5` (104 KI lines, one per unique number) | `9d9c3ef5` |
+
+### Per-KI verdicts (dispatch-named only)
+
+- KI-63 CLOSED (in tree; B.2 verified), KI-82/87 CLOSED `b637cec2`, KI-91 CLOSED (in tree),
+  KI-95 CLOSED `8f45e552`, KI-101(a) CLOSED `6c1c2b5d`, KI-101(b) CLOSED `ddd8c619`,
+  KI-102/103 CLOSED `bd0a8693`, KI-105(a) CLOSED (push), KI-105(b) CLOSED `ddd8c619`,
+  KI-108 `d662864b`+`e66d47c7`, KI-109 `6a1c9227`, KI-111 `1f5f5d76`+`0563f1de`,
+  KI-128/129 CLOSED (sibling chain + register note), KI-131 `9674180d`+`20df32a6`,
+  KI-133 `b9837da7`, KI-140 `d359e9d9`, KI-141 `fa8c7eec`, KI-142 `62f43094`+`fb8266d6`,
+  KI-143 `76a08984`, KI-145 CLOSED stale-figure, KI-147 `ad3f8f40`, KI-149/151 CLOSED-MEASURED,
+  KI-152 CLOSED (sibling chain), KI-98/99 retroactively covered by the push.
+- STILL-OPEN by dispatch's own ruling: KI-100 (disclosed), KI-124 (audit decides), KI-132 (separate
+  slice), KI-159 (separate slice), KI-104 (ADR-0027 Proposed, owner signature).
+- BLOCKED-PEER: the KI-131 consumer pin inside `tests/browser/career-cockpit.spec.ts:210` is edited
+  in the working tree and verified green (`1 passed`), but the file carries UX-05 sibling lines, so
+  this session did not commit it; it rides that file's own landing.
+- New defect filed: **KI-160** (cockpit 88px @640, Races 59px @320; proven pre-existing with the
+  strip mount reverted byte-identically).
+
+### Gate outputs (one screen)
+
+```text
+pint --test (changed files)          -> {"tool":"pint","result":"passed"}
+phpstan (changed files)              -> [OK] No errors (5 pre-existing missingType hits in the
+                                        parser test's helper signatures, identical at HEAD)
+npm run typecheck                    -> TC=0
+npm run build                        -> B=0 (built 15.2s, run before every browser pass)
+npm run lint:ui                      -> LINT=0, 202 findings (baseline 209)
+md_fence_check (touched docs)        -> 0 invalid closing fence(s)
+math lore gate docs                  -> 584 hits / 75 exempt (delta +1 vs 583; the delta is this
+                                        dispatch's career-section-nav.spec.ts:133 "run-scoped tail",
+                                        class 2 ordinary-word substring, same word and class as the
+                                        already-ruled support-deck.spec.ts:351; ruled, not edited)
+lore gate code                       -> 319 hits at the day's baseline; no new hit from this pass
+pest GametoraRaceCatalogParserTest   -> 42 passed
+pest CockpitFinaleStripTest          ->  8 passed
+pest --filter='FinaleReader|CockpitFinale' -> passed
+pest UnityCupPanelTest (KI-133)      -> 12/12 green (11 pre + 1 new, non-vacuity RED proven,
+                                        guard removed -> 1 failed, restored -> 12 passed)
+career-race-strip.spec.ts            -> 5 passed, 1 failed (KI-160 pre-existing overflow, proven
+                                        without the mount; the sixth case is green in isolation of
+                                        that reflow assertion)
+career-section-nav.spec.ts           -> 6 passed (loop map, scoped names, retired-nav case
+                                        rewritten to assert the R7-38 retirement)
+support-deck.spec.ts stepper case    -> 1 passed
+team-edit.spec.ts                    -> 1 passed
+career-cockpit.spec.ts (full file)   -> 31 passed, 1 failed pre-my-change; after the KI-131 pin
+                                        + peer co-edit, the failing case passes in isolation;
+                                        full-file re-run deferred (peer file mid-flight)
+run-import.spec.ts / review.spec.ts  -> pre-existing reds at HEAD, recorded, not this dispatch's
+```
+
+**Not run this pass:** full `php artisan test --compact` (contention pre-flight clean but the
+worktree is mid-flight with two sibling sessions; full-suite evidence would describe a moving tree
+per the test-dispatch rule); `migrate:status` on the dev DB (no migration this session touches a
+table the dev DB lacks; KI-133's migration verified on scratch and the dev DB column read back);
+`composer audit`/`npm audit` (no dependency changed).
+
+### Register-vs-tree divergences found during execution
+
+1. `career-race-strip.spec.ts:98` pinned RaceCard's retired drawer flow (`Details and actions for` /
+   `Enter Race`); the R7 rewrite replaced it with a row-level `Enter` button. Rewritten to the
+   shipped flow rather than restoring a dead surface.
+2. `career-section-nav.spec.ts:80` pinned the pre-R7-38 completed-run stepper, retired by `68015d36`
+   (2026-11-08) — red since that commit. Rewritten to assert the retirement itself.
+3. `career-section-nav.spec.ts:131` exact-href pin broke when `Link` hrefs render absolute (Inertia
+   v2); now matches the run-scoped tail, mirroring `support-deck.spec.ts:351`.
+4. The dispatch's C.1 spec named `SetupLayout.vue`-family writes for the proxy; the tree's write
+   path is `UnityCupEditor.vue` (team editor) + `StoreTrainingRunRequest`, which is what landed.
+5. The dispatch's C.3 asked for a data-file edit + reparse; the promote layer matches rows on
+   `title`, so a data-file rename would fork the finale row. Landed at the parser's normalisation
+   layer instead (KI-71 precedent), with the KI-71-established orphan-removal read path applied.
+
+### Post-commit peer set
+
+Untracked-by-this-session and untouched at close: `docs/research/ui-ux-application-context-brief.md`,
+`tests/browser/career-cockpit.spec.ts`, `resources/js/components/ArtworkSlot.vue`,
+`resources/js/components/support/SupportSlot.vue`, `resources/js/pages/Veterans/Index.vue`.
+
+### Push outcome
+
+Landed. `git push origin master` -> `To github.com:IzzatFirdaus/umamusume-laravel13.git
+b16a7a50..ad3f8f40`. KI-105(a) closed on that fact; O-1 no longer holds any closure.
+
+### The Phase F block
+
+Landed at `9d9c3ef5`, top of `KNOWN-ISSUES.md`: 104 KI lines, one per unique number the register
+carries (57-160, seven duplicate-numbered pairs each listed once with a shared verdict), plus the
+peer-dirty note and this report's pointer. Every closure names its SHA or proving command.
+## S-RS-REMAINING-1-report-2026-11-10.md
+
+> **Folded into this master in consolidation Round 28 (owner-ordered, 2026-11-13) from**
+> `docs/research/S-RS-REMAINING-1-report-2026-11-10.md` (119 lines). It is the
+> S-RS-REMAINING-1 close-out dispatch report of 2026-11-10: commit inventory reconciliation,
+> the write-failure verifications, the stash incident and the gates of that pass.
+> The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
+> demotion; the body is otherwise untouched. Its fenced `git status` snapshot and command
+> outputs quote the tree as it sat on the day and stay verbatim as history.
+> The source was tracked at the fold, so it is recoverable at the delete commit.
+
+### S-RS-REMAINING-1 session close-out report
+
+**Date:** 2026-11-10. **Pass:** S-RS-REMAINING-1 (Phases 0-2) + S-RS-REMAINING-1-CLOSE (Phase 4, this dispatch).
+**Pre-flight HEAD:** `f60e0ea8` at session start; close-out pre-flight ran against `76590c6d` (after 20 session commits + this dispatch's Pint repair). Final HEAD after Phase 4.1: `9bae3fa5`.
+
+### 1. Pre-flight HEAD + peer set (measured, not inherited)
+
+```text
+git log --oneline f60e0ea8..HEAD   ->  22 commits at pre-flight (see inventory)
+git status --short (pre-flight) ->
+ M docs/research/ui-ux-application-context-brief.md      (peer, untouched all session)
+ ?? docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md      (peer, untracked)
+ ?? docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09/
+ ?? docs/audits/trainer-desk-v3-ux/
+ ?? docs/research/RS-UC-SCENARIO-DETAIL-2026-11-09/
+ ?? docs/research/scenario-detail-design-language-survey-2026-11-09.md
+```
+
+Peer set unchanged by every commit of this session (pathspec-only, `git status` re-read pre/post each commit).
+
+### 2. Commit inventory
+
+`git log --format='%H %s' f60e0ea8..HEAD | wc -l` at close-out pre-flight = **22**. Composition:
+
+- **20 commits authored by this session**: `25eea0e1` (0.1), `32a7faf3` (0.2), `bd0a8693` (0.3), `d662864b` + `e66d47c7` (0.4), `6a1c9227` (0.4b), `1f5f5d76` (0.5 prose), `0563f1de` (0.5 register), `3253b8ea` (1.4), `62f43094` + `fb8266d6` (1.5), `fa8c7eec` + `cd42c151` (1.6), `76a08984` + `5e7ecf4e` (1.7), `8f45e552` + `4bcb945d` (1.9), `ade1e5f9` (2.1), `34b1a0e2` (2.2), `7befea63` (2.5). Every SHA and subject matches the session summary's table; no missing commit, no altered subject.
+- **2 peer commits landed mid-range from a concurrent session**: `50e09715` (Round 25 consolidation) and `cc0ea0c7` (Round 25 addendum). They sit inside `f60e0ea8..HEAD` because the range is shared; they are not this session's work.
+- **Correction to the session summary:** it claimed "19 commits"; its own table listed several two-SHA rows, so its own content names 20 session commits. The "19" was an arithmetic error, not a missing commit. `20 session + 2 peer = 22` reconciles the range exactly.
+- This dispatch added: `76590c6d` (pre-flight D repair), `9bae3fa5` (Phase 4.1). Total at report time: 24 in range.
+
+Branch (not merged, owner-held): `owner-decisions/KI-101-refresh` @ `31be0555` (trace + counter fix) + `9a41712c` (trace report in SLICE-RECORDS on that branch).
+
+### 3. Pre-flight verification findings
+
+**A. Commit inventory:** `RECONCILED_WITH_CORRECTION` — 22 in range, every SHA/subject matches, summary's "19" was an undercount of its own table (20 session commits) plus the peer pair.
+
+**B.1 — `reencode_04.py` / slice 0.4 (KI-108): `LANDED_AS_CLAIMED`.**
+```text
+python -c "... SLICE-RECORDS.md ..."   -> worktree nuls: 0, bom: False
+git show d662864b:... | python -c ...   -> d662864b blob nuls: 0
+git show HEAD:... | python -c ...       -> HEAD blob nuls: 0
+```
+The failed `reencode_04.py` write was a first draft the write tool refused (stale-content guard); the valid successor `reenc04b/c.py` ran. The ledger ships clean at every blob checked.
+
+**B.2 — `candidateform-final.txt` / slice 1.7 (KI-143): `LANDED_AS_CLAIMED`.**
+```text
+git show 76a08984 --stat -- ...CandidateForm.vue -> 165 +++------, 36 insertions, 129 deletions
+grep -c 'variant="row"\|variant: .row' ...CandidateForm.vue (HEAD tree) -> 0
+git show 76a08984:...CandidateForm.vue | wc -l -> 192
+```
+The failed write was again a refused first draft (`candidateform-final.txt` v1); the applied content came from `candidateform-stripped.txt`. Retirement is at HEAD.
+
+**B.3 — `build_03.py`:** first draft of slice 0.3's payload builder, superseded by `reconcile_03.py` (which ran and shipped `bd0a8693`). No output shipped via `build_03.py`. Pattern note recorded below.
+
+**B.4 — Verifier reconciliation:** B.1 `LANDED_AS_CLAIMED`, B.2 `LANDED_AS_CLAIMED`, B.3 no output shipped (abandoned draft). Zero `NOT_LANDED`.
+
+**C — `run-import.spec.ts:123` pre-existing claim: `PRE-EXISTING-CONFIRMED`.**
+The spec is byte-identical at `8f45e552^` and HEAD (md5 `ae2037fb...` both), and the parent-tree run fails identically:
+```text
+git checkout 8f45e552^ -- tests/browser/run-import.spec.ts
+PLAYWRIGHT_PORT=8171 ... npx playwright test tests/browser/run-import.spec.ts --grep "refuses a file"
+-> EXIT=1, 1 failed: ":123 refuses a file the app never wrote, in the words that say what to fix"
+```
+Same error as the session run (`element(s) not found` on the refusal sentence). Spec restored (md5 re-verified). The session's attribution stands.
+
+**D — `TrainingRun.php` Pint claim: `FALSE_POSITIVE` in the session summary; repaired.**
+```text
+vendor/bin/pint --test --format agent app/Models/TrainingRun.php
+  -> fail, fixers ["unary_operator_spaces","not_operator_with_successor_space","phpdoc_align"]
+vendor/bin/pint --test --format agent .scratch-uma/rs-remaining-1/pp/TrainingRun.php  (the 8f45e552^ blob)
+  -> passed
+```
+The parent file is Pint-clean; the three fixers were introduced by this session's `@property Carbon|null $imported_at` docblock rows (misaligned continuation columns). The summary's "pre-existing three fixers" claim was wrong. Repaired at `76590c6d` (pint's own prescribed alignment applied; `pint --test` on the file now passes; PHPStan on the KI-95 pair `[OK] No errors`).
+
+**E — KI-159 filed: `FILED`.** `grep -n '^## KI-159' KNOWN-ISSUES.md` -> `4742:## KI-159 The wizard-parity deck step counts six title= reasons...` with defect/why/evidence/closure sections naming `SupportSlot.vue:173/:240` and `wizard-parity.spec.ts` deck case. Filed in `cd42c151`; no action needed.
+
+**Pre-flight totals:** `ALL_LANDED_AS_CLAIMED` on the write-failure claims (3/3); `N_REGRESSIONS_MIS_ATTRIBUTED = 0`; `N_PINT_CLAIMS_FALSE = 1` (repaired at `76590c6dd` — see `76590c6d`).
+
+**New fence-finding-class candidate (the dispatch asked):** "scratch-script refusal hides whether the first version ran." Three times this session a write tool refused an overwrite of a first draft (`build_03.py`, `reencode_04.py`, `candidateform-final.txt`), and the session summary described only the successful successor. The refusal is invisible in logs, so a summary's "change landed" claim cannot be trusted without blob verification — which this pre-flight did. Candidate addition under the wrapper-trap family (`references/verification-patterns.md`, v5). NOT added to the reference file in this pass (out of scope; recorded here for the next skill-maintenance pass).
+
+### 4. Incident during THIS close-out (measured, then resolved)
+
+A `git stash push`/`pop` probe for the lore delta replayed a **foreign five-day-old stash** (`stash@{0}`, WIP on `b4458c09`, 2026-11-02) over the tree mid-pass, leaving conflict markers in 5 files (`KNOWN-ISSUES.md` x3 hunks, `config/advisor.php`, `CardPicker.vue` x2, `TrainingDetail.vue`, `career-trainee-select.spec.ts`) and deleting `tests/browser/career-race-strip.spec.ts` from disk. Root cause: the probe stashed 8 tracked files and popped without checking the top stash's identity — exactly the failure class the repo's rules name ("never `git stash pop`" without confirming the top entry is yours). Resolution, all byte-verified:
+- Both sides of every conflict read: `Updated upstream` = current committed content; `Stashed changes` = the foreign stash's superseded 2026-11-02 drafts (old token spellings, old `'value' => 30` constant, old option-list markup). Resolution took `Updated upstream`.
+- After resolution all five files equal their HEAD blobs (`== HEAD blob: True` x5, LF-normalized compare), zero markers remain, `php -l` clean, `npm run typecheck` exit 0, fences 0 invalid.
+- `career-race-strip.spec.ts` restored via `git checkout HEAD --` (md5 `23f3e389...` matches the HEAD blob; no commit ever carried its deletion).
+- The foreign stashes are untouched (`stash@{0..2}` still present for their owner).
+Lesson (matches the standing rule): the lore-delta probe was unnecessary — the "before" leg of it measured the post-pop tree, proving nothing, while nearly costing five files. Recorded here rather than repeated.
+
+### 5. Gates at close-out (commands and outputs)
+
+```text
+vendor/bin/pest --compact --no-coverage --filter="RenderedCopyHygieneTest|HistoricalRunImportTest|FilterContractTest"
+  -> EXIT=0; first line pest banner; Tests: 60 passed (319 assertions)
+     (RenderedCopyHygiene 8/38, HistoricalRunImport 17/143 incl. the KI-95 case, FilterContract 35/138)
+npm run typecheck (vue-tsgo && tsc)  -> EXIT=0
+npm run lint:ui                     -> EXIT=0; ui-framework-check: 500 finding(s)
+                                        (unchanged across the session; 0 findings in this pass's files)
+python tools/md_fence_check.py      -> EXIT=0; 0 invalid closing fence(s) in 204 file(s)
+php tools/lore.php                  -> lore-docs: 583 hit(s), 75 exempt line(s)  (delta 0 vs the 583 recorded 2026-11-10)
+php tools/lore.php code             -> lore-code: 320 hit(s)  (was 319 at session start)
+```
+
+Lore-code delta ruling (+1): the touched-file hit set is unchanged class-for-class (dataset `friend` keys, `pair`-family substrings in prose, verbatim type shapes — all in lines this session did not author; the +1 arrives with the peer Round-25 corpus growth, not with this pass's edits, whose added prose carries none of the banned families).
+
+`migrate:status` NOT run this close-out (no migration shipped in this session; the register's KI-60 line names it as the standing check for the next schema-touching pass). `composer audit`/`npm audit` not re-run beyond slice 1.1's recorded `npm audit --omit=dev -> found 0 vulnerabilities` (no dependency changed after it).
+
+### 6. What is still open (hand-off)
+
+- **KI-159** (deck-step six `title=` on `SupportSlot.vue:173/:240`) — filed `cd42c151`, fix owed to a later slice, out of scope by dispatch.
+- **Pre-existing reds recorded, not fixed (per dispatch):** `run-import.spec.ts:123` (`PRE-EXISTING-CONFIRMED`); `review.spec.ts:126`/`:307` (both reproduced RED at HEAD with the slice stashed); `wizard-parity` deck-step case (KI-159's subject).
+- **Owner-decision work, not merged:** branch `owner-decisions/KI-101-refresh` (`31be0555`: trace classification (a), Navigation-Timing counter, 4/4 green; `9a41712c`: trace report); KI-147 disposition package (`7befea63`) awaiting the owner's (a)/(b)/(c) call; the Phase-3 branches the original runbook named (`owner-decisions/KI-82/91/128/129/131/132/133/145/149/152`, KI-60/61/63/100/105 legs) remain unstarted by this session and owned by the owner's rulings.
+- **KI-95 remainder:** `SCREEN_SPEC.md`'s record-screen section still describes the retired screen (the entry's doc half).
+- **Register hygiene remainder:** seven duplicate-numbered pairs remain by design (distinct subjects, classified in `## register-duplicates-2026-11-10.md`); KI-136/137 (peer-owned journey spec) untouched.
+
+### 7. Anything the session summary got wrong
+
+1. "19 commits" — undercount; the true session-authored figure is 20 (plus 2 peer commits inside the range).
+2. "Pint fail = pre-existing three fixers on TrainingRun.php" — false positive; parent file is clean, the fixers came from this session's docblock rows (repaired `76590c6d`).
+3. "Phase 4.1/4.2 not landed (per-slice notes stand in their place)" — accurate at the time of that summary; both are now landed (`9bae3fa5`, this file).
