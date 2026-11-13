@@ -8,6 +8,7 @@ use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
 use App\Models\CharacterCard;
 use App\Models\DeckSlot;
+use App\Models\RaceCatalogSlot;
 use App\Models\Skill;
 use App\Models\SupportCard;
 use App\Models\TrainingRun;
@@ -790,4 +791,16 @@ it('stores ceilings-only drafts as cap columns with a null build target, per ADR
 
     expect($run->cap_speed)->toBe(1325)
         ->and($run->build_target)->toBeNull();
+});
+
+it('ships the career length from its server-side owners rather than letting the page hold 72', function (): void {
+    // Plan v2 slice 3.6 (sub-finding 2): `CAREER LENGTH` was a page-local constant. The number has
+    // one owner server-side — `TrainingRun::TURNS_PER_YEAR` (24) times `RaceCatalogSlot::YEAR_SENIOR`
+    // (3 career years) — and the page must read that, not spell 72 for itself.
+    session([SetupDraft::SESSION_KEY => []]);
+
+    test()->get(route('career.preflight'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('careerTurns', TrainingRun::TURNS_PER_YEAR * RaceCatalogSlot::YEAR_SENIOR));
 });

@@ -11,6 +11,7 @@ use App\Models\Advisor\BuildTargetPayload;
 use App\Models\CharacterCard;
 use App\Models\DeckSlot;
 use App\Models\Legacy\LegacySelectionPayload;
+use App\Models\RaceCatalogSlot;
 use App\Models\Skill;
 use App\Models\SupportCard;
 use App\Models\TrainingRun;
@@ -115,6 +116,9 @@ class PreflightController extends Controller
             'step' => 6,
             'visited' => SetupDraft::visited(),
             'saved' => SetupDraft::saved(),
+            // Plan v2 slice 3.6 (sub-finding 2): the career length, from its one owner. Three career
+            // years of the client's own 24-turn grid; the page used to hold `72` as a local constant.
+            'careerTurns' => TrainingRun::TURNS_PER_YEAR * RaceCatalogSlot::YEAR_SENIOR,
             'contract' => [
                 'complete' => $complete,
                 'build' => $build,

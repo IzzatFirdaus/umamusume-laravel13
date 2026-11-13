@@ -162,6 +162,8 @@ interface Warning {
 
 const props = defineProps<{
     step: number;
+    /** Plan v2 slice 3.6: three career years of the client's own 24-turn grid, from the server. */
+    careerTurns: number;
     /** The steps this session has opened, the step bar's completed marking reads them. */
     visited: number[];
     /** The steps that have data stored in the draft (`SetupDraft::saved()`), read apart from `visited`. */
@@ -552,8 +554,9 @@ function checkState(row: ChecklistRow): 'Pass' | 'Warning' | 'Missing' | 'Skippe
     return 'Pass';
 }
 
-/** The wireframe's career length: three career years on the client's own 24-turn grid. */
-const CAREER_TURNS = 72;
+/** The wireframe's career length, shipped by the controller from `TrainingRun::TURNS_PER_YEAR` ×
+ *  `RaceCatalogSlot::YEAR_SENIOR` (plan v2 slice 3.6). The page no longer spells the number. */
+const CAREER_TURNS = props.careerTurns;
 </script>
 
 <template>
