@@ -457,3 +457,25 @@ audits README's rule-1 figure was re-measured after the fold. md_fence_check is 
 touched document; its default tracked-set run hit a transient FileNotFoundError on a peer session's
 mid-flight move (the capability-matrix working-tree delete), which is infrastructure, not a
 defect of this fold.
+Round 28 post-commit evidence note (2026-11-13). Census ref-mode 655 GONE at 0dbc5425
+against 656 at dca1b6a0, net +1, every entry classed: +4 fold-banner provenance cites in
+SLICE-RECORDS.md (20816/20871/20929/21056); +2 the plan's own document-home lines, moved with
+its body into PLANS-AND-BRIEFS.md (8890/8913) and left verbatim by ruling; +1 the REMAINING-1
+record's own dead cite of `references/verification-patterns.md`, which moved with its body
+(SLICE-RECORDS.md:21141; net zero against its pre-fold home in the deleted source at :78); +1
+a pre-existing INDEX.md cite of `docs/design-research/_scratch/WEB-FINDINGS.md` that shifted
+from line 985 to 1031 under the Round-28 section insert (net zero); +1 KNOWN-ISSUES.md:4039,
+where the committed register still cites the deleted plan path because the repoint to the
+section anchor is carried uncommitted with the register's concurrent peer edits, per the carry
+doctrine, and resolves when that file lands. Against these: five repointed cites of the survey
+(DESIGN.md:513, the design-research README:13, PLANS-AND-BRIEFS.md:7533, this log:257,
+INDEX.md:761) and the audits README's old uc3 mention (README:24) left the count, resolving
+live through the section anchors `folded_sections()` registers from the masters. Lore
+unchanged by the fold: 603 docs + 75 exempt, 351 code; the +1 against Round 27's 602 is this
+log's own Round-27 evidence note (committed in 0dbc5425 after that round's gates had measured),
+and four hits moved with their bodies. Containment re-proven 7/7 from the landed HEAD blobs
+against freeze-sha-verified source copies; parity 14 passed / 34 assertions. Measurement
+correction recorded: the freeze figure labelled "working-tree census 655" was ref-mode at
+HEAD (the tool's `dead_links()` defaults to `ref=DEFAULT_REF`); the round's true working-tree
+census is 664 dead (616 GONE, 48 UNTRACKED), the difference being peer-uncommitted edits, the
+register carry, and the anchors' live resolution.
