@@ -100,3 +100,36 @@ test('a genuinely undated obligation keeps the undated tooltip', async ({ page }
         'an undated row lost its reason',
     ).toHaveAttribute('title', /does not date/i);
 });
+
+/*
+ * Walk-8 F-07 / F-10 (reconciled to R7-22): on a run past an obligation it never played, the
+ * Advisor's warn block said the obligation "is due and not recorded" and then dated it "55 turns
+ * ago" — a deadline presented as actionable beside a Rest recommendation. The state half landed at
+ * `30eb2b4d` (the row reads `not reached`); the sentence half is this case. A passed deadline says
+ * so: it is not due, it fell due before this run's position, and no door on the screen can settle
+ * it (the wire's own "cannot be satisfied by any action on the screen").
+ */
+test('says a passed deadline is behind the run, not due (walk-8 F-07/F-10)', async ({ page }) => {
+    const runUrl = await startCareer(page, 'unity_cup');
+    createdRunUrls.push(runUrl);
+
+    // Turn 67, the position walk 8 stood at: the debut's turn 12 is long behind a run that recorded
+    // nothing against it. (At 13 turns the row still resolves `current` — the deadline passed during
+    // the run's own standing turn — which is a different state and not this case's subject.)
+    const runId = /\/training-runs\/(\d+)/.exec(runUrl)?.[1];
+    expect(runId, `not a training-run URL: ${runUrl}`).toBeDefined();
+    await recordTurns(page, String(runId), 67);
+
+    await page.goto(`${runUrl}/cockpit`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const advisor = page.getByRole('region', { name: 'Advisor' });
+
+    // The warn block must not call a passed deadline due, and must not read as an invitation.
+    await expect(advisor.getByText(/is due and not recorded/)).toHaveCount(0);
+    await expect(advisor.getByText(/fell due .* before the position this run|behind this run|passed before this run/)).toBeVisible();
+
+    // And the row itself keeps the honest state word.
+    const debut = advisor.locator('tbody tr').filter({ hasText: 'Junior Make Debut' });
+    await expect(debut.getByText('not reached', { exact: true })).toBeVisible();
+});

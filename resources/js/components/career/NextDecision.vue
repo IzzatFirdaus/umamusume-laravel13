@@ -218,7 +218,21 @@ const incompleteData = computed(
              thing to do about it. -->
         <div v-if="due !== null" class="warn flex flex-wrap items-start gap-2">
             <span class="pill pill-caution shrink-0">{{ statePill(due.state).word }}</span>
+            <!-- Walk-8 F-07 / F-10 (R7-22): one sentence covered both states. A row whose deadline
+                 has passed (`not_reached`) was called "due" and dated "55 turns ago" — an
+                 invitation beside a Rest recommendation. The two states are two sentences: a
+                 current obligation is due; a passed one fell due before this run's position and
+                 no door on the screen can settle it. -->
             <AlertRow
+                v-if="due.state === 'not_reached'"
+                class="min-w-0 flex-1"
+                glyph="▲"
+                tone="critical"
+                :text="due.label + ' fell due on turn ' + due.due_turn + ', before the position this run stands at, and no race is recorded against it.'"
+                detail="The deadline is behind this run, so no action on this screen can settle it. Recording the race itself remains possible from the race desk."
+            />
+            <AlertRow
+                v-else
                 class="min-w-0 flex-1"
                 glyph="▲"
                 tone="critical"
