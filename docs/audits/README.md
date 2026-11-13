@@ -20,10 +20,14 @@ a familiar symptom is recognised instead of re-investigated.
 
 1. **The report is a loose `.md`** unless the audit is genuinely multi-part. 18 reports sit loose
    under `docs/audits/` (20 loose `.md` files; the other two are this index and
-   `RECONCILIATION-REGISTER.md`). The only genuinely multi-part series, the Trainer Desk v3.x
+   `RECONCILIATION-REGISTER.md`). Two of the 18 are peer reports of 2026-11-13 that landed
+   after the Round-27 fold (`uc3-elite-team-boundary-inspection-2026-11-12.md`,
+   `rice-shower-unity-cup-capability-matrix.md`) and carry no row yet, by the peer-ownership
+   doctrine this index keeps for files their session still owns. The only genuinely multi-part series, the Trainer Desk v3.x
    audit (nine documents) and its ten-part retest, was folded into `AUDIT-AND-VERIFICATION.md`
-   master sections on 2026-11-12 (Round 26, owner-ordered); no bundled report `.md` remains
-   on disk.
+   master sections on 2026-11-12 (Round 26, owner-ordered); the three `trainer-desk-v3x-*`
+   Phase-0 records went into `PLANS-AND-BRIEFS.md` sections the same day (Round 27,
+   owner-ordered); no bundled report `.md` remains on disk.
 2. **Evidence goes in a subdirectory, never beside the report.** `screens/` for a split audit,
    `screenshots/` for a bundled set. Nothing is written to the top level of `docs/audits/` except
    reports.
@@ -66,8 +70,12 @@ disk. Rows whose report was folded keep their pre-fold figures as dated history.
 | 2026-11-12 | `RECONCILIATION-REGISTER.md` — cross-walk issue index, walk-8 and F-series ownership dispositions, prevention | 422 | — | none (an index, not a walk) |
 | 2026-11-11 | `walk-8-follow-up-plan.md` (folded into `AUDIT-AND-VERIFICATION.md` section `## walk-8-follow-up-plan.md`, 2026-11-12) — PA specs, new-finding triage, scenario coverage | 416 | — | none (a plan, not a walk) |
 | 2026-11-11 | `audit-methodology-and-remediation-specs.md` (folded into `AUDIT-AND-VERIFICATION.md` section `## audit-methodology-and-remediation-specs.md`, 2026-11-12) — capability rule, F-03/F-08 specs, 3 scenario-walk plans | 499 | — | none (specs, not a walk) |
+| 2026-11-12 | `trainer-desk-v3x-roadmap-baseline-2026-11-12.md` (folded into `PLANS-AND-BRIEFS.md` section `## trainer-desk-v3x-roadmap-baseline-2026-11-12.md`, 2026-11-12) — 3.x roadmap baseline: phases, Phase-0 scope | 275 | — | none (a plan, not a walk) |
+| 2026-11-12 | `trainer-desk-v3x-change-boundary-2026-11-12.md` (folded into `PLANS-AND-BRIEFS.md` section `## trainer-desk-v3x-change-boundary-2026-11-12.md`, 2026-11-12) — Phase-0 change boundary | 241 | — | none (a plan, not a walk) |
+| 2026-11-12 | `trainer-desk-v3x-phase0-close-2026-11-12.md` (folded into `PLANS-AND-BRIEFS.md` section `## trainer-desk-v3x-phase0-close-2026-11-12.md`, 2026-11-12) — Phase-0 close, exit gates | 155 | — | none (a close record, not a walk) |
 
-**22 report rows: 17 name reports still on disk under `docs/audits/` (4 with evidence directories, 13 without), and 5 name reports folded into `AUDIT-AND-VERIFICATION.md` master sections on 2026-11-12 (Round 26, owner-ordered), each row pointing at its own section; 121 PNGs sit across the five split-audit `screens/` directories. The two peer `trainer-desk-v3x-*` reports of 2026-11-12 are loose and have no row yet.**
+
+**25 report rows: 17 name reports still on disk under `docs/audits/` (4 with evidence directories, 13 without), and 8 name reports folded into master sections (five into `AUDIT-AND-VERIFICATION.md` master sections on 2026-11-12, Round 26, owner-ordered; three `trainer-desk-v3x-*` Phase-0 records into `PLANS-AND-BRIEFS.md` sections, Round 27, owner-ordered), each row pointing at its own section; 121 PNGs sit across the five split-audit `screens/` directories.**
 Re-derive: `ls docs/audits/*.md | wc -l` (20 files; 18 reports with the two indexes set aside), `find docs/audits -path '*/screens/*.png' | wc -l` (121).
 
 ## Bundled sets

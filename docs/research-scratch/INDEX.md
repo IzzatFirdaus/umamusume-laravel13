@@ -309,6 +309,7 @@ moved, 13 buckets, the two executor defects fixed first) is the dated status not
 | The 2026-11-10 scenario-detail arc: the span-hole fix (`S-RS-SPAN-1`), the KI-154 sweep and fix (`S-RS-KI154-1`), the Our Grand Concert `goal_source` resolution (`S-A-P01-OG-1`), the remodel plan, Move-3 and Phase 1/2 dispatches (`S-RS-REMODEL-B1/B2/C1/C2`), the cleanup and ruling-prep dispatches, the HFW visual overhaul (`S-RS-VISUAL-1`), its arc close-out, and the four-workstream summary; all thirteen Round 24 sections | `SLICE-RECORDS.md`, sections `## S-RS-SPAN-1-report-2026-11-10.md` through `## S-RS-CLEANUP-2-report-2026-11-10.md` (Round 24) |
 | The 2026-11-02 race-catalog/JP-only verification close-out, the two 2026-11-08 implemented proposals (Sparks skill picker; trainee preset auto-fill) whose `S-A-P02`/`S-A-P01` ledger rows sit above, the 2026-11-09 scenario-detail upgrade plan (round-7 `F-01`/`F-02` fixes), the 2026-11-10 `S-RS-REMODEL-B1` remodel plan with its W-ruling Addendum, and the 2026-11-10 rulings-owed memos the owner settled the same day | `SLICE-RECORDS.md`, sections `## 2026-11-02-race-enrichment-jp-only-completion-report.md`, `## 2026-11-08-sparks-skill-picker.md`, `## 2026-11-08-trainee-preset-autofill.md`; `PROCESS-PLANS.md`, sections `## 2026-11-09-scenario-detail-upgrade.md`, `## 2026-11-10-scenario-detail-remodel.md`; and `PLANS-AND-BRIEFS.md`, section `## 2026-11-10-ruling-memos-scenario-detail.md` (Round 25) |
 | The `docs/audits/` consolidation of 2026-11-12: the Rice Shower Unity Cup round-6 slice-audit container and its round-7 owner-calls decision document, the RS-UC scenario-detail page report, the walk-8 follow-up plan, the audit-methodology and F-series remediation specs, the RTX/UX-09/F-13 verification report, the F-series ownership transfer and inventory, the Trainer Desk v3.x nine-part UX audit and its ten-part retest, and the remediation/progress reports of the verification workstream; all thirty-one Round 26 sections | `AUDIT-AND-VERIFICATION.md`, sections `## rice-shower-unity-cup-round6-slice-audits.md` through `## 09-consolidated-remediation-plan.md` (twenty-seven), and `SLICE-RECORDS.md`, sections `## remediation-phase-progress-report.md` through `## progress-report-f-series-2026-11-12.md` (four) (Round 26) |
+| The Trainer Desk 3.x Phase-0 records (the 2026-11-12 roadmap baseline that established the 3.x phases and scoped Phase 0, the change boundary that fenced what Phase 0 may and may not touch, and the 2026-11-12 close record that proved each Phase-0 exit gate) | `PLANS-AND-BRIEFS.md`, sections `## trainer-desk-v3x-roadmap-baseline-2026-11-12.md` through `## trainer-desk-v3x-phase0-close-2026-11-12.md` (three, Round 27) |
 
 ### Round 13 (2026-10-07, owner-named) — two scratch files into the files that owned their subject
 
@@ -877,6 +878,55 @@ during the fold.
 **Disposition of the originals.** Deleted from the working tree after containment proof. Six are
 tracked, recoverable at the delete commit; twenty-five were untracked, and their sections are the
 only copies.
+
+### Round 27 (2026-11-12, owner-ordered) — the three Trainer Desk 3.x Phase-0 records into PLANS-AND-BRIEFS.md
+
+The owner named the three `trainer-desk-v3x-*` records of 2026-11-12 for consolidation and deletion.
+All three were tracked (the peer session landed them in `324e92f7`, close Phase 0), so each section is
+recoverable at the delete commit. Routing followed the companion-master precedent: the 3.x-roadmap
+thread's decisions already live in `PLANS-AND-BRIEFS.md` (the peer-landed rulings A–J section
+`trainer-desk-3x-roadmap-rulings-2026-11-12.md`), the change-boundary record itself names this master
+as its companion, and keeping the chain 0.1 baseline – 0.2 rulings – 0.3 boundary – 0.4 close in
+one master avoids inter-master repoints. This owner order supersedes the Round-26 "peer-owned,
+rowless by design" README ruling recorded in the R26 post-commit note and the stays-note this INDEX
+carries in its Round-26 References paragraph; both remain verbatim above as dated history.
+
+| Absorbed file | Lines | New home | Recoverable after delete? |
+| --- | --- | --- | --- |
+| `trainer-desk-v3x-roadmap-baseline-2026-11-12.md` | 275 | `PLANS-AND-BRIEFS.md` | Yes — tracked, recoverable at the delete commit |
+| `trainer-desk-v3x-change-boundary-2026-11-12.md` | 241 | `PLANS-AND-BRIEFS.md` | Yes — tracked, recoverable at the delete commit |
+| `trainer-desk-v3x-phase0-close-2026-11-12.md` | 155 | `PLANS-AND-BRIEFS.md` | Yes — tracked, recoverable at the delete commit |
+
+Verification ran per the discipline: the containment proof found all three rebuilt bodies
+line-complete in the master (532 non-blank body lines, zero missing), the appended region was proven
+pure append (prefix byte-identical to the freeze at write time, NUL count unchanged at zero; the
+region was written to the master's fold-time CRLF convention, and the repository's `.gitattributes`
+normalise the whole master to LF at commit), fences balanced, and the same proof re-run from the landed blob after commit. Departures from
+verbatim, mechanical and banner-stated: the H1 re-level to `###` plus one-level demotion of the
+remaining headings (fence-aware), terminator normalisation of the three LF sources to the master's
+fold-time CRLF convention (with the repository's `.gitattributes` storing the result as LF), and
+the seven live-citation repoints listed below. Dated inventories inside the bodies
+(the `git status` snapshot and the staging manifest quoted in the close record) stay verbatim.
+
+**References.** Seven live citations were repointed before the delete: `PLANS-AND-BRIEFS.md`
+:7726 (its own rulings-section grounding cite of the baseline), and the intra-set pointers
+`phase0-close` :87/:88 (sibling sizes kept), `change-boundary` :5/:75/:230, and
+`roadmap-baseline` :161. The `:140-142` staging manifest in the close record, its `(this file)`
+self-reference at :89, and the baseline's `:48-58` dated tree enumeration are quoted history and
+stayed verbatim.
+
+**Doctrine (round-recorded):** a fold that is owner-ordered against files a peer session has landed
+is not a working-tree conflict; the peer's landed commit made the sources tracked, and the fold
+proves containment against the edited (repointed) bytes. The Round-26 note's "rowless by design"
+and the predelete stays-note are superseded by the owner order that named this round.
+
+Terminator event, recorded because the round's scratch evidence predates it: between the splice and
+the delete gate, an event outside this round (consistent with an `.editorconfig`-conformant editor
+save, or the peer session) normalised the working-tree CRLF of `PLANS-AND-BRIEFS.md` and
+`CONSOLIDATION-LOG.md` to LF. Content was verified intact immediately: `git diff --numstat` against
+HEAD showed exactly this round's edits (688/1 on the master, 32/0 on the log) and nothing else.
+The landed blobs are LF either way, per `.gitattributes`.
+
 
 ### Deliberate exceptions, outside the masters
 

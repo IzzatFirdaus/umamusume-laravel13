@@ -382,3 +382,47 @@ Post-commit verification, each figure measured from the landed blobs:
   - Scratch harness files for this round live under
     .scratch-uma/round26-consolidation/ (scripts and outputs only; no worksheet
     files at the scratch root).
+## Round 27 coordination notes (2026-11-12)
+
+Owner order: consolidate the three `trainer-desk-v3x-*` Phase-0 records dated 2026-11-12 into
+`docs/research-scratch/` and delete the originals. All three were tracked at the fold (peer-landed
+in `324e92f7`); the sections are recoverable at the delete commit. Routing followed the
+companion-master precedent: the change-boundary record declares `PLANS-AND-BRIEFS.md` its
+companion, the peer-landed ruling section `trainer-desk-3x-roadmap-rulings-2026-11-12.md` lives
+there, and the record chain 0.1-0.4 stays in one master. This order supersedes the Round-26
+"rowless by design" README ruling and the Round-26 stays-note in INDEX.md (both left verbatim as
+dated history). Seven live citations repointed pre-delete: P&B :7726 (its own rulings-section
+grounding cite); intra-set phase0-close :87/:88, change-boundary :5/:75/:230,
+roadmap-baseline :161. Verbatim kept: phase0-close :89 `(this file)` and :140-142 staging
+manifest; baseline :48-58 dated enumeration. The three repointed sources were deleted with
+git rm -f (edit-then-delete doctrine: containment was proven against the edited bytes).
+Sanctioned mechanical departures (banner-stated): the three LF sources were written with CRLF
+terminators matching the master's fold-time working-tree convention (the repository's
+.gitattributes, text=auto eol=lf, stores the landed content as LF); H1 re-level to ### plus
+one-level demotion outside fences; the repoint list above.
+Post-write terminator event: between the splice and the delete gate, an event outside this
+round normalised the working-tree CRLF of PLANS-AND-BRIEFS.md and CONSOLIDATION-LOG.md to LF;
+content verified intact by numstat (688/1 and 32/0, exactly this round's edits).
+Lore-gate probe: the appended regions and repointed lines added zero lore hits at write time
+(checked per-hit against the freeze figures, 599/75 docs + 351 code at 4ba014bf); the post-delete
+gate re-runs are the authority and every delta gets a per-hit ruling below.
+Guard rails: prefix byte-identity, NUL unchanged (0), CRLF purity of the appended region
+(687 new CRLF lines, 0 LF-only), anchor line-uniqueness (a line equal to "## <name>"; backticked
+mentions in prose do not count), fences balanced, containment 3/3 bodies line-complete
+(532 non-blank lines, total missing 0), and the same proof re-run from the landed blob
+post-commit. docs/audits/README.md gains three folded-into rows; its totals line and rule 1
+are re-measured post-delete; figures written pre-delete are asserted by the gate before commit.
+Scratch: .scratch-uma/round27-consolidation/ only (scripts and outputs at the round subdir,
+nothing at the scratch root). Wait-state: none at fold time. Peer commits 01ad5e46 and f080bb99 landed mid-round
+(scenario research notes, the scenario test-data matrix, BurstBandsCard.vue,
+Veterans/Index.vue, full-career-journey.spec.ts) on paths this round does not touch;
+UMAMUSUME_REFERENCE.md, _audit-prompt.md and ui-ux-application-context-brief.md remain
+peer-uncommitted, and none of the three carries a live cite of the round's sources
+(checked: no trainer-desk-v3x stem in their bodies).
+Post-fold addition carried, provenance recorded here (2026-11-13): the change-boundary section's
+`### 3. Tally` carries a nine-line paragraph added by the scenario-research session on 2026-11-12
+21:36 under the owner's Decision-6 instruction (its session record: 'the tally reconciles exactly,
+36/14/9/1 = 60, re-derived independently'; inserted into the fold region because the section is now
+the living copy). This fold pass re-verified its arithmetic against the section's own table (49 rows
+parsed; range cells `3.2-3.6`=5, `5.2-5.4`=4, `7.1-7.5`=5 expanded; 36/14/9/1 = 60) and amended this
+round's banner to say the body is 'otherwise untouched except for' that recorded addition.
