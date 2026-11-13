@@ -333,11 +333,14 @@ function onSkillPrioritySelect(payload: { id: number; name: string }): void {
 
         <!-- The wireframe's labelled-defect pattern, kept in its shape. It states the failure the step
              exists to prevent rather than describing the implementation: a career whose target was never
-             entered reads as a career with no goal at the moment it is committed. -->
+             entered reads as a career with no goal at the moment it is committed. R7-47 (walk-8 E-08):
+             the HFW's own first sentence ("This is the step the current build skips.") described the
+             wireframe's build, not this one — the step is stamped through and mandatory — so the block
+             now opens on the defect it actually names. -->
         <div class="warn" data-field="target-defect">
-            <b>This is the step the current build skips.</b>
-            A run created with no target entered commits with five empty goals, and the cockpit then has
-            nothing to measure a turn against. Filling these in is what makes the run's progress answerable.
+            <b>A run created with no target entered commits with five empty goals.</b>
+            The cockpit then has nothing to measure a turn against. Filling these in is what makes the
+            run's progress answerable.
         </div>
 
         <!--

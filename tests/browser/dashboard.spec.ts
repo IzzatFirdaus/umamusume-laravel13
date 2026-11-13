@@ -199,6 +199,9 @@ test('the quick actions are four outline destinations and a note', async ({ page
     }
     // A quick action is never the filled primary; the resume card owns that.
     await expect(quick.locator('[data-variant="primary"]')).toHaveCount(0);
+    // Walk-8 E-03 / R7-40: the one-word difference between this door and the resume card's other
+    // import door is answered where each is read.
+    await expect(quick.getByText(/A historical career arrives as a CSV turn log/)).toBeVisible();
     // index.html:184 -- the rationale is behind a closed disclosure now: the summary ships, the
     // prose appears on click, so the card reads destinations-first.
     const why = quick.locator('details').filter({ hasText: 'Why four destinations' });
@@ -251,6 +254,7 @@ test('with no active career the resume card names the absence and keeps its acti
         await expect(card.getByText('Not recorded: no career is running.')).toBeVisible();
         await expect(card.getByRole('link', { name: 'Start a career' })).toBeVisible();
         await expect(card.getByRole('link', { name: 'Import an existing career' })).toBeVisible();
+        await expect(card.getByText(/recorded at its current position/)).toBeVisible();
         // With nothing to resume, the head's outline is not enough: this card owns the one accent.
         await expect(card.locator('[data-variant="primary"]')).toHaveCount(1);
         await expect(page.locator('[data-variant="primary"]')).toHaveCount(1);

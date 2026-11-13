@@ -693,6 +693,14 @@ const CAREER_TURNS = props.careerTurns;
                 <section class="card" aria-labelledby="checks-heading">
                     <h2 id="checks-heading">Checks</h2>
                     <p role="status" class="mt-1 text-sm text-ink">{{ attention.sentence }}</p>
+                    <!-- Walk-8 E-14: the count names steps needing attention while creation is allowed
+                         anyway, and nothing said which gate actually blocks. A scenario and a trainee
+                         are the whole refusal list (`canStart`), so the line fires only while that is
+                         true and an attention row exists above it. -->
+                    <p v-if="attention.tone === 'attention' && canStart" class="mt-1 text-xs text-ink-muted">
+                        Only the scenario and the trainee block creation. Every other step above
+                        records as absent if you start now.
+                    </p>
 
                     <table class="mt-2.5 w-full text-left text-sm">
                         <caption class="sr-only">The five setup steps and whether each is recorded</caption>

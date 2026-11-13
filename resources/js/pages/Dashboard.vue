@@ -422,6 +422,12 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                             class="inline-flex min-h-11 items-center px-1 text-sm font-semibold text-ink underline underline-offset-2 hover:decoration-2"
                         >Import an existing career</Link>
                     </div>
+                    <!-- R7-40 / walk-8 E-03: the other door's own line, so the one-word difference
+                         between the two import labels is answered where each is read. -->
+                    <p class="mt-2 text-xs text-ink-muted">
+                        A career you are already partway through is recorded at its current position;
+                        a completed turn log arrives through the CSV importer instead.
+                    </p>
                 </section>
 
                 <!-- The wireframe's three stacked tiles (index.html:110-130): `.k` key, a 14px value,
@@ -650,6 +656,13 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                             </li>
                         </ul>
                     </nav>
+                    <!-- R7-40 / walk-8 E-03: `Import a historical career` and the resume card's
+                         `Import an existing career` differ by one word and neither stated what
+                         distinguishes them. One line per door, in each door's own card. -->
+                    <p class="mt-2 text-xs text-ink-muted">
+                        A historical career arrives as a CSV turn log; a career you are already partway
+                        through is recorded at its current position instead.
+                    </p>
                     <details class="mt-3">
                         <summary class="cursor-pointer list-none text-xs font-semibold text-ink-strong">
                             Why four destinations

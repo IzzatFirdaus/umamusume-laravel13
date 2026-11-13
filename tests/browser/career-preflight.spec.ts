@@ -241,6 +241,10 @@ test('counts a saved-but-incomplete deck as attention, not as recorded (UX-03)',
     const status = page.getByRole('status').filter({ hasText: /steps? needs? attention/ });
     await expect(status).toHaveText('1 step needs attention');
     await expect(page.getByRole('status').filter({ hasText: 'entered steps are recorded' })).toHaveCount(0);
+
+    // Walk-8 E-14: the count names steps needing attention while creation is allowed anyway; the
+    // line below it states which gate actually blocks.
+    await expect(page.getByText(/Only the scenario and the trainee block creation/)).toBeVisible();
 });
 
 test('prints the duel reward the config states, not a hardcoded tier', async ({ page }) => {

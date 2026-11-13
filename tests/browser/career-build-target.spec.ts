@@ -388,3 +388,16 @@ test('never offers a JapanOnly skill in the picker', async ({ page }) => {
         removeJapanOnlySkill();
     }
 });
+
+test('the warn block names the defect, not a build that skips the step (walk-8 E-08/R7-47)', async ({ page }) => {
+    // Walk-8 S05: `This is the step the current build skips.` sat above a step the wizard stamps
+    // through and requires. The sentence described the wireframe's own build, not this one; the block
+    // now opens on the failure the step exists to prevent.
+    await page.goto('/career/setup/target');
+    await page.locator('#app > *').first().waitFor();
+
+    const warn = page.locator('[data-field="target-defect"]');
+    await expect(warn).toBeVisible();
+    await expect(warn).toContainText('A run created with no target entered commits with five empty goals.');
+    await expect(page.getByText('This is the step the current build skips.')).toHaveCount(0);
+});
