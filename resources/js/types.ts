@@ -301,9 +301,21 @@ export interface ScenarioPanelSection {
 
 /**
  * The Trackblazer grade-points meter (plan §9 E4, `x-grade-point-meter` provenance).
- * The ladder row count is four plus the debut row; the dirt-leaning and limited-turf-range
- * tracks the matrix also carries are not the rendered track (KI-15).
+ *
+ * The ladder row count is four plus the debut row, read from whichever of the matrix's three tracks
+ * the trainee's aptitudes select (ruling F1; the derivation is `TrackblazerVariant`).
+ *
+ * `classification` is the derivation's own word and can be `ambiguous`; `track` is which of the three
+ * config tracks its figures come from. They differ exactly on the ambiguous and unclassified cases,
+ * which render `standard` without claiming to be classified `standard`.
  */
+export interface TrackblazerGradeVariant {
+    classification: 'dirt_leaning' | 'limited_turf_range' | 'ambiguous' | 'standard' | null;
+    track: 'dirt_leaning' | 'limited_turf_range' | 'standard';
+    reason: string;
+    evidence: { label: string; letter: string }[];
+}
+
 export interface TrackblazerGradeSection {
     objectives: { index: number; name: string; required: number }[];
     current: number | null;
@@ -311,7 +323,9 @@ export interface TrackblazerGradeSection {
     unpriced_count: number;
     unassigned_count: number;
     periods: { index: number; name: string; required: number; earned: number | null; unpriced: number }[];
-    ladder_source: 'standard';
+    ladder_source: 'dirt_leaning' | 'limited_turf_range' | 'standard';
+    /** Why this track applies. Null when the run has no trainee to classify. */
+    variant: TrackblazerGradeVariant | null;
     rotation_turns: number | null;
     rotation_resets_in: number | null;
 }

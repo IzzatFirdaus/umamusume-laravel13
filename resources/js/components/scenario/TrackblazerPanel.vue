@@ -68,6 +68,13 @@ interface GradePeriod {
     unpriced: number;
 }
 
+interface GradeVariant {
+    classification: 'dirt_leaning' | 'limited_turf_range' | 'ambiguous' | 'standard' | null;
+    track: 'dirt_leaning' | 'limited_turf_range' | 'standard';
+    reason: string;
+    evidence: { label: string; letter: string }[];
+}
+
 interface GradeSection {
     objectives: GradeObjective[];
     current: number | null;
@@ -75,7 +82,9 @@ interface GradeSection {
     unpriced_count: number;
     unassigned_count: number;
     periods: GradePeriod[];
-    ladder_source: 'standard';
+    ladder_source: 'dirt_leaning' | 'limited_turf_range' | 'standard';
+    /** Why this track applies. Null when the run has no trainee to classify. */
+    variant: GradeVariant | null;
     rotation_turns: number | null;
     rotation_resets_in: number | null;
     planning: PlanningSection;
@@ -289,6 +298,28 @@ const currentPeriod = computed<{ name: string; required: number } | null>(() => 
 
 const earned = computed<number | null>(() => props.scenario.grade?.earned ?? null);
 
+/**
+ * The selected track's display name. The keys stay `dirt_leaning`-shaped because the config and the
+ * ingest join read them (ruling E keeps `grade_*` identifiers); only this string is display copy.
+ */
+const trackLabel = computed<string>((): string => {
+    switch (props.scenario.grade?.ladder_source) {
+        case 'dirt_leaning':
+            return 'dirt-leaning';
+        case 'limited_turf_range':
+            return 'limited-turf-range';
+        default:
+            return 'standard';
+    }
+});
+
+/** The aptitude letters the classification read, as one evidence row. */
+const aptitudeEvidence = computed<string>((): string =>
+    (props.scenario.grade?.variant?.evidence ?? [])
+        .map((axis): string => `${axis.label} ${axis.letter}`)
+        .join(' · '),
+);
+
 const barPercent = computed((): number => {
     const period = currentPeriod.value;
 
@@ -395,6 +426,36 @@ const epithetToneClasses: Record<EpithetRow['state'], string> = {
             <h3 :id="gradeHeadingId" tabindex="-1" class="text-lg font-semibold text-ink-strong">
                 Result Points
             </h3>
+
+            <!-- Which of the three published tracks this trainee is on, and why. A scenario with an
+                 unambiguous aptitude reading names its variant track; an ambiguous one says which two
+                 aptitudes tie, because a Trainer reading "standard" without that sentence would take a
+                 fallback for a classification. An unrecorded reading says so instead of claiming
+                 either. -->
+            <div v-if="props.scenario.grade?.variant" class="card px-3 py-2 text-sm text-ink">
+                <p class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                    <span class="font-semibold text-ink-strong">Result Point track:</span>
+                    <span>{{ trackLabel }}</span>
+                    <span
+                        v-if="props.scenario.grade.variant.classification === 'ambiguous'"
+                        class="pill pill-caution"
+                    >ambiguous</span>
+                    <span
+                        v-else-if="props.scenario.grade.variant.classification === null"
+                        class="pill pill-caution"
+                    >not classified</span>
+                </p>
+                <p class="mt-1 text-ink-muted">{{ props.scenario.grade.variant.reason }}</p>
+                <p
+                    v-if="props.scenario.grade.variant.evidence.length > 0"
+                    class="mt-1 font-mono text-xs tabular-nums text-ink-muted"
+                >
+                    {{ aptitudeEvidence }}
+                </p>
+                <p v-else class="mt-1 text-ink-muted">
+                    No aptitude letter is recorded for this trainee, so there is no evidence row to print.
+                </p>
+            </div>
 
             <div v-if="props.scenario.grade === null" class="text-sm text-ink-muted" role="status">
                 <p>No scenario is set for this run, so no result-point meter is composed.</p>

@@ -96,6 +96,11 @@ CLAUDE.local.md
 /research-scratch/
 /.scratch-uma/
 /.scratch-merge-preserve/
+# A one-off driver script written to the repo ROOT rather than into `.scratch-uma/<session>/`.
+# `AGENTS.md` §9 requires session artifacts to live in that session's own subdirectory and holds only
+# directories at the `.scratch-uma/` root; this file predates the rule being followed. Ignored by name
+# rather than deleted, because it is another session's artifact and not this pass's to remove.
+/.scratch-umamusume-laravel13
 # Isolated git worktrees. One is created per parallel dispatch so a peer's uncommitted edits cannot be
 # swept into a commit or baked into a bundle; none of them is history material.
 /.worktrees/

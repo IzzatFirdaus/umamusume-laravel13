@@ -47,10 +47,12 @@ final class TrackblazerPanelBuilder
      * Returns null for any scenario that is not Trackblazer, so the `grade` key is the arm's own and
      * a scenario with no grade ladder draws nothing rather than an empty one.
      *
-     * The ladder row count is 4, debut + three end-of-year rows from
-     * `config('scenarios.scenarios.trackblazer.grade_objectives.standard')`. The dirt-leaning and
-     * limited-turf-range tracks the matrix also carries are not the rendered track, because no column
-     * tells the renderer which trainee belongs where (KI-15).
+     * The ladder row count is 4, debut + three end-of-year rows, read from the track
+     * `TrackblazerVariant` selects for this run's trainee (ruling F1). The matrix carries all three
+     * tracks, and which one applies is the derivation's answer rather than this method's: a
+     * `dirt_leaning` or `limited_turf_range` trainee gets that track's figures, an `ambiguous` one
+     * gets `standard` with the reason printed beside it, and an unclassified one gets `standard` as
+     * the conservative denominator (D-256, KI-15).
      *
      * @return array<string, mixed>|null
      */
@@ -60,6 +62,8 @@ final class TrackblazerPanelBuilder
             return null;
         }
 
+        $variant = TrackblazerVariant::forRun($run);
+
         return [
             'objectives' => $run->gradeObjectives(),
             'current' => $run->current_objective_index,
@@ -67,13 +71,17 @@ final class TrackblazerPanelBuilder
             'unpriced_count' => $run->gradeUnpricedCount(),
             'unassigned_count' => $run->gradeUnassignedCount(),
             'periods' => $run->gradePeriods(),
-            'ladder_source' => 'standard',
+            // The track whose figures the rows above carry, and why. `classification` is null only
+            // when the trainee's aptitudes are not recorded, which is a different fact from
+            // `ambiguous` (a reading that names no track) — the panel prints both differently.
+            'ladder_source' => $variant['track'] ?? TrackblazerVariant::STANDARD,
+            'variant' => $variant,
             'rotation_turns' => (int) (config('scenarios.scenarios.trackblazer.shop.rotation_turns') ?? 0) ?: null,
             'rotation_resets_in' => $run->shop_resets_in,
             // G5's three planning surfaces. They nest here rather than joining the top-level section
             // because they are readings of the grade ladder, and the section's own shape is what
             // `scenarioSectionKeys()` pins (gate G-33: the matrix, not a scenario name, opens them).
-            'planning' => $this->planningSection($run, $latest),
+            'planning' => $this->planningSection($run, $latest, $variant),
             'calendar' => $this->calendarSection($run),
             'fatigue' => $this->fatigueSection($run),
         ];
@@ -94,9 +102,10 @@ final class TrackblazerPanelBuilder
      * printed: a total that silently omits them would understate itself, which is the same refusal
      * `gradeUnpricedFor()` makes about finished races.
      *
+     * @param  array{classification: string|null, track: string, reason: string, evidence: list<array{label: string, letter: string}>}|null  $variant
      * @return array<string, mixed>
      */
-    private function planningSection(TrainingRun $run, ?TurnEntry $latest): array
+    private function planningSection(TrainingRun $run, ?TurnEntry $latest, ?array $variant): array
     {
         /** @var array<string, mixed> $def */
         $def = (array) (config('scenarios.scenarios.trackblazer') ?? []);
@@ -172,9 +181,9 @@ final class TrackblazerPanelBuilder
                 'name' => (string) $objective['name'],
                 'needed' => number_format((int) $objective['required']),
                 'needed_badge' => 'confirmed',
-                'needed_title' => 'The standard track in the scenario\'s own grade objectives, '
-                    .'transcribed from uma.guide. Only the standard track is printed: no column says which trainee belongs '
-                    .'on the dirt-leaning or limited-turf-range one.',
+                'needed_title' => 'The '.$this->trackLabel($variant).' track in the scenario\'s own grade objectives, '
+                    .'transcribed from uma.guide. The track is selected from the trainee\'s aptitudes, and the '
+                    .'reason it was selected (or why none could be) is stated in the panel above.',
                 'is_current' => $current === $index,
                 'plan' => $plan === null ? null : number_format($plan),
                 'plan_badge' => $plan === null ? null : 'calculated',
@@ -528,6 +537,24 @@ final class TrackblazerPanelBuilder
             'recovery_title' => 'Guaranteed Energy and Mood events, from '
                 .(string) ($fatigue['recovery_source'] ?? 'the publisher master'),
         ];
+    }
+
+    /**
+     * The user-facing name of a track key.
+     *
+     * The keys stay `grade_*`-shaped and the user-facing term stays Result Points: the keys are what
+     * the config and the ingest join read, and renaming them is not authorised (`AGENTS.md` §5,
+     * ruling E). Only the words this method prints are display copy.
+     *
+     * @param  array{classification: string|null, track: string, reason: string, evidence: list<array{label: string, letter: string}>}|null  $variant
+     */
+    private function trackLabel(?array $variant): string
+    {
+        return match ($variant['track'] ?? TrackblazerVariant::STANDARD) {
+            TrackblazerVariant::DIRT_LEANING => 'dirt-leaning',
+            TrackblazerVariant::LIMITED_TURF_RANGE => 'limited-turf-range',
+            default => 'standard',
+        };
     }
 
     /**

@@ -750,8 +750,8 @@ return [
             | The Director's bond does not agree with itself: line 310 says 19 / 31 / 51 while the
             | GameWith row at line 1235 says 15 / 30 / 50, and docs/Trackblazer-plan.md:361 rules only
             | that the uma.guide figures are single-source. Both pairs are therefore printed and
-            | neither is settled here, the way KI-15 keeps two published tracks unchosen rather than
-            | picking a denominator. No column stores this run's bond reading either way.
+            | neither is settled here, the way this matrix keeps two published figures side by side
+            | rather than picking one. No column stores this run's bond reading either way.
             */
             'year_end_gates' => [
                 ['label' => 'Junior', 'timing' => 'Late December, Junior Year', 'fans' => 5000, 'bond_uma_guide' => 19, 'bond_game_with' => 15],

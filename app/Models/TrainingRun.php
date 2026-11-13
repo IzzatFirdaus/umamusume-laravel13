@@ -17,6 +17,7 @@ use App\Models\Legacy\LegacySelectionPayload;
 use App\Models\TurnEvents\RaceFatiguePayload;
 use App\Models\TurnEvents\ShopPurchasePayload;
 use App\Models\TurnEvents\TeamRankPayload;
+use App\Services\Career\TrackblazerVariant;
 use App\Services\CareerCalendar;
 use Database\Factories\TrainingRunFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
@@ -960,7 +961,7 @@ class TrainingRun extends Model
     }
 
     /**
-     * The Grade Point ladder, in order: the debut race, which asks for no points,
+     * The Result Point ladder, in order: the debut race, which asks for no points,
      * then one deadline per year. Each row carries the 1-based `index` a Trainer
      * enters a finish against, so the period a race counts toward and the period it
      * is displayed under can never drift apart.
@@ -968,14 +969,13 @@ class TrainingRun extends Model
      * This was derived in the template. It belongs here for the same reason
      * `stripValues()` does: a view should not walk config.
      *
-     * The standard track is the only one selected. The matrix also carries
-     * `dirt_leaning` and `limited_turf_range`, and the two sources disagree about
-     * where a sprint-only trainee lands: `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Grade Points (Replacing Career Goals)" puts "Sprint Umas with
-     * poor aptitude in other distances" on the **Dirt** track, while
-     * `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Basic Information" gives the same character class a third track with only the
-     * Classic objective reduced. Neither names the aptitude letter that places a
-     * trainee in one, so picking a track here would be a guess printed as a target
-     * (D-256, KI-15).
+     * **Which of the three tracks is selected** is `TrackblazerVariant`'s answer, and only its answer
+     * (ruling F1). The matrix carries `standard`, `dirt_leaning` and `limited_turf_range`; a trainee
+     * whose aptitudes select a variant track gets that track's figures, an `ambiguous` trainee gets
+     * `standard` with the reason the variant could not be chosen, and a trainee with no recorded
+     * aptitudes gets `standard` as the conservative denominator rather than a guess (D-256, KI-15).
+     * Before this method read the derivation, only `standard` could be printed, which is what KI-15
+     * recorded as the gap.
      *
      * @return list<array{index: int, name: string, required: int}>
      */
@@ -987,15 +987,18 @@ class TrainingRun extends Model
 
         $def = config('scenarios.scenarios.'.$this->scenarioKey());
         $labels = $def['grade_objective_labels'] ?? [];
-        $standard = $def['grade_objectives']['standard'] ?? [];
+        $tracks = $def['grade_objectives'] ?? [];
+        $variant = TrackblazerVariant::forRun($this);
+        $selected = $variant['track'] ?? TrackblazerVariant::STANDARD;
+        $track = $tracks[$selected] ?? $tracks[TrackblazerVariant::STANDARD] ?? [];
 
-        if ($standard === []) {
+        if ($track === []) {
             return [];
         }
 
         $rows = [];
 
-        foreach ($standard as $year => $points) {
+        foreach ($track as $year => $points) {
             $rows[] = [
                 'name' => $labels[$year] ?? $year,
                 'required' => (int) $points,

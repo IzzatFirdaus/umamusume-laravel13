@@ -54,6 +54,17 @@ interface Trainee {
 interface Scenario {
     key: string;
     label: string;
+    /**
+     * Ruling F1's Trackblazer variant classification and the track it selects, derived by
+     * `TrackblazerVariant` from the draft trainee's aptitudes. Null for every scenario that composes no
+     * Result Point objectives, and for a Trackblazer draft with no trainee chosen yet.
+     */
+    variant: {
+        classification: 'dirt_leaning' | 'limited_turf_range' | 'ambiguous' | 'standard' | null;
+        track: 'dirt_leaning' | 'limited_turf_range' | 'standard';
+        reason: string;
+        evidence: { label: string; letter: string }[];
+    } | null;
     focus: string | null;
     /** Why no focus sentence exists, when the scenario's own record says why (URA Finale's). */
     focus_reason: string | null;
@@ -234,6 +245,21 @@ watch(
  * empty values) — the first prints "no scenario", the second prints each row's own absence.
  */
 const asks = computed(() => props.contract.build.scenario?.asks ?? null);
+
+/**
+ * The selected Result Point track's display name. The stored keys stay `dirt_leaning`-shaped (ruling E
+ * keeps the `grade_*` identifiers and the underscore keys); only this string is display copy.
+ */
+const preflightTrackLabel = computed<string>((): string => {
+    switch (props.contract.build.scenario?.variant?.track) {
+        case 'dirt_leaning':
+            return 'dirt-leaning';
+        case 'limited_turf_range':
+            return 'limited-turf-range';
+        default:
+            return 'standard';
+    }
+});
 
 /*
  * The finale-target line, assembled from the configuration's own figures: the speed target's own
@@ -834,6 +860,33 @@ const CAREER_TURNS = 72;
                                         compact
                                         reason="This scenario's record has no duel system."
                                     />
+                                </td>
+                            </tr>
+                            <tr
+                                v-if="props.contract.build.scenario?.variant"
+                                class="border-b border-rule"
+                            >
+                                <th scope="row" class="py-1.5 pr-2 font-normal text-ink-muted">Result Point track</th>
+                                <td class="py-1.5 text-ink">
+                                    <!-- Ruling F1: the track is selected from the draft trainee's aptitudes, by
+                                         the same `TrackblazerVariant` owner the Cockpit reads, so the two
+                                         screens cannot disagree. An ambiguous reading prints that word and its
+                                         two tying aptitudes rather than letting "standard" stand as a
+                                         classification. -->
+                                    <p class="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                                        <span>{{ preflightTrackLabel }}</span>
+                                        <span
+                                            v-if="props.contract.build.scenario.variant.classification === 'ambiguous'"
+                                            class="pill pill-caution"
+                                        >ambiguous</span>
+                                        <span
+                                            v-else-if="props.contract.build.scenario.variant.classification === null"
+                                            class="pill pill-caution"
+                                        >not classified</span>
+                                    </p>
+                                    <p class="mt-1 text-xs text-ink-muted">
+                                        {{ props.contract.build.scenario.variant.reason }}
+                                    </p>
                                 </td>
                             </tr>
                             <tr>

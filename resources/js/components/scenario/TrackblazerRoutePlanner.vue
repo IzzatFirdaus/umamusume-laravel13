@@ -20,9 +20,10 @@
  * `TrainingRun::epithetProgress()`, and one race must not have two surfaces on one screen. What this
  * list owes is the pointer, which `planning.routes_pointer` supplies.
  *
- * **Standard track only.** The denominator is the config's standard row because no column says which
- * trainee belongs on the dirt-leaning or limited-turf-range one; that is KI-15, and the row's badge
- * carries the sentence.
+ * **The track is the derivation's, not this list's.** Which of the three tracks the denominator comes
+ * from is decided by `App\Services\Career\TrackblazerVariant` from the trainee's aptitude letters
+ * (2026-11-13), and the sentence saying which one and why is rendered by `TrackblazerPanel`, not here.
+ * This list prints whatever figures the server sent it, so it cannot disagree with the meter above it.
  *
  * Each period is a two-column `dt`/`dd` list. The pairs are the `dl`'s own children, unwrapped:
  * axe's `definition-list` rule reads that child list, and a wrapping `div` fails it while also

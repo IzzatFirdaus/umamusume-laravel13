@@ -16,12 +16,18 @@ use App\Services\DeckAnalysis;
 /**
  * One equipped card for the service: its name and its at-cap effects, in the shape the controller maps.
  *
+ * `basis` and `level` are required by `DeckAnalysis`'s `CardInput` shape (`app/Services/DeckAnalysis.php:39`)
+ * and are what the service copies onto every effect line it prints. This helper is the producer these unit
+ * tests feed it, so it owes the whole shape: omitting the two keys made `collect()` read an absent `basis`
+ * on all nine effect-bearing cases. `catalog`/`null` is the at-cap reading, which is what `atCap()` resolves
+ * to — the per-level reading is `DeckAnalysisReachedEffectsTest`'s subject, not this file's.
+ *
  * @param  array<int, array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>  $effects
- * @return array{card_name: string, effects: array<int, array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>}
+ * @return array{card_name: string, effects: array<int, array{effect_id: int, name: string|null, display: string, value: int, symbol: string|null, calc: string|null}>, basis: 'catalog'|'level', level: int|null}
  */
-function deckCard(string $name, array $effects): array
+function deckCard(string $name, array $effects, string $basis = 'catalog', ?int $level = null): array
 {
-    return ['card_name' => $name, 'effects' => $effects];
+    return ['card_name' => $name, 'effects' => $effects, 'basis' => $basis, 'level' => $level];
 }
 
 /**

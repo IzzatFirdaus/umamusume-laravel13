@@ -62,6 +62,8 @@
             "npm run typecheck",
             "@php artisan test"
         ],
+        "test:pest": "vendor/bin/pest --compact",
+        "test:pest:warn": "vendor/bin/pest --compact --display-warnings",
         "lore": "@php tools/lore.php",
         "lore-code": "@php tools/lore.php code",
         "docs": "python tools/doc_census.py",

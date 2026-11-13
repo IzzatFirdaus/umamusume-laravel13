@@ -183,6 +183,25 @@ test('renders the Grade-Points region as the no-period absence the component pri
     await expect(grade.getByText(/Surplus does not carry over/)).toBeVisible();
 });
 
+test('names the Result Point track and the aptitude reading behind it', async ({ page }) => {
+    const grade = page.getByRole('region', { name: 'Result Points' });
+
+    // Ruling F1: the track is derived from the trainee's aptitudes, and the panel says which one and
+    // why rather than leaving a Trainer to infer it from the figures. This run's trainee reads turf A /
+    // dirt G / sprint E, so the reading is unambiguous and the standard track applies.
+    await expect(grade.getByText(/Result Point track:/)).toBeVisible();
+    await expect(grade.getByText('standard', { exact: true }).first()).toBeVisible();
+    await expect(grade.getByText(/match neither variant/)).toBeVisible();
+
+    // The evidence row prints the letters the classification read, so the claim is checkable on screen.
+    // Scoped to the monospace evidence line: the reason sentence above it names the same two letters in
+    // prose, and a loose matcher would pass on either.
+    const evidence = grade.locator('p.font-mono');
+    await expect(evidence).toContainText('Turf A');
+    await expect(evidence).toContainText('Dirt G');
+    await expect(evidence).toContainText('Sprint E');
+});
+
 test('renders the epithet checklist with three states, glyph plus word', async ({ page }) => {
     const epithets = page.getByRole('region', { name: 'Epithet routes' });
     await expect(epithets).toBeVisible();

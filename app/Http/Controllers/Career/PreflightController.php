@@ -16,6 +16,7 @@ use App\Models\SupportCard;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Services\Career\SetupDraft;
+use App\Services\Career\TrackblazerVariant;
 use App\Services\DataPipeline\ArtworkMirror;
 use App\Services\DeckAnalysis;
 use App\Services\IndependentTraining\Lifecycle;
@@ -232,9 +233,22 @@ class PreflightController extends Controller
         /** @var array<string, mixed> $config */
         $config = (array) config('scenarios.scenarios.'.$key, []);
 
+        // Ruling F1's derivation, read from the same owner the Cockpit and the panel builder read, so
+        // the track a draft shows here and the track the run shows after Preflight cannot disagree.
+        // The draft's trainee is what it classifies; a draft with no trainee yet gets `null`, which the
+        // page renders as "not chosen" rather than as a classification nobody made.
+        $trainee = SetupDraft::read()['umamusume_id'] === null
+            ? null
+            : Umamusume::query()->find(SetupDraft::read()['umamusume_id']);
+        $variant = TrackblazerVariant::forTrainee($trainee);
+
         return [
             'key' => $key,
             'label' => (string) ($config['label'] ?? $key),
+            // The variant classification and the track it selects. Null for every scenario whose matrix
+            // does not compose Result Point objectives, because the classification is Trackblazer's own
+            // rule and not a general trainee reading (gate G-33: the matrix gates it, not a name test).
+            'variant' => ($config['panels']['grade_objectives'] ?? false) === true ? $variant : null,
             // The focus sentence is the scenario's own guide, stored under `metadata.planning_focus`.
             // URA Finale deliberately has none (`metadata.planning_focus_reason` says why), and the
             // page prints that reason rather than a bare N/A.
