@@ -39,6 +39,10 @@ interface PlanRow {
     name_ja: string | null;
     is_unique: boolean;
     sp_cost: number | null;
+    /** Walk-8 F-29: `skills.type` as published, or null where the source states none. */
+    type: string | null;
+    /** Walk-8 F-29: `run_skills.hint_level` where recorded, else null. */
+    hint_level: number | null;
     recorded: { status: string; turn: number | null; current_level: number | null; hint_level: number | null } | null;
     conditions: string | null;
     fit: FitCell[];
@@ -126,10 +130,44 @@ const PAGE_SIZE = 10;
 
 const allRows = computed<PlanRow[]>(() => props.groups.flatMap((group) => group.rows));
 
+/**
+ * Walk-8 F-29 (plan v2 slice 3.5): the two filters that were `disabled` with one inert option.
+ * They act on what the payload actually carries: `type` (`skills.type`) and `hint_level`
+ * (`run_skills.hint_level`). `canFilterType`/`canFilterHints` are false only when no row in the
+ * pool carries a value, and the control then keeps its disabled state with the reason in `title`.
+ */
+const typeFilter = ref('');
+const hintFilter = ref('');
+
+const typeOptions = computed<string[]>(() =>
+    [...new Set(allRows.value.map((row) => row.type).filter((type): type is string => type !== null && type !== ''))].sort(),
+);
+
+const canFilterType = computed<boolean>(() => typeOptions.value.length >= 2);
+const canFilterHints = computed<boolean>(() => allRows.value.some((row) => row.hint_level !== null));
+
 const filteredRows = computed<PlanRow[]>(() => {
     const needle = search.value.trim().toLowerCase();
 
-    return allRows.value.filter((row) => needle === '' || row.name.toLowerCase().includes(needle));
+    return allRows.value.filter((row) => {
+        if (needle !== '' && !row.name.toLowerCase().includes(needle)) {
+            return false;
+        }
+
+        if (typeFilter.value !== '' && row.type !== typeFilter.value) {
+            return false;
+        }
+
+        if (hintFilter.value === 'hinted' && row.hint_level === null) {
+            return false;
+        }
+
+        if (hintFilter.value === 'not_hinted' && row.hint_level !== null) {
+            return false;
+        }
+
+        return true;
+    });
 });
 
 const pageCount = computed(() => Math.max(1, Math.ceil(filteredRows.value.length / PAGE_SIZE)));
@@ -510,11 +548,29 @@ const coverageConstants = computed(() =>
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Type</span>
-                <BaseSelect disabled :options="[{ value: '', label: 'Any' }]" model-value="" title="No column carries a skill type, so this filter cannot act." />
+                <!-- Walk-8 F-29: enabled when the pool carries two or more types; disabled with the
+                     reason otherwise, never a control that looks actionable and does nothing. -->
+                <BaseSelect
+                    v-model="typeFilter"
+                    name="skill_type"
+                    :disabled="!canFilterType"
+                    :options="[{ value: '', label: 'Any' }, ...typeOptions.map((type) => ({ value: type, label: type }))]"
+                    :title="canFilterType ? undefined : 'The pool holds fewer than two skill types, so this filter cannot act.'"
+                    @update:model-value="page = 1"
+                />
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Hints</span>
-                <BaseSelect disabled :options="[{ value: '', label: 'Any' }]" model-value="" title="Hint levels are not recorded per skill, so this filter cannot act." />
+                <!-- Walk-8 F-29: enabled when any pooled row records a hint level; the run's own
+                     acquisition editor is the writer. Disabled with the reason otherwise. -->
+                <BaseSelect
+                    v-model="hintFilter"
+                    name="skill_hints"
+                    :disabled="!canFilterHints"
+                    :options="[{ value: '', label: 'Any' }, { value: 'hinted', label: 'Hinted only' }, { value: 'not_hinted', label: 'Not hinted' }]"
+                    :title="canFilterHints ? undefined : 'No skill on this run records a hint level, so this filter cannot act.'"
+                    @update:model-value="page = 1"
+                />
             </label>
             <button type="button" class="btn btn-quiet min-h-11" @click="search = ''; page = 1">Clear</button>
         </div>

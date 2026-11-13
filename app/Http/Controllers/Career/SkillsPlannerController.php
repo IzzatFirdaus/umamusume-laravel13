@@ -662,9 +662,16 @@ final class SkillsPlannerController extends Controller
             'id' => $skill?->id,
             'name' => $name,
             'name_ja' => $skill?->name_ja,
+            // Walk-8 F-29 (plan v2 slice 3.5): the HINTS/TYPE filters act on these. `type` is
+            // `skills.type` (Speed / Stamina / Power / Guts / Wit / Passive / Recovery), the same
+            // column the catalogue publishes; `hint_level` is `run_skills.hint_level` where the
+            // run recorded one. Both null when the source states none, which the filter reads as
+            // "cannot decide this row" rather than as a value.
+            'type' => $skill?->type,
             'is_unique' => $skill !== null && $skill->is_unique,
             'sp_cost' => $skill?->sp_cost,
             'recorded' => $recorded,
+            'hint_level' => $recorded['hint_level'] ?? null,
             'conditions' => $this->conditionsLine($skill),
             'fit' => $this->fitCells($skill, $target),
             'note' => $note,

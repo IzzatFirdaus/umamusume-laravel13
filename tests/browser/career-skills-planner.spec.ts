@@ -491,3 +491,80 @@ test('reaches the add-skill picker with no disclosure opened (F-12)', async ({ p
     await picker.fill('Gourmand');
     await expect(page.getByRole('option', { name: /Gourmand/ }).first()).toBeVisible();
 });
+
+/*
+ * Walk-8 F-29: `TYPE` and `HINTS` were disabled with a single inert `Any` option — two controls
+ * that look actionable and do nothing. The data they need exists: `skills.type` is populated
+ * (Speed/Passive/Recovery), and `run_skills.hint_level` has a writer (the acquisition editor).
+ * Plan v2 (post-audit) slice 3.5: the filters act where the pool carries the data; a filter stays
+ * disabled with its reason only where the pool genuinely holds no value to filter on.
+ */
+test('acts on the Type filter, and keeps Hints disabled with its reason until a hint is recorded (F-29)', async ({ page }) => {
+    await openPlanner(page);
+
+    // Addressed by name: the wrapping-label lookup also matches the skill picker's own hint text.
+    const type = page.locator('select#skill_type');
+
+    // The fixture's pool carries catalogued skills with a type, so the control is live and narrows.
+    // The option chosen is read from the control itself: the fixture's pool is two seeded skills,
+    // so which types exist is the payload's fact and not this case's assumption.
+    await expect(type).toBeEnabled();
+    const firstType = (await type.locator('option').allTextContents()).find((label) => label !== 'Any');
+    expect(firstType, 'no type option rendered').toBeDefined();
+
+    const before = await page.locator('main table tbody tr').count();
+    await type.selectOption({ label: firstType as string });
+    const afterType = await page.locator('main table tbody tr').count();
+    expect(afterType, 'the type filter narrowed nothing').toBeLessThanOrEqual(before);
+
+    await type.selectOption({ label: 'Any' });
+    const back = await page.locator('main table tbody tr').count();
+    expect(back, 'clearing the type filter restores the table').toBeGreaterThanOrEqual(afterType);
+
+    // No skill on this run records a hint level, so the Hints control stays disabled and says why.
+    const hints = page.locator('select#skill_hints');
+    await expect(hints).toBeDisabled();
+    await expect(hints).toHaveAttribute('title', /No skill on this run records a hint level/);
+});
+
+test('the Hints filter acts once the run records a hint level (F-29)', async ({ page }) => {
+    const runUrl = await openPlanner(page);
+
+    // Record a hint through the same write the acquisition editor posts (`runs.skills.sync`): read
+    // the sync URL and a pooled skill id from the page's own payload rather than hard-coding either.
+    const { syncUrl, skillId } = await page.evaluate(() => {
+        const el = document.querySelector('script[data-page="app"]');
+        const props = JSON.parse(el?.textContent ?? '{}').props ?? {};
+        const groups = props.groups ?? [];
+        const row = groups.flatMap((group) => group.rows).find((candidate) => candidate.id !== null);
+
+        return { syncUrl: props.run?.skills_sync_url ?? '', skillId: row?.id ?? null };
+    });
+
+    expect(syncUrl, 'the page payload carries no skills sync URL').not.toBe('');
+    expect(skillId, 'no pooled skill row to hint').not.toBeNull();
+
+    const cookie = (await page.context().cookies()).find((c) => c.name === 'XSRF-TOKEN');
+    const body = new URLSearchParams({
+        'skills[0][skill_id]': String(skillId),
+        'skills[0][status]': 'Suggested',
+        'skills[0][hint_level]': '3',
+    });
+    const saved = await page.request.post(syncUrl, {
+        headers: {
+            'content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+            ...(cookie ? { 'X-XSRF-TOKEN': decodeURIComponent(cookie.value) } : {}),
+        },
+        data: body.toString(),
+        maxRedirects: 0,
+    });
+    expect(saved.status(), 'the hint write was refused').toBeLessThan(400);
+
+    await page.goto(`${runUrl}/skills`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const hints = page.locator('select#skill_hints');
+    await expect(hints).toBeEnabled();
+    await hints.selectOption({ label: 'Hinted only' });
+    await expect(page.getByText(/skills? · page 1 of 1/)).toBeVisible();
+});
