@@ -266,7 +266,7 @@ it('names the Spirit Burst payout in the burst countdown (§13.2)', function ():
     $run = nextDecisionRun('unity_cup', 1, 80, DECISION_SHORT_TARGETS);
 
     // The combined tally is only answered when both counters are recorded; an unrecorded one is not a
-    // zero (D-220). 11 combined leaves 2 short of the Gold Lv3 threshold of 13.
+    // zero (D-220). 11 combined leaves 2 short of the top band's threshold of 13.
     $run->update(['spirit_bursts_count' => 8, 'extreme_bursts_count' => 3]);
 
     /** @var array{scenario: array{team: array{burst_countdown: array{warning_message: string}|null}}} $props */
@@ -276,6 +276,31 @@ it('names the Spirit Burst payout in the burst countdown (§13.2)', function ():
 
     expect($countdown)->not->toBeNull()
         ->and($countdown['warning_message'])->toContain('Spirit Burst');
+});
+
+it('serializes both burst-count readings and no turn arithmetic to the Cockpit payload', function (): void {
+    // The helper is pinned in `SpiritBurstCountdownTest`; this is the wire the browser actually reads.
+    // Two things must survive serialization: both readings of the tally, and the fact that no turn is
+    // claimed. The old payload carried `turns_left: 69` derived from a hardcoded turn 70 — a deadline
+    // no source places — so `payout_turn` is asserted present-and-null rather than merely absent, and
+    // `turns_left` is asserted gone so a stale frontend cannot revive the number.
+    $run = nextDecisionRun('unity_cup', 65, 80, DECISION_SHORT_TARGETS);
+    $run->update(['spirit_bursts_count' => 8, 'extreme_bursts_count' => 3]);
+
+    /** @var array{scenario: array{team: array{burst_countdown: array{counts: array<string, array{bursts: int, band: string|null, reward: string|null, next_threshold: int|null, bursts_needed: int|null}>, active_mode: string, payout_timing: string|null, payout_turn: null, warning_message: string|null}}} $props */
+    $props = $this->get(route('runs.cockpit', $run))->assertOk()->inertiaProps();
+
+    $countdown = $props['scenario']['team']['burst_countdown'];
+
+    expect($countdown['counts']['normal_only']['bursts'])->toBe(8)
+        ->and($countdown['counts']['normal_and_extreme']['bursts'])->toBe(11)
+        ->and($countdown['counts']['normal_and_extreme']['band'])->toBe('10–12')
+        ->and($countdown['counts']['normal_and_extreme']['reward'])->toContain('Burning Spirit Lv1')
+        ->and($countdown['active_mode'])->toBe('normal_and_extreme')
+        ->and($countdown['payout_timing'])->toBe('Senior Year, Late November')
+        ->and($countdown['payout_turn'])->toBeNull()
+        ->and($countdown)->not->toHaveKey('turns_left')
+        ->and($countdown)->not->toHaveKey('target_bursts');
 });
 
 it('marks an arithmetic row Calculated and a row taken as read Confirmed, and never the other two states', function (): void {

@@ -75,7 +75,7 @@ use Inertia\Response;
  *     roster: list<array{teammate: string, state: string, stateLabel: string}>,
  *     race_guidance: int|null,
  *     race_entries: list<array{title: string, tier: string|null, circles: int|null, placement: int|null}>,
- *     bands: list<array{total: string, reward: string}>,
+ *     bands: list<array{total: string, family: string, level: string, reward: string}>,
  *     payout_timing: string|null,
  *     special_training: array{energy_penalty_removed: bool|null, wit_burst_energy_bonus: int|null},
  *     team_name: string|null,

@@ -516,17 +516,23 @@ return [
             'spirit_burst_states' => ['chargeable', 'charged', 'held', 'spent', 'extreme_ready', 'extreme_spent'],
             /*
             | The burst-count reward bands, transcribed from docs/scenarios/02-unity-cup.md:213-218
-            | ("Exclusive Skills from Spirit Burst Count", corrected to post-rework values, the
-            | white/gold framing superseding the withdrawn tier names). Whether Extreme Bursts count
-            | toward the threshold is a live publisher disagreement (run report §8.2), so the panel
-            | renders the caveat beside the table and never places this run in a band: the count the
-            | bands read is not recorded here, and D-223 keeps it that way.
+            | (post-rework values). `family` and `level` name the skill the band awards: the white-tier
+            | skill is Ignited Spirit and the gold-tier is Burning Spirit, with "white hint"/"gold hint"
+            | kept in `reward` only as the tier description of the hint it grants. Ignited Spirit is a
+            | prerequisite for the Burning Spirit of the same stat; whether learning Burning Spirit
+            | suppresses or replaces Ignited Spirit in a race is unresolved and is not modelled anywhere.
+            |
+            | Whether Extreme Bursts count toward the threshold is a live publisher disagreement (run
+            | report §8.2): GameTora counts both, other descriptions state a threshold without saying.
+            | `TeamPanelBuilder::spiritBurstCounts()` therefore reports both readings rather than one, and
+            | the panel prints which reading each band came from. Adding a band here moves the arithmetic
+            | with it, since the next threshold is read from these rows rather than restated in PHP.
             */
             'spirit_burst_bands' => [
-                ['total' => '4–6', 'reward' => 'White hint Lv1, +10 to the matching stat, +10 SP'],
-                ['total' => '7–9', 'reward' => 'White hint Lv3, +20 to the matching stat, +20 SP'],
-                ['total' => '10–12', 'reward' => 'Gold hint Lv1, +30 to the matching stat, +30 SP'],
-                ['total' => '13+', 'reward' => 'Gold hint Lv3, +40 to the matching stat, +40 SP'],
+                ['total' => '4–6', 'family' => 'Ignited Spirit', 'level' => 'Lv1', 'reward' => 'Ignited Spirit Lv1 (white hint), +10 to the matching stat, +10 SP'],
+                ['total' => '7–9', 'family' => 'Ignited Spirit', 'level' => 'Lv3', 'reward' => 'Ignited Spirit Lv3 (white hint), +20 to the matching stat, +20 SP'],
+                ['total' => '10–12', 'family' => 'Burning Spirit', 'level' => 'Lv1', 'reward' => 'Burning Spirit Lv1 (gold hint), +30 to the matching stat, +30 SP'],
+                ['total' => '13+', 'family' => 'Burning Spirit', 'level' => 'Lv3', 'reward' => 'Burning Spirit Lv3 (gold hint), +40 to the matching stat, +40 SP'],
             ],
             // 02-unity-cup.md:220 — the gold versions arrive from the scripted event in Senior
             // Year, late November. "Late November" is the calendar vocabulary the run screens use.

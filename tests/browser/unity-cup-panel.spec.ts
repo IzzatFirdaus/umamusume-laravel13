@@ -56,10 +56,10 @@ test('renders the configured burst bands, their payout timing and the Extreme ca
     const table = section.getByRole('table', { name: /Reward by combined Spirit Burst/ });
     await expect(table).toBeVisible();
     await expect(table.getByRole('row').getByText('4–6', { exact: true })).toBeVisible();
-    // Verbatim from `config/scenarios.php`'s `spirit_burst_bands`, last band: the config reads
-    // "Gold hint Lv3, +40 to the matching stat, +40 SP". The spec used to omit the "to the", which
-    // made this case fail against copy the app never printed.
-    await expect(table.getByText('Gold hint Lv3, +40 to the matching stat, +40 SP')).toBeVisible();
+    // Verbatim from `config/scenarios.php`'s `spirit_burst_bands`, last band: the config names the
+    // skill (Burning Spirit is the gold tier; "gold hint" is only its tier description) and reads
+    // "Burning Spirit Lv3 (gold hint), +40 to the matching stat, +40 SP".
+    await expect(table.getByText('Burning Spirit Lv3 (gold hint), +40 to the matching stat, +40 SP')).toBeVisible();
 
     // The caveat names all three publisher conflicts, in words: state never rides the ⚠ mark alone.
     await expect(section.getByText(/Three parts of this table are publisher conflicts/)).toBeVisible();
@@ -77,10 +77,13 @@ test('shows the Spirit meter as text and a bar, with readiness and the held advi
 
     const section = page.getByRole('region', { name: 'Scenario' });
 
-    // The meter carries the reading twice: the text and the labelled bar's accessible name.
-    const meter = section.getByRole('img', { name: /Current Spirit: not recorded/ });
+    // The meter carries the reading twice: the text and the labelled bar's accessible name. The label
+    // is the card's own (`SpiritCard.vue`), which says "manual proxy" — a figure here is one
+    // Trainer-entered aggregate for the whole team, not a game reading (KI-133), so the accessible
+    // name carries that qualifier too and this case must match the copy the app actually prints.
+    const meter = section.getByRole('img', { name: /Current Spirit \(manual proxy\): not recorded/ });
     await expect(meter).toBeVisible();
-    await expect(section.getByText('Current Spirit', { exact: true })).toBeVisible();
+    await expect(section.getByText('Current Spirit (manual proxy)', { exact: true })).toBeVisible();
     await expect(section.getByText('N/A').first()).toBeVisible();
 
     // Burst readiness is not derivable — no recorded Spirit, no configured threshold — so the

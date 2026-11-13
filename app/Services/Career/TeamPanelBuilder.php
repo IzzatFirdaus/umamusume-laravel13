@@ -44,7 +44,7 @@ use Illuminate\Support\Collection;
  *     roster: list<array{teammate: string, state: string, stateLabel: string}>,
  *     race_guidance: int|null,
  *     race_entries: list<array{title: string, tier: string|null, circles: int|null, placement: int|null}>,
- *     bands: list<array{total: string, reward: string}>,
+ *     bands: list<array{total: string, family: string, level: string, reward: string}>,
  *     bands_source: string|null,
  *     bands_caveat: string|null,
  *     payout_timing: string|null,
@@ -594,7 +594,7 @@ final class TeamPanelBuilder
         /** @var array<string, string> $teamStatGrades */
         $teamStatGrades = is_array($run->team_stat_grades) ? $run->team_stat_grades : [];
 
-        /** @var list<array{total: string, reward: string}> $bands */
+        /** @var list<array{total: string, family: string, level: string, reward: string}> $bands */
         $bands = $composesBursts
             ? array_values((array) config('scenarios.scenarios.'.$run->scenarioKey().'.spirit_burst_bands', []))
             : [];
@@ -786,15 +786,8 @@ final class TeamPanelBuilder
         foreach ((array) config('scenarios.scenarios.'.$scenarioKey.'.spirit_burst_bands', []) as $band) {
             $total = (string) ($band['total'] ?? '');
 
-            if (preg_match('/^(\d+)(?:–(\d+))?\+?$/u', $total, $matches) === 1) {
-                $low = (int) $matches[1];
-                // The upper bound's group is optional and absent from `$matches` when the label is
-                // open-ended (`13+`), which is what makes the band unbounded rather than empty.
-                $high = isset($matches[2]) ? (int) $matches[2] : null;
-
-                if ($combined >= $low && ($high === null || $combined <= $high)) {
-                    return $total;
-                }
+            if ($this->bandContains($total, $combined)) {
+                return $total;
             }
         }
 
@@ -804,20 +797,29 @@ final class TeamPanelBuilder
     /**
      * The Spirit Burst countdown to the Senior November payout event.
      *
-     * Only applies to Unity Cup (the only scenario with the Spirit Burst system).
-     * Returns null for other scenarios or when no turns have been recorded.
+     * Two facts here are not settled by the evidence, and this method reports both rather than choosing
+     * one and printing it as the answer.
      *
-     * The payout occurs at Senior Year, Late November (turn ~70).
-     * Gold Lv3 requires 13+ combined Spirit + Extreme bursts.
+     * **Whether Extreme Spirit Bursts count toward the band.** GameTora counts both; other descriptions
+     * state a Spirit Burst threshold without saying. `spiritBurstCounts()` carries both readings and the
+     * payload names which one each band came from, so neither is presented as the rule.
+     *
+     * **The turn the payout lands on.** No published source gives it and this application maps no turn to
+     * a calendar month, so no countdown arithmetic is printed. This method previously hardcoded
+     * `$payoutTurn = 70` and reported `turns_left`, which stated a deadline the evidence does not carry and
+     * disagreed with the config's own `burst_payout_timing` ('Senior Year, Late November'). The timing is
+     * now read from config as calendar vocabulary and no turn is derived from it.
+     *
+     * What the bands, the highest-stat variant and the additional-bursts arithmetic do support is still
+     * reported: the count, the next threshold, and how many more are needed.
      *
      * @param  array<string, mixed>  $team  the team section payload from teamSection()
      * @return array{
-     *     current_bursts: int,
-     *     target_bursts: int,
-     *     bursts_needed: int,
-     *     warning_message: string|null,
-     *     turns_left: int,
-     *     payout_turn: int
+     *     counts: array<string, array{bursts: int|null, band: string|null, reward: string|null, next_threshold: int|null, bursts_needed: int|null, basis: string}>,
+     *     active_mode: string,
+     *     payout_timing: string|null,
+     *     payout_turn: null,
+     *     warning_message: string|null
      * }|null
      */
     public function burstCountdown(TrainingRun $run, array $team): ?array
@@ -827,39 +829,172 @@ final class TeamPanelBuilder
             return null;
         }
 
-        // Need at least one turn recorded to calculate position
-        $latestTurn = $run->turnEntries->sortByDesc('turn')->first();
-        if ($latestTurn === null) {
+        $counts = $this->spiritBurstCounts($run);
+
+        if ($counts === null) {
             return null;
         }
 
-        $currentTurn = (int) $latestTurn->turn;
-        $payoutTurn = 70; // Senior Year, Late November ≈ turn 70
-        $turnsLeft = max(0, $payoutTurn - $currentTurn);
-
-        $combined = $team['combined_bursts'] ?? null;
-        if ($combined === null) {
-            return null;
-        }
-
-        $targetBursts = 13; // Gold Lv3 threshold
-        $burstsNeeded = max(0, $targetBursts - $combined);
+        // The combined reading is the one this build treats as active, because that is the reading the
+        // band table's publisher states. It is named as an interpretation, not as a settled rule.
+        $active = $counts[self::BURST_MODE_COMBINED];
 
         $warningMessage = null;
-        if ($burstsNeeded > 0) {
-            // §13.2: the copy named a payout TIER (`Gold Lv3`) and a season, not the event, so a reader
-            // holding the scenario's name could take the count as time to the finals — a different
-            // event. The arithmetic is untouched; only the sentence names what it counts to.
-            $warningMessage = "Need {$burstsNeeded} more burst".($burstsNeeded === 1 ? '' : 's')." in {$turnsLeft} turn".($turnsLeft === 1 ? '' : 's').' to the Spirit Burst payout (Gold Lv3, Senior November).';
+
+        if ($active['bursts_needed'] !== null && $active['bursts_needed'] > 0) {
+            // The sentence names the event and the reading it counted with, and states no number of turns:
+            // the old copy said "in N turns" off a turn the evidence does not place.
+            $needed = $active['bursts_needed'];
+            $warningMessage = "Need {$needed} more burst".($needed === 1 ? '' : 's')
+                .' to the Spirit Burst payout (Gold Lv3, Senior November). This counts normal plus '
+                .'Extreme bursts; a normal-only reading would need '
+                .($counts[self::BURST_MODE_NORMAL]['bursts_needed'] ?? 0).' more.';
         }
 
         return [
-            'current_bursts' => $combined,
-            'target_bursts' => $targetBursts,
-            'bursts_needed' => $burstsNeeded,
+            'counts' => $counts,
+            'active_mode' => self::BURST_MODE_COMBINED,
+            'payout_timing' => $team['payout_timing'] ?? null,
+            // Kept in the payload as an explicit null so a reader expecting a turn is told there is none,
+            // rather than finding the key missing and inferring a zero.
+            'payout_turn' => null,
             'warning_message' => $warningMessage,
-            'turns_left' => $turnsLeft,
-            'payout_turn' => $payoutTurn,
         ];
+    }
+
+    /** The counting reading that counts normal Spirit Bursts alone. */
+    public const BURST_MODE_NORMAL = 'normal_only';
+
+    /** The counting reading that counts normal plus Extreme Spirit Bursts (GameTora's). */
+    public const BURST_MODE_COMBINED = 'normal_and_extreme';
+
+    /**
+     * Both readings of the burst tally the band table could be applied to, each priced against its own
+     * band, or null when neither counter is recorded.
+     *
+     * The two readings disagree only where an Extreme burst moves the total across a band edge, which is
+     * why neither is folded into the other: a run with 3 normal and 1 Extreme burst sits in `4–6` by the
+     * combined reading and in no band at all by the normal-only one, and the Trainer is entitled to see
+     * that rather than one of the two.
+     *
+     * A missing counter is not a zero (D-220), so a reading that needs the Extreme tally answers null for
+     * its own count rather than treating it as absent-from-the-sum.
+     *
+     * @return array<string, array{bursts: int|null, band: string|null, reward: string|null, next_threshold: int|null, bursts_needed: int|null, basis: string}>|null
+     */
+    private function spiritBurstCounts(TrainingRun $run): ?array
+    {
+        $normal = $run->spirit_bursts_count;
+        $extreme = $run->extreme_bursts_count;
+
+        if ($normal === null && $extreme === null) {
+            return null;
+        }
+
+        $bands = array_values((array) config('scenarios.scenarios.'.$run->scenarioKey().'.spirit_burst_bands', []));
+
+        $normalCount = $normal;
+        $combinedCount = ($normal !== null && $extreme !== null) ? $normal + $extreme : null;
+
+        return [
+            self::BURST_MODE_NORMAL => [
+                'bursts' => $normalCount,
+                'band' => $normalCount === null ? null : $this->burstBandFor($normalCount, $run->scenarioKey()),
+                'reward' => $this->burstRewardFor($normalCount, $bands),
+                'next_threshold' => $this->nextBurstThreshold($normalCount, $bands),
+                'bursts_needed' => $this->burstsNeeded($normalCount, $bands),
+                'basis' => 'Normal Spirit Bursts only. Sources that state a threshold without naming Extreme '
+                    .'bursts are read this way.',
+            ],
+            self::BURST_MODE_COMBINED => [
+                'bursts' => $combinedCount,
+                'band' => $combinedCount === null ? null : $this->burstBandFor($combinedCount, $run->scenarioKey()),
+                'reward' => $this->burstRewardFor($combinedCount, $bands),
+                'next_threshold' => $this->nextBurstThreshold($combinedCount, $bands),
+                'bursts_needed' => $this->burstsNeeded($combinedCount, $bands),
+                'basis' => 'Normal plus Extreme Spirit Bursts. GameTora counts both, so this is the reading '
+                    .'the band table is transcribed from; other descriptions leave it unstated.',
+            ],
+        ];
+    }
+
+    /**
+     * The reward string of the band a total falls in, or null when the total is unknown or outside them.
+     *
+     * @param  list<array{total: string, family: string, level: string, reward: string}>  $bands
+     */
+    private function burstRewardFor(?int $total, array $bands): ?string
+    {
+        if ($total === null) {
+            return null;
+        }
+
+        foreach ($bands as $band) {
+            if ($this->bandContains($band['total'], $total)) {
+                return $band['reward'] !== '' ? $band['reward'] : null;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * The lowest band floor above the total, or null when the total is unknown, already past the last
+     * band, or the bands state no floors.
+     *
+     * This is what replaces the retired `target_bursts = 13` literal: the next edge is read from the
+     * configured bands rather than restated in PHP, so a band edit moves the arithmetic with it.
+     *
+     * @param  list<array{total: string, family: string, level: string, reward: string}>  $bands
+     */
+    private function nextBurstThreshold(?int $total, array $bands): ?int
+    {
+        if ($total === null) {
+            return null;
+        }
+
+        $floors = [];
+
+        foreach ($bands as $band) {
+            if (preg_match('/^(\d+)/u', $band['total'], $matches) === 1) {
+                $floors[] = (int) $matches[1];
+            }
+        }
+
+        $above = array_values(array_filter($floors, static fn (int $floor): bool => $floor > $total));
+        sort($above);
+
+        return $above[0] ?? null;
+    }
+
+    /**
+     * How many more bursts the next band floor asks for, or null when the total is unknown or no floor is
+     * above it (the top band is reached, so nothing is "needed").
+     *
+     * @param  list<array{total: string, family: string, level: string, reward: string}>  $bands
+     */
+    private function burstsNeeded(?int $total, array $bands): ?int
+    {
+        $next = $this->nextBurstThreshold($total, $bands);
+
+        return ($next === null || $total === null) ? null : max(0, $next - $total);
+    }
+
+    /**
+     * Whether one band label (`4–6`, `13+`) contains a total. A label this parse does not recognise
+     * contains nothing, which keeps the panel's absence rather than inventing a placement.
+     */
+    private function bandContains(string $total, int $count): bool
+    {
+        if (preg_match('/^(\d+)(?:–(\d+))?\+?$/u', $total, $matches) !== 1) {
+            return false;
+        }
+
+        $low = (int) $matches[1];
+        // The upper bound's group is optional and absent from `$matches` when the label is open-ended
+        // (`13+`), which is what makes the band unbounded rather than empty.
+        $high = isset($matches[2]) ? (int) $matches[2] : null;
+
+        return $count >= $low && ($high === null || $count <= $high);
     }
 }

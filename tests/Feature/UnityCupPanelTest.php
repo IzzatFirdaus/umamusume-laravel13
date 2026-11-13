@@ -146,9 +146,12 @@ it('carries the configured burst bands, their payout timing and the Special Trai
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             // Transcribed from docs/scenarios/02-unity-cup.md:213-220, post-rework corrected values.
+            // The band's skill is named by `family`/`level` (Ignited Spirit is the white tier, Burning
+            // Spirit the gold one); "gold hint" survives in `reward` as the tier description only.
             ->where('scenario.team.bands', fn (Collection $bands): bool => $bands->count() === 4
                 && $bands->first()['total'] === '4–6'
-                && str_contains($bands->last()['reward'], 'Gold hint Lv3'))
+                && $bands->first()['family'] === 'Ignited Spirit'
+                && str_contains($bands->last()['reward'], 'Burning Spirit Lv3'))
             ->where('scenario.team.payout_timing', 'Senior Year, Late November')
             // team_training_energy_penalty => false is the 2026-07-01 rework's removal, stated as
             // the fact it is; wit_burst_energy_bonus => 5 rides verbatim.
@@ -318,7 +321,6 @@ it('cites edges-versus-criteria for the burst-band conflict, not a Skill Point d
         // The unsourced publisher figure must not come back.
         ->not->toContain('15/15/20/20');
 });
-
 
 it('carries the labelled manual Spirit proxy and keeps its absence distinct from zero (KI-133)', function (): void {
     // KI-133, ruled 2026-11-10: the gauge is per team member with no published maximum, so this

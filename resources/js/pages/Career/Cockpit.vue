@@ -554,13 +554,45 @@ const teamRank = computed((): string => {
 });
 
 /**
- * Spirit Burst countdown to Senior November payout (Slice 2.2).
- * Only renders for Unity Cup when the team panel is composed and a countdown warning exists.
+ * Spirit Burst payout panel: the countdown the burst widget used to print, now stated as what the
+ * evidence supports. The old row carried `Need N more bursts in T turns`; the turn count came from a
+ * hardcoded turn 70 that no source places, so the row states the timing as calendar vocabulary and
+ * both counting readings instead. Only renders for Unity Cup when the team panel is composed.
  */
 const teamBurstCountdown = computed((): string | null => {
-    const scenario = props.scenario as { team?: { burst_countdown?: { warning_message?: string | null } } };
+    interface BurstReading {
+        bursts?: number | null;
+        band?: string | null;
+        bursts_needed?: number | null;
+    }
+    interface BurstCountdown {
+        counts?: Record<string, BurstReading>;
+        payout_timing?: string | null;
+        warning_message?: string | null;
+    }
+
+    const scenario = props.scenario as { team?: { burst_countdown?: BurstCountdown } };
     const countdown = scenario.team?.burst_countdown;
-    return countdown?.warning_message ?? null;
+
+    if (countdown === undefined) {
+        return null;
+    }
+
+    if (countdown.warning_message != null && countdown.warning_message !== '') {
+        return countdown.warning_message;
+    }
+
+    // At the top band nothing is needed, so the row still reports the reading and the timing rather
+    // than vanishing and leaving the reader to infer that the counters were never entered.
+    const combined = countdown.counts?.normal_and_extreme;
+
+    if (combined?.bursts == null) {
+        return null;
+    }
+
+    const timing = countdown.payout_timing ?? 'timing not published';
+
+    return `${combined.bursts} counted (normal plus Extreme), ${combined.band ?? 'no band'} reached, ${timing}.`;
 });
 
 /**
