@@ -81,7 +81,7 @@ KI-129 CLOSED — affirmed 2026-11-10 per owner dispatch: the capsule is intenti
 KI-130 OPEN — not dispatched
 KI-131 CLOSED — 9674180d + 20df32a6: run-scoped aria-labels on the two colliding steps; consumers re-pinned (support-deck, section-nav); cockpit-forms pin edited in a peer-dirty file and rides that file's landing
 KI-132 OPEN — two-key split ruled by owner; slice not dispatched here, scheduled separately
-KI-133 DEPLOYED — b9837da7 authored it and KI-161 deployed `current_spirit_proxy` to the dev database 2026-11-12: payload and editor field land as a labelled manual proxy. **Option A (event-derived per-member six-state board) is DELIVERED** at `fe9fc421`: derived from `turn_events`, no new persistence, and it lists only members with a recorded burst event. **Option C (numeric per-member gauge) stays BLOCKED** — no source publishes a value or maximum. A-0.13 (full-team enumeration, R8 declined) was never Option A's prerequisite; that attribution is corrected in the entry.
+KI-133 CLOSED 2026-11-13 — proxy DEPLOYED (`b9837da7`, migration applied via KI-161) and the per-member path delivered: the event-derived six-state board, pinned at `fe9fc421` (identity, ordering, latest-wins, no synthesis of unrecorded members, proxy independence; mutation-verified). The board lists only members with recorded burst events and never claims the 20/20 team. KI-125/A-0.13 (full-team enumeration, R8 declined) is a separate concern and was never this board's prerequisite. No numeric per-member gauge value or maximum is stored or claimed: the game publishes none.
 KI-134 RESOLVED — pre-dispatch register state
 KI-135 RESOLVED — pre-dispatch register state
 KI-136 OPEN — not dispatched
@@ -190,7 +190,7 @@ those entries' current status; this line names them, it does not restate them.
 - KI-130 OPEN - blocked: owner ruling
 - KI-131 OPEN - openable copy fix; not touched
 - KI-132 OPEN - blocked: payload contract change (own pass)
-- KI-133 DEPLOYED (`b9837da7` + migration applied 2026-11-12 via KI-161) - manual proxy column live on dev. **Option A is also delivered**: the per-member six-state board is derived from `turn_events` and rendered, pinned by `fe9fc421` (2026-11-12). Remaining gaps are named in the entry: a numeric gauge value/maximum is still unpublished, so Option C stays blocked. A-0.13 is **not** a prerequisite for A or B (corrected 2026-11-12: this line read "blocked: shape decision + roster").
+- KI-133 CLOSED (2026-11-13) - proxy deployed (`b9837da7`, migration applied via KI-161) AND the per-member board delivered: `fe9fc421` pins identity, ordering, latest-wins, no synthesis and proxy independence on the `turn_events`-derived roster, mutation-verified. Option A never needed A-0.13 (full-team enumeration; R8 declined); the numeric-per-member gauge was never this entry's acceptance criterion and stays unmodelled because no source publishes a value or maximum. Corrected 2026-11-12 (deployment + A-0.13 attribution), closed 2026-11-13.
 - KI-134 RESOLVED (previous session)
 - KI-135 RESOLVED 2026-10-30 (standing)
 - KI-136 OPEN, PEER-OWNED - full-career-journey locator; peer file, no touch
@@ -4010,7 +4010,7 @@ incidental.
 proves complete, partial and absent targets all read back.
 
 ### KI-133 B-0.6 `current_spirit` shape wrong - the Spirit gauge is per team member, not per run - FILED 2026-10-25 (R9)
-**Status: DEPLOYED for the manual proxy; Option A (event-derived per-member board) DELIVERED at `fe9fc421`; the numeric-per-member-gauge question (Option C) stays BLOCKED on unpublished client evidence.** Corrected 2026-11-12 (this line read `OPEN … No column ships`, which stopped being true on 2026-11-11). Read this entry in three layers, because a single word cannot carry them:
+**Status: CLOSED 2026-11-13.** Both halves of this entry's own closure test now hold: (a) the manual proxy is deployed and its round-trip is tested; (b) the per-member shape landed and `fe9fc421` proves per-member state round-trips, mutation-verified. The owner-accepted shape is Option A, the event-derived six-state board; the numeric-per-member gauge was never an acceptance criterion — this entry's own preferred `spirit_gauges` shape was a boolean *because* it invents no maximum. Corrected 2026-11-12 (this line read `OPEN … No column ships`, which stopped being true on 2026-11-11); closed 2026-11-13 on the two-halves test in the closure paragraph. The three layers below stand as history.
 
 | Layer | State | Evidence |
 | --- | --- | --- |
@@ -4036,17 +4036,19 @@ a game value it does not represent. Source: `docs/UMAMUSUME_REFERENCE.md` §2.2.
   value" in the UI and the migration comment. Fake-but-labelled beats fake-but-unlabelled, but it is a
   compromise, not the right model.
 
-**Current classification:** `blocked: shape decision + A-0.13`. R8 declined the roster table; B-0.6 depends
-on it. Reopen R8 only if the roster is reopened at the same time.
+**Current classification:** resolved by the owner-approved plan (`docs/plans/ki-82-ki-133-resolution-plan.md`) and dispatch (2026-11-12): Option A, the event-derived board, was chosen; the `spirit_gauges` table was not. R8's roster-table decline stands, and is irrelevant to the delivered shape because the board needs no enumeration. Reopen R8 only if a future full-team board is wanted.
 
-**Closure:** none. Two independent things must both hold, and only one is done. (a) **The proxy path:** the
+**Closure: CLOSED 2026-11-13.** Two independent things must both hold, and both now do. (a) **The proxy path:** the
 migration must be applied on the database in use and a test must prove the labelled proxy round-trips - the code and
-the test exist, and both halves are now satisfied: the migration was applied 2026-11-12 (KI-161) and
+the test exist, and both halves are satisfied: the migration was applied 2026-11-12 (KI-161) and
 `UnityCupPanelTest` exercises the round-trip. (b) **The per-member path:** the
-chosen shape lands and a test proves per-member state round-trips - untouched, still blocked on A-0.13's roster.
+chosen shape landed and `fe9fc421` proves per-member state round-trips on the `turn_events`-derived roster,
+re-verified by mutation on 2026-11-13 (a phantom member fails 6 tests). The earlier "still blocked on A-0.13's
+roster" read the enumeration blocker as applying to this path; the owner's Option A dispatch removed that, and no
+full-team enumeration is needed to display what `turn_events` records.
 Marking this CLOSED on the strength of `b9837da7` alone would repeat KI-60's mistake in the opposite direction:
 there the suite passed while migrations were Pending, here the code would be called shipped while the same thing
-is true.
+is true - which is why closure names `fe9fc421`, not the migration.
 
 ## KI-134 The Preferences savebar cannot state the form's condition, so the HFW's disabled-when-clean control is unbuilt - FILED 2026-10-26 (HFW parity S11.1 correction), RESOLVED 2026-10-26 (HFW parity S11.1)
 
@@ -5024,7 +5026,7 @@ here rather than as a new entry because the probe, the failure class and the clo
 one; a fix for either surface that does not re-read the other is incomplete.
 
 ### KI-161 `current_spirit_proxy` shipped in code and validated, but its migration was Pending on the dev database - FILED 2026-11-12, DEPLOYED 2026-11-12
-**Status: CLOSED 2026-11-12 - migration deployed to `database/database.sqlite` under explicit owner approval; column verified, write path verified, existing data preserved.** Deployment and verification records are in the sections below. **This closure covers the persistence column only**: KI-133's per-member Spirit shape question stays OPEN and blocked, and the manual proxy remains a labelled proxy rather than a game value.
+**Status: CLOSED 2026-11-12 - migration deployed to `database/database.sqlite` under explicit owner approval; column verified, write path verified, existing data preserved.** Deployment and verification records are in the sections below. **This closure covers the persistence column only** (historical, 2026-11-12): KI-133's per-member Spirit shape question was then OPEN and blocked; it was resolved 2026-11-13 by the delivered event-derived board, and the manual proxy remains a labelled proxy rather than a game value.
 
 **Current state.** `b9837da7` (2026-11-11) landed KI-133's manual proxy as `current_spirit_proxy` on
 `training_runs`: a migration, a `#[Fillable]` entry, a `StoreTrainingRunRequest` rule
@@ -5058,8 +5060,8 @@ is invisible in the UI: the absence reads as "not recorded" rather than as "this
 **Closure.** Run the migration on the dev database - **needs owner approval, because it writes to the shared
 file** - or drop the field from `#[Fillable]` and the request rule until it ships. This entry does not cover
 the choice between those; it records that the two halves disagree. Closure does **not** cover KI-133's own
-shape question, which stays OPEN and blocked per its body; that entry read `FIXED IN TREE, NOT DEPLOYED` until this
-deployment, and now reads `DEPLOYED` for the proxy with the shape question still open.
+shape question, which was OPEN and blocked at the time this paragraph was written (2026-11-12); that entry read `FIXED IN TREE, NOT DEPLOYED` until this
+deployment, and was closed 2026-11-13 once the per-member board landed and was pinned (`fe9fc421`).
 
 **Migration review, 2026-11-12, on an isolated scratch copy - the shared file was not touched.**
 `cp database/database.sqlite .scratch-uma/followup-2026-11-12/ki161-scratch.sqlite`, then every step below run with
