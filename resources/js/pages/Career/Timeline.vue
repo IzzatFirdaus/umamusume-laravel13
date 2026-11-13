@@ -162,6 +162,12 @@ const resultUrl = computed(() => props.run.cockpit_url.replace(/\/cockpit$/, '/r
 
 const phaseCount = (head: string): number => props.entries.filter((entry) => entry.position.startsWith(head)).length;
 
+/**
+ * Walk-8 E-22: `Senior Year · 1 entries` printed the plural for a count of one. One word per
+ * count, used by the phase summaries and the record footer alike so the two cannot drift.
+ */
+const entryWord = (count: number): string => (count === 1 ? 'entry' : 'entries');
+
 const finaleText = computed(() => {
     if (props.finale === null) {
         return 'No finale row';
@@ -188,7 +194,7 @@ const finaleText = computed(() => {
             <PageHeader
                 eyebrow="Career timeline"
                 title="Every logged turn, race and event"
-                :description="props.run.trainee + '\u2019s ' + props.run.scenario_label + ' career, in order. ' + props.entries.length + ' entries recorded. This is the auditable record behind the Result screen.'"
+                :description="props.run.trainee + '\u2019s ' + props.run.scenario_label + ' career, in order. ' + props.entries.length + ' ' + entryWord(props.entries.length) + ' recorded. This is the auditable record behind the Result screen.'"
             >
                 <template #actions>
                     <a :href="resultUrl" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">Career result</a>
@@ -255,11 +261,14 @@ const finaleText = computed(() => {
                                 <td class="py-2 pr-3">{{ entry.kind_label }}</td>
                                 <td class="py-2 pr-3">
                                     <b>{{ entry.action_label }}</b> <span class="text-ink-muted">· {{ entry.result }}</span>
-                                    <!-- `C6b.2`: the turn-correction door, reached from the row it corrects. -->
+                                    <!-- `C6b.2`: the turn-correction door, reached from the row it corrects.
+                                         The house 44px target (`DESIGN.md` §12; the spec's own
+                                         `main a, main button` sweep): `inline-flex min-h-11
+                                         items-center` like every other door. -->
                                     <a
                                         v-if="entry.edit_url"
                                         :href="entry.edit_url"
-                                        class="ml-2 whitespace-nowrap text-xs text-ink-strong underline"
+                                        class="ml-2 inline-flex min-h-11 items-center whitespace-nowrap text-xs text-ink-strong underline"
                                     >Edit turn {{ entry.turn }}</a>
                                 </td>
                                 <td
@@ -275,7 +284,7 @@ const finaleText = computed(() => {
                     </table>
                 </div>
                 <div class="mt-2 flex flex-wrap items-center justify-between gap-2 text-sm">
-                    <span class="text-ink-muted">{{ filteredEntries.length }} entries · showing {{ visibleEntries.length }}</span>
+                    <span class="text-ink-muted">{{ filteredEntries.length }} {{ entryWord(filteredEntries.length) }} · showing {{ visibleEntries.length }}</span>
                     <div class="flex gap-2">
                         <button type="button" class="btn btn-sm min-h-11" :disabled="page <= 1" @click="page = Math.max(1, page - 1)">Previous</button>
                         <button type="button" class="btn btn-sm min-h-11" :disabled="page >= pageCount" @click="page = Math.min(pageCount, page + 1)">Next</button>
@@ -293,14 +302,14 @@ const finaleText = computed(() => {
             <h2 id="timeline-phase-heading">Phase grouping</h2>
             <p class="sub">Collapsed by phase, the shape a 72-turn run needs. The open phase is the one you are reading.</p>
             <details open class="mt-2">
-                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-extrabold text-ink-strong">Junior Year · {{ phaseCount('Junior') }} entries</summary>
+                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-extrabold text-ink-strong">Junior Year · {{ phaseCount('Junior') }} {{ entryWord(phaseCount('Junior')) }}</summary>
                 <p class="mt-1 text-xs text-ink-muted">Turns 1-24. Duration unknown for most entries; the Debut race is the one dated obligation.</p>
             </details>
             <details class="mt-2">
-                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-extrabold text-ink-strong">Classic Year · {{ phaseCount('Classic') }} entries</summary>
+                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-extrabold text-ink-strong">Classic Year · {{ phaseCount('Classic') }} {{ entryWord(phaseCount('Classic')) }}</summary>
             </details>
             <details class="mt-2">
-                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-extrabold text-ink-strong">Senior Year · {{ phaseCount('Senior') }} entries</summary>
+                <summary class="flex min-h-11 cursor-pointer items-center text-sm font-extrabold text-ink-strong">Senior Year · {{ phaseCount('Senior') }} {{ entryWord(phaseCount('Senior')) }}</summary>
             </details>
             <details class="mt-2">
                 <summary class="flex min-h-11 cursor-pointer items-center text-sm font-extrabold text-ink-strong">After the grid · finale block ({{ phaseCount('After the grid') }})</summary>

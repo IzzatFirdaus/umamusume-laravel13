@@ -143,6 +143,40 @@ const grandparent = (parent: LegacyParent | null, index: number): string | null 
 const grandparentRank = (parent: LegacyParent | null, index: number): string | null =>
     parent?.ancestors_rank_letters?.[index] ?? null;
 
+/**
+ * The parent's sub line, as segments that exist.
+ *
+ * Walk-8 E-20: `Rank B+ · · Unity Cup` printed an empty segment between two separators when the
+ * letters or the stars were absent (`E-20`), because the separators rode unconditional
+ * concatenation. Empty segments drop; a value's own word stays beside it. A parent whose only
+ * reading is the scenario still prints it, so the line never collapses to nothing.
+ */
+const parentLine = (parent: LegacyParent | null): string => {
+    if (parent === null) {
+        return 'No parent recorded for this slot';
+    }
+
+    const parts: string[] = [];
+
+    if (parent.is_guest) {
+        parts.push('Guest');
+    }
+
+    if (parent.rank_label !== null && parent.rank_label !== '') {
+        parts.push(parent.rank_label);
+    }
+
+    const stars = parent.rank ?? 0;
+
+    if (stars > 0) {
+        parts.push('★'.repeat(stars));
+    }
+
+    parts.push(props.run.scenario_label);
+
+    return parts.join(' · ');
+};
+
 const sparkCarries = (spark: LegacyParent['sparks'][number]): string => {
     if (spark.kind === 'blue') {
         return spark.target === null ? 'Moves a stat' : `Moves ${spark.target}`;
@@ -419,7 +453,11 @@ const statusGlyphClass = (status: Milestone['status']): string => {
                     <!-- R7-33: the letter the Trainer entered on the Legacy step prints beside the star
                          grade. The stars are honest — they render `Rank (stars)`, a value the entry form
                          genuinely recorded (R7-34) — but the letter was stored, sent, and never drawn. -->
-                    <p class="sub">{{ parent === null ? 'No parent recorded for this slot' : (parent.is_guest ? 'Guest · ' : '') + (parent.rank_label ?? '') + ' · ' + '★'.repeat(parent.rank ?? 0) + ' · ' + props.run.scenario_label }}</p>
+                    <!-- Walk-8 E-20: the line printed `Rank B+ · · Unity Cup` with an empty segment
+                         when one of the two readings (letters, stars) was absent, because the
+                         separators were unconditional string concatenation. Segments that have no
+                         value are dropped instead; the words that carry values stay. -->
+                    <p class="sub">{{ parentLine(parent) }}</p>
 
                     <p v-if="parent === null || parent.sparks.length === 0" class="text-sm text-ink">
                         {{ parent === null ? 'No parent is recorded in this slot.' : 'This parent carries no recorded spark.' }}

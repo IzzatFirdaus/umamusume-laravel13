@@ -238,3 +238,30 @@ test('labels the undo with the last logged turn, not the rail maximum (R7-27)', 
     // And the control is inert, matching what its own title says (R7-21's rule, same shell).
     await expect(undo).toBeDisabled();
 });
+
+test('prints no empty segment between separators on a parent line (E-20)', async ({ page }) => {
+    // Walk-8 E-20: `Rank B+ · · Unity Cup` when the stars were absent. The parent line is built
+    // from segments that exist, so two separators never sit beside each other.
+    const runUrl = await openTimeline(page);
+
+    await page.goto(`${runUrl}/inheritance`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const subs = await page.locator('section[id^="parent-"] .sub').allTextContents();
+    for (const text of subs) {
+        expect(text, `empty separator segment in: ${text}`).not.toMatch(/·\s*·/);
+    }
+});
+
+test('says 1 entry for one entry, never 1 entries (E-22)', async ({ page }) => {
+    // The fixture needs exactly one logged turn: the singular is the defect's whole statement.
+    const runUrl = await createRun(page);
+    const runId = runUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
+    await recordTurns(page, runId, 1);
+
+    await page.goto(`${runUrl}/timeline`, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.getByText(/\b1 entries\b/)).toHaveCount(0);
+    await expect(page.getByText(/1 entry\b/).first()).toBeVisible();
+});
