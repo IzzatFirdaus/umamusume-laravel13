@@ -120,6 +120,7 @@ Homestead.yaml
 # Local-only artifacts (this app is never deployed; PRD NFR-1)
 /research-scratch/
 /.scratch-uma/
+/.local-browsers/
 /.scratch-merge-preserve/
 # A one-off driver script written to the repo ROOT rather than into `.scratch-uma/<session>/`.
 # `AGENTS.md` §9 requires session artifacts to live in that session's own subdirectory and holds only
