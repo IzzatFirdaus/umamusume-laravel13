@@ -31,4 +31,25 @@ test('the desktop sidebar keeps the full Support Cards label', async ({ page }) 
     const sidebar = page.getByRole('navigation', { name: 'Global navigation' });
     await expect(sidebar).toBeVisible();
     await expect(sidebar.getByRole('link', { name: 'Support Cards', exact: true })).toBeVisible();
+    // The quick-glance version surface restored by owner ruling G6 = SHIP (sidebar foot, inside
+    // the shell aside — the rail nav itself ends above it).
+    await expect(page.locator('aside').getByText('v3.0.0')).toBeVisible();
+});
+
+test('the mobile More panel shows the version after opening', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.goto('/', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    const bar = page.getByRole('navigation', { name: 'Primary mobile' });
+    await expect(bar).toBeVisible();
+
+    const morePanel = page.locator('details.flex-1 > ul');
+    const moreSummary = page.locator('details.flex-1 > summary');
+    // The shell's foot is `hidden` (display:none) below 768px, so it still counts in the DOM;
+    // only the panel's own copy is the visible one, and only after More opens.
+    await expect(moreSummary).toBeVisible();
+    await expect(morePanel.getByText('v3.0.0')).toBeHidden();
+    await moreSummary.click();
+    await expect(morePanel.getByText('v3.0.0')).toBeVisible();
 });

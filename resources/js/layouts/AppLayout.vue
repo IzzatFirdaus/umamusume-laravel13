@@ -8,15 +8,25 @@ import { useLayout } from '../composables/useLayout';
 
 const page = usePage();
 
+// The build's version, from the shared `app` props
+// (`HandleInertiaRequests::appVersion()` reads VERSION.md, its single source). Null is a real
+// state the middleware can produce (missing file, unparsed line); the shell hides it cleanly
+// rather than guessing a number. Help's card renders a named absence for the same null — two
+// complementary surfaces, not duplicated.
+const appVersion = page.props.app.version;
+
 /*
- * The bar carries the breadcrumb and the live-career pill, and nothing else: the product name and
- * the rail's collapse control moved to the rail head (HFW index.html annotation 10 — the control
- * belongs to the pane it resizes, and a global row owning a local width was plan 1.2's mistake).
- * The build's version string used to sit on the right, which made an implementation detail the last
- * thing a Trainer read on every screen; the footer's "Local data · Trainer Desk" line names the
- * build's nature without printing a number. `page.props.app` still arrives from
- * `HandleInertiaRequests` for any screen that wants it (the Settings screen reports it among its
- * own facts); the shell just stops spending the header on it.
+ * Version display ruling history:
+ *   2026-10-26 — removed from the shell: "an implementation detail the last thing a Trainer
+ *   read on every screen". The topbar kept no version surface; Help's "About this build" card
+ *   (6c10ff62) stayed as the detailed view, naming `v3.0.0` alone. `page.props.app` still
+ *   arrives from `HandleInertiaRequests` for any screen that wants it; the shell just stopped
+ *   spending the header on it.
+ *   2026-11-15 — owner ruling G6 = SHIP restores it: the version prints in the sidebar footer
+ *   (desktop) and the mobile More panel (390px), as a quick-glance surface next to Help's card.
+ *   The two surfaces are complementary, not duplicated: the card is the detail, the shell line
+ *   is the glance. `HandleInertiaRequests::appVersion()` remains the single source (reads
+ *   VERSION.md). Null is hidden cleanly rather than guessing a number.
  */
 
 /*
@@ -471,6 +481,10 @@ const moreIsCurrent = computed(() =>
             >
                 <span :class="railCollapsed ? 'sr-only' : ''">Data sources</span>
             </Link>
+            <div
+                v-if="appVersion !== null"
+                class="px-4 py-2 mt-auto border-t border-rule-soft text-xs font-mono text-ink-muted"
+            >v{{ appVersion }}</div>
         </aside>
 
 <!-- The HFW's `.main` column: bar, page head, canvas. Three bands, each capped at the shell
@@ -686,6 +700,9 @@ const moreIsCurrent = computed(() =>
                             {{ overflow.label }}
                             <span class="ml-1 text-xs">not built</span>
                         </span>
+                    </li>
+                    <li v-if="appVersion !== null" class="px-2 py-2 text-xs font-mono text-ink-muted mt-2 pt-2">
+                        v{{ appVersion }}
                     </li>
                 </ul>
             </details>
