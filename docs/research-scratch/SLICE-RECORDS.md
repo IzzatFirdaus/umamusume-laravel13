@@ -21206,7 +21206,8 @@ the paths the C3 remainder needed. The owner ruled it abandoned WIP and ordered 
 as 6bbca89b (19 files, 1087 insertions) after six repairs this session added to the draft, each
 recorded in the commit body: a dropped TrainingDecisionController import that broke route
 registration, a nonexistent 	rainingRun.trainee relation (real: umamusume), a runtime
-oute() crash on the board page (no Ziggy in the shell; urls now server-composed), native POST
+
+oute() crash on the board page (no Ziggy in the shell; urls now server-composed), native POST
 forms without CSRF (419 on submit; both offer doors now post through Inertia), a missing
 TransferRequestFactory, and composer.json autoload corruption from the same session restored
 to HEAD rather than committed.
@@ -21283,5 +21284,14 @@ composer.json/package-lock.json drift was restored to HEAD, not updated).
   doc additions (KNOWN-ISSUES.md, docs/UMAMUSUME_REFERENCE.md 2.10, the ui-ux brief,
   SCREEN_SPEC.md's Trackblazer-variant note), docs/plans/* findings, the .devcontainer
   bootstrap, and the rchive-GeJpfR/ 30 MB zip. Each belongs to its own session's disposition.
-- The two peer docs commits that landed mid-dispatch (12f1d823, then 2583e28d/c589c102/
+- The two peer docs commits that landed mid-dispatch (12f1d823, then 2583e28d/c589c102/)
   c902ae45) are not this dispatch's work and are not vouched for here.
+
+### 65. Phase 1 close-out, Phase 2 deferral, Phase 3 P3/P4/P5 outcomes (2026-11-14)
+
+| Fact | Value |
+|---|---|
+| Phase 1 closure | 2026-11-14 — Phase 1 (browser remediation) closed at Slice 1.1. Full Playwright baseline: 794 passed, 2 skipped, 0 failed, 1.6h, port 8344, session-private DB, log `.scratch-uma/browser-baseline-2026-11-14/run10.log`. Prior 204/867 interrupted run reclassified as KI-74 contention, not product defects. Slices 1.2 and 1.3-N removed from scope — zero work orders. |
+| Phase 2 deferral | Phase 2 (Kilo Code / MiniMax / DSH configs): not in this build — schemas unconfirmed, deferred to a future schema-verified cycle. |
+| Phase 3 P3 closure | `.gitignore` restructure landed at d8238c87 — `/.scratch-uma/` (L122) and `/.local-browsers/` (L123) cover all baseline artifacts; no additional patterns needed. |
+| P4/P5 outcomes | P4 `.devcontainer`: HELD — Docker not installed on this host; left untracked per owner ruling. P5 archive zip: NO-OP — none present on drive. |
