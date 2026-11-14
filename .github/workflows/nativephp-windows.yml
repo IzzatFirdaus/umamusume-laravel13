@@ -89,6 +89,14 @@ jobs:
       - name: Pre-build environment guard
         run: composer run pre-native-build --no-interaction
 
+      - name: Install NSIS (Nullsoft Scriptable Install System)
+        shell: pwsh
+        run: choco install nsis -y --no-progress
+
+      - name: Build NativePHP electron plugin
+        run: npm run plugin:build
+        working-directory: nativephp/electron
+
       - name: Build NativePHP Windows installer
         run: php artisan native:build win x64 --no-interaction
 
