@@ -106,15 +106,22 @@
       "id": "minimax-mcp",
       "path": "~/.minimax/mcp.json",
       "format": "json",
-      "strategy": "merge",
-      "note": "Fix laravel-boost quoting: cmd.exe /c \"%LOCALAPPDATA%\\MiniMax\\MCP\\laravel-boost.cmd\". Host-local only."
+      "strategy": "noop",
+      "note": "APPLIED 2026-11-14 (scratch-uma/agent-controls-slice-i/fix-lb-quoting.mjs): laravel-boost command/args un-mangled from the doubled-quoted single string into command: cmd.exe + args [/d,/s,/c,\"%LOCALAPPDATA%...laravel-boost.cmd\"] (backup kept). Host-local only."
+    },
+    {
+      "id": "minimax-permission-deny",
+      "path": "~/.minimax/permission.json",
+      "format": "json",
+      "strategy": "noop",
+      "note": "APPLIED 2026-11-14 (scratch-uma/agent-controls-slice-i/apply-deny.mjs): 14 deny rules (tool_name bash, matcher kind command, patterns cat:*/Get-Content:*/type:*/head:*/tail:*/Set-Content:*/Out-File:*/Add-Content:*/curl:*/wget:*/Invoke-WebRequest:*/Invoke-RestMethod:*/Select-String:*/Get-ChildItem:*) - MiniMax's NATIVE permission surface (supersedes the planned plugins/terminal-gate dir, which has no shipped schema). Mechanism verified from app.asar: selectMatchingRule deny>ask>allow; 'X:*' = safe prefix match. Engine simulation (verify-deny.mjs, 1:1 algorithm copy): all 5 dup-command classes DENY; git status/php artisan no-match (correct); compound commands with shell separators are rejected by the matcher's separator guard and fall through to ask - documented residual gap, not a silent allow (ask still gates). Idempotent (2nd pass: no changes). Runtime live-fire NOT performed (no MiniMax CLI on PATH; GUI app only) - status: rule-engine-verified, live-session-unverified."
     },
     {
       "id": "minimax-plugin",
       "path": "~/.minimax/plugins/terminal-gate/",
       "format": "dir",
-      "strategy": "copy",
-      "note": "Hypothesis-testing slice (I). Blocking decision unconfirmed; does not travel with the clone."
+      "strategy": "noop",
+      "note": "SUPERSEDED (Slice I): the plugins/ dir is empty in this build and no plugin-runner schema was found for it; permission.json v2 (allow/deny/ask with tool_name+matcher) is the shipped control surface and is used instead - see minimax-permission-deny."
     },
     {
       "id": "dsh-bridge",
