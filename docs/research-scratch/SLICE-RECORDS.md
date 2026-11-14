@@ -21180,3 +21180,108 @@ Lore-code delta ruling (+1): the touched-file hit set is unchanged class-for-cla
 1. "19 commits" — undercount; the true session-authored figure is 20 (plus 2 peer commits inside the range).
 2. "Pint fail = pre-existing three fixers on TrainingRun.php" — false positive; parent file is clean, the fixers came from this session's docblock rows (repaired `76590c6d`).
 3. "Phase 4.1/4.2 not landed (per-slice notes stand in their place)" — accurate at the time of that summary; both are now landed (`9bae3fa5`, this file).
+
+## v3.x reconciliation close-out - ratification, C3 index count, fresh baseline (2026-11-14)
+
+Dispatch: owner-directed close-out of the v3.x UX remediation reconciliation. Plan file
+.kilo/plans/1794638010461-v3x-ratify-c3-index-count.md (gitignored scaffolding; its content is
+restated here so the ruling survives in the tracked record).
+
+### 1. Owner ruling (2026-11-14)
+
+1. **Phases A-G of the v3.x UX remediation ratified as landed**, with the deviations their landing
+   commits record: A/UX-18a 90763b51 (+ 9cc21b8f,  4894584, 2832ee6; no planned_skills
+   table - the audit re-measure in AUDIT-AND-VERIFICATION.md 25875-25889 killed both premises),
+   B+C1 and C2  0b5cfef, C3 detail trail 606ddba9, C4 20855b5f, C5 d886d140, C6 7c343669.
+2. **P4 accepted all three shipped interpretive decisions** (finale label The Grand Concert at
+   config/scenarios.php:1110; the UX-11 sample-build row cut; wizard-flow.spec.ts as it
+   stands). Phase H stays skipped.
+3. **The one C3 acceptance line 606ddba9 dropped was ruled back in**: the "Used as parent"
+   numeric count on the Veterans library index.
+
+### 2. Recovered peer work (precondition for the slice)
+
+The shared worktree carried a dormant session's unfinished transfer-request feature across exactly
+the paths the C3 remainder needed. The owner ruled it abandoned WIP and ordered it landed. Landed
+as 6bbca89b (19 files, 1087 insertions) after six repairs this session added to the draft, each
+recorded in the commit body: a dropped TrainingDecisionController import that broke route
+registration, a nonexistent 	rainingRun.trainee relation (real: umamusume), a runtime
+oute() crash on the board page (no Ziggy in the shell; urls now server-composed), native POST
+forms without CSRF (419 on submit; both offer doors now post through Inertia), a missing
+TransferRequestFactory, and composer.json autoload corruption from the same session restored
+to HEAD rather than committed.
+
+### 3. Task R1 - the C3 remainder
+
+Landed as 4fda56f7 ("feat(veterans): carry the used-as-parent count onto the library index (C3
+remainder)"). Semantics, recorded in that commit body and mirrored in five new
+VeteranLibraryScreenTest cases: the count is character-keyed on 	rainingRun.umamusume_id (the
+stored parent columns hold Umamusume ids, not Veteran ids, matching the detail trail of
+606ddba9); it counts child runs, never column instances (a run naming the trainee in both parent
+columns contributes one); two filings of one trainee carry the same count. One query per page in
+VeteranController::index(), trainee ids from the already-eager-loaded rows; an empty page skips
+the query (a wasted-work guard - the framework compiles an empty whereIn to   = 1, not invalid
+SQL). The count is merged in index()'s 	hrough() closure, not inside VeteranRow::from(),
+whose shape the Legacy Lab's browse list also reads. SCREEN_SPEC.md deliberately untouched:
+SCR-VET-001 (4.16) describes the row in prose and enumerates no column list.
+
+### 4. Task R2 - fresh regression baseline (as captured; a record, not a fix)
+
+KI-74 pre-flight passed first: one trivial SQLite read on the dev database took 9.4 ms, so the box
+was quiet at launch.
+
+- **Feature suite: complete and green.** php artisan test --compact ->
+  Tests: 2415 passed (37175 assertions), Duration 1306.13s, run in the background from
+  .scratch-uma/r1-c3-index/feature-suite.log against the tree containing R1. Zero failures; the
+  prior baseline's two known reds (UiHygieneTest, ScenarioAdvisorFinaleTest) are confirmed fixed
+  (fixed by 080bb99 and 72160eca respectively).
+- **Browser suite: interrupted; recorded inconclusive, not classified as product failures.** The
+  session-private run (PLAYWRIGHT_PORT=8171, scratch db under .scratch-uma/r1-c3-index/) was
+  terminated by the host tool's own timeout at case 204/867, before any summary line. Up to that
+  point the log showed 6 Test timeout of 180000ms exceeded and 14 expectation failures,
+  concentrated in career-cockpit/preflight/training specs, with locator.click timing out - the
+  KI-74 contention signature, recorded here as **infrastructure/inconclusive under load**, not as
+  a defect list. No re-run was attempted (owner instruction: R2 is a measurement, not a fix).
+- **Targeted browser evidence stands from R1's gates:** eterans.spec.ts 16/16 passed and
+  eterans-parity.spec.ts 2/2 passed, both session-private (port 8161, scratch db under
+  .scratch-uma/r1-c3-index/). The first parity invocation timed out on webServer boot and passed
+  on re-invocation - infrastructure, classified per the failure-attribution step.
+
+### 5. Gates at close-out (commands and outputs)
+
+`	ext
+php artisan test --compact --filter=VeteranLibraryScreenTest -> 20 passed (306 assertions)
+npx playwright test tests/browser/veterans.spec.ts           -> 16 passed (session-private)
+npx playwright test tests/browser/veterans-parity.spec.ts    -> 2 passed  (session-private)
+vendor/bin/pint --test --format agent <touched paths>        -> passed (all rounds)
+vendor/bin/phpstan analyse --no-progress --memory-limit=1G   -> OK, no errors
+npm run typecheck                                            -> exit 0
+npm run build                                                -> exit 0
+npm run lint:ui                                              -> exit 0, 509 report-only findings, no debt increase
+composer lore                                                -> lore-docs: 611 hit(s), 75 exempt line(s)
+composer lore-code                                           -> lore-code: 356 hit(s)
+`
+
+Lore deltas and rulings (+5 docs, +5 code from the last recorded 606/351): both deltas are the R1
+test fixtures' names - "Indexed Mare", "Both Columns Mare", "Unused Mare", "Twice Filed Mare", and
+a second "Unrelated Sire" - the same class as the three "...Mare" fixtures 606ddba9 already
+carries: private test-database labels that never render to a Trainer and name no mechanic. Ruled
+and closed; no shipped copy carries any banned family.
+
+composer audit / 
+pm audit not run: no dependency changed in this dispatch (the session's
+composer.json/package-lock.json drift was restored to HEAD, not updated).
+
+### 6. What is still open (hand-off)
+
+- **The browser-suite baseline remains unmeasured end to end.** The interrupted run above is the
+  only full-suite attempt this dispatch; a quiet-box re-run of the 867 cases, session-private and
+  one process at a time, is the standing remainder for the next checkpoint. The R1 slice's own
+  browser surfaces are green.
+- **Untracked non-feature work left in the tree untouched** (not this dispatch's, not staged):
+  agent-config ignore restructure (.gitignore, .claude/skills/*, .tooling/REVIEW-LOG.md),
+  doc additions (KNOWN-ISSUES.md, docs/UMAMUSUME_REFERENCE.md 2.10, the ui-ux brief,
+  SCREEN_SPEC.md's Trackblazer-variant note), docs/plans/* findings, the .devcontainer
+  bootstrap, and the rchive-GeJpfR/ 30 MB zip. Each belongs to its own session's disposition.
+- The two peer docs commits that landed mid-dispatch (12f1d823, then 2583e28d/c589c102/
+  c902ae45) are not this dispatch's work and are not vouched for here.
