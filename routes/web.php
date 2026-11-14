@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\ArtworkAssetController;
+use App\Http\Controllers\AboutController;
 use App\Http\Controllers\Career\BuildTargetController;
 use App\Http\Controllers\Career\CockpitController;
 use App\Http\Controllers\Career\DeckSelectController;
@@ -29,6 +29,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SupportCardController;
 use App\Http\Controllers\TrainingRunController;
+use App\Http\Controllers\UpdateCheckController;
 use App\Http\Controllers\VeteranController;
 use Illuminate\Support\Facades\Route;
 
@@ -277,3 +278,6 @@ Route::get('/database/scenarios', [DatabaseController::class, 'scenarios'])->nam
 Route::get('/database/events', [DatabaseController::class, 'events'])->name('database.events');
 Route::get('/database/shop-items', [DatabaseController::class, 'shopItems'])->name('database.shop-items');
 Route::get('/database/sparks', [DatabaseController::class, 'sparks'])->name('database.sparks');
+// About dialog and update check (v3.0.0 release engineering).
+Route::get('/about', [AboutController::class, 'show'])->name('about.show');
+Route::get('/updates/check', [UpdateCheckController::class, 'check'])->name('updates.check');

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Link, usePage } from '@inertiajs/vue3';
 import { computed, nextTick, ref, watch } from 'vue';
-import NavGlyph from '../components/NavGlyph.vue';
+import UpdateBanner from '../components/UpdateBanner.vue';
 
 const page = usePage();
 const appVersion = computed(() => page.props.app?.version ?? null);
@@ -289,6 +289,7 @@ const mobileMoreClass =
                 </span>
             </header>
             <main id="main" class="flex-1 px-6 py-6 pb-24 md:pb-6">
+                <UpdateBanner />
                 <p
                      v-if="flashStatus"
                      role="status"

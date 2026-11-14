@@ -6,6 +6,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Validation\ValidationException;
+use Native\Desktop\Http\Middleware\PreventRegularBrowserAccess;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -17,6 +18,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        if (class_exists(PreventRegularBrowserAccess::class)) {
+            $middleware->prepend([
+                PreventRegularBrowserAccess::class,
+            ]);
+        }
+
         $middleware->web(append: [
             HandleInertiaRequests::class,
         ]);

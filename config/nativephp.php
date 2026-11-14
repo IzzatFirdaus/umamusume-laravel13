@@ -44,6 +44,21 @@ return [
         '*/tests',
     ],
 
+    /*
+     * ponytail: NativePHP leaves vendor/nativephp/php-bin out of the build copy and then
+     * runs `composer install --no-dev` inside the build directory under a hardcoded 300s
+     * timeout (vendor/nativephp/desktop/src/Builder/Concerns/PrunesVendorDirectory.php:15).
+     * Re-extracting the 373 MB php-bin archive inside that budget is not reliable here, so
+     * the package is force-included instead and composer finds it already installed, which
+     * turns the step into a no-op. PrunesVendorDirectory deletes it again before packaging,
+     * so the installer never carries the archives. Upgrade path: NativePHP raising the
+     * timeout, or shipping the PHP binary outside the composer install.
+     */
+    'cleanup_include_files' => [
+        'vendor/nativephp/php-bin/*',
+        'vendor/nativephp/php-bin/bin/*/*/*.zip',
+    ],
+
     'updater' => [
         'enabled' => env('NATIVEPHP_UPDATER_ENABLED', false),
 
