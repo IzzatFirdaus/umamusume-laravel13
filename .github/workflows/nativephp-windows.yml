@@ -94,8 +94,10 @@ jobs:
         run: choco install nsis -y --no-progress
 
       - name: Build NativePHP electron plugin
-        run: npm run plugin:build
         working-directory: nativephp/electron
+        run: |
+          npm ci
+          npm run plugin:build
 
       - name: Build NativePHP Windows installer
         run: php artisan native:build win x64 --no-interaction
