@@ -46,26 +46,22 @@
       "id": "hermes-config",
       "path": "~/AppData/Local/hermes/config.yaml",
       "format": "yaml",
-      "strategy": "set-key",
-      "key": "platform_toolsets.cli",
-      "value": ["file", "web", "search", "code_execution"],
-      "note": "Remove `terminal`; add file/web/search/code_execution. Uncomment mcp_servers with 5-server pruned set; lazy:true only after eager connect."
+      "strategy": "noop",
+      "note": "APPLIED 2026-11-14 via exact-line surgery (scratch-uma/agent-controls-slice-h/hermes-edit.mjs, dry-run diff then --apply, backup config.yaml.bak-1794657583005): platform_toolsets.cli flow-array union (terminal removed; search added - file/web/code_execution already present), delegation keys uncommented-and-set (max_concurrent_children: 3, max_spawn_depth: 2, inherit_mcp_toolsets: false), mcp_servers playwright added with lazy, lazy:true set on laravel-boost/filesystem. Validated with a real YAML parse (PyYAML): all targets verified; second edit pass = 0 changes. Not converted to a manifest strategy: single-host one-shot, and the DSH append-yaml-row strategy pattern covers future rows."
     },
     {
       "id": "hermes-delegation",
       "path": "~/AppData/Local/hermes/config.yaml",
       "format": "yaml",
-      "strategy": "set-key",
-      "key": "delegation.max_spawn_depth",
-      "value": 2,
-      "note": "Clamped 1-3. Also set delegation.max_concurrent_children (default 3, floor 1) and delegation.inherit_mcp_toolsets: false. Confirm nesting at runtime."
+      "strategy": "noop",
+      "note": "APPLIED with hermes-config above (delegation.max_spawn_depth: 2, max_concurrent_children: 3, inherit_mcp_toolsets: false)."
     },
     {
       "id": "hermes-shell-hooks",
       "path": "~/AppData/Local/hermes/shell-hooks-allowlist.json",
       "format": "json",
-      "strategy": "merge",
-      "note": "Add on_session_start, pre_llm_call, post_llm_call alongside on_session_end."
+      "strategy": "noop",
+      "note": "APPLIED BY THE RUNTIME: pre_tool_call approval for hermes-pretooluse.mjs was recorded 2026-11-14T08:58Z when a live Hermes session fired the hook and the user approved it (on_session_end row pre-existing). No manual edit needed - the allowlist is approval-driven, not config-driven."
     },
     {
       "id": "codex-config-toml",
