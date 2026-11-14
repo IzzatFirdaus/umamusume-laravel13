@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "rules": [
+    {
+      "id": "file-read",
+      "matcher": "Bash|PowerShell",
+      "pattern": "^\\s*(cat|Get-Content|type|head|tail|more|less)\\b",
+      "deny": true,
+      "replacement": "read",
+      "message": "Blocked: use the Read tool instead of `{cmd}`."
+    },
+    {
+      "id": "file-write",
+      "matcher": "Bash|PowerShell",
+      "pattern": "\\b(Set-Content|Out-File|tee|Add-Content)\\b|(^|[^>])>\\s*\\S",
+      "deny": true,
+      "replacement": "write",
+      "message": "Blocked: use the Write/Edit tool instead of shell redirection."
+    },
+    {
+      "id": "network-fetch",
+      "matcher": "Bash|PowerShell",
+      "pattern": "^\\s*(curl|wget|Invoke-WebRequest|Invoke-RestMethod)\\b",
+      "deny": true,
+      "replacement": "WebFetch",
+      "message": "Blocked: use the WebFetch tool instead of `{cmd}`."
+    },
+    {
+      "id": "allow-trusted",
+      "matcher": "Bash|PowerShell",
+      "pattern": "^\\s*(git|npm|pnpm|yarn|composer|php|artisan|node|npx|docker|docker-compose)\\b",
+      "deny": false,
+      "allow": true
+    }
+  ]
+}

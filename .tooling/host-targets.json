@@ -1,0 +1,98 @@
+{
+  "version": 1,
+  "targets": [
+    {
+      "id": "qoder-settings",
+      "path": "~/.qoder/settings.json",
+      "format": "json",
+      "strategy": "merge",
+      "note": "autoApprove.enabled stays false (Step 1.13). PreToolUse denial lives in committed .qoder/settings.json (1.13b), not here."
+    },
+    {
+      "id": "codex-hooks",
+      "path": "~/.codex/hooks.json",
+      "format": "json",
+      "strategy": "merge",
+      "payload": { "PreToolUse": [], "SubagentStart": [] },
+      "note": "Re-trust via `codex hooks trust` (version-specific). Record working command here after discovery. Do not mix with [hooks] table in config.toml."
+    },
+    {
+      "id": "hermes-config",
+      "path": "~/AppData/Local/hermes/config.yaml",
+      "format": "yaml",
+      "strategy": "set-key",
+      "key": "platform_toolsets.cli",
+      "value": ["file", "web", "search", "code_execution"],
+      "note": "Remove `terminal`; add file/web/search/code_execution. Uncomment mcp_servers with 5-server pruned set; lazy:true only after eager connect."
+    },
+    {
+      "id": "hermes-delegation",
+      "path": "~/AppData/Local/hermes/config.yaml",
+      "format": "yaml",
+      "strategy": "set-key",
+      "key": "delegation.max_spawn_depth",
+      "value": 2,
+      "note": "Clamped 1-3. Also set delegation.max_concurrent_children (default 3, floor 1) and delegation.inherit_mcp_toolsets: false. Confirm nesting at runtime."
+    },
+    {
+      "id": "hermes-shell-hooks",
+      "path": "~/AppData/Local/hermes/shell-hooks-allowlist.json",
+      "format": "json",
+      "strategy": "merge",
+      "note": "Add on_session_start, pre_llm_call, post_llm_call alongside on_session_end."
+    },
+    {
+      "id": "codex-config-toml",
+      "path": "~/.codex/config.toml",
+      "format": "toml",
+      "strategy": "set-key",
+      "key": "agents.max_depth",
+      "value": 2,
+      "note": "Verify-at-runtime; if rejected, update with actual keys. Inline API keys on lines 161/191/200 are host-local, out of scope."
+    },
+    {
+      "id": "vscode-settings",
+      "path": ".vscode/settings.json",
+      "format": "json",
+      "strategy": "merge",
+      "note": "chat.permissions.default: default; kilo-code.new.autoApprove.enabled: false; zoo-code.deniedCommands: [Get-Content, Set-Content, Out-File, Invoke-WebRequest, Invoke-RestMethod, curl, wget, Select-String, Get-ChildItem]."
+    },
+    {
+      "id": "antigravity-hooks",
+      "path": ".agents/hooks.json",
+      "format": "json",
+      "strategy": "merge",
+      "note": "Shell tool run_command; deny emits {decision:'deny',reason}; pass-through emits {}; never allow or allow_tool:false; fail-closed on unparseable output."
+    },
+    {
+      "id": "kilo-config",
+      "path": ".kilo/kilo.jsonc",
+      "format": "jsonc",
+      "strategy": "merge",
+      "note": "Permission block, not a hook. '*' : 'deny' catch-all; allow git/composer/php artisan/node explicitly. Integrated terminal commands bypass (residual risk)."
+    },
+    {
+      "id": "minimax-mcp",
+      "path": "~/.minimax/mcp.json",
+      "format": "json",
+      "strategy": "merge",
+      "note": "Fix laravel-boost quoting: cmd.exe /c \"%LOCALAPPDATA%\\MiniMax\\MCP\\laravel-boost.cmd\". Host-local only."
+    },
+    {
+      "id": "minimax-plugin",
+      "path": "~/.minimax/plugins/terminal-gate/",
+      "format": "dir",
+      "strategy": "copy",
+      "note": "Hypothesis-testing slice (I). Blocking decision unconfirmed; does not travel with the clone."
+    },
+    {
+      "id": "dsh-bridge",
+      "path": "~/.dsh/config.json",
+      "format": "json",
+      "strategy": "set-key",
+      "key": "configPath",
+      "value": "${USERPROFILE}/.codex/hooks.json",
+      "note": "Verify path at runtime; absolute configPath to codex hooks.json. SubagentStart not supported (silent-skip)."
+    }
+  ]
+}

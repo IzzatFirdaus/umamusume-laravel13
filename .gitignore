@@ -47,11 +47,19 @@ Homestead.json
 Homestead.yaml
 
 # AI agent tooling (personal configs and installed skill payloads)
-/.mcp.json
-/.claude
+# Tracked agent-control files (committed, travel with the clone):
+#   .mcp.json, .claude/settings.json, .claude/hooks/, .claude/agents/, .claude/skills/,
+#   .cursor/, .tooling/ (except .tooling/logs/), .qoder/, .kilo/, .agents/
 CLAUDE.local.md
-/.agents
-/.cursor
+# Local-only agent config / state (never committed):
+/.claude/settings.local.json
+/.claude/logs/
+/.claude/state/
+/.mcp.local.json
+/.tooling/logs/
+!.qoder/settings.json
+!.kilo/kilo.jsonc
+!.agents/hooks.json
 /.grok
 /boost.json
 /opencode.json
@@ -69,8 +77,6 @@ CLAUDE.local.md
 /.gemini/
 /.hermes/
 /.junie/
-/.kilo/
-/.kilocode/
 /.kiro/
 /.minimax/
 /.mux/
@@ -80,7 +86,6 @@ CLAUDE.local.md
 /.playwright-cli/
 /playwright-report/
 /test-results/
-/.qoder/
 /.roo/
 /.superpowers/
 /.trae/
@@ -89,6 +94,7 @@ CLAUDE.local.md
 /.windsurf/
 /skills-lock.json
 /kilo.json
+/kilo.jsonc
 /crush.json
 /.github/
 
@@ -139,3 +145,8 @@ tools/force-db-rebuild.py
 
 # Python cache for tools
 tools/__pycache__/
+
+# Audit screenshots and scratch artifacts (local reference; not history material)
+/.scratch-audit/
+/docs/audits/**/screens/
+/docs/audits/**/screenshots/

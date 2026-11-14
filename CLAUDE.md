@@ -71,15 +71,15 @@ disagree, `PRD.md` wins; do not edit `PRODUCT.md` by hand (the plugin rewrites i
 **Browser tooling**: the `playwright-cli` skill in `.claude/skills/` drives a real browser for
 rendered checks, and the repo's own Playwright suite is `@playwright/test` with
 `playwright.config.ts` and specs under `tests/browser/` (`npm run test:browser`,
-session-private per `AGENTS.md` §9 "Testing and validation"). There is **no** Playwright MCP
-server: `.mcp.json` registers only `filesystem`, `git`, `docs`, `laravel-boost`, and
-`gitkraken`.
+session-private per `AGENTS.md` §9 "Testing and validation"). `.mcp.json` registers `filesystem`, `laravel-boost`, and `playwright` (the pruned 3-server set; `git` and `context7` were dropped for tool-count and cold-start reasons, and no inline secrets remain).
 
 **Hooks**: `.claude/settings.local.json` registers an impeccable design check after every
 `Edit`/`Write` and a deeper pass at `Stop`. The check is active on this host: the script
 resolves to a user-level installation outside the repository, so it runs here but not for
 anyone who clones. Both are local, gitignored config. Do not edit that file as part of a
-feature change.
+feature change. The hook controls added under `.claude/hooks/` (terminal denial and the
+subagent depth cap) follow the same per-host model: they are gitignored local
+configuration, not repository truth, and do not travel to a fresh clone.
 
 **Skills** in `.claude/skills/`: `laravel-best-practices`, `pest-testing`,
 `testing-best-practices`, `running-tests`, `tailwindcss-development`, `creating-models`,
@@ -314,3 +314,17 @@ Dated 2026-10-24: this file no longer carries the stale Laravel Boost block that
 write had pasted onto its end; that block described a vanilla-JavaScript skeleton with no
 Inertia and no Vue, which is not this repository. AGENTS.md §2a is the canonical plan-first
 contract, and §4 here now points to it for Claude's `TodoWrite` tracking.
+
+## Tooling gaps
+
+MCP server approval must be written to `~/.claude.json` under `projects[path]`.
+`enabledMcpjsonServers` in `.claude/settings.local.json` is ignored by Claude
+Code. If `claude mcp list` shows fewer than five servers after clone, approve
+each once interactively (or add `enableAllProjectMcpServers: true` to
+`.claude/settings.local.json` if your build honors that global approval toggle).
+
+## Agent controls
+
+Delegation defaults live in `AGENTS.md` (delegation-default section): delegate
+multi-step or context-heavy work to a subagent; inline only single-file trivial
+tasks; "inline is faster" is not a valid reason to skip delegation.

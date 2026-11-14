@@ -1,0 +1,40 @@
+{
+    "mcpServers": {
+        "laravel-boost": {
+            "command": "php",
+            "args": [
+                "artisan",
+                "boost:mcp"
+            ]
+        },
+        "playwright": {
+            "command": "cmd.exe",
+            "args": [
+                "/c",
+                "npx",
+                "-y",
+                "@playwright/mcp@0.0.38"
+            ],
+            "env": {
+                "MCP_SERVER_REQUEST_TIMEOUT": "120000"
+            }
+        },
+        "filesystem": {
+            "type": "stdio",
+            "command": "cmd.exe",
+            "args": [
+                "/c",
+                "npx",
+                "-y",
+                "@modelcontextprotocol/server-filesystem",
+                "D:\\\\Projects\\\\umamusume-laravel13"
+            ],
+            "tools": [
+                "*"
+            ],
+            "env": {
+                "MCP_SERVER_REQUEST_TIMEOUT": "120000"
+            }
+        }
+    }
+}

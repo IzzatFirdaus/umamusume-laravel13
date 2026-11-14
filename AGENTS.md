@@ -326,6 +326,33 @@ tooling layer (`.agents/`, `docs/SKILL_AUTOMATION.md`). They touch no catalog or
 
 Full detail: `ARCHITECTURE.md`. Digest: `ARCHITECTURE-ESSENTIALS.md`.
 
+### Hermes toolset narrowing (S1, tooling governance)
+
+The `terminal` tool was removed from `platform_toolsets.cli` in `$HERMES_HOME/config.yaml`
+(`C:\Users\exatf\AppData\Local\hermes\config.yaml`), so Hermes is now a **file-and-web-only**
+runtime for agent-driven work. The shell is no longer a resident agent tool; shell-only commands
+(`git`, `composer`, `artisan`, `pest`, `php`, `node`, ...) require an MCP server or explicit user
+invocation and do not fire as agent tool calls.
+
+Dedicated replacements carry the shell's previous responsibilities:
+
+| Shell task | Hermes dedicated tool |
+|---|---|
+| Read files (`cat`, `Get-Content`) | `file` → `read_file` |
+| Write/edit files (`>`, `Set-Content`) | `file` → `write_file`, `patch` |
+| Fetch URLs (`curl`, `wget`) | `web` → `web_search`, `web_extract` |
+| Search files (`grep`, `ls`) | `file` → `search` |
+| Execute scripts (`node`, `python`) | `code_execution` |
+
+A `pre_tool_call` shell hook (`D:\Projects\umamusume-laravel13\.claude\hooks\hermes-pretooluse.mjs`,
+registered as `hooks.pre_tool_call` with `matcher: terminal` and `fail_closed: true`) acts as a
+safety bouncer if `terminal` is ever re-enabled: it denies `cat`/shell-redirect/`curl` and names the
+replacement tool via exit code 2.
+
+Version control, dependency installation, migrations, and test runs are delegated to a different IDE
+(Claude Code, Qoder, or Codex) rather than Hermes. This is an intentional narrowing, not a gap —
+record it as such when choosing Hermes for a task class.
+
 ## 9. Testing and validation
 
 Pest 4, feature-first. One global binding in `tests/Pest.php` applies `TestCase` plus
@@ -815,3 +842,12 @@ fails if the logic breaks; a trivial one-liner needs no test.
 | 2026-10-26   | Round 21 fold, owner-ordered: the root `coverage.md` and `SKILL_REGISTRY.md` and the eight files under `docs/audits/` and `docs/proposals/` dated 2026-10-24/25 (the group-ab audit, pass report and Phase 8.1 browser triage; the group-ab plan, consolidated plan and rulings-owed brief; the remaining-work roadmap and its rulings brief) were folded into `docs/research-scratch/` masters and deleted from their locations. §3's `coverage.md` map row now names `GOVERNANCE.md` sections, and §14's tracked root set shrinks to thirteen. Nothing else in this file moved. | The owner ordered the consolidation. `INDEX.md` §File discipline forbids standalone markdown outside the masters, and the two root skill files were not in that section's standing-set table at all, so the fold clears a standing violation as well as absorbing ten sources. | <!-- census: quoted-original -->
 | 2026-10-27   | §13's named-primitive migration ruleblock was removed, per its own banner ("removed at Phase 6 exit"). §9's `count: 219` debt figure was re-verified against `tools/ui-lint-baseline.json`; no other section moved. | The named-primitive migration exited when Phase 6 released 2.1.0 on 2026-10-23 (`docs/proposals/frontend-architecture-plan.md:1006`); that plan's rationale at `:791` is that a migration-scoped rule outliving its migration becomes stale instruction. The clean tree measures 219 arbitrary values; the working tree's 221 are two peer-owned additions (`Review/Index.vue:300`, `Career/SkillsPlanner.vue:374`), so the baseline is unchanged. |
 | 2026-10-31   | §9 gains the working-copy drift rule: `git diff HEAD -- <path>` before and after staging any file another session writes, with the two causes named (a peer reset, and a private-index landing built from HEAD's bytes). | Discovered in the Database and Help HFW pass, where `SCREEN_SPEC.md` and `KNOWN-ISSUES.md` each fell behind HEAD after a blob-built landing, so a peer's next pathspec commit would have deleted the landed rows. The check costs one command and the failure mode is silent. |
+
+## Delegation defaults
+
+Delegate multi-step or context-heavy work to a subagent; inline only
+single-file, trivial tasks. "Inline is faster" is not a valid reason to skip
+delegation. A child subagent's `tools:` allowlist must be a strict subset of
+the parent's (child \u2286 parent attenuation), and spawn depth is capped by the
+Hermes `delegation.max_spawn_depth` setting. The delegation log
+(`.tooling/logs/delegation.jsonl`) records one line per `SubagentStart`. |

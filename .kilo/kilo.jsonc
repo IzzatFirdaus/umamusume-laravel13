@@ -1,0 +1,15 @@
+// Kilo permission block (agent controls — committed, travels with the clone).
+// Kilo has no command hook; interception is in-process plugin tool.execute.before only.
+// "*": "deny" catch-all for silent denial; trusted commands allowed explicitly.
+// Later rules win. Commands typed into the integrated terminal bypass this layer
+// entirely (residual risk — documented in plan Risks & open questions).
+{
+  "$schema": "https://app.kilo.ai/config.json",
+  "permission": {
+    "*": "deny",
+    "git *": "allow",
+    "composer *": "allow",
+    "php artisan *": "allow",
+    "node *": "allow"
+  }
+}
