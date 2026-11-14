@@ -18,7 +18,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Remove ELECTRON_RUN_AS_NODE if present
         shell: pwsh
@@ -38,7 +38,7 @@ jobs:
           cache: npm
 
       - name: Cache Composer dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: |
             ~\AppData\Local\Composer\Cache
@@ -73,10 +73,12 @@ jobs:
             echo 'NATIVEPHP_NSIS_DELETE_APP_DATA=false' >> .env
             echo "Created fallback .env (no .env.example in repo)"
           fi
-          php artisan key:generate --no-interaction --force
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --optimize-autoloader --no-interaction
+
+      - name: Generate application key
+        run: php artisan key:generate --no-interaction --force
 
       - name: Install Node dependencies
         run: npm ci
@@ -101,7 +103,7 @@ jobs:
           }
 
       - name: Upload Windows installer artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: nativephp-windows-installer
           path: |
@@ -112,7 +114,7 @@ jobs:
 
       - name: Upload failure logs on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: nativephp-windows-failure-logs
           path: |
