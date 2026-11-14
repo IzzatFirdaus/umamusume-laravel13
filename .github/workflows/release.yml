@@ -78,16 +78,32 @@ jobs:
           npm ci
           npm run plugin:build
 
+      - name: Resolve application version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${GITHUB_EVENT_NAME}" = "push" ] && [[ "${GITHUB_REF}" == refs/tags/v* ]]; then
+            echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "version=manual-${GITHUB_RUN_ID}" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Build NativePHP Windows installer
         run: php artisan native:build win x64 --no-interaction
         env:
           # Tag-derived version on release pushes; a CI run id on manual dispatch.
-          # GITHUB_TOKEN is intentionally NOT set here: NativePHP serializes
-          # env('GITHUB_TOKEN') into NATIVEPHP_UPDATER_CONFIG, which
-          # electron-builder embeds into the built app. The token must stay
-          # restricted to the GitHub Release step below, where it is never
-          # embedded in the distributed application.
-          NATIVEPHP_APP_VERSION: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('manual-{0}', github.run_id) }}
+          # The leading "v" is stripped so the app version is clean semver for
+          # electron-builder's extraMetadata.version; the git tag itself (and the
+          # updater's vPrefixedTagName lookup) stays "v1.0.0".
+          # GITHUB_TOKEN is intentionally blanked: GitHub Actions auto-injects
+          # GITHUB_TOKEN into every job, and NativePHP copies env('GITHUB_TOKEN')
+          # into GH_TOKEN for the build process (Updater::environmentVariables),
+          # while electron-builder embeds the updater config into the app. The
+          # token must stay restricted to the GitHub Release step below, where it
+          # is never embedded in the distributed application.
+          NATIVEPHP_APP_VERSION: ${{ steps.version.outputs.version }}
+          GITHUB_TOKEN: ''
           NATIVEPHP_UPDATER_ENABLED: 'true'
           NATIVEPHP_UPDATER_PROVIDER: 'github'
           GITHUB_OWNER: ${{ github.repository_owner }}
