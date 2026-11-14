@@ -47,7 +47,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-composer-
 
-      - name: Prepare environment
+      - name: Prepare environment file
         shell: bash
         run: |
           set -euo pipefail
@@ -56,20 +56,21 @@ jobs:
             cp .env.example .env
             echo "Created .env from .env.example"
           else
-            cat > .env <<'EOF'
-APP_NAME="Trainer Desk"
-APP_ENV=production
-APP_KEY=
-APP_DEBUG=false
-APP_URL=http://localhost
-DB_CONNECTION=sqlite
-DB_DATABASE=database/database.sqlite
-CACHE_STORE=file
-SESSION_DRIVER=file
-QUEUE_CONNECTION=sync
-NATIVEPHP_UPDATER_ENABLED=true
-NATIVEPHP_NSIS_DELETE_APP_DATA=false
-EOF
+            echo 'APP_NAME="Trainer Desk"' > .env
+            echo 'APP_ENV=production' >> .env
+            echo 'APP_KEY=' >> .env
+            echo 'APP_DEBUG=false' >> .env
+            echo 'APP_URL=http://localhost' >> .env
+            echo '' >> .env
+            echo 'DB_CONNECTION=sqlite' >> .env
+            echo 'DB_DATABASE=database/database.sqlite' >> .env
+            echo '' >> .env
+            echo 'CACHE_STORE=file' >> .env
+            echo 'SESSION_DRIVER=file' >> .env
+            echo 'QUEUE_CONNECTION=sync' >> .env
+            echo '' >> .env
+            echo 'NATIVEPHP_UPDATER_ENABLED=true' >> .env
+            echo 'NATIVEPHP_NSIS_DELETE_APP_DATA=false' >> .env
             echo "Created fallback .env (no .env.example in repo)"
           fi
           php artisan key:generate --no-interaction --force
