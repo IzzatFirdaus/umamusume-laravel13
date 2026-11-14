@@ -14,9 +14,18 @@ try { p = JSON.parse(input); } catch (err) {
   process.exit(2);
 }
 
-const tool = p?.tool_name ?? '';
-const cmd = p?.tool_input?.command ?? '';
-const result = classify(tool, cmd);
+const tool = p?.tool_name ?? p?.toolName ?? '';
+const rawCmd = p?.tool_input?.command
+  ?? p?.tool_input?.args
+  ?? p?.tool_input?.cmd
+  ?? p?.input?.command
+  ?? p?.input?.args
+  ?? '';
+const cmd = typeof rawCmd === 'string' ? rawCmd : String(rawCmd ?? '');
+// Other runtimes sharing this adapter (e.g. the DSH bridge) name their shell
+// tool differently; map shell-ish tool names onto the policy's Bash matcher.
+const policyTool = /bash|shell|terminal|command|exec|process|cmd/i.test(tool) ? 'Bash' : tool;
+const result = classify(policyTool, cmd);
 
 if (!result || !result.deny) {
   process.exit(0);

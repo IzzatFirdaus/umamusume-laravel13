@@ -39,7 +39,9 @@ $RECYCLE.BIN/
 /.fleet
 /.idea
 /.nova
-/.vscode
+/.vscode/*
+!.vscode/settings.json
+!.vscode/mcp.json
 /.zed
 
 # Homestead

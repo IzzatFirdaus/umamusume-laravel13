@@ -78,17 +78,26 @@
     },
     {
       "id": "vscode-settings",
-      "path": ".vscode/settings.json",
+      "path": "~/AppData/Roaming/Antigravity IDE/User/settings.json",
       "format": "json",
-      "strategy": "merge",
-      "note": "chat.permissions.default: default; kilo-code.new.autoApprove.enabled: false; zoo-code.deniedCommands: [Get-Content, Set-Content, Out-File, Invoke-WebRequest, Invoke-RestMethod, curl, wget, Select-String, Get-ChildItem]."
+      "strategy": "noop",
+      "note": "Slice G decision: the host has kilo-code.new.autoApprove.enabled=true as a deliberate user-level preference (schema default is false). Forcing it false globally would override every project; instead the workspace-scoped deny lives in the repo's .vscode/settings.json (un-ignored in .gitignore, travels with the clone). zoo-code.deniedCommands and chat.permissions.default do not exist in this build's schema (verified package.json - only kilo-code.* keys)."
     },
     {
       "id": "antigravity-hooks",
       "path": ".agents/hooks.json",
       "format": "json",
-      "strategy": "merge",
-      "note": "Shell tool run_command; deny emits {decision:'deny',reason}; pass-through emits {}; never allow or allow_tool:false; fail-closed on unparseable output."
+      "strategy": "noop",
+      "note": "Verified at runtime (Slice G): .agents/hooks.json is NOT a config surface in this Antigravity build (no hooks references in extension docs or package schema; no zoo-code.* keys exist - only kilo-code.*). The real DSH agent runtime bridges Claude-dialect hooks via @deepseek-ai/dsh-hooks-claude-code with a configPath row - see dsh-hooks-bridge target. The planned {'decision':'deny'} stdout schema belongs to no shipped surface; not implemented."
+    },
+    {
+      "id": "dsh-hooks-bridge",
+      "path": "~/.dsh/profiles/desktop/cordis.patch.yml",
+      "format": "yaml",
+      "strategy": "append-yaml-row",
+      "rowId": "dsh-bridge-hooks-umamusume",
+      "row": "- id: dsh-bridge-hooks-umamusume\n  name: '@openma/dsh-agents-plugins-bridge/hooks-claude-code'\n  config:\n    configPath: 'D:/Projects/umamusume-laravel13/.claude/hooks/dsh-hooks.json'\n    projectDir: 'D:/Projects/umamusume-laravel13'",
+      "note": "Slice G: the DSH runtime's hooks bridge (@deepseek-ai/dsh-hooks-claude-code) runs Claude-dialect hooks from a configPath row; process-level, launch-cwd-relative, so ABSOLUTE path mandatory (verified in the package README). Zero hook rows existed before this row (verified cordis.patch.yml). Text-append, idempotent by id scan; row uses the committed dsh-hooks.json (PreToolUse .* -> claude-pretooluse.mjs, SubagentStart -> delegation-log.mjs)."
     },
     {
       "id": "kilo-config",

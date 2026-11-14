@@ -140,6 +140,21 @@ function applyAppendHook(path, target) {
   return { changed: true, backup: bak, added: [target.event + ':' + target.matcher] };
 }
 
+// Appends a cordis patch row to a DSH profile's cordis.patch.yml. The file is a
+// top-level YAML array of entries; we append one entry as text (no YAML
+// dependency) after verifying the marker id is absent. Idempotent by id scan.
+function applyAppendYamlRow(path, target) {
+  if (!existsSync(path)) return { changed: false, note: 'target file does not exist: ' + path };
+  const raw = readFileSync(path, 'utf8');
+  if (raw.includes('id: ' + target.rowId)) return { changed: false };
+  const row = typeof target.row === 'string' ? target.row : String(target.row);
+  const sep = raw.endsWith('\n') ? '' : '\n';
+  const next = raw + sep + row + '\n';
+  const bak = backup(path);
+  writeFileSync(path, next);
+  return { changed: true, backup: bak, added: [target.rowId] };
+}
+
 let changedCount = 0;
 for (const target of (manifest.targets || [])) {
   const path = expand(target.path);
@@ -150,6 +165,8 @@ for (const target of (manifest.targets || [])) {
     result = applyCopyServers(path, expand(target.source), target.servers ?? []);
   } else if (target.strategy === 'append-hook') {
     result = applyAppendHook(path, { ...target, command: expand(target.command) });
+  } else if (target.strategy === 'append-yaml-row') {
+    result = applyAppendYamlRow(path, { ...target, row: expand(target.row) });
   } else {
     process.stdout.write('skip ' + target.id + ' (strategy ' + target.strategy + ' not exercised in this pass; see host-targets.json note)\n');
     continue;
