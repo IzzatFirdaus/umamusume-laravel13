@@ -24,9 +24,10 @@ if (tool !== 'terminal' && tool !== 'process') {
   process.exit(0);
 }
 
-const args = p?.tool_input?.args;
+const ti = p?.tool_input ?? {};
+const args = ti.command ?? ti.cmd ?? ti.args;
 // Shape-tolerant extraction: string passes through; arrays join (argv form);
-// objects use .command; anything else is unrecognized -> fail closed
+// objects use .command/.args/.cmd; anything else is unrecognized -> fail closed
 // (a String()-coerced "[object Object]" would match no rule and silently allow).
 let cmd = null;
 if (typeof args === 'string') {
