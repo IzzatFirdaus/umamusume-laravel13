@@ -42,16 +42,60 @@ final class VeteranController extends Controller
 {
     /**
      * `GET /veterans`, the library list.
+     *
+     * Each row carries the C3 remainder's used-as-parent count beside its spark tallies. The count
+     * is keyed on the trainee (`umamusume_id`), the same character-keyed read the detail screen's
+     * trail takes below: the two stored parent columns hold Umamusume ids, so the figure answers
+     * "how many careers named this character as a parent", not "this specific filing" - two filings
+     * of one trainee carry the same count. It counts child runs, never column instances, so a run
+     * naming the trainee in both parent columns contributes one.
      */
     public function index(VeteranSearchRequest $request, ListVeterans $veterans): Response
     {
         $filters = $request->filters();
         $order = $request->order();
 
-        $rows = $veterans
+        $paginator = $veterans
             ->handle($filters, $request->query('pageSize'), $order)
-            ->withQueryString()
-            ->through(fn (Veteran $veteran): array => VeteranRow::from($veteran));
+            ->withQueryString();
+
+        /*
+         * The count is one query for the page, not one per row. The trainee ids come from the
+         * paginator's already-eager-loaded `trainingRun.umamusume`, so this adds exactly one read
+         * of `training_runs`. An empty page skips the query entirely - a wasted-work guard, not an
+         * error fix (the framework compiles an empty `whereIn` to `0 = 1`, so the query itself
+         * would be safe either way).
+         */
+        $traineeIds = collect($paginator->items())
+            ->map(static fn (Veteran $veteran): int => $veteran->trainingRun->umamusume_id)
+            ->filter()
+            ->unique()
+            ->values();
+
+        $usedAsParent = $traineeIds->isEmpty()
+            ? collect()
+            : TrainingRun::query()
+                ->where(static fn ($query) => $query
+                    ->whereIn('inheritance_parent_a_id', $traineeIds)
+                    ->orWhereIn('inheritance_parent_b_id', $traineeIds))
+                ->get(['inheritance_parent_a_id', 'inheritance_parent_b_id'])
+                // Count runs, not column instances: a child run naming the trainee in both
+                // columns is flattened to one contribution through per-row `unique()`.
+                ->flatMap(static fn (TrainingRun $child) => collect([
+                    $child->inheritance_parent_a_id,
+                    $child->inheritance_parent_b_id,
+                ])->filter()->unique())
+                ->countBy();
+
+        $rows = $paginator->through(static fn (Veteran $veteran): array => array_merge(
+            VeteranRow::from($veteran),
+            [
+                // The used-as-parent tally, merged here rather than inside `VeteranRow::from()`:
+                // the Legacy Lab's browse list reads the same row shape, and the count is the
+                // Veteran library's column, not a property every surface must carry.
+                'used_as_parent_count' => $usedAsParent[$veteran->trainingRun->umamusume_id] ?? 0,
+            ],
+        ));
 
         return Inertia::render('Veterans/Index', [
             'veterans' => $rows,

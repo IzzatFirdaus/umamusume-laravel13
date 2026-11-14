@@ -361,3 +361,106 @@ it('reads a parent from either column, so parent B carries the trail as well (C3
             ->has('usedAsParent', 1)
             ->where('usedAsParent.0.trainee', 'Another Runner'));
 });
+
+/*
+ * The C3 remainder on the index: the same character-keyed read the detail trail makes, carried as
+ * one numeric column. The parent columns hold Umamusume ids, so the count follows the trainee - it
+ * counts child runs (never column instances, so both-columns counts once), two filings of one
+ * trainee carry the same figure, and an unused trainee prints 0 as a recorded fact.
+ */
+it('carries the used-as-parent count onto the library row, reading both parent columns (C3)', function (): void {
+    $parent = Umamusume::factory()->create(['name' => 'Indexed Mare']);
+    $veteran = veteranScreenFiled($parent, 'ura_finale');
+
+    $childTrainee = Umamusume::factory()->create(['name' => 'Index Child']);
+    // Parent A of one run and parent B of another: two runs, two counts.
+    TrainingRun::factory()->create([
+        'umamusume_id' => $childTrainee->id,
+        'scenario' => 'unity_cup',
+        'status' => RunStatus::Completed,
+        'inheritance_parent_a_id' => $parent->id,
+    ]);
+    TrainingRun::factory()->create([
+        'umamusume_id' => $childTrainee->id,
+        'scenario' => 'ura_finale',
+        'status' => RunStatus::Completed,
+        'inheritance_parent_b_id' => $parent->id,
+    ]);
+    // A decoy naming a different parent on the same columns, which the count must not read.
+    $unrelated = Umamusume::factory()->create(['name' => 'Unrelated Sire']);
+    TrainingRun::factory()->create([
+        'umamusume_id' => $childTrainee->id,
+        'scenario' => 'ura_finale',
+        'status' => RunStatus::Completed,
+        'inheritance_parent_a_id' => $unrelated->id,
+    ]);
+
+    test()->get(route('veterans.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Veterans/Index')
+            ->where('veterans.data.0.used_as_parent_count', 2));
+});
+
+it('counts a child run naming the trainee in both parent columns once (C3)', function (): void {
+    $parent = Umamusume::factory()->create(['name' => 'Both Columns Mare']);
+    $veteran = veteranScreenFiled($parent, 'ura_finale');
+
+    $childTrainee = Umamusume::factory()->create(['name' => 'Both Columns Child']);
+    TrainingRun::factory()->create([
+        'umamusume_id' => $childTrainee->id,
+        'scenario' => 'unity_cup',
+        'status' => RunStatus::Completed,
+        'inheritance_parent_a_id' => $parent->id,
+        'inheritance_parent_b_id' => $parent->id,
+    ]);
+
+    test()->get(route('veterans.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Veterans/Index')
+            ->where('veterans.data.0.used_as_parent_count', 1));
+});
+
+it('prints zero for a trainee no career has used as a parent (C3)', function (): void {
+    $parent = Umamusume::factory()->create(['name' => 'Unused Mare']);
+    $veteran = veteranScreenFiled($parent, 'ura_finale');
+
+    test()->get(route('veterans.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Veterans/Index')
+            ->where('veterans.data.0.used_as_parent_count', 0));
+});
+
+it('gives two filings of one trainee the same used-as-parent count (C3)', function (): void {
+    $parent = Umamusume::factory()->create(['name' => 'Twice Filed Mare']);
+    $first = veteranScreenFiled($parent, 'ura_finale');
+    $second = veteranScreenFiled($parent, 'unity_cup');
+
+    $childTrainee = Umamusume::factory()->create(['name' => 'Twice Filed Child']);
+    TrainingRun::factory()->create([
+        'umamusume_id' => $childTrainee->id,
+        'scenario' => 'ura_finale',
+        'status' => RunStatus::Completed,
+        'inheritance_parent_a_id' => $parent->id,
+    ]);
+
+    $rows = test()->get(route('veterans.index'))->assertOk()->inertiaProps('veterans.data');
+    $byId = collect($rows)->keyBy('id');
+
+    // The library's default order is newest first, so the rows are addressed by id, not by index:
+    // both filings of one trainee carry the same character-keyed figure.
+    expect($byId[$first->id]['used_as_parent_count'])->toBe(1)
+        ->and($byId[$second->id]['used_as_parent_count'])->toBe(1);
+});
+
+it('renders an empty library page with the count defaulted to zero and no parent query', function (): void {
+    // No Veterans exist, so the page has no trainee ids to read: the count query is skipped
+    // outright (a wasted-work guard, not an error fix), and the page renders its empty state.
+    test()->get(route('veterans.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Veterans/Index')
+            ->where('veterans.data', []));
+});

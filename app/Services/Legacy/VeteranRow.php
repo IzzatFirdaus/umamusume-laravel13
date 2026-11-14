@@ -40,6 +40,10 @@ final class VeteranRow
      *               hasSelection: bool, builder_url: string|null, veteran_url: string, portrait_url: string|null,
      *               saved_at: string|null, blue: int, pink: int, unique: int, compare_url: string,
      *               transfer_url: string|null}
+     *
+     * The Veteran library's index appends one further key to this shape at its own call site
+     * (`used_as_parent_count`, the C3 tally composed in `VeteranController::index()`); it is not
+     * part of the shared row, because the Legacy Lab's browse list does not print it.
      */
     public static function from(Veteran $veteran): array
     {

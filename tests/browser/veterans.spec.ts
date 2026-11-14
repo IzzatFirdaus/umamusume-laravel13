@@ -467,3 +467,40 @@ test('the veteran detail lists the careers that used the trainee as a parent (C3
     const childLink = section.getByRole('link', { name: 'Eishin Flash' });
     await expect(childLink).toHaveAttribute('href', /\/training-runs\/\d+\/cockpit$/);
 });
+
+/*
+ * The C3 remainder on the index: the same character-keyed count the detail trail prints, carried
+ * as one numeric column. Filed through the create form's own parent select, because that is the
+ * one browser path that writes `inheritance_parent_a_id`. The child career is a run, not a
+ * Veteran, so the library shows only filed careers: the parent's row counts 1 (the child run
+ * names her trainee), and a second filing whose trainee nothing used counts 0.
+ */
+test('the library row prints the used-as-parent count, 0 when unused (C3)', async ({ page }) => {
+    createdRunUrls.push(await fileCareer(page, 'Agnes Digital', 'Speed', 'Filed as the parent.'));
+
+    // The child career: names Agnes Digital as parent A through the create form's own select.
+    // It stays a run (never filed), so the library's Agnes row is the only row that reads it.
+    await page.goto('/training-runs/create', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+    await page.locator('#trainee-combobox').fill('Eishin Flash');
+    await page.keyboard.press('Enter');
+    await page.selectOption('select[name="scenario"]', { value: 'ura_finale' });
+    await page.selectOption('select[name="inheritance_parent_a_id"]', { label: 'Agnes Digital' });
+    await page.getByRole('button', { name: 'Create run' }).click();
+    await page.waitForURL(/\/training-runs\/\d+\/cockpit$/, { timeout: 60_000 });
+    createdRunUrls.push(page.url().replace(/\/cockpit$/, ''));
+
+    // A second filing whose trainee no career has named as a parent: the column's zero state.
+    await fileCareer(page, 'Mejiro McQueen', null, null, 'ura_finale');
+
+    await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.getByRole('columnheader', { name: 'Used as parent' })).toBeVisible();
+
+    const parentRow = page.locator('[data-veteran-row]').filter({ hasText: 'Agnes Digital' });
+    await expect(parentRow.locator('[data-used-as-parent]')).toHaveText('1');
+
+    const unusedRow = page.locator('[data-veteran-row]').filter({ hasText: 'Mejiro McQueen' });
+    await expect(unusedRow.locator('[data-used-as-parent]')).toHaveText('0');
+});

@@ -57,6 +57,7 @@ interface Veteran {
     blue: number;
     pink: number;
     unique: number;
+    used_as_parent_count: number;
     compare_url: string;
     transfer_url: string | null;
 }
@@ -403,6 +404,11 @@ const factorGrades: { family: string; note: string }[] = [
                             <th scope="col" class="n">Blue sparks</th>
                             <th scope="col" class="n">Pink sparks</th>
                             <th scope="col" class="n">Unique sparks</th>
+                            <!-- HFW-OVERRIDE (columns: used-as-parent count). The wireframe draws no
+                                 such column; the owner's 2026-11-14 ruling restores the C3 index count
+                                 the detail screen's trail already prints, and it sits with the other
+                                 bare-integer tallies before the Open column. -->
+                            <th scope="col" class="n">Used as parent</th>
                             <th scope="col" class="n"><span class="sr-only">Open the Veteran</span></th>
                         </tr>
                     </thead>
@@ -481,6 +487,13 @@ const factorGrades: { family: string; note: string }[] = [
                                  column "Unique"; the reference's family is Green (§1.5.2), and the row key
                                  `unique` is `sparkCount($payload, 'green')`. One join, stated once. -->
                             <td class="n font-mono tabular-nums" data-spark="unique">{{ veteran.unique }}</td>
+                            <!-- C3 remainder: how many careers named this trainee as an inheritance
+                                 parent, one bare integer like the spark tallies beside it. The count is
+                                 character-keyed (the parent columns hold Umamusume ids), counts runs not
+                                 column instances, and two filings of one trainee carry the same figure -
+                                 the same read the detail screen's trail makes. A zero is a recorded fact
+                                 (no career used the trainee), never an absence. -->
+                            <td class="n font-mono tabular-nums" data-used-as-parent>{{ veteran.used_as_parent_count }}</td>
                             <td class="n">
                                 <div class="flex items-center gap-1.5">
                                     <LinkButton :href="veteran.veteran_url" variant="secondary" size="sm">Open</LinkButton>
