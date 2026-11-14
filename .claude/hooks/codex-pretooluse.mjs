@@ -4,7 +4,7 @@
 // { event: { tool, arguments: { command } } }. Denies shell commands that
 // duplicate a dedicated tool; blocks via exit code 2.
 import { readFileSync } from 'node:fs';
-import { classify } from '../tooling/policy.mjs';
+import { classify } from '../../.tooling/policy.mjs';
 
 let input = '';
 try { input = readFileSync(0, 'utf8'); } catch {}

@@ -1,17 +1,21 @@
 #!/usr/bin/env node
 // Shared policy classification module for Trainer Desk agent controls.
-// Loads .tooling/policy.json and exposes isAllowed()/classify().
+// Loads .tooling/policy.json (same directory) and exposes classify()/isAllowed().
+// Fail-closed: if the table cannot be loaded, classify() returns a deny rule so
+// adapters block rather than silently allowing.
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
-const policyPath = new URL('./policy.json', import.meta.url).pathname;
-let policy;
+const policyPath = fileURLToPath(new URL('./policy.json', import.meta.url));
+
+let rules = [];
+let loadError = null;
 try {
-  policy = JSON.parse(readFileSync(policyPath, 'utf8'));
-} catch {
-  policy = { version: 1, rules: [] };
+  const parsed = JSON.parse(readFileSync(policyPath, 'utf8'));
+  rules = Array.isArray(parsed.rules) ? parsed.rules : [];
+} catch (err) {
+  loadError = String(err && err.message ? err.message : err);
 }
-
-const rules = Array.isArray(policy.rules) ? policy.rules : [];
 
 function matchPattern(cmd, pattern) {
   try {
@@ -21,7 +25,18 @@ function matchPattern(cmd, pattern) {
   }
 }
 
+export function policyLoadError() {
+  return loadError;
+}
+
 export function classify(tool, command) {
+  if (loadError !== null) {
+    return {
+      id: 'policy-load-error',
+      deny: true,
+      message: 'Agent-controls policy table unavailable; failing closed (' + loadError + ').'
+    };
+  }
   const cmd = command ?? '';
   for (const rule of rules) {
     if (rule.matcher && !new RegExp(rule.matcher).test(tool ?? '')) continue;

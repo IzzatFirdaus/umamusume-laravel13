@@ -4,7 +4,7 @@
 // against .tooling/policy.json, and exits 2 to block denied commands.
 // Fail closed: a stdin/parse/classify error exits 2 (block) rather than allowing.
 import { readFileSync } from 'node:fs';
-import { classify } from '../tooling/policy.mjs';
+import { classify } from '../../.tooling/policy.mjs';
 
 let input = '';
 try { input = readFileSync(0, 'utf8'); } catch {}

@@ -6,7 +6,29 @@
       "path": "~/.qoder/settings.json",
       "format": "json",
       "strategy": "merge",
-      "note": "autoApprove.enabled stays false (Step 1.13). PreToolUse denial lives in committed .qoder/settings.json (1.13b), not here."
+      "payload": { "autoApprove": { "enabled": false } },
+      "note": "Step 1.13: ensure-only (already false on this host). Home settings also carry a pre-existing PreToolUse Bash hook -> qoder-pretooluse.mjs, left as-is: harmless double-fire against 1.13b's in-tree copy."
+    },
+    {
+      "id": "qoder-mcp-servers",
+      "path": "~/.qoder/settings.json",
+      "format": "json",
+      "strategy": "copy-servers",
+      "source": "~/.gemini/config/mcp_config.json",
+      "servers": ["tavily", "gitkraken"],
+      "note": "Step 2.1: add missing servers only (laravel-boost/playwright already present, skipped). `docs` is absent from the Gemini source (gap, recorded). Values copied at runtime so no API key enters the repo."
+    },
+    {
+      "id": "qoder-delegation-log",
+      "path": "~/.qoder/settings.json",
+      "format": "json",
+      "strategy": "append-hook",
+      "event": "PreToolUse",
+      "matcher": "task|Task",
+      "marker": "delegation-log.mjs",
+      "command": "node \"${REPO}/.claude/hooks/delegation-log.mjs\"",
+      "timeout": 10,
+      "note": "Step 5.5: sibling entry instead of &&-chaining the ponytail command (less destructive, idempotent by marker)."
     },
     {
       "id": "codex-hooks",
