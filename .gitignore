@@ -47,20 +47,24 @@ Homestead.json
 Homestead.yaml
 
 # AI agent tooling (personal configs and installed skill payloads)
-# Tracked agent-control files (committed, travel with the clone):
-#   .mcp.json, .claude/settings.json, .claude/hooks/, .claude/agents/, .claude/skills/,
-#   .cursor/, .tooling/ (except .tooling/logs/), .qoder/, .kilo/, .agents/
-CLAUDE.local.md
+# Directories kept ignored (tool/vendor installs, not project state):
+.agents/
+.kilo/*
+!.kilo/kilo.jsonc
+.kilocode/
+.cursor/
+.claude/*
+!.claude/settings.json
+!.claude/hooks/
+!.claude/agents/
+!.claude/skills/
 # Local-only agent config / state (never committed):
-/.claude/settings.local.json
-/.claude/logs/
-/.claude/state/
 /.mcp.local.json
 /.tooling/logs/
-!.qoder/settings.json
-!.kilo/kilo.jsonc
-!.agents/hooks.json
-/.grok
+# Project-specific MCP configs (kept tracked):
+.mcp.json
+.mcp.example.json
+.qoder/settings.json
 /boost.json
 /opencode.json
 /.augment/

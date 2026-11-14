@@ -1,0 +1,125 @@
+---
+name: laravel-best-practices
+description: "Laravel PHP code review. Use when writing or reviewing Laravel PHP code. Use for controllers, models, migrations, form requests, jobs, Eloquent queries, N+1 checks. Do NOT use for deployment, authorization policies, or non-PHP code."
+triggers:
+  - write laravel code
+  - review laravel
+  - refactor laravel
+  - form request
+  - eloquent query
+  - n+1
+disable-model-invocation: false
+license: MIT
+metadata:
+  author: laravel
+  domain: backend
+---
+
+# Laravel Best Practices
+
+Apply Laravel idioms when writing or reviewing PHP code in this project.
+
+## Trigger Criteria
+
+User requests: "write a controller", "add a job", "refactor this model", "fix N+1", "add validation", "set up caching", "review this code".
+
+## Controllers
+
+- Keep controllers **thin**. Delegate business logic to Action classes (`app/Actions/`) or Service classes (`app/Services/`).
+- Use **Form Request classes** for validation — never inline `validate()` in controller methods.
+- Use named routes for URL generation.
+- Return JSON via `response()->json()` for APIs.
+
+<code-snippet name="controller-example" lang="php">
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Illuminate\Http\JsonResponse;
+
+class UserController extends Controller
+{
+
+```text
+public function index(): JsonResponse
+{
+    return response()->json([
+        'data' => User::select(['id', 'name', 'email'])->get(),
+    ]);
+}
+```
+
+}
+</code-snippet>
+
+## Models
+
+- Use attributes (`#[Fillable]`, `#[Hidden]`) over legacy properties.
+- Define `casts()` as a method.
+- Use the `HasFactory` trait with a factory.
+- Avoid N+1 with `loadMissing` or `with` for eager loading.
+
+<code-snippet name="model-example" lang="php">
+<?php
+
+namespace App\Models;
+
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+
+# [Fillable(['name', 'email'])]
+
+# [Hidden(['password', 'remember_token'])]
+
+class User extends Authenticatable
+{
+
+```text
+/** @use HasFactory<UserFactory> */
+use HasFactory, Notifiable;
+
+protected function casts(): array
+{
+    return [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+}
+```
+
+}
+</code-snippet>
+
+## Validation
+
+- Form Request classes in `app/Http/Requests/`.
+- Use `Rule::exists()` for database existence checks.
+- Return custom error responses for API consumers.
+
+## Queues & Jobs
+
+- Jobs implementing `ShouldQueue` are dispatched via `Bus::dispatch`.
+- Use `--tries` and `--timeout` when running `queue:listen`.
+- Keep jobs small and single-purpose.
+
+## Caching
+
+- Cache expensive queries with `Cache::remember()` and a sensible TTL.
+- This repository has no Redis. Catalog reads invalidate through the `catalog:version` counter bumped on promotion (`AGENTS.md` §8).
+
+## Authorization
+
+- There is no authorization layer, and that is the design (`PRD.md` NFR-1, `ARCHITECTURE.md` §8). The app is loopback-only and single-Trainer.
+- Do not add policies, gates or `Auth::user()` flows unless the work explicitly asks for one (`AGENTS.md` §12).
+
+## Architecture
+
+- Prefer **Action classes** (`handle` / `execute` / `__invoke`) for one-off operations.
+- Prefer **Service classes** for shared domain logic and external integrations.
+- Use **API Resources** (`app/Http/Resources/`) for JSON transformations.
+- Dispatch events from Actions/Services, never from controllers or models directly.
