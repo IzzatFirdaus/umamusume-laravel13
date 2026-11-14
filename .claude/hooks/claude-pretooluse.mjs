@@ -15,13 +15,30 @@ try { p = JSON.parse(input); } catch (err) {
 }
 
 const tool = p?.tool_name ?? p?.toolName ?? '';
-const rawCmd = p?.tool_input?.command
-  ?? p?.tool_input?.args
-  ?? p?.tool_input?.cmd
-  ?? p?.input?.command
-  ?? p?.input?.args
-  ?? '';
-const cmd = typeof rawCmd === 'string' ? rawCmd : String(rawCmd ?? '');
+const ti = p?.tool_input ?? p?.input ?? {};
+const rawCmd = ti.command ?? ti.cmd ?? ti.args;
+// Shape-tolerant extraction: string passes through; arrays join (argv form);
+// objects use .command/.args; anything else is unrecognized -> fail closed
+// (a String()-coerced "[object Object]" would match no rule and silently allow).
+function extractCommand(raw) {
+  if (raw === undefined || raw === null) return null;
+  if (typeof raw === 'string') return raw;
+  if (Array.isArray(raw)) return raw.map((x) => String(x)).join(' ');
+  if (typeof raw === 'object') {
+    const inner = raw.command ?? raw.args ?? raw.cmd;
+    if (typeof inner === 'string') return inner;
+    if (Array.isArray(inner)) return inner.map((x) => String(x)).join(' ');
+    return null;
+  }
+  return null;
+}
+const cmd = extractCommand(rawCmd);
+if (cmd === null) {
+  process.stderr.write(
+    'claude-pretooluse: unrecognized payload shape for tool "' + String(tool) + '"; failing closed (no command field extracted).\n'
+  );
+  process.exit(2);
+}
 // Other runtimes sharing this adapter (e.g. the DSH bridge) name their shell
 // tool differently; map shell-ish tool names onto the policy's Bash matcher.
 const policyTool = /bash|shell|terminal|command|exec|process|cmd/i.test(tool) ? 'Bash' : tool;

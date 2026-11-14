@@ -23,8 +23,27 @@ if (tool !== 'terminal' && tool !== 'process') {
   process.exit(0);
 }
 
-const args = p?.tool_input?.args ?? '';
-const cmd = typeof args === 'string' ? args : String(args ?? '');
+const args = p?.tool_input?.args;
+// Shape-tolerant extraction: string passes through; arrays join (argv form);
+// objects use .command; anything else is unrecognized -> fail closed
+// (a String()-coerced "[object Object]" would match no rule and silently allow).
+let cmd = null;
+if (typeof args === 'string') {
+  cmd = args;
+} else if (Array.isArray(args)) {
+  cmd = args.map((x) => String(x)).join(' ');
+} else if (args !== null && typeof args === 'object') {
+  const inner = args.command ?? args.args ?? args.cmd;
+  if (typeof inner === 'string') cmd = inner;
+  else if (Array.isArray(inner)) cmd = inner.map((x) => String(x)).join(' ');
+}
+if (cmd === null) {
+  process.stderr.write(JSON.stringify({
+    action: 'block',
+    message: 'Blocked: unrecognized terminal/process payload shape; failing closed.'
+  }) + '\n');
+  process.exit(2);
+}
 
 // The shared table matches on Bash|PowerShell transport names; Hermes uses
 // terminal/process, so map before classifying.
