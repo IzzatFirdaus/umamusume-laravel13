@@ -1614,3 +1614,23 @@ duplication should have been collapsed in the same change.
 behaviour and not this app's to change; it does not make `cancel` a usable event — the type map declares
 `cancel` (`types/types.d.ts:204-208`) but 2.3.28 never fires it, so a listener keyed on it would be a check that
 cannot fail; and it does not touch KI-76, which is a server-side defect with its own remedy choice.
+
+### KI-81 Commit `7f0eef32` landed with `--no-verify` bypassing the pre-commit hook, because the hook's delegated script `tools/pre-commit-pathspec` did not exist in the worktree - FILED 2026-11-14 (Phase 0 Slice 0.1), OPEN
+
+**Status: OPEN.** The commit `7f0eef32` (feat(nativephp): land About dialog, update check, and Electron packaging scaffold) was committed with `git commit --no-verify` because the pre-commit hook at `.git/hooks/pre-commit` delegates to `tools/pre-commit-pathspec`, but that script existed only in the main repo's `tools/` directory, not in the worktree's `tools/` directory. In a git worktree, `git rev-parse --show-toplevel` returns the worktree root, so the hook looked for the script in the wrong location and failed every commit.
+
+**Proving commands.**
+
+```bash
+# The hook delegates to the pathspec script
+cat .git/hooks/pre-commit
+# #!/bin/sh
+# exec sh "$(git rev-parse --show-toplevel)/tools/pre-commit-pathspec"
+
+# The script was missing from the worktree
+ls -la tools/pre-commit-pathspec   # absent before this slice
+```
+
+**Fix applied in this slice.** Copied `tools/pre-commit-pathspec` from the main repo to the worktree's `tools/` directory and added `tests/Feature/PreCommitHookPathsTest.php` asserting the script exists and the hook delegates to it.
+
+**What closure does not cover.** The commit `7f0eef32` remains in history with `--no-verify`; amending its commit message to document the bypass is a separate step if the owner prefers a clean history over a register entry. The register entry is the durable record either way.
