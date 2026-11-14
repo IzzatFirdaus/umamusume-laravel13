@@ -2,38 +2,48 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Route;
+
 beforeEach(function (): void {
-    $this->withoutVite();
-    config(['nativephp-internal.running' => true]);
-    config(['nativephp-internal.secret' => 'test-secret-12345']);
+    Route::middleware('web')->get('/native-secret-gate-probe', static fn () => response('ok'));
+
+    config([
+        'nativephp-internal.secret' => 'test-native-secret',
+    ]);
 });
 
-it('blocks requests without any secret when running in NativePHP mode', function (): void {
-    $this->getJson('/api/v1/umamusume')
-        ->assertStatus(403);
-});
-
-it('blocks requests with an incorrect secret', function (): void {
-    $this->getJson('/api/v1/umamusume', headers: [
-        'X-NativePHP-Secret' => 'wrong-secret',
-    ])->assertStatus(403);
-});
-
-it('allows requests with a valid header secret', function (): void {
-    $this->getJson('/api/v1/umamusume', headers: [
-        'X-NativePHP-Secret' => 'test-secret-12345',
-    ])->assertOk();
-});
-
-it('allows requests with a valid cookie secret', function (): void {
-    $response = $this->getJson('/api/v1/umamusume');
-
-    $response->assertStatus(403);
-});
-
-it('does not block requests when not running in NativePHP mode', function (): void {
+it('allows regular browser requests outside native mode', function (): void {
     config(['nativephp-internal.running' => false]);
 
-    $this->getJson('/api/v1/umamusume')
+    $this->get('/native-secret-gate-probe')->assertOk();
+});
+
+it('rejects native mode requests that omit the native secret', function (): void {
+    config(['nativephp-internal.running' => true]);
+
+    $this->get('/native-secret-gate-probe')->assertForbidden();
+});
+
+it('rejects native mode requests with an invalid native secret', function (): void {
+    config(['nativephp-internal.running' => true]);
+
+    $this->withHeaders([
+        'X-NativePHP-Secret' => 'not-the-secret',
+    ])->get('/native-secret-gate-probe')->assertForbidden();
+});
+
+it('allows native mode requests with the native header secret', function (): void {
+    config(['nativephp-internal.running' => true]);
+
+    $this->withHeaders([
+        'X-NativePHP-Secret' => 'test-native-secret',
+    ])->get('/native-secret-gate-probe')->assertOk();
+});
+
+it('allows native mode requests with the native cookie secret', function (): void {
+    config(['nativephp-internal.running' => true]);
+
+    $this->withCookie('_php_native', 'test-native-secret')
+        ->get('/native-secret-gate-probe')
         ->assertOk();
 });

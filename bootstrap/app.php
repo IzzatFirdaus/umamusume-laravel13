@@ -19,7 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         if (class_exists(PreventRegularBrowserAccess::class)) {
-            $middleware->prepend([
+            $middleware->web(prepend: [
                 PreventRegularBrowserAccess::class,
             ]);
         }
