@@ -32,7 +32,7 @@ jobs:
           extensions: zip, pdo_sqlite, mbstring, openssl, curl, fileinfo, tokenizer, xml, ctype, json, bcmath, intl
 
       - name: Setup Node.js 24
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v5
         with:
           node-version: '24'
           cache: npm
@@ -87,7 +87,7 @@ jobs:
         run: npm run build
 
       - name: Pre-build environment guard
-        run: php artisan pre-native-build
+        run: composer run pre-native-build --no-interaction
 
       - name: Build NativePHP Windows installer
         run: php artisan native:build win x64 --no-interaction
