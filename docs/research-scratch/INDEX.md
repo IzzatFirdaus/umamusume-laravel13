@@ -974,6 +974,29 @@ dated snapshots, `PLANS-AND-BRIEFS.md` marked verbatim inventory rows) were left
 
 
 
+### Round 29 (2026-11-14, owner-ordered) — four plan/findings files into PLANS-AND-BRIEFS.md
+
+The owner named four plan/findings files under `docs/plans/` and `docs/proposals/`, ordered them
+consolidated into `docs/research-scratch/PLANS-AND-BRIEFS.md` and the originals deleted. All four
+are dated plan/findings documents — a tinyfish improvement scan, its findings, a reference-doc
+sync finding, and a Transfer Requests implementation plan — so they route as one set to the
+plans-and-briefs master, whose Provenance section already carries plan sources. None had been
+embedded by an earlier round.
+
+| Absorbed file | Lines | New home | Recoverable after delete? |
+| --- | --- | --- | --- |
+| `docs/plans/tinyfish-improvement-scan.md` | 21 | `PLANS-AND-BRIEFS.md`, section `## tinyfish-improvement-scan.md` | No — untracked; section is the only copy |
+| `docs/plans/tinyfish-improvement-findings.md` | 56 | `PLANS-AND-BRIEFS.md`, section `## tinyfish-improvement-findings.md` | No — untracked; section is the only copy |
+| `docs/plans/reference-sync-findings.md` | 51 | `PLANS-AND-BRIEFS.md`, section `## reference-sync-findings.md` | No — untracked; section is the only copy |
+| `docs/proposals/Transfer-Requests-plan.md` | 39 | `PLANS-AND-BRIEFS.md`, section `## Transfer-Requests-plan.md` | No — untracked; section is the only copy |
+
+Verification ran per the discipline: containment proven 4/4 before the delete (every non-blank source
+line found in its section, in order, with one-level heading demotion; 0 missing in each). All four
+sources were valid UTF-8 with LF endings, so no encoding repair was needed.
+
+**References.** No live citations outside the set name the four deleted paths; each is cited only from
+its own `PLANS-AND-BRIEFS.md` section anchor and from the provenance rows above.
+
 ### Deliberate exceptions, outside the masters
 
 Three entries stay outside `docs/research-scratch/` on purpose. They are listed here so a future pass

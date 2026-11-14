@@ -99,6 +99,8 @@ This document consolidates the following source files verbatim (no summarization
 
 - Round 21 (2026-10-26, owner-ordered): the two rulings-owed briefs of the Group A + Group B / remaining-work thread were consolidated here and their originals deleted — `docs/proposals/group-ab-rulings-owed.md` (223 lines, 184/184 verified) and `docs/proposals/remaining-work-rulings-owed.md` (305 lines, 217/217 verified), each as its own `## <filename>` section. Chosen home: this master already carries the O-2, O-3 and `audit-decisions` packages, and a two-option write-up with a recommendation per item is that same class. The plans went to `PROCESS-PLANS.md`, the audits to `AUDIT-AND-VERIFICATION.md`; see `docs/research-scratch/INDEX.md` section `### Round 21`. <!-- census: quoted-original -->
 
+- Round 29 (2026-11-14, owner-ordered): four plan/findings files consolidated here from `docs/plans/` and `docs/proposals/`, originals deleted — `docs/plans/tinyfish-improvement-scan.md` (21 lines), `docs/plans/tinyfish-improvement-findings.md` (56 lines), `docs/plans/reference-sync-findings.md` (51 lines), and `docs/proposals/Transfer-Requests-plan.md` (39 lines), each as its own `## <filename>.md` section. Chosen home: this master is the plans-and-briefs master and these are all plan/findings documents; see `docs/research-scratch/INDEX.md` section `### Round 29`.
+
 ---
 
 ## TASK-16-RUN-VIEW-FRAME-BRIEF.md
@@ -9247,3 +9249,203 @@ The entry should say so rather than leaving a reader to re-file it as KI-82 agai
 **Neither issue is marked CLOSED by this document.** KI-82's closure is proposed in §3.5 and should be
 committed as its own documentation change; KI-133's entry needs its blocker corrected before anyone plans
 against it.
+
+---
+
+## tinyfish-improvement-scan.md
+
+> **Consolidated 2026-11-14 (Round 29, owner-ordered).** Source: `docs/plans/tinyfish-improvement-scan.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/plans/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+
+## Tinyfish fullstack improvement scan — plan
+
+**Goal:** Use tinyfish MCP to gather evidence (Umamusume JP/Global official sources, game data) and identify concrete fullstack improvements implementable in this Trainer Desk codebase.
+
+**Scope:** Information gathering only in this phase — no code changes. Proposals must name real resolvable paths (verified via `git ls-files`) and be grounded in tinyfish-retrieved evidence.
+
+**Acceptance criteria:**
+- A list of fullstack improvements (backend + frontend + tests), each with: tinyfish source evidence, target file paths in this tree, why it's implementable now.
+- Every named path verified against the tree before being listed.
+- Findings written to `docs/plans/tinyfish-improvement-findings.md`.
+
+**TODO:**
+1. Confirm tinyfish availability (tool_search / manage_connections).
+2. Browse Umamusume JP + Global official news/sites via tinyfish for recently announced features/mechanics absent from Trainer Desk.
+3. Cross-reference each new feature against codebase (`app/`, `resources/js/`, `tests/`, `routes/`, `config/`) to find gaps.
+4. Propose implementable fullstack improvements with paths; verify each path via `git ls-files`.
+5. Write findings to `docs/plans/tinyfish-improvement-findings.md`.
+
+**Verification:** `git ls-files <path>` for every proposed file; `git status --short` clean of unintended changes; no code edited in this phase.
+
+**Risks:** tinyfish may not be reachable as an MCP connector (54 enabled, none connected per prior check); if unavailable, fall back to `web_search`/`web_extract` on official Umamusume news. Plan text names paths that are claims until verified — do not edit any file named in the plan until its path resolves under `git ls-files`.
+
+---
+
+## tinyfish-improvement-findings.md
+
+> **Consolidated 2026-11-14 (Round 29, owner-ordered).** Source: `docs/plans/tinyfish-improvement-findings.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/plans/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+
+## Tinyfish fullstack improvement findings
+
+### Source evidence
+
+tinyfish_agent Global news scan — https://umamusume.com/news/ — run b021a49c-f544-45f8-986d-e80a4dfb58e4, COMPLETED, 47 announcements (2026-10-20 → 2026-11-13). JP scan run b913b2f1… still RUNNING (no poll tool available); treat as pending follow-up. Evidence is the tinyfish stream JSON, not a summary I authored.
+
+### Cross-reference: announced feature → codebase state
+
+| Announced feature | Notice | Date | Codebase state | Code gap? |
+|---|---|---|---|---|
+| Champions Meeting: Aquarius Cup | 1147 | 2026-11-07 | Champions Meeting exists; new cup = race data, no code change | No |
+| Unity Cup Scouts & support cards | 1149 | 2026-11-05 | Unity Cup scenario exists in config/scenarios.php; scouts are gacha (cut, PRD §6) | No |
+| Racing Carnival / Sparks / Carnival Bonus | 1151 | 2026-11-05 | No code; "spark" hits are Legacy inheritance sparks, unrelated | Yes (large new mode) |
+| **Transfer Requests / Veteran** | **1157** | **2026-11-05** | **Veteran library mature (list/show/compare/save); zero transfer code** | **Yes** |
+| Title Missions expansion | 1168 | 2026-11-09 | No mission/title system | Yes (large new system) |
+| Capricorn Cup | 1135 | 2026-10-31 | Champions Meeting exists; new cup = race data | No |
+| New Year's Race Rally | 1133/1123 | 10/29 / 10/22 | Career Star Piece bonus events; could be config data | Minor |
+| New Beginnings Part 1/2 | 1122/1131 | 10/20 / 10/27 | New game mode | Yes (large) |
+
+Game mechanic (Global notice 1157, 2026-11-05): trainers transfer Veteran Umamusume meeting requested conditions for rewards (Star Pieces, Monies, Support Points); transferred Umamusume disappear permanently; requests update every 2 days; limited transfer counts.
+
+### Primary improvement: Transfer Requests for Veterans
+
+Why implementable: the Veteran domain already exists — `app/Models/Veteran.php`, actions `ListVeterans`/`ShowVeteran`/`RecordVeteran`, `VeteranController` (+ `SaveVeteranController`), Vue pages `Veterans/Index|Show|Compare`, routes `/veterans`, `/veterans/{veteran}`, `/veterans/compare`, `/training-runs/{run}/veteran`, 5 feature tests. Transfer Requests is a real announced mechanic with zero code present. Single-user compatible: a filed Veteran can be offered for transfer; completing it removes the Veteran from the library and banks a reward.
+
+#### Fullstack design (paths verified below)
+
+Backend (new files):
+- Migration `database/migrations/…_create_transfer_requests_table.php`: `id`, `veteran_id` FK→veterans (cascade), `status` (offered|completed|withdrawn), `reward_kind`, `reward_amount`, `offered_at`, `completed_at`.
+- `app/Models/TransferRequest.php` — model, `belongsTo(Veteran::class)`.
+- `app/Actions/OfferTransferRequest.php` — creates one offered request per Veteran.
+- `app/Actions/CompleteTransferRequest.php` — marks completed, removes the Veteran (disappears permanently), records reward.
+- `app/Http/Requests/TransferRequestRequest.php` — form request validation.
+- `app/Http/Controllers/TransferRequestController.php` — store (offer), complete, withdraw (destroy).
+- Routes in `routes/web.php`: POST `/veterans/{veteran}/transfer`, POST `/transfer-requests/{transfer}/complete`, DELETE `/transfer-requests/{transfer}`.
+- `Veteran` model: add `transferRequest()` relation + `transferable()` scope.
+
+Frontend (new files + edits):
+- `resources/js/pages/Veterans/TransferRequests.vue` — Inertia page: list offers, offer a Veteran, complete/withdraw.
+- Offer button on `resources/js/pages/Veterans/Show.vue` and row action on `Index.vue` (reuse `VeteranRow.vue` shape).
+
+Tests (new file):
+- `tests/Feature/TransferRequestTest.php` — offer, complete removes Veteran, withdraw, validation.
+
+#### Path verification
+
+Existing paths above resolved under `git ls-files` (session output). New file paths are proposals; no collision — repo-wide `TransferRequest` search returned docs only.
+
+#### Schema decision point
+
+New `transfer_requests` table vs columns on `veterans`. Separate table preferred (a request has its own lifecycle/timestamps/reward). Schema change → needs migration + Architect review before implementation.
+
+### Secondary candidates (larger, not recommended now)
+
+- Title Missions: new mission/title tracking system; no existing surface. Bigger build.
+- Racing Carnival: new limited-time mode + Sparks currency + event skills in Career. Large.
+- New Beginnings: new game mode. Large.
+
+### Follow-up
+
+Read JP tinyfish scan (run b913b2f1…) when a poll method is available; re-scan for JP-only features absent from the codebase.
+
+---
+
+## reference-sync-findings.md
+
+> **Consolidated 2026-11-14 (Round 29, owner-ordered).** Source: `docs/plans/reference-sync-findings.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/plans/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+
+## Reference-doc sync findings — docs/UMAMUSUME_REFERENCE.md vs codebase
+
+**Date:** 2026-11-14
+**Scope:** frontend (`resources/js/`), backend (`app/`, `routes/`, `lang/`), fullstack (`tests/`), browser specs
+**Method:** repo-wide search for reference-doc facts (news URLs, notice IDs, event/feature names, dates, policy names), then read each overlapping file. Plan mode: identify instances, verify consistency, mark stale for update. No unrequested changes.
+
+### Result: zero stale instances, zero edits required
+
+Every codebase instance of information also listed in `docs/UMAMUSUME_REFERENCE.md` is already consistent with the doc. No frontend/UI/UX file references any reference-doc live-ops fact, so nothing there needed updating.
+
+### Backend instances verified (all consistent)
+
+| File | Reference-doc fact | Code state | Verdict |
+|------|-------------------|------------|---------|
+| `app/Enums/IndependentTrainingPolicy.php` (§1.1.7, §1.6.8) | 3 policies: バランス重視 / スタミナ重視 / スプリント重視 | `Balanced` / `Stamina` / `Sprint`, labels `Balanced` / `Stamina focus` / `Sprint focus` | ✓ |
+| `app/Services/IndependentTraining/Lifecycle.php` (§1.1.7) | 50-min idle window; 3 fixed inputs (policy/rotation/priority skills); ≤10 priority skills; one-at-a-time; scheduled-tick completion (`CompleteIndependentTraining`), not browser timer | `DURATION_MINUTES = 50`; caps at `IndependentTrainingRun::MAX_PRIORITY_SKILLS` (10); `start()`/`complete()`/`abandon()`; `complete()` driven by scheduled command | ✓ |
+| `app/Services/IndependentTraining/Simulator.php` (§1.1.7) | ~1.3M fans/run; 1 winner's sash; growth-rate excluded from stats; hints = exactly the fixed priority list | `FANS = 1_300_000`; `SASHES = 1`; never reads `growth_rate`; returns priority list as skill hints | ✓ |
+| `app/Console/Commands/CompleteIndependentTraining.php` (§1.1.7) | Scheduled tick closes expired windows | Console command invoking `Lifecycle::complete()` / `abandon()` | ✓ |
+| `app/Enums/BuildPurpose.php` (§1.1.x build targets) | Build purpose names incl. Champions Meeting | `case ChampionsMeeting = 'ChampionsMeeting'` | ✓ |
+| `lang/en/uma.php:68` (`uma.build_purpose` map) | `[Global]` client term "Champions Meeting" | `'ChampionsMeeting' => 'Champions Meeting'` | ✓ |
+| `app/Models/Veteran.php` | Veteran = finished trainee kept in library (PRD FR-G, ADR-0020 §3) | Model with `training_run_id`, notes, tags; docblock ties Veteran to completed run | ✓ |
+| `app/Services/Legacy/VeteranRow.php` | Veteran library row shape | `from(Veteran): array`; labels run as the Veteran's facts | ✓ |
+| `app/Http/Controllers/DashboardController.php` | Veteran library recent list, capped at 3 | `recentVeterans` capped; `veteranCount` total | ✓ |
+| `app/Http/Controllers/VeteranController.php`, `LegacyController.php` | Veteran library browse/compare | `ListVeterans`, `ShowVeteran` actions; read-only projections | ✓ |
+
+### Fullstack / tests instances verified (all consistent)
+
+| File | Reference-doc fact | Code state | Verdict |
+|------|-------------------|------------|---------|
+| `tests/Feature/CareerBuildTargetTest.php:88` | `ChampionsMeeting` label `Champions Meeting` | `['value' => 'ChampionsMeeting', 'label' => 'Champions Meeting']` | ✓ |
+| `tests/Feature/DashboardTest.php` | Recent Veterans capped at 3 | asserts `rows` capped, `total` counted | ✓ |
+| `tests/browser/veterans.spec.ts` | Veteran library UI, empty state, rows | Playwright spec for library nav + rows | ✓ |
+| `tests/utils/file-career.ts`, `ura-completed-run.ts` | File career into Veteran library | helpers for test setup | ✓ |
+
+### Not present in code (docs-only facts — nothing to apply)
+
+These appear in `docs/UMAMUSUME_REFERENCE.md` but are not encoded anywhere in the codebase, so there is nothing to update:
+- News URLs `umamusume.jp/news/?t=game`, `umamusume.com/news/` — fetch-engine concern, not application code
+- Notice IDs (3437, 3453, 3476, 3479, 1050, 1058, 1064, 100087) — docs citations only
+- Champions Meeting dates (MILE 09-18→09-24, CLASSIC 09-29→10-05, Scorpio Cup 09-19) — docs citations only
+- Training Pass aggregation period (09-24→10-26), premium pass 350 paid Carats — docs citations only
+- Transfer Requests window (09-24→09-28), notice 1058 — docs citations only
+- Training scenarios count / 15th scenario announcement — docs citations only
+
+### Pre-existing uncommitted changes (not mine, left untouched)
+
+`.gitignore`, `KNOWN-ISSUES.md`, `SCREEN_SPEC.md`, `docs/framework-ui-ux/_audit-prompt.md`, `docs/research/ui-ux-application-context-brief.md`, `resources/js/pages/Career/TrainingDetail.vue`, `tests/browser/career-training-detail.spec.ts`, plus 2 untracked directories. Not part of this sync; no changes made.
+
+### Conclusion
+
+No code, frontend, UI/UX, backend, or test file needed updating. The Independent Training implementation already encodes the reference doc's facts (50-minute window, three policies, ten-priority-skill cap, scheduled completion, ~1.3M fans, one sash, growth-rate excluded), and the Champions Meeting label matches the `[Global]` client term. Nothing stale found.
+
+---
+
+## Transfer-Requests-plan.md
+
+> **Consolidated 2026-11-14 (Round 29, owner-ordered).** Source: `docs/proposals/Transfer-Requests-plan.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+
+## Transfer Requests — implementation plan
+
+**Source:** `docs/plans/tinyfish-improvement-findings.md` (tinyfish Global news scan run b021a49c, notice 1157, 2026-11-05). Announced mechanic: trainers transfer Veteran Umamusume meeting requested conditions for rewards (Star Pieces, Monies, Support Points); transferred Umamusume disappear permanently; requests update every 2 days; limited transfer counts.
+
+**Goal:** Add Transfer Requests to the Veteran library — offer a filed Veteran for transfer, complete a transfer (Veteran removed, reward banked), withdraw an offer.
+
+**Scope:** Backend (migration, model, actions, controller, form request, routes), frontend (Transfers page + offer buttons), feature tests. Additive only — no changes to existing Veteran read surfaces beyond new actions. Out of scope: reward fulfillment (Star Pieces/Monies/Support Points ledger doesn't exist — record reward on the request, do not invent a wallet), 2-day refresh scheduler, JP-only features.
+
+**Acceptance criteria:**
+- `php artisan migrate` creates `transfer_requests` table; `migrate:rollback` drops it.
+- Offer: POST creates offered request for an existing Veteran; duplicate offer blocked.
+- Complete: marks request completed, deletes the Veteran, records reward.
+- Withdraw: deletes an offered request; Veteran stays.
+- Validation via form request (422 on bad input).
+- New `TransferRequests.vue` Inertia page renders via GET `/veterans/{veteran}/transfer-requests`.
+- `pest` full suite green; `npm run typecheck` clean; `make lint` clean.
+
+**Verification:** every path below resolved under `git ls-files` before naming (edit targets) or confirmed new/no-collision (new files). Run `vendor\bin\pest`, `npm run typecheck`, `make lint` after implementation.
+
+**TODO:**
+1. Schema decision: separate `transfer_requests` table vs columns on `veterans`. Decision: separate table (request has own lifecycle/timestamps/reward). Requires migration — Architect review before implementation.
+2. Create migration `database/migrations/yyyy_mm_dd_hhmmss_create_transfer_requests_table.php`.
+3. Create `app/Models/TransferRequest.php` (`belongsTo(Veteran::class)`, status enum offered|completed|withdrawn).
+4. Edit `app/Models/Veteran.php`: add `transferRequest()` relation + `transferable()` scope.
+5. Create `app/Actions/OfferTransferRequest.php`, `app/Actions/CompleteTransferRequest.php`.
+6. Create `app/Http/Requests/TransferRequestRequest.php`.
+7. Create `app/Http/Controllers/TransferRequestController.php` (store/offer, complete, withdraw/destroy).
+8. Edit `routes/web.php`: POST `/veterans/{veteran}/transfer-requests`, POST `/transfer-requests/{transfer}/complete`, DELETE `/transfer-requests/{transfer}`.
+9. Create `resources/js/pages/Veterans/TransferRequests.vue` (Inertia page).
+10. Edit `resources/js/pages/Veterans/Show.vue` (offer button) and `resources/js/pages/Veterans/Index.vue` (row action).
+11. Create `tests/Feature/TransferRequestTest.php` (offer/complete/withdraw/validation).
+12. Run gates: pest full suite, npm run typecheck, make lint.
+
+**Path verification (resolved under git ls-files this session):**
+- Edit targets: `routes/web.php`, `app/Models/Veteran.php`, `resources/js/pages/Veterans/Show.vue`, `resources/js/pages/Veterans/Index.vue`, `resources/js/components/VeteranRow.vue` (unchanged, reference shape only).
+- Existing stable: `app/Http/Controllers/VeteranController.php`, `app/Actions/{ListVeterans,ShowVeteran,RecordVeteran}.php`, `resources/js/pages/Veterans/{Index,Show,Compare}.vue`, `resources/js/domain/veteranNote.ts`, 5 feature tests.
+- New files (no collision — repo-wide TransferRequest search = docs only): migration, `app/Models/TransferRequest.php`, `app/Actions/OfferTransferRequest.php`, `app/Actions/CompleteTransferRequest.php`, `app/Http/Requests/TransferRequestRequest.php`, `app/Http/Controllers/TransferRequestController.php`, `resources/js/pages/Veterans/TransferRequests.vue`, `tests/Feature/TransferRequestTest.php`.
+
+**Risks/dependencies:** migration is a schema change → Architect review before implementation; JP tinyfish scan (run b913b2f1…) still pending, may surface JP-only transfer variants; reward ledger absent — reward is recorded on request, not paid out.
