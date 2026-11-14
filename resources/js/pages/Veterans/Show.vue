@@ -118,7 +118,7 @@ const offerTransfer = (): void => {
                 <button
                     v-if="props.transferUrl"
                     type="button"
-                    :class="`${doorClass} bg-warning font-semibold text-on-warning`"
+                    :class="`${doorClass} border border-action font-medium text-ink-strong`"
                     @click="offerTransfer"
                 >
                     Offer for Transfer

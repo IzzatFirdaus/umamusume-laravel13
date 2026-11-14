@@ -106,7 +106,7 @@ const offerTransfer = (): void => {
                 <button
                     v-if="props.veteran.transfer_url"
                     type="button"
-                    class="inline-flex min-h-11 items-center rounded-md border border-warning bg-warning px-3 font-medium text-on-warning hover:bg-warning/90 transition-colors duration-150 ease-out"
+                    class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-3 font-medium text-ink transition-colors duration-150 ease-out"
                     @click="offerTransfer"
                 >
                     Offer for Transfer
