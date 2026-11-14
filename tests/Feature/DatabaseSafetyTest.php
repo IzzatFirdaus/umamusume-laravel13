@@ -11,7 +11,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 beforeEach(function () {
     Config::set('database.connections.sqlite.database', 'database/database.sqlite');
-    Config::set('database-safety.canonical', 'D:/Projects/umamusume-laravel13/database/database.sqlite');
+    Config::set('database-safety.canonical', database_path('database.sqlite'));
     Config::set('database-safety.isolated_roles', ['isolated', 'test', 'browser', 'scratch', 'e2']);
     Config::set('database-safety.destructive_commands', ['migrate:fresh', 'migrate:refresh', 'migrate:reset', 'migrate:rollback', 'db:wipe']);
 
@@ -79,7 +79,8 @@ it('refuses isolated role targeting canonical even with override env vars', func
     putenv('UMA_DATABASE_ROLE=test');
     putenv('UMA_ALLOW_CANONICAL_DESTRUCTIVE=true');
     putenv('UMA_OPERATOR_ACKNOWLEDGED=yes');
-    Config::set('database.connections.sqlite.database', 'D:/Projects/umamusume-laravel13/database/database.sqlite');
+    $canonicalDb = database_path('database.sqlite');
+    Config::set('database.connections.sqlite.database', $canonicalDb);
 
     $guard = app(DatabaseGuard::class);
 
@@ -97,7 +98,8 @@ it('refuses browser role targeting canonical even with override env vars', funct
     putenv('UMA_DATABASE_ROLE=browser');
     putenv('UMA_ALLOW_CANONICAL_DESTRUCTIVE=true');
     putenv('UMA_OPERATOR_ACKNOWLEDGED=yes');
-    Config::set('database.connections.sqlite.database', 'D:/Projects/umamusume-laravel13/database/database.sqlite');
+    $canonicalDb = database_path('database.sqlite');
+    Config::set('database.connections.sqlite.database', $canonicalDb);
 
     $guard = app(DatabaseGuard::class);
 

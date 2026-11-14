@@ -130,7 +130,7 @@ class DatabaseGuard
 
     public function isAbsolute(string $path): bool
     {
-        return str_starts_with($path, '/') || preg_match('/^[A-Za-z]:[\\/]/', $path) === 1;
+        return str_starts_with($path, '/') || preg_match('#^[A-Za-z]:[\\\\/]#', $path) === 1;
     }
 
     public function allowsCanonicalDestructive(): bool
