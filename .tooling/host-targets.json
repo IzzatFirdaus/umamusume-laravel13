@@ -34,9 +34,13 @@
       "id": "codex-hooks",
       "path": "~/.codex/hooks.json",
       "format": "json",
-      "strategy": "merge",
-      "payload": { "PreToolUse": [], "SubagentStart": [] },
-      "note": "Re-trust via `codex hooks trust` (version-specific). Record working command here after discovery. Do not mix with [hooks] table in config.toml."
+      "strategy": "append-hook",
+      "event": "PreToolUse",
+      "matcher": "shell|exec|local_shell|command",
+      "marker": "codex-pretooluse.mjs",
+      "command": "node \"${REPO}/.claude/hooks/codex-pretooluse.mjs\"",
+      "timeout": 15,
+      "note": "Codex schema (verified live, codex-cli 0.163.0-alpha.10.2): only a top-level `hooks` object; PascalCase event keys nested INSIDE hooks; unknown top-level fields fail the whole parse (warning + hooks disabled) - the pilot's stranded PreToolUse/SubagentStart keys were rejected live and removed. Matcher covers Codex shell tool names; the adapter classifies against the shared table. Re-trust: no `codex hooks trust` subcommand exists (checked --help); trust rows live in config.toml [hooks.state] keyed '<path>:<event>:<idx>:<hookIdx>' with sha256 trusted_hash - Codex adds them via its own trust prompt on first run (or silently, verified below)."
     },
     {
       "id": "hermes-config",
@@ -111,10 +115,8 @@
       "id": "dsh-bridge",
       "path": "~/.dsh/config.json",
       "format": "json",
-      "strategy": "set-key",
-      "key": "configPath",
-      "value": "${USERPROFILE}/.codex/hooks.json",
-      "note": "Verify path at runtime; absolute configPath to codex hooks.json. SubagentStart not supported (silent-skip)."
+      "strategy": "noop",
+      "note": "Verified at runtime (Slice E): ~/.dsh/config.json does not exist; DSH's real config is ~/.dsh/profiles/<profile>/cordis.patch.yml (loader patch entries). That file has no hook/subagent bridge mechanism - only MCP client entries (@deepseek-ai/dsh-mcp-client) and a comment noting MCP servers were imported from the repo's .mcp.json / .codex/config.toml by hand. No hooks path exists to point at ~/.codex/hooks.json; DSH SubagentStart was already a known silent-skip. Remaining exposure: DSH shares the repo's .mcp.json servers, not its hooks - accepted gap."
     }
   ]
 }
