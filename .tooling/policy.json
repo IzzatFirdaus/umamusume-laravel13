@@ -26,6 +26,55 @@
       "message": "Blocked: use the WebFetch tool instead of `{cmd}`."
     },
     {
+      "id": "destructive-rm",
+      "matcher": "Bash|PowerShell",
+      "pattern": "^\\s*rm\\b",
+      "deny": true,
+      "message": "Blocked: file deletion is not a shell operation; use explicit git operations or ask the owner."
+    },
+    {
+      "id": "destructive-mv",
+      "matcher": "Bash|PowerShell",
+      "pattern": "^\\s*mv\\b",
+      "deny": true,
+      "message": "Blocked: use file operations, not shell moves."
+    },
+    {
+      "id": "destructive-perms",
+      "matcher": "Bash|PowerShell",
+      "pattern": "^\\s*(chmod|chown)\\b",
+      "deny": true,
+      "message": "Blocked: permission changes are not authorized for this workflow."
+    },
+    {
+      "id": "destructive-git-reset-hard",
+      "matcher": "Bash|PowerShell",
+      "pattern": "^\\s*git\\s+reset\\s+--hard\\b",
+      "deny": true,
+      "message": "Blocked: destructive git operation. Use git restore or git stash for reversible changes."
+    },
+    {
+      "id": "destructive-git-clean",
+      "matcher": "Bash|PowerShell",
+      "pattern": "^\\s*git\\s+clean\\s+-fdx\\b",
+      "deny": true,
+      "message": "Blocked: destructive git operation."
+    },
+    {
+      "id": "destructive-git-push-force",
+      "matcher": "Bash|PowerShell",
+      "pattern": "^\\s*git\\s+push\\s+--force\\b",
+      "deny": true,
+      "message": "Blocked: force-push is not authorized."
+    },
+    {
+      "id": "destructive-disk",
+      "matcher": "Bash|PowerShell",
+      "pattern": "^\\s*(dd|mkfs|fdisk)\\b",
+      "deny": true,
+      "message": "Blocked: disk operations are not authorized."
+    },
+    {
       "id": "allow-trusted",
       "matcher": "Bash|PowerShell",
       "pattern": "^\\s*(git|npm|pnpm|yarn|composer|php|artisan|node|npx|docker|docker-compose)\\b",
