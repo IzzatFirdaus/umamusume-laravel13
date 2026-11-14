@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AppLayout from '../../../layouts/AppLayout.vue';
 import PageHeader from '../../../components/ui/PageHeader.vue';
+import StatBadge from '../../../components/StatBadge.vue';
 import { BaseButton, BaseCheckbox, BaseInput, BaseSelect, BaseTextarea } from '../../../components/Form';
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import { computed, reactive } from 'vue';
@@ -32,6 +33,9 @@ const props = defineProps<{
 }>();
 
 type StateField = 'speed' | 'stamina' | 'power' | 'guts' | 'wit' | 'energy' | 'fans' | 'skill_points';
+
+/** The five stat keys StatBadge accepts — the subset of StateField that names a discipline. */
+type StatBadgeStat = 'speed' | 'stamina' | 'power' | 'guts' | 'wit';
 
 const STAT_FIELDS: { key: StateField; label: string }[] = [
     { key: 'speed', label: 'Speed' },
@@ -250,6 +254,11 @@ const positionErrors = computed<string[]>(() => {
                          name the whole block ("Speed I don't know this value") and left the checkbox
                          unnamed. Each control now owns its label text. -->
                     <div v-for="field in STAT_FIELDS" :key="field.key" class="flex flex-col gap-1">
+                        <!-- The badge names the stat visually; BaseInput's own :label keeps the
+                             accessible name. Not required: these fields have the "I don't know"
+                             escape, so no asterisk here. The cast narrows StateField to the five
+                             stat keys — the loop iterates STAT_FIELDS, whose keys are exactly those. -->
+                        <StatBadge :stat="field.key as StatBadgeStat" variant="plain" />
                         <BaseInput
                             :id="`snapshot-${field.key}`"
                             v-model.number="form[field.key]"

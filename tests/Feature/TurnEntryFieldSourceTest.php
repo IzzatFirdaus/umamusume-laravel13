@@ -57,9 +57,14 @@ it('has the training decision read the shared list instead of declaring its own'
 it('labels a stat field with the bare word and keeps the required marker separate', function (): void {
     $page = (string) file_get_contents(base_path('resources/js/pages/Career/TrainingDetail.vue'));
 
+    // 2026-11-14 stat Slice B: the bare-word label is now the shared `StatBadge` (the badge's
+    // LABELS map prints the same capitalised word the domain list carries), with the required
+    // marker in its own sibling span. The two assertions below pin the new shape: badge driven by
+    // the loop's field, marker separate from it.
     expect($page)
         ->not->toContain('{{ field.label }} total')
-        ->toContain('<span class="text-ink-muted">{{ field.label }} *</span>')
+        ->toContain('<StatBadge :stat="field.name" variant="plain" />')
+        ->toContain('<span class="text-ink-muted">*</span>')
         // One spelling for the optional field, with `sp` kept as the field name.
         ->toContain("{ name: 'sp', label: 'Skill Points', max: null }")
         // Energy is a three-state control since `1ec92ab` (exact / band / unknown), reading the

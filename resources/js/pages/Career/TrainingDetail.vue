@@ -38,6 +38,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
 import DisciplineComparison from '../../components/career/DisciplineComparison.vue';
+import StatBadge from '../../components/StatBadge.vue';
 import { undoTurnLabel } from '../../lib/career/turnDisplay';
 import { TURN_ENTRY_ENERGY_BANDS, TURN_ENTRY_ENERGY_STATES, TURN_ENTRY_FACILITY_FIELDS, TURN_ENTRY_PREVIEW_FIELDS, TURN_ENTRY_STAT_FIELDS as statFields } from '../../domain/turnEntryFields';
 
@@ -964,7 +965,10 @@ const energyBandNote = computed(() =>
                         </span>
                     </label>
                     <label v-for="field in statFields" :key="field.name" class="flex flex-col gap-1">
-                        <span class="text-ink-muted">{{ field.label }} *</span>
+                        <span class="flex items-center gap-2">
+                            <StatBadge :stat="field.name" variant="plain" />
+                            <span class="text-ink-muted">*</span>
+                        </span>
                         <BaseInput
                             :id="'turn-' + field.name"
                             v-model="form[field.name]"

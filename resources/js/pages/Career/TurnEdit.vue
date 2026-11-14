@@ -15,6 +15,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import BaseInput from '../../components/Form/BaseInput.vue';
+import StatBadge from '../../components/StatBadge.vue';
 import BaseSelect from '../../components/Form/BaseSelect.vue';
 import LinkButton from '../../components/Form/LinkButton.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
@@ -172,11 +173,26 @@ const submit = (): void => {
 
             <form class="mt-3 grid grid-cols-2 gap-3 text-sm @4xl:grid-cols-3" @submit.prevent="submit">
                 <BaseInput id="turn" v-model="form.turn" type="number" label="Turn" min="1" />
-                <BaseInput id="speed" v-model="form.speed" type="number" label="Speed" min="0" />
-                <BaseInput id="stamina" v-model="form.stamina" type="number" label="Stamina" min="0" />
-                <BaseInput id="power" v-model="form.power" type="number" label="Power" min="0" />
-                <BaseInput id="guts" v-model="form.guts" type="number" label="Guts" min="0" />
-                <BaseInput id="wit" v-model="form.wit" type="number" label="Wit" min="0" />
+                <div class="flex flex-col gap-1">
+                    <StatBadge stat="speed" variant="plain" />
+                    <BaseInput id="speed" v-model="form.speed" type="number" label="Speed" min="0" />
+                </div>
+                <div class="flex flex-col gap-1">
+                    <StatBadge stat="stamina" variant="plain" />
+                    <BaseInput id="stamina" v-model="form.stamina" type="number" label="Stamina" min="0" />
+                </div>
+                <div class="flex flex-col gap-1">
+                    <StatBadge stat="power" variant="plain" />
+                    <BaseInput id="power" v-model="form.power" type="number" label="Power" min="0" />
+                </div>
+                <div class="flex flex-col gap-1">
+                    <StatBadge stat="guts" variant="plain" />
+                    <BaseInput id="guts" v-model="form.guts" type="number" label="Guts" min="0" />
+                </div>
+                <div class="flex flex-col gap-1">
+                    <StatBadge stat="wit" variant="plain" />
+                    <BaseInput id="wit" v-model="form.wit" type="number" label="Wit" min="0" />
+                </div>
                 <BaseInput id="sp" v-model="form.sp" type="number" label="Skill points" min="0" />
                 <BaseInput id="energy" v-model="form.energy" type="number" label="Energy" min="0" />
                 <BaseSelect
