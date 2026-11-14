@@ -49,15 +49,28 @@ Homestead.yaml
 # AI agent tooling (personal configs and installed skill payloads)
 # Directories kept ignored (tool/vendor installs, not project state):
 .agents/
+.grok/
 .kilo/*
 !.kilo/kilo.jsonc
 .kilocode/
 .cursor/
+.qoder/*
+!.qoder/settings.json
 .claude/*
 !.claude/settings.json
 !.claude/hooks/
 !.claude/agents/
 !.claude/skills/
+# Host-local skill payloads kept untracked (only the trigger-contract skills
+# listed in the plan are tracked under .claude/skills/):
+.claude/skills/creating-models/
+.claude/skills/deploying-to-cloud/
+.claude/skills/fetch-pipeline/
+.claude/skills/inertia-vue-development/
+.claude/skills/infer-conventions/
+.claude/skills/playwright-cli/
+.claude/skills/running-tests/
+.claude/skills/testing-best-practices/
 # Local-only agent config / state (never committed):
 /.mcp.local.json
 /.tooling/logs/
