@@ -48,10 +48,31 @@ jobs:
             ${{ runner.os }}-composer-
 
       - name: Prepare environment
-        shell: pwsh
+        shell: bash
         run: |
-          Copy-Item .env.example .env
-          php artisan key:generate --force --no-interaction
+          set -euo pipefail
+          if [ -f .env ]; then rm -f .env; fi
+          if [ -f .env.example ]; then
+            cp .env.example .env
+            echo "Created .env from .env.example"
+          else
+            cat > .env <<'EOF'
+APP_NAME="Trainer Desk"
+APP_ENV=production
+APP_KEY=
+APP_DEBUG=false
+APP_URL=http://localhost
+DB_CONNECTION=sqlite
+DB_DATABASE=database/database.sqlite
+CACHE_STORE=file
+SESSION_DRIVER=file
+QUEUE_CONNECTION=sync
+NATIVEPHP_UPDATER_ENABLED=true
+NATIVEPHP_NSIS_DELETE_APP_DATA=false
+EOF
+            echo "Created fallback .env (no .env.example in repo)"
+          fi
+          php artisan key:generate --no-interaction --force
 
       - name: Install Composer dependencies
         run: composer install --prefer-dist --optimize-autoloader --no-interaction
