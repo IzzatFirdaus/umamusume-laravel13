@@ -1,0 +1,133 @@
+name: NativePHP Windows Build
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+    branches:
+      - worktree/cherry-pick
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Remove ELECTRON_RUN_AS_NODE if present
+        shell: pwsh
+        run: Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue
+
+      - name: Setup PHP 8.5
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          extensions: zip, pdo_sqlite, mbstring, openssl, curl, fileinfo, tokenizer, xml, ctype, json, bcmath, intl
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~\AppData\Local\Composer\Cache
+            vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Prepare environment file
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f .env ]; then rm -f .env; fi
+          if [ -f .env.example ]; then
+            cp .env.example .env
+            echo "Created .env from .env.example"
+          else
+            echo 'APP_NAME="Trainer Desk"' > .env
+            echo 'APP_ENV=production' >> .env
+            echo 'APP_KEY=' >> .env
+            echo 'APP_DEBUG=false' >> .env
+            echo 'APP_URL=http://localhost' >> .env
+            echo '' >> .env
+            echo 'DB_CONNECTION=sqlite' >> .env
+            echo 'DB_DATABASE=database/database.sqlite' >> .env
+            echo '' >> .env
+            echo 'CACHE_STORE=file' >> .env
+            echo 'SESSION_DRIVER=file' >> .env
+            echo 'QUEUE_CONNECTION=sync' >> .env
+            echo '' >> .env
+            echo 'NATIVEPHP_UPDATER_ENABLED=true' >> .env
+            echo 'NATIVEPHP_NSIS_DELETE_APP_DATA=false' >> .env
+            echo "Created fallback .env (no .env.example in repo)"
+          fi
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --optimize-autoloader --no-interaction
+
+      - name: Generate application key
+        run: php artisan key:generate --no-interaction --force
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build
+
+      - name: Pre-build environment guard
+        run: composer run pre-native-build --no-interaction
+
+      - name: Install NSIS (Nullsoft Scriptable Install System)
+        shell: pwsh
+        run: choco install nsis -y --no-progress
+
+      - name: Build NativePHP electron plugin
+        working-directory: nativephp/electron
+        run: |
+          npm ci
+          npm run plugin:build
+
+      - name: Build NativePHP Windows installer
+        run: php artisan native:build win x64 --no-interaction
+
+      - name: List dist contents
+        shell: pwsh
+        run: |
+          $dist = Join-Path $PWD 'nativephp/electron/dist'
+          if (Test-Path $dist) {
+            Get-ChildItem $dist -Recurse | Select-Object FullName, Length, LastWriteTime | Format-Table -AutoSize
+          } else {
+            Write-Warning "Dist directory not found: $dist"
+          }
+
+      - name: Upload Windows installer artifacts
+        uses: actions/upload-artifact@v6
+        with:
+          name: nativephp-windows-installer
+          path: |
+            nativephp/electron/dist/**/*.exe
+            nativephp/electron/dist/**/*.7z
+            nativephp/electron/dist/**/*.blockmap
+          if-no-files-found: error
+
+      - name: Upload failure logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: nativephp-windows-failure-logs
+          path: |
+            nativephp/electron/dist/**/*.log
+            storage/logs/*.log
+          if-no-files-found: ignore
