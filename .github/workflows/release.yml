@@ -1,0 +1,154 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-release:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Remove ELECTRON_RUN_AS_NODE if present
+        shell: pwsh
+        run: Remove-Item Env:ELECTRON_RUN_AS_NODE -ErrorAction SilentlyContinue
+
+      - name: Setup PHP 8.5
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          extensions: zip, pdo_sqlite, mbstring, openssl, curl, fileinfo, tokenizer, xml, ctype, json, bcmath, intl
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Cache Composer dependencies
+        uses: actions/cache@v5
+        with:
+          path: |
+            ~\AppData\Local\Composer\Cache
+            vendor
+          key: ${{ runner.os }}-composer-${{ hashFiles('composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-composer-
+
+      - name: Prepare environment file
+        shell: bash
+        run: |
+          set -euo pipefail
+          cp .env.example .env
+          sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env
+          sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
+          echo "Created .env from .env.example (release settings)"
+
+      - name: Install Composer dependencies
+        run: composer install --prefer-dist --optimize-autoloader --no-interaction
+
+      - name: Generate application key
+        run: php artisan key:generate --no-interaction --force
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Build frontend assets
+        run: npm run build
+
+      - name: Pre-build environment guard
+        run: composer run pre-native-build --no-interaction
+
+      - name: Install NSIS (Nullsoft Scriptable Install System)
+        shell: pwsh
+        run: choco install nsis -y --no-progress
+
+      - name: Build NativePHP electron plugin
+        working-directory: nativephp/electron
+        run: |
+          npm ci
+          npm run plugin:build
+
+      - name: Build NativePHP Windows installer
+        run: php artisan native:build win x64 --no-interaction
+        env:
+          # Tag-derived version on release pushes; a CI run id on manual dispatch.
+          # GITHUB_TOKEN is intentionally NOT set here: NativePHP serializes
+          # env('GITHUB_TOKEN') into NATIVEPHP_UPDATER_CONFIG, which
+          # electron-builder embeds into the built app. The token must stay
+          # restricted to the GitHub Release step below, where it is never
+          # embedded in the distributed application.
+          NATIVEPHP_APP_VERSION: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && github.ref_name || format('manual-{0}', github.run_id) }}
+          NATIVEPHP_UPDATER_ENABLED: 'true'
+          NATIVEPHP_UPDATER_PROVIDER: 'github'
+          GITHUB_OWNER: ${{ github.repository_owner }}
+          GITHUB_REPO: ${{ github.event.repository.name }}
+          GITHUB_RELEASE_TYPE: 'release'
+          GITHUB_CHANNEL: 'latest'
+
+      - name: Validate Windows installer exists
+        id: validate
+        shell: pwsh
+        run: |
+          $dist = Join-Path $PWD 'nativephp/electron/dist'
+          $installers = Get-ChildItem -Path "$dist/*.exe" -ErrorAction SilentlyContinue
+          if (-not $installers) {
+            Write-Error "No Windows installer (.exe) found in $dist — NativePHP build did not produce an installer"
+            exit 1
+          }
+          $exe = $installers | Select-Object -First 1
+          if ($exe.Length -eq 0) {
+            Write-Error "Installer $($exe.FullName) is empty — aborting release"
+            exit 1
+          }
+          Write-Host "Installer validated: $($exe.Name) ($($exe.Length) bytes)"
+          echo "installer_name=$($exe.Name)" >> $env:GITHUB_OUTPUT
+          echo "installer_path=$($exe.FullName)" >> $env:GITHUB_OUTPUT
+
+      - name: Generate SHA-256
+        id: sha
+        shell: pwsh
+        run: |
+          $exe = Get-Item -Path "${{ steps.validate.outputs.installer_path }}"
+          $hash = (Get-FileHash $exe.FullName -Algorithm SHA256).Hash.ToLower()
+          echo "hash=$hash" >> $env:GITHUB_OUTPUT
+
+      - name: Generate latest.json (release tags only)
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        shell: pwsh
+        run: |
+          $json = @{
+            version = "${{ github.ref_name }}"
+            url = "https://github.com/${{ github.repository }}/releases/download/${{ github.ref_name }}/${{ steps.validate.outputs.installer_name }}"
+            sha256 = "${{ steps.sha.outputs.hash }}"
+            published_at = (Get-Date -Format "yyyy-MM-ddTHH:mm:ssZ")
+          } | ConvertTo-Json
+          Set-Content -Path "latest.json" -Value $json
+          Get-Content "latest.json"
+
+      - name: Upload Windows installer as artifact (manual verification)
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@v6
+        with:
+          name: nativephp-windows-installer-manual
+          path: nativephp/electron/dist/*.exe
+          if-no-files-found: error
+
+      - name: Create GitHub Release (release tags only)
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v3
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          files: |
+            nativephp/electron/dist/*.exe
+            latest.json
+          generate_release_notes: true
