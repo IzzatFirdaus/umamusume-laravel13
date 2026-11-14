@@ -209,6 +209,17 @@ and the corpus-transcription caveat above holds. Replacing those two stubs is th
 > and `rule` uses the reference's muted slate text colour; both are recorded in `app.css`. The
 > tokens that sit ON a surface keep a per-theme step because no single hex clears 4.5:1 on both
 > `#FFFEFF` and `#303032`; the list is in the `app.css` dark-block note.
+>
+> *Dated erratum 2026-11-14 (stat-colour Slice A, two corrections to this block): (1) the
+> `HLF_reference/` paths above now live under `docs/archive/HLF_reference/` (15 light + 25
+> `dark_mode/` captures, all tracked); `docs/design-research/HLF_reference/` does not exist, and
+> the sampling citations that name these files (e.g. `app.css:161`) resolve to the archive tree.
+> (2) This block's dark column was superseded the same day it was recorded: `9fa70510`
+> (2026-10-25, "definitive synthesized light and dark palette") replaced it with the mockups'
+> charcoal, and the current dark block (`app.css:484-493`) matches that synthesis comment
+> (`app.css:475-482`) value-for-value — not this block's dark column. The light column was
+> superseded by the same commit and later by `bc102252`. The block stands as decision history;
+> the current values are in `resources/css/app.css`.*
 
 > **2026-10-24 — third theme: eva01.** A standalone palette, selectable from `/preferences`'
 > Theme control as "Evangelion Unit-01" and applied by `html[data-theme='eva01']`: page
@@ -1245,6 +1256,16 @@ than re-reads.
   intent rather than retired: `[40rem]` (4 sites) as a `--measure-md` token candidate,
   `[minmax(0,Nrem)_minmax(0,1fr)]` (6 sites) as a `--grid-sidebar-main` candidate, and `[26rem]` as a
   sibling of the measure. The other 12 are one-offs (viewport heights, layout fixes, a vendor selector).
+
+*Dated update 2026-11-14 (stat Slice A + C1a; the 2026-10-27 note above is preserved as written).*
+
+- **The token count is now stated as 102 and the pin is reconciled to the stylesheet.** Stat Slice A
+  minted seven `--color-stat-*-ink` text-tier tokens, so `DesignTokensTest.php` asserts
+  `toHaveCount(102)` in both the static count and the browser gate, and `DesignDocEnforcementTest`
+  holds this sentence to those two pins (the fourth ratchet, after 59→81→89→95). The C1a ink ruling
+  (the 2026-10-31 grey-parity report's declined option 3) also moved the light ink family to the
+  HFW/corpus warm-brown set in the same pass; all 24 ink-family contract pairs were recomputed and
+  the browser gate holds.
 
 *Dated update 2026-10-27 (mechanics sync; every dated read above is preserved as written).*
 

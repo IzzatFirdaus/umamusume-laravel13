@@ -132,6 +132,14 @@
      * that fall under 3:1 on white (power, wit, pal, group) are darkened along the same hue to
      * #E2770B / #19A772 / #CA8417 / #23A85B. Idle/disabled/muted/faint keep their validated
      * values because the mockups supply no distinct tier for them.
+     *
+     * 2026-11-14 (C1a ruling, stat-colour plan Phase 3): the light ink family moves to the
+     * HFW/corpus warm-brown set -- ink #6A5641, strong #482720, muted #6A6A75, faint #988F87 --
+     * the measured game ink language (corpus tokens.json anchors) and the HFW's own ramp. All
+     * 24 ink-family contract pairs were recomputed at the change (worst: ink-muted on sunken
+     * 4.57:1, on the 4.5 floor) and the G-18 browser gate holds. The 2026-10-31 grey-parity
+     * report GREY-SCALE-APP-VS-HFW.md recorded exactly this as its declined option 3. Dark and
+     * eva01 ink ramps are untouched (per-theme values).
      */
     --color-page: #F4F4FF;
     --color-panel: #FBFBFD;
@@ -139,9 +147,9 @@
     --color-sunken: #EDEDF1;
     --color-idle: #E2E4F0;
     --color-disabled: #D1D3E0;
-    --color-ink: #322A2F;
-    --color-ink-strong: #000000;
-    --color-ink-muted: #625D7D;
+    --color-ink: #6A5641;
+    --color-ink-strong: #482720;
+    --color-ink-muted: #6A6A75;
     /* ink-faint is a non-text token: borders, hairline ticks, disabled glyphs.
        Measured as body-size text it lands at 3.18 on white and 2.58 on the sunken
        surface, so it must never carry a label. The accessible subordinate tier is
@@ -149,7 +157,7 @@
        2026-10-24 (Umamusume brand palette): #8C8A9A, the brand's soft purple-grey;
        also used as the light `rule` because the given hairline #D1D3E0 measures
        1.41:1 on the page, under G-18's 3:1 card boundary. */
-    --color-ink-faint: #8C8A9A;
+    --color-ink-faint: #988F87;
     /* Hairline. 2026-10-15 (Phase 11R.2): the light step was #6E6C73, the same value the dark
        override carries, so a card edge and a status-pill border read as a dark-mode line on the
        light field. Lightened to the palest grey that still clears G-18's `rule on page` 3:1 for a
@@ -257,6 +265,20 @@ Light #D7D8E0 measures 1.25:1 on page, which is why it never carries a card edge
     --color-stat-power-bg: #FAF0E6;
     --color-stat-guts-bg: #F0E6FA;
     --color-stat-wit-bg: #E6FAEC;
+
+    /* Stat text tier (2026-11-14, stat-colour Slice A): the seven stats as TEXT on the tint
+       fills and the panel. Each value is its game base hex mixed toward black to the lightest
+       step that clears 4.5:1 on every surface it may sit on -- panel #FBFBFD, its own
+       --color-tint-* fill and its own --color-stat-*-bg fill (computed 4.53-5.33:1; the five
+       tint pairs are the binding rows and are in the G-18 contract at
+       DesignTokensTest::g18ContractPairs). The boundary tier above stays the icon/border tier. */
+    --color-stat-speed-ink: #166EAF;
+    --color-stat-stamina-ink: #AD3E3B;
+    --color-stat-power-ink: #A15B10;
+    --color-stat-guts-ink: #AC3B63;
+    --color-stat-wit-ink: #0C784F;
+    --color-stat-pal-ink: #946300;
+    --color-stat-group-ink: #498219;
 
     /*
      * Mood tiers, as the client paints them (research §3.1, §6.17). `GREAT` and `GOOD` are
@@ -529,12 +551,26 @@ html[data-theme='dark'] {
     --color-stat-pal: #F9A31C;
     --color-stat-group: #26B864;
     /* Dark stat-block backgrounds (2026-10-25 synthesis): deep tinted variants behind the
-       bright SVG stat icons. */
+       bright SVG stat icons. (Provenance note, 2026-11-14 correction pass: this dark ramp is the
+       mockups' charcoal synthesis, per the block comment above -- NOT the HLF reference, whose
+       dark column was the superseded 2026-10-24 palette that 9fa70510 replaced the same day.
+       Erratum recorded in DESIGN.md's 2026-10-24 second-ruling block.) */
     --color-stat-speed-bg: #1A2636;
     --color-stat-stamina-bg: #331A26;
     --color-stat-power-bg: #33261A;
     --color-stat-guts-bg: #261A33;
     --color-stat-wit-bg: #1A3322;
+    /* Dark stat text tier (2026-11-14 stat Slice A): per-theme foreground step, the same
+       pattern --color-sp-ink uses. The dark values are the dark block's own bright stat hues,
+       which clear 4.5:1 on their tint fills (4.72-6.16:1 computed); the light block's darkened
+       -ink values would fail here (3.15:1 for speed, caught by the G-18 browser gate). */
+    --color-stat-speed-ink: #2F94EE;
+    --color-stat-stamina-ink: #F05B4F;
+    --color-stat-power-ink: #F7820C;
+    --color-stat-guts-ink: #F45E96;
+    --color-stat-wit-ink: #1AAE77;
+    --color-stat-pal-ink: #F9A31C;
+    --color-stat-group-ink: #26B864;
 
     --color-up: #B89825;
     --color-down: #97D1F9;
@@ -665,6 +701,17 @@ html[data-theme='eva01'] {
     --color-stat-wit: #8CC78A;
     --color-stat-pal: #AEBB84;
     --color-stat-group: #86C996;
+    /* eva01 stat text tier (2026-11-14 stat Slice A): the lifted per-theme values carry here
+       too (6.26-8.76:1 on eva01's tint fills and panel, computed); the light -ink darkened set
+       is unreadable on this theme's near-black purples, the same reason the stat marks above
+       carry [dark] values (see the block note). */
+    --color-stat-speed-ink: #7FA8E8;
+    --color-stat-stamina-ink: #F08A96;
+    --color-stat-power-ink: #C99A6B;
+    --color-stat-guts-ink: #F08BB4;
+    --color-stat-wit-ink: #8CC78A;
+    --color-stat-pal-ink: #AEBB84;
+    --color-stat-group-ink: #86C996;
 
     --color-up: #B89825;
     --color-down: #97D1F9;

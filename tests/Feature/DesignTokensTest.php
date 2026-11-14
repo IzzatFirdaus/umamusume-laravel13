@@ -277,12 +277,16 @@ it('counts every colour token the static theme declares', function (): void {
     // an undeclared token, and a stale pin defeats it.
     $tokens = themeStaticColorTokens();
 
-    expect($tokens)->toHaveCount(95)
+    // 2026-11-14 stat Slice A: +7 --color-stat-*-ink text-tier tokens (95 -> 102), each minted
+    // at the lightest black-mix of its game base that clears 4.5:1 on panel and both tint fills.
+    expect($tokens)->toHaveCount(102)
         ->and($tokens)->toContain('--color-goal')
         ->and($tokens)->toContain('--color-goal-line')
         ->and($tokens)->toContain('--color-on-risk')
         ->and($tokens)->toContain('--color-stat-speed')
-        ->and($tokens)->toContain('--color-stat-group');
+        ->and($tokens)->toContain('--color-stat-group')
+        ->and($tokens)->toContain('--color-stat-speed-ink')
+        ->and($tokens)->toContain('--color-stat-group-ink');
 });
 
 /*
@@ -472,6 +476,20 @@ function g18ContractPairs(): array
         'stat-pal on raised' => ['foreground' => 'stat-pal', 'background' => 'raised', 'type' => 'boundary'],
         'stat-group on raised' => ['foreground' => 'stat-group', 'background' => 'raised', 'type' => 'boundary'],
 
+        // 2026-11-14 stat Slice A: the stat text tier on its own tint fills. Each
+        // --color-stat-*-ink was minted at the lightest black-mix of its game base
+        // hex that clears 4.5:1 on panel, its --color-tint-* fill and its
+        // --color-stat-*-bg fill (computed 4.53-5.33:1 at minting); the five tint
+        // rows here are the binding pairs. pal/group have no tint token, so their
+        // rows measure on the panel.
+        'stat-speed-ink on tint-speed' => ['foreground' => 'stat-speed-ink', 'background' => 'tint-speed', 'type' => 'text'],
+        'stat-stamina-ink on tint-stamina' => ['foreground' => 'stat-stamina-ink', 'background' => 'tint-stamina', 'type' => 'text'],
+        'stat-power-ink on tint-power' => ['foreground' => 'stat-power-ink', 'background' => 'tint-power', 'type' => 'text'],
+        'stat-guts-ink on tint-guts' => ['foreground' => 'stat-guts-ink', 'background' => 'tint-guts', 'type' => 'text'],
+        'stat-wit-ink on tint-wit' => ['foreground' => 'stat-wit-ink', 'background' => 'tint-wit', 'type' => 'text'],
+        'stat-pal-ink on panel' => ['foreground' => 'stat-pal-ink', 'background' => 'panel', 'type' => 'text'],
+        'stat-group-ink on panel' => ['foreground' => 'stat-group-ink', 'background' => 'panel', 'type' => 'text'],
+
         // Track 2-D brand and status additions (Phase 11.16). Each new role owes a
         // measured G-18 pair; values are the ruling's starting draft and these rows
         // are the gate. Failures here mean a token needs stepping, never that a row
@@ -490,6 +508,7 @@ function g18ContractPairs(): array
         // that is neither text nor boundary. It owes no WCAG threshold but must not
         // vanish against the chrome it sits on.
         'brand-accent on brand-chrome' => ['foreground' => 'brand-accent', 'background' => 'brand-chrome', 'type' => 'hairline'],
+
     ];
 }
 
@@ -649,8 +668,9 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         $names = themeStaticColorTokens();
 
         // Same reconciled pin as the static count above (2026-10-27: 94 -> 95, measured against the
-        // stylesheet, not against the tree's history; the two rows must not disagree).
-        expect($names)->toHaveCount(95);
+        // stylesheet, not against the tree's history; the two rows must not disagree.
+        // 2026-11-14 stat Slice A: +7 --color-stat-*-ink tokens, 95 -> 102 in both rows).
+        expect($names)->toHaveCount(102);
 
         foreach (contrastThemes() as $theme) {
             /** @var array<string, array{raw: string, resolved: string}> $resolved */
@@ -695,7 +715,7 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         $pairs = g18ContractPairs();
         $badges = g18GradeBadgeTokens();
 
-        expect($pairs)->toHaveCount(41)
+        expect($pairs)->toHaveCount(48)
             ->and($badges)->toHaveCount(9)
             ->and(array_keys($pairs))->toBe([
                 'ink on panel', 'ink on raised', 'ink-muted on sunken', 'ink-muted on raised', 'ink-muted on panel',
@@ -706,6 +726,13 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
                 'pick-line on raised',
                 'stat-speed on raised', 'stat-stamina on raised', 'stat-power on raised',
                 'stat-guts on raised', 'stat-wit on raised', 'stat-pal on raised', 'stat-group on raised',
+                // 2026-11-14 stat Slice A: the stat text tier on its own tint fills. The five
+                // tint pairs are the binding rows (4.56-4.98:1 computed at minting); pal/group
+                // carry panel-only rows because those two types have no tint token.
+                'stat-speed-ink on tint-speed', 'stat-stamina-ink on tint-stamina',
+                'stat-power-ink on tint-power', 'stat-guts-ink on tint-guts',
+                'stat-wit-ink on tint-wit',
+                'stat-pal-ink on panel', 'stat-group-ink on panel',
                 'on-brand-chrome on brand-chrome', 'brand-accent-ink on page',
                 'brand-accent-ink on raised', 'brand-accent-ink on sunken',
                 'brand-accent-ink on brand-accent-soft',
