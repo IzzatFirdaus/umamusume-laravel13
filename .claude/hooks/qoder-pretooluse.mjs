@@ -6,6 +6,7 @@
 // Fail-closed: classify() returns a deny rule if the policy table cannot load.
 import { readFileSync } from 'node:fs';
 import { classify } from '../../.tooling/policy.mjs';
+import { logDenial } from '../../.tooling/denial-log.mjs';
 
 let input = '';
 try { input = readFileSync(0, 'utf8'); } catch {}
@@ -25,4 +26,5 @@ if (!result || !result.deny) {
 
 const first = String(cmd).split(/\s+/)[0] ?? cmd;
 process.stderr.write((result.message || 'Blocked command.').replace('{cmd}', first) + '\n');
+logDenial({ runtime: 'qoder', tool, command: cmd, rule: result.id, replacement: result.replacement ?? '' });
 process.exit(2);

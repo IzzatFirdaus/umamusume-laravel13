@@ -5,6 +5,7 @@
 // Fail closed: a stdin/parse/classify error exits 2 (block) rather than allowing.
 import { readFileSync } from 'node:fs';
 import { classify } from '../../.tooling/policy.mjs';
+import { logDenial } from '../../.tooling/denial-log.mjs';
 
 let input = '';
 try { input = readFileSync(0, 'utf8'); } catch {}
@@ -51,4 +52,5 @@ if (!result || !result.deny) {
 const first = String(cmd).split(/\s+/)[0] ?? cmd;
 const message = (result.message || 'Blocked command.').replace('{cmd}', first);
 process.stderr.write(message + '\n');
+logDenial({ runtime: 'claude', tool: policyTool, command: cmd, rule: result.id, replacement: result.replacement ?? '' });
 process.exit(2);
