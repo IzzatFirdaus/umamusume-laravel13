@@ -38,7 +38,8 @@ final class VeteranRow
      * @return array{id: int, run_id: int, label: string, trainee: string, trainee_ja: string|null, scenario_label: string,
      *               status: string, status_label: string, tags: list<string>, notes: string|null,
      *               hasSelection: bool, builder_url: string|null, veteran_url: string, portrait_url: string|null,
-     *               saved_at: string|null, blue: int, pink: int, unique: int, compare_url: string}
+     *               saved_at: string|null, blue: int, pink: int, unique: int, compare_url: string,
+     *               transfer_url: string|null}
      */
     public static function from(Veteran $veteran): array
     {
@@ -78,6 +79,10 @@ final class VeteranRow
             'pink' => self::sparkCount($payload, 'pink'),
             'unique' => self::sparkCount($payload, 'green'),
             'compare_url' => route('legacy.compare', ['runs' => [$run->id]]),
+            // Transfer Request door: offered only when this Veteran has no active offer.
+            'transfer_url' => $veteran->transferRequest?->isOffered()
+                ? null
+                : route('veterans.transfers.store', $veteran),
         ];
     }
 

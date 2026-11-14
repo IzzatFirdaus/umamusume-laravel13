@@ -2,6 +2,7 @@
 import ArtworkSlot from './ArtworkSlot.vue';
 import StatusPill from './StatusPill.vue';
 import SubCell from './SubCell.vue';
+import { router } from '@inertiajs/vue3';
 import { veteranResultClause } from '../domain/veteranNote';
 
 interface Props {
@@ -21,6 +22,8 @@ interface Props {
         veteran_url: string;
         /** The trainee's loopback portrait url, or null when the mirror holds no file. */
         portrait_url: string | null;
+        /** Transfer offer URL when this Veteran has no active offer; null otherwise. */
+        transfer_url: string | null;
     };
 }
 
@@ -34,6 +37,22 @@ function statusVariant(status: string): 'info' | 'success' | 'warning' | 'neutra
         case 'Active': return 'info';
         case 'Retired': return 'warning';
         default: return 'neutral';
+    }
+}
+
+/**
+ * Confirm, then offer through Inertia's own client: a native `<form method="POST">` here
+ * would 419 — the shell carries no CSRF-echoing form helper, and `router.post` sends the
+ * `X-XSRF-TOKEN` header the session verifies.
+ */
+const offerTransfer = (): void => {
+    const url = props.veteran.transfer_url;
+
+    if (url !== null && confirm(
+        `Offer "${props.veteran.trainee}" for transfer? ` +
+        'This will list the Veteran for transfer. On completion, the Veteran is permanently removed from your library.'
+    )) {
+        router.post(url, {}, { preserveScroll: true });
     }
 }
 </script>
@@ -83,6 +102,15 @@ function statusVariant(status: string): 'info' | 'success' | 'warning' | 'neutra
                 >
                     Compare this career
                 </a>
+                <!-- Transfer offer: only when the Veteran has no active offer. -->
+                <button
+                    v-if="props.veteran.transfer_url"
+                    type="button"
+                    class="inline-flex min-h-11 items-center rounded-md border border-warning bg-warning px-3 font-medium text-on-warning hover:bg-warning/90 transition-colors duration-150 ease-out"
+                    @click="offerTransfer"
+                >
+                    Offer for Transfer
+                </button>
             </div>
         </div>
 

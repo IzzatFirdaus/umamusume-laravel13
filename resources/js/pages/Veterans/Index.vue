@@ -58,6 +58,7 @@ interface Veteran {
     pink: number;
     unique: number;
     compare_url: string;
+    transfer_url: string | null;
 }
 
 interface Absence {
@@ -212,6 +213,18 @@ const teamSentence = computed<string>(() => {
 /** A page move is a visit, not a client-side slice: the filters and the order ride along (`withQueryString`). */
 function goToPage(page: number): void {
     router.get(props.searchAction, { ...filteredQuery(props.order), page }, { preserveScroll: true });
+}
+
+/** Confirm and submit an Offer for Transfer action. Mirrors Show.vue and VeteranRow.vue behavior. */
+function confirmTransfer(url: string, label: string): void {
+    if (confirm(`Offer ${label} for transfer? This creates a transfer request that another trainer can complete.`)) {
+        router.post(url, {}, {
+            preserveScroll: true,
+            onSuccess: () => {
+                // Page reloads via Inertia partial reload
+            },
+        });
+    }
 }
 
 /** The four factor families the reference card names, with the published grade arithmetic (UMAMUSUME_REFERENCE.md §1.5.2). */
@@ -469,7 +482,17 @@ const factorGrades: { family: string; note: string }[] = [
                                  `unique` is `sparkCount($payload, 'green')`. One join, stated once. -->
                             <td class="n font-mono tabular-nums" data-spark="unique">{{ veteran.unique }}</td>
                             <td class="n">
-                                <LinkButton :href="veteran.veteran_url" variant="secondary" size="sm">Open</LinkButton>
+                                <div class="flex items-center gap-1.5">
+                                    <LinkButton :href="veteran.veteran_url" variant="secondary" size="sm">Open</LinkButton>
+                                    <form v-if="veteran.transfer_url" @submit.prevent="confirmTransfer(veteran.transfer_url, veteran.label)">
+                                        <button
+                                            type="submit"
+                                            class="inline-flex min-h-11 items-center rounded-md border border-rule bg-sunken px-3 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
+                                        >
+                                            Offer for Transfer
+                                        </button>
+                                    </form>
+                                </div>
                             </td>
                         </tr>
                     </tbody>

@@ -172,6 +172,10 @@ final class VeteranController extends Controller
             'artworkURL' => VeteranRow::portraitUrl($run),
             'notice' => LegacyController::RECORD_ONLY_NOTICE,
             'absences' => self::absences(),
+            // Transfer Request door: offered only when this Veteran has no active offer.
+            'transferUrl' => $veteran->transferRequest?->isOffered()
+                ? null
+                : route('veterans.transfers.store', $veteran),
         ]);
     }
 

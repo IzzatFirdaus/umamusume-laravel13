@@ -30,6 +30,7 @@ use App\Http\Controllers\ReviewController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SupportCardController;
 use App\Http\Controllers\TrainingRunController;
+use App\Http\Controllers\TransferRequestController;
 use App\Http\Controllers\VeteranController;
 use Illuminate\Support\Facades\Route;
 
@@ -287,6 +288,23 @@ Route::get('/veterans/compare', [VeteranController::class, 'compare'])->name('ve
 Route::get('/veterans/{veteran}', [VeteranController::class, 'show'])
     ->whereNumber('veteran')
     ->name('veterans.show');
+
+/*
+ * Transfer Requests (Global notice 1157, 2026-11-05).
+ * A Trainer offers a Veteran for transfer; on completion the Veteran is
+ * permanently removed and the reward {star_pieces?, monies?, support_points?}
+ * is recorded for audit. No wallet/ledger exists yet.
+ */
+Route::get('/veterans/transfers', [TransferRequestController::class, 'index'])->name('veterans.transfers');
+Route::post('/veterans/{veteran}/transfers', [TransferRequestController::class, 'store'])
+    ->whereNumber('veteran')
+    ->name('veterans.transfers.store');
+Route::put('/transfers/{transfer}/complete', [TransferRequestController::class, 'complete'])
+    ->whereNumber('transfer')
+    ->name('transfers.complete');
+Route::delete('/transfers/{transfer}', [TransferRequestController::class, 'withdraw'])
+    ->whereNumber('transfer')
+    ->name('transfers.withdraw');
 
 /*
  * Save Veteran (SCREEN-020, PRD FR-G-1, plan §8 D16's write half). The pair follows `runs.inheritance`: the

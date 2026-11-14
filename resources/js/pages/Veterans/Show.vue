@@ -18,7 +18,7 @@
 import AppLayout from '../../layouts/AppLayout.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
-import { Head } from '@inertiajs/vue3';
+import { Head, router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
 interface Veteran {
@@ -59,6 +59,8 @@ const props = defineProps<{
     artworkURL: string | null;
     notice: string;
     absences: Absence[];
+    /** `route('veterans.transfers.store', veteran)` when this Veteran has no active offer; null otherwise. */
+    transferUrl: string | null;
 }>();
 
 const doorClass =
@@ -80,6 +82,20 @@ const lede = computed((): string => {
 const noStatsRecorded = computed((): boolean =>
     Object.values(props.stats).every((value) => value === null),
 );
+
+/**
+ * Confirm, then offer through Inertia's own client: the shell carries no CSRF-echoing form
+ * helper, and `router.post` sends the `X-XSRF-TOKEN` header the session verifies, where a
+ * native `<form method="POST">` on this page would 419.
+ */
+const offerTransfer = (): void => {
+    if (confirm(
+        `Offer "${props.veteran.trainee}" for transfer? ` +
+        'This will list the Veteran for transfer. On completion, the Veteran is permanently removed from your library.'
+    ) && props.transferUrl !== null) {
+        router.post(props.transferUrl, {}, { preserveScroll: true });
+    }
+}
 </script>
 
 <template>
@@ -99,6 +115,14 @@ const noStatsRecorded = computed((): boolean =>
                 <a :href="props.runUrl" :class="`${doorClass} bg-primary-action font-semibold text-on-primary-action`">
                     Open the Cockpit
                 </a>
+                <button
+                    v-if="props.transferUrl"
+                    type="button"
+                    :class="`${doorClass} bg-warning font-semibold text-on-warning`"
+                    @click="offerTransfer"
+                >
+                    Offer for Transfer
+                </button>
             </template>
         </PageHeader>
 

@@ -6,9 +6,11 @@ namespace App\Models;
 
 use Database\Factories\VeteranFactory;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Support\Carbon;
 
 /**
@@ -66,6 +68,27 @@ class Veteran extends Model
     public function trainingRun(): BelongsTo
     {
         return $this->belongsTo(TrainingRun::class);
+    }
+
+    /**
+     * @return HasOne<TransferRequest, $this>
+     */
+    public function transferRequest(): HasOne
+    {
+        return $this->hasOne(TransferRequest::class);
+    }
+
+    /**
+     * Veterans that have no offered transfer request (eligible for a new offer).
+     *
+     * @param  Builder<static>  $query
+     * @return Builder<static>
+     */
+    public function scopeTransferable(Builder $query): Builder
+    {
+        return $query->whereDoesntHave('transferRequest', function (Builder $sub): void {
+            $sub->where('status', TransferRequest::STATUS_OFFERED);
+        });
     }
 
     /**

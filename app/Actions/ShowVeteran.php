@@ -24,6 +24,7 @@ final class ShowVeteran
     public function handle(Veteran $veteran): Veteran
     {
         return $veteran->loadMissing([
+            'transferRequest',
             'trainingRun.umamusume',
             'trainingRun.turnEntries',
             'trainingRun.skills',

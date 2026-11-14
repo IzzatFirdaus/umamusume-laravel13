@@ -48,7 +48,7 @@ final class ListVeterans
 
         // `characterCard` is the chosen-form frame the row reads first; `umamusume.cards` is the identity
         // frame its fallback falls back to. Both are loaded so neither path is a query per row.
-        $query = Veteran::query()->with('trainingRun.characterCard', 'trainingRun.umamusume.cards');
+        $query = Veteran::query()->with('transferRequest', 'trainingRun.characterCard', 'trainingRun.umamusume.cards');
 
         // The row prints the trainee's name, so the library's search matches what is printed, in
         // either of the two name columns the row can show (`veterans.html:71`).
