@@ -21,6 +21,7 @@ import BaseSelect from '../Form/BaseSelect.vue';
 import BaseCheckbox from '../Form/BaseCheckbox.vue';
 import ArtworkSlot from '../ArtworkSlot.vue';
 import SupportTypeMark from './SupportTypeMark.vue';
+import Pagination from '../ui/Pagination.vue';
 import { nextTick, ref, computed } from 'vue';
 
 interface Option {
@@ -54,11 +55,22 @@ const props = defineProps<{
      */
     type: string | null;
     query: string | null;
+    /**
+     * R6-24: the page facts the server's paginator answered. `total` is the filtered set's count,
+     * not the mounted rows, so the pager can say "251 cards" while the dialog holds 25.
+     */
+    page: number;
+    pages: number;
+    from: number;
+    to: number;
+    total: number;
 }>();
 
 const emit = defineEmits<{
     (event: 'equip', cardId: number): void;
     (event: 'filter', filters: { type: string; query: string }): void;
+    /** R6-24: the page the reader asked for; the owning page issues the request. */
+    (event: 'page', page: number): void;
 }>();
 
 const dialog = ref<HTMLDialogElement | null>(null);
@@ -265,5 +277,20 @@ defineExpose({ open, openAt });
             </template>
         </template>
         <p v-else class="note mt-3">No support card matches that filter. Clear the search or uncheck Owned only.</p>
+
+        <!-- R6-24: the pager lives inside the dialog, where the list it moves is. `compact` states
+             the filtered total and the current page; Previous/Next are the only two moves a picker
+             needs. A single-page result renders no pager at all. -->
+        <Pagination
+            v-if="pages > 1"
+            variant="compact"
+            :page="page"
+            :pages="pages"
+            :from="from"
+            :to="to"
+            :total="total"
+            noun="cards"
+            @navigate="emit('page', $event)"
+        />
     </dialog>
 </template>

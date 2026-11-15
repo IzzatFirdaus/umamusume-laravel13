@@ -115,6 +115,12 @@ const props = defineProps<{
         type: string | null;
         query: string | null;
         fillingSlot: number;
+        /** R6-24: the server's paginator facts for the picker's filtered set. */
+        page: number;
+        pages: number;
+        from: number;
+        to: number;
+        total: number;
     };
     scenarioLabel: string | null;
     scenarioKey: string | null;
@@ -249,6 +255,28 @@ function filter(retarget = false): void {
             // One entry per retarget would bury the step in history; the URL is stating which slot the
             // picker aims at, not recording a new place.
             replace: retarget,
+        },
+    );
+}
+
+/**
+ * R6-24: move the picker to another page of the filtered set. The dialog is open, so the visit
+ * preserves component state and replaces the history entry rather than stacking one per page; the
+ * current Type and name filter travel with it, because a page move is not a reason to drop a search.
+ */
+function goToPage(page: number): void {
+    router.get(
+        props.selfUrl,
+        {
+            type: type.value || undefined,
+            q: search.value || undefined,
+            deck_slot: filling.value,
+            page: page > 1 ? page : undefined,
+        },
+        {
+            preserveScroll: true,
+            preserveState: true,
+            replace: true,
         },
     );
 }
@@ -534,8 +562,14 @@ function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
                     :types="props.types"
                     :type="props.picker.type"
                     :query="props.picker.query"
+                    :page="props.picker.page"
+                    :pages="props.picker.pages"
+                    :from="props.picker.from"
+                    :to="props.picker.to"
+                    :total="props.picker.total"
                     @equip="equipCard"
                     @filter="applyPickerFilter"
+                    @page="goToPage"
                 />
             </section>
 

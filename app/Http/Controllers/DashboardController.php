@@ -112,6 +112,11 @@ class DashboardController extends Controller
                 'forms' => CharacterCard::count(),
                 'skills' => Skill::count(),
                 'supportCards' => SupportCard::count(),
+                // R6-24: the scoped partner the support-card catalogue figure needs. A total
+                // without the Global scope reads as though every row were playable on this client.
+                // Support cards use the generated column's own literal, which is the value
+                // `SupportCardController` reads in the same way.
+                'globalSupportCards' => SupportCard::query()->where('release_status', 'Global')->count(),
             ],
             // Fresh install orientation (UX-23): three zero tiles tell a new Trainer nothing about
             // why the app looks empty, so while no source row exists the Dashboard (and the wizard's

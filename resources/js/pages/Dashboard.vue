@@ -105,6 +105,8 @@ const props = defineProps<{
         forms: number;
         skills: number;
         supportCards: number;
+        /** R6-24: the Global-released half of the support-card catalogue total. */
+        globalSupportCards: number;
     };
     /** Fresh install (UX-23): false while no catalogue row exists, and the KPI row trades its three
      *  zero tiles for one named state with the fetch command. */
@@ -568,7 +570,13 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                 <section class="card" aria-labelledby="kpi-support-heading" data-card="kpi_support">
                     <h2 id="kpi-support-heading" class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Support cards</h2>
                     <div class="flex items-center justify-between gap-3">
-                        <p class="font-mono text-kpi font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.supportCards) }}</p>
+                        <div>
+                            <p class="font-mono text-kpi font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.supportCards) }}</p>
+                            <!-- R6-24: the picker filters to the Global releases, so the tile names
+                                 that scope beside the catalogue total rather than leaving a Trainer to
+                                 reconcile 559 against 251 on another screen. -->
+                            <p class="mt-1 text-xs text-ink-muted" data-field="support-scope">{{ group(props.counts.globalSupportCards) }} on [Global]</p>
+                        </div>
                         <Link href="/support-cards" class="inline-flex min-h-11 shrink-0 items-center underline underline-offset-2 hover:decoration-2">Browse cards</Link>
                     </div>
                 </section>

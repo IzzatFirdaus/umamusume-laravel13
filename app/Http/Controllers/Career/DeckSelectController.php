@@ -215,7 +215,8 @@ class DeckSelectController extends Controller
      *
      * The labels carry the rarity word and the type word so one line per card says what it is, the way
      * `deckPayload()`'s options do, and the type filter narrows server-side so a Trainer with 559 catalogue
-     * rows is not handed 559 option nodes to arrow through.
+     * rows is not handed 559 option nodes to arrow through. R6-24 pages the result at 25, so the dialog
+     * mounts one page rather than the whole Global set.
      *
      * @param  list<int>  $selected
      * @return array<string, mixed>
@@ -257,8 +258,16 @@ class DeckSelectController extends Controller
             ->orderBy('char_name')
             ->orderBy('title_en');
 
-        // Get ownership groups for all cards in the picker
-        $allCardIds = $query->pluck('id')->all();
+        // R6-24: the picker is one page at a time. `->get()` handed the dialog every Global release
+        // at once (251 on this tree), which is the payload the Dashboard's 559 count had no scoped
+        // partner for. `withQueryString()` keeps the active filter on the pager's own links even
+        // though this page renders the shared `Pagination` component rather than Laravel's links.
+        $page = $query->paginate(25)->withQueryString();
+        $cards = $page->getCollection();
+
+        // Get ownership groups for the cards on this page only; the groups are a row decoration,
+        // not a filter, so the page's own ids are the whole input the map needs.
+        $allCardIds = $cards->pluck('id')->all();
         $ownershipGroups = $this->ownershipGroups($allCardIds);
 
         // Get in-deck positions from the current draft
@@ -284,7 +293,7 @@ class DeckSelectController extends Controller
         $slotType = $slotTypeMap[$fillingSlot] ?? null;
 
         return [
-            'options' => $query->get()
+            'options' => $cards
                 ->map(static fn (SupportCard $card): array => [
                     'id' => $card->id,
                     'name' => $card->displayName(),
@@ -310,6 +319,13 @@ class DeckSelectController extends Controller
             // the fault is on, the way `openDeckSlot()` does for the run screen: a client ref could not
             // survive the redirect back, which is exactly when it has to reopen.
             'fillingSlot' => $this->fillingSlot($request),
+            // R6-24: the pager's four facts, read off the paginator rather than counted from the
+            // page's rows. A row count would report 25 of 25 on every page but the last.
+            'page' => $page->currentPage(),
+            'pages' => $page->lastPage(),
+            'from' => $page->firstItem() ?? 0,
+            'to' => $page->lastItem() ?? 0,
+            'total' => $page->total(),
         ];
     }
 
