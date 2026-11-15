@@ -8,8 +8,10 @@ use App\Actions\WithdrawTransferRequest;
 use App\Models\TransferRequest;
 use App\Models\Umamusume;
 use App\Models\Veteran;
+use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /**
  * Transfer Requests for Veteran Umamusume (Global notice 1157, 2026-11-05).
@@ -21,12 +23,13 @@ use Illuminate\Support\Facades\Schema;
  *
  * The reward is recorded for audit (no wallet/ledger exists yet).
  */
-it('creates the transfer_requests table with veteran foreign key and unique offered constraint', function (): void {
+it('creates the transfer_requests table with a nullable veteran link and one offered row per veteran', function (): void {
     expect(Schema::hasColumns('transfer_requests', [
         'id',
         'veteran_id',
         'status',
         'reward',
+        'veteran_label',
         'completed_at',
         'withdrawn_at',
         'created_at',
@@ -39,10 +42,19 @@ it('creates the transfer_requests table with veteran foreign key and unique offe
 
     expect($fk)->toBe('veteran_id->veterans');
 
-    // Unique index on veteran_id + status
+    // The link must be nullable: the FK's `nullOnDelete` is what keeps a completed row alive as the
+    // audit record once its Veteran is deleted (corrective migration `2026_11_15_131115`).
+    $veteranColumn = collect(Schema::getColumns('transfer_requests'))->firstWhere('name', 'veteran_id');
+    expect($veteranColumn['nullable'] ?? false)->toBeTrue();
+
+    // The partial unique replaced `one_per_veteran_per_status` in the same corrective migration: a
+    // Veteran's withdrawn and completed rows accumulate as the audit trail, so only the OFFERED row
+    // is unique. Rewritten 2026-11-15: the old full-unique assertion pinned the shape under which a
+    // second withdraw was a 500 (`UNIQUE constraint failed: transfer_requests.veteran_id,
+    // transfer_requests.status`).
     $indexes = Schema::getIndexes('transfer_requests');
-    $uniquePerStatus = collect($indexes)->firstWhere('name', 'one_per_veteran_per_status');
-    expect($uniquePerStatus)->not->toBeNull();
+    expect(collect($indexes)->firstWhere('name', 'one_offered_per_veteran'))->not->toBeNull()
+        ->and(collect($indexes)->firstWhere('name', 'one_per_veteran_per_status'))->toBeNull();
 });
 
 it('offers a Veteran for transfer, creating an offered request', function (): void {
@@ -198,4 +210,51 @@ it('TransferRequest status constants', function (): void {
     expect(TransferRequest::STATUS_OFFERED)->toBe('offered')
         ->and(TransferRequest::STATUS_COMPLETED)->toBe('completed')
         ->and(TransferRequest::STATUS_WITHDRAWN)->toBe('withdrawn');
+});
+
+it('lets one Veteran cycle offer, withdraw, offer, withdraw', function (): void {
+    // The second withdraw is what the full unique index refused with `UNIQUE constraint failed:
+    // transfer_requests.veteran_id, transfer_requests.status` (measured 2026-11-15). The partial
+    // unique allows it: only the offered row is unique.
+    $veteran = Veteran::factory()->create();
+
+    $first = (new OfferTransferRequest)->handle($veteran);
+    (new WithdrawTransferRequest)->handle($first);
+    $second = (new OfferTransferRequest)->handle($veteran);
+    (new WithdrawTransferRequest)->handle($second);
+
+    expect(TransferRequest::where('veteran_id', $veteran->id)->where('status', 'withdrawn')->count())->toBe(2);
+});
+
+it('refuses a second offered row for one Veteran at the schema level', function (): void {
+    $veteran = Veteran::factory()->create();
+    (new OfferTransferRequest)->handle($veteran);
+
+    expect(fn () => TransferRequest::create(['veteran_id' => $veteran->id, 'status' => 'offered']))
+        ->toThrow(QueryException::class);
+});
+
+it('stamps the transferred Veteran label before the row is deleted, so the audit row still names her', function (): void {
+    $veteran = Veteran::factory()->create();
+    $name = $veteran->trainingRun->umamusume->name;
+
+    $transfer = (new OfferTransferRequest)->handle($veteran);
+    (new CompleteTransferRequest)->handle($transfer);
+
+    $survivor = TransferRequest::find($transfer->id);
+
+    expect($survivor)->not->toBeNull()
+        ->and($survivor->veteran_id)->toBeNull()
+        ->and($survivor->veteran_label)->toContain($name);
+});
+
+it('carries the board paging url so a page move stays on the board', function (): void {
+    // The pager used `veteransIndexUrl` (the library) and left the board for a different screen
+    // (fixed 2026-11-15); this pins the address the page moves through.
+    test()->get(route('veterans.transfers'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Veterans/TransferRequests')
+            ->where('transfersUrl', route('veterans.transfers'))
+            ->where('veteransIndexUrl', route('veterans.index')));
 });

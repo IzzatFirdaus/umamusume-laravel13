@@ -24,16 +24,22 @@ use Illuminate\Support\Carbon;
  * the reward for audit; it is not paid out.
  *
  * @property int $id
- * @property int $veteran_id
+ * @property int|null $veteran_id null once the Veteran row is deleted: the FK's `nullOnDelete`
+ *                                keeps this row as the audit record and drops the link
  * @property 'offered'|'completed'|'withdrawn' $status
  * @property array<array-key, mixed>|null $reward {star_pieces?, monies?, support_points?}
+ * @property string|null $veteran_label who was transferred, stamped at completion because
+ *                                      `veteran_id` nulls when the Veteran row goes; null on
+ *                                      every row that predates the corrective migration
  * @property Carbon|null $completed_at
  * @property Carbon|null $withdrawn_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read Veteran $veteran
+ * @property-read Veteran|null $veteran null once the Veteran row is deleted (`nullOnDelete`): the
+ *                                       row survives as the audit record with its link dropped, so
+ *                                       every reader must handle the absent relation
  */
-#[Fillable(['veteran_id', 'status', 'reward', 'completed_at', 'withdrawn_at'])]
+#[Fillable(['veteran_id', 'status', 'reward', 'veteran_label', 'completed_at', 'withdrawn_at'])]
 class TransferRequest extends Model
 {
     /** @use HasFactory<TransferRequestFactory> */
