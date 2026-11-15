@@ -13,10 +13,18 @@ test('enforces request-secret gate', async () => {
         throw new Error('NATIVEPHP_SECRET is not set');
     }
 
-    const app: ChildProcess = spawn(exePath, [], {
-        env: { ...process.env },
+    const app: ChildProcess = spawn(exePath, ['--no-sandbox', '--disable-gpu'], {
+        env: { ...process.env, DISPLAY: ':0' },
         stdio: ['ignore', 'pipe', 'pipe'],
     });
+
+    app.on('error', (err) => {
+        throw new Error(
+            `Failed to spawn Electron at ${exePath}: ${err.message}`,
+        );
+    });
+
+    console.log(`[packaged-test] Electron spawned at ${exePath}, waiting for PHP port...`);
 
     let appOutput = '';
     app.stdout?.on('data', (d) => (appOutput += d.toString()));
@@ -37,6 +45,7 @@ test('enforces request-secret gate', async () => {
 
         const attempt = () => {
             if (Date.now() > deadline) {
+                console.log(`[packaged-test] Electron output before timeout: ${appOutput}`);
                 reject(
                     new Error(
                         `PHP server port not found within 300s. Electron output: ${appOutput}`,
@@ -73,6 +82,7 @@ test('enforces request-secret gate', async () => {
                     );
                     const found = results.find((p) => p !== null);
                     if (found !== undefined) {
+                        console.log(`[packaged-test] PHP port found: ${found}`);
                         resolve(found);
                         return;
                     }
