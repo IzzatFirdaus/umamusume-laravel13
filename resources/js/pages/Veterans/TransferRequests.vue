@@ -7,7 +7,7 @@
  * records the reward for audit; withdrawing returns the Veteran to the library. No
  * wallet exists, so a reward is recorded, never paid out on this screen.
  *
- * Every url arrives server-side (`transferUrls`, `veteransIndexUrl`): the shell carries
+ * Every url arrives server-side (`transfersUrl`, `transferUrls`, `veteransIndexUrl`): the shell carries
  * no Ziggy, so `route()` is not callable from page code. Errors arrive through Inertia's
  * shared `errors` prop; confirmations ride the session's `status` flash, which AppLayout's
  * own banner prints — this page renders no flash of its own.
@@ -23,6 +23,8 @@ interface TransferRequest {
     created_at: string;
     completed_at: string | null;
     withdrawn_at: string | null;
+    /** Who was transferred, stamped at completion because `veteran_id` nulls once the row goes. */
+    veteran_label: string | null;
     veteran: {
         id: number;
         training_run: {
@@ -49,6 +51,8 @@ interface Props {
     transferUrls: Record<string, { complete: string; withdraw: string }>;
     /** Server-composed door back to the library. */
     veteransIndexUrl: string;
+    /** The board's own address, so a page move stays on the board. */
+    transfersUrl: string;
 }
 
 const props = defineProps<Props>();
@@ -68,7 +72,16 @@ const tabs = [
 
 const currentList = computed(() => props[activeTab.value]);
 
+/**
+ * Who was transferred. The stamped label leads, because a completed row's `veteran` relation is
+ * gone (the FK nulls `veteran_id` when the Veteran is deleted); the relation answers the live
+ * states, and only a row that predates the corrective migration falls to the named absence.
+ */
 const veteranDisplay = (transfer: TransferRequest): string => {
+    if (transfer.veteran_label !== null && transfer.veteran_label !== '') {
+        return transfer.veteran_label;
+    }
+
     const name = transfer.veteran?.training_run?.umamusume?.name ?? 'Removed Veteran';
     const ja = transfer.veteran?.training_run?.umamusume?.name_ja;
 
@@ -118,7 +131,7 @@ const handleWithdraw = (transfer: TransferRequest): void => {
 
 /** A page move is a visit, not a client-side slice: the tab rides the query string. */
 const goToPage = (pageNum: number): void => {
-    router.get(props.veteransIndexUrl, { tab: activeTab.value, page: pageNum }, { preserveScroll: true });
+    router.get(props.transfersUrl, { tab: activeTab.value, page: pageNum }, { preserveScroll: true });
 };
 
 /** The recorded reward, printed as amounts, or the named absence with its reason. */

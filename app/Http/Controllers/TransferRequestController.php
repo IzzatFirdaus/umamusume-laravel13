@@ -67,6 +67,7 @@ final class TransferRequestController extends Controller
             // URLs composed server-side so the page spells none (`AUD-20261102-028 F-01`): the
             // shell carries no Ziggy, so `route()` is not callable from page code.
             'veteransIndexUrl' => route('veterans.index'),
+            'transfersUrl' => route('veterans.transfers'),
             'transferUrls' => $transferUrls,
         ]);
     }

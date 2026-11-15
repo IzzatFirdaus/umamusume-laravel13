@@ -11,6 +11,7 @@ use App\Models\Veteran;
 use Illuminate\Database\QueryException;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /**
  * Transfer Requests for Veteran Umamusume (Global notice 1157, 2026-11-05).
@@ -245,4 +246,15 @@ it('stamps the transferred Veteran label before the row is deleted, so the audit
     expect($survivor)->not->toBeNull()
         ->and($survivor->veteran_id)->toBeNull()
         ->and($survivor->veteran_label)->toContain($name);
+});
+
+it('carries the board paging url so a page move stays on the board', function (): void {
+    // The pager used `veteransIndexUrl` (the library) and left the board for a different screen
+    // (fixed 2026-11-15); this pins the address the page moves through.
+    test()->get(route('veterans.transfers'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Veterans/TransferRequests')
+            ->where('transfersUrl', route('veterans.transfers'))
+            ->where('veteransIndexUrl', route('veterans.index')));
 });

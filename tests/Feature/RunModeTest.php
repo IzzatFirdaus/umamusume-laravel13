@@ -71,3 +71,20 @@ it('defaults the create form to NewCareer when it sends no mode at all', functio
 
     expect(TrainingRun::query()->latest('id')->first()->mode)->toBe(RunMode::NewCareer);
 });
+
+it('keeps a snapshot mode when an identity update omits it', function (): void {
+    // `Career/RunSettings.vue` posts no `mode` (its forms carry status, scenario or identity), so
+    // the request's unguarded default rewrote every edited snapshot to `new_career` on save
+    // (measured 2026-11-15). The default belongs to `runs.store` alone.
+    $run = TrainingRun::factory()->create([
+        'mode' => 'snapshot',
+        'career_position' => ['year' => 3, 'month' => 10, 'phase' => 'Early', 'turn_index' => 67],
+    ]);
+
+    test()->put(route('runs.update', $run), [
+        'umamusume_id' => $run->umamusume_id,
+        'status' => $run->status->value,
+    ])->assertRedirect();
+
+    expect($run->fresh()->mode)->toBe(RunMode::Snapshot);
+});

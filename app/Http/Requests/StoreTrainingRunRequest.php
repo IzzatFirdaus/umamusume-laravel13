@@ -190,8 +190,15 @@ class StoreTrainingRunRequest extends FormRequest
          * predates the snapshot entry point: the default lives here rather than in the schema so a
          * writer that omits the field gets the same run a pre-snapshot writer got, and the schema
          * keeps its own null for a row no request ever touched.
+         *
+         * Scoped to `runs.store`. `runs.update` posts from forms that do not carry a mode
+         * (`Career/RunSettings.vue`), and merging the default there rewrote every edited snapshot to
+         * `new_career` on save (measured 2026-11-15). The model's own `$attributes` default already
+         * answers any other writer that omits the field.
          */
-        $this->merge(['mode' => $this->input('mode', RunMode::NewCareer->value)]);
+        if ($this->routeIs('runs.store')) {
+            $this->merge(['mode' => $this->input('mode', RunMode::NewCareer->value)]);
+        }
 
         /*
          * The scenario's Pro Shop frame. A countdown the run already stored is cleared when the
