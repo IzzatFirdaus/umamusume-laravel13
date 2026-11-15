@@ -719,7 +719,15 @@ const isActive = computed((): boolean => props.run.status === 'Active');
  * walk 7 `§7.3 S11`). R7-66 records the half this cannot close: no surface stores an in-force ceiling,
  * so `in-force` is reachable only for a run that carries the columns.
  */
-const denominatorLabel = computed((): 'cap' | 'floor' | 'in-force' => 'cap');
+const denominatorLabel = computed((): 'cap' | 'floor' | 'in-force' => {
+    const entered = props.identity.caps;
+
+    if (Object.values(entered).some((cap) => cap.entered !== null)) {
+        return 'cap';
+    }
+
+    return 'floor';
+});
 
 
 // E4: the Cockpit renders a "Shop" jump only when the matrix composes one. The shape is the
