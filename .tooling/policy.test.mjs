@@ -196,6 +196,37 @@ test('deny regression: chained rm after scratch rm', () => {
   assert.strictEqual(lastJson(stdout).decision, 'block');
 });
 
+test('deny: git commit message contains greater-than arrow', () => {
+  const { exitCode, stdout } = runGuard(payload('git commit -m "fix: a -> b"'));
+  assert.strictEqual(exitCode, 2);
+  assert.strictEqual(lastJson(stdout).decision, 'block');
+  assert.ok(lastJson(stdout).reason.includes('-F'));
+});
+
+test('deny: git commit message contains pipe', () => {
+  const { exitCode, stdout } = runGuard(payload('git commit -m "a | b"'));
+  assert.strictEqual(exitCode, 2);
+  assert.strictEqual(lastJson(stdout).decision, 'block');
+});
+
+test('deny: git commit message contains semicolon', () => {
+  const { exitCode, stdout } = runGuard(payload('git commit -m "a; b"'));
+  assert.strictEqual(exitCode, 2);
+  assert.strictEqual(lastJson(stdout).decision, 'block');
+});
+
+test('allow: git commit -F file', () => {
+  const { exitCode, stdout } = runGuard(payload('git commit -F .scratch-uma/msg.txt'));
+  assert.strictEqual(exitCode, 0);
+  assert.strictEqual(lastJson(stdout).decision, 'allow');
+});
+
+test('allow: git status regression after metachar rule', () => {
+  const { exitCode, stdout } = runGuard(payload('git status'));
+  assert.strictEqual(exitCode, 0);
+  assert.strictEqual(lastJson(stdout).decision, 'allow');
+});
+
 test('extract command from top-level command key', () => {
   const { exitCode, stdout } = runGuard('{"command":"git status"}\n');
   assert.strictEqual(exitCode, 0);

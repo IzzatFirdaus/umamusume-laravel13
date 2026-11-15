@@ -10,6 +10,13 @@
       "message": "Blocked: use the Read tool instead of `{cmd}`."
     },
     {
+      "id": "commit-message-metachar",
+      "matcher": "Bash|PowerShell|code_execution",
+      "pattern": "^git\\s+commit.*[<>|&;]",
+      "deny": true,
+      "message": "Commit message contains a shell metacharacter (one of: greater-than, less-than, pipe, ampersand, semicolon). Write the message to a file and run git commit -F file — this is the correct pattern for messages with these characters."
+    },
+    {
       "id": "file-write",
       "matcher": "Bash|PowerShell|code_execution",
       "pattern": "\\b(Set-Content|Out-File|tee|Add-Content)\\b|(^|[^>])>\\s*\\S",
