@@ -540,6 +540,22 @@ const teamUnityTrainings = computed((): string => {
 });
 
 /**
+ * The five per-stat team grades §1.8 records (Speed A, Stamina A, Power A, Guts S, Wit A). The
+ * payload ships them keyed by the stat matrix, one entry per stat with `grade` null until entered
+ * (`TeamPanelBuilder::teamSection()` with the configured `stat_order`); the row joins whatever
+ * grades it has and names each stat with its letter, so a letter is never bare and an unrecorded
+ * one keeps the table's `N/A` rather than a default. Null when the payload carries no grades at all.
+ */
+const teamStatGrades = computed((): string => {
+    const grades = teamState.value?.stat_grades ?? [];
+    // A grade is `A` or `N/A`: the absent reading stays named rather than dropped, matching how the
+    // League and Bursts rows state their own absences.
+    const parts = grades.map((grade) => `${grade.label} ${grade.grade ?? 'N/A'}`);
+
+    return parts.length === 0 ? 'N/A' : parts.join(' · ');
+});
+
+/**
  * The HFW prints `11 (inside 10-12)`: the combined Spirit and Extreme count, named against the band
  * the matrix publishes. Both halves are separate columns, so the total is their sum and never a
  * stored figure; a run with neither records the absence.
@@ -708,6 +724,8 @@ interface TeamState {
     unity_trainings_count: number | null;
     spirit_bursts_count: number | null;
     extreme_bursts_count: number | null;
+    /** The five per-stat team grades (A6.6), keyed by the stat matrix; null until entered. */
+    stat_grades: { key: string; label: string; grade: string | null }[];
 }
 
 const teamState = computed((): TeamState | null => (props.scenario as { team?: TeamState }).team ?? null);
@@ -1041,6 +1059,10 @@ const jumpToShop = (): void => {
                             <tr v-if="composesTeamPanel">
                                 <td>Team rank</td>
                                 <td><span class="pill pill-neutral">{{ teamRank }}</span></td>
+                            </tr>
+                            <tr v-if="composesTeamPanel">
+                                <td>Team stat grades</td>
+                                <td class="font-mono tabular-nums">{{ teamStatGrades }}</td>
                             </tr>
                             <tr v-if="composesTeamPanel">
                                 <td>Unity Trainings</td>

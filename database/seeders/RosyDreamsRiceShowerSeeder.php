@@ -414,6 +414,11 @@ class RosyDreamsRiceShowerSeeder extends Seeder
             // 2026-11-15 owner ruling). Stored as the letter alone: the star count is the panel's
             // own presentation of the rank, not a second fact this column holds.
             'team_rank' => 'S',
+            // §1.8's Team Info panel, second readout: the five per-stat team grades
+            // (Speed A, Stamina A, Power A, Guts S, Wit A). Keyed by the stat names
+            // `config/scenarios.php` `stat_order` carries, which is the same key set
+            // `StoreTrainingRunRequest` validates per-stat grades against.
+            'team_stat_grades' => ['Speed' => 'A', 'Stamina' => 'A', 'Power' => 'A', 'Guts' => 'S', 'Wit' => 'A'],
             'unity_trainings_count' => 55,
             'spirit_bursts_count' => 6,
             'extreme_bursts_count' => 5,
