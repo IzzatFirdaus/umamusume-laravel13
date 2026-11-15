@@ -36,6 +36,8 @@ jobs:
 
       - name: Resolve build run ID
         shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           $runId = "${{ github.event.workflow_run.id }}"
           if ($runId) {
