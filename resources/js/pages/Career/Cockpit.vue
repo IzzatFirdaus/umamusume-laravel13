@@ -573,10 +573,13 @@ const teamBurstCountdown = computed((): string | null => {
         warning_message?: string | null;
     }
 
-    const scenario = props.scenario as { team?: { burst_countdown?: BurstCountdown } };
-    const countdown = scenario.team?.burst_countdown;
+    const scenario = props.scenario as { team?: { burst_countdown?: BurstCountdown | null } } | null;
+    const countdown = scenario?.team?.burst_countdown;
 
-    if (countdown === undefined) {
+    // `TeamPanelBuilder::burstCountdown()` answers null when a run records neither burst counter
+    // (zero-turn run #35), so the absent test is `== null`: `=== undefined` let the null through and
+    // the read below threw `Cannot read properties of null (reading 'warning_message')` (BO-002).
+    if (countdown == null) {
         return null;
     }
 

@@ -228,6 +228,32 @@ test('names the stat denominator by the figure it prints, floor or cap (R7-19, R
     await expect(rows.filter({ hasText: /\bcap\b/ })).toHaveCount(0);
 });
 
+test('renders a zero-turn Unity Cup career without the burst-countdown crash (BO-002)', async ({ page }) => {
+    // `TeamPanelBuilder::burstCountdown()` answers null when neither burst counter is recorded, and the
+    // page's absent test read `=== undefined`, so the null reached `.warning_message` and threw
+    // `Cannot read properties of null (reading 'warning_message')` on every zero-turn render. A painted
+    // page hides a page error, so the error itself is captured rather than inferred from the layout.
+    const errors: string[] = [];
+    page.on('pageerror', (error) => errors.push(error.message));
+    // Vue catches a render-time throw and logs it, so the pageerror event may never fire: the console
+    // channel is where this defect is observable. Both are read, and the assertion is scoped to the
+    // throw this case exists for rather than to every message a page may log.
+    page.on('console', (message) => {
+        if (message.type() === 'error') errors.push(message.text());
+    });
+    const burstErrors = (): string[] => errors.filter((message) => message.includes('warning_message'));
+
+    const cockpitUrl = await newCareer(page);
+    await page.goto(cockpitUrl, { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.getByRole('heading', { name: 'Stats and state' })).toBeVisible();
+    // The countdown row is absent, not blank: the team rows beside it still state their own absences,
+    // so a hidden row is the designed empty state rather than a panel that failed to compose.
+    await expect(page.getByText('Spirit Burst Countdown')).toHaveCount(0);
+    expect(burstErrors(), errors.join('\n')).toEqual([]);
+});
+
 test('lists the career obligations the calendar states, each as a mark and a word', async ({ page }) => {
     // The seeded reference calendar is what this asserts against, so the expected rows are read from the
     // seeder rather than invented: `Junior Make Debut` is a shared mandatory slot at Junior turn 12, and
