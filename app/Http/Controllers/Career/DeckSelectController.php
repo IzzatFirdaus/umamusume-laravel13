@@ -154,8 +154,30 @@ class DeckSelectController extends Controller
         // it falls back to the step's own default instead of refusing the page.
         $slot = (int) $request->input('deck_slot');
 
+        // The picker's own query travels with the save so the redirect returns to the same page and
+        // filter. Without it, equipping a card from page 3 sent the Trainer back to page 1.
+        $query = [];
+
+        if (in_array($slot, DeckSlot::POSITIONS, true)) {
+            $query['deck_slot'] = $slot;
+        }
+
+        $page = (int) $request->query('page', 0);
+
+        if ($page > 1) {
+            $query['page'] = $page;
+        }
+
+        foreach (['type', 'q'] as $facet) {
+            $value = $request->query($facet);
+
+            if (is_string($value) && $value !== '') {
+                $query[$facet] = $value;
+            }
+        }
+
         return redirect()
-            ->route('career.deck', in_array($slot, DeckSlot::POSITIONS, true) ? ['deck_slot' => $slot] : [])
+            ->route('career.deck', $query)
             ->with('status', 'Deck saved.');
     }
 

@@ -37,3 +37,32 @@ test('paginates the support-card picker at 25 cards per page', async ({ page }) 
     const secondPage = await rows.allInnerTexts();
     expect(secondPage).not.toEqual(firstPage);
 });
+
+test('keeps the picker page when the same slot is reopened or equipped', async ({ page }) => {
+    await page.goto('/career/setup/deck', { waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
+
+    const dialog = page.getByRole('dialog');
+    const pager = dialog.locator('[data-region="pager"]');
+    const rows = dialog.locator('ul[aria-label="Support cards, scrollable"] li');
+
+    await expect(pager).toContainText(/page 1 of \d+/);
+    await pager.getByRole('button', { name: 'Next' }).click();
+    await expect(pager).toContainText(/page 2 of \d+/);
+
+    // Reopening the slot already being browsed must keep the page, not snap back to page 1.
+    await page.keyboard.press('Escape');
+    await expect(dialog).not.toBeVisible();
+    await page.getByRole('button', { name: 'Choose a card for Slot 1' }).click();
+    await expect(dialog).toBeVisible();
+    await expect(pager).toContainText(/page 2 of \d+/);
+
+    // Equipping from page 2 must leave the step on page 2 so the next card is one click away.
+    await rows.first().getByRole('button', { name: 'Equip', exact: true }).click();
+    await expect(dialog).not.toBeVisible();
+    await page.getByRole('button', { name: 'Replace the card in Slot 1' }).click();
+    await expect(dialog).toBeVisible();
+    await expect(pager).toContainText(/page 2 of \d+/);
+});

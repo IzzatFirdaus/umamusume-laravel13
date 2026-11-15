@@ -238,13 +238,14 @@ function errorLabel(field: string): string {
  * keep its slots out of the URL. It carries the current filter too, because retargeting the picker is not
  * a reason to drop a Type or a name the Trainer just narrowed the list with.
  */
-function filter(retarget = false): void {
+function filter(retarget = false, page?: number): void {
     router.get(
         props.selfUrl,
         {
             type: type.value || undefined,
             q: search.value || undefined,
             deck_slot: filling.value,
+            page: page !== undefined && page > 1 ? page : undefined,
         },
         {
             preserveScroll: true,
@@ -289,7 +290,10 @@ function goToPage(page: number): void {
 function save(after?: number): void {
     const slot = after ?? filling.value;
 
-    form.put(props.action, {
+    // Carry the picker's current query (page, type, name) through the write. The redirect uses it to
+    // return to the same page and filter, so equipping a card from page 3 does not send the Trainer
+    // back to page 1.
+    form.put(`${props.action}${window.location.search}`, {
         preserveScroll: true,
         onSuccess: () => {
             nextTick(() => document.getElementById(`deck-slot-${slot}`)?.focus());
@@ -394,8 +398,9 @@ function replace(position: number, opener: Event): void {
         ? { type: '', query: '' }
         : { type: props.picker.type, query: props.picker.query });
 
-    // Then retarget, keeping the component alive so the dialog above survives the round trip.
-    filter(true);
+    // Then retarget, keeping the component alive so the dialog above survives the round trip. A
+    // reopen of the same slot keeps the page the Trainer was browsing; a new slot starts at page 1.
+    filter(true, retargeted ? undefined : props.picker.page);
 }
 
 function setOwnership(position: number, ownership: 'OWNED' | 'RENTED'): void {
