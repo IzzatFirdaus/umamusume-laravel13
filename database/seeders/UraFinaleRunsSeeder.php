@@ -799,7 +799,15 @@ class UraFinaleRunsSeeder extends Seeder
         }
 
         foreach (self::RUN_15_DECK as $position => $slot) {
-            $card = SupportCard::query()->where('support_id', $slot['support_id'])->firstOrFail();
+            // The deck is fixture evidence, not a catalogue dependency: a test that imports the
+            // tracker without seeding support cards must still get the runs. Skip a slot the
+            // catalogue cannot resolve rather than aborting the whole import; the production
+            // seed resolves all six because the published support_ids are present.
+            $card = SupportCard::query()->where('support_id', $slot['support_id'])->first();
+
+            if ($card === null) {
+                continue;
+            }
 
             $run->deckSlots()->create([
                 'support_card_id' => $card->id,
