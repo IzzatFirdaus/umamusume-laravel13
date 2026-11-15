@@ -405,26 +405,28 @@ const rows = computed<ChecklistRow[]>(() => [
  * The heading's count. `role="status"` on it (in the template) is the announcement: the number is the
  * page's answer to "can I start", and it changes only when the draft does.
  *
- * The count comes from the server's warning list, which is the same list the `Checks` table renders, so
- * the two cannot disagree. The removed version counted `rows.filter(row => !row.entered)`, and `entered`
- * is `deck !== null` — a six-slot deck saved with nothing equipped is `entered`, so it printed "All 5
- * entered steps are recorded" over a table reading `Deck Warning · 0 of six positions carry a card`. A
- * `Warning` is not an `entered` flag and a client boolean cannot express it.
+ * BO-006: the count is the table's own rows, not the server's missing-section list. A filled draft can
+ * carry a `Warning` on a section that was entered (the deck with empty slots), and the old
+ * `missing_section.*` filter skipped it, so the sentence said `1 step needs attention` over a table
+ * reading `Legacy Missing` and `Deck Warning`. `Skipped` is the supported optional-target state and is
+ * not attention.
  */
 const attention = computed((): { sentence: string; tone: 'clear' | 'attention' } => {
-    const warnings = props.contract.warnings;
+    const counted = rows.value.filter((row) => {
+        const state = checkState(row);
 
-    if (warnings.length === 0) {
-        return { sentence: `All ${rows.value.length} entered steps are recorded.`, tone: 'clear' };
+        return state !== 'Pass' && state !== 'Skipped';
+    });
+
+    if (counted.length === 0) {
+        const entered = rows.value.filter((row) => checkState(row) === 'Pass').length;
+
+        return { sentence: `All ${entered} entered steps are recorded.`, tone: 'clear' };
     }
 
-    // Only the sections count toward the heading's number; the filled sections' own gaps ("the deck is
-    // not full") are already visible on their row and would double the count if listed by name here.
-    const sections = warnings.filter((warning) => warning.key.startsWith('missing_section.'));
-    const count = sections.length > 0 ? sections.length : warnings.length;
-    const noun = count === 1 ? 'step needs' : 'steps need';
+    const noun = counted.length === 1 ? 'step needs' : 'steps need';
 
-    return { sentence: `${count} ${noun} attention`, tone: 'attention' };
+    return { sentence: `${counted.length} ${noun} attention`, tone: 'attention' };
 });
 
 /** What `StartCareerRequest` refuses without, and nothing else: a scenario and a trainee. */
@@ -745,11 +747,12 @@ const CAREER_TURNS = props.careerTurns;
                                     <!-- Exactly one fix link, on the row that is the one warning. A link on
                                          every row would be five ways to leave a screen whose point is the
                                          single thing left to do. -->
+                                    <span v-if="checkState(row) === 'Warning'" aria-hidden="true" class="text-ink-muted"> · </span>
                                     <Link
                                         v-if="checkState(row) === 'Warning'"
                                         :href="row.edit"
                                         :aria-label="`Fix ${row.label}`"
-                                        class="ml-2 inline-flex min-h-11 items-center text-sm font-medium text-ink underline"
+                                        class="inline-flex min-h-11 items-center text-sm font-medium text-ink underline"
                                     >
                                         Fix this
                                     </Link>

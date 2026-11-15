@@ -214,9 +214,10 @@ test('reviews the five entered steps as one checklist row each', async ({ page }
     await expect(page.locator('#preflight-step-legacy')).toContainText('Missing');
     await expect(page.locator('#preflight-step-legacy')).toContainText('Not entered');
 
-    // The heading's count is the page's answer to "can I start", and it is a live region.
-    await expect(page.getByRole('status').filter({ hasText: 'step needs attention' })).toHaveText(
-        '1 step needs attention',
+    // The heading's count is the page's answer to "can I start", and it is a live region. This walk has
+    // one equipped card, so the table carries two non-Pass rows: Legacy `Missing` and Deck `Warning`.
+    await expect(page.getByRole('status').filter({ hasText: /steps? needs? attention/ })).toHaveText(
+        '2 steps need attention',
     );
 
     // AbsenceValue renders the reason as the disclosure's content, not as a mouse-only title, and the
@@ -239,7 +240,15 @@ test('counts a saved-but-incomplete deck as attention, not as recorded (UX-03)',
     await expect(deckRow).toContainText('Warning');
 
     const status = page.getByRole('status').filter({ hasText: /steps? needs? attention/ });
-    await expect(status).toHaveText('1 step needs attention');
+
+    // BO-006: the count is the table's own non-Pass rows, not the server's missing-section list. This
+    // draft has one equipped card, so Legacy is `Missing` and Deck is `Warning`: two rows need attention.
+    const states = await page
+        .locator('section[aria-labelledby="checks-heading"] tbody tr td:nth-child(2)')
+        .allInnerTexts();
+    const attentionCount = states.filter((state) => !['Pass', 'Skipped'].includes(state.trim())).length;
+    expect(attentionCount, 'the table carries Legacy Missing and Deck Warning').toBe(2);
+    await expect(status).toHaveText(`${attentionCount} steps need attention`);
     await expect(page.getByRole('status').filter({ hasText: 'entered steps are recorded' })).toHaveCount(0);
 
     // Walk-8 E-14: the count names steps needing attention while creation is allowed anyway; the
