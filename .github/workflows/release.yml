@@ -63,10 +63,6 @@ jobs:
       - name: Generate application key
         run: php artisan key:generate --no-interaction --force
 
-      - name: Scaffold NativePHP electron project
-        shell: pwsh
-        run: Copy-Item -Recurse -Force vendor/nativephp/desktop/resources/electron nativephp/electron
-
       - name: Install Node dependencies
         run: npm ci
 
