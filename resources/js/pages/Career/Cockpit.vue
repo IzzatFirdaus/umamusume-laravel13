@@ -539,9 +539,11 @@ const teamBursts = computed((): string => {
         return 'N/A';
     }
 
-    const total = (team.spirit_bursts_count ?? 0) + (team.extreme_bursts_count ?? 0);
-
-    return total >= 10 && total <= 12 ? `${total} (inside 10-12)` : String(total);
+    const spirit = team.spirit_bursts_count ?? 0;
+    const extreme = team.extreme_bursts_count ?? 0;
+    const total = spirit + extreme;
+    const band = total >= 10 && total <= 12 ? ' (inside 10-12)' : '';
+    return `${total} (${spirit} spirit · ${extreme} extreme)${band}`;
 });
 
 const teamRank = computed((): string => {
