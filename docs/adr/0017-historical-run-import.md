@@ -5,7 +5,7 @@
   code: built — migration 2026_09_30_174646 (imported_at, import_source); ImportHistoricalRunRequest; tests/Feature/HistoricalRunImportTest.php
   superseded-by: —
   amended-by: 0015 (the ceilings it validates against are ScenarioCaps::forRun's), 0014 (the deck it deliberately does not fill)
-  open: a comma inside condition makes a file unimportable — the export joins with bare commas and does not quote; the fix belongs to export(), not to the parser
+  open: — (the comma-inside-condition limit was corrected 2026-11-15; `export()` writes through `fputcsv` and quotes such a cell, see the Ledger)
 -->
 
 Status: **Accepted** (Slice 4, built 2026-10-01). Realises the import half of `PRD.md` US-12's neighbouring
@@ -67,6 +67,10 @@ no scenario is measured at the base cap with no bonus. Nothing in the import re-
 - **A comma inside `condition` makes the file unimportable.** `export()` joins with bare commas and does not
   quote, so such a value arrives as a twelfth cell. The row-length check rejects the file rather than reading
   `fans` into `energy` by position. This is the export's limitation inherited, not a new one.
+  *Dated correction 2026-11-15: this limit is closed at its root, in `export()`, as the sentence above said
+  it had to be. The export now writes through `fputcsv` with an explicit empty escape, so a cell carrying a
+  comma or a quote is quoted and the round trip succeeds; the row-length check and the parser are unchanged.
+  The original sentence is kept because it correctly identified the owner of the fix.*
 
 `str_getcsv()` is called with its `$escape` argument explicit. PHP 8.5 deprecates relying on the default, and
 an empty escape is the correct reading of a writer that emits no backslash quoting — passing it keeps the
@@ -105,3 +109,9 @@ parser symmetrical with the emitter instead of merely silencing a notice.
   is not corrected here". It was corrected here in the end: the human owner ruled the band is wrong and
   `04658f2` closed it on 2026-10-01. Kept because the sentence is the shape of a correct deferral that was
   then overtaken, and a reader needs to see that the import was on the strict side while it stood.
+- 2026-11-15 · **The comma limit closed at its owner.** `TrainingRunController::export()` was rewritten to
+  emit through `fputcsv` (explicit `,`, `"`, empty escape) and to drop the trailing newline so a run's export
+  stays byte-identical to the format every existing row was written in. `HistoricalRunImportTest`'s case that
+  pinned the limit was replaced in place with the round trip it now promises: export a run whose `condition`
+  is "Good, slightly lame", import the bytes back, assert the stored condition. The `memory:` note beside the
+  import's `str_getcsv` call already required this symmetry.

@@ -1473,19 +1473,40 @@ class TrainingRunController extends Controller
         if ($format === 'json') {
             $content = json_encode(['data' => new TrainingRunResource($run)], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
         } else {
-            // Appended after the original eight rather than interleaved: the leading
-            // positions are unchanged, so a consumer keying on column order still reads
-            // the same fields. Energy, mood and fans are captured by the guided form and
-            // shown on the run screen, so leaving them out meant the exported run was not
-            // the run the Trainer had just looked at (audit F-9). `condition` stays --
-            // D-53 keeps the raw escape hatch reachable, and its column is real.
-            $rows = [['turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'mood', 'fans']];
+            /*
+             * Appended after the original eight rather than interleaved: the leading
+             * positions are unchanged, so a consumer keying on column order still reads
+             * the same fields. Energy, mood and fans are captured by the guided form and
+             * shown on the run screen, so leaving them out meant the exported run was not
+             * the run the Trainer had just looked at (audit F-9). `condition` stays --
+             * D-53 keeps the raw escape hatch reachable, and its column is real.
+             *
+             * Written through `fputcsv` so a cell carrying a comma or a quote is quoted rather
+             * than splitting the row: the bare-comma join made a condition like "Good, slightly
+             * lame" shift every later column, which ADR-0017 used to record as this format's
+             * limit (fixed 2026-11-15). The escape argument is explicit both because PHP 8.5
+             * deprecates relying on its default and because the importer reads with the same
+             * empty escape, which keeps the writer and the reader symmetrical.
+             */
+            $handle = fopen('php://temp', 'r+');
 
-            foreach ($run->turnEntries as $entry) {
-                $rows[] = [$entry->turn, $entry->speed, $entry->stamina, $entry->power, $entry->guts, $entry->wit, $entry->sp, $entry->condition, $entry->energy, $entry->mood?->value, $entry->fans];
+            if ($handle === false) {
+                throw new \RuntimeException('Could not open the CSV buffer.');
             }
 
-            $content = implode("\n", array_map(fn (array $row): string => implode(',', array_map(fn ($cell): string => (string) ($cell ?? ''), $row)), $rows));
+            fputcsv($handle, ['turn', 'speed', 'stamina', 'power', 'guts', 'wit', 'sp', 'condition', 'energy', 'mood', 'fans'], ',', '"', '');
+
+            foreach ($run->turnEntries as $entry) {
+                fputcsv($handle, [$entry->turn, $entry->speed, $entry->stamina, $entry->power, $entry->guts, $entry->wit, $entry->sp, $entry->condition, $entry->energy, $entry->mood?->value, $entry->fans], ',', '"', '');
+            }
+
+            rewind($handle);
+            // The trailing newline `fputcsv` writes after the last row is dropped, so the export
+            // stays byte-identical to the bare-join format every existing row was written in. It
+            // matters beyond tidiness: the importer labels a pasted body with a hash of its bytes,
+            // and a serialiser that added a byte would change the provenance of an unchanged file.
+            $content = rtrim((string) stream_get_contents($handle), "\n");
+            fclose($handle);
         }
 
         return response($content, 200, [

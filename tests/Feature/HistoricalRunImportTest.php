@@ -289,19 +289,25 @@ it('writes nothing on the preview step', function (): void {
     expect(TurnEntry::count())->toBe($turnsBefore);
 });
 
-it('rejects a condition carrying a comma rather than shifting every later column', function (): void {
+it('round trips a condition carrying a comma, because the export quotes the cell', function (): void {
+    // Replaced 2026-11-15: this case pinned ADR-0017's documented limit (a bare-comma join), and the
+    // export now writes through `fputcsv`, which quotes a cell carrying a comma or a quote. The old
+    // assertion described the exact defect (the file failed loudly rather than shifting columns into
+    // the wrong fields); the new one asserts the round trip, which is the contract the importer's own
+    // `str_getcsv` read.
     $source = importRun();
-    $before = TrainingRun::count();
+    $source->turnEntries()->create(importTurn(['condition' => 'Good, slightly lame']));
 
-    // `export()` joins with bare commas and does not quote, so a comma inside `condition` arrives as a
-    // twelfth cell. Reading it by position would land `fans` in `energy`; the row-length check makes
-    // the file fail loudly instead. Recorded as the format's known limit in ADR-0017.
-    $csv = importCsv([importTurn(['condition' => 'Good, slightly lame'])]);
+    $csv = test()->get("/training-runs/{$source->id}/export/csv")->assertOk()->getContent();
+
+    expect($csv)->toContain('"Good, slightly lame"');
 
     test()->post(route('runs.import.store'), importPayload($source, ['csv' => $csv]))
-        ->assertSessionHasErrors(['turns']);
+        ->assertRedirect();
 
-    expect(TrainingRun::count())->toBe($before);
+    $imported = importedRun($source->id);
+
+    expect($imported->turnEntries()->firstWhere('turn', 1)->condition)->toBe('Good, slightly lame');
 });
 
 it('accepts a mood a paper sheet wrote in lower case', function (): void {
