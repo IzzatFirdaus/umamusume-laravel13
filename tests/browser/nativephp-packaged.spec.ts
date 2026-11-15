@@ -17,6 +17,16 @@ test('enforces request-secret gate', async () => {
         stdio: ['ignore', 'pipe', 'pipe'],
     });
 
+    app.stdout?.on('data', (data) => {
+        console.log(`[app stdout] ${data.toString().trim()}`);
+    });
+    app.stderr?.on('data', (data) => {
+        console.log(`[app stderr] ${data.toString().trim()}`);
+    });
+    app.on('exit', (code, signal) => {
+        console.log(`[app exit] code=${code} signal=${signal}`);
+    });
+
     let phpPort: number | null = null;
 
     // The packaged exe is a windowed GUI app: its stdout never carries the
@@ -30,8 +40,10 @@ test('enforces request-secret gate', async () => {
                         signal: AbortSignal.timeout(100),
                     });
                     if (res.status === 403 || res.status === 200) {
+                        console.log(`[port scan] ${port} -> ${res.status}`);
                         return port;
                     }
+                    console.log(`[port scan] ${port} -> ${res.status} (ignored)`);
                 } catch {
                     // port closed or app not yet serving
                 }
@@ -43,6 +55,9 @@ test('enforces request-secret gate', async () => {
 
     const deadline = Date.now() + 240000; // 4 min; cold CI start needs time
     while (Date.now() < deadline) {
+        if (app.exitCode !== null && app.exitCode !== undefined) {
+            throw new Error(`App exited early with code ${app.exitCode} before PHP port was found`);
+        }
         phpPort = await findPort();
         if (phpPort) {
             break;
