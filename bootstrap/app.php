@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ArtworkAssetController;
+use App\Http\Middleware\EnforceNativePHPSecret;
 use App\Http\Middleware\HandleInertiaRequests;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -35,6 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // handle full-page reloads / version mismatches (ADR-0020 §1).
         $middleware->web(append: [
             HandleInertiaRequests::class,
+            EnforceNativePHPSecret::class,
         ]);
     })
     ->withSchedule(function (Schedule $schedule): void {

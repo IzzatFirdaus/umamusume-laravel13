@@ -62,7 +62,7 @@ export default {
     appPath: null,
     icon: null,
     store: settingsStore,
-    randomSecret: generateRandomString(32),
+    randomSecret: (process.env.NATIVEPHP_SECRET as string) || generateRandomString(32),
     processes: {},
     windows: {},
     notifications: {},
