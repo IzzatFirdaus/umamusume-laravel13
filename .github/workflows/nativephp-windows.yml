@@ -29,7 +29,7 @@ jobs:
         with:
           php-version: '8.5'
           coverage: none
-          extensions: zip, pdo_sqlite, mbstring, openssl, curl, fileinfo, tokenizer, xml, ctype, json, bcmath, intl
+          extensions: zip, pdo_sqlite, mbstring, openssl, curl, fileinfo, tokenizer, xml, ctype, json, bcmath, intl, sockets
 
       - name: Setup Node.js 24
         uses: actions/setup-node@v5
