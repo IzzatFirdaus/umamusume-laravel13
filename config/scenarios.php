@@ -549,6 +549,26 @@ return [
             // 02-unity-cup.md:220 — the gold versions arrive from the scripted event in Senior
             // Year, late November. "Late November" is the calendar vocabulary the run screens use.
             'burst_payout_timing' => 'Senior Year, Late November',
+            /*
+            | The league-placement bonus ladder, so the panel can name the figure the 8th-place
+            | standing pays (BO-015, R6-48 coverage).
+            |
+            | Transcribed from the publisher ladder §7 finding 11 records: game8.jp prints
+            |「2〜5位 全ステータス+50、6〜10位 +30、11〜15位 +20、16〜20位 +10、20〜30位 ボーナス無し」and
+            | game8.co's Global-facing page independently names its top band ("ranking 5th or above").
+            | Two edges are the publishers' own and are recorded rather than resolved: the top band is
+            | printed `2〜5位` by game8.jp while gamewith prints `1~5位` and game8.co says "5th or above"
+            | (which includes 1st), so the top band here opens at 1st; and game8.jp's `20〜30位 ボーナス無し`
+            | overlaps its own `16〜20位 +10` at exactly 20th, so the paying bands stop at 20 and a
+            | placement above them answers null — the panel then prints the placement alone rather
+            | than inventing a figure.
+            */
+            'league_placement_bonus' => [
+                ['from' => 1, 'to' => 5, 'bonus' => 50],
+                ['from' => 6, 'to' => 10, 'bonus' => 30],
+                ['from' => 11, 'to' => 15, 'bonus' => 20],
+                ['from' => 16, 'to' => 20, 'bonus' => 10],
+            ],
             'team_rank_ladder' => [
                 ['ranks' => ['G', 'F'], 'level' => 1],
                 ['ranks' => ['D', 'E'], 'level' => 2],

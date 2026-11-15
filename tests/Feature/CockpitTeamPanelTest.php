@@ -263,6 +263,44 @@ final class CockpitTeamPanelTest extends TestCase
     }
 
     /**
+     * BO-015: the league-placement bonus the Team Info panel's `+30` names.
+     *
+     * Doc §1.8 reads `Team Ranking Bonus: All Attributes + 30` beside an 8th-place league standing,
+     * and §7 finding 11 settles that the figure is the placement ladder's band, not a Team Rank S
+     * reading. The ladder is the matrix's own key, so the panel prints the band the stored placement
+     * falls in; a placement no band names answers null and the panel states the placement alone.
+     */
+    public function test_reads_the_league_placement_bonus_from_the_published_ladder(): void
+    {
+        $cases = [
+            8 => 30,   // the run's own standing, the band the client's +30 tooltip reads
+            3 => 50,   // the top band (game8.co's "5th or above" reading includes 1st)
+            12 => 20,
+            18 => 10,
+            25 => null, // above the paying bands: game8.jp prints 20〜30位 ボーナス無し
+        ];
+
+        foreach ($cases as $placement => $expected) {
+            $run = $this->unityCupRun(['team_league_placement' => $placement]);
+
+            $this->get(route('runs.cockpit', $run))
+                ->assertOk()
+                ->assertInertia(fn (Assert $page) => $page
+                    ->where('scenario.team.league_bonus', $expected));
+        }
+    }
+
+    public function test_reads_the_league_bonus_as_absent_when_no_placement_is_recorded(): void
+    {
+        $run = $this->unityCupRun();
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('scenario.team.league_bonus', null));
+    }
+
+    /**
      * @param  array<string, mixed>  $state
      */
     private function unityCupRun(array $state = []): TrainingRun

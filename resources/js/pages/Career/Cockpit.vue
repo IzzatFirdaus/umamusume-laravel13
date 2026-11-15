@@ -523,9 +523,26 @@ const teamLine = computed((): string => {
     return parts.length === 0 ? 'N/A, not recorded' : parts.join(' \u00b7 ');
 });
 
-const teamLeague = computed((): string => (teamState.value?.team_league_placement === null || teamState.value === null
-    ? 'N/A'
-    : String(teamState.value.team_league_placement)));
+/**
+ * BO-015: the standing plus the figure it pays. Doc §1.8 reads `League 8th` beside the client
+ * tooltip's `Team Ranking Bonus: All Attributes + 30`, and §7 finding 11 binds that figure to the
+ * league standing's band. `league_bonus` is the band's own figure (derived by
+ * `TeamPanelBuilder::leaguePlacementBonus()` from `config/scenarios.php`); a standing no band names
+ * prints alone, and an unrecorded placement keeps the row's own `N/A`. The figure is never derived
+ * here: this row prints the payload.
+ */
+const teamLeague = computed((): string => {
+    const team = teamState.value;
+
+    if (team === null || team.team_league_placement === null) {
+        return 'N/A';
+    }
+
+    const placement = String(team.team_league_placement);
+    const bonus = team.league_bonus ?? null;
+
+    return bonus === null ? placement : `${placement} \u00b7 +${bonus} all attributes`;
+});
 
 /**
  * The Unity Trainings count §1.8 records on the Team Info panel (R6-48 coverage). It is the same
@@ -720,6 +737,8 @@ interface TeamState {
     team_name: string | null;
     team_motto: string | null;
     team_league_placement: number | null;
+    /** The band bonus the standing pays (BO-015), from the scenario's own ladder; null when no band names it. */
+    league_bonus: number | null;
     team_preseason_wins: number | null;
     unity_trainings_count: number | null;
     spirit_bursts_count: number | null;

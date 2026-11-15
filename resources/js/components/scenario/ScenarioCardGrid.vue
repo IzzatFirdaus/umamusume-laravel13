@@ -236,10 +236,11 @@ const current = computed((): { rank: string; level: number | null } | null => (
             <!-- The +30 is the figure the recorded client shows, and it was read beside the S emblem.
                  Per `docs/research/flows-career-workspace.md:232` it is the LEAGUE-PLACEMENT bonus, not
                  a rank bonus: 6th-10th pays +30, and this run placed 8th (KI-155). The gate still reads
-                 the rank because the observation is only recorded for this run's board, and this build
-                 stores no placement ladder to generalise from (no `league_bonus` or `placement_bonus` key
-                 exists in `config/scenarios.php`), so the line states an observed figure rather than a
-                 derived one. It rides the rank card because that is where the client prints it. -->
+                 the rank because the observation is only recorded for this run's board, so the line
+                 states an observed figure rather than a derived one; the ladder now exists
+                 (`league_placement_bonus` in `config/scenarios.php`, derived as `league_bonus` on the
+                 payload for the Cockpit's League row), and re-pointing this card at it is a separate
+                 ruling. It rides the rank card because that is where the client prints it. -->
             <p v-if="team.rank === 'S'" class="mt-2 flex flex-wrap items-center gap-2 text-sm text-ink">
                 <span class="font-semibold text-ink-strong">Team Ranking Bonus: All Attributes +30</span>
                 <ProvenanceBadge state="estimated" :title="bonusTitle" />

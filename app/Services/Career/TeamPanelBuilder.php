@@ -643,6 +643,10 @@ final class TeamPanelBuilder
             'team_name' => $run->team_name,
             'team_motto' => $run->team_motto,
             'team_league_placement' => $run->team_league_placement,
+            // BO-015: the figure the client's team-race tooltip reads beside the standing (+30 at
+            // 8th). Read from the same ladder the config block holds, so the placement and the number
+            // it pays cannot come from different bands; null when no band names the standing.
+            'league_bonus' => $this->leaguePlacementBonus($run->team_league_placement, $def),
             'team_preseason_wins' => $run->team_preseason_wins,
             'unity_trainings_count' => $run->unity_trainings_count,
             'spirit_bursts_count' => $run->spirit_bursts_count,
@@ -788,6 +792,33 @@ final class TeamPanelBuilder
 
             if ($this->bandContains($total, $combined)) {
                 return $total;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * BO-015: the league-placement bonus a standing pays, read from the scenario's own ladder.
+     *
+     * `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md` §7 finding 11 prints the ladder
+     * (2〜5位 +50, 6〜10位 +30, 11〜15位 +20, 16〜20位 +10, 20〜30位 ボーナス無し) and settles that the
+     * client's `+30` tooltip is bound to the league standing rather than to the letter rank. The
+     * config key is the ladder's carrier and this method only reads it, so no band edge is restated
+     * here. A standing no band names (nothing recorded, or above the paying bands) answers null, and
+     * the caller prints the standing alone rather than a figure no source pays.
+     *
+     * @param  array<string, mixed>  $def  the scenario definition, as teamSection() resolved it
+     */
+    private function leaguePlacementBonus(?int $placement, array $def): ?int
+    {
+        if ($placement === null) {
+            return null;
+        }
+
+        foreach ((array) ($def['league_placement_bonus'] ?? []) as $band) {
+            if ($placement >= (int) $band['from'] && $placement <= (int) $band['to']) {
+                return (int) $band['bonus'];
             }
         }
 
