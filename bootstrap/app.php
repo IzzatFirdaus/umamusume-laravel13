@@ -32,6 +32,14 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // NativePHP authenticates browser-window traffic with the plain
+        // `_php_native` cookie (`electron-plugin/src/server/utils.ts`) or the
+        // `X-NativePHP-Secret` header; `EnforceNativePHPSecret` reads both.
+        // `EncryptCookies` runs first in the `web` group and nulls any cookie
+        // it cannot decrypt, so without this exemption the cookie branch of
+        // both gates can never authenticate.
+        $middleware->encryptCookies(except: ['_php_native']);
+
         // Inertia needs its middleware on the web group to serve the SPA shell and
         // handle full-page reloads / version mismatches (ADR-0020 §1).
         $middleware->web(append: [
