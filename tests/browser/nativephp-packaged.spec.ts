@@ -17,28 +17,39 @@ test('enforces request-secret gate', async () => {
         stdio: ['ignore', 'pipe', 'pipe'],
     });
 
-    let phpPort: number | null = null;
-    const portReady = new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(
-            () => reject(new Error('PHP server port not found within 90s')),
-            90000,
-        );
-        const onData = (data: Buffer) => {
-            const text = data.toString();
-            const match =
-                text.match(/PHP Server started on port:\s*(\d+)/) ??
-                text.match(/Development Server \(.*:(\d+)\) started/);
-            if (match) {
-                clearTimeout(timeout);
-                phpPort = parseInt(match[1], 10);
-                resolve();
-            }
-        };
-        app.stdout.on('data', onData);
-        app.stderr.on('data', onData);
-    });
+    // Detect PHP server port by probing 8100-9000 (NativePHP's getPhpPort range).
+    // Parsing Electron stdout for 'PHP Server started on port:' is unreliable on
+    // Windows packaged GUI apps, where console.log may not reach the spawn pipe.
+    const phpPort = await new Promise<number>((resolve, reject) => {
+        const deadline = Date.now() + 300000;
 
-    await portReady;
+        const attempt = () => {
+            if (Date.now() > deadline) {
+                reject(new Error('PHP server port not found within 300s'));
+                return;
+            }
+
+            (async () => {
+                // Give Electron time to initialize and start PHP
+                await new Promise((r) => setTimeout(r, 20000));
+                for (let port = 8100; port < 9000; port++) {
+                    try {
+                        const controller = new AbortController();
+                        const t = setTimeout(() => controller.abort(), 500);
+                        await fetch(`http://127.0.0.1:${port}/`, { signal: controller.signal });
+                        clearTimeout(t);
+                        resolve(port);
+                        return;
+                    } catch {
+                        // Port not open yet
+                    }
+                }
+                setTimeout(attempt, 15000);
+            })().catch((err) => reject(err));
+        };
+
+        attempt();
+    });
 
     const baseUrl = `http://127.0.0.1:${phpPort}`;
 
