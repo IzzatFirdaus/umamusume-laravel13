@@ -61,9 +61,20 @@ jobs:
       - shell: pwsh
         run: |
           $installer = Get-ChildItem -Path "artifacts" -Filter "*.exe" -Recurse | Select-Object -First 1
+          if (-not $installer) {
+            Write-Error "No installer .exe found in artifacts/"
+            exit 1
+          }
           Start-Process -FilePath $installer.FullName -ArgumentList "/S" -Wait
-          $exePath = Get-ChildItem -Path "$env:LOCALAPPDATA\Programs" -Recurse -Filter "*.exe" | Where-Object { $_.Name -notmatch "uninstall" } | Select-Object -First 1
+          $programsDir = Join-Path $env:LOCALAPPDATA "Programs"
+          $exePath = Get-ChildItem -Path $programsDir -Recurse -Filter "*.exe" | Where-Object { $_.Name -notmatch "uninstall" } | Select-Object -First 1
+          if (-not $exePath) {
+            Write-Error "No installed .exe found under $programsDir"
+            Get-ChildItem -Path $programsDir -Recurse | Select-Object -First 20 | ForEach-Object { Write-Host $_.FullName }
+            exit 1
+          }
           echo "NATIVEPHP_EXE_PATH=$($exePath.FullName)" >> $env:GITHUB_ENV
+          echo "Found app at $($exePath.FullName)"
 
       - run: npx playwright test --config=playwright.nativephp.config.ts
         env: { NATIVEPHP_EXE_PATH: "${{ env.NATIVEPHP_EXE_PATH }}" }
