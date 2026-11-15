@@ -1,4 +1,5 @@
 name: NativePHP Windows Acceptance
+# Acceptance gate for packaged Windows installer (Slice 1.2)
 on:
   workflow_run:
     workflows: ["NativePHP Windows Build"]
