@@ -252,7 +252,7 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
                         <td class="px-3 py-3">
                             <template v-if="run.scenario_label">{{ run.scenario_label }}</template>
                             <span v-else>
-                                N/A<span class="sr-only">: no scenario is set for this run.</span>
+                                N/A<span class="sr-only">, no scenario is set for this run.</span>
                             </span>
                         </td>
                         <!-- Annotation 3: the turn always carries the career's length for a live run.
@@ -269,7 +269,7 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
                         <td class="px-3 py-3">
                             <template v-if="positionText(run) !== 'N/A'">{{ positionText(run) }}</template>
                             <span v-else>
-                                N/A<span class="sr-only">: no turn has been logged on this run yet.</span>
+                                N/A<span class="sr-only">, no turn has been logged on this run yet.</span>
                             </span>
                         </td>
                         <td class="px-3 py-3">

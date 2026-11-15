@@ -472,7 +472,7 @@ const factorGrades: { family: string; note: string }[] = [
                             <td>{{ veteran.scenario_label }}</td>
                             <td class="font-mono tabular-nums">
                                 <template v-if="veteran.saved_at">{{ veteran.saved_at }}</template>
-                                <span v-else>N/A<span class="sr-only">: this record states no filing date.</span></span>
+                                <span v-else>N/A<span class="sr-only">, this record states no filing date.</span></span>
                             </td>
                             <!--
                                 One bare integer per cell: the stored spark tally for that family, never a

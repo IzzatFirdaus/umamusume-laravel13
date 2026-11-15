@@ -198,7 +198,7 @@ const CONFLICTS: ReadonlyArray<{ question: string; state: string }> = [
                                 rel="noreferrer noopener"
                                 target="_blank"
                             >Open source</a>
-                            <template v-else>N/A<span class="sr-only">: this source publishes no page a Trainer can open.</span></template>
+                            <template v-else>N/A<span class="sr-only">, this source publishes no page a Trainer can open.</span></template>
                         </td>
                     </tr>
                     <tr v-for="dataset in props.transcribed" :key="`transcribed-${dataset.name}`">
@@ -216,7 +216,7 @@ const CONFLICTS: ReadonlyArray<{ question: string; state: string }> = [
                                 rel="noreferrer noopener"
                                 target="_blank"
                             >Open source</a>
-                            <template v-else>N/A<span class="sr-only">: this source publishes no page a Trainer can open.</span></template>
+                            <template v-else>N/A<span class="sr-only">, this source publishes no page a Trainer can open.</span></template>
                         </td>
                     </tr>
                 </tbody>

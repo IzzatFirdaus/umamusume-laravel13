@@ -333,7 +333,7 @@ const isPal = (card: Card): boolean => card.type === 'friend';
                                      absence this is: the tooltip and its screen-reader twin are one
                                      statement in two media (DESIGN.md §5). -->
                                 <template v-else>
-                                    <span title="The source states no friendship bonus for this card.">N/A</span><span class="sr-only">: the source states no friendship bonus for this card.</span>
+                                    <span title="The source states no friendship bonus for this card.">N/A</span><span class="sr-only">, the source states no friendship bonus for this card.</span>
                                 </template>
                             </td>
                             <td :class="td">

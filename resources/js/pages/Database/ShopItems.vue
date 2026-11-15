@@ -203,7 +203,7 @@ const close = async (): Promise<void> => {
                                 :class="ratingClass(props.ratings[item.name])"
                                 :title="props.ratingsSource"
                             >{{ props.ratings[item.name] }}</span>
-                            <span v-else>N/A<span class="sr-only">: this publisher names no rating for the item.</span></span>
+                            <span v-else>N/A<span class="sr-only">, this publisher names no rating for the item.</span></span>
                         </td>
                     </tr>
                 </tbody>

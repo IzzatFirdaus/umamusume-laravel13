@@ -92,11 +92,11 @@ const tdNum = 'border-b border-rule px-2 py-3 text-right align-top font-mono tex
                                 </td>
                                 <td :class="td">
                                     <template v-if="pair.parent_a">{{ pair.parent_a }}</template>
-                                    <span v-else>N/A<span class="sr-only">: this parent slot is empty.</span></span>
+                                    <span v-else>N/A<span class="sr-only">, this parent slot is empty.</span></span>
                                 </td>
                                 <td :class="td">
                                     <template v-if="pair.parent_b">{{ pair.parent_b }}</template>
-                                    <span v-else>N/A<span class="sr-only">: this parent slot is empty.</span></span>
+                                    <span v-else>N/A<span class="sr-only">, this parent slot is empty.</span></span>
                                 </td>
                                 <td :class="tdNum">{{ pair.blue_grades }}</td>
                                 <td :class="[td, 'text-right']">
