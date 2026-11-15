@@ -83,7 +83,9 @@ class SpiritBurstCountdownTest extends TestCase
         $countdown = $this->countdown(8, 3);
 
         $this->assertNotNull($countdown);
-        $this->assertStringContainsString('Need 2 more bursts', $countdown['warning_message']);
+        // BO-016: the countdown names the tier the count has reached and the tier the next edge pays,
+        // so `11` beside `2 more` cannot read as one band's arithmetic (11 + 2 = 13 is outside 10–12).
+        $this->assertStringContainsString('11 combined (Gold Lv1 secured; 2 more for Gold Lv3)', $countdown['warning_message']);
         $this->assertStringContainsString('normal plus Extreme', $countdown['warning_message']);
         // The retired copy said "in 69 turns" off a turn 70 no source places. The timing key carries the
         // calendar vocabulary and the arithmetic key is an explicit null, not a guess.
@@ -103,6 +105,9 @@ class SpiritBurstCountdownTest extends TestCase
         $this->assertNull($countdown['counts']['normal_only']['band']);
         $this->assertNull($countdown['counts']['normal_only']['reward']);
 
+        // The tier words come from the band rows themselves: the first band is white-tier.
+        $this->assertStringContainsString('6 combined (White Lv1 secured; 1 more for White Lv3)', $countdown['warning_message']);
+
         // Each reading walks to its own next edge: normal-only 3 must reach 4, combined 6 must reach 7.
         $this->assertSame(4, $countdown['counts']['normal_only']['next_threshold']);
         $this->assertSame(1, $countdown['counts']['normal_only']['bursts_needed']);
@@ -117,6 +122,8 @@ class SpiritBurstCountdownTest extends TestCase
         $this->assertNotNull($countdown);
         $this->assertNull($countdown['counts']['normal_only']['band']);
         $this->assertNull($countdown['counts']['normal_and_extreme']['band']);
+        // Nothing is secured below the first band, so the countdown states the target alone.
+        $this->assertStringContainsString('2 combined (2 more for White Lv1)', $countdown['warning_message']);
         // The floor is read from config (4), not from a literal in PHP.
         $this->assertSame(4, $countdown['counts']['normal_and_extreme']['next_threshold']);
         $this->assertSame(2, $countdown['counts']['normal_and_extreme']['bursts_needed']);

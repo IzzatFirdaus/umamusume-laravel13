@@ -873,12 +873,29 @@ final class TeamPanelBuilder
         $warningMessage = null;
 
         if ($active['bursts_needed'] !== null && $active['bursts_needed'] > 0) {
-            // The sentence names the event and the reading it counted with, and states no number of turns:
-            // the old copy said "in N turns" off a turn the evidence does not place.
+            // BO-016: the sentence names the tier the count has reached and the tier the gap pays, both
+            // read from the band rows themselves. The unqualified `Need N more` read as arithmetic
+            // against the printed band (`Bursts 11 (inside 10-12)` beside `need 2 more`, where 11 + 2 =
+            // 13 is outside 10–12); naming both tiers makes it plain the deficit counts to the NEXT
+            // band's edge. The sentence states no number of turns: the old copy said "in N turns" off a
+            // turn the evidence does not place.
             $needed = $active['bursts_needed'];
-            $warningMessage = "Need {$needed} more burst".($needed === 1 ? '' : 's')
-                .' to the Spirit Burst payout (Gold Lv3, Senior November). This counts normal plus '
-                .'Extreme bursts; a normal-only reading would need '
+            $count = (int) ($active['bursts'] ?? 0);
+            $bands = array_values((array) config('scenarios.scenarios.'.$run->scenarioKey().'.spirit_burst_bands', []));
+            $secured = $this->burstTierLabel($active['band'], $bands);
+            $target = $this->burstTierLabel($this->burstBandLabelForFloor($active['next_threshold'], $bands), $bands);
+
+            if ($secured !== null && $target !== null) {
+                $headline = "{$count} combined ({$secured} secured; {$needed} more for {$target})";
+            } elseif ($target !== null) {
+                // Below the first band nothing is secured, so the sentence states the target alone.
+                $headline = "{$count} combined ({$needed} more for {$target})";
+            } else {
+                $headline = "Need {$needed} more burst".($needed === 1 ? '' : 's');
+            }
+
+            $warningMessage = $headline
+                .'. This counts normal plus Extreme bursts; a normal-only reading would need '
                 .($counts[self::BURST_MODE_NORMAL]['bursts_needed'] ?? 0).' more.';
         }
 
@@ -1009,6 +1026,77 @@ final class TeamPanelBuilder
         $next = $this->nextBurstThreshold($total, $bands);
 
         return ($next === null || $total === null) ? null : max(0, $next - $total);
+    }
+
+    /**
+     * The tier words of the band a count label names (`family` + `level`, e.g. `Gold Lv1`), or null
+     * when the label matches no band.
+     *
+     * BO-016: the countdown names the tier it counts toward, and both the tier's words and its edges
+     * come from the same configured band rows, so the sentence cannot state a tier one band away from
+     * the arithmetic it prints.
+     *
+     * @param  string|null  $bandLabel  a band's own `total` label (`10–12`, `13+`)
+     * @param  list<array{total: string, family: string, level: string, reward: string}>  $bands
+     */
+    private function burstTierLabel(?string $bandLabel, array $bands): ?string
+    {
+        if ($bandLabel === null) {
+            return null;
+        }
+
+        foreach ($bands as $band) {
+            if ($band['total'] === $bandLabel) {
+                // "gold hint"/"white hint" is the tier DESCRIPTION carried inside `reward`; the tier's
+                // NAME is `family` + `level` (`Burning Spirit Lv1`). The sentence prints the family's
+                // short tier word the way §1.8 does (`Gold Lv1`), which is the `level` prefixed by the
+                // family's own skilled-tier adjective.
+                $tier = $this->burstTierWord($band['family']);
+
+                return $tier === null ? null : $tier.' '.$band['level'];
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * The short tier word a band family pays (`Ignited Spirit` -> `White`, `Burning Spirit` -> `Gold`),
+     * or null for a family this map does not know.
+     *
+     * The gold/white naming is the config's own: the reward strings carry "white hint"/"gold hint" as the
+     * tier description, and §1.8 reads the tiers as `Gold Lv1`/`Gold Lv3`. The family names are the
+     * skills the bands award, so the map is by family and no band row is edited to satisfy it.
+     */
+    private function burstTierWord(string $family): ?string
+    {
+        return match ($family) {
+            'Ignited Spirit' => 'White',
+            'Burning Spirit' => 'Gold',
+            default => null,
+        };
+    }
+
+    /**
+     * The band label whose floor is the given threshold (`13` -> `13+`), or null when no band floor
+     * matches. `nextBurstThreshold()` answers the floor; this finds the band that owns it, so the tier
+     * words are read from a band row rather than reconstructed from the number.
+     *
+     * @param  list<array{total: string, family: string, level: string, reward: string}>  $bands
+     */
+    private function burstBandLabelForFloor(?int $threshold, array $bands): ?string
+    {
+        if ($threshold === null) {
+            return null;
+        }
+
+        foreach ($bands as $band) {
+            if (preg_match('/^(\d+)/u', $band['total'], $matches) === 1 && (int) $matches[1] === $threshold) {
+                return $band['total'];
+            }
+        }
+
+        return null;
     }
 
     /**

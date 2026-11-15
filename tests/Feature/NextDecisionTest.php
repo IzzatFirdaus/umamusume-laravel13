@@ -259,10 +259,11 @@ it('names the event each turn-counter counts to (§13.2)', function (): void {
         ->and($finaleRow['text'])->not->toBe('Unity Cup is 5 turns away.');
 });
 
-it('names the Spirit Burst payout in the burst countdown (§13.2)', function (): void {
+it('states the reached tier and the gap to the next in the burst countdown (§13.2, BO-016)', function (): void {
     // The burst widget at turn 1 read `Need 2 more bursts in 69 turns for Gold Lv3 (Senior November
-    // payout)`. It names a payout TIER, not the event, so a reader with the scenario's name in mind
-    // could take `69 turns` as time to the finals — a different event, 70 vs 73 in this run's terms.
+    // payout)`. The turn arithmetic is retired (no source places the payout on a turn), and BO-016
+    // retired the unqualified `Need N more`: beside `Bursts 11 (inside 10-12)` it read as one band's
+    // contradiction. The countdown now names the tier the count has reached and the tier the gap pays.
     $run = nextDecisionRun('unity_cup', 1, 80, DECISION_SHORT_TARGETS);
 
     // The combined tally is only answered when both counters are recorded; an unrecorded one is not a
@@ -275,7 +276,8 @@ it('names the Spirit Burst payout in the burst countdown (§13.2)', function ():
     $countdown = $props['scenario']['team']['burst_countdown'] ?? null;
 
     expect($countdown)->not->toBeNull()
-        ->and($countdown['warning_message'])->toContain('Spirit Burst');
+        ->and($countdown['warning_message'])->toContain('11 combined (Gold Lv1 secured; 2 more for Gold Lv3)')
+        ->and($countdown['warning_message'])->not->toContain('turns');
 });
 
 it('serializes both burst-count readings and no turn arithmetic to the Cockpit payload', function (): void {
