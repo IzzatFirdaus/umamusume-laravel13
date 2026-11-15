@@ -71,6 +71,9 @@
         "docs": "python tools/doc_census.py",
         "docs-adr": "python tools/adr-check.py docs/adr",
         "lint": "pint --test",
+        "pre-native-build": [
+            "@php tools/check-electron-env.php"
+        ],
         "fix": "pint",
         "typecheck": "npm run typecheck",
         "analyse": "phpstan analyse",
