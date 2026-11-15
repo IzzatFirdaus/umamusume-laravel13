@@ -154,6 +154,48 @@ test('extract command from args sibling', () => {
   assert.strictEqual(lastJson(stdout).decision, 'allow');
 });
 
+test('allow: rm inside .scratch-uma', () => {
+  const { exitCode, stdout } = runGuard(payload('rm .scratch-uma/commit-msg.txt'));
+  assert.strictEqual(exitCode, 0);
+  assert.strictEqual(lastJson(stdout).decision, 'allow');
+});
+
+test('allow: rm -rf inside .scratch-uma', () => {
+  const { exitCode, stdout } = runGuard(payload('rm -rf .scratch-uma/temp/'));
+  assert.strictEqual(exitCode, 0);
+  assert.strictEqual(lastJson(stdout).decision, 'allow');
+});
+
+test('deny regression: rm -rf /tmp/x', () => {
+  const { exitCode, stdout } = runGuard(payload('rm -rf /tmp/x'));
+  assert.strictEqual(exitCode, 2);
+  assert.strictEqual(lastJson(stdout).decision, 'block');
+});
+
+test('deny regression: rm -rf ~/Documents', () => {
+  const { exitCode, stdout } = runGuard(payload('rm -rf ~/Documents'));
+  assert.strictEqual(exitCode, 2);
+  assert.strictEqual(lastJson(stdout).decision, 'block');
+});
+
+test('deny regression: rm traversal out of .scratch-uma', () => {
+  const { exitCode, stdout } = runGuard(payload('rm .scratch-uma/../app.css'));
+  assert.strictEqual(exitCode, 2);
+  assert.strictEqual(lastJson(stdout).decision, 'block');
+});
+
+test('deny regression: rm scratch plus outside target', () => {
+  const { exitCode, stdout } = runGuard(payload('rm .scratch-uma/a /etc/passwd'));
+  assert.strictEqual(exitCode, 2);
+  assert.strictEqual(lastJson(stdout).decision, 'block');
+});
+
+test('deny regression: chained rm after scratch rm', () => {
+  const { exitCode, stdout } = runGuard(payload('rm .scratch-uma/a; rm -rf /tmp'));
+  assert.strictEqual(exitCode, 2);
+  assert.strictEqual(lastJson(stdout).decision, 'block');
+});
+
 test('extract command from top-level command key', () => {
   const { exitCode, stdout } = runGuard('{"command":"git status"}\n');
   assert.strictEqual(exitCode, 0);

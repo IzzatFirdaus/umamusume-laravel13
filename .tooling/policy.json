@@ -26,6 +26,13 @@
       "message": "Blocked: use the WebFetch tool instead of `{cmd}`."
     },
     {
+      "id": "allow-scratch-rm",
+      "matcher": "Bash|PowerShell|code_execution",
+      "pattern": "^\\s*rm\\s+(-\\S+\\s+)*(\\.scratch-uma/(?!.*\\.\\.)[^\\s;&|]*\\s*)+$",
+      "deny": false,
+      "allow": true
+    },
+    {
       "id": "destructive-rm",
       "matcher": "Bash|PowerShell|code_execution",
       "pattern": "^\\s*rm\\b",
