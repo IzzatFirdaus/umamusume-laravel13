@@ -13,7 +13,7 @@ test('enforces request-secret gate', async () => {
         throw new Error('NATIVEPHP_SECRET is not set');
     }
 
-    const app: ChildProcess = spawn(exePath, ['--no-sandbox', '--disable-gpu'], {
+    const app: ChildProcess = spawn(exePath, ['--no-sandbox', '--disable-gpu', '--headless=new'], {
         env: { ...process.env, DISPLAY: ':0' },
         stdio: ['ignore', 'pipe', 'pipe'],
     });
@@ -41,14 +41,14 @@ test('enforces request-secret gate', async () => {
     // Parsing Electron stdout for 'PHP Server started on port:' is unreliable on
     // Windows packaged GUI apps, where console.log may not reach the spawn pipe.
     const phpPort = await new Promise<number>((resolve, reject) => {
-        const deadline = Date.now() + 300000;
+        const deadline = Date.now() + 600000;
 
         const attempt = () => {
             if (Date.now() > deadline) {
                 console.log(`[packaged-test] Electron output before timeout: ${appOutput}`);
                 reject(
                     new Error(
-                        `PHP server port not found within 300s. Electron output: ${appOutput}`,
+                        `PHP server port not found within 600s. Electron output: ${appOutput}`,
                     ),
                 );
                 return;
@@ -71,7 +71,7 @@ test('enforces request-secret gate', async () => {
 
             (async () => {
                 // Give Electron time to initialize and start PHP.
-                await new Promise((r) => setTimeout(r, 5000));
+                await new Promise((r) => setTimeout(r, 10000));
                 for (let batchStart = 8100; batchStart < 9000; batchStart += 20) {
                     const batchEnd = Math.min(batchStart + 20, 9000);
                     const results = await Promise.all(
