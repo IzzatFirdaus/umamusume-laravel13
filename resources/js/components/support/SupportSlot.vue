@@ -173,7 +173,7 @@ function focusRow(): void {
                             title="The Scenario Link badge cannot be derived for this card."
                         >Scenario Link: N/A</span>
                         <span v-if="card.scenario_link_note" class="sr-only">, {{ card.scenario_link_note }}</span>
-                        <span v-else class="sr-only">, The Scenario Link badge cannot be derived for this card.</span>
+                        <span v-else class="sr-only">, the Scenario Link badge cannot be derived for this card.</span>
                     </span>
                 </p>
 
