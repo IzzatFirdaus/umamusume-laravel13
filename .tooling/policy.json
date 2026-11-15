@@ -3,7 +3,7 @@
   "rules": [
     {
       "id": "file-read",
-      "matcher": "Bash|PowerShell",
+      "matcher": "Bash|PowerShell|code_execution",
       "pattern": "^\\s*(cat|Get-Content|type|head|tail|more|less)\\b",
       "deny": true,
       "replacement": "read",
@@ -11,7 +11,7 @@
     },
     {
       "id": "file-write",
-      "matcher": "Bash|PowerShell",
+      "matcher": "Bash|PowerShell|code_execution",
       "pattern": "\\b(Set-Content|Out-File|tee|Add-Content)\\b|(^|[^>])>\\s*\\S",
       "deny": true,
       "replacement": "write",
@@ -19,7 +19,7 @@
     },
     {
       "id": "network-fetch",
-      "matcher": "Bash|PowerShell",
+      "matcher": "Bash|PowerShell|code_execution",
       "pattern": "^\\s*(curl|wget|Invoke-WebRequest|Invoke-RestMethod)\\b",
       "deny": true,
       "replacement": "WebFetch",
@@ -27,56 +27,56 @@
     },
     {
       "id": "destructive-rm",
-      "matcher": "Bash|PowerShell",
+      "matcher": "Bash|PowerShell|code_execution",
       "pattern": "^\\s*rm\\b",
       "deny": true,
       "message": "Blocked: file deletion is not a shell operation; use explicit git operations or ask the owner."
     },
     {
       "id": "destructive-mv",
-      "matcher": "Bash|PowerShell",
+      "matcher": "Bash|PowerShell|code_execution",
       "pattern": "^\\s*mv\\b",
       "deny": true,
       "message": "Blocked: use file operations, not shell moves."
     },
     {
       "id": "destructive-perms",
-      "matcher": "Bash|PowerShell",
+      "matcher": "Bash|PowerShell|code_execution",
       "pattern": "^\\s*(chmod|chown)\\b",
       "deny": true,
       "message": "Blocked: permission changes are not authorized for this workflow."
     },
     {
       "id": "destructive-git-reset-hard",
-      "matcher": "Bash|PowerShell",
+      "matcher": "Bash|PowerShell|code_execution",
       "pattern": "^\\s*git\\s+reset\\s+--hard\\b",
       "deny": true,
       "message": "Blocked: destructive git operation. Use git restore or git stash for reversible changes."
     },
     {
       "id": "destructive-git-clean",
-      "matcher": "Bash|PowerShell",
+      "matcher": "Bash|PowerShell|code_execution",
       "pattern": "^\\s*git\\s+clean\\s+-fdx\\b",
       "deny": true,
       "message": "Blocked: destructive git operation."
     },
     {
       "id": "destructive-git-push-force",
-      "matcher": "Bash|PowerShell",
+      "matcher": "Bash|PowerShell|code_execution",
       "pattern": "^\\s*git\\s+push\\s+--force\\b",
       "deny": true,
       "message": "Blocked: force-push is not authorized."
     },
     {
       "id": "destructive-disk",
-      "matcher": "Bash|PowerShell",
+      "matcher": "Bash|PowerShell|code_execution",
       "pattern": "^\\s*(dd|mkfs|fdisk)\\b",
       "deny": true,
       "message": "Blocked: disk operations are not authorized."
     },
     {
       "id": "allow-trusted",
-      "matcher": "Bash|PowerShell",
+      "matcher": "Bash|PowerShell|code_execution",
       "pattern": "^\\s*(git|npm|pnpm|yarn|composer|php|artisan|node|npx|docker|docker-compose)\\b",
       "deny": false,
       "allow": true
