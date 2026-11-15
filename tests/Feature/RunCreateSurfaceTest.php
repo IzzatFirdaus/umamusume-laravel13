@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Enums\RunStatus;
 use App\Models\RaceEntry;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
@@ -68,4 +69,47 @@ it('leaves the four fields unset when the Trainer posts without them', function 
         ->and($run->inheritance_parent_b_id)->toBeNull()
         ->and($run->current_objective_index)->toBeNull()
         ->and($run->shop_resets_in)->toBeNull();
+});
+
+it('refuses a shop countdown on a scenario that has no shop', function (): void {
+    // The model guard refuses this combination with an exception (the 500 this slice fixes); the
+    // boundary now refuses it as a field error first. Only Trackblazer composes a shop.
+    $trainee = Umamusume::factory()->create();
+
+    test()->post('/training-runs', [
+        'umamusume_id' => $trainee->id,
+        'status' => 'Active',
+        'scenario' => 'ura_finale',
+        'shop_resets_in' => 3,
+    ])->assertSessionHasErrors('shop_resets_in');
+});
+
+it('refuses a countdown longer than the rotation the scenario allows', function (): void {
+    $trainee = Umamusume::factory()->create();
+
+    test()->post('/training-runs', [
+        'umamusume_id' => $trainee->id,
+        'status' => 'Active',
+        'scenario' => 'trackblazer',
+        'shop_resets_in' => 7,
+    ])->assertSessionHasErrors('shop_resets_in');
+});
+
+it('clears the stored countdown when the scenario switches to one without a shop', function (): void {
+    $run = TrainingRun::factory()->create([
+        'scenario' => 'trackblazer',
+        'status' => RunStatus::Active,
+        'shop_resets_in' => 4,
+    ]);
+
+    test()->put(route('runs.update', $run), [
+        'umamusume_id' => $run->umamusume_id,
+        'status' => $run->status->value,
+        'scenario' => 'ura_finale',
+    ])->assertRedirect()->assertSessionHasNoErrors();
+
+    $fresh = $run->fresh();
+
+    expect($fresh->scenario)->toBe('ura_finale')
+        ->and($fresh->shop_resets_in)->toBeNull();
 });

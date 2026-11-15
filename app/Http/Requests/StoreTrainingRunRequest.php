@@ -132,11 +132,39 @@ class StoreTrainingRunRequest extends FormRequest
                     }
                 },
             ],
-            // The shop rotation countdown, as the Trainer reads it. The scenario's own
-            // `shop.rotation_turns` is the upper bound and the model guard applies it,
-            // because the bound lives in config and a static rule here would duplicate
-            // it with a number that can drift.
-            'shop_resets_in' => ['nullable', 'integer', 'min:0'],
+            /*
+             * The shop rotation countdown, as the Trainer reads it. Only a scenario that composes a
+             * Pro Shop has a rotation to count down, so a value on any other scenario is refused here
+             * rather than left to the model guard, which threw a 500 where this form shows a field
+             * error (measured 2026-11-15). The upper bound is the same `shop.rotation_turns` the guard
+             * reads, for the same reason the guard reads it: the bound lives in config and a static
+             * `max:` here would duplicate it with a number that can drift.
+             */
+            'shop_resets_in' => [
+                'nullable',
+                'integer',
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if ($value === null || ! is_numeric($value)) {
+                        return;
+                    }
+
+                    $run = $this->route('run');
+                    $scenario = $this->input('scenario', $run instanceof TrainingRun ? $run->scenario : null);
+                    $rotation = $scenario === null || $scenario === ''
+                        ? 0
+                        : (int) config('scenarios.scenarios.'.$scenario.'.shop.rotation_turns', 0);
+
+                    if ($rotation === 0) {
+                        $fail('This scenario has no Pro Shop, so there is no rotation countdown to record.');
+
+                        return;
+                    }
+
+                    if ((int) $value < 0 || (int) $value > $rotation) {
+                        $fail('The Pro Shop rotates every '.$rotation.' turns in this scenario, so a longer countdown is a misread.');
+                    }
+                },
+            ],
             // The four ceilings the Trainer read off the client for this run (`ADR-0025`). This is the
             // identity form's write, so it is where a cap corrected mid-run is stored; the same rule set
             // guards the build target step, which is where a target above the scenario bound is entered
@@ -164,6 +192,26 @@ class StoreTrainingRunRequest extends FormRequest
          * keeps its own null for a row no request ever touched.
          */
         $this->merge(['mode' => $this->input('mode', RunMode::NewCareer->value)]);
+
+        /*
+         * The scenario's Pro Shop frame. A countdown the run already stored is cleared when the
+         * payload switches it to a scenario with no shop and says nothing about the countdown: the
+         * stored number would otherwise meet the model guard against the new scenario's absent
+         * rotation and surface as a 500. A payload that does state a value is left untouched, so the
+         * `shop_resets_in` rule refuses it with a field error instead of silently discarding it.
+         */
+        $run = $this->route('run');
+
+        if ($run instanceof TrainingRun && $this->missing('shop_resets_in')) {
+            $scenario = $this->input('scenario', $run->scenario);
+            $rotation = $scenario === null || $scenario === ''
+                ? 0
+                : (int) config('scenarios.scenarios.'.$scenario.'.shop.rotation_turns', 0);
+
+            if ($rotation === 0 && $run->shop_resets_in !== null) {
+                $this->merge(['shop_resets_in' => null]);
+            }
+        }
     }
 
     /**
