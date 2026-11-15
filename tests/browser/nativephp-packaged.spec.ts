@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { spawn, type ChildProcess } from 'child_process';
+import { createConnection, type NetConnectOpts } from 'net';
 
 test('enforces request-secret gate', async () => {
     const exePath = process.env.NATIVEPHP_EXE_PATH;
@@ -17,6 +18,17 @@ test('enforces request-secret gate', async () => {
         stdio: ['ignore', 'pipe', 'pipe'],
     });
 
+    let appOutput = '';
+    app.stdout?.on('data', (d) => (appOutput += d.toString()));
+    app.stderr?.on('data', (d) => (appOutput += d.toString()));
+    app.on('exit', (code) => {
+        if (code !== null && code !== 0) {
+            throw new Error(
+                `Electron process exited early with code ${code}. Output: ${appOutput}`,
+            );
+        }
+    });
+
     // Detect PHP server port by probing 8100-9000 (NativePHP's getPhpPort range).
     // Parsing Electron stdout for 'PHP Server started on port:' is unreliable on
     // Windows packaged GUI apps, where console.log may not reach the spawn pipe.
@@ -25,26 +37,48 @@ test('enforces request-secret gate', async () => {
 
         const attempt = () => {
             if (Date.now() > deadline) {
-                reject(new Error('PHP server port not found within 300s'));
+                reject(
+                    new Error(
+                        `PHP server port not found within 300s. Electron output: ${appOutput}`,
+                    ),
+                );
                 return;
             }
 
+            const probePort = async (port: number): Promise<number | null> => {
+                const opts: NetConnectOpts = { host: '127.0.0.1', port, timeout: 200 };
+                return new Promise<number | null>((res) => {
+                    const socket = createConnection(opts, () => {
+                        socket.destroy();
+                        res(port);
+                    });
+                    socket.on('error', () => res(null));
+                    socket.on('timeout', () => {
+                        socket.destroy();
+                        res(null);
+                    });
+                });
+            };
+
             (async () => {
-                // Give Electron time to initialize and start PHP
-                await new Promise((r) => setTimeout(r, 20000));
-                for (let port = 8100; port < 9000; port++) {
-                    try {
-                        const controller = new AbortController();
-                        const t = setTimeout(() => controller.abort(), 500);
-                        await fetch(`http://127.0.0.1:${port}/`, { signal: controller.signal });
-                        clearTimeout(t);
-                        resolve(port);
+                // Give Electron time to initialize and start PHP.
+                await new Promise((r) => setTimeout(r, 5000));
+                for (let batchStart = 8100; batchStart < 9000; batchStart += 20) {
+                    const batchEnd = Math.min(batchStart + 20, 9000);
+                    const results = await Promise.all(
+                        Array.from(
+                            { length: batchEnd - batchStart },
+                            (_, i) => probePort(batchStart + i),
+                        ),
+                    );
+                    const found = results.find((p) => p !== null);
+                    if (found !== undefined) {
+                        resolve(found);
                         return;
-                    } catch {
-                        // Port not open yet
                     }
+                    if (Date.now() > deadline) break;
                 }
-                setTimeout(attempt, 15000);
+                setTimeout(attempt, 10000);
             })().catch((err) => reject(err));
         };
 
