@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   test-packaged-exe:
@@ -33,12 +34,27 @@ jobs:
 
       - run: npm ci && npx playwright install --with-deps chromium
 
+      - name: Resolve build run ID
+        shell: pwsh
+        run: |
+          $runId = "${{ github.event.workflow_run.id }}"
+          if ($runId) {
+            echo "BUILD_RUN_ID=$runId" >> $env:GITHUB_ENV
+          } else {
+            $latestBuild = gh api /repos/${{ github.repository }}/actions/workflows/nativephp-windows.yml/runs --jq '.workflow_runs[] | select(.conclusion == "success") | .id' | Select-Object -First 1
+            if (-not $latestBuild) {
+              Write-Error "No successful build run found. Run the NativePHP Windows Build workflow first."
+              exit 1
+            }
+            echo "BUILD_RUN_ID=$latestBuild" >> $env:GITHUB_ENV
+          }
+
       - uses: actions/download-artifact@v4
         with:
           name: nativephp-windows-installer
           path: artifacts
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event.workflow_run.id || github.run_id }}
+          run-id: ${{ env.BUILD_RUN_ID }}
 
       - shell: pwsh
         run: |
