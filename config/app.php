@@ -56,6 +56,44 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Application Version
+    |--------------------------------------------------------------------------
+    |
+    | The version this build reports in the About dialog and compares against the
+    | release feed. It is the same value `config('nativephp.version')` packages, so
+    | the installer filename and the in-app version cannot drift apart.
+    |
+    */
+
+    'version' => env('APP_VERSION', '0.1.0'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Build Revision
+    |--------------------------------------------------------------------------
+    |
+    | The commit the installer was cut from, written by the release workflow.
+    | `dev` marks a build that carries no revision, which is what a local build is.
+    |
+    */
+
+    'build_sha' => env('APP_BUILD_SHA', 'dev'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Release Feed
+    |--------------------------------------------------------------------------
+    |
+    | The `latest.json` the packaged app reads to decide whether a newer release
+    | exists. Empty on a machine that has no feed to ask, which is every browser
+    | and test run, so the update banner stays inert there.
+    |
+    */
+
+    'update_feed_url' => env('UPDATE_FEED_URL'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
     |
