@@ -357,7 +357,7 @@ class CockpitController extends Controller
      * The run's own identity, flattened. `scenario_label` names the absence rather than borrowing the
      * baseline's name, which is a composition device and not a fact (D-220).
      *
-     * @return array{id: int, trainee: string, trainee_ja: string|null, status: string, status_label: string, scenario_label: string, run_url: string, index_url: string, timeline_url: string, result_url: string, training_url: string, deck_url: string, status_labels: array<string,string>, scenarios: array<string,string>, update_url: string, destroy_url: string, current_objective_index: int|null}
+     * @return array{id: int, trainee: string, trainee_ja: string|null, notes: string|null, status: string, status_label: string, scenario_label: string, run_url: string, index_url: string, timeline_url: string, result_url: string, training_url: string, deck_url: string, status_labels: array<string,string>, scenarios: array<string,string>, update_url: string, destroy_url: string, current_objective_index: int|null}
      */
     private function runSection(TrainingRun $run): array
     {
@@ -365,6 +365,9 @@ class CockpitController extends Controller
             'id' => $run->id,
             'trainee' => $run->umamusume->name,
             'trainee_ja' => $run->umamusume->name_ja,
+            // R6-53: the free-text note the create form, the snapshot form and the import path write.
+            // It rides the run's own identity so the Cockpit reads the column directly, not a copy.
+            'notes' => $run->notes,
             'status' => $run->status->value,
             'status_label' => $run->status->label(),
             // The header edit forms (ruling 1) carry these as hidden values so a partial update
