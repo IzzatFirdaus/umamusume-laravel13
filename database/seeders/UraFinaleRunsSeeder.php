@@ -10,6 +10,7 @@ use App\Enums\MoodTier;
 use App\Enums\RaceEntryStatus;
 use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
+use App\Models\SupportCard;
 use App\Models\TrainingRun;
 use App\Services\CareerCalendar;
 use Illuminate\Database\Seeder;
@@ -755,10 +756,57 @@ class UraFinaleRunsSeeder extends Seeder
         ],
     ];
 
+    /**
+     * The six-card deck the audit walks as run 15 (the tracker's Run 3, Maruzensky).
+     *
+     * The tracker records no deck for Run 3. This is the reference guide's §1.4 six-card Unity Cup
+     * deck, the same loadout the Rosy Dreams seed carries; it exists to close the populated-deck
+     * coverage hole, where three audit passes had walked the builder empty. Cards resolve by the
+     * published `support_id`, never by row id, so the fixture survives a re-seed.
+     *
+     * Public for the same reason `RUNS` is: the seeder test materialises the FK prerequisites from
+     * this table instead of duplicating the ids.
+     *
+     * @var array<int, array{support_id: int, ownership: string, level: int}>
+     */
+    public const array RUN_15_DECK = [
+        1 => ['support_id' => 30003, 'ownership' => 'OWNED', 'level' => 35],  // [Dream Big!] Tokai Teio
+        2 => ['support_id' => 30018, 'ownership' => 'OWNED', 'level' => 30],  // [Even the Littlest Bud] Nishino Flower
+        3 => ['support_id' => 30020, 'ownership' => 'OWNED', 'level' => 30],  // [Double Carrot Punch!] Biko Pegasus
+        4 => ['support_id' => 30016, 'ownership' => 'RENTED', 'level' => 50], // [Piece of Mind] Super Creek
+        5 => ['support_id' => 30030, 'ownership' => 'OWNED', 'level' => 30],  // [Just Keep Going] Matikanetannhauser
+        6 => ['support_id' => 30019, 'ownership' => 'OWNED', 'level' => 35],  // [Urara's Day Off!] Haru Urara
+    ];
+
     public function run(): void
     {
         foreach (self::RUNS as $label => $run) {
             $this->importRun((string) $label, $run);
+        }
+    }
+
+    /**
+     * Attach the six-card fixture to the run the audit walks as run 15.
+     *
+     * The guard is `$label === '3'` because that is the tracker row the seeded database materialises
+     * as id 15; it is the only run this fixture targets. `deckSlots()->exists()` keeps a re-seed from
+     * duplicating the six rows after the first pass.
+     */
+    private function seedRun15Deck(string $label, TrainingRun $run): void
+    {
+        if ($label !== '3' || $run->deckSlots()->exists()) {
+            return;
+        }
+
+        foreach (self::RUN_15_DECK as $position => $slot) {
+            $card = SupportCard::query()->where('support_id', $slot['support_id'])->firstOrFail();
+
+            $run->deckSlots()->create([
+                'support_card_id' => $card->id,
+                'slot_position' => $position,
+                'ownership' => $slot['ownership'],
+                'card_level' => $slot['level'],
+            ]);
         }
     }
 
@@ -777,6 +825,10 @@ class UraFinaleRunsSeeder extends Seeder
         $source = self::SOURCE_FILE.' (Run '.$label.')';
 
         if (TrainingRun::where('import_source', $source)->exists()) {
+            // The run body is already imported; a re-seed still fills the deck fixture if an older
+            // seed predates it, without duplicating the six slots.
+            $this->seedRun15Deck($label, TrainingRun::where('import_source', $source)->firstOrFail());
+
             return;
         }
 
@@ -821,6 +873,8 @@ class UraFinaleRunsSeeder extends Seeder
                 'career_position_source' => 'imported',
             ]);
         }
+
+        $this->seedRun15Deck($label, $model);
 
         foreach ($run['races'] as $race) {
             $model->raceEntries()->create([

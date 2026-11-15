@@ -6,9 +6,11 @@ use App\Enums\MoodTier;
 use App\Enums\RaceEntryStatus;
 use App\Enums\RunStatus;
 use App\Models\CharacterCard;
+use App\Models\DeckSlot;
 use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
 use App\Models\Skill;
+use App\Models\SupportCard;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\Umamusume;
@@ -56,6 +58,12 @@ beforeEach(function (): void {
             }
         }
     }
+
+    foreach (UraFinaleRunsSeeder::RUN_15_DECK as $slot) {
+        if (SupportCard::where('support_id', $slot['support_id'])->doesntExist()) {
+            SupportCard::factory()->create(['support_id' => $slot['support_id']]);
+        }
+    }
 });
 
 it('seeds all seventeen URA Finale tracker runs with one turn each', function (): void {
@@ -66,6 +74,34 @@ it('seeds all seventeen URA Finale tracker runs with one turn each', function ()
     expect($runs)->toHaveCount(17)
         ->and(TurnEntry::whereIn('training_run_id', $runs->pluck('id'))->count())->toBe(17)
         ->and($runs->where('imported_at', '!=', null))->toHaveCount(17);
+});
+
+it('seeds the six-card deck on run 15 and leaves every other tracker run empty', function (): void {
+    $this->seed(UraFinaleRunsSeeder::class);
+
+    $run = TrainingRun::where('import_source', 'docs/Umamusume_Progress_Tracker_Runs.md (Run 3)')->firstOrFail();
+
+    expect($run->deckSlots()->count())->toBe(6)
+        ->and($run->deckSlots()->orderBy('slot_position')->pluck('slot_position')->all())->toBe([1, 2, 3, 4, 5, 6])
+        ->and($run->deckSlots()->where('ownership', 'OWNED')->count())->toBe(5)
+        ->and($run->deckSlots()->where('ownership', 'RENTED')->count())->toBe(1)
+        ->and($run->deckSlots()->whereNotNull('card_level')->count())->toBe(6);
+
+    $otherRunIds = TrainingRun::where('import_source', 'like', 'docs/Umamusume_Progress_Tracker_Runs.md (Run %')
+        ->where('import_source', '!=', 'docs/Umamusume_Progress_Tracker_Runs.md (Run 3)')
+        ->pluck('id');
+
+    expect($otherRunIds)->not->toBeEmpty()
+        ->and(DeckSlot::whereIn('training_run_id', $otherRunIds)->count())->toBe(0);
+});
+
+it('does not duplicate the run-15 deck when the seeder is re-run', function (): void {
+    $this->seed(UraFinaleRunsSeeder::class);
+    $this->seed(UraFinaleRunsSeeder::class);
+
+    $run = TrainingRun::where('import_source', 'docs/Umamusume_Progress_Tracker_Runs.md (Run 3)')->firstOrFail();
+
+    expect($run->deckSlots()->count())->toBe(6);
 });
 
 it('stores each run snapshot turn and mood from its roster line', function (): void {
