@@ -63,6 +63,9 @@ jobs:
       - name: Generate application key
         run: php artisan key:generate --no-interaction --force
 
+      - name: Scaffold NativePHP project
+        run: php artisan native:install --force --quiet
+
       - name: Install Node dependencies
         run: npm ci
 
