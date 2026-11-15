@@ -5,12 +5,27 @@ on:
     types: [completed]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
 jobs:
   test-packaged-exe:
     if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
     runs-on: windows-latest
+    timeout-minutes: 15
+    env:
+      NATIVEPHP_SECRET: ${{ secrets.NATIVEPHP_SECRET }}
     steps:
-      - uses: actions/checkout@v5
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Generate NATIVEPHP_SECRET if not set
+        shell: pwsh
+        run: |
+          if (-not $env:NATIVEPHP_SECRET) {
+            $secret = -join ((48..57) + (65..90) + (97..122) | Get-Random -Count 32 | ForEach-Object { [char]$_ })
+            echo "NATIVEPHP_SECRET=$secret" >> $env:GITHUB_ENV
+          }
 
       - uses: actions/setup-node@v5
         with: { node-version: '24', cache: 'npm' }
@@ -26,7 +41,7 @@ jobs:
 
       - shell: pwsh
         run: |
-          $installer = Get-ChildItem -Path "artifacts" -Filter "*.exe" | Select-Object -First 1
+          $installer = Get-ChildItem -Path "artifacts" -Filter "*.exe" -Recurse | Select-Object -First 1
           Start-Process -FilePath $installer.FullName -ArgumentList "/S" -Wait
           $exePath = Get-ChildItem -Path "$env:LOCALAPPDATA\Programs" -Recurse -Filter "*.exe" | Where-Object { $_.Name -notmatch "uninstall" } | Select-Object -First 1
           echo "NATIVEPHP_EXE_PATH=$($exePath.FullName)" >> $env:GITHUB_ENV
