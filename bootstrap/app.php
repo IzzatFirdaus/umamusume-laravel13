@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ArtworkAssetController;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Http\Middleware\PreventRegularBrowserAccess;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
@@ -35,6 +36,7 @@ return Application::configure(basePath: dirname(__DIR__))
         // handle full-page reloads / version mismatches (ADR-0020 §1).
         $middleware->web(append: [
             HandleInertiaRequests::class,
+            PreventRegularBrowserAccess::class,
         ]);
     })
     ->withSchedule(function (Schedule $schedule): void {
