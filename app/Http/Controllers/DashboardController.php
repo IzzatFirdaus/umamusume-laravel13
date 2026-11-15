@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\ListVeterans;
 use App\Enums\CandidateStatus;
+use App\Enums\ReleaseStatus;
 use App\Enums\RunStatus;
 use App\Models\CharacterCard;
 use App\Models\MatchCandidate;
@@ -112,10 +113,11 @@ class DashboardController extends Controller
                 'forms' => CharacterCard::count(),
                 'skills' => Skill::count(),
                 'supportCards' => SupportCard::count(),
-                // R6-24: the scoped partner the support-card catalogue figure needs. A total
+                // R6-24 and BO-008: the scoped partner each catalogue figure needs. A total
                 // without the Global scope reads as though every row were playable on this client.
-                // Support cards use the generated column's own literal, which is the value
-                // `SupportCardController` reads in the same way.
+                // Trainees use the enum's stored value; support cards use the generated column's
+                // own literal, which is the value `SupportCardController` reads in the same way.
+                'globalTrainees' => Umamusume::query()->where('release_status', ReleaseStatus::GlobalReleased->value)->count(),
                 'globalSupportCards' => SupportCard::query()->where('release_status', 'Global')->count(),
             ],
             // Fresh install orientation (UX-23): three zero tiles tell a new Trainer nothing about

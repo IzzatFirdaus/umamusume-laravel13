@@ -105,7 +105,8 @@ const props = defineProps<{
         forms: number;
         skills: number;
         supportCards: number;
-        /** R6-24: the Global-released half of the support-card catalogue total. */
+        /** R6-24 / BO-008: the Global-released halves of the two catalogue totals. */
+        globalTrainees: number;
         globalSupportCards: number;
     };
     /** Fresh install (UX-23): false while no catalogue row exists, and the KPI row trades its three
@@ -554,7 +555,13 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                          catalogue's own door beside it. The door sits on the number's empty right
                          side instead of under it, so the card reads figure-first. -->
                     <div class="flex items-center justify-between gap-3">
-                        <p class="font-mono text-kpi font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.catalogueTrainees) }}</p>
+                        <div>
+                            <p class="font-mono text-kpi font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.catalogueTrainees) }}</p>
+                            <!-- BO-008: the catalogue total without its Global scope read as though
+                                 every trainee were playable on this client. The scope sits under the
+                                 figure rather than in the heading, so the tile still reads figure-first. -->
+                            <p class="mt-1 text-xs text-ink-muted" data-field="trainee-scope">{{ group(props.counts.globalTrainees) }} on [Global]</p>
+                        </div>
                         <Link href="/umamusume" class="inline-flex min-h-11 shrink-0 items-center underline underline-offset-2 hover:decoration-2">Browse catalog</Link>
                     </div>
                 </section>
