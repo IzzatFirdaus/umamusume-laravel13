@@ -104,6 +104,33 @@ it('does not duplicate the run-15 deck when the seeder is re-run', function (): 
     expect($run->deckSlots()->count())->toBe(6);
 });
 
+it('fills run-15 deck slots that the catalogue could not resolve on the first seed', function (): void {
+    SupportCard::query()->delete();
+
+    $deck = UraFinaleRunsSeeder::RUN_15_DECK;
+    $firstThree = array_slice($deck, 0, 3, true);
+    $lastThree = array_slice($deck, 3, null, true);
+
+    foreach ($firstThree as $slot) {
+        SupportCard::factory()->create(['support_id' => $slot['support_id']]);
+    }
+
+    $this->seed(UraFinaleRunsSeeder::class);
+
+    $run = TrainingRun::where('import_source', 'docs/Umamusume_Progress_Tracker_Runs.md (Run 3)')->firstOrFail();
+
+    expect($run->deckSlots()->count())->toBe(3);
+
+    foreach ($lastThree as $slot) {
+        SupportCard::factory()->create(['support_id' => $slot['support_id']]);
+    }
+
+    $this->seed(UraFinaleRunsSeeder::class);
+
+    expect($run->deckSlots()->count())->toBe(6)
+        ->and($run->deckSlots()->orderBy('slot_position')->pluck('slot_position')->all())->toBe([1, 2, 3, 4, 5, 6]);
+});
+
 it('stores each run snapshot turn and mood from its roster line', function (): void {
     $this->seed(UraFinaleRunsSeeder::class);
 

@@ -789,12 +789,13 @@ class UraFinaleRunsSeeder extends Seeder
      * Attach the six-card fixture to the run the audit walks as run 15.
      *
      * The guard is `$label === '3'` because that is the tracker row the seeded database materialises
-     * as id 15; it is the only run this fixture targets. `deckSlots()->exists()` keeps a re-seed from
-     * duplicating the six rows after the first pass.
+     * as id 15; it is the only run this fixture targets. Each position is filled with `firstOrCreate`,
+     * so a re-seed fills slots an earlier pass could not resolve and never duplicates or overwrites one
+     * that is already there.
      */
     private function seedRun15Deck(string $label, TrainingRun $run): void
     {
-        if ($label !== '3' || $run->deckSlots()->exists()) {
+        if ($label !== '3') {
             return;
         }
 
@@ -806,15 +807,21 @@ class UraFinaleRunsSeeder extends Seeder
             $card = SupportCard::query()->where('support_id', $slot['support_id'])->first();
 
             if ($card === null) {
+                $this->command?->warn(
+                    "Run 15 deck slot {$position}: support_id {$slot['support_id']} is not in the catalogue; slot left empty."
+                );
+
                 continue;
             }
 
-            $run->deckSlots()->create([
-                'support_card_id' => $card->id,
-                'slot_position' => $position,
-                'ownership' => $slot['ownership'],
-                'card_level' => $slot['level'],
-            ]);
+            $run->deckSlots()->firstOrCreate(
+                ['slot_position' => $position],
+                [
+                    'support_card_id' => $card->id,
+                    'ownership' => $slot['ownership'],
+                    'card_level' => $slot['level'],
+                ],
+            );
         }
     }
 
