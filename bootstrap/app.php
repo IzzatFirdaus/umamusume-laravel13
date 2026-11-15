@@ -2,7 +2,6 @@
 
 use App\Http\Controllers\ArtworkAssetController;
 use App\Http\Middleware\HandleInertiaRequests;
-use App\Http\Middleware\PreventRegularBrowserAccess;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
@@ -10,6 +9,7 @@ use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
+use Native\Desktop\Http\Middleware\PreventRegularBrowserAccess;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -32,8 +32,12 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        // Inertia needs its middleware on the web group to serve the SPA shell and
-        // handle full-page reloads / version mismatches (ADR-0020 §1).
+        if (class_exists(PreventRegularBrowserAccess::class)) {
+            $middleware->web(prepend: [
+                PreventRegularBrowserAccess::class,
+            ]);
+        }
+
         $middleware->web(append: [
             HandleInertiaRequests::class,
             PreventRegularBrowserAccess::class,

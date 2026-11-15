@@ -5,6 +5,7 @@ import Flash from '../components/ui/Flash.vue';
 import NavGlyph from '../components/NavGlyph.vue';
 import VisitProgressBar from '../components/VisitProgressBar.vue';
 import { useLayout } from '../composables/useLayout';
+import UpdateBanner from '../components/UpdateBanner.vue';
 
 const page = usePage();
 

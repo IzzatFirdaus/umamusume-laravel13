@@ -28,9 +28,6 @@ ehthumbs.db
 Desktop.ini
 $RECYCLE.BIN/
 *.lnk
-# A tool once wrote an unexpanded %SystemDrive% as a relative path; the directory is apparatus
-# litter, not project state, and `git add -A` would sweep it into a commit.
-/%SystemDrive%/
 
 # OS: macOS
 .DS_Store
@@ -39,9 +36,7 @@ $RECYCLE.BIN/
 /.fleet
 /.idea
 /.nova
-/.vscode/*
-!.vscode/settings.json
-!.vscode/mcp.json
+/.vscode
 /.zed
 
 # Homestead
@@ -49,37 +44,11 @@ Homestead.json
 Homestead.yaml
 
 # AI agent tooling (personal configs and installed skill payloads)
-# Directories kept ignored (tool/vendor installs, not project state):
-.agents/
-.grok/
-.kilo/*
-!.kilo/kilo.jsonc
-.kilocode/
-.cursor/
-.qoder/*
-!.qoder/settings.json
-.claude/*
-!.claude/settings.json
-!.claude/hooks/
-!.claude/agents/
-!.claude/skills/
-# Host-local skill payloads kept untracked (only the trigger-contract skills
-# listed in the plan are tracked under .claude/skills/):
-.claude/skills/creating-models/
-.claude/skills/deploying-to-cloud/
-.claude/skills/fetch-pipeline/
-.claude/skills/inertia-vue-development/
-.claude/skills/infer-conventions/
-.claude/skills/playwright-cli/
-.claude/skills/running-tests/
-.claude/skills/testing-best-practices/
-# Local-only agent config / state (never committed):
-/.mcp.local.json
-/.tooling/logs/
-# Project-specific MCP configs (kept tracked):
-.mcp.json
-.mcp.example.json
-.qoder/settings.json
+/.mcp.json
+/.claude
+/.agents
+/.cursor
+/.grok
 /boost.json
 /opencode.json
 /.augment/
@@ -91,20 +60,21 @@ Homestead.yaml
 /.copilot/
 /.crush/
 /.crushrc
-/.dsh-vision-toolkit/
 /.factory/
 /.gemini/
 /.hermes/
 /.junie/
+/.kilo/
+/.kilocode/
 /.kiro/
 /.minimax/
 /.mux/
 /.opencode/
 /.playwright/
 /.playwright-mcp/
-/.playwright-cli/
 /playwright-report/
 /test-results/
+/.qoder/
 /.roo/
 /.superpowers/
 /.trae/
@@ -113,22 +83,13 @@ Homestead.yaml
 /.windsurf/
 /skills-lock.json
 /kilo.json
-/kilo.jsonc
-/crush.json
-/.github/
+/.github/*
+!/.github/workflows/
+!/.github/workflows/*.yml
 
 # Local-only artifacts (this app is never deployed; PRD NFR-1)
 /research-scratch/
 /.scratch-uma/
-/.scratch-merge-preserve/
-# A one-off driver script written to the repo ROOT rather than into `.scratch-uma/<session>/`.
-# `AGENTS.md` §9 requires session artifacts to live in that session's own subdirectory and holds only
-# directories at the `.scratch-uma/` root; this file predates the rule being followed. Ignored by name
-# rather than deleted, because it is another session's artifact and not this pass's to remove.
-/.scratch-umamusume-laravel13
-# Isolated git worktrees. One is created per parallel dispatch so a peer's uncommitted edits cannot be
-# swept into a commit or baked into a bundle; none of them is history material.
-/.worktrees/
 /testing
 /database/*.sqlite*
 *.sql
@@ -153,19 +114,3 @@ Homestead.yaml
 /docs/game-screenshots/
 /docs/design-research/**/*.png
 docs/vibe_images/
-
-# Scratch & temporary development scripts
-tools/tmp_*
-tools/rebuild-db.*
-tools/force-db-rebuild.py
-/temp.json
-/preflight.php
-/storage/sqlite_test.php
-
-# Python cache for tools
-tools/__pycache__/
-
-# Audit screenshots and scratch artifacts (local reference; not history material)
-/.scratch-audit/
-/docs/audits/**/screens/
-/docs/audits/**/screenshots/
