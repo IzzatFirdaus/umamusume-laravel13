@@ -21295,3 +21295,16 @@ composer.json/package-lock.json drift was restored to HEAD, not updated).
 | Phase 2 deferral | Phase 2 (Kilo Code / MiniMax / DSH configs): not in this build — schemas unconfirmed, deferred to a future schema-verified cycle. |
 | Phase 3 P3 closure | `.gitignore` restructure landed at d8238c87 — `/.scratch-uma/` (L122) and `/.local-browsers/` (L123) cover all baseline artifacts; no additional patterns needed. |
 | P4/P5 outcomes | P4 `.devcontainer`: HELD — Docker not installed on this host; left untracked per owner ruling. P5 archive zip: NO-OP — none present on drive. |
+
+
+### 66. Phase 1 close report + peer drift + gate status (2026-11-15)
+
+| Fact | Value |
+|---|---|
+| Phase 1 closure | 2026-11-15 — Phase 1 (career-cockpit.spec.ts) closed. `86d649d3 test(cockpit): select first enabled form option, not disabled placeholder` at `career-cockpit.spec.ts:1091` (`option.first()` → `option:not([disabled]).first()`, `BaseSelect.vue:130,157` disabled placeholder). Targeted test: `1 passed (51.4s)`. Full suite: `33 passed` (6.8m), exit 0. Fix survived peer commit `27800fa8` (line 1091 intact; peer changed fan-ladder test ~867-885 only). |
+| Peer drift since e584944f | 28 commits `e584944f..27800fa8`, 27 peer + 1 own (`86d649d3`). Peer classes: `tests` 1 (`27800fa8` touches `tests/browser/career-cockpit.spec.ts`), `product` 2 (`02997418` team stat grades, `66cc90e1` Unity Trainings count — both touch `resources/js/pages/Career/Cockpit.vue`), `other` 24 (merges, CI, NativePHP/electron build). Flagged: `27800fa8` → `tests/browser/`, `02997418`/`66cc90e1` → `resources/js/`. |
+| Phase 2 readiness | not ready — `git log --oneline --since="1 hour ago"` returns 4 commits (peer active; condition 2 fails). Condition 1 (`.scratch-uma/hermes-bo002-*/` mmin -60 empty): pass. Condition 3 (Phase 1 closed): pass. |
+| P3 Docker | no — `docker --version` exit 127, Docker not installed. |
+| P4 schemas | absent — no Kilo/MiniMax/DSH config schema files in tree. |
+| P5 G3 audit | dispatched — `docs/audits/browser-observation-2026-11-14/`, `docs/audits/browser-observation-2026-11-15/`, `docs/audits/browser-observation-2026-11-15-followup/` present. |
+| HEAD at close | `27800fa8` (peer advanced past own `86d649d3`). Own working tree clean at close; only peer-modified tracked files and peer untracked dirs remain. |
