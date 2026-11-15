@@ -551,7 +551,7 @@ class CockpitController extends Controller
      * one band's answer; a count no documented band contains yields a null class and a bare number,
      * never a class nobody sourced.
      *
-     * @return array{trainee_rarity: int|null, potential_level: int|null, card_title: string|null, growth_rate: array<string, int|null>|null, stat_order: list<string>, caps: array<string, array{entered: int|null, scenario: int}>, fans: int|null, fan_ladder: array{class: string|null, nextThreshold: int|null, gap: int|null}|null}
+     * @return array{trainee_rarity: int|null, potential_level: int|null, card_title: string|null, growth_rate: array<string, int|null>|null, stat_order: list<string>, caps: array<string, array{entered: int|null, scenario: int}>, fans: int|null, fan_ladder: array{class: string|null, nextThreshold: int|null, gap: int|null, nextClass: string|null}|null}
      */
     private function identitySection(TrainingRun $run, ?TurnEntry $latest): array
     {

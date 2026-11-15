@@ -192,7 +192,7 @@ const props = defineProps<{
          */
         caps: Record<string, { entered: number | null; scenario: number }>;
         fans: number | null;
-        fan_ladder: { class: string | null; nextThreshold: number | null; gap: number | null } | null;
+        fan_ladder: { class: string | null; nextThreshold: number | null; gap: number | null; nextClass: string | null } | null;
     };
     /**
      * A-0.1: the cap arithmetic's recorded inputs (§1.2). The caps the run states, resolved the same

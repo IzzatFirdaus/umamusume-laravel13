@@ -867,16 +867,16 @@ test('names no component by the retired name its rename replaced', async () => {
     expect(offenders, `the retired name survives in ${offenders.join(', ')}`).toEqual([]);
 });
 
-test('prints the bare fan count, because the ladder is a Dashboard reading (S0)', async ({ page }) => {
-    // A-0.10's case asserted the fan tile printed `30,755 to 240,000`. `CareerStatePanel.vue:267-271`
-    // records the override that removed it: `HFW-OVERRIDE (text: fan-ladder)` — every cockpit HFW prints
-    // the bare count in this tile, the ladder is a Dashboard reading, and `fanLadder` stays a prop "so a
-    // caller that wants it can add it back rather than re-deriving the band". The register's `R7-73`
-    // classifies the same absence as `Known limitation`, citing R6-43's override.
+test('prints the fan count with its ladder class and the gap to the next band (S0, R6-43)', async ({ page }) => {
+    // A-0.10's case asserted the fan tile printed `30,755 to 240,000`. The `HFW-OVERRIDE (text:
+    // fan-ladder)` that replaced it printed the bare count on the rationale that "the ladder is a
+    // Dashboard reading". The Round-6 reconciliation falsified that rationale (R6-43 (c): `Dashboard`
+    // reads no ladder anywhere), and the owner ruling restores the source's own reading (§1.1: the
+    // 30,755-fan gap is the run's headline objective), so this case asserts the restored shape.
     //
-    // The successor assertion is the override itself: the count prints, the ladder suffix does not. That
-    // is what the screen is meant to do, and asserting it means a future re-add fails this case loudly
-    // rather than silently changing the surface.
+    // The class and the gap ride `identity.fan_ladder`, read through `FanLadder` off
+    // `config('uma.fan_ladder')` - the class name and the name of the next class both come from the
+    // band itself, so the number and the words beside it cannot come from different bands.
     const cockpitUrl = await newCareer(page);
     const runId = cockpitUrl.match(/\/training-runs\/(\d+)/)?.[1] ?? '';
     await recordTurns(page, runId, 1, { fans: '209245' });
@@ -885,8 +885,7 @@ test('prints the bare fan count, because the ladder is a Dashboard reading (S0)'
 
     const state = page.locator('section[aria-labelledby="career-state-heading"]');
 
-    await expect(state.getByText('209,245')).toBeVisible();
-    await expect(state.getByText(/to 240,000/)).toHaveCount(0);
+    await expect(state.getByText('209,245 · Star (30,755 to Top Star)')).toBeVisible();
 });
 
 test('prints the cap composition as a footer under Stats and state', async ({ page }) => {

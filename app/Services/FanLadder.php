@@ -49,10 +49,24 @@ final class FanLadder
     }
 
     /**
-     * All three answers at once, in the shape a page prop carries. Kept together so a caller cannot
+     * The class the next threshold opens ("Top Star"), or null when the ladder names no next band.
+     *
+     * The name rides the band itself (`next_class`) rather than a renderer's literal, so the number
+     * and the name it counts toward are always the same band's answer.
+     */
+    public static function nextClassName(int $fans): ?string
+    {
+        $band = self::bandFor($fans);
+        $name = $band['next_class'] ?? null;
+
+        return is_string($name) && $name !== '' ? $name : null;
+    }
+
+    /**
+     * All four answers at once, in the shape a page prop carries. Kept together so a caller cannot
      * print a class beside a gap computed from a different band.
      *
-     * @return array{class: string|null, nextThreshold: int|null, gap: int|null}
+     * @return array{class: string|null, nextThreshold: int|null, gap: int|null, nextClass: string|null}
      */
     public static function fromValue(int $fans): array
     {
@@ -60,15 +74,16 @@ final class FanLadder
             'class' => self::classFor($fans),
             'nextThreshold' => self::nextThreshold($fans),
             'gap' => self::gapToNext($fans),
+            'nextClass' => self::nextClassName($fans),
         ];
     }
 
     /**
-     * @return array{class: string, from: int, to: int}|null
+     * @return array{class: string, from: int, to: int, next_class?: string}|null
      */
     private static function bandFor(int $fans): ?array
     {
-        /** @var list<array{class: string, from: int, to: int}> $bands */
+        /** @var list<array{class: string, from: int, to: int, next_class?: string}> $bands */
         $bands = (array) config('uma.fan_ladder', []);
 
         foreach ($bands as $band) {

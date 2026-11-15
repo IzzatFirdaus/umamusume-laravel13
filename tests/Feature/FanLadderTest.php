@@ -22,6 +22,13 @@ it('names the Top Star threshold as the end of that band', function (): void {
     expect(FanLadder::nextThreshold(209_245))->toBe(240_000);
 });
 
+it('names the class the next threshold opens, so the gap can be stated against a name', function (): void {
+    // The reading ships as `Star (30,755 to Top Star)`: the class the count holds, the gap, and the
+    // name the gap counts toward. The name is the ladder's own (`config('uma.fan_ladder')`), never a
+    // string the renderer carries, so one band's class cannot travel beside another band's name.
+    expect(FanLadder::nextClassName(209_245))->toBe('Top Star');
+});
+
 it('measures the documented gap to the next threshold', function (): void {
     expect(FanLadder::gapToNext(209_245))->toBe(30_755);
 });
@@ -36,10 +43,11 @@ it('answers nothing above the highest documented threshold rather than inventing
         ->and(FanLadder::gapToNext(240_000))->toBeNull();
 });
 
-it('keeps the three answers in one shape so a class cannot travel beside another band', function (): void {
+it('keeps the four answers in one shape so a class cannot travel beside another band', function (): void {
     expect(FanLadder::fromValue(209_245))->toBe([
         'class' => 'Star',
         'nextThreshold' => 240_000,
         'gap' => 30_755,
+        'nextClass' => 'Top Star',
     ]);
 });

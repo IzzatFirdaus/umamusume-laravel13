@@ -570,10 +570,13 @@ return [
      * repository reads names - no tier below Star and no tier above Top Star is stated anywhere, so the
      * ladder has one entry and `FanLadder` answers null past its top rather than inventing a tier.
      *
-     * @var list<array{class: string, from: int, to: int}>
+     * `next_class` is the name the band's `to` threshold opens, so the reading can state the gap
+     * against a name ("30,755 to Top Star") without a renderer carrying the string itself (R6-43).
+     *
+     * @var list<array{class: string, from: int, to: int, next_class: string}>
      */
     'fan_ladder' => [
-        ['class' => 'Star', 'from' => 0, 'to' => 240000],
+        ['class' => 'Star', 'from' => 0, 'to' => 240000, 'next_class' => 'Top Star'],
     ],
 
     /*

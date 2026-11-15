@@ -66,9 +66,10 @@ const props = defineProps<{
     /**
      * The fan ladder the latest reading sits in, read server-side through `FanLadder`. Null when no
      * fan count is recorded; its `class` is null when no documented band contains the count, in which
-     * case the row prints the bare number.
+     * case the row prints the bare number. `gap` and `nextClass` name the distance to the next band
+     * and the class that threshold opens, both null when the ladder names none.
      */
-    fanLadder?: { class: string | null; nextThreshold: number | null; gap: number | null } | null;
+    fanLadder?: { class: string | null; nextThreshold: number | null; gap: number | null; nextClass: string | null } | null;
     /**
      * The word for the second number's own denominator. The Cockpit's second number is the Trainer's
      * target and the event screen's is the run's ceiling, so the word is a required prop rather than a
@@ -296,11 +297,18 @@ function percent(stat: Stat): number {
                         :reason="`${row.label} has not been recorded for this run.`"
                         compact
                     />
-                    <!-- HFW-OVERRIDE (text: fan-ladder): this tile printed the fan count with its
-                         ladder class and the gap to the next band. Every cockpit HFW prints the bare
-                         count in this tile, and the ladder is a Dashboard reading, so the suffix is
-                         excess here. `fanLadder` stays a prop so a caller that wants it can add it
-                         back rather than re-deriving the band. -->
+                    <!-- The fans tile prints the count with its ladder class and the gap to the next
+                         band ("209,245 · Star (30,755 to Top Star)"), the reading the source (§1.1)
+                         records. The `HFW-OVERRIDE (text: fan-ladder)` this replaces cut the suffix
+                         because "the ladder is a Dashboard reading"; the Round-6 reconciliation
+                         falsified that rationale (R6-43 (c): Dashboard reads no ladder), the owner
+                         ruled the gap is the run's headline objective, and the parked `fanLadder`
+                         prop is what this renders. A count the ladder cannot place (null class)
+                         prints the bare number rather than a class nobody sourced. -->
+                    <span
+                        v-else-if="row.key === 'fans' && props.fanLadder && props.fanLadder.class !== null"
+                        class="font-mono tabular-nums"
+                    >{{ group(row.value as number) }}<template v-if="props.fanLadder.gap !== null && props.fanLadder.nextClass !== null"> · {{ props.fanLadder.class }} ({{ group(props.fanLadder.gap) }} to {{ props.fanLadder.nextClass }})</template></span>
                     <span v-else class="font-mono tabular-nums">{{ group(row.value as number) }}</span>
                 </div>
             </li>
