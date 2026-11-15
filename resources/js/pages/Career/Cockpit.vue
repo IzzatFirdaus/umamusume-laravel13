@@ -146,7 +146,7 @@ interface Performance {
 }
 
 const props = defineProps<{
-    run: { id: number; trainee: string; trainee_ja: string | null; umamusume_id: number; scenario: string | null; status: string; status_label: string; scenario_label: string; run_url: string; skills_url: string; index_url: string; timeline_url: string; result_url: string; training_url: string; deck_url: string; status_labels: Record<string, string>; scenarios: Record<string, string>; update_url: string; destroy_url: string; export_csv_url: string; export_json_url: string; current_objective_index: number | null;
+    run: { id: number; trainee: string; trainee_ja: string | null; notes: string | null; umamusume_id: number; scenario: string | null; status: string; status_label: string; scenario_label: string; run_url: string; skills_url: string; index_url: string; timeline_url: string; result_url: string; training_url: string; deck_url: string; status_labels: Record<string, string>; scenarios: Record<string, string>; update_url: string; destroy_url: string; export_csv_url: string; export_json_url: string; current_objective_index: number | null;
         /**
          * KI-95: the import provenance line, `Imported {date} from {source}`, derived by the
          * controller only for runs an import wrote; a career someone started here carries null and
@@ -768,22 +768,22 @@ const isActive = computed((): boolean => props.run.status === 'Active');
  *
  * The reference's §1.3.4 guard is the authority: an observed in-force ceiling must not be printed as
  * "the scenario cap", and the published floor must not be printed as either. Three states, three
- * words — `cap` only where the Trainer entered the ceiling, `floor` where the figure is the scenario's
- * published number and the run records none, `in-force` where the run's own columns carry one but the
- * identity form has not been read back into `caps.entered`.
+ * words — `cap` where the Trainer entered every ceiling, `floor` where the run records none and the
+ * figure is the scenario's published number, `in-force` where the run carries some but not all ceilings
+ * (mixed: some rows show entered caps, others show the scenario floor).
  *
- * R7-19 read all five rows labelled `cap` on a run whose four `cap_*` columns are null (register §4.1;
- * walk 7 `§7.3 S11`). R7-66 records the half this cannot close: no surface stores an in-force ceiling,
- * so `in-force` is reachable only for a run that carries the columns.
+ * R7-19 read all five rows labelled `cap` on a run whose `cap_*` columns are all null (register §4.1;
+ * walk 7 `§7.3 S11`). `in-force` is now reachable whenever a run's `cap_*` columns are partially set.
  */
 const denominatorLabel = computed((): 'cap' | 'floor' | 'in-force' => {
     const entered = props.identity.caps;
-
-    if (Object.values(entered).some((cap) => cap.entered !== null)) {
-        return 'cap';
+    const values = Object.values(entered);
+    const hasEntered = values.some((cap) => cap.entered !== null);
+    if (!hasEntered) {
+        return 'floor';
     }
-
-    return 'floor';
+    const allEntered = values.every((cap) => cap.entered !== null);
+    return allEntered ? 'cap' : 'in-force';
 });
 
 
@@ -1124,6 +1124,17 @@ const jumpToShop = (): void => {
                         type the run has not recorded prints <b>Not recorded</b> rather than a zero.
                     </p>
                 </Section>
+
+                <!-- R6-53: `training_runs.notes` is written from three screens and had no reader. A
+                     native disclosure keeps the Cockpit's density: the summary is the collapsed state,
+                     and the full note is one press away. The text is rendered with `pre-wrap` because a
+                     note is a paragraph, and no line clamp is applied inside the open panel: clamping
+                     the expanded state would hide the text the disclosure exists to reveal. -->
+                <details v-if="props.run.notes" class="mt-4" data-region="run-notes">
+                    <summary class="cursor-pointer text-sm font-semibold text-ink-strong">Notes</summary>
+                    <p class="mt-2 whitespace-pre-wrap text-sm text-ink">{{ props.run.notes }}</p>
+                </details>
+                <p v-else class="mt-4 text-sm text-ink-muted">No notes recorded.</p>
             </div>
 
             <div class="flex min-w-0 flex-col gap-4">
