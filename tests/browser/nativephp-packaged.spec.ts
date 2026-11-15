@@ -18,27 +18,39 @@ test('enforces request-secret gate', async () => {
     });
 
     let phpPort: number | null = null;
-    const portReady = new Promise<void>((resolve, reject) => {
-        const timeout = setTimeout(
-            () => reject(new Error('PHP server port not found within 90s')),
-            90000,
-        );
-        const onData = (data: Buffer) => {
-            const text = data.toString();
-            const match =
-                text.match(/PHP Server started on port:\s*(\d+)/) ??
-                text.match(/Development Server \(.*:(\d+)\) started/);
-            if (match) {
-                clearTimeout(timeout);
-                phpPort = parseInt(match[1], 10);
-                resolve();
-            }
-        };
-        app.stdout?.on('data', onData);
-        app.stderr?.on('data', onData);
-    });
 
-    await portReady;
+    // The packaged exe is a windowed GUI app: its stdout never carries the
+    // "PHP Server started on port" line. The app picks a free port in
+    // 8100-9000, so scan that range until something answers on HTTP.
+    const findPort = async (): Promise<number | null> => {
+        for (let port = 8100; port <= 9000; port++) {
+            try {
+                const res = await fetch(`http://127.0.0.1:${port}`, {
+                    signal: AbortSignal.timeout(200),
+                });
+                if (res.status === 403 || res.status === 200) {
+                    return port;
+                }
+            } catch {
+                // port closed or app not yet serving
+            }
+        }
+        return null;
+    };
+
+    const deadline = Date.now() + 90000;
+    while (Date.now() < deadline) {
+        phpPort = await findPort();
+        if (phpPort) {
+            break;
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
+    if (!phpPort) {
+        app.kill();
+        throw new Error('PHP server port not found within 90s');
+    }
 
     const baseUrl = `http://127.0.0.1:${phpPort}`;
 
