@@ -37,6 +37,13 @@ interface Props {
     title?: string;
     ariaLabel?: string;
     required?: boolean;
+    /**
+     * BO-010: draw the visible `*` beside the label. The native `required` attribute is the
+     * enforcement and `aria-required` is the announcement; this marker is the sighted affordance,
+     * so it is `aria-hidden` and opt-in rather than a second accessible name on every required
+     * select in the tree.
+     */
+    showRequiredMarker?: boolean;
     disabled?: boolean;
     multiple?: boolean;
     ariaDescribedby?: string;
@@ -106,9 +113,14 @@ function onFocus(event: FocusEvent): void {
 
 <template>
     <div v-if="label" class="flex flex-col gap-1">
-        <label :for="selectId" :id="`${selectId}-label`" class="text-sm font-medium text-ink">
-            <span data-testid="base-select-label">{{ label }}</span>
-        </label>
+        <div class="flex items-center gap-1">
+            <label :for="selectId" :id="`${selectId}-label`" class="text-sm font-medium text-ink">
+                <span data-testid="base-select-label">{{ label }}</span>
+            </label>
+            <!-- BO-010: outside the label so the control's accessible name stays exactly the label
+                 word; the native `required` attribute and `aria-required` carry the announcement. -->
+            <span v-if="showRequiredMarker" class="text-risk" aria-hidden="true">*</span>
+        </div>
         <select
             :id="selectId"
             :name="name"

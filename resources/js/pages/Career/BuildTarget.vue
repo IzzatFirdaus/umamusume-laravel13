@@ -404,6 +404,8 @@ function onSkillPrioritySelect(payload: { id: number; name: string }): void {
                             label="Purpose"
                             :options="[{ value: '', label: 'Not chosen yet' }, ...props.purposeOptions]"
                             :aria-describedby="describedBy('purpose')"
+                            required
+                            show-required-marker
                         />
                         <p v-if="errorOf('purpose')" role="alert" class="mt-1 text-sm text-risk">{{ errorOf('purpose') }}</p>
                     </div>
@@ -415,6 +417,8 @@ function onSkillPrioritySelect(payload: { id: number; name: string }): void {
                             label="Surface"
                             :options="[{ value: '', label: 'Not chosen yet' }, ...props.surfaces.map(s => ({ value: s, label: s }))]"
                             :aria-describedby="describedBy('surface')"
+                            required
+                            show-required-marker
                         />
                         <p v-if="errorOf('surface')" role="alert" class="mt-1 text-sm text-risk">{{ errorOf('surface') }}</p>
                     </div>
@@ -426,6 +430,8 @@ function onSkillPrioritySelect(payload: { id: number; name: string }): void {
                             label="Style"
                             :options="[{ value: '', label: 'Not chosen yet' }, ...props.styles.map(s => ({ value: s, label: s }))]"
                             :aria-describedby="describedBy('style')"
+                            required
+                            show-required-marker
                         />
                         <p v-if="errorOf('style')" role="alert" class="mt-1 text-sm text-risk">{{ errorOf('style') }}</p>
                     </div>
