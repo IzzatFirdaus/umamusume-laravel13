@@ -63,6 +63,16 @@ Homestead.yaml
 !.claude/hooks/
 !.claude/agents/
 !.claude/skills/
+
+# Third-party tool state directories (tool/vendor installs, not project state)
+.commandcode/
+.devin/
+.inferencesh/
+.kimchi/
+.qwen/
+.claude/skills/modern-web-guidance/
+/skills/
+
 # Host-local skill payloads kept untracked (only the trigger-contract skills
 # listed in the plan are tracked under .claude/skills/):
 .claude/skills/creating-models/
