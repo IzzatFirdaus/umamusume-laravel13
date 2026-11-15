@@ -1,0 +1,35 @@
+name: NativePHP Windows Acceptance
+on:
+  workflow_run:
+    workflows: ["NativePHP Windows Build"]
+    types: [completed]
+  workflow_dispatch:
+
+jobs:
+  test-packaged-exe:
+    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with: { node-version: '24', cache: 'npm' }
+
+      - run: npm ci && npx playwright install --with-deps chromium
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: nativephp-windows-installer
+          path: artifacts
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id || github.run_id }}
+
+      - shell: pwsh
+        run: |
+          $installer = Get-ChildItem -Path "artifacts" -Filter "*.exe" | Select-Object -First 1
+          Start-Process -FilePath $installer.FullName -ArgumentList "/S" -Wait
+          $exePath = Get-ChildItem -Path "$env:LOCALAPPDATA\Programs" -Recurse -Filter "*.exe" | Where-Object { $_.Name -notmatch "uninstall" } | Select-Object -First 1
+          echo "NATIVEPHP_EXE_PATH=$($exePath.FullName)" >> $env:GITHUB_ENV
+
+      - run: npx playwright test --config=playwright.nativephp.config.ts
+        env: { NATIVEPHP_EXE_PATH: "${{ env.NATIVEPHP_EXE_PATH }}" }
