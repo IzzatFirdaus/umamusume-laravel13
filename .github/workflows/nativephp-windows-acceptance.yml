@@ -70,7 +70,12 @@ jobs:
           $exePath = Get-ChildItem -Path $programsDir -Recurse -Filter "*.exe" | Where-Object { $_.Name -notmatch "uninstall" } | Select-Object -First 1
           if (-not $exePath) {
             Write-Error "No installed .exe found under $programsDir"
-            Get-ChildItem -Path $programsDir -Recurse | Select-Object -First 20 | ForEach-Object { Write-Host $_.FullName }
+            Write-Host "=== Diagnostic: contents of $programsDir ==="
+            Get-ChildItem -Path $programsDir -Recurse | Select-Object -First 50 | ForEach-Object { Write-Host $_.FullName }
+            Write-Host "=== Diagnostic: contents of C:\Program Files ==="
+            Get-ChildItem -Path "C:\Program Files" -Recurse -Filter "*.exe" | Select-Object -First 20 | ForEach-Object { Write-Host $_.FullName }
+            Write-Host "=== Diagnostic: contents of C:\Program Files (x86) ==="
+            Get-ChildItem -Path "C:\Program Files (x86)" -Recurse -Filter "*.exe" | Select-Object -First 20 | ForEach-Object { Write-Host $_.FullName }
             exit 1
           }
           echo "NATIVEPHP_EXE_PATH=$($exePath.FullName)" >> $env:GITHUB_ENV
