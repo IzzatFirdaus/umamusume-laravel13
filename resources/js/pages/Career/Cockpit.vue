@@ -528,6 +528,18 @@ const teamLeague = computed((): string => (teamState.value?.team_league_placemen
     : String(teamState.value.team_league_placement)));
 
 /**
+ * The Unity Trainings count §1.8 records on the Team Info panel (R6-48 coverage). It is the same
+ * charge counter the burst economy reads from its other side, so the panel prints the stored number
+ * and never derives one. Absent until stated: the cell prints the table's own `N/A` rather than a
+ * zero no source states. Null and undefined are both the absence; the payload always carries the key.
+ */
+const teamUnityTrainings = computed((): string => {
+    const count = teamState.value?.unity_trainings_count ?? null;
+
+    return count === null ? 'N/A' : String(count);
+});
+
+/**
  * The HFW prints `11 (inside 10-12)`: the combined Spirit and Extreme count, named against the band
  * the matrix publishes. Both halves are separate columns, so the total is their sum and never a
  * stored figure; a run with neither records the absence.
@@ -1029,6 +1041,10 @@ const jumpToShop = (): void => {
                             <tr v-if="composesTeamPanel">
                                 <td>Team rank</td>
                                 <td><span class="pill pill-neutral">{{ teamRank }}</span></td>
+                            </tr>
+                            <tr v-if="composesTeamPanel">
+                                <td>Unity Trainings</td>
+                                <td class="font-mono tabular-nums">{{ teamUnityTrainings }}</td>
                             </tr>
                         </tbody>
                     </table>
