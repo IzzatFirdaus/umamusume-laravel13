@@ -547,12 +547,17 @@ const teamBursts = computed((): string => {
 });
 
 const teamRank = computed((): string => {
-    // Recorded TeamRankPayload via header.values.team_rank (CockpitController::headerSection, :509).
+    // Recorded through `TrainingRun::latestTeamRank()` — the stored `team_rank` column first, the
+    // latest reported turn event as fallback (R6-48 owner ruling 2026-11-15) — and shipped as
+    // `header.values.team_rank` (CockpitController::headerSection).
     const rank = props.header.values['team_rank'];
     if (typeof rank !== 'string' || rank.trim() === '') {
         return 'not recorded';
     }
-    return rank;
+    // §1.8 records the S emblem as `S (five stars)`; no source pairs a star count with any other
+    // letter, so only S carries the qualifier rather than a blanket suffix that would invent a
+    // star count for G..A and S+.
+    return rank === 'S' ? 'S (five stars)' : rank;
 });
 
 /**
