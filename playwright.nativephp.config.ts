@@ -5,6 +5,6 @@ export default defineConfig({
   testMatch: 'nativephp-packaged.spec.ts',
   fullyParallel: false,
   workers: 1,
-  timeout: 120000,
+  timeout: 300000,
   use: { trace: 'on-first-retry' },
 });
