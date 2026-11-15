@@ -1089,7 +1089,7 @@ test('prints the card base stats as a labelled Starting line beneath the stat ra
 
             const formSelect = stepPage.locator('#selected-form');
             await expect(formSelect).toBeVisible();
-            const formValue = await formSelect.locator('option').first().getAttribute('value');
+            const formValue = await formSelect.locator('option:not([disabled])').first().getAttribute('value');
             expect(formValue, 'the form select carries no option').not.toBeNull();
             await formSelect.selectOption(formValue as string, WRITE);
         },
