@@ -5,11 +5,13 @@ declare(strict_types=1);
 namespace Tests\Feature;
 
 use App\Enums\RunStatus;
+use App\Enums\TurnEventType;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Collection;
 use Inertia\Testing\AssertableInertia as Assert;
+use InvalidArgumentException;
 use Tests\TestCase;
 
 /**
@@ -159,6 +161,105 @@ final class CockpitTeamPanelTest extends TestCase
         ])->assertSessionHasErrors([
             'team_stat_grades.Speed' => 'Per-stat grade must be G-S; S+ is overall team rank only.',
         ]);
+    }
+
+    /**
+     * R6-48: the stored rank letter is the Team panel's source when the run has one.
+     *
+     * The header strip and the panel read the same resolved value (`TrainingRun::latestTeamRank()`),
+     * so this case pins both surfaces against one stored column and one facility level derived from
+     * it through the config ladder.
+     */
+    public function test_reads_the_stored_team_rank_letter_for_the_panel_and_the_header_strip(): void
+    {
+        $run = $this->unityCupRun(['team_rank' => 'S']);
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('scenario.team.rank', 'S')
+                ->where('scenario.team.facility_level', 5)
+                ->where('header.values.team_rank', 'S'));
+    }
+
+    /**
+     * One owner, one answer: when both stores hold a letter the stored current state wins over the
+     * latest reported turn event (owner ruling 2026-11-15, R6-48), so the strip and the panel cannot
+     * disagree about one rank.
+     */
+    public function test_reads_the_stored_rank_over_an_older_turn_event(): void
+    {
+        $run = $this->unityCupRun(['team_rank' => 'S']);
+
+        $run->turnEvents()->create([
+            'turn' => 3,
+            'event_type' => TurnEventType::Scenario,
+            'source_name' => 'Unity Training',
+            'deltas' => ['rank' => 'A'],
+        ]);
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('scenario.team.rank', 'S')
+                ->where('header.values.team_rank', 'S'));
+    }
+
+    /**
+     * The event-only path stays alive for runs recorded before the column existed (the
+     * `UnityCupEditor` turn route still writes it), so a run with no stored letter resolves through
+     * the latest reported event.
+     */
+    public function test_falls_back_to_the_latest_turn_event_when_no_letter_is_stored(): void
+    {
+        $run = $this->unityCupRun();
+
+        $run->turnEvents()->create([
+            'turn' => 3,
+            'event_type' => TurnEventType::Scenario,
+            'source_name' => 'Unity Training',
+            'deltas' => ['rank' => 'A'],
+        ]);
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('scenario.team.rank', 'A')
+                ->where('header.values.team_rank', 'A'));
+    }
+
+    public function test_reads_the_rank_as_absent_when_neither_store_records_one(): void
+    {
+        $run = $this->unityCupRun();
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('scenario.team.rank', null)
+                ->where('header.values.team_rank', null));
+    }
+
+    /**
+     * R10 kept intact: `S+` is a valid overall rank (accepted by the column) while
+     * `team_rank_ladder` maps it no rung, so the facility level stays null rather than invented.
+     */
+    public function test_accepts_s_plus_as_the_overall_rank_without_a_facility_rung(): void
+    {
+        $run = $this->unityCupRun(['team_rank' => 'S+']);
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('scenario.team.rank', 'S+')
+                ->where('scenario.team.facility_level', null));
+    }
+
+    public function test_refuses_a_letter_outside_the_league_vocabulary(): void
+    {
+        // The vocabulary is validated at the model boundary (owner ruling 2026-11-15, R6-48), so a
+        // writer that is not a Form Request still cannot store a letter the client's board has not got.
+        expect(fn () => $this->unityCupRun(['team_rank' => 'Z']))
+            ->toThrow(InvalidArgumentException::class);
     }
 
     /**

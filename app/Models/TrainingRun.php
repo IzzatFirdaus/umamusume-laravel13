@@ -74,6 +74,11 @@ use Illuminate\Support\Carbon;
  * @property string|null $team_motto the team's motto; null until stated
  * @property int|null $team_league_placement the team's league placement (1..99); null until stated
  * @property int|null $team_preseason_wins preseason rounds won (0..4); null until stated
+ * @property string|null $team_rank the run's current league rank letter (`TeamRankPayload::LETTERS`,
+ *                                  `S+` included, validated by the `saving` guard); null until
+ *                                  stated. The stored current state `latestTeamRank()` reads first,
+ *                                  over the latest reported turn event (R6-48, owner ruling
+ *                                  2026-11-15)
  * @property array<string, string>|null $team_stat_grades the five per-stat team ranks, or null until stated
  * @property int|null $unity_trainings_count Unity Trainings run, as the Trainer reports the tally;
  *                                           null until stated, never counted from turn entries
@@ -114,7 +119,7 @@ use Illuminate\Support\Carbon;
  *                                       run with a Legacy selection stays comparable before it is
  *                                       filed)
  */
-#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'trainee_rarity', 'potential_level', 'growth_rate', 'cap_speed', 'cap_stamina', 'cap_power', 'cap_guts', 'team_name', 'team_motto', 'team_league_placement', 'team_preseason_wins', 'unity_trainings_count', 'spirit_bursts_count', 'extreme_bursts_count', 'current_spirit_proxy', 'team_stat_grades', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source', 'career_position', 'career_position_source', 'mode'])]
+#[Fillable(['umamusume_id', 'character_card_id', 'scenario', 'status', 'inheritance_parent_a_id', 'inheritance_parent_b_id', 'legacy_selection', 'build_target', 'notes', 'trainee_rarity', 'potential_level', 'growth_rate', 'cap_speed', 'cap_stamina', 'cap_power', 'cap_guts', 'team_name', 'team_motto', 'team_league_placement', 'team_preseason_wins', 'unity_trainings_count', 'spirit_bursts_count', 'extreme_bursts_count', 'current_spirit_proxy', 'team_rank', 'team_stat_grades', 'current_objective_index', 'shop_resets_in', 'imported_at', 'import_source', 'career_position', 'career_position_source', 'mode'])]
 class TrainingRun extends Model
 {
     /**
@@ -146,6 +151,17 @@ class TrainingRun extends Model
     protected static function booted(): void
     {
         static::saving(function (self $run): void {
+            // R6-48: the column's vocabulary is validated here, at the model boundary, not by a DB
+            // enum (owner ruling 2026-11-15). `TeamRankPayload::LETTERS` is the one owner of the
+            // league's letters, so even a writer that is not a Form Request cannot store one the
+            // client's board has not got.
+            if ($run->team_rank !== null && ! in_array($run->team_rank, TeamRankPayload::LETTERS, true)) {
+                throw new \InvalidArgumentException(
+                    'Team rank ['.$run->team_rank.'] is not one of the league letters ('
+                    .implode(', ', TeamRankPayload::LETTERS).').',
+                );
+            }
+
             if ($run->current_objective_index !== null) {
                 self::assertGradePeriod($run->current_objective_index, $run, 'current_objective_index');
             }
@@ -1349,12 +1365,24 @@ class TrainingRun extends Model
     }
 
     /**
-     * The rank letter the Trainer most recently reported, or null while they have not.
+     * The rank letter the run carries, or null while the Trainer has not stated one.
+     *
+     * One owner, two stores, one priority order (R6-48, owner ruling 2026-11-15): the stored
+     * `team_rank` column is the current state the Team Info panel is, and the latest reported turn
+     * event answers for a run whose letter predates the column (the `UnityCupEditor` turn route
+     * still writes that payload). The header strip, the Team panel, the gauge and the Dashboard
+     * tile all read this method, so they cannot disagree about one rank.
      */
     public function latestTeamRank(): ?TeamRankPayload
     {
         if (! $this->composesPanel('team_rank_ladder')) {
             return null;
+        }
+
+        // The column first: the stored current state, already vocabulary-checked by the `saving`
+        // guard, so `make()` cannot throw on a row this build wrote.
+        if (is_string($this->team_rank) && $this->team_rank !== '') {
+            return TeamRankPayload::make($this->team_rank);
         }
 
         return $this->turnEvents
