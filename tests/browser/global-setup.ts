@@ -134,6 +134,16 @@ export const DEVTOOLS_ENV = { INERTIA_DEVTOOLS_ENABLED: 'false' } as const;
  * Walks the tree once; directory mtimes are not read (a directory's own mtime moves on rename
  * operations that leave file content unchanged, which would refuse an honest bundle).
  */
+ // Freshness tolerance for filesystem mtime resolution (KI-101 gate). A source
+ // file edited in the same millisecond as the build, or a clock step between the
+ // build process and this setup process, can place the newest source mtime a
+ // fraction of a second ahead of a manifest that is genuinely fresh. Allow the
+ // source to lead the manifest by up to 2s before refusing; a bundle that is
+ // genuinely stale (source older than its own build output) still trips the gate.
+ // ponytail: 2s absorbs ms-resolution noise on this host; raise only if a slower
+ // filesystem shows systematic false positives — never to skip a real rebuild.
+ const FRESHNESS_TOLERANCE_MS = 2_000;
+
 function newestSourceMtime(root: string): number {
     let newest = -1;
 
@@ -188,7 +198,7 @@ export default async function globalSetup(): Promise<void> {
         // exactly the case this check exists for: the bundle cannot contain it either.
         const newest = newestSourceMtime(resolve(repoRoot, 'resources/js'));
 
-        if (newest > manifestTime) {
+        if (newest > manifestTime + FRESHNESS_TOLERANCE_MS) {
             throw new Error(
                 `public/build is older than resources/js (manifest ${Math.round(manifestTime)}, `
                 + `newest source ${Math.round(newest)}); run npm run build `

@@ -7,13 +7,10 @@ import { SCRATCH_DATABASE, DEVTOOLS_ENV } from './tests/browser/global-setup';
 // database the harness builds (`tests/browser/global-setup.ts`, KI-69) via `php artisan serve`;
 // run with `npm run test:browser`.
 //
-// The port is session-private by default (KI-105's harness-isolation decision, S-RS-COMPLETE-1
-// slice B.1): a derived `8100 + (pid % 200)` value means two concurrent invocations boot two
-// servers instead of colliding on one shared default (the KI-73/KI-80 class). `PLAYWRIGHT_PORT`
-// still wins when a session names its own.
-const port = Number(
-    process.env.PLAYWRIGHT_PORT ?? String(8100 + (process.pid % 200)),
-);
+// Fixed default port; two concurrent invocations share 8123 by design and one wins
+// the bind while the other fails fast — that is the intended serial contract
+// (workers: 1, retries: 0). `PLAYWRIGHT_PORT` still wins when a session names its own.
+const port = Number(process.env.PLAYWRIGHT_PORT ?? 8123);
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${port}`;
 
 const webServerEnv = {
