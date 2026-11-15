@@ -23,33 +23,36 @@ test('enforces request-secret gate', async () => {
     // "PHP Server started on port" line. The app picks a free port in
     // 8100-9000, so scan that range until something answers on HTTP.
     const findPort = async (): Promise<number | null> => {
-        for (let port = 8100; port <= 9000; port++) {
-            try {
-                const res = await fetch(`http://127.0.0.1:${port}`, {
-                    signal: AbortSignal.timeout(200),
-                });
-                if (res.status === 403 || res.status === 200) {
-                    return port;
+        const results = await Promise.all(
+            Array.from({ length: 901 }, (_, i) => 8100 + i).map(async (port) => {
+                try {
+                    const res = await fetch(`http://127.0.0.1:${port}`, {
+                        signal: AbortSignal.timeout(100),
+                    });
+                    if (res.status === 403 || res.status === 200) {
+                        return port;
+                    }
+                } catch {
+                    // port closed or app not yet serving
                 }
-            } catch {
-                // port closed or app not yet serving
-            }
-        }
-        return null;
+                return null;
+            }),
+        );
+        return results.find((p) => p !== null) ?? null;
     };
 
-    const deadline = Date.now() + 90000;
+    const deadline = Date.now() + 240000; // 4 min; cold CI start needs time
     while (Date.now() < deadline) {
         phpPort = await findPort();
         if (phpPort) {
             break;
         }
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await new Promise((resolve) => setTimeout(resolve, 2000));
     }
 
     if (!phpPort) {
         app.kill();
-        throw new Error('PHP server port not found within 90s');
+        throw new Error('PHP server port not found within 4 minutes');
     }
 
     const baseUrl = `http://127.0.0.1:${phpPort}`;
