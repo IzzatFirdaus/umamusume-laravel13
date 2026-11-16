@@ -10,7 +10,9 @@ class EnforceNativePHPSecret
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $secret = env('NATIVEPHP_SECRET');
+        // `env()` is a `config/`-only call in this repo (AGENTS.md §7); the key is published there as
+        // `nativephp.secret`. Reading it through `config()` also keeps it cacheable.
+        $secret = config('nativephp.secret');
 
         if (! $secret) {
             return $next($request);

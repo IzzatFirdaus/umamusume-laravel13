@@ -178,7 +178,11 @@ class TraineeSelectController extends Controller
             'scenarioUrl' => route('career.scenario'),
             'profileUrl' => $draft['umamusume_id'] === null
                 ? null
-                : route('career.trainee.profile', ['umamusume' => $draft['umamusume_id']]),
+                // The route binds `{umamusume}` by slug (`Umamusume::getRouteKeyName()`), so a URL
+                // built from the draft's id resolves to a 404. Look the row up and name its slug.
+                : route('career.trainee.profile', [
+                    'umamusume' => Umamusume::whereKey($draft['umamusume_id'])->value('slug') ?? $draft['umamusume_id'],
+                ]),
         ]);
     }
 

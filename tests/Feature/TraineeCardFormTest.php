@@ -126,7 +126,7 @@ it('labels the form count each surface reports, so a scope cannot be read as a t
             // And it now says which two — the released ones, not "all of them".
             ->where('trainees.data.0.form_count_label', '2 released forms'));
 
-    $this->get(route('career.trainee.profile', ['umamusume' => $trainee->id]))
+    $this->get(route('career.trainee.profile', ['umamusume' => $trainee->slug]))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             // The read screen lists all three and splits the count, so a Trainer can see the third form

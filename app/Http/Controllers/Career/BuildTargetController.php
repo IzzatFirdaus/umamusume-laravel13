@@ -10,6 +10,7 @@ use App\Http\Requests\Career\StoreDraftBuildTargetRequest;
 use App\Models\Advisor\BuildTargetPayload;
 use App\Models\Preference;
 use App\Models\Skill;
+use App\Models\Umamusume;
 use App\Services\Career\SetupDraft;
 use App\Services\HintDiscount;
 use App\Services\ScenarioCaps;
@@ -182,17 +183,25 @@ class BuildTargetController extends Controller
     /**
      * The screen the back door returns to: the stored trainee's profile, or the roster before a pick.
      *
-     * The profile route binds the id it is given, so a draft naming a trainee the catalog no longer
-     * holds would 404 on the way back; the draft's id is written through an `exists` rule and the
-     * roster is the honest fallback, so the link is built only when the id is an int and leaves the
-     * binding to answer for the row.
+     * The profile route binds `{umamusume}` by slug, so the draft's stored id is resolved to its
+     * slug here; a draft naming a trainee the catalog no longer holds has no slug to build from and
+     * the roster is the honest fallback.
      */
     private function backUrl(): string
     {
         $umamusumeId = SetupDraft::read()['umamusume_id'];
 
-        return is_int($umamusumeId)
-            ? route('career.trainee.profile', ['umamusume' => $umamusumeId])
+        if (! is_int($umamusumeId)) {
+            return route('career.trainee');
+        }
+
+        // The route binds `{umamusume}` by slug (`Umamusume::getRouteKeyName()`), so the id the draft
+        // stores is not a URL key. A row the catalog no longer holds falls back to the roster rather
+        // than to a slug-less URL that would 404 on the way back.
+        $slug = Umamusume::whereKey($umamusumeId)->value('slug');
+
+        return is_string($slug)
+            ? route('career.trainee.profile', ['umamusume' => $slug])
             : route('career.trainee');
     }
 

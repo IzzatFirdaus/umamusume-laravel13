@@ -188,7 +188,7 @@ it('sends the chosen trainee her own row, so the echo card can picture her and n
             ->where('selectedTrainee.forms.1.title', '[Vampire Makeover!]')
             // The key is always sent. Whether it holds a url is the mirror's state, not this page's.
             ->has('selectedTrainee.artworkURL')
-            ->where('profileUrl', route('career.trainee.profile', ['umamusume' => $chosen->id])));
+            ->where('profileUrl', route('career.trainee.profile', ['umamusume' => $chosen->slug])));
 
     $this->get('/career/setup/trainee')
         ->assertOk()
@@ -509,7 +509,7 @@ it('renders the profile with the aptitude letters once and the four skill lists 
         'skills_event' => [],
     ]);
 
-    $this->get('/career/setup/trainee/'.$trainee->id)
+    $this->get('/career/setup/trainee/'.$trainee->slug)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Career/TraineeProfile')
@@ -556,7 +556,7 @@ it('counts a skill id that resolves to no Global skill instead of dropping it si
         ]);
     }
 
-    $this->get('/career/setup/trainee/'.$trainee->id)
+    $this->get('/career/setup/trainee/'.$trainee->slug)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('forms.0.id', $card->id)
@@ -569,7 +569,7 @@ it('counts a skill id that resolves to no Global skill instead of dropping it si
 it('names the growth and base-stat absences the wireframe rows keep their place for', function (): void {
     $trainee = rosterTrainee('Silence Suzuka', ['turf' => 'A']);
 
-    $this->get('/career/setup/trainee/'.$trainee->id)
+    $this->get('/career/setup/trainee/'.$trainee->slug)
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             // One visible reason per block, printed by the page: five identical per-cell disclosures

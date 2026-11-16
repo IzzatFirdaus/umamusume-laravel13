@@ -91,7 +91,7 @@ test('draws a resource the matrix labels through the meter, with the number and 
     // widget strip's Team Rank. Each meter is addressed by its accessible name instead, which is the
     // handle that cannot collide: the Spirit meter's position in the reading order is the design.
     await expect(section.getByRole('img', { name: /Team Rank: not recorded/ })).toBeVisible();
-    await expect(section.getByRole('img', { name: /Spirit Bursts: not recorded/ })).toBeVisible();
+    await expect(section.getByRole('img', { name: /Spirit Bursts \(combined\): not recorded/ })).toBeVisible();
     // KI-133 (`b9837da7`, 2026-11-11) relabelled this meter to `Current Spirit (manual proxy)`,
     // because the figure is one Trainer-entered aggregate for the whole team rather than a game
     // reading, and the client's gauge publishes no maximum for it to sit against. `SpiritCard.vue:30`

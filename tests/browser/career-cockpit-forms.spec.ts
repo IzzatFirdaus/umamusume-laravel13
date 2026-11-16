@@ -176,6 +176,10 @@ test('records the Unity Cup team state through the team editor', async ({ page }
     // The panel is a page of its own in v3.0.0, so the read-back is read there.
     await openScenarioDetail(page);
     await expect(page.getByText(/Spirit Bursts 6 \/ 5 Extreme/)).toBeVisible();
+    // BO-017: the Scenario panel's `spirit_bursts` widget value is the combined total
+    // (spirit_bursts_count + extreme_bursts_count); its label now states the scope so
+    // readers never confuse it with either counter alone.
+    await expect(page.getByRole('img', { name: /Spirit Bursts \(combined\): 11/ })).toBeVisible();
 });
 
 test('records the per-stat team grades and reads them back on the panel', async ({ page }) => {
@@ -241,7 +245,7 @@ test('renders the Unity Cup scenario region without a runtime error, the bursts 
 
     // The bursts widget renders as the labelled meter, its own shape: the value is the unrecorded
     // reading the matrix's widget carries, and the bar names it.
-    await expect(page.getByRole('img', { name: 'Spirit Bursts: not recorded' })).toBeVisible();
+    await expect(page.getByRole('img', { name: 'Spirit Bursts (combined): not recorded' })).toBeVisible();
 
     // And the crash the bad registration produced never reaches the console.
     expect(

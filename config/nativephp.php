@@ -6,6 +6,12 @@ use App\Providers\NativeAppServiceProvider;
 
 return [
     /*
+     * The packaging workflow generates this per build; the middleware reads it through
+     * `config()` so one value has one owner and PHPStan's no-`env()`-outside-config rule holds.
+     */
+    'secret' => env('NATIVEPHP_SECRET'),
+
+    /*
      * The version of your app. It is used to determine if the app needs to be
      * updated. Increment this value every time you release a new version.
      */
