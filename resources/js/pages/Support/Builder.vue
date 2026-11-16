@@ -454,10 +454,6 @@ function save(): void {
                         v-model="search"
                         name="query"
                         type="search"
-                        autocorrect="off"
-                        autocapitalize="none"
-                        :spellcheck="false"
-                        enterkeyhint="search"
                         label="Name contains"
                     />
                     <BaseButton type="submit" variant="secondary">Filter</BaseButton>

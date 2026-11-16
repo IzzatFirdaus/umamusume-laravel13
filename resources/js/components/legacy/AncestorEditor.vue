@@ -132,9 +132,6 @@ function removeSpark(sparkIndex: number): void {
             type="text"
             list="known-rank-letters"
             autocomplete="off"
-            autocorrect="off"
-            autocapitalize="characters"
-            :spellcheck="false"
         />
 
         <label class="mt-2 block text-xs font-medium text-ink" :for="id('ancestor-rank')">

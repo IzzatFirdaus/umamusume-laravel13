@@ -263,44 +263,37 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                         </Note>
                     </div>
 
-                    <!-- The group's own caption, as the legend rather than loose text above the set:
-                         the visible heading names the group for assistive tech (forms guide §1, W3C
-                         H71), and the radio set is the control group that guide calls the
-                         highest-priority case. The caption sat here already, so nothing is invented
-                         or printed twice. -->
-                    <fieldset class="mt-3">
-                        <legend class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Options</legend>
+                    <p class="mt-3 text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Options</p>
 
-                        <div class="mt-1 flex flex-col gap-2.5">
-                            <label
-                                v-for="(choice, index) in knownForName?.choices ?? []"
-                                :key="choice.label"
-                                class="flex cursor-pointer items-start gap-2.5 rounded-md px-3 py-[11px]"
-                                :class="form.choice_label === choice.label ? 'border-2 border-pick-line bg-green-tint' : 'border border-rule-soft bg-raised'"
+                    <div class="mt-1 flex flex-col gap-2.5">
+                        <label
+                            v-for="(choice, index) in knownForName?.choices ?? []"
+                            :key="choice.label"
+                            class="flex cursor-pointer items-start gap-2.5 rounded-md px-3 py-[11px]"
+                            :class="form.choice_label === choice.label ? 'border-2 border-pick-line bg-green-tint' : 'border border-rule-soft bg-raised'"
+                        >
+                            <input
+                                type="radio"
+                                name="known_choice"
+                                class="mt-0.5"
+                                :checked="form.choice_label === choice.label"
+                                @change="selectChoice(index, choice.label)"
                             >
-                                <input
-                                    type="radio"
-                                    name="known_choice"
-                                    class="mt-0.5"
-                                    :checked="form.choice_label === choice.label"
-                                    @change="selectChoice(index, choice.label)"
-                                >
-                                <span class="min-w-0 flex-1">
-                                    <span class="block text-sm font-bold text-ink-strong">{{ choice.label }}</span>
-                                    <span class="mt-0.5 block text-xs text-ink-muted">
-                                        Selecting shown; outcome not predicted.
-                                        <span v-if="choice.outcome_recorded && choice.outcome !== null"> Recorded outcome: {{ choice.outcome }}.</span>
-                                    </span>
+                            <span class="min-w-0 flex-1">
+                                <span class="block text-sm font-bold text-ink-strong">{{ choice.label }}</span>
+                                <span class="mt-0.5 block text-xs text-ink-muted">
+                                    Selecting shown; outcome not predicted.
+                                    <span v-if="choice.outcome_recorded && choice.outcome !== null"> Recorded outcome: {{ choice.outcome }}.</span>
                                 </span>
-                            </label>
+                            </span>
+                        </label>
 
-                            <label class="flex flex-col gap-1 rounded-md border border-rule-soft bg-raised px-3 py-[11px]">
-                                <span class="text-sm font-bold text-ink-strong">The option's own words</span>
-                                <BaseInput v-model="form.choice_label" name="choice_label" maxlength="200" placeholder="Type the option the client showed" :error="form.errors.choice_label" />
-                                <span class="text-xs text-ink-muted">Selecting shown; outcome not predicted.</span>
-                            </label>
-                        </div>
-                    </fieldset>
+                        <label class="flex flex-col gap-1 rounded-md border border-rule-soft bg-raised px-3 py-[11px]">
+                            <span class="text-sm font-bold text-ink-strong">The option's own words</span>
+                            <BaseInput v-model="form.choice_label" name="choice_label" maxlength="200" placeholder="Type the option the client showed" :error="form.errors.choice_label" />
+                            <span class="text-xs text-ink-muted">Selecting shown; outcome not predicted.</span>
+                        </label>
+                    </div>
 
                     <p v-if="knownForName === null" class="mt-2 text-xs text-ink-muted">
                         No recorded choices for this event yet. The first entry becomes the first known outcome.

@@ -534,9 +534,6 @@ const pickOptions = (): { value: string; label: string }[] => [
                                     type="text"
                                     list="known-rank-letters"
                                     autocomplete="off"
-                                    autocorrect="off"
-                                    autocapitalize="characters"
-                                    :spellcheck="false"
                                 />
                             </div>
                             <div>

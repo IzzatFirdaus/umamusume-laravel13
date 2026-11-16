@@ -544,7 +544,7 @@ const coverageConstants = computed(() =>
         <div class="mt-3.5 flex flex-wrap items-end gap-2.5">
             <label class="flex min-w-[220px] flex-1 flex-col gap-1">
                 <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Search</span>
-                <input v-model="search" type="search" name="skill_search" autocorrect="off" autocapitalize="none" spellcheck="false" enterkeyhint="search" placeholder="Skill name" class="min-h-11 rounded-md border border-rule bg-raised px-3 text-sm" @input="page = 1">
+                <input v-model="search" type="search" name="skill_search" placeholder="Skill name" class="min-h-11 rounded-md border border-rule bg-raised px-3 text-sm" @input="page = 1">
             </label>
             <label class="flex flex-col gap-1">
                 <span class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Type</span>

@@ -597,9 +597,6 @@ const hasAnyNode = computed(() =>
                                      type="text"
                                      list="known-rank-letters"
                                      autocomplete="off"
-                                     autocorrect="off"
-                                     autocapitalize="characters"
-                                     :spellcheck="false"
                                      :error="fieldError(index, 'rank_letter')"
                                  />
                                  <p

@@ -24,16 +24,6 @@ interface Props {
     max?: string | number;
     step?: string | number;
     autocomplete?: string;
-    /**
-     * Text-correction and on-screen-keyboard hints (`forms` guide §3). All optional and omitted from
-     * the DOM when undefined, so a call site opts in per field semantics: search inputs and codes get
-     * them, prose keeps the platform defaults.
-     */
-    autocorrect?: 'on' | 'off';
-    autocapitalize?: 'none' | 'off' | 'characters' | 'words' | 'sentences';
-    spellcheck?: boolean;
-    enterkeyhint?: 'enter' | 'done' | 'go' | 'next' | 'previous' | 'search' | 'send';
-    inputmode?: 'none' | 'text' | 'decimal' | 'numeric' | 'tel' | 'search' | 'email' | 'url';
     accept?: string;
     ariaDescribedby?: string;
     ariaLabel?: string;
@@ -42,13 +32,7 @@ interface Props {
     list?: string;
 }
 
-const props = withDefaults(defineProps<Props>(), {
-    // Boolean props absent from a call site default to `false` under Vue's boolean casting, and a
-    // `false` binding renders `spellcheck="false"` (enumerated attribute, so unlike `disabled` it is
-    // not removed when false). An explicit `undefined` default keeps "absent" absent: only call
-    // sites that opt in render any hint attribute.
-    spellcheck: undefined,
-});
+const props = defineProps<Props>();
 
 const emit = defineEmits<{
     'update:modelValue': [value: string | number | File | null];
@@ -121,11 +105,6 @@ function onKeydown(event: KeyboardEvent): void {
                 :max="max"
                 :step="step"
                 :autocomplete="autocomplete"
-                :autocorrect="autocorrect"
-                :autocapitalize="autocapitalize"
-                :spellcheck="spellcheck"
-                :enterkeyhint="enterkeyhint"
-                :inputmode="inputmode"
                 :accept="accept"
                 :list="list"
                 :aria-label="ariaLabel"
@@ -154,11 +133,6 @@ function onKeydown(event: KeyboardEvent): void {
         :max="max"
         :step="step"
         :autocomplete="autocomplete"
-        :autocorrect="autocorrect"
-        :autocapitalize="autocapitalize"
-        :spellcheck="spellcheck"
-        :enterkeyhint="enterkeyhint"
-        :inputmode="inputmode"
         :accept="accept"
         :list="list"
         :aria-label="ariaLabel"
