@@ -1,5 +1,7 @@
 # Trainer Desk — Implementation Roadmap (2026-11-16)
 
+> **SUPERSEDED 2026-11-16** by docs/roadmap/project-roadmap-2026-11-16.md. P0–P5 slices closed; see §1 new roadmap for evidence.
+
 **Status:** active · **Pair:** `docs/plan/implementation-plan-2026-11-16.md`. This file owns the phase/slice map, the
 order and the acceptance bar; the plan file owns the code-level steps, paths and commands. Read both together; where
 they disagree the roadmap governs and the plan is corrected.
