@@ -57,18 +57,24 @@ try {
 
 const { autoUpdater } = electronUpdater;
 
-// `MAIN_VITE_NATIVEPHP_BUILD_PATH` is inlined at build time. In a packaged app it
-// can resolve to a path that only existed on the build machine (or one inside
-// app.asar), so the PHP server script is never found and the app never opens an
-// HTTP port. The packaged payload is always shipped at `resources/build`, so fall
-// back to that when the inlined path is not present on this machine.
-let buildPath = path.resolve(import.meta.dirname, import.meta.env.MAIN_VITE_NATIVEPHP_BUILD_PATH);
-if (!fs.existsSync(buildPath) && app.isPackaged) {
-    const packagedBuildPath = path.join(process.resourcesPath, 'build');
-    if (fs.existsSync(packagedBuildPath)) {
-        buildPath = packagedBuildPath;
-    }
+// `MAIN_VITE_NATIVEPHP_BUILD_PATH` is inlined at build time. It is absent in a
+// packaged build, where `path.resolve(dirname, undefined)` throws at module load
+// and kills the main process before `whenReady` - so the PHP server never starts.
+// Resolve only when the value exists, and fall back to the shipped payload.
+const inlinedBuildPath = import.meta.env.MAIN_VITE_NATIVEPHP_BUILD_PATH;
+const fallbackBuildPath = app.isPackaged
+    ? path.join(process.resourcesPath, 'build')
+    : path.resolve(import.meta.dirname, '..', '..', '..', 'build');
+
+let buildPath = inlinedBuildPath
+    ? path.resolve(import.meta.dirname, inlinedBuildPath)
+    : fallbackBuildPath;
+
+if (!fs.existsSync(buildPath) && fs.existsSync(fallbackBuildPath)) {
+    buildPath = fallbackBuildPath;
 }
+
+console.log('[main] buildPath:', buildPath);
 const defaultIcon = path.join(buildPath, 'icon.png');
 const certificate = path.join(buildPath, 'cacert.pem');
 
