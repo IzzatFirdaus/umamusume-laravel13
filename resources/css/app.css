@@ -528,7 +528,7 @@ html[data-theme='dark'] {
     --color-green-deep: #83B503;
     --color-green-tint: #19191B;
     --color-ring: #83B503;
-    --color-risk: #FF4400;
+    --color-risk: #FF6F3B;
     --color-on-risk: #121212;
     /* Per-theme foreground steps (see the block note above). The goal line is the
        sampled amber #B89825; the selection boundary its sampled gold #E3B977.
@@ -848,6 +848,21 @@ html[data-theme='eva01'] {
     :focus-visible {
         outline: 2px solid var(--color-ring);
         outline-offset: 2px;
+    }
+
+    /*
+     * BO-011 (2026-11-15): seed the ring colour at rest, so no focus stop paints a transition.
+     * `transition-colors` carries `outline-color` in its property list, so on any element that
+     * has it the 2px ring above animated from the resting `outline-color` — `currentColor`,
+     * because `outline-style` is `none` until focus — to `--color-ring` over the 150ms default
+     * duration. Measured on `/review/10`: 23 focus stops settled on one colour, but the first
+     * painted frame showed five, and the six offenders were exactly the elements reporting
+     * `outline-color` in their `transition-property`. With the same value at rest and on focus
+     * there is no delta to interpolate, so the first frame is already the token. Declared in
+     * the base layer, so a `focus-visible:outline-*` utility still wins; no `!important`.
+     */
+    :where(a, button, input, select, textarea, summary, [tabindex]) {
+        outline-color: var(--color-ring);
     }
 
     *::selection {

@@ -864,6 +864,63 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
     });
 
     /*
+     * BO-004 (2026-11-15): `--color-risk` is set as *text* on three surfaces — the Dashboard's
+     * `To do` pill sits on `panel`, the risk rail sits on `raised`, and the same token is printed
+     * on `page`. The G-18 contract above pins `on-risk on risk` (ink on the fill) but never
+     * measured the fill's own ink against the surfaces, so a risk colour could fail AA on every
+     * one of them and the suite stayed green: `#FF4400` measured 3.66:1 on raised and 4.16:1 on
+     * panel in dark before this row existed.
+     *
+     * This is a token-level invariant, not a browser behaviour, so it lives here rather than in a
+     * Playwright spec: the ratio is a property of the two resolved values, and the page is only
+     * the resolver. It is a separate case rather than three more rows in `g18ContractPairs()`
+     * because that list's count and key order are themselves contracted (`:718-742`) and
+     * `DesignDocEnforcementTest` re-reads them against DESIGN.md §10.
+     */
+    it('keeps --color-risk legible as text on every surface it is set on', function (): void {
+        $page = visit('/umamusume');
+
+        $surfaces = ['raised', 'panel', 'page'];
+        $names = array_merge(
+            ['--color-risk'],
+            array_map(static fn (string $role): string => '--color-'.$role, $surfaces),
+        );
+
+        foreach (contrastThemes() as $theme) {
+            /** @var array<string, array{raw: string, resolved: string}> $resolved */
+            $resolved = (array) $page->script(resolvedTokenScript($names, $theme));
+
+            $risk = parseComputedColor($resolved['--color-risk']['resolved'] ?? '');
+
+            expect($risk)->not->toBeNull(sprintf(
+                '%s theme: --color-risk did not resolve to a colour, so no ratio below it can be trusted.',
+                $theme,
+            ));
+
+            foreach ($surfaces as $role) {
+                $surface = parseComputedColor($resolved['--color-'.$role]['resolved'] ?? '');
+
+                expect($surface)->not->toBeNull(sprintf(
+                    '%s theme: --color-%s did not resolve to a colour.',
+                    $theme,
+                    $role,
+                ));
+
+                $ratio = contrastRatio($risk, $surface);
+
+                expect($ratio)->toBeGreaterThanOrEqual(4.5, sprintf(
+                    '%s theme: --color-risk on --color-%s measures %.2f:1, under the 4.5:1 WCAG AA text'
+                    .' threshold. The risk hue is printed as text on this surface (BO-004), so it owes the'
+                    .' text ratio, not the 3:1 boundary ratio.',
+                    $theme,
+                    $role,
+                    $ratio,
+                ));
+            }
+        }
+    });
+
+    /*
      * The card surface against the page behind it, measured and floored rather than
      * contracted at 3:1 (frontend-fidelity Slice 0.4, 2026-10-14).
      *
