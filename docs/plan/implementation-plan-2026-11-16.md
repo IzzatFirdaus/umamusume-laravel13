@@ -1,7 +1,5 @@
 # Implementation Plan — 2026-11-16 (pairs `docs/roadmap/implementation-roadmap-2026-11-16.md`)
 
-> **SUPERSEDED 2026-11-16** by docs/plan/project-plan-2026-11-16.md. P0–P5 slices closed; see §1 new roadmap for evidence.
-
 **Read with the roadmap.** That file owns the phase/slice map, the dependency order, the acceptance bar and the
 completed-work exclusions; this file owns the code-level steps. Where they disagree the roadmap governs and this file
 is corrected. Slice ids are shared and must stay in step: P0.1 · P1.1–P1.3 · P2.1–P2.3 · P3.1–P3.8 · P4.1–P4.5 ·
