@@ -249,7 +249,7 @@ function remainingLetters(group: AptitudeGroup): string {
              goes through the shell's media slot, outside the h1; the empty alt keeps it out of the
              heading's accessible name, and a missing mirror renders nothing (DESIGN.md §4.7). -->
         <template #title-media>
-            <span aria-hidden="true"><ArtworkSlot :url="props.trainee.artworkURL" alt="" size="size-16" /></span>
+            <span aria-hidden="true"><ArtworkSlot :url="props.trainee.artworkURL" alt="" size="size-16" :eager="true" /></span>
         </template>
         <template #title>
             {{ props.trainee.name }}

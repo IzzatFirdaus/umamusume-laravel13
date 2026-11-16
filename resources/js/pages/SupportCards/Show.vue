@@ -186,7 +186,7 @@ const statedAt = (stage: EffectStage): string => {
             <!-- No link: this page is the card, so a frame around it would be a link to itself
                  (`DESIGN.md` §4.7, the header slot's no-action case). Decorative alt, because the name
                  prints beside it. -->
-            <ArtworkSlot :url="props.card.artworkURL" alt="" size="size-16" />
+            <ArtworkSlot :url="props.card.artworkURL" alt="" size="size-16" :eager="true" />
             <p v-if="hasJapanese" lang="ja" class="text-sm text-ink-muted">{{ japaneseName }}</p>
         </div>
 

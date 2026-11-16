@@ -30,7 +30,7 @@ export type { ProvenanceState };
  * The placement rule from the old component still holds: the mark sits beside the figure it labels,
  * never in a page-level legend, and a figure with no mark is a confirmed figure rather than a bug.
  */
-import { computed, ref } from 'vue';
+import { computed, useId } from 'vue';
 
 const props = defineProps<{
     state: 'confirmed' | 'calculated' | 'estimated' | 'unknown';
@@ -59,36 +59,32 @@ const mark = computed(() => (props.state === 'confirmed' ? null : (MARKS[props.s
 
 const name = computed(() => (props.title ? `${mark.value?.word}: ${props.title}` : (mark.value?.word ?? '')));
 
-// Visible on focus as well as hover. `mouseenter`/`mouseleave` rather than CSS `group-hover`, because
-// the same element has to respond to focus, and CSS cannot express "focus OR hover" on a span
-// without either duplicating rules or relying on `:focus-within` that a non-focusable span never gets.
-const open = ref(false);
+// Stable per-instance id so each mark's tooltip pairs one-to-one with its trigger through interestfor.
+const tooltipId = useId();
 </script>
 
 <template>
     <span v-if="mark !== null" class="relative inline-flex align-middle">
-        <span
-            role="img"
+        <button
+            type="button"
             :aria-label="name"
-            tabindex="0"
-            class="pill pill-neutral focus:outline-2 focus:outline-offset-2"
-            @mouseenter="open = true"
-            @mouseleave="open = false"
-            @focus="open = true"
-            @blur="open = false"
+            :interestfor="tooltipId"
+            class="pill pill-neutral min-h-11 focus:outline-2 focus:outline-offset-2"
         >
             <span aria-hidden="true" class="font-mono">{{ mark.glyph }}</span>
             <span>{{ mark.word }}</span>
-        </span>
-        <!-- The reason, when there is one. `role="tooltip"` and positioned above the mark; it stays in
-             the accessible name above regardless of whether this popover is open, so opening it is a
-             convenience for sighted readers and not the only route to the sentence. -->
-        <span
-            v-if="props.title && open"
+        </button>
+        <!-- Plain text hint; native popover light-dismisses on Escape / click outside. The hint
+             sentence repeats what `aria-label` already says, so no `aria-describedby` (would
+             double-read). Positioned by anchor-positioning CSS in app.css (gated behind @supports);
+             browsers without it fall back to the popover's default placement. -->
+        <div
+            :id="tooltipId"
+            popover="hint"
             role="tooltip"
-            class="card absolute bottom-full left-0 z-10 mb-1 w-max max-w-xs bg-raised px-2 py-1 text-xs font-normal text-ink shadow-overlay"
+            class="provenance-tooltip card w-max max-w-xs bg-raised px-2 py-1 text-xs font-normal text-ink shadow-overlay"
         >
             {{ props.title }}
-        </span>
+        </div>
     </span>
 </template>

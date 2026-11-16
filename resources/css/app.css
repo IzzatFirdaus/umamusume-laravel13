@@ -2063,3 +2063,35 @@ table.t tr.is-current td {
     background:var(--color-brand-chrome);
 }
 
+/* Dialog overscroll containment: progressive enhancement. Unsupported browsers
+   (e.g. Safari) ignore the declaration and the page keeps its current behavior.
+   Per MWG `dialog` guide — do not fall back to overflow: hidden on html/body. */
+dialog:modal {
+    overscroll-behavior: contain;
+}
+
+dialog::backdrop {
+    overflow: hidden;
+    overscroll-behavior: contain;
+}
+
+/* Popover polyfill escape hatch: the polyfill applies .\:popover-open instead
+   of the native :popover-open pseudo-class. Combine both so display:block is
+   honored in every browser. Per MWG popover guide — mandatory when using the
+   polyfill. */
+[popover]:is(:popover-open, .\:popover-open) {
+    display: block;
+}
+
+/* Anchor positioning for provenance tooltips: gated so browsers without native
+   anchor positioning keep the default popover placement (centered viewport)
+   rather than being stranded at (0, 0) by an unconditional inset: auto. */
+@supports (position-area: block-start) {
+    [popover="hint"].provenance-tooltip {
+        position-area: block-start;
+        position-try-fallbacks: flip-block;
+        inset: auto;
+        margin: 0;
+    }
+}
+

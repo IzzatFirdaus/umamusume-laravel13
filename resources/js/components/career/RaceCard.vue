@@ -239,6 +239,7 @@ const folds = computed<boolean>(
 
         <dialog
             ref="dialog"
+            closedby="any"
             class="overlay-shadow ml-auto h-full max-h-none w-full max-w-md rounded-none border-l border-rule bg-page p-0 text-ink backdrop:bg-scrim"
             @close="closed"
         >

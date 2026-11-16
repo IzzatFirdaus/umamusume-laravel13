@@ -71,6 +71,12 @@ defineProps<{
      * invisible box above a heading is just a gap.
      */
     reserve?: boolean;
+    /**
+     * Above-the-fold / LCP slot: load immediately (`loading="eager"` + `fetchpriority="high"`)
+     * instead of the default lazy. List rows leave this unset. MWG performance: never lazy-load
+     * the LCP image; visible images default to eager.
+     */
+    eager?: boolean;
 }>();
 </script>
 
@@ -82,13 +88,14 @@ defineProps<{
         :class="[size, 'block shrink-0']"
         data-artwork-slot
     >
-        <img :src="url" :alt="alt" loading="lazy" decoding="async" :class="`${size} rounded-md object-cover`">
+        <img :src="url" :alt="alt" :loading="eager ? 'eager' : 'lazy'" :fetchpriority="eager ? 'high' : 'auto'" decoding="async" :class="`${size} rounded-md object-cover`">
     </a>
     <img
         v-else-if="url"
         :src="url"
         :alt="alt"
-        loading="lazy"
+        :loading="eager ? 'eager' : 'lazy'"
+        :fetchpriority="eager ? 'high' : 'auto'"
         decoding="async"
         :class="`${size} rounded-md object-cover`"
         data-artwork-slot

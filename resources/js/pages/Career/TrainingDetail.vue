@@ -472,6 +472,14 @@ function onKeydown(event: KeyboardEvent): void {
         return;
     }
 
+    // IME composition must not be interrupted: isComposing is the native check, and
+    // keyCode 229 catches Safari's compositionend/keydown ordering inversion (MWG
+    // ime-safe-enter-submit, strategy 1). Legacy keyCode 13 handlers were immune; this
+    // handler migrated to event.key, so without the guard it would now submit early.
+    if (event.isComposing || event.keyCode === 229) {
+        return;
+    }
+
     if (event.key === 'Enter') {
         if (choice.value === null || (event.target as HTMLElement | null)?.tagName === 'BUTTON') {
             return;

@@ -316,7 +316,7 @@ watch(isOpen, (open) => {
             :id="uid"
             role="listbox"
             :aria-label="props.label"
-            class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-rule bg-raised shadow-lg"
+            class="absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md border border-rule bg-raised overlay-shadow"
             style="max-width: 24rem"
             @mousedown.prevent
         >
