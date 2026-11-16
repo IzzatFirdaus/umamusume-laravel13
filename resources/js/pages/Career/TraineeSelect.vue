@@ -587,6 +587,10 @@ const sortLabel = computed(
                         type="text"
                         id="filter-search"
                         name="search"
+                        autocorrect="off"
+                        autocapitalize="none"
+                        :spellcheck="false"
+                        enterkeyhint="search"
                         placeholder="Name or unique skill"
                         label="Search"
                     />
@@ -652,7 +656,7 @@ const sortLabel = computed(
                     </p>
                     <p class="text-xs text-ink-muted">
                         <template v-if="selectedSummary">{{ selectedSummary }}.</template>
-                        The form you pick sets this run's rarity and potential.
+                        The form you pick sets this run's character card.
                     </p>
                 </div>
 

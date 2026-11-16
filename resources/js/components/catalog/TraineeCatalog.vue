@@ -213,6 +213,10 @@ const fieldLabel = 'text-xs font-semibold text-ink-muted';
                     type="text"
                     id="trainee-search"
                     name="search"
+                    autocorrect="off"
+                    autocapitalize="none"
+                    :spellcheck="false"
+                    enterkeyhint="search"
                     placeholder="Trainee or card name"
                     :error="errors.search"
                 />

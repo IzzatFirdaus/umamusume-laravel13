@@ -178,6 +178,7 @@ defineExpose({ open, openAt });
 <template>
     <dialog
         ref="dialog"
+        closedby="any"
         class="m-auto w-full max-w-2xl rounded-lg border-rule bg-panel p-4 text-ink backdrop:bg-black/40"
         :aria-label="`Choose a card for ${slotLabel}`"
         @close="closed"
@@ -206,6 +207,10 @@ defineExpose({ open, openAt });
                 v-model="query"
                 id="deck-filter-search"
                 name="q"
+                autocorrect="off"
+                autocapitalize="none"
+                :spellcheck="false"
+                enterkeyhint="search"
                 type="search"
                 label="Name contains"
             />

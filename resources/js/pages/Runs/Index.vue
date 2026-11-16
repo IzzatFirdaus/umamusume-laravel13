@@ -111,18 +111,21 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
 
         <!-- HFW runs-index annotation 1: the filters are one inline form row, above the table. A
              plain GET form so the applied filter is the URL, shareable and reload-safe. -->
-        <form
-            method="get"
-            action="/training-runs"
-            role="search"
-            aria-label="Filter careers"
-            class="flex flex-wrap items-end gap-3"
-        >
+        <search aria-label="Filter careers">
+            <form
+                method="get"
+                action="/training-runs"
+                class="flex flex-wrap items-end gap-3"
+            >
             <label class="flex min-w-0 flex-1 basis-64 flex-col gap-1" :class="fieldLabel">
                 Search trainee
                 <input
                     type="search"
                     name="search"
+                    autocorrect="off"
+                    autocapitalize="none"
+                    spellcheck="false"
+                    enterkeyhint="search"
                     :value="props.filters.search ?? ''"
                     placeholder="Rice Shower, Maruzensky…"
                     :class="fieldControl"
@@ -177,6 +180,7 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
                 class="inline-flex min-h-11 items-center px-2 text-sm text-ink-muted hover:underline transition-colors duration-150 ease-out"
             >Clear</a>
         </form>
+        </search>
 
         <!-- An empty list is a real state, not a failure, and it has to say what happens next.
              "No data" alone would leave the Trainer guessing. A filtered-empty list says which
