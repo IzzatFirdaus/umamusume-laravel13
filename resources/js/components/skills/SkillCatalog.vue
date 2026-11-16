@@ -205,6 +205,10 @@ const secondaryName = (skill: Skill): string | null =>
                     v-model="search"
                     type="text"
                     name="search"
+                    autocorrect="off"
+                    autocapitalize="none"
+                    :spellcheck="false"
+                    enterkeyhint="search"
                     placeholder="Part of a skill name"
                     :error="errors.search"
                 />

@@ -179,6 +179,10 @@ function goToPage(page: number): void {
                     v-model="q"
                     type="search"
                     name="q"
+                    autocorrect="off"
+                    autocapitalize="none"
+                    :spellcheck="false"
+                    enterkeyhint="search"
                     placeholder="Race name"
                 />
             </label>

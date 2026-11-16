@@ -284,6 +284,10 @@ const factorGrades: { family: string; note: string }[] = [
                     v-model="search"
                     name="search"
                     type="search"
+                    autocorrect="off"
+                    autocapitalize="none"
+                    :spellcheck="false"
+                    enterkeyhint="search"
                     placeholder="Trainee name"
                     :error="errors.search"
                 />
@@ -305,6 +309,9 @@ const factorGrades: { family: string; note: string }[] = [
                     id="veteran-filter-tag"
                     name="tag"
                     type="text"
+                    autocorrect="off"
+                    autocapitalize="none"
+                    :spellcheck="false"
                     placeholder="One tag"
                     :error="errors.tag"
                 />
