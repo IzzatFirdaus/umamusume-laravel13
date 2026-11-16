@@ -145,19 +145,31 @@ test('shows review progress and keeps the pager reachable', async ({ page }) => 
     await expect(page.getByText(/\d+ of \d+ items to resolve\./)).toHaveCount(0);
     await expect(page.getByText(`${now} of ${total} resolved`)).toBeVisible();
 
-    // The pager stays put while the queue scrolls under it. This is measured, not asserted as a
-    // class: the shell's `main` carries `@container`, and containment makes `position: sticky` a
-    // no-op for its descendants (containment-mechanism.spec.ts proves that), so a `sticky` class
-    // here would be a claim the browser does not honour.
+    // The pager is the last thing in the queue and stays in DOM order after the table, so reaching the
+    // bottom of the content reaches it. This is measured, not asserted as a class.
+    //
+    // It is deliberately NOT `position: sticky`: `AppLayout.vue:616` puts `@container` on the canvas,
+    // containment ends `position: sticky` for descendants, and KI-150 records "keep no page-level
+    // sticky" as the standing choice — `661527e1d` removed the dead declaration. This case asserted
+    // the removed behaviour, so it could only ever fail; it now pins the order that the design does
+    // guarantee, which is the property a Trainer depends on.
     const pager = page.getByTestId('review-pager');
     await expect(pager).toBeVisible();
-    const beforeScroll = await pager.evaluate((element) => element.getBoundingClientRect().bottom);
-    await page.mouse.wheel(0, 900);
-    await page.waitForTimeout(250);
-    const afterScroll = await pager.evaluate((element) => element.getBoundingClientRect().bottom);
 
-    expect(afterScroll, 'the pager is still at the bottom of the viewport after scrolling').toBeLessThanOrEqual(720 + 1);
-    expect(Math.abs(afterScroll - beforeScroll), 'the pager did not scroll away with the content').toBeLessThanOrEqual(1);
+    // The pager sits after every row of the queue: its top edge is below the last row's bottom edge.
+    const lastRow = page.locator('#review-results tr').last();
+    const lastRowBox = await lastRow.boundingBox();
+    const pagerBox = await pager.boundingBox();
+    expect(lastRowBox, 'the queue rendered no last row to order against').not.toBeNull();
+    expect(pagerBox, 'the pager has no box').not.toBeNull();
+    expect(
+        pagerBox!.y,
+        'the pager renders above the last queue row instead of after it',
+    ).toBeGreaterThanOrEqual(lastRowBox!.y + lastRowBox!.height - 1);
+
+    // And it is reachable: scrolling to it brings it fully into the viewport.
+    await pager.scrollIntoViewIfNeeded();
+    await expect(pager).toBeInViewport();
 });
 
 test('measures the queue against the shell gutter', async ({ page }) => {
@@ -349,9 +361,24 @@ test('renders the wireframe regions in the wireframe order at 1280', async ({ pa
 
     let queueCardDropped = false;
     let queueNoteDropped = false;
+    let queueCautionDropped = false;
 
     const demanded = hfw.regions.filter((marker) => {
         if (marker === 'pill-positive') {
+            return false;
+        }
+
+        /*
+         * The no-match pill. The HFW draws it as `pill-caution`; `2b864b51` deliberately moved the
+         * Review no-match state to `pill-neutral` under AUD-20261102-021 F-02 ("neutral no-match"),
+         * because a candidate the engine could not match is an absence rather than a warning — the
+         * caution colour read as an error the Trainer had to act on. This is a ruled deviation, not
+         * a missing marker, so it is excluded the same way the dropped card and note are. The class
+         * is still in `PAGE_MARKERS` because other pages legitimately draw `pill-caution`.
+         */
+        if (marker === 'pill-caution' && !queueCautionDropped) {
+            queueCautionDropped = true;
+
             return false;
         }
 
