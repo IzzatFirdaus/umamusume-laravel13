@@ -326,6 +326,11 @@ Status mapping: 400 bad input, 404 missing, 422 validation, 500 internal (generi
 
 Deliberately absent: auth endpoints, write endpoints, idempotency keys (single local consumer, read-only surface), cursor pagination.
 
+Six endpoints is terminal (`PRD.md` FR-E E-1 names "catalog and runs", not skills; owner ruling
+2026-11-16, ruling 9B). `skills`, `support-cards`, and every other catalog table stay browser-only:
+adding a read-only index/show for them would be surface the PRD does not ask for. A request for one is
+a PRD amendment first, not a controller.
+
 ## 5. Data-Fetching Engine (JP ↔ Global cross-reference)
 
 ### Pipeline stages
@@ -545,8 +550,10 @@ quiet worktree (KI-74).
 - `tests/browser/dashboard.spec.ts` — the in-flight and `invalid` states on the landing screen.
 - `tests/browser/screen-speed.spec.ts` and the other migrated specs cover rendered copy per screen.
 
-**Intentionally deferred.** Route-level query-count tests (NFR-11) and a development-only diagnostics
-surface (NFR-19) are not built. `CockpitController` still loads whole `race_catalog_slots` sets per
+**Intentionally deferred.** Route-level query-count tests (NFR-11) are not built. The
+development-only diagnostics surface (NFR-19) is a **terminal deferral: not in scope for 3.0.0**
+(ruled 2026-11-16, ruling 10B) and is named on the release-bar exception list
+(P7.1 condition 7). `CockpitController` still loads whole `race_catalog_slots` sets per
 request (bounded by scenario, not by page) and `PreferenceController::backup()` runs `VACUUM INTO` on
 the request thread; both are recorded here rather than changed, because neither is on the path that was
 breaking and both need their own measurement.
