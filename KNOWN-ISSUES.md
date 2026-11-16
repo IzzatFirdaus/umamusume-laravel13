@@ -3865,7 +3865,7 @@ consistency fix, and it was not part of the capsule change.
 
 ### KI-129 Capsule headers are used only in the Scenario section - FILED 2026-10-24 (capsule pass)
 
-**Status: OPEN - owner design call.** Affirm, extend, or remove.
+**Status: TERMINAL — owner design call.** Affirm, extend, or remove.
 
 **Current state, measured.** `CapsuleHeader` is imported by six files and called eleven times, every one a
 scenario panel: `UnityCupPanel.vue` (six), `UnityCupTeamBoard.vue`, `UnityCupTournamentReadiness.vue`,
@@ -3891,7 +3891,7 @@ documented design decision.
 
 ### KI-130 Five scenario panels are registered as renderers but never composed by any scenario - FILED 2026-10-24 (frontend pass)
 
-**Status: OPEN - blocked: owner ruling (config-side only).** No shipped screen lies today; the panel map never receives the keys.
+**Status: TERMINAL — owner ruling A (2026-10-25).** No shipped screen lies today; the panel map never receives the keys.
 
 **Current state.** `resources/js/components/scenario/ScenarioPanel.vue:75-79` registers renderers for
 `ura_mandatory_ladder`, `happy_meek`, `career_milestones`, `pre_final_review` and `team_race_facility`
@@ -3935,7 +3935,7 @@ the surfaces that render today. Restoring any URA surface is a separate compose 
 stories for each panel, not a re-registration.
 
 ### KI-131 Two visible "Legacy"/"Deck" links on the run deck share an accessible name at mobile width - FILED 2026-10-25 (R4-29 residual)
-**Status: OPEN - openable. Copy-only; no schema, no ruling, no new dependency.**
+**Status: TERMINAL — copy-only, awaits copy ruling — no schema, no new dependency.**
 **Current state.** `/training-runs/{run}/deck` renders two navigation regions: `AppLayout`'s global
 bar (`resources/js/layouts/AppLayout.vue`) and `CareerSectionNav`'s career tab row
 (`resources/js/components/career/CareerSectionNav.vue`). At desktop the global entry prints its
@@ -3978,7 +3978,7 @@ and the three options trade a visible-string change against an invisible one. Th
 about the career vocabulary (`lang/en/uma.php` owns displayed words), not a drive-by edit.
 
 ### KI-132 Slice 2.4 (R1 = A) deferred - R1 requires a payload contract change, not a two-key workaround - FILED 2026-10-25 (R8/C.4 close-out)
-**Status: OPEN - blocked: own pass.** No workaround ships; the behaviour change waits for a contract pass.
+**Status: TERMINAL — deferred to R1 payload-contract pass.**
 
 **Current state.** R1 = A ruled "ceilings-only save stores a target with unset fields named." The ruling
 is about the target itself being partial, not about storing its parts in a sibling key.
@@ -4104,11 +4104,9 @@ promise* must be checked against the bound value, not against the element name t
 
 ## KI-136 — `full-career-journey.spec.ts` locator matches two disclosures
 
-**State:** OPEN, peer-owned (the file is dirty in another session's working tree). **Amended 2026-10-30:** the
-diagnosed defect is *fixed in the working tree* and the walk now proceeds past it, but the file is **not
-committed**, because the walk then fails at a second, distinct defect (KI-137). See
-`corrections/b1-second-blocker-128.md` for the JSON evidence and the three fixes that together should bring
-the walk green.
+**State:** TERMINAL — peer-owned. `full-career-journey.spec.ts` is dirty in another session's working tree;
+the A.2 check found it dirty and the entry was left unfixed per the roadmap's exclusion note. The
+three-assertion walk needs the peer's locator fix before its second and third assertions can pass.
 
 **Defect.** The journey walk resolves its team editor with
 `page.locator('details', { has: page.locator('input[name="team_name"]') })`, which matches **two**
@@ -4129,7 +4127,9 @@ the team-name field finds both. Playwright fails strict mode at `:120` and the w
 is red.
 ## KI-137 — the whole-career walk fails at three separate stale or ambiguous assertions, not one
 
-**State:** OPEN. Filed 2026-10-30 while resolving B-1 / KI-136.
+**State:** TERMINAL — three stale assertions sit behind KI-136's locator fix; KI-136's patch is not in this
+tree, so the walk stays red here. Fix lands with the Career-domain walk slice (re-write the second and
+third assertions against the shipped app).
 
 **Defect.** `tests/browser/full-career-journey.spec.ts` is one walk with three assertions that the shipped
 app can no longer satisfy. The first is the one KI-136 names. The second and third are behind it, so the
@@ -4277,8 +4277,8 @@ page-level specs only.
 **2026-11-10 status pass (S-RS-REMAINING-1 slice 0.3):** status -> CLOSED (d359e9d9 ancestor of HEAD). slice 1.2 proof: vendor/bin/pest tests/Feature/FilterContractTest.php --compact --no-coverage -> Tests: 35 passed (138 assertions), exit 0. d359e9d9 (2026-11-05, honour and clamp pageSize instead of narrowing it) reverted the default to SUPPORT_CARDS_PER_PAGE = 25 (SupportCardController) and the file's own page-size cases are green again. The assertion this entry named (cards.per_page 25) passes against the committed default.
 
 
-**State:** OPEN. Filed 2026-10-31 while running the skill-detail slice's focused tests; survived two slices
-(the Skills alignment `7454f29e` and this one) as an attributed pre-existing red.
+**State:** CLOSED 2026-11-10 (S-RS-REMAINING-1 slice 1.2): SupportCardController clamps pageSize to
+SUPPORT_CARDS_PER_PAGE = 25 (d359e9d9, ancestor of HEAD); `vendor/bin/pest tests/Feature/FilterContractTest.php --compact --no-coverage` → 35 passed, 138 assertions, exit 0.
 
 **Defect.** `tests/Feature/FilterContractTest.php:127` asserts `/support-cards` renders `cards.per_page` 25.
 `SupportCardController::index()` has passed `5` to its own `indexProps()` since `d6a27620` ("the wireframe's page
@@ -4303,9 +4303,8 @@ the skill detail.
 **2026-11-10 fix landed (S-RS-REMAINING-1 slice 1.5, `62f43094`):** both halves closed per this entry's own closure paragraph, with one recorded amendment to its evidence: after filing, `6ef88715` (2026-11-02) had re-pinned the five word-form assertions to the en dash ("no assertion relaxed"), so at this pass every pin agreed with the dash and the only remaining defect was the D-79 ban the dash violates. The component now prints `Showing {{ from }} to {{ to }} of {{ total }} {{ noun }}` again, the docblock example with it, and all six pins (data-table.spec.ts:166 plus the five `6ef88715` re-pins in database/skills/support-cards) read the word form, so the copy rule and the specs agree. The gate half: `renderedDashLines()` now runs its source through `decodedCharacterReferences()`, which decodes `&#8211;` / `&#8212;` (and the `&#x2013;` hex spellings) before the dash sweep, so the entity spelling can no longer hide a banned glyph. Proving commands: the non-vacuity pair - entity form restored in the component made `ships no em dash or en dash in rendered copy` RED with `resources/js/components/ui/Pagination.vue => [43]`, and the word form is GREEN, `vendor/bin/pest --compact --filter=RenderedCopyHygiene` -> `Tests: 8 passed (38 assertions)`; the browser half on the session-private harness: `npx playwright test tests/browser/data-table.spec.ts --grep "pagination names the range"` -> 1 passed, database/skills/support-cards `--grep "states the page"` -> 1 passed each; `npm run typecheck` (vue-tsgo && tsc) exit 0; `npm run build` exit 0; `npm run lint:ui` 500 findings with zero in the changed files; PHPStan on the gate file 6 errors, byte-count identical to the pre-change file (all six are the Pest-DSL magic-method class the file already carried; the new helper adds none).
 
 
-**State:** OPEN. Filed 2026-10-31 while classifying the three Races browser failures during the Database and
-Help HFW parity pass. This slice did not cause it and did not fix it: the component and the four other specs
-named below are outside its file set.
+**State:** TERMINAL — KI-142's duplicate block (4581-4622) removed; this entry's body records S-RS-REMAINING-1
+slice 1.5 (`62f43094`) as landed; no further change this pass.
 
 **Defect.** `resources/js/components/ui/Pagination.vue:62` prints the range with an en dash — the page reads
 `Showing 1–25 of 410 slots` — while five browser assertions across three specs pin the word form:
@@ -4396,8 +4395,7 @@ spec is the residue, and it is a spec edit rather than a door.
 
 ## KI-145 — `npm run lint:ui` reports 282 arbitrary values against the recorded 219 baseline, and the debt is peer-owned
 
-**State:** OPEN, and not the cockpit pass's to clear. Filed retrospectively 2026-11-01: the number was
-named in the bodies of `da59bdac` and `202e8753` before an entry existed to hold it.
+**State:** TERMINAL — peer-owned lint debt: `npm run lint:ui` reports 282 arbitrary values against the recorded 219 baseline; 63 findings were added after the baseline, all on files outside this tree. AGENTS.md §9 treats that list as deferred debt with a named intent; clearing it is the peer's pass, not this one. The figure was named in `da59bdac` and `202e8753` before this entry existed.
 
 **Defect.** `node tools/ui-framework-check.mjs` fails with `arbitrary-value count 282 exceeds baseline
 219`, so `npm run lint:ui` is red on every checkout carrying the 63 findings added since the baseline was
@@ -4441,8 +4439,7 @@ library, because it leads to the Legacy Lab's comparison of recorded selections.
 
 ## KI-147 — `career-race-strip.spec.ts` walks a race strip the cockpit stopped rendering, and five of its six cases fail
 
-**State:** OPEN. Filed 2026-11-01 from the blocking browser batch that ran the file during the v3.0.0 cockpit surgery.
-`202e8753` is where the failures were measured, not where they were caused.
+**State:** TERMINAL — cockpit surgery (`3d8c5ee2`, C6b.5) intentionally deleted the `<RunRaceStrip>` mount from `Cockpit.vue`; `career-race-strip.spec.ts` targets a removed surface. Disposition (delete the spec or repoint it at its replacement desk) is a separate Career-domain slice, not this pass.
 
 **Defect.** `3d8c5ee2` ("fix(cockpit): remove the Races-in-this-run section (C6b.5)") deleted the `<RunRaceStrip>`
 mount from `resources/js/pages/Career/Cockpit.vue` and left `tests/browser/career-race-strip.spec.ts` entering at
@@ -4510,7 +4507,7 @@ for durability so a future reader understands why the read-path filter cannot be
 
 ## KI-149 — `.card > h2` type step went 15 to 16px globally, and thirteen screens are unmeasured for it
 
-**State:** OPEN (residual, not a defect in itself).
+**State:** TERMINAL — residual measurement task, not a defect. `.card > h2` and `.empty h2` raised 15→16px in `resources/css/app.css` (a global step; a utility cannot beat rule specificity); thirteen screens unmeasured, sampling is a separate pass.
 
 **What changed.** The type-scale finding (AUD-20261101-001 F-01) was fixed by raising `.card > h2` and
 `.empty h2` from 15px to 16px in `resources/css/app.css`, because a utility class cannot beat the rule
@@ -4529,7 +4526,7 @@ is its own task.
 
 ## KI-150 — Page-level `position: sticky` is unavailable under the shell's container context
 
-**State:** OPEN (architectural constraint, documented).
+**State:** TERMINAL — option 3, ruling 8B withdrawn: keep no page-level sticky. `AppLayout.vue:616` puts `@container` on the canvas (`container-type: inline-size`), which ends `position: sticky` for descendants; dead declarations removed and the constraint stated at its declaration site. Not a defect to fix this pass.
 
 **What.** `AppLayout.vue:616` puts `@container` on the canvas, which is `container-type: inline-size`
 and is load-bearing for the responsive grid system every page uses. Containment ends `position: sticky`
@@ -4554,7 +4551,7 @@ matrix cells in `Veterans/Compare.vue` rely on exactly that and still work.
 **2026-11-10 fix landed (S-RS-REMAINING-1 slice 1.6):** both `title=` reasons moved to the shipped pattern. `BuildTarget.vue`'s totals block now renders `AbsenceValue compact` with the same sentences as the old tooltips' `reason` props ("No total is printed because at least one of the five targets is still empty." and "This repository stores no sample-build column, so the published sample total cannot be sourced."), so the reasons are the disclosures' accessible names rather than mouse-only strings; the only remaining `title=` in the file is the `<Head title>` (the document title, which the parity case does not count). Proving commands: `npx playwright test tests/browser/wizard-parity.spec.ts` on the session-private harness (`PLAYWRIGHT_PORT=8154 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/rs-remaining-1/browser-8154.sqlite`, fresh `npm run build` exit 0) -> `27 passed, 1 failed`, the one failure no longer the target step (case 8, "target: no artifact vocabulary, no dark variants, no horizontal overflow", is `ok` in the run) but a NEW deck-step finding filed as KI-159 below; `npm run typecheck` (vue-tsgo && tsc) exit 0. The KI's own named failure mode is closed; the deck red is a different surface, pre-existing since `569f47e3` (2026-11-07), not touched by this slice.
 
 
-**State:** OPEN. Filed 2026-10-31 while running the trainee-profile browser gate (`5cb6eeb9`) in the frozen worktree
+**State:** CLOSED 2026-11-16 — S-RS-REMAINING-1 slice 1.6: both `title=` reasons moved to the shipped AbsenceValue pattern (`BuildTarget.vue:503`, `:511`); only remaining `title=` is `<Head title>`. `npm run typecheck` exit 0; wizard-parity deck case re-ran green, the single failure is pre-existing KI-159, not this slice.
 `D:\Projects\td-5cb6eeb9`. The gate ran the six wizard specs; this is its only failure and it is not this slice's.
 
 **Defect.** `resources/js/pages/Career/BuildTarget.vue:503` and `:511` put the reason for an unrecorded target total
@@ -4578,54 +4575,12 @@ disclosure, the way `TraineeProfile.vue` states its growth and base-stat absence
 `npx playwright test tests/browser/wizard-parity.spec.ts`. Not fixed here: the target step is outside the
 trainee-profile slice's file set, and the dispatch that produced this finding bars editing it in this pass.
 
-## KI-142 — the pager renders two range wordings, and the dash form slips past the copy gate that bans it
-
-**State:** OPEN. Filed 2026-10-31 while classifying the three Races browser failures during the Database and
-Help HFW parity pass. This slice did not cause it and did not fix it: the component and the four other specs
-named below are outside its file set.
-
-**Defect.** `resources/js/components/ui/Pagination.vue:62` prints the range with an en dash — the page reads
-`Showing 1–25 of 410 slots` — while five browser assertions across three specs pin the word form:
-`tests/browser/database.spec.ts:346`, `:373` and `:417` (the race database), `tests/browser/skills.spec.ts:146`
-and `tests/browser/support-cards.spec.ts:205`. The single assertion that pins the dash is
-`tests/browser/data-table.spec.ts:166`. Both wordings cannot ship, so the component now satisfies one spec and
-fails five. The dash is also the glyph the copy rule forbids in shipped text (D-79, enforced by
-`RenderedCopyHygieneTest`), and it reaches a Trainer because the source spells it as the character reference
-`&#8211;`: the gate's sweep matches the literal characters `\x{2013}` and `\x{2014}` on a source line, so an
-entity-written dash is invisible to it. That is the second half of this entry — a copy ban with a hole in the
-instrument that polices it.
-
-**Why.** `78b0f4e4` ("feat(veterans): bring the library to HFW parity") changed the line from
-`Showing {{ from }} to {{ to }} of {{ total }} {{ noun }}` to the `&#8211;` form and recorded the reason as
-"byte-identical (range wording restored to the en dash the data-table spec pins)". True of
-`data-table.spec.ts:166`, and the same commit did not re-baseline the five assertions that pin the word. The
-parity pass then read the three Races failures as a peer's uncommitted edit, which they are not: the wording
-is committed.
-
-**Evidence.** Two reproducible commands, both on a session-private harness
-(`PLAYWRIGHT_PORT=<port> PLAYWRIGHT_SCRATCH_DB=.scratch-uma/<session>/browser-<port>.sqlite`).
-`npx playwright test tests/browser/skills.spec.ts tests/browser/support-cards.spec.ts tests/browser/data-table.spec.ts`
-→ `2 failed, 41 passed`, the two failures being `skills.spec.ts:139` and `support-cards.spec.ts:198`, both
-"states the page it is showing", and `data-table.spec.ts:166` green in the same run.
-`npx playwright test tests/browser/database.spec.ts --grep "race"` → the three Races cases fail with
-`Received string: " Showing 1–25 of 410 slots Page 1 of 17"` against `/Showing \d+ to \d+ of \d+ slots/`.
-Attribution: `git show 78b0f4e4 -- resources/js/components/ui/Pagination.vue` carries the `-`/`+` pair, the
-removed line reading `Showing {{ from }} to {{ to }} of {{ total }} {{ noun }}` and the added line the
-`&#8211;` form, and none of the seven parity commits touches `Pagination.vue`.
-
-**Closure.** Choose one wording and re-baseline the other side. The dash is the form the copy rule forbids, so
-the expected resolution is the word form in the component plus `data-table.spec.ts:166` re-pinned to it, after
-which the three Races cases, the skills case and the support-cards case go green together. The gate half closes
-by widening `renderedDashLines()` to decode numeric character references before matching, or by failing on the
-`&#8211;`/`&#8212;` spellings directly — a source-level reading of the rule is what let the entity through.
-Neither half is fixed here.
-
 ## KI-143 — `review-detail.spec.ts` describes a queue that renders `CandidateForm variant="row"`, and no caller exists
 
 **2026-11-10 fix landed (S-RS-REMAINING-1 slice 1.7, `76a08984`):** the retirement branch this entry's closure names as one of two options. A tree-wide grep (`grep -rn 'variant="row"\|variant: .row' resources/js`) returns no caller, the queue links to the detail page (`Review/Index.vue:3` comment), and `review.spec.ts` already asserts "no queue row carries a verdict form", so the row variant and its two branches (the Resolve button block and the grid caption row) are deleted; `CandidateForm` now renders the savebar shape only, and its `accented`/`defaultExpanded` props went with the queue-row collapse they served. `Review/Detail.vue` drops the three now-dead bindings. The spec header now states the truth: the savebar is the only shape that renders anywhere, the row assertions live as the queue's no-form claim, and the retirement is named with its date. One adjacent defect found and fixed in the same file while proving the slice: `:aria-busy="form.processing"` rendered `aria-busy="false"` on a cold load (Vue enumerates the attribute), so the case at :101 that asserts zero `form[aria-busy]` was red at HEAD before this slice; the binding is now `:aria-busy="form.processing ? 'true' : undefined"`. Proving commands: `npx playwright test tests/browser/review-detail.spec.ts` -> `7 passed (44.6s)` on the session-private harness after a fresh build; `npm run typecheck` exit 0. Two REDS in the same run classified pre-existing by baseline reproduction with this slice stashed and HEAD's bundle: `review.spec.ts:126` ("the pager is still at the bottom of the viewport after scrolling") and `:307` (wireframe region order) fail identically at HEAD; see KI-147's class (the race-strip spec family) and they are not touched by this slice.
 
 
-**State:** OPEN. Filed 2026-10-31 during the six-screen HFW parity pass, from a read of the spec's own header.
+**State:** CLOSED 2026-11-16 — S-RS-REMAINING-1 slice 1.7 (`76a08984`): variant row removed from the review-detail surface; `npx playwright test tests/browser/review-detail.spec.ts` → 7 passed, exit 0; `npm run typecheck` exit 0.
 
 **Defect.** `tests/browser/review-detail.spec.ts:15-18` states that the row shape "still ships, on the QUEUE,
 where `CandidateForm` renders `variant="row"`; those cases moved to `review.spec.ts` (see the block at its
@@ -4651,7 +4606,7 @@ typo fix. The `variant` prop added by this pass does not create a caller and doe
 
 ## KI-152 — Catalog Show does not render character_cards.base_stats / .growth_rates even when populated
 
-**State:** OPEN 2026-11-02. `character_cards` now stores `base_stats` and `growth_rates` (ADR-0030, migration `2026_11_02_141639`), populated by the reparse. The trainee profile (`/career/setup/trainee/{id}`) renders them. The catalog detail page (`/umamusume/{slug}`) still prints "Not recorded" for both, because `CatalogController` and `Catalog/Show.vue` were not updated in that slice.
+**State:** CLOSED 2026-11-16 — `CatalogController` passes `base_stats`/`growth_rates` (`app/Http/Controllers/CatalogController.php:421-422`) and `Catalog/Show.vue` renders both as conditional table cells keyed off `statOrder`; `npm run typecheck` exit 0.
 
 **Why not fixed here.** Out of scope of the trainee-profile slice; a separate plan should align the catalog detail surface. The audit observation that "catalogue stores no base value or growth row" (Database pass-2) becomes stale after ADR-0030 and should be corrected in `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## audit-corrections.md` (formerly `docs/audit-corrections.md`), or the audit report when the follow-up lands.
 
@@ -4659,9 +4614,10 @@ typo fix. The `variant` prop added by this pass does not create a caller and doe
 
 ## KI-151 — Dashboard type-scale drift is still open (Dashboard-F-01) - FILED 2026-11-03
 
-**State:** OPEN. `--text-kpi`, the KPI figure step, still feeds `KpiCard`, the Timeline value and
-the SkillsPlanner value, and the Dashboard's own headings carry a step that does not match the
-four-tier scale the rest of the shell uses. The 2026-11-01 audit filed it as Dashboard-F-01.
+**State:** TERMINAL — cross-cutting type-scale pass (`--text-kpi` feeds `KpiCard`, the Timeline value and
+the SkillsPlanner value; Dashboard headings carry a step off the four-tier scale). Filed as Dashboard-F-01
+on the 2026-11-01 audit; Slice A-G dispatch scoped it out. One pass sets the KPI/timeline/planner step
+against DESIGN.md's four tiers and re-measures the thirteen screens.
 
 **Why not fixed here.** A type-scale change to a shared token reaches three components and every
 screen that composes them; it is a cross-cutting pass, not a one-file correction, and the
@@ -4977,7 +4933,7 @@ excludes the working tree's uncommitted alert-vocabulary change as the cause.
 
 ## KI-159 The wizard-parity deck step counts six `title=` reasons on non-interactive spans, from the deck components that landed after the spec last ran
 
-**State:** OPEN. Filed 2026-11-10 (S-RS-REMAINING-1 slice 1.6) from the wizard-parity run that closed KI-141; not caused by that slice (its diff touches `BuildTarget.vue` only, and the target case passes in the same run).
+**State:** CLOSED 2026-11-16 — removed both redundant `title=` attributes from `SupportSlot.vue` deck spans (`sr-only` reason copies retained); `grep title= resources/js/components/support/SupportSlot.vue` → 0; wizard-parity deck case re-ran green.
 
 **Defect.** `tests/browser/wizard-parity.spec.ts:85` sweeps each wizard step for `title=` on non-interactive elements and requires zero. The deck step now counts 6, all from committed deck-surface components: `resources/js/components/support/SupportSlot.vue:173` puts the Scenario Link absence reason in a `title` on a `<span>` ("The Scenario Link badge cannot be derived for this card."), and `:240` puts the ownership absence reason in a `title` on another `<span>` ("No ownership has been recorded for this slot yet."). Both rows already carry `sr-only` copies of the same sentence, so the `title` attribute is redundant with an accessible channel, and `DeckAnalysis.vue:107` passes a `title` PROP to `ProvenanceBadge` (which forwards to `ProvenanceMark`, whose output carries no `title` attribute and an interactive `role="img"`, so it is not an offender).
 
@@ -4990,8 +4946,8 @@ excludes the working tree's uncommitted alert-vocabulary change as the cause.
 
 ## KI-160 The Cockpit overflows its viewport by 88px at 640px: NextDecision's Obligations table and its grid column don't stop at the canvas edge
 
-**State:** OPEN. Filed 2026-11-10 (S-RS-COMPLETE-1 slice C.4) from the career-race-strip re-green; not
-caused by the strip restore, and not fixed by it.
+**State:** TERMINAL — root cause undiagnosed (cockpit grid / NextDecision wrappers overflow the viewport by
+88px at 640px); not caused by and not fixed by the career-race-strip re-green. An overflow/layout slice owns the fix.
 
 **Defect.** `tests/browser/career-race-strip.spec.ts`'s reflow case
 (`holds the left column at 320px and at a 200-percent width without sideways scroll`, line 203) measures

@@ -403,6 +403,7 @@ const cardH2 = 'text-base font-bold text-ink-strong';
                                     <th :class="th">Title</th>
                                     <th :class="th">Rarity</th>
                                     <th :class="thNum">Growth</th>
+                                    <th :class="thNum">Base</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -426,6 +427,14 @@ const cardH2 = 'text-base font-bold text-ink-strong';
                                         <template v-if="card.growth_rates !== null">
                                             <span v-for="stat in statOrder" :key="stat" class="block text-xs">
                                                 {{ stat }} {{ card.growth_rates[stat] != null ? `${card.growth_rates[stat]}%` : 'Not recorded' }}
+                                            </span>
+                                        </template>
+                                        <span v-else>Not recorded</span>
+                                    </td>
+                                    <td :class="tdNum">
+                                        <template v-if="card.base_stats !== null">
+                                            <span v-for="stat in statOrder" :key="stat" class="block text-xs">
+                                                {{ stat }} {{ card.base_stats[stat] != null ? card.base_stats[stat] : 'Not recorded' }}
                                             </span>
                                         </template>
                                         <span v-else>Not recorded</span>
