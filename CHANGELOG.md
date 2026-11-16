@@ -30,6 +30,17 @@ truth for mechanics; the two ADRs that contradicted it were amended rather than 
 - **Maiden lock is run-level** (§1.2.6) - `TrainingRun::hasClearedMaidenLock()` (won Debut grade 900 or
   Maiden grade 800, placement 1) gates standard grades through `maidenGates()`, and the per-race
   `is_maiden_gated` / `maiden_gated` columns are dropped (migration `2026_10_27_120000`).
+- **Trainee profile slug resolution** - `TraineeSelectController` and `BuildTargetController` now resolve
+  `{umamusume}` to its slug at source, restoring the profile link from the trainee setup step (Commit `50e31d14`).
+- **Native PHP secret from config, not env** - `EnforceNativePHPSecret` reads `config('nativephp.secret')`
+  instead of `env()`, satisfying the no-`env()`-outside-config rule (Commit `50e31d14`).
+- **DocAccuracyTest no longer passes silently** - fence regex accepts bare fences, per-path failure message
+  added, and `expect($checked)->toBeGreaterThan(10)` floor added so the sweep cannot pass on zero rows
+  (had been asserting nothing since 2026-10-19; Commit `50e31d14`).
+- **Veterans transfer-requests browser spec** - new `tests/browser/veterans-transfer-requests.spec.ts`
+  covering tabs, pager and empty state on `/veterans/transfers` (Commit `50e31d14`).
+- **Slug paths and `Spirit Bursts (combined)` label** - `CareerTraineeSelectTest`,
+  `TraineeCardFormTest`, `CareerScenarioSelectTest` aligned with production (Commit `50e31d14`).
 
 ### Added
 
