@@ -87,3 +87,43 @@ jobs:
 
       - run: npx playwright test --config=playwright.nativephp.config.ts
         env: { NATIVEPHP_EXE_PATH: "${{ env.NATIVEPHP_EXE_PATH }}" }
+
+      - name: Collect packaged-app diagnostics
+        if: always()
+        shell: pwsh
+        run: |
+          $installRoot = Join-Path $env:LOCALAPPDATA 'Programs\trainer-desk'
+          $appDir = Join-Path $installRoot 'resources\build\app'
+          Write-Host "=== install root ==="
+          if (Test-Path $installRoot) { Get-ChildItem $installRoot -Force | Select-Object Name | Out-String | Write-Host } else { Write-Host "MISSING: $installRoot" }
+          Write-Host "=== resources/build/app top-level ==="
+          if (Test-Path $appDir) { Get-ChildItem $appDir -Force | Select-Object Name | Out-String | Write-Host } else { Write-Host "MISSING: $appDir" }
+          Write-Host "=== vendor/laravel server.php present ==="
+          Write-Host (Test-Path (Join-Path $appDir 'vendor\laravel\framework\src\Illuminate\Foundation\resources\server.php'))
+          Write-Host "=== public/index.php present ==="
+          Write-Host (Test-Path (Join-Path $appDir 'public\index.php'))
+          Write-Host "=== php binary ==="
+          $php = Join-Path $installRoot 'resources\build\php\php.exe'
+          Write-Host "php.exe present: $(Test-Path $php)"
+          if (Test-Path $php) { & $php -v }
+          Write-Host "=== userData logs ==="
+          $ud = Join-Path $env:APPDATA 'trainer-desk'
+          if (Test-Path $ud) {
+            Get-ChildItem $ud -Recurse -Force | Select-Object FullName, Length | Format-Table -AutoSize | Out-String | Write-Host
+            Get-ChildItem $ud -Recurse -Filter *.log -Force | ForEach-Object {
+              Write-Host "--- $($_.FullName) ---"
+              Get-Content $_.FullName -Tail 300
+            }
+            New-Item -ItemType Directory -Force -Path 'appdata-dump' | Out-Null
+            Copy-Item $ud -Destination 'appdata-dump\trainer-desk' -Recurse -Force
+          } else {
+            Write-Host "MISSING: $ud"
+          }
+
+      - name: Upload packaged-app diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: packaged-app-diagnostics
+          path: appdata-dump
+          if-no-files-found: ignore
