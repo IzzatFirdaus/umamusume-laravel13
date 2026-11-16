@@ -137,11 +137,11 @@ test('walks the recorded-action card through its three states', async ({ page })
     await expect(card.getByText('Agreed')).toBeVisible();
     // The state is a word, never a mark: `CareerBuildTargetTest` keeps the trust glyphs inside
     // `ProvenanceBadge.vue` alone, and the card must not read as a provenance statement.
-    await expect(card.getByRole('img', { name: /^Calculated/ }).first()).toBeVisible();
+    await expect(card.getByRole('button', { name: /^Calculated/ }).first()).toBeVisible();
     // `confirmed` renders NOTHING — `ProvenanceMark` deliberately omits it from its mark map, because a
     // figure the tool is sure of does not need a badge (plan 1.7, `91a6047`). This assertion waited for
     // the retired badge long after it was deleted, and it had never run here to notice.
-    await expect(card.getByRole('img', { name: /^Confirmed/ })).toHaveCount(0);
+    await expect(card.getByRole('button', { name: /^Confirmed/ })).toHaveCount(0);
 
     // The card is the slot, not the history: the door goes to the Timeline, which owns the whole list.
     const door = card.getByRole('link', { name: 'Every action this run took' });
@@ -286,7 +286,7 @@ test('lists the career obligations the calendar states, each as a mark and a wor
     await expect(undated.getByText('no date')).toHaveAttribute('title', /does not date/i);
 
     // Every row states its provenance by name, not by glyph alone.
-    await expect(advisor.getByRole('img', { name: /^Calculated/ }).first()).toBeVisible();
+    await expect(advisor.getByRole('button', { name: /^Calculated/ }).first()).toBeVisible();
 
     // UX-04: the table names which rows every scenario inherits and which belong to this one alone. The
     // rows themselves are correct either way (Unity Cup draws URA Finale's per-turn calendar, forking only
@@ -557,14 +557,14 @@ test('records Energy through the cockpit correction and then marks one action', 
     // and not by its glyph (`ProvenanceBadge.vue`'s own accessible-name rule).
     await expect(advisorRegion.getByRole('term')).not.toHaveCount(0);
     await expect(
-        advisorRegion.getByRole('img', { name: /^Calculated/ }).first(),
+        advisorRegion.getByRole('button', { name: /^Calculated/ }).first(),
     ).toBeVisible();
     // Three constants back the ranked answer (the advisory line, the session cost, Wit's cost), and all
     // three are `confirmed`, which renders NO mark at all — `ProvenanceMark` omits it from its mark map
     // because a figure the tool is sure of does not need a badge (plan 1.7, `91a6047`). The retired
     // assertion asked for three `Confirmed` badges; the mark that must exist here is the `Calculated`
     // one asserted above, and the exception states below it.
-    await expect(advisorRegion.getByRole('img', { name: /^Confirmed/ })).toHaveCount(0);
+    await expect(advisorRegion.getByRole('button', { name: /^Confirmed/ })).toHaveCount(0);
     // The constant a figure rests on prints its source and read date visibly, not only in a tooltip
     // (ADR-0001 §2 and §7, owner ruling 5a). The source names the PUBLISHER: `844aebf` removed the
     // `UMAMUSUME_REFERENCE.md §…` document path from `config/advisor.php`, because a path a Trainer

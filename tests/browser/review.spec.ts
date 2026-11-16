@@ -66,8 +66,8 @@ test('each row explains itself: confidence, source, match and the door to the de
     // question is stated, the proposal (or its absence) is printed, the state word is the badge's, and
     // the row's one door goes to the page that decides.
     await expect(row.locator('time')).toBeVisible();
-    await expect(row.locator('[role="img"]').first()).toBeVisible();
-    await expect(row.locator('[role="img"]').first()).toHaveAttribute('aria-label', /^(Unknown|Estimated|Calculated)/);
+    await expect(row.locator('button[interestfor]').first()).toBeVisible();
+    await expect(row.locator('button[interestfor]').first()).toHaveAttribute('aria-label', /^(Unknown|Estimated|Calculated)/);
     await expect(row.getByText(/Why this name is here|No suggestion:|Suggested id:/)).toBeVisible();
     await expect(row.getByTestId('review-detail-link')).toBeVisible();
 });

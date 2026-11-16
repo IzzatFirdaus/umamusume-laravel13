@@ -91,7 +91,7 @@ test('names the caps verified and says why the panel is undrawn in a visible lin
     // published value marks nothing. The undrawn panel is an absence, not a figure, so the prose line
     // owns that whole statement (`DESIGN.md` §4.2, owner's ruling 2026-10-09).
     await expect(section.getByText(/Verified \d{4}-\d{2}-\d{2}/)).toBeVisible();
-    await expect(section.getByRole('img', { name: /^Unknown/ })).toHaveCount(0);
+    await expect(section.getByRole('button', { name: /^Unknown/ })).toHaveCount(0);
 
     // The sentence is server-provided prose, so it is asserted by its own words. The old second half
     // pinned a `title` carrying `docs/scenarios/07-grand-concert.md`; no element in the region carries a

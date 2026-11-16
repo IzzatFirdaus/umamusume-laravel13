@@ -65,7 +65,7 @@ test('renders the configured burst bands, their payout timing and the Extreme ca
     await expect(section.getByText(/Three parts of this table are publisher conflicts/)).toBeVisible();
 
     // The table's own provenance marker, per design-2.0 §49.
-    await expect(section.getByRole('img', { name: /^Estimated/ })).toBeVisible();
+    await expect(section.getByRole('button', { name: /^Estimated/ })).toBeVisible();
 
     // The payout timing renders, and the run's own band position is named as absent, not guessed.
     await expect(section.getByText(/The gold versions arrive from the scripted event in Senior Year, Late November/)).toBeVisible();
@@ -156,16 +156,17 @@ test('reaches the panel by keyboard without adding a control or trapping focus',
     await expect(section.getByText(/No teammate burst states recorded\./)).toBeVisible();
 
     // The panel adds no form control of its own, so there is no control inside it that a keyboard path
-    // could step over. This assertion fails the day an input, a select or a button lands in a panel.
+    // could step over. This assertion fails the day an input, a select or a submit button lands in a panel.
     //
     // Amended 2026-10-25 (owner ruling R3, `DESIGN.md` §5(a)): the absence channel is permitted here, so
     // the guard measures what a stop can *do*, not how many there are. Measured this pass: the region's
     // only links are `TeamRankLadderPanel`'s "Record this race" rows, every one of them navigating to the
-    // run's own races screen; its only other focusable node is `ProvenanceMark`'s `role="img"` mark, which
-    // opens a tooltip and acts on nothing; and its only disclosure is `AbsenceValue`'s. The cockpit's
+    // run's own races screen; its only other focusable node is `ProvenanceMark`'s `interestfor` button,
+    // which opens a tooltip and acts on nothing (excluded here and in the tab walk below by the same
+    // `interestfor` attribute); and its only disclosure is `AbsenceValue`'s. The cockpit's
     // own wrapper is gone with v3.0.0, so there is no longer a shell disclosure to exclude.
-    await expect(section.locator('input, select, textarea, button')).toHaveCount(0);
-    await expect(section.locator('[tabindex]:not([role="img"])')).toHaveCount(0);
+    await expect(section.locator('input, select, textarea, button:not([interestfor])')).toHaveCount(0);
+    await expect(section.locator('[tabindex]')).toHaveCount(0);
     await expect(
         section.locator('details:not(:has(> summary:has-text("N/A")))'),
     ).toHaveCount(0);
@@ -211,8 +212,9 @@ test('reaches the panel by keyboard without adding a control or trapping focus',
                 tag: el.tagName,
                 insideRegion: el.closest('section[aria-labelledby="career-scenario-heading"]') !== null,
                 isControl:
-                    ['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName) ||
-                    (el.hasAttribute('tabindex') && el.getAttribute('role') !== 'img'),
+                    (['BUTTON', 'INPUT', 'SELECT', 'TEXTAREA'].includes(el.tagName) &&
+                        !el.hasAttribute('interestfor')) ||
+                    el.hasAttribute('tabindex'),
             };
         });
 
@@ -294,11 +296,11 @@ test('draws the five team race categories as a table with the published ask and 
 
     // The ruling, measured, as amended 2026-10-25 (owner ruling R3) and re-measured for `v3.0.0`: the
     // region adds no form control, its only panel disclosures are `AbsenceValue`'s, and its only other
-    // focusable node is `ProvenanceMark`'s `role="img"` mark. The board
+    // focusable node is `ProvenanceMark`'s `interestfor` button. The board
     // itself adds neither, which is the claim this case owns.
     const region = page.getByRole('region', { name: 'Scenario' });
-    await expect(region.locator('input, select, textarea, button')).toHaveCount(0);
-    await expect(region.locator('[tabindex]:not([role="img"])')).toHaveCount(0);
+    await expect(region.locator('input, select, textarea, button:not([interestfor])')).toHaveCount(0);
+    await expect(region.locator('[tabindex]')).toHaveCount(0);
     await expect(
         region.locator('details:not(:has(> summary:has-text("N/A")))'),
     ).toHaveCount(0);
@@ -341,7 +343,7 @@ test('states the team race shape and prints no opponent projection, no chance an
 
     // Ruling 2a: both answers are absences, so no provenance badge accompanies either `N/A` —
     // a badge qualifies a displayed value, and `unknown` beside an absence was retired.
-    await expect(shape.getByRole('img', { name: /^Unknown/ })).toHaveCount(0);
+    await expect(shape.getByRole('button', { name: /^Unknown/ })).toHaveCount(0);
     await expect(shape.locator('dd').first().getByText('N/A')).toBeVisible();
 
     const text = await shape.innerText();

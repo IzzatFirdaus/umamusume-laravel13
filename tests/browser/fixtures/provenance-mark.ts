@@ -1,3 +1,4 @@
+import '../../../resources/js/polyfills';
 import { createApp, h } from 'vue';
 import ProvenanceMark from '../../../resources/js/components/ProvenanceMark.vue';
 

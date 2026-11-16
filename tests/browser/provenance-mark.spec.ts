@@ -46,7 +46,7 @@ test('a confirmed figure carries no mark at all', async ({ page }) => {
     // so the absence of the element IS the behaviour: a wrapper with a zero-height span would still
     // occupy a box in a flex row and still be reachable as a node.
     await expect(page.locator('#mark-confirmed')).toHaveCount(0);
-    await expect(page.locator('#mark-confirmed [role="img"]')).toHaveCount(0);
+    await expect(page.locator('#mark-confirmed button')).toHaveCount(0);
 
     // And the word never reaches the page from this component.
     await expect(page.locator('body')).not.toContainText('Confirmed');
@@ -62,7 +62,7 @@ test('the three exception states each render word and glyph', async ({ page }) =
     ];
 
     for (const [selector, word] of cases) {
-        const mark = page.locator(`${selector} [role="img"]`);
+        const mark = page.locator(`${selector} button`);
         await expect(mark).toBeVisible();
 
         // The word is the accessible name, so a screen reader hears the state rather than the glyph.
@@ -76,13 +76,14 @@ test('keyboard focus reveals the reason, and the reason is in the name either wa
     await open(page);
 
     const host = page.locator('#mark-reason');
-    const mark = host.locator('[role="img"]');
+    const mark = host.locator('button');
 
     // The reason is already part of the accessible name before anything is opened.
     await expect(mark).toHaveAttribute('aria-label', 'Estimated: Averaged across three recorded turns.');
 
-    // Not visible until the reader reaches it.
-    await expect(host.locator('[role="tooltip"]')).toHaveCount(0);
+    // The popover element exists in the DOM from first paint; the platform keeps it hidden until the
+    // trigger is hovered or focused, so "not shown" is `hidden`, not "absent".
+    await expect(host.locator('[role="tooltip"]')).toBeHidden();
 
     // Revealed by keyboard, with no pointer involved. This is the assertion hover-only styling fails.
     await mark.focus();
@@ -92,7 +93,7 @@ test('keyboard focus reveals the reason, and the reason is in the name either wa
     // And hidden again when focus leaves.
     await page.locator('h1').focus().catch(() => undefined);
     await mark.blur();
-    await expect(host.locator('[role="tooltip"]')).toHaveCount(0);
+    await expect(host.locator('[role="tooltip"]')).toBeHidden();
 });
 
 test('an out-of-vocabulary state paints no mark instead of failing the render', async ({ page }) => {
@@ -105,7 +106,7 @@ test('an out-of-vocabulary state paints no mark instead of failing the render', 
     // a state outside the union is a production input. It must degrade to no mark, exactly as
     // `confirmed` does, rather than reach `MARKS[state]` and throw during render on a Database page.
     await expect(page.locator('#fixture-main')).toBeVisible();
-    await expect(page.locator('#mark-out-of-vocabulary [role="img"]')).toHaveCount(0);
+    await expect(page.locator('#mark-out-of-vocabulary button')).toHaveCount(0);
     expect(failures).toEqual([]);
 });
 
@@ -113,6 +114,6 @@ test('hover reveals the reason too', async ({ page }) => {
     await open(page);
 
     const host = page.locator('#mark-reason');
-    await host.locator('[role="img"]').hover();
+    await host.locator('button').hover();
     await expect(host.locator('[role="tooltip"]')).toBeVisible();
 });

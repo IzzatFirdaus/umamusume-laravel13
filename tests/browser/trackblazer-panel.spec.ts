@@ -410,9 +410,9 @@ test('the ledger names what this run holds, against the cap, with the publisher 
     // count itself is a sum over stored purchases, so its state is Calculated (`ADR-0020` §2), and the
     // reserve's own Estimated badge lives in the ledger's grid rather than in this list.
     await expect(held.getByText('Must Buy')).toBeVisible();
-    await expect(held.getByRole('img', { name: /^Estimated/ })).toHaveCount(1);
-    await expect(held.getByRole('img', { name: /^Calculated/ })).toHaveCount(1);
-    await expect(ledger.getByRole('img', { name: /^Estimated/ })).toHaveCount(2);
+    await expect(held.getByRole('button', { name: /^Estimated/ })).toHaveCount(1);
+    await expect(held.getByRole('button', { name: /^Calculated/ })).toHaveCount(1);
+    await expect(ledger.getByRole('button', { name: /^Estimated/ })).toHaveCount(2);
 });
 
 test('the ledger prints the reserve as a tip and leaves the inflow absent until a race is entered', async ({ page }) => {
@@ -424,7 +424,7 @@ test('the ledger prints the reserve as a tip and leaves the inflow absent until 
 
     // The reserve is one publisher's tip, so it carries Estimated and never a rule's Confirmed.
     await expect(ledger.getByText(/Keep at least 100 coins banked heading into Summer/)).toBeVisible();
-    await expect(ledger.getByRole('img', { name: /^Estimated/ })).toHaveCount(1);
+    await expect(ledger.getByRole('button', { name: /^Estimated/ })).toHaveCount(1);
 
     // No race entered, so no projection is printed and the row says why.
     await expect(ledger.getByText(/No race is entered for this run yet/)).toBeVisible();

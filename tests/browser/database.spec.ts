@@ -136,11 +136,11 @@ test('the Events view renders the recurring types with glyph-and-word provenance
     // The provenance badge's accessible name is read with getByRole, never toHaveText: the glyph is
     // aria-hidden and toHaveText would read it (KI-70's class of failure). The unverified row is the
     // one `unknown` badge on this page, so exactly one is expected.
-    await expect(page.getByRole('img', { name: /^Unknown/ }).first()).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Unknown/ }).first()).toBeVisible();
     // `confirmed` is a figure the tool is sure of, and it deliberately carries no mark: the
     // vocabulary marks only the three exception states. This assertion used to look for a Confirmed
     // badge and had been failing since that ruling landed.
-    expect(await page.getByRole('img', { name: /^Confirmed/ }).count()).toBe(0);
+    expect(await page.getByRole('button', { name: /^Confirmed/ }).count()).toBe(0);
 
     // No colour-only state: the server tag is bracketed text, so it reads without styling.
     await expect(page.getByText('[JP]').first()).toBeVisible();
