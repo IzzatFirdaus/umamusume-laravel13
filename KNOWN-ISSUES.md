@@ -62,9 +62,9 @@ KI-110 OPEN — pre-dispatch register state; outside this dispatch's scope, unch
 KI-111 CLOSED — 1f5f5d76 + 0563f1de: four real mistagged closers stripped; md_fence_check 0 invalid in 209 files
 KI-112 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-113 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-114 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-114 OPEN — item 2 withdrawn 2026-11-16 (component ships `Not equipped.`, specs agree); items 1/3/4 = picker migration, peer-owned
 KI-115 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-116 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-116 OPEN — openable-unopened: `forLevel()` exists at `SupportCardEffects.php:209`, prior "does not exist" claim refuted 2026-11-16
 KI-117 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-118 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-119 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
@@ -75,7 +75,7 @@ KI-123 CLOSED-WONTFIX — ruled out at filing; does not reproduce
 KI-124 OPEN — travel-note landed (R13); moves wontfix at next audit if unused
 KI-125 CLOSED-WONTFIX — R8 declined; roster reopens only if R8 reopens
 KI-126 CLOSED-WONTFIX — R8 declined; roster reopens only if R8 reopens
-KI-127 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-127 OPEN — `.card p-3` present; `CapsuleHeader` replaced by plain `<h2>` at `c1f09053`; still dead registration (2026-11-16 measurement)
 KI-128 CLOSED — Delete moved to its own footer door /training-runs/{run}/delete (C6b.3 lineage, peer landing); delete flow green in this session's cockpit-forms walk
 KI-129 CLOSED — affirmed 2026-11-10 per owner dispatch: the capsule is intentional on the scenario section, DESIGN.md:497 sanction stands; extension and removal rejected. No code change
 KI-130 OPEN — not dispatched
@@ -173,9 +173,9 @@ those entries' current status; this line names them, it does not restate them.
 - KI-110 ACCEPTED LIMITATION (standing)
 - KI-111 FIXED-IN-TREE @ `1f5f5d76` - three mistagged closers + one unclosed block; `md_fence_check.py` -> `0 invalid closing fence(s) in 209 file(s)` (register note `0563f1de`)
 - KI-112, KI-113 CLOSED (previous sessions)
-- KI-114 OPEN - deck-picker browser files; not touched
+- KI-114 OPEN - deck-picker browser files; items 1/3/4 stand, item 2 (`Empty.` copy) withdrawn 2026-11-16 on measurement (component ships `Not equipped.`, specs agree)
 - KI-115 CLOSED - does not reproduce (ruling stands)
-- KI-116 OPEN - blocked on A-0.5
+- KI-116 OPEN - openable-unopened: `forLevel()` exists at `SupportCardEffects.php:209` (claim otherwise refuted 2026-11-16)
 - KI-117 OPEN - blocked: ADR
 - KI-118 CLOSED @ `005561c1` - status flipped this pass (slice 0.3): migration in tree, ancestor of HEAD
 - KI-119 SUPERSEDED-BY KI-133 (as its own dated note records)
@@ -184,7 +184,7 @@ those entries' current status; this line names them, it does not restate them.
 - KI-122, KI-123 CLOSED - do not reproduce (standing)
 - KI-124 OPEN - openable, travel-note landed (per its own note), stays openable-unopened
 - KI-125, KI-126 CLOSED - declined per R8; status lines flipped to match their bodies this pass (slice 0.3)
-- KI-127 OPEN - team race facility panel card wrapper; not touched
+- KI-127 OPEN - team race facility panel: `.card p-3` present (`:51`), `CapsuleHeader` replaced by plain `<h2>` at `c1f09053`; still a dead registration, so composed surface unpinned
 - KI-128 OPEN - owner placement decision
 - KI-129 OPEN - owner design call
 - KI-130 OPEN - blocked: owner ruling
@@ -3599,7 +3599,15 @@ minutes. The eleven, by cause:
    declared at `pages/Career/Preflight.vue:70` and nothing in the template reads it, and the words
    "Grandparent" are gone from the frontend.
 2. `career-legacy-deck-steps.spec.ts:229` and `support-deck.spec.ts:56` read the slot's absence as
-   `Not equipped`. The slot now prints `Empty.` (`components/support/SupportSlot.vue:115`).
+   `Not equipped`. The slot now prints `Empty.` (`components/support/SupportSlot.vue:115`). **Corrected
+   2026-11-16: this claim is stale and the second half is wrong.** The slot prints `Not equipped.`, not
+   `Empty.` — `resources/js/components/support/SupportSlot.vue:143`, inside the `<p v-if="!card">` that
+   carries the deliberate-statement comment above it. `Empty.` does not occur anywhere in
+   `SupportSlot.vue` (grep count 0). Both named specs already assert the string the component ships:
+   twelve occurrences of `toContainText('Not equipped')` across `career-legacy-deck-steps.spec.ts:533,597`
+   and `support-deck.spec.ts:75,160,161,192,196,197,210,307,315,364,380`, positive and negative alike.
+   So this item is not a cause of red: copy and assertion agree. The cause list for KI-114 is the picker
+   migration in items 1, 3 and 4; item 2 is withdrawn.
 3. `career-legacy-deck-steps.spec.ts:267` and `:343` and `support-deck.spec.ts:113`, `:148`, `:250` drive the
    picker through controls that are gone: `#deck-pick` (a `<select>`), `getByRole('button', { name: /^Equip to
    Slot N/ })`, `Equip owned to Slot 1`, `The picker writes to Slot 1.`, `Deck saved.`, `select[name="rarity"]`,
@@ -3668,6 +3676,8 @@ would have caught it, and no such gate exists.
 **What closure would need.** The A-0.5 per-run `deck_slots.card_level` column and an ADR, then a derivation from level to effect values.
 
 **2026-10-25 — dependency cleared.** A-0.5 landed at `df624cca`. KI-116 is no longer `blocked: A-0.5`; it becomes openable as a code-only slice (needs `SupportCardEffects::forLevel()`, which does not exist yet — `atCap()` is the only method, `SupportCardEffects.php:59`).
+
+**2026-11-16 — the blocker claim in the note above is refuted on measurement.** `SupportCardEffects::forLevel()` exists: `app/Services/SupportCardEffects.php:209`, declared `public static function forLevel(int $cardId, int $level, ?array $dictionary = null): array`, with its own docblock at `:199` and a cross-reference to `atLevel()` at `:156`. `atCap()` is not "the only method". The level-to-effect derivation this entry says closure needs is therefore already in the tree; what remains open is the wiring from a run's `deck_slots.card_level` to that call, which is a code slice with no unmet dependency. Status moves from `blocked` to openable-unopened, matching KI-124's wording. No ADR is owed: the derivation exists, and `card_level` storage landed under A-0.5 at `df624cca`.
 
 ---
 
@@ -3841,6 +3851,28 @@ block the round-4 screenshot showed.
 heading hierarchy; folding it in would have made one commit cover two different shapes.
 
 **2026-10-24 — KI-127 framing correction.** KI-127 recorded the facility panel as "the only scenario panel with no .card wrapper and no CapsuleHeader" alongside eight composed panels. The panel is a **dead registration**: it is registered in ScenarioPanel.vue:74-78 but is not enabled by any scenario's `panels` block in config/scenarios.php and receives no `facilities` payload from ScenarioSectionBuilder. It does not compose live on the cockpit or any other scenario surface, so "beside eight that do" overstated the visual gap — the eight composed panels are beside five uncarded-and-uncomposed panels, per SCREEN_SPEC.md:3892-3901 item 24. The `.card` + CapsuleHeader wrap landed at 1119e437 via an isolated fixture (tests/browser/team-race-facility-panel.spec.ts). The composed-surface pin is deferred until the panel composes.
+
+**2026-11-16 — the wrap has since been replaced by a plain `<h2>`, and `CapsuleHeader` was never deleted.** Two corrections to the note above, both measured at `origin/master` (`ae26b799`):
+
+1. **The panel no longer carries `CapsuleHeader`, and that is deliberate, not a regression.** `c1f09053`
+   ("feat(scenario-detail): HFW visual overhaul, page-wide plain h2", S-RS-VISUAL-1) replaced this panel's
+   `import CapsuleHeader` and `<CapsuleHeader :title="props.label" class="mb-3" />` with a plain
+   `<h2 class="text-lg font-semibold text-ink-strong">{{ props.label }}</h2>` (`git show c1f09053 --` that
+   path). The `.card p-3` wrapper from `1119e437` survives at `TeamRaceFacilityPanel.vue:51`, and the
+   per-facility `<h3>` groups survive below it at `:70`. So the panel now conforms by the same plain-`h2`
+   rule the other career pages follow; the card boundary is intact.
+2. **`CapsuleHeader.vue` was not retired tree-wide, and no commit deleted it.** The file exists at
+   `resources/js/components/CapsuleHeader.vue` (437 bytes, tracked, last touched by `63d1cdd2`). It has
+   exactly one referencing file, `SpiritBurstRoster.vue:23`, and that reference is a *comment* describing
+   bare mode, not an import. So the component is an **orphan**: still in the tree, no live importer. A
+   claim that it was "retired tree-wide at `c1f09053`" is wrong twice — `c1f09053` does not delete it
+   (its diff for this path removes the *import*, not the component file), and "retired tree-wide" would be
+   an overstatement of an orphan file nobody removed.
+
+What stays open: the `.card` wrapper exists but the panel is still a dead registration (`registerPanel` at
+`ScenarioPanel.vue:75`, no scenario enables `team_race_facility`, no `facilities` payload), so nothing pins
+its composed surface. That was true when this entry was filed and is unchanged. Whether the orphan
+`CapsuleHeader.vue` should be deleted is a separate cleanup question, not part of this entry.
 
 
 ---
