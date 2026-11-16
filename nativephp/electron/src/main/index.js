@@ -8,6 +8,53 @@ import { createSplash } from './splash.js';
 import fixPath from 'fix-path';
 fixPath();
 
+// A packaged GUI app has no attached console, so its main-process output is
+// discarded and a startup failure leaves no trace. Mirror console output to a
+// file under userData so the acceptance workflow (and a user) can see exactly
+// how far the Electron/PHP bootstrap got.
+try {
+    const mainLog = path.join(app.getPath('userData'), 'nativephp-main.log');
+    const write = (prefix, args) => {
+        try {
+            const line = `${new Date().toISOString()} ${prefix}${args
+                .map((a) => (typeof a === 'string' ? a : JSON.stringify(a)))
+                .join(' ')}`;
+            fs.appendFileSync(mainLog, line + '\n');
+        } catch {
+            /* ignore logging failures */
+        }
+    };
+    const origLog = console.log.bind(console);
+    const origErr = console.error.bind(console);
+    console.log = (...a) => {
+        origLog(...a);
+        write('', a);
+    };
+    console.error = (...a) => {
+        origErr(...a);
+        write('ERR ', a);
+    };
+    // php.ts prints PHP stdout/stderr only when SHELL_VERBOSITY > 0.
+    if (!process.env.SHELL_VERBOSITY) {
+        process.env.SHELL_VERBOSITY = '1';
+    }
+    process.on('unhandledRejection', (reason) => {
+        console.error(
+            '[main] unhandledRejection:',
+            reason && reason.stack ? reason.stack : reason,
+        );
+    });
+    process.on('uncaughtException', (err) => {
+        console.error(
+            '[main] uncaughtException:',
+            err && err.stack ? err.stack : err,
+        );
+    });
+    console.log('[main] module loaded');
+} catch {
+    /* ignore */
+}
+
 const { autoUpdater } = electronUpdater;
 
 // `MAIN_VITE_NATIVEPHP_BUILD_PATH` is inlined at build time. In a packaged app it
@@ -32,6 +79,7 @@ const appPath = path.join(buildPath, 'app');
 let splashWindow;
 
 app.whenReady().then(() => {
+    console.log('[main] app ready; bootstrapping NativePHP');
     try {
         splashWindow = createSplash(appPath, import.meta.dirname);
     } catch (error) {
