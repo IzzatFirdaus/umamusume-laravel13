@@ -140,7 +140,7 @@ git status --porcelain | cut -c1-2 | sort | uniq -c
 
 **Step 2 — Classify each ` D`.** Three classes only:
 - **move** — prove the replacement exists: `docs/audits/<subdir>/<same-basename>` for the 17 audit documents (for
-  example `docs/audits/reconciliation-register/RECONCILIATION-REGISTER.md`). Record the path pair.
+  example docs/audits/reconciliation-register/RECONCILIATION-REGISTER.md). Record the path pair.
 - **peer removal** — the 90 `jev-inspect/**` rows (a foreign project's tree) and any other row whose owner is another
   session. Not this change's to restore; recorded, not touched.
 - **loss** — no replacement and no owner. Restore with `git restore -- <path>` or commit the deletion with a stated
@@ -456,14 +456,14 @@ absent.
 
 ---
 
-## P5.3 — CI premise and `QWEN.md`
+## P5.3 — CI premise and QWEN.md
 
 Owner decides track-vs-ignore first. Then correct only statements the tree falsifies: artwork-mirror manual-ness
 (auto-mirror landed), uploads (still cut per `PRD.md` §6.13 — verify, do not delete), CI (three workflows exist; none
 runs the quality gates; build green, acceptance run `43768347753` red with `No installed .exe found under
 $programsDir`). Pair every corrected sentence with the reading that falsified the old one.
 
-**Acceptance.** `QWEN.md` contradicts nothing in the tree; regeneration risk noted. This is the one prose deliverable
+**Acceptance.** QWEN.md contradicts nothing in the tree; regeneration risk noted. This is the one prose deliverable
 the project's own exit bar requires.
 
 ---
@@ -515,7 +515,7 @@ composer lore
 php artisan migrate:status
 ```
 Quote each summary line and exit code. Conditions 4–7 (WCAG pairs, clean-clone artwork render + offline placeholder,
-`QWEN.md` truth, the BO ledger's terminal states) are verified by their own named readings, not by these commands.
+QWEN.md truth, the BO ledger's terminal states) are verified by their own named readings, not by these commands.
 
 **Acceptance.** Seven conditions pass, or the exceptions carry the owner ruling that permits them; a skipped arm is
 reported as skipped.

@@ -53,13 +53,13 @@ byte-identical so their provenance survives.
 | Source | Size / mtime | State | Disposition |
 | :--- | :--- | :--- | :--- |
 | `docs/plans/implementation-roadmap-v3.0.0.md` (untracked) | 27,171 B · 15:40:43 | Its own author recorded no tree access; Phases 0–3 and 6 have since landed (`21568017`, `1f4a9c5f`, `5b8ee62c`, `9f800577`, `5156bc49`, `df150cd8`, `d330c82e`, `37fd9c88`, `fe8747c9`) | **Absorbed.** Its still-open Phase 4/5 items survive as P5.1–P5.4. Not executed from; a peer edited it after this ruling, so treat its bytes as a peer artifact |
-| `docs/plans/remediation-plan-2026-11-15.md` (untracked) | 28,388 B · 15:26:00 | MWG Phases 1–3 executed (3.1 CLS no-op, 3.2 16 files, 3.3 `EventDecision` fieldset, 3.4 no-change, 2.2b popover decision recorded); its named code defects verified landed (`CompleteTransferRequest` no longer re-reads with `fresh()`, `shop_resets_in` guarded, CSV via `fputcsv`, `veteran_label` column present) | **Absorbed.** Its only live remainder is commit attribution + QA, which is P1.1 and P7 |
-| `docs/roadmap/implementation-roadmap-hermes-2026-11-16.md` + `docs/plan/implementation-plan-hermes-2026-11-16.md` | 30,241 B / 14,616 B · 15:39:09 | A sibling session's pair, renamed from the earlier unsuffixed canonical pair at 15:39:09 and still being written while this file was authored | **Not absorbed, not edited.** Authoritative for that session only. Four measured defects are recorded here so an executor who opens it is not misled: its plan has **no R1.3 task** (its roadmap cross-refs a section that does not exist), **no R4 task** (while its self-check claims R0–R7 coverage), duplicate `Step 4`/`Step 5` numbering in its R3 task, and §0 figures that were stale on the day ("31/29" KI, "94 deletions") |
-| `docs/roadmap/v3.0.0-implementation-roadmap-2026-11-16.md` + `docs/plan/v3.0.0-execution-plan-2026-11-16.md` | 11,181 B / 4,646 B · 13:37 | An earlier pair, superseded the same afternoon | **Absorbed** where it adds a gate (fresh-SQLite install check, release qualification); otherwise superseded |
+| docs/plans/remediation-plan-2026-11-15.md (untracked) | 28,388 B · 15:26:00 | MWG Phases 1–3 executed (3.1 CLS no-op, 3.2 16 files, 3.3 `EventDecision` fieldset, 3.4 no-change, 2.2b popover decision recorded); its named code defects verified landed (`CompleteTransferRequest` no longer re-reads with `fresh()`, `shop_resets_in` guarded, CSV via `fputcsv`, `veteran_label` column present) | **Absorbed.** Its only live remainder is commit attribution + QA, which is P1.1 and P7 |
+| docs/roadmap/implementation-roadmap-hermes-2026-11-16.md + docs/plan/implementation-plan-hermes-2026-11-16.md | 30,241 B / 14,616 B · 15:39:09 | A sibling session's pair, renamed from the earlier unsuffixed canonical pair at 15:39:09 and still being written while this file was authored | **Not absorbed, not edited.** Authoritative for that session only. Four measured defects are recorded here so an executor who opens it is not misled: its plan has **no R1.3 task** (its roadmap cross-refs a section that does not exist), **no R4 task** (while its self-check claims R0–R7 coverage), duplicate `Step 4`/`Step 5` numbering in its R3 task, and §0 figures that were stale on the day ("31/29" KI, "94 deletions") |
+| `docs/roadmap/v3.0.0-implementation-roadmap-2026-11-16.md` + docs/plan/v3.0.0-execution-plan-2026-11-16.md | 11,181 B / 4,646 B · 13:37 | An earlier pair, superseded the same afternoon | **Absorbed** where it adds a gate (fresh-SQLite install check, release qualification); otherwise superseded |
 | `docs/audits/browser-observation-2026-11-15-followup/10-final-verification.md` (tracked, `21568017`) | 408 lines | Audit record with a "next steps, in execution order" list | **Absorbed item-by-item** into P3; its two stale claims are corrected in P3.4 and P3.6 |
 | `docs/plans/{frontend-colour-update-2026-11-14, frontend-stat-colours-and-dark-mode-integration, career-legacy-manual-input-findings}.md` | 11,098 / 11,595 / 3,116 B | Slice plans and research for work already landed | **Left alone** — not roadmaps, no remaining slice |
 
-Two files a previous draft expected do **not** exist and must not be re-created: `docs/roadmap.md`, `docs/plan.md`, and
+Two files a previous draft expected do **not** exist and must not be re-created: docs/roadmap.md, docs/plan.md, and
 `docs/proposals/Trainer Desk 2.0 — Remaining implementation.txt`. `probe_runs.php` is gone (peer removed) — its old
 Pint trap is dead.
 
@@ -101,7 +101,7 @@ fixes — are **not ancestors of HEAD**; they live on another branch. Their cont
    already done.
 2. **A slice is complete only when its verification commands have run and their output is quoted in the hand-off.**
    A report is not progress. The only documentation deliverables this roadmap permits are the ones a slice names
-   explicitly (P5.3 `QWEN.md`, P7.2 `VERSION.md`/`CHANGELOG.md`, P7.3 tag request, `KNOWN-ISSUES.md` register writes
+   explicitly (P5.3 QWEN.md, P7.2 `VERSION.md`/`CHANGELOG.md`, P7.3 tag request, `KNOWN-ISSUES.md` register writes
    that a change obliges), because the project's own exit bar requires them.
 3. **Never stage, commit, push or install without the owner naming the paths in that turn.** No `git add -A`, no
    `git commit -a`, no real-index commit — the private-index recipe in the plan. `pint --test <paths>`, never
@@ -151,7 +151,7 @@ match the table** — the table is corrected by measurement, never the reverse.
 ## P1 — Attribution: bank or park what the worktree already holds (owner decision, blocking)
 
 ### P1.1 The 17 MWG files
-**Objective.** Land or park the MWG first-pass remediation (`docs/audits/mwg-audit/mwg-audit-report.md`) without
+**Objective.** Land or park the MWG first-pass remediation (docs/audits/mwg-audit/mwg-audit-report.md) without
 sweeping a peer's work.
 **Depends.** P0.1.
 **Files.** All under `resources/js/`: `components/Form/BaseInput.vue`, `components/Form/SearchableSkillPicker.vue`,
@@ -418,17 +418,17 @@ a feature test · `composer lore` 0. Deferral branch: the `ARCHITECTURE.md` line
 **Acceptance.** The requirement is either implemented behind a local-env guard or recorded as a terminal deferral —
 never silently absent.
 
-### P5.3 CI premise and `QWEN.md` accuracy
+### P5.3 CI premise and QWEN.md accuracy
 **Objective.** Make the operator-facing guide true, and settle what CI is.
 **Depends.** P3.8 (the statements being corrected must be true when written).
-**Files.** `QWEN.md` (untracked) · the three workflows · `AGENTS.md` §1 (its "No CI" half is falsified: three
+**Files.** QWEN.md (untracked) · the three workflows · `AGENTS.md` §1 (its "No CI" half is falsified: three
 workflows exist; its "every gate runs locally" half stands — none of the three runs pest/pint/phpstan/typecheck/the
 ui-ratchet).
 **Steps.** Plan P5.3: owner decides track-vs-ignore first; then correct only statements the tree falsifies
 (artwork-mirror manual-ness — auto-mirror landed; uploads remain cut per `PRD.md` §6.13 — verify, do not delete; CI).
 **Verify.** Each corrected sentence paired with the reading that falsified the old one · regeneration-risk note.
 **Acceptance.** This is the one slice whose deliverable is partly prose, and it is permitted because the project's own
-v3.0.0 exit bar requires `QWEN.md` to contradict nothing in the tree.
+v3.0.0 exit bar requires QWEN.md to contradict nothing in the tree.
 
 ### P5.4 Externally gated items (no execution)
 **Objective.** Keep the gate visible rather than fabricating progress.
@@ -492,7 +492,7 @@ attributed to the shared surface rather than to the scenario.
 4. WCAG AA on every token pair except documented carve-outs (BO-004 resolved by P5.5 or recorded).
 5. Clean clone + install renders artwork with no manual command and shows a labelled placeholder offline
    (`ArtworkSlot.vue` placeholder confirmed present; auto-mirror path re-verified).
-6. `QWEN.md` contradicts nothing in the tree (P5.3).
+6. QWEN.md contradicts nothing in the tree (P5.3).
 7. The ledger names every BO finding's terminal state.
 **Steps.** Plan P7.1: run each condition, quote every command's summary and exit code.
 **Verify.** The seven outputs, quoted.
@@ -525,7 +525,7 @@ is the one place a decision is the deliverable.
 P1 banks real code and disposes real rows · P2 moves a lock file to a verified fixed version · P3 turns red suites
 green with root-cause fixes and adds the missing spec · P4 converts a drifting register into verdicts · P5 implements
 or records each feature requirement · P6 walks three untested scenarios · P7 proves the release bar by command. No
-phase terminates in prose alone, and the four prose deliverables this roadmap permits (P5.3 `QWEN.md`, P7.2
+phase terminates in prose alone, and the four prose deliverables this roadmap permits (P5.3 QWEN.md, P7.2
 `VERSION.md`/`CHANGELOG.md`, P7.3 the owner decision, and the `KNOWN-ISSUES.md` register writes a change obliges) are
 the ones the project's own exit bar requires.
 
