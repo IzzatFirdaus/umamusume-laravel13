@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { spawn, type ChildProcess } from 'child_process';
+import { createConnection } from 'net';
 
 test('enforces request-secret gate', async () => {
     const exePath = process.env.NATIVEPHP_EXE_PATH;
@@ -31,26 +32,32 @@ test('enforces request-secret gate', async () => {
 
     // The packaged exe is a windowed GUI app: its stdout never carries the
     // "PHP Server started on port" line. The app picks a free port in
-    // 8100-9000, so scan that range until something answers on HTTP.
+    // 8100-9000, so look for a listening socket in that range and then confirm
+    // it answers HTTP.
+    const isListening = (port: number): Promise<boolean> =>
+        new Promise((resolve) => {
+            const socket = createConnection({ host: '127.0.0.1', port });
+            const done = (result: boolean): void => {
+                socket.destroy();
+                resolve(result);
+            };
+            socket.setTimeout(250);
+            socket.once('connect', () => done(true));
+            socket.once('timeout', () => done(false));
+            socket.once('error', () => done(false));
+        });
+
+    // A TCP connect tells us whether anything is listening without making PHP
+    // serve a request: the built-in server handles one request at a time, and a
+    // burst of parallel HTTP probes starves the very port it is looking for.
     const findPort = async (): Promise<number | null> => {
-        const results = await Promise.all(
-            Array.from({ length: 901 }, (_, i) => 8100 + i).map(async (port) => {
-                try {
-                    const res = await fetch(`http://127.0.0.1:${port}`, {
-                        signal: AbortSignal.timeout(100),
-                    });
-                    if (res.status === 403 || res.status === 200) {
-                        console.log(`[port scan] ${port} -> ${res.status}`);
-                        return port;
-                    }
-                    console.log(`[port scan] ${port} -> ${res.status} (ignored)`);
-                } catch {
-                    // port closed or app not yet serving
-                }
-                return null;
-            }),
-        );
-        return results.find((p) => p !== null) ?? null;
+        for (let port = 8100; port <= 9000; port++) {
+            if (await isListening(port)) {
+                console.log(`[port scan] ${port} -> listening`);
+                return port;
+            }
+        }
+        return null;
     };
 
     const deadline = Date.now() + 240000; // 4 min; cold CI start needs time
