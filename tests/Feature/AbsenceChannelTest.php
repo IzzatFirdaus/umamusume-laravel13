@@ -146,7 +146,10 @@ it('never adds a new N/A whose reason is only on a title', function (): void {
         // with it. The disclosure channel it was migrated to is unchanged on every other site.
         'resources/js/pages/Career/Cockpit/Panels/CareerGoalsPanel.vue',
         'resources/js/pages/Career/Cockpit/Panels/TeamRankLadderPanel.vue',
-        'resources/js/pages/Career/Cockpit/Panels/UraMandatoryLadder.vue',
+        // UraMandatoryLadder.vue was deleted with the three other orphaned cockpit panels
+        // (CareerMilestonesPanel, HappyMeekPanel, PreFinalReviewPanel): no route, panel map or
+        // import reached any of them, and `spa.ts`'s page glob alone made them buildable.
+        // Its migrated-site guard leaves this list with it.
         // Already migrated before this pass; listed so the same regression is caught here.
         'resources/js/components/ui/DataTable.vue',
         'resources/js/components/SubCell.vue',
