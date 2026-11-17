@@ -222,13 +222,16 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(selected.getByText('Admire Vega')).toBeVisible();
         await expect(selected.getByText('[Starry Nocturne]')).toBeVisible();
         await expect(selected.getByText(/Medium A · Turf A · End closer A/)).toBeVisible();
-        // The wireframe's sentence names rarity and potential only. "Growth row" is deliberately absent:
-        // no column records a growth rate, so promising one would be a claim the schema cannot back.
-        await expect(selected.getByText(/sets this run's rarity and potential/)).toBeVisible();
+        // R6-16: the sentence used to promise "this run's rarity and potential", which the wizard never
+        // writes — rarity and potential are entered on Run settings after the career exists. The picker
+        // writes `character_card_id`, so the sentence now says exactly that. "Growth row" is
+        // deliberately absent too: no column records a growth rate.
+        await expect(selected.getByText(/sets this run's character card/)).toBeVisible();
+        await expect(selected.getByText(/rarity and potential/)).toHaveCount(0);
         await expect(selected.getByText(/growth/i)).toHaveCount(0);
         await expect(selected.getByRole('link', { name: 'Preview profile' })).toHaveAttribute(
             'href',
-            /\/career\/setup\/trainee\/\d+$/,
+            /\/career\/setup\/trainee\/admire-vega$/,
         );
     });
 
@@ -355,7 +358,7 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(traineeChoice(page)).toContainText('Admire Vega');
         await expect(choicesSoFar(page).getByRole('link', { name: 'Preview profile' })).toHaveAttribute(
             'href',
-            /\/career\/setup\/trainee\/\d+$/,
+            /\/career\/setup\/trainee\/admire-vega$/,
         );
 
         await action.click();
@@ -456,7 +459,7 @@ test.describe('Trainee Selection and Profile', () => {
         // `Preview profile` control: the per-card `Profile` link this case used to click was cut in
         // Phase B.2 because the wireframe draws no such link on a roster card.
         await choicesSoFar(page).getByRole('link', { name: 'Preview profile' }).click();
-        await page.waitForURL(/\/career\/setup\/trainee\/\d+$/);
+        await page.waitForURL(/\/career\/setup\/trainee\/admire-vega$/);
 
         // The profile has no table: the roster's row role does not exist here. The page's own
         // heading carries the name, and the footer button carries the chosen state.
@@ -481,16 +484,16 @@ test.describe('Trainee Selection and Profile', () => {
         await expect(page.getByText(/Trainee set:/)).toBeVisible();
 
         const forward = page.getByRole('link', { name: /^Review .* aptitudes and choose a form$/ });
-        await expect(forward).toHaveAttribute('href', /\/career\/setup\/trainee\/\d+$/);
+        await expect(forward).toHaveAttribute('href', /\/career\/setup\/trainee\/admire-vega$/);
         await forward.click();
-        await page.waitForURL(/\/career\/setup\/trainee\/\d+$/);
+        await page.waitForURL(/\/career\/setup\/trainee\/admire-vega$/);
 
         // The profile writes the choice and asks for the next step by name, so the PUT lands on step 3.
         await page.getByRole('button', { name: 'Continue to build target', exact: true }).click();
         await page.waitForURL(/\/career\/setup\/target$/);
 
         // The target's back door returns to the profile it came from (`career-target.html:63`).
-        await expect(page.getByRole('link', { name: 'Back', exact: true })).toHaveAttribute('href', /\/career\/setup\/trainee\/\d+$/);
+        await expect(page.getByRole('link', { name: 'Back', exact: true })).toHaveAttribute('href', /\/career\/setup\/trainee\/admire-vega$/);
     });
 
     test('renders the same success flash when the card is clicked (R3-31)', async ({ page }) => {
@@ -509,7 +512,7 @@ test.describe('Trainee Selection and Profile', () => {
     });
 
     test('renders the profile at card grain, with the Basic facts card gone', async ({ page }) => {
-        await page.goto('/career/setup/trainee/33');
+        await page.goto('/career/setup/trainee/admire-vega');
         await page.locator('#app > *').first().waitFor();
 
         // The wireframe's right column ends at the scenario pills; the old Basic facts card was removed
@@ -579,7 +582,7 @@ test.describe('Trainee Selection and Profile', () => {
         }
 
         // The profile's two controls that leave or commit the step.
-        await page.goto('/career/setup/trainee/33');
+        await page.goto('/career/setup/trainee/admire-vega');
         await page.locator('#app > *').first().waitFor();
 
         for (const control of [

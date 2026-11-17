@@ -334,7 +334,16 @@ const incompleteData = computed(
             <!-- The wireframe's obligations table (Obligation / State / Due): a table, not a row list,
                  so the three aligned columns carry the comparison. The state is a pill AND a word, and
                  an undated row prints "no date" rather than a dash. The provenance badge and the door
-                 stay inside the obligation cell. -->
+                 stay inside the obligation cell.
+
+                 The wrapper is the scroll container, not the card. `app.css`'s `card:has(> table.t)`
+                 only reaches a table that is the card's direct child, and this one is nested two
+                 components deep inside the advisor rail, so without a local scroller the obligations
+                 matrix panned the whole document at 320 and at 640 (WCAG 1.4.10 reflow). A bare
+                 wrapper, not a named region with a tab stop: the Advisor card already carries both
+                 (`AdvisorRail.vue`), and a second nested region would add a second stop to reach the
+                 same content. Same shape `CareerStatePanel` and `RacePlanner` use. -->
+            <div class="mt-2 overflow-x-auto">
             <table class="t mt-2 w-full border-collapse text-sm">
                 <thead>
                     <tr><th class="text-left">Obligation</th><th class="text-left">State</th><th class="text-right">Due</th></tr>
@@ -378,6 +387,7 @@ const incompleteData = computed(
                     </tr>
                 </tbody>
             </table>
+            </div>
         </section>
 
         <h3 class="mt-4 text-lg font-semibold text-ink-strong">

@@ -18,6 +18,7 @@ import { Head, Link } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
 import { latestLoggedTurn } from '../../lib/career/turnDisplay';
+import Sparkline from '../../components/ui/Sparkline.vue';
 
 const props = defineProps<{
     run: {
@@ -140,6 +141,12 @@ const energyText = (entry: { energy_reading: { text: string | null } | null }): 
     entry.energy_reading?.text ?? null;
 const spOf = (entry: { actual: Record<string, number | null> | null }): number | null => entry.actual?.sp ?? null;
 
+const energySeries = computed(() =>
+    props.entries
+        .map((entry) => entry.energy_reading?.value)
+        .filter((value): value is number => value !== null),
+);
+
 // The turn an undo would remove: the run's latest logged turn, from the same derivation the Events
 // and Inheritance forms prefill with. The rail used to take its own maximum across every entry, so
 // the label answered "how far does this rail reach" rather than "which turn is the run's last"
@@ -252,7 +259,7 @@ const finaleText = computed(() => {
                 <div class="overflow-x-auto">
                     <table class="t w-full min-w-[44rem] border-collapse text-sm">
                         <thead>
-                            <tr><th class="text-right">Turn</th><th class="text-left">Position</th><th class="text-left">Kind</th><th class="text-left">What happened</th><th class="text-right">Energy</th><th class="text-right">SP</th></tr>
+                            <tr><th class="text-right">Turn</th><th class="text-left">Position</th><th class="text-left">Kind</th><th class="text-left">What happened</th><th class="text-right">Energy</th><th class="text-right">SP</th><th class="text-right">Momentum</th></tr>
                         </thead>
                         <tbody>
                             <tr v-for="entry in visibleEntries" :key="entry.key" :class="entry.corrected ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft">
@@ -279,6 +286,9 @@ const finaleText = computed(() => {
                                     class="py-2 pr-3 text-right font-mono"
                                     :title="spOf(entry) === null ? 'This turn recorded no skill-point figure.' : undefined"
                                 >{{ spOf(entry) ?? 'N/A' }}</td>
+                                <td class="py-2 pr-3 text-right">
+                                    <Sparkline :values="energySeries" :width="64" :height="16" />
+                                </td>
                             </tr>
                         </tbody>
                     </table>

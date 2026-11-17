@@ -104,6 +104,35 @@ class Umamusume extends Model
     }
 
     /**
+     * Route model binding resolves `{umamusume}` by `slug` (the URL form a Trainer bookmarks),
+     * not by `id`: `/career/setup/trainee/rice-shower` must resolve the same way the id form does.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    /**
+     * Resolve `{umamusume}` by `slug` first, then by `id`.
+     *
+     * `getRouteKeyName()` alone answered the slug form and dropped the id form: an id URL that a
+     * browser spec, a saved draft or an older link still carries became a 404 the moment binding
+     * moved to `slug`. Both forms name a row the catalogue holds, so both resolve; a value that
+     * matches neither is still the binding's 404.
+     */
+    public function resolveRouteBinding($value, $field = null): ?self
+    {
+        $column = $field ?? $this->getRouteKeyName();
+        $match = $this->where($column, $value)->first();
+
+        if ($match === null && $field === null && $column !== 'id') {
+            $match = $this->where('id', $value)->first();
+        }
+
+        return $match;
+    }
+
+    /**
      * The profile block, when the `characters` document has been fetched.
      *
      * A `HasOne` and not a `hasOne` behind a nullable join in the view: the row is optional (the

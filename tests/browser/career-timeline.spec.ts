@@ -128,7 +128,7 @@ test('renders the HFW region model: four counts, one record table and the pager'
     await expect(page.locator('main table')).toHaveCount(1);
 
     const headers = await page.locator('main table thead th').allTextContents();
-    expect(headers.map((header) => header.trim())).toEqual(['Turn', 'Position', 'Kind', 'What happened', 'Energy', 'SP']);
+    expect(headers.map((header) => header.trim())).toEqual(['Turn', 'Position', 'Kind', 'What happened', 'Energy', 'SP', 'Momentum']);
 
     await expect(page.getByText(/entries · showing/)).toBeVisible();
     await expect(page.getByRole('heading', { name: 'Phase grouping', level: 2 })).toBeVisible();

@@ -58,8 +58,13 @@ type CapColumn = `cap_${string}`;
 
 const capColumn = (stat: string): CapColumn => `cap_${stat.toLowerCase()}`;
 
-/** What this page is for, in one line, under the one `h1`. */
-const lede = computed(() => `The identity fields the Cockpit used to hold. Everything here writes through ${props.run.update_url}.`);
+/**
+ * What this page is for, in one line, under the one `h1`.
+ *
+ * Names the writer in words rather than printing it: a route is a URL, and a URL under a heading is an
+ * address bar in the middle of a sentence (S18-05). The form still posts to `props.run.update_url`.
+ */
+const lede = computed(() => 'The identity fields the Cockpit used to hold. Every change saves through this run\'s own update route.');
 
 /*
  * Every form carries the whole key set `runs.update` demands, because `umamusume_id` and `status`
@@ -324,10 +329,15 @@ const saveIdentity = (): void => {
                                         :aria-label="`${stat} ceiling`"
                                         min="1"
                                     />
+                                    <!-- R8 E-03 (P-5 ruling): the caption names the quantity it holds. This
+                                         figure is the scenario's published FLOOR — an entered run ceiling
+                                         replaces it for this run — so it says `floor`, the same word the
+                                         Cockpit strip uses. The input's accessible name stays `${stat}
+                                         ceiling` and the title is unchanged; only the visible word moves. -->
                                     <span
                                         class="text-xs text-ink-muted"
                                         title="The figure this scenario publishes in its own cap table. An entered ceiling replaces it for this run; leaving the field empty restores it."
-                                    >Scenario {{ ceiling.scenario }}</span>
+                                    >Scenario floor {{ ceiling.scenario }}</span>
                                 </span>
                             </label>
                         </fieldset>

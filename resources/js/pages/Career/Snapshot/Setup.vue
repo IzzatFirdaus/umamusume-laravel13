@@ -66,6 +66,10 @@ const form = useForm({
     career_year: seeded('career_year'),
     career_month: seeded('career_month'),
     career_phase: seeded('career_phase'),
+    // U-03 / R8 (E-04): the two identity facts `RunSettings` already edits, collected here so a Trainer
+    // entering a snapshot never has to save it and then go and find them on another screen.
+    trainee_rarity: seeded('trainee_rarity'),
+    potential_level: seeded('potential_level'),
     speed: seeded('speed'),
     stamina: seeded('stamina'),
     power: seeded('power'),
@@ -203,6 +207,33 @@ const positionErrors = computed<string[]>(() => {
                   required
                   :error="form.errors.umamusume_id"
                 />
+                <!-- U-03 / R8 (E-04): the card's rarity and Potential Level, both printed by the client's
+                     own trainee panel. They are the run's, not the catalogue card's, because a trained
+                     copy can be awakened past what the collection screen shows. Bound to the validator's
+                     own range (★1-★3, 1-5) so the form cannot offer what the request would refuse. -->
+                <div class="mt-3 grid gap-3 g-3">
+                    <BaseSelect
+                      v-model="form.trainee_rarity"
+                      name="trainee_rarity"
+                      label="Rarity"
+                      :options="[
+                        { value: '', label: 'Not stated' },
+                        { value: '1', label: '★1' },
+                        { value: '2', label: '★2' },
+                        { value: '3', label: '★3' },
+                      ]"
+                      :error="form.errors.trainee_rarity"
+                    />
+                    <BaseInput
+                      v-model="form.potential_level"
+                      name="potential_level"
+                      label="Potential Level"
+                      type="number"
+                      min="1"
+                      max="5"
+                      :error="form.errors.potential_level"
+                    />
+                </div>
             </section>
 
             <section aria-labelledby="snapshot-position-heading" class="card">

@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Domain\Career\CareerPosition;
 use App\Enums\RaceEntryStatus;
 use App\Enums\RunStatus;
 use App\Models\RaceCatalogSlot;
@@ -165,6 +166,34 @@ it('summarises the turn being decided rather than re-listing every race offered 
             ->where('raceStrip.this_turn.recorded.0.status', 'Entered')
             // The option list stays on the screen that owns the decision.
             ->where('raceStrip.links.decision_url', route('runs.races.decision', $run)));
+});
+
+it('stands at the imported position for a snapshot, not one past the turns it logged', function (): void {
+    /*
+     * A snapshot imported at Senior Early October (turn index 67) with one turn logged since. The
+     * strip read `nextTurnToPlay()` (turn 68, Senior turn 20) while the race screens it links to read
+     * `decisionTurn()` (the stored position, Senior turn 19), so the Cockpit offered a different
+     * turn's races than the Race Decision and Race planner screens it hands off to. `decisionTurn()`
+     * is the one owner for a run that carries a stored position; a new-career run still falls through
+     * to the turn after the one it last logged, which every case above this one asserts.
+     */
+    $run = raceStripRun(turns: 1);
+    $run->forceFill([
+        'career_position' => CareerPosition::fromTurnIndex(67),
+        'career_position_source' => 'snapshot',
+    ])->save();
+
+    // Senior turn 19 (index 67) and the turn after it (index 68) each carry one race, so the two
+    // readings are distinguishable by what they offer, not only by the number they print.
+    raceStripSlot(['title' => 'Senior October Stakes', 'year' => RaceCatalogSlot::YEAR_SENIOR, 'turn' => 19, 'month' => 10, 'half' => 'Early']);
+    raceStripSlot(['title' => 'Senior November Stakes', 'year' => RaceCatalogSlot::YEAR_SENIOR, 'turn' => 20, 'month' => 10, 'half' => 'Late']);
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('raceStrip.this_turn.turn', 19)
+            ->where('raceStrip.this_turn.year_label', 'Senior')
+            ->where('raceStrip.this_turn.offered', 1));
 });
 
 it('says so when the calendar carries no race at the turn being decided', function (): void {

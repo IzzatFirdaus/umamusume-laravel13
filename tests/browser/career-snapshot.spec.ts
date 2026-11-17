@@ -59,7 +59,7 @@ test.describe('Snapshot entry', () => {
         await hydrate(page, '/career/snapshot');
 
         await expect(page.getByRole('heading', { name: 'Start from existing snapshot', level: 1 })).toBeVisible();
-        await expect(page.getByRole('heading', { name: 'Start from existing snapshot', level: 2 })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Record your position', level: 2 })).toBeVisible();
 
         // The one promise the screen makes: the position entered becomes the run's own position, and
         // nothing is guessed at. Both sentences are the page's own copy, not a summary of it.
@@ -269,16 +269,17 @@ test.describe('Snapshot review', () => {
 test.describe('Snapshot review, bare visit', () => {
     test('states that nothing has been entered, with every field not provided', async ({ page }) => {
         // The audit's severe finding: this URL used to render the Setup heading because the GET
-        // validated like a submit. The HFW's empty review is a real screen: eight Not provided tiles,
+        // validated like a submit. The HFW's empty review is a real screen: twelve Not provided tiles,
         // the stepper naming Review, and a confirm with nothing to re-post.
         await page.goto('/career/snapshot/review', { waitUntil: 'networkidle' });
         await page.locator('#app > *').first().waitFor();
 
         await expect(page.getByRole('heading', { name: 'Review snapshot', level: 1 })).toBeVisible();
         await expect(page.getByRole('navigation', { name: 'Snapshot steps' })).toBeVisible();
-        // R7-99: ten rows, not eight — the two identity rows lead the read-back and a bare visit
-        // reports them as not provided like every other field.
-        await expect(page.locator('[data-state="not_provided"]')).toHaveCount(10);
+        // R7-99: twelve rows, not eight — four identity rows (trainee, scenario, rarity,
+        // potential level) lead the read-back and a bare visit reports them as not provided
+        // like every other field.
+        await expect(page.locator('[data-state="not_provided"]')).toHaveCount(12);
         await expect(page.getByRole('status').filter({ hasText: 'No snapshot has been entered yet' })).toBeVisible();
         await expect(page.getByRole('button', { name: 'Record snapshot' })).toBeDisabled();
     });

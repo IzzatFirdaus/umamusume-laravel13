@@ -169,6 +169,16 @@ const treatment = (state: string): string => {
             <span>I understand this snapshot cannot be undone.</span>
         </label>
 
+        <!-- U-02 / R8 (P-2 ruling): the one fact this record does not collect. A snapshot is the run's
+             position and state, so the trainee's owned skills are added afterwards on the run's own
+             planner — which is where the client's Learn list already lives in this tool, and which marks
+             each one Acquired when it is added. Saying so here is the whole of the hand-off: without it
+             the Trainer records the career and never learns the list has a second door. -->
+        <p class="mt-4 max-w-3xl text-xs text-ink-muted" data-owned-skills-handoff>
+            This snapshot records where the career stands. The trainee's owned skills are added
+            afterwards on the run's Skills planner, which marks each one as acquired when you add it.
+        </p>
+
         <div class="mt-6 flex flex-wrap items-center gap-3">
             <button
                 type="button"

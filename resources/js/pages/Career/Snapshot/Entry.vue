@@ -44,7 +44,7 @@ const props = defineProps<{
 
         <section aria-labelledby="snapshot-entry-heading" class="card mt-3.5 max-w-3xl">
             <h2 id="snapshot-entry-heading" class="text-lg font-semibold text-ink-strong">
-                Start from existing snapshot
+                Record your position
             </h2>
             <p class="mt-2 text-sm text-ink">
                 Record a career that is already underway, exactly as far along as your client shows it.

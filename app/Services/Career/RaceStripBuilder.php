@@ -81,7 +81,17 @@ final class RaceStripBuilder
             ];
         }
 
-        $next = $run->hasScenario() ? $run->nextTurnToPlay() : null;
+        /*
+         * The turn the strip reads its calendar rows against is the turn the screens it links to
+         * decide about, so both come from one owner (`TrainingRun::decisionTurn()`: the stored
+         * position for a snapshot, else the turn after the last one logged).
+         *
+         * This read `nextTurnToPlay()` directly, which is the right answer only for a new-career run
+         * and one turn late for a snapshot: run #36 (imported at Senior Early October, index 67, one
+         * turn logged) had the strip offering Senior turn 20 while the header said turn 67 of 72 and
+         * the race planner planned turn 19.
+         */
+        $next = $run->hasScenario() ? $run->decisionTurn() : null;
 
         // The trainee's own obligations, keyed on the calendar row each one names (PRD FR-A-10,
         // ADR-0026). One query for the whole region, not one per row: this strip prints three regions and

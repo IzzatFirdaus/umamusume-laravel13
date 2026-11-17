@@ -49,13 +49,13 @@ it('renders the three confidence states as three distinct labels', function (): 
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('Career/Snapshot/Review')
-            // R7-99 prepended the two identity rows (trainee, scenario), so the state rows now start
-            // at index 2 rather than 0.
-            ->where('fields.2.display', 'Known · Speed 607')
-            ->where('fields.5.display', 'Unknown · Guts')
-            ->where('fields.7.display', 'Not provided · Energy')
-            ->where('fields.5.state', 'unknown')
-            ->where('fields.7.state', 'not_provided'));
+            // The identity rows lead (trainee, scenario, then R8's rarity and Potential Level), so the
+            // state rows start at index 4 rather than 0.
+            ->where('fields.4.display', 'Known · Speed 607')
+            ->where('fields.7.display', 'Unknown · Guts')
+            ->where('fields.9.display', 'Not provided · Energy')
+            ->where('fields.7.state', 'unknown')
+            ->where('fields.9.state', 'not_provided'));
 });
 
 it('keeps Unknown and Not provided apart rather than rendering both as one absence', function (): void {
@@ -150,9 +150,9 @@ it('opens on a bare visit with every field not provided instead of bouncing to t
             ->component('Career/Snapshot/Review')
             ->where('has_draft', false)
             ->where('position_label', null)
-            ->has('fields', 10)
-            ->where('fields.2.display', 'Not provided · Speed')
-            ->where('fields.9.display', 'Not provided · Skill Points')
+            ->has('fields', 12)
+            ->where('fields.4.display', 'Not provided · Speed')
+            ->where('fields.11.display', 'Not provided · Skill Points')
             ->where('entry', route('career.snapshot')));
 });
 
@@ -163,7 +163,7 @@ it('reads back the session draft after the setup form opened the review once', f
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('has_draft', true)
-            ->where('fields.2.display', 'Known · Speed 607'));
+            ->where('fields.4.display', 'Known · Speed 607'));
 });
 
 it('reads the submitted body and refuses to read a payload carried in the query string', function (): void {

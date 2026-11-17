@@ -32,13 +32,13 @@ export function useVisitState(): { visiting: Ref<boolean>; visitFailed: Ref<bool
     const stopFinish = router.on('finish', () => {
         visiting.value = false;
     });
-    const stopException = router.on('exception', () => {
+    const stopException = router.on('networkError', () => {
         visiting.value = false;
         visitFailed.value = true;
 
         return false;
     });
-    const stopInvalid = router.on('invalid', () => {
+    const stopInvalid = router.on('httpException', () => {
         visiting.value = false;
         visitFailed.value = true;
 

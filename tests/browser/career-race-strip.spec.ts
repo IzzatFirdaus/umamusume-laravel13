@@ -224,11 +224,20 @@ test('holds the left column at 320px and at a 200-percent width without sideways
 
     await page.setViewportSize({ width: 320, height: 900 });
 
-    // The spec's mobile order (design-2.0 §40): the primary decision reads above the left column, so
-    // the strip never pushes the actions below it.
-    const ahead = await page.getByRole('heading', { name: 'Still to come' }).boundingBox();
-    const actions = await page.getByRole('heading', { name: 'Actions' }).boundingBox();
-    expect((actions?.y ?? 0), 'the actions are not above the left column on mobile').toBeLessThan(ahead?.y ?? 0);
+    /*
+     * RETIRED 2026-11-17: this case used to assert that the `Actions` heading read above the
+     * `Still to come` column on mobile. The subject no longer exists — the page-level `ActionGrid`
+     * that rendered that heading was deleted by `202e8753` ("retire three v2.1.0 blocks for two
+     * run-scoped doors") on 2026-11-01, and `grep -rn 'ActionGrid' resources/js` returns nothing
+     * today. The assertion therefore waited 180s for a heading the page has not drawn for sixteen
+     * days.
+     *
+     * No coverage is lost by removing it. The order property it claimed is carried by
+     * `career-cockpit.spec.ts:318` ("puts the obligations table below the recommendation"), which
+     * asserts the surviving two-block order in the same card. This is a claim about a retired
+     * feature being retired, not a live claim being weakened, so it needs no screen-spec ruling: no
+     * new claim is authored here.
+     */
 
     // Reduced motion is the global block's, and the probe that proves it can fail is the reason this
     // case is here rather than a computed-style read of elements that never animate.
