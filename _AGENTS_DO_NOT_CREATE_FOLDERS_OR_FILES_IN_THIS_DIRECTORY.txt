@@ -1,0 +1,34 @@
+_AGENTS DO NOT CREATE FOLDERS OR FILES IN THIS DIRECTORY - KEEP CONSTRAINED TO YOUR ASSIGNED REPOSITORY DIRECTORY
+
+This repository is: D:\Projects\umamusume-laravel13
+
+ALL files, folders, worktrees, test outputs, vendor directories, and scratch artifacts
+created by agents MUST be placed ONLY in:
+
+1. Inside the repository: D:\Projects\umamusume-laravel13\
+2. Inside the repository's scratch workspace: D:\Projects\umamusume-laravel13\.scratch-uma\
+
+FORBIDDEN locations (agents have previously violated this):
+- D:\Projects\uma-recover\        (full repo copy - FORBIDDEN)
+- D:\Projects\test-results\       (test output - FORBIDDEN)
+- D:\Projects\umamusume-laravel13$WT\  (worktree/vendor - FORBIDDEN)
+- D:\Projects\NUL                  (Windows device artifact - FORBIDDEN)
+- Any path outside D:\Projects\umamusume-laravel13\
+
+PERMITTED locations for agent-created artifacts:
+- .scratch-uma/<session>/...       (session-specific scratch)
+- .scratch-uma/sqlite/             (browser test databases)
+- .scratch-uma/worktrees/          (git worktrees if needed)
+- .scratch-uma/test-results/       (test outputs)
+- .scratch-uma/vendor/             (isolated vendor if needed)
+- .scratch-uma/logs/               (logs)
+- .scratch-uma/scripts/            (one-off scripts)
+- .scratch-uma/probes/             (debug probes)
+- .scratch-uma/data/               (data extracts)
+- .scratch-uma/recovered/          (recovered artifacts)
+
+See AGENTS.md §9 "Every artifact an agent writes stays inside the repository"
+and §6 ".scratch-uma/ = investigation scratch space" for binding rules.
+
+Violations create untracked, unreachable files that collide with other projects
+and are invisible to all quality gates. Clean up is a manual burden.
