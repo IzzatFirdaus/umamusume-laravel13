@@ -84,15 +84,12 @@ def classify(path):
     return invalid_closers, unclosed
 
 
-def md_files(paths):
-    """The markdown files to check, from the arguments or from git when given none.
+def tracked_markdown():
+    """Every tracked `.md` path, from git rather than a directory walk.
 
-    `git ls-files` rather than a directory walk so the check sees exactly the tracked
-    set the census sees, and never a scratch file another session left behind.
+    `git ls-files` so the check sees exactly the tracked set the census sees, and never a
+    scratch file another session left behind.
     """
-    if paths:
-        return [p for p in paths if os.path.isfile(os.path.join(REPO, p))]
-
     import subprocess
 
     out = subprocess.run(["git", "ls-files", "--", "*.md"], cwd=REPO,
@@ -101,9 +98,59 @@ def md_files(paths):
     return [p for p in out.splitlines() if p.strip()]
 
 
+def md_files(paths):
+    """The markdown files to check, plus the paths that could not be read.
+
+    Three argument shapes are honoured, because a gate command must not silently check
+    nothing:
+
+    * no paths      -> every tracked markdown file
+    * a file        -> that file
+    * a directory   -> every tracked markdown file under it
+
+    The directory case matters: a bare `os.path.isfile` filter turned
+    `python tools/md_fence_check.py tools/ tests/` into `0 file(s)` and exit 0, a green
+    gate that had read nothing. A path that resolves to neither a tracked file nor a
+    directory is returned as unreadable so the caller can report it.
+    """
+    tracked = tracked_markdown()
+    if not paths:
+        return [p for p in tracked if os.path.isfile(os.path.join(REPO, p))], []
+
+    wanted = []
+    unreadable = []
+    for arg in paths:
+        norm = arg.replace("\\", "/").rstrip("/")
+        full = os.path.join(REPO, norm)
+
+        if os.path.isfile(full):
+            wanted.append(norm)
+        elif os.path.isdir(full):
+            prefix = norm + "/"
+            under = [p for p in tracked if p.startswith(prefix)]
+            # A directory with no tracked markdown under it is unreadable, not empty:
+            # answering "0 files" there is the false green this function exists to stop.
+            if not under:
+                unreadable.append(arg)
+            wanted.extend(under)
+        else:
+            unreadable.append(arg)
+
+    seen = set()
+    files = []
+    for p in wanted:
+        if p not in seen and os.path.isfile(os.path.join(REPO, p)):
+            seen.add(p)
+            files.append(p)
+    return files, unreadable
+
+
 def main(argv):
-    paths = md_files(argv[1:])
+    paths, unreadable = md_files(argv[1:])
     total = 0
+
+    for arg in unreadable:
+        print(f"  UNREADABLE {arg!r}: not a file, and holds no tracked markdown", file=sys.stderr)
 
     for path in paths:
         invalid, unclosed = classify(path)
@@ -118,9 +165,13 @@ def main(argv):
 
     print(f"\n{total} invalid closing fence(s) in {len(paths)} file(s)")
 
-    # Exit non-zero only on the defect class this tool exists to catch. An unclosed
-    # fence is reported for the reader but is not a failure: a code block that runs
-    # to the end of the file is legal CommonMark and the tool has no way to know
+    # An unreadable argument fails the run: a gate that read nothing must not report green.
+    if unreadable:
+        return 2
+
+    # Otherwise exit non-zero only on the defect class this tool exists to catch. An
+    # unclosed fence is reported for the reader but is not a failure: a code block that
+    # runs to the end of the file is legal CommonMark and the tool has no way to know
     # whether that was intended.
     return 1 if total else 0
 
