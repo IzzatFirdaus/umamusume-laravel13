@@ -183,12 +183,25 @@ class DashboardController extends Controller
         $turn = (int) $strip['turn'];
         $decisionTurn = $run->decisionTurn();
 
+        /*
+         * Where the run stands is the position it holds, not how many turns it happened to log.
+         *
+         * `positionLabel()` used to be fed `$turn` (the recorded count), so a snapshot imported at
+         * Senior Early October and one turn logged read `Junior Year · Early January` here and
+         * `Senior Year · Early October` on the Cockpit it resumes - the landing screen and the screen
+         * it opens disagreed about the career's standing. `careerPosition()` is the one owner: a stored
+         * position wins, and a new-career run derives from its own latest logged turn, which is the
+         * same reading `$turn` gave it. A run holding neither still claims nothing (D-220).
+         */
+        $position = $run->careerPosition();
+        $positionLabel = $position === null ? null : $this->positionLabel($position->turnIndex);
+
         return [
             'run_id' => $run->id,
             'trainee' => $run->umamusume->name,
             'trainee_ja' => $run->umamusume->name_ja,
             'scenario_label' => $this->scenarioLabel($run),
-            'position_label' => $this->positionLabel($turn),
+            'position_label' => $positionLabel,
             /*
              * Where the Cockpit says the run stands (`TrainingRun::decisionTurn()`: the imported
              * position for a snapshot run, else the turn after the last one logged) and the label for
@@ -200,7 +213,9 @@ class DashboardController extends Controller
             'cockpit_turn' => $decisionTurn['turn_index'] ?? null,
             'cockpit_label' => $decisionTurn === null
                 ? null
-                : ($decisionTurn['year'].' Year · Turn '.$decisionTurn['turn']),
+                // `forYear()`, not `$decisionTurn['year'].' Year'`: the array carries the grid constant
+                // (`3` for Senior), so concatenating the word onto it printed "3 Year · Turn 19".
+                : (CareerPositionLabel::forYear($decisionTurn['year']).' · Turn '.$decisionTurn['turn']),
             'turn' => $turn,
             // The cockpit's own standing (`decisionTurn()`: the imported position for a snapshot
             // run, else the turn after the last one logged). The page prints it beside `turn` only

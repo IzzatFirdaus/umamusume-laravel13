@@ -104,6 +104,15 @@ class Umamusume extends Model
     }
 
     /**
+     * Route model binding resolves `{umamusume}` by `slug` (the URL form a Trainer bookmarks),
+     * not by `id`: `/career/setup/trainee/rice-shower` must resolve the same way the id form does.
+     */
+    public function getRouteKeyName(): string
+    {
+        return 'slug';
+    }
+
+    /**
      * The profile block, when the `characters` document has been fetched.
      *
      * A `HasOne` and not a `hasOne` behind a nullable join in the view: the row is optional (the
