@@ -11,22 +11,28 @@ A peer landed slice 3.2 and closed KI-165 **during** the previous pass. Re-measu
 
 ## 0. What changed since pass 1 (measured, not remembered)
 
+**Baseline re-derived at `HEAD b86d4667`** (a peer landed 10 commits while pass 2 was being reviewed; the
+worktree still holds the uncommitted ladder work). Every figure below is a command's output at that ref.
+
 | Item | Pass 1 said | Now | Command |
 | --- | --- | --- | --- |
-| `fan_ladder` bands | 1 (`Star 0-240000`) | **7**, half-open, `PHP_INT_MAX` ceiling | `grep -c "'class'" config/uma.php` -> `7` |
-| `FanLadderTest` | pinned `classFor(240_000) is null` | re-pinned to the **below-Bronze** null; **22 passed / 28 assertions** | `php artisan test --compact --filter=FanLadderTest < /dev/null` |
-| KI-165 register row | OPEN | **CLOSED 2026-11-17**, naming the divergence from `plan-defects` slice 3.2 | `grep -n '^KI-165' KNOWN-ISSUES.md` |
-| Register OPEN set | 11 | **10** (KI-104, 106, 114, 116, 119, 127, 162, 163, 164, **166**) | `audit_status_register.py` |
+| `fan_ladder` bands | 1 (`Star 0-240000`) | **1 at `HEAD`, 7 in the worktree** — the ladder work is **uncommitted** | `git show HEAD:config/uma.php \| grep -c "'class'"` -> `1`; `grep -c "'class'" config/uma.php` -> `7` |
+| `FanLadderTest` | pinned `classFor(240_000) is null` | worktree re-pinned to the **below-Bronze** null; **22 passed / 28 assertions** in the worktree | `php artisan test --compact --filter=FanLadderTest < /dev/null` |
+| KI-165 register row | OPEN | **0 rows at `HEAD`, 2 in the worktree** (`CLOSED 2026-11-17`) — also uncommitted | `git show HEAD:KNOWN-ISSUES.md \| grep -c '^KI-165'` -> `0` |
+| Register OPEN set | 11 | **10** (KI-104, 106, 114, 116, 119, 127, 162, 163, 164, 166) | `audit_status_register.py` |
 | Register index rows | 110 | 110, with **6 contradictions still** | same |
 | Browser cases | 876 | **877** in 125 files | `npx playwright test --list` |
-| Working tree | 252 | **266** porcelain rows | `git status --porcelain -uall \| wc -l` |
+| Working tree | 252 | **99** porcelain rows (1 `M ` staged, 63 ` M`, **2 ` D`**, 33 `??`) | `git status --porcelain -uall \| awk '{print substr($0,1,2)}' \| sort \| uniq -c` |
+| Deletions | 109 | **2** — the peer committed `e5fc0e1c docs(legacy): remove jev-inspect subtree` and `13ad587b`, so the 109 are gone from the status count | same |
 
-**The peer's fan-ladder mapping is better-sourced than my plan's, and it wins.** `plan-defects` slice 3.2
-proposed `Star` spanning `[100000, 240000)`; the landed version keys each band's `from` to that tier's **own**
-published threshold (`Star [160000, 240000)`), which is what the client's pyramid actually prints — a tier name
-sits beside the count that *reaches* it. That keeps the audited reading (`Star`, 30,755 to `Top Star`)
-unchanged and answers null below 5,000 instead of borrowing Bronze's name. **Slice 3.2 is closed. Do not execute
-its array.** Read `config/uma.php`'s `fan_ladder` block before touching anything else in that area.
+**The peer's fan-ladder mapping is better-sourced than my plan's, and it wins — but it is uncommitted, so it is
+not yet in the tree any clean clone would build.** `plan-defects` slice 3.2 proposed `Star` spanning
+`[100000, 240000)`; the worktree keys each band's `from` to that tier's **own** published threshold
+(`Star [160000, 240000)`), which is what the client's pyramid actually prints — a tier name sits beside the count
+that *reaches* it. That keeps the audited reading (`Star`, 30,755 to `Top Star`) unchanged and answers null below
+5,000 instead of borrowing Bronze's name. **Do not execute slice 3.2's array or its test table.** S-0.5 must land
+`config/uma.php` + `tests/Feature/FanLadderTest.php` + the KI-165 row together, or the ladder reverts to one band
+for anyone who builds from `HEAD`.
 
 ---
 
@@ -172,26 +178,61 @@ exactly 1 case and 0 files; `--config=playwright.nativephp.config.ts --list` sti
 required for a test deletion) with the reason in the commit body, or rewrite to the shipped preflight.
 *Acceptance:* listing total drops by 1, or the file is green in isolation.
 
-**S-1.3 — the probe group is 31 cases, not 9. (Pass 1 was wrong.)** Counted from the runner's own listing:
+**S-1.3 — the out-of-product case group is 35 cases across 10 files, and every file carries a disposition.
+(Pass 1 said 9; pass 2 said 31 and left a file unruled. Both were wrong.)** Counted from
+`npx playwright test --list`, which prints one line per case against its file:
 
 | File | Cases | Disposition |
 | --- | --- | --- |
 | `annotation-sweep.spec.ts` | **19** | wireframe-apparatus sweep, one case per screen — a real regression class; **keep** |
-| `scratch-phase1-screenshots.spec.ts` | 4 | screenshot capture artefact |
-| `scratch-isolation.spec.ts` | 3 | pins the scratch-DB contract — **keep** (it guards KI-80) |
-| `containment.spec.ts` | 3 | pins a deliberate limitation — **keep** |
-| `flash-name-{first,fix,mechanism,probe,probe-settled}.spec.ts` | 5 | single-use investigation artefacts |
-| `containment-mechanism.spec.ts` | 1 | spins its own Vite server on port 5201 |
+| `scratch-phase1-screenshots.spec.ts` | 4 | screenshot capture artefact for a landed dispatch; **park** — keep the file, exclude from the release sweep by name (its images are not a gate) |
+| `scratch-isolation.spec.ts` | 3 | pins the scratch-DB contract (KI-80); **keep** |
+| `containment.spec.ts` | 3 | pins a deliberate limitation; **keep** |
+| `flash-name-{first,fix,mechanism,probe,probe-settled}.spec.ts` | 5 | single-use investigation artefacts; **retire** |
+| `containment-mechanism.spec.ts` | 1 | spins its own Vite server on port 5201; **retire** |
+| **sum** | **35** | 29 kept/parked, **6 retired** |
 
-**31 cases sit outside product coverage**; 845 of 877 cases are product behaviour. Retiring the five
-`flash-name-*` plus `containment-mechanism` removes 6 cases and one port conflict. `annotation-sweep`'s 19 are
-**not** probe debris — my pass-1 plan called it a single case and would have deleted a real gate.
+**The arithmetic, stated so it can be checked:** 841 product cases + 35 group cases + 1 `nativephp-packaged`
+case = **877**, the runner's own total. Conventional daemonizing. After retiring 6: **871 cases remain**.
+`annotation-sweep`'s 19 are **not** probe debris — pass 1 called it a single case and would have deleted a real
+gate.
 
-**S-1.4 — `composer test` is not a release gate.** It runs `config:clear`, `npm run typecheck`, `artisan test`
-only. *Change:* add a `gates` script running lore, pint, phpstan, typecheck, `lint:ui`, fences, then the PHP
-suite. *Acceptance:* `composer run gates` exit 0 quoted with a duration; a deliberate pint violation makes it
-exit non-zero. **Note:** inside a composer script the child inherits a tty, so the `< /dev/null` requirement
-does not apply; a backgrounded run does need it.
+**S-1.4 — `composer test` is not a release gate, and the `gates` script must not use `@php` on a Python tool.**
+`composer test` runs `config:clear`, `npm run typecheck`, `artisan test` only. Add a `gates` script in this
+exact order, with these exact lines:
+
+```json
+"gates": [
+    "@php tools/lore.php",
+    "@php tools/lore.php code",
+    "@php vendor/bin/pint --test --format agent",
+    "@php vendor/bin/phpstan analyse --no-progress --memory-limit=1G",
+    "npm run typecheck",
+    "node tools/ui-framework-check.mjs",
+    "python tools/md_fence_check.py tools/ tests/ docs/design-research/",
+    "@php artisan test --compact"
+]
+```
+
+**Two traps in that block, both measured:**
+
+1. **`@php` must never prefix a Python script.** `@php` makes Composer run the **PHP binary** on the file. Measured:
+   `php tools/md_fence_check.py` -> `exit 0` while printing the file's 5,181-byte Python docstring and checking
+   nothing — a **false green**. The correct step is the bare `python tools/md_fence_check.py …` line above, which
+   on the same tree -> `exit 1` with the real `FileNotFoundError`. `build/` "fences step" written as
+   `"@php tools/md_fence_check.py"` is the bug; this block supersedes it.
+2. **`< /dev/null` is required only on the `terminal` tool path, not inside a Composer script.** Measured three
+   ways on the same filter: `execute_code` with an inherited pipe -> `exit 0, 22 passed`; `execute_code` with
+   `stdin=DEVNULL` -> `exit 0, 22 passed`; the Hermes `terminal` tool **without** the redirect -> `exit 1,
+   stdin is not a tty`; `terminal` **with** `< /dev/null` -> `exit 0, 22 passed`. A Composer script run via
+   `composer.bat run gates` was `exit 0, 22 passed` under **both** inherited stdin and `DEVNULL`. So
+   `composer run gates` is usable unattended, and a direct `php artisan test` from the `terminal` tool needs the
+   redirect.
+
+*Acceptance:* `composer run gates` exit 0 quoted **with its duration and its per-step output**; a deliberate pint
+violation makes it exit non-zero; and the fences step is proven live by running
+`composer run gates 2>&1 | grep -c 'invalid closing fence'` and reading a non-zero count of the *real* checker's
+line, not a Python traceback. **Do not accept a prose claim for either trap — quote the run.**
 
 **S-1.5 — `tools/md_fence_check.py` crashes with no arguments** on the 25 tracked-but-deleted audit paths.
 *Change:* skip missing files and report them; exit 0 when the present files are clean.

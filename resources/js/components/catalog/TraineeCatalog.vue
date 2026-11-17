@@ -14,10 +14,11 @@
  * a machine token; a Japan-only row prints the label as muted text rather than as a badge, because
  * "not on Global" is an absence this tool states rather than a status it awards (annotation 6).
  *
- * **The growth row keeps its place and states the absence.** The HFW prints a row of percentages
- * because its catalogue carries them; this one does not, and a `+0%` for every stat would be a
- * fabricated figure (`+0%` is the print for a recorded zero, not for a column this tool never
- * fetched). `training_runs.growth_rate` is where a growth row lives, entered on the run that reads it.
+ * **The growth row keeps its place and names where the figure lives.** The index payload carries no
+ * growth figures, so a `+0%` for every stat would be a fabricated number (`+0%` is the print for a
+ * recorded zero, not for a value this payload does not carry). Every `character_cards` row does hold
+ * `base_stats` and `growth_rates` (ADR-0030) and the trainee's own page renders both, so the card says
+ * where they are read rather than claiming they were never fetched.
  */
 import ArtworkSlot from '../ArtworkSlot.vue';
 import Pagination from '../ui/Pagination.vue';
@@ -372,10 +373,13 @@ const fieldLabel = 'text-xs font-semibold text-ink-muted';
                         </div>
                         <p v-else class="text-xs text-ink-muted">Aptitude not published for this trainee.</p>
 
-                        <!-- The growth row keeps its place and states the absence. A stat this catalogue
-                             never fetched is not a zero, so no percentage prints here. -->
+                        <!-- The growth row keeps its place and names where the figure actually lives. Every
+                             `character_cards` row carries `base_stats` and `growth_rates` (ADR-0030), and the
+                             detail page renders both; this index payload does not carry them, so the card
+                             says where they are read rather than claiming they were never fetched. -->
                         <p class="text-xs text-ink-muted">
-                            Growth <span class="text-ink">not stored</span> · the catalogue holds no growth row for an
+                            Growth <span class="text-ink">on the trainee's own page</span> · every stored form
+                            carries its growth row.
                         </p>
                     </Link>
                 </li>
