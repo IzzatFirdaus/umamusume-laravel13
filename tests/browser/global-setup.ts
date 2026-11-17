@@ -36,8 +36,9 @@ const repoRoot = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
  * `PLAYWRIGHT_SCRATCH_DB` names the path when set; the default carries the pid and the load-time
  * millisecond, because a recycled pid alone could match a peer's stale file.
  *
- * ponytail: per-invocation files are never swept, so `database/` keeps one file per run under the
- * existing `/database/*.sqlite*` ignore. Upgrade path: an `exit` hook removing only the resolved path.
+ * The path targets `.scratch-uma/sqlite/` (git-ignored scratch workspace) rather than `database/`,
+ * keeping the project's `database/` directory clean for the canonical application database and migrations.
+ * See AGENTS.md §6 ".scratch-uma/ = investigation scratch space" and `.scratch-uma/sqlite/INDEX.md`.
  */
 export function scratchDatabasePath(env: NodeJS.ProcessEnv = process.env): string {
     const named = env.PLAYWRIGHT_SCRATCH_DB;
@@ -46,7 +47,7 @@ export function scratchDatabasePath(env: NodeJS.ProcessEnv = process.env): strin
         return isAbsolute(named) ? named : resolve(repoRoot, named);
     }
 
-    return join(repoRoot, 'database', `browser-scratch-${process.pid}-${Date.now()}.sqlite`);
+    return join(repoRoot, '.scratch-uma', 'sqlite', `browser-scratch-${process.pid}-${Date.now()}.sqlite`);
 }
 
 /** Removes exactly this path and its write-ahead siblings. Never a glob: a pattern reaches a peer's file. */

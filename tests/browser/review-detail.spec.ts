@@ -166,6 +166,59 @@ test('commits the record its other-form action names, in one press', async ({ pa
     }
 });
 
+test('paints one focus-ring colour on every focus stop, from the first frame', async ({ page }) => {
+    // BO-011. The audit read four ring colours across one screen; a settled-state read cannot see
+    // them, because `transition-colors` carries `outline-color` and every ring lands on the token
+    // 150ms later. Measured 2026-11-15 on `/review/10`: 23 stops settled on one colour, but the
+    // first painted frame showed five — the six offenders were exactly the elements reporting
+    // `outline-color` in their `transition-property`. So this reads synchronously after focus.
+    // The base layer now seeds `outline-color: var(--color-ring)` at rest, leaving no delta to
+    // interpolate; a settled read would pass on the defect and is deliberately not the assertion.
+    const [candidate] = seedPendingCandidates(1, { suggested: true });
+
+    await page.goto(`/review/${candidate.id}`);
+    await page.locator('#app > *').first().waitFor();
+
+    const report = await page.evaluate(() => {
+        const selector =
+            'a[href],button:not([disabled]),select,input:not([type=hidden]),summary,[tabindex]:not([tabindex="-1"])';
+        const els = ([...document.querySelectorAll(selector)] as HTMLElement[]).filter(
+            (e) => e.offsetParent !== null,
+        );
+
+        // Resolve the token into the same serialised form `getComputedStyle` returns, so the
+        // comparison is value-to-value rather than hex-against-rgb.
+        const probe = document.createElement('span');
+        probe.style.color = getComputedStyle(document.documentElement)
+            .getPropertyValue('--color-ring')
+            .trim();
+        document.body.appendChild(probe);
+        const ring = getComputedStyle(probe).color;
+        probe.remove();
+
+        const rows = els.map((el) => {
+            el.focus({ focusVisible: true });
+
+            return {
+                label: (el.getAttribute('aria-label') || el.textContent || el.tagName).trim().slice(0, 28),
+                immediate: getComputedStyle(el).outlineColor,
+            };
+        });
+
+        return { ring, rows };
+    });
+
+    expect(report.rows.length, 'the page must expose a walkable set of focus stops').toBeGreaterThanOrEqual(20);
+
+    const offToken = report.rows.filter((row) => row.immediate !== report.ring);
+
+    expect(
+        offToken,
+        `every focus stop must paint ${report.ring} on its first frame; these did not: `
+            + JSON.stringify(offToken, null, 2),
+    ).toEqual([]);
+});
+
 test('passes an axe scan at WCAG A and AA on the literal detail URL', async ({ page }) => {
     // The rowid reset in `clearPendingCandidates` makes this fixture's row id 1, so the URL can be
     // written literally. `RouteCoverageTest` decides which routes the corpus visits and scans by

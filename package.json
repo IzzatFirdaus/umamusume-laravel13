@@ -30,8 +30,10 @@
         "esbuild@0.28.2": true
     },
     "dependencies": {
-        "@inertiajs/vue3": "^2.3.28",
+        "@inertiajs/vue3": "^3.11.0",
+        "@oddbird/popover-polyfill": "^0.7.3",
         "@vitejs/plugin-vue": "^6.0.9",
+        "interestfor": "^1.0.14",
         "vue": "^3.5.43"
     }
 }

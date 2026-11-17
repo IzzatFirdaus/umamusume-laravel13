@@ -186,6 +186,9 @@ function handleClickOutside(event: MouseEvent): void {
             <BaseInput
                 :id="inputId"
                 :name="inputId"
+                autocorrect="off"
+                autocapitalize="none"
+                :spellcheck="false"
                 :placeholder="placeholder ?? 'Search skills…'"
                 :disabled="disabled"
                 :modelValue="search"
@@ -244,7 +247,7 @@ function handleClickOutside(event: MouseEvent): void {
                 :id="listId"
                 role="listbox"
                 :aria-label="label ?? 'Skill suggestions'"
-                class="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border border-rule bg-raised shadow-lg ring-1 ring-rule"
+                class="absolute z-10 mt-1 w-full max-h-60 overflow-auto rounded-md border border-rule bg-raised overlay-shadow ring-1 ring-rule"
             >
                 <li
                     v-for="(opt, index) in filteredOptions"
@@ -268,7 +271,7 @@ function handleClickOutside(event: MouseEvent): void {
 
             <p
                 v-else-if="isOpen"
-                class="absolute z-10 mt-1 w-full rounded-md border border-rule bg-raised shadow-lg ring-1 ring-rule p-3 text-sm text-ink-muted"
+                class="absolute z-10 mt-1 w-full rounded-md border border-rule bg-raised overlay-shadow ring-1 ring-rule p-3 text-sm text-ink-muted"
             >
                 No skills match "{{ search }}".
             </p>

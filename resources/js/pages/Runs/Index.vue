@@ -104,6 +104,11 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
             <PageHeader eyebrow="Careers" title="Training runs">
                 <template #actions>
                     <LinkButton href="/career/setup/scenario" variant="primary">New career</LinkButton>
+                    <!-- E-02 / R8: the snapshot door had no link on this list, so the only way to
+                         record a career already underway was the Dashboard or a typed URL. The label
+                         matches the destination's own H1 (`Start from existing snapshot`) and the
+                         helper below the table names which door is which. -->
+                    <LinkButton href="/career/snapshot" variant="secondary">Start from existing snapshot</LinkButton>
                     <LinkButton href="/training-runs/import" variant="secondary">Import a run</LinkButton>
                 </template>
             </PageHeader>

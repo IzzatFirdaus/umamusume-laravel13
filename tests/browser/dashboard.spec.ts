@@ -253,7 +253,9 @@ test('with no active career the resume card names the absence and keeps its acti
     if (hasCareer === 0) {
         await expect(card.getByText('Not recorded: no career is running.')).toBeVisible();
         await expect(card.getByRole('link', { name: 'Start a career' })).toBeVisible();
-        await expect(card.getByRole('link', { name: 'Import an existing career' })).toBeVisible();
+        // E-02 / R8: one door, one label. The empty state and the always-rendered Quick actions card
+        // both point at the snapshot entry, so both read the destination's own H1 name.
+        await expect(card.getByRole('link', { name: 'Start from existing snapshot' })).toBeVisible();
         await expect(card.getByText(/recorded at its current position/)).toBeVisible();
         // With nothing to resume, the head's outline is not enough: this card owns the one accent.
         await expect(card.locator('[data-variant="primary"]')).toHaveCount(1);

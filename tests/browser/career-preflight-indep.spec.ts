@@ -1,18 +1,20 @@
 import { test, expect } from '@playwright/test';
 
 /*
- * Rendered-copy evidence for the Independent Training entry tab (`UMAMUSUME_REFERENCE.md` §1.1.7).
+ * Rendered-copy evidence for the Preflight step's Independent Training state.
  *
- * `CareerPreflightTest` and `IndependentTrainingStoreTest` assert the resolved props and the write;
- * this file asserts what only a browser reaches — that the mode toggle and the policy selector are on
- * the commitment screen and read in the client's own nouns.
+ * The SS1.1.7 entry tab is gone: Phase E2 cut the Career-mode switch and the policy radios from
+ * Preflight (`ae16ec88`; `career-preflight.html:176-186` draws the Commit card and nothing else),
+ * and nothing else in the product starts an idle-mode run — the mode survives only as a stored
+ * state the Dashboard and Result screens display. `career-preflight.spec.ts:274` pins the
+ * absence from its own walk; this file pins it from the SS1.1.7 walk (steps 1, 2 and 5), so no
+ * wizard draft resurrects the controls. `StartCareerRequest` keeps `independent` nullable, so a
+ * run body without the mode is still a valid start.
  *
  * **This walk stops at steps 1, 2 and 5 on purpose.** `tests/utils/start-career.ts` drives step 3 by
  * its field names (`select[name="distance"]` and friends), and step 3 is the surface a peer pass is
  * rebuilding in its own working tree, so a walk through it times out on a control this spec does not
- * need. The entry tab renders from the draft's trainee and scenario alone — the toggle, the policy
- * selector and the primary all appear without a build target — so the walk reaches the page the
- * assertions are about and nothing else.
+ * need. The walk reaches the page the assertions are about and nothing else.
  */
 
 const WRITE = { timeout: 60_000 } as const;
@@ -51,28 +53,16 @@ async function draftThroughDeck(page: import('@playwright/test').Page): Promise<
     await page.locator('#app > *').first().waitFor();
 }
 
-test('offers the Career mode toggle and reveals the policy selector in the client nouns', async ({ page }) => {
+test('Preflight draws no Career mode switch and no policy selector (Phase E2 cut, SS1.1.7 walk)', async ({ page }) => {
     await draftThroughDeck(page);
 
-    const mode = page.getByRole('group', { name: 'Career mode' });
-    await expect(mode).toBeVisible();
-    await expect(mode.getByRole('button', { name: 'Normal Career' })).toBeVisible();
-    await expect(mode.getByRole('button', { name: 'Independent Training' })).toBeVisible();
+    // Phase E2 cut (`ae16ec88`): `career-preflight.html:176-186` draws the Commit card and nothing
+    // else. The write carries no choice of its own, so no wizard draft can resurrect the controls.
+    // The sibling `career-preflight.spec.ts:274` pins the same absence from its own walk.
+    await expect(page.getByText('Career mode')).toHaveCount(0);
+    await expect(page.getByText('Independent Training')).toHaveCount(0);
+    await expect(page.getByText('Training policy')).toHaveCount(0);
 
-    // The policy selector is the idle mode's one required input, so it is absent until the mode is on.
-    await expect(page.getByRole('group', { name: 'Training policy' })).toHaveCount(0);
-
-    await mode.getByRole('button', { name: 'Independent Training' }).click();
-
-    const policy = page.getByRole('group', { name: 'Training policy' });
-    await expect(policy).toBeVisible({ timeout: WRITE.timeout });
-    await expect(policy.getByLabel('Balanced')).toBeVisible();
-    await expect(policy.getByLabel('Stamina focus')).toBeVisible();
-    await expect(policy.getByLabel('Sprint focus')).toBeVisible();
-
-    // The recommendation the reference records as Kamigame's, printed as the selector's own note.
-    await expect(page.getByText('Balanced is recommended', { exact: false })).toBeVisible();
-
-    // And the primary names the mode it will start.
-    await expect(page.getByRole('button', { name: 'Start Independent Training' })).toBeVisible();
+    // And the primary names the shipped write, not the cut mode.
+    await expect(page.getByRole('button', { name: 'Create the run' })).toBeVisible();
 });

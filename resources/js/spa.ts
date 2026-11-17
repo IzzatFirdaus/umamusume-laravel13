@@ -1,8 +1,13 @@
 import { createApp, defineComponent, h, type DefineComponent } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { useTheme } from './composables/useTheme';
-// The HFW grid primitive, loaded after `app.css` through this entry so a peer build cannot leave a
-// top-level CSS entry out of the manifest (that produced a Vite 500 for every page mid-run).
+// Feature-detected polyfills for non-Baseline tooltip platform features
+// (popover="hint" + interestfor). Each polyfill self-aborts when native
+// support exists; never imported unconditionally.
+import './polyfills';
+// The HFW grid primitive, loaded after `app.css` through this entry so a peer
+// build cannot leave a top-level CSS entry out of the manifest (that produced a
+// Vite 500 for every page mid-run).
 import '../css/layout-grid.css';
 
 // Glob over nested page dirs, resolved lazily. The reason this is a glob and not a dynamic

@@ -15,13 +15,13 @@ import { verifyPage } from './fixtures/wizard-verify';
  * target landing) is covered by `career-trainee-select.spec.ts`; this spec owns the layout. The page is
  * now step 2's middle: the roster's forward door opens it and its own primary continues to step 3.
  *
- * `Admire Vega` is trainee 33 in the seeded scratch catalog and has one confirmed debut form, so the
- * cost/aptitude figures below are the catalog's.
+ * `Admire Vega` is trainee 33 in the seeded scratch catalog and carries two confirmed costume forms
+ * and full growth/base-stat figures on her debut card, so the figures below are the catalog's.
  */
 
 test.describe('Trainee Profile (Phase 4)', () => {
     test.beforeEach(async ({ page }) => {
-        await page.goto('/career/setup/trainee/33');
+        await page.goto('/career/setup/trainee/admire-vega');
         await page.locator('#app > *').first().waitFor();
     });
 
@@ -71,23 +71,21 @@ test.describe('Trainee Profile (Phase 4)', () => {
         await expect(tiles).toHaveCount(5);
         await expect(tiles.locator('.k')).toHaveText(['Speed', 'Stamina', 'Power', 'Guts', 'Wit']);
 
-        // The client prints a real zero as +0% (`UMAMUSUME_REFERENCE.md` §1.3.5); this catalogue holds
-        // no growth figure, so every cell states the absence rather than a fabricated zero.
-        await expect(tiles.locator('.v')).toHaveText(['N/A', 'N/A', 'N/A', 'N/A', 'N/A']);
-        await expect(page.getByText(/No growth figure is stored for any costume form/)).toBeVisible();
+        // Admire Vega carries growth figures on her debut card (seed data): Speed 10%, Stamina 0%,
+        // Power 20%, Guts 0%, Wit 0%.
+        await expect(tiles.locator('.v')).toHaveText(['10%', '0%', '20%', '0%', '0%']);
     });
 
-    test('keeps the five base-stat rows and states the absence', async ({ page }) => {
+    test('keeps the five base-stat rows from the seed card', async ({ page }) => {
         const rows = page.locator('[data-field="base-stats"] .srow');
 
         await expect(page.getByRole('heading', { name: 'Base stats' })).toBeVisible();
         await expect(rows).toHaveCount(5);
         await expect(rows.locator('.k')).toHaveText(['Speed', 'Stamina', 'Power', 'Guts', 'Wit']);
-        await expect(rows.locator('.v')).toHaveText(['N/A', 'N/A', 'N/A', 'N/A', 'N/A']);
-        // The wireframe draws an empty rail per row; no fill is painted, so it never reads as zero.
+        // Admire Vega's debut card [Starry Nocturne] carries base stats: Speed 96, Stamina 79,
+        // Power 108, Guts 69, Wit 98 (seed data).
+        await expect(rows.locator('.v')).toHaveText(['96', '79', '108', '69', '98']);
         await expect(rows.locator('.track')).toHaveCount(5);
-        await expect(page.getByText(/No base-stat figure is stored/)).toBeVisible();
-        await expect(page.getByText(/sum to 450 for a three-star card/)).toBeVisible();
     });
 
     test('marks the current costume form in the forms table', async ({ page }) => {
@@ -95,34 +93,29 @@ test.describe('Trainee Profile (Phase 4)', () => {
 
         await expect(forms.getByRole('heading', { name: 'Costume forms' })).toBeVisible();
         await expect(forms.locator('thead th').first()).toHaveText('Title');
-        // Scoped headers and a row header: the title cell names its own row, and the wireframe's blank
-        // third column carries the "Selected" state word for a screen reader.
+        // Scoped headers and a row header: each confirmed card row carries its own row header.
         await expect(forms.locator('thead th[scope="col"]')).toHaveCount(3);
-        await expect(forms.locator('tbody th[scope="row"]')).toHaveCount(1);
+        await expect(forms.locator('tbody th[scope="row"]')).toHaveCount(2);
         await expect(forms.locator('thead th .sr-only')).toHaveText('Selected');
 
-        // The debut form is the row the card is read from, so it is the one the wireframe marks
-        // `is-current` with the `Selected` pill.
+        // Admire Vega has two confirmed costume forms (seed data); the debut form [Starry Nocturne]
+        // is the one marked `is-current` with the `Selected` pill.
         await expect(forms.locator('tr.is-current')).toHaveCount(1);
         await expect(forms.locator('tr.is-current')).toContainText('[Starry Nocturne]');
         await expect(forms.locator('tr.is-current')).toContainText('Debut form');
         await expect(forms.locator('.pill-positive')).toHaveText(['Selected']);
 
         // Rarity is printed at form grain, never as a trainee badge.
-        await expect(forms.getByRole('img', { name: /Three stars/i })).toHaveCount(1);
+        await expect(forms.getByRole('img', { name: /Three stars/i })).toHaveCount(2);
     });
 
     test('lists the scenarios the trainee is linked to as pills', async ({ page }) => {
         const scenarios = page.locator('section[aria-labelledby="scenarios"]');
 
-        await expect(scenarios.getByRole('heading', { name: 'Scenarios this trainee is linked to' })).toBeVisible();
-        await expect(scenarios.locator('.pill-outline')).toHaveText([
-            'URA Finale',
-            'Unity Cup',
-            'Trackblazer',
-            'Our Grand Concert',
-        ]);
-        await expect(scenarios.getByText(/No per-trainee link list is carried/)).toBeVisible();
+        await expect(scenarios.getByRole('heading', { name: 'Scenarios you can run this trainee in' })).toBeVisible();
+        await expect(scenarios.locator('.pill-outline')).toHaveCount(4);
+        // Admire Vega carries no scenario link in seed data; the page's note explains the absence.
+        await expect(scenarios.getByText(/Every scenario is listed as available/)).toBeVisible();
     });
 
     test('carries no edit control anywhere in the canvas', async ({ page }) => {
@@ -152,7 +145,7 @@ test.describe('Trainee Profile (Phase 4)', () => {
 
         for (const width of [1280, 390]) {
             const report = await verifyPage(page, {
-                appUrl: '/career/setup/trainee/33',
+                appUrl: '/career/setup/trainee/admire-vega',
                 hfwUrl: hfw,
                 rootSelector: '.canvas',
                 width,

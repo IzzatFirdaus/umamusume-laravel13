@@ -101,10 +101,12 @@ test('prints three aptitude letters and the debut form\'s own rarity on a card',
     const letters = card.locator('.pill-outline');
     await expect(letters).toHaveCount(3);
 
-    // The growth row keeps its place and states the absence: this catalogue stores no growth figure,
-    // so no percentage prints where nothing was fetched.
+    // The growth row keeps its place and names where the figure is read: the index payload carries no
+    // growth figures, but every `character_cards` row does hold one (ADR-0030) and the trainee's own
+    // page renders it, so the card must not claim the catalogue stores none.
     await expect(card).toContainText('Growth');
-    await expect(card).toContainText('not stored');
+    await expect(card).toContainText("on the trainee's own page");
+    await expect(card).not.toContainText('not stored');
     await expect(card).not.toContainText('+0%');
 });
 

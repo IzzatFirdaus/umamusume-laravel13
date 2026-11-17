@@ -1,4 +1,4 @@
-﻿import { test, expect, type Page } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 /**
  * Sweep over the seven setup steps: the shape every page owes the wireframe regardless of what it
@@ -22,7 +22,7 @@ const PAGES: Step[] = [
     { name: 'scenario', path: '/career/setup/scenario' },
     { name: 'trainee', path: '/career/setup/trainee' },
     // The profile step is per-trainee; `career-trainee-select.spec.ts` proves `/33` is in the roster.
-    { name: 'profile', path: '/career/setup/trainee/33' },
+    { name: 'profile', path: '/career/setup/trainee/admire-vega' },
     { name: 'target', path: '/career/setup/target' },
     { name: 'legacy', path: '/career/setup/legacy' },
     { name: 'deck', path: '/career/setup/deck' },

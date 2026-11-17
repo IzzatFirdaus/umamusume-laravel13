@@ -117,10 +117,11 @@ const keys: { key: string; does: string }[] = [
                     <p class="note mt-3">
                         <span class="g" aria-hidden="true">○</span>
                         <span>
-                            <b>Undo.</b> A committed turn cannot be taken back from
-                            this build: there is no Undo last turn control. Correct a wrong value on the
-                            screen that owns it. This is stated as a gap rather than drawn as a button that
-                            would do nothing.
+                            <b>Undo.</b> Four career screens draw an <b>Undo turn</b> control and every one of
+                            them is disabled in this build, so a committed turn cannot be taken back from the
+                            screens. Correct a wrong value on the screen that owns it. The control is stated as
+                            disabled rather than left off, so nobody reads its absence as permission to look
+                            for it elsewhere.
                         </span>
                     </p>
                 </div>

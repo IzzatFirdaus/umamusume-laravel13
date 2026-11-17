@@ -381,7 +381,7 @@ function runBackup(): void {
                         />
                     </div>
 
-                    <p class="mt-1 text-xs text-ink-muted">Wide is held behind DL.14 in this build and is unavailable until that ships.</p>
+                    <p v-if="!props.wideBentoEnabled" class="mt-1 text-xs text-ink-muted">Wide is held behind DL.14 in this build and is unavailable until that ships.</p>
 
                     <Note class="mt-2.5">
                         The widths are the ratified ones: 768 / 1152 / 1536. Below 1280px the wide shell

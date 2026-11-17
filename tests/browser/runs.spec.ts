@@ -86,6 +86,21 @@ test('renders the run list, and says what happens next when it is empty', async 
     await expect(filters.getByRole('link', { name: 'Clear' })).toBeVisible();
 });
 
+test('Start from existing snapshot door opens the snapshot page', async ({ page }) => {
+    // E-02 / R8: a career already underway is recorded at its current position, and this list used
+    // to offer no way to it. The label matches the destination's own H1, and the click is asserted
+    // because a link whose href is right but whose target is wrong still loses the door.
+    await page.goto('/training-runs');
+    await page.locator('#app > *').first().waitFor();
+    const head = page.locator('[role="banner"]');
+    const snapshotDoor = head.getByRole('link', { name: 'Start from existing snapshot' });
+    await expect(snapshotDoor).toBeVisible();
+    await expect(snapshotDoor).toHaveAttribute('href', '/career/snapshot');
+    await snapshotDoor.click();
+    await page.waitForURL('**/career/snapshot');
+    await expect(page.getByRole('heading', { name: 'Start from existing snapshot' })).toBeVisible();
+});
+
 test('a filtered empty list names the filter rather than reading as an empty library', async ({ page }) => {
     await page.goto('/training-runs?status=Retired');
     await page.locator('#app > *').first().waitFor();

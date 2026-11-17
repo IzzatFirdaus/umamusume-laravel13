@@ -149,7 +149,7 @@ test.describe('wizard head band actions', () => {
      * door assertions above on the served page.
      */
     test('profile: head band carries "Choose a different trainee" and the forward door', async ({ page }) => {
-        await open(page, '/career/setup/trainee/1');
+        await open(page, '/career/setup/trainee/special-week');
 
         const row = actions(page);
         await expect(row.locator('a, button')).toHaveCount(2);

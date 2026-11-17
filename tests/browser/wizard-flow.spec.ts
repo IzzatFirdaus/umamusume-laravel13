@@ -56,7 +56,7 @@ test('a user can complete the setup wizard from scenario to a created run', asyn
     await page.locator('[data-trainee-card]').first().click();
     await expect(page.getByText(/Trainee set:/)).toBeVisible();
     await clickPrimary(page, /^Review .* aptitudes and choose a form$/);
-    await expect(page).toHaveURL(/\/career\/setup\/trainee\/\d+$/);
+    await expect(page).toHaveURL(/\/career\/setup\/trainee\/[^/]+$/);
 
     // Step 2's read screen. Its chips read the same draft: step 1 saved, step 2 current and saved, so
     // the current chip is done rather than "started unfinished".
@@ -74,7 +74,7 @@ test('a user can complete the setup wizard from scenario to a created run', asyn
     await expect(page).toHaveURL(/\/career\/setup\/target$/);
 
     // The target's back door returns to the profile the Trainer just read (`career-target.html:63`).
-    await expect(page.getByRole('link', { name: 'Back', exact: true })).toHaveAttribute('href', /\/career\/setup\/trainee\/\d+$/);
+    await expect(page.getByRole('link', { name: 'Back', exact: true })).toHaveAttribute('href', /\/career\/setup\/trainee\/[^/]+$/);
 
     // Step 3 — build target. The step's validation is all-or-nothing: any entered value makes purpose,
     // distance, surface, style and all five stats required together, so a real completion fills them all.

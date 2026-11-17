@@ -49,9 +49,14 @@ test('the trust vocabulary names the three exceptions and states that an unmarke
     await expect(tags.getByRole('row').filter({ hasText: /^\s*✓?\s*Confirmed/ })).toHaveCount(0);
 });
 
-test('undo is described as a gap and no inert control is drawn', async ({ page }) => {
+test('undo is described as drawn and disabled, and Help itself draws no inert control', async ({ page }) => {
     const loop = page.getByRole('region', { name: 'The turn loop' });
-    await expect(loop.getByText('there is no Undo last turn control')).toBeVisible();
+    // Five career screens render a disabled `Undo turn N` and `DELETE turns/{turn}` is live, so the
+    // old sentence ("there is no Undo last turn control") contradicted the app. The page states the
+    // control exists and is disabled in this build; the second assertion keeps Help honest about
+    // itself, because this page draws no control of its own.
+    await expect(loop.getByText('Four career screens draw an', { exact: false })).toBeVisible();
+    await expect(loop.getByText('disabled in this build')).toBeVisible();
     await expect(page.getByRole('button', { name: /Undo/ })).toHaveCount(0);
 });
 
