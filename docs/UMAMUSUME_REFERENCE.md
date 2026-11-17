@@ -1833,6 +1833,34 @@ the body `{"announce_id":NNN}`, and the index from `pr_info_index` with `{"limit
 holds the complete notice. That is how §4.6 could scan the whole Global archive rather than sample it, and it is the
 answer to the two places in this file that recorded a notice's title and date but "URL not recorded".
 
+### 2.10. Companion scenario-research documents
+
+The six documents under `docs/audits/trainer-desk-v3-ux/scenario-research/` are test-case and audit
+documentation built on this reference. They cite this file by source id (A1–A14, B1–B7, C1–C8) and add
+mechanics detail, test states, and information gaps that are too procedural for a reference document but
+load-bearing for any scenario walk.
+
+| Document | What it holds | When to read it |
+|---|---|---|
+| `scenario-research-sources.md` | Source register: 29 sources (14 publisher tier A, 7 tier B, 8 tier C), 5 captured `[Global]` frames, URL per row, page date, region, what each supports. Fetch date 2026-11-12 for the whole set. | Before citing a scenario fact; to verify a URL or tier |
+| `ura-finale-test-case.md` | URA Finale test case: scenario key `ura_finale`, caps 1400×5, Special Week's 8-row goal ladder, fan gates (Early Feb Senior 60,000/40,000 turf/dirt; Early April 70,000/60,000 plus green Akikawa bond; Late Dec 120,000/80,000), Happy Meek duel ladder by level (+10/+25 stat, +30 SP per win, +4 max energy), finals on turns 74/76/78, deck shape, 15 test states S1–S15, 10 assertions | URA Finale walk or audit |
+| `trackblazer-test-case.md` | Trackblazer test case: scenario key `trackblazer`, caps 1200/1900/1200/1200/1500, Result Points vs Grade Points naming conflict (§1), four objectives (60/300/300 standard track; 30/200/300 dirt-leaning; 60/200/300 limited-turf-range decided from `aptitude_turf`/`aptitude_dirt`), Pro Shop/Shop Coins, Twinkle Star Climax name verified from tier A/B sources, 20 test states T1–T20, 10 assertions | Trackblazer walk or audit |
+| `our-grand-concert-test-case.md` | Grand Concert test case: scenario key `our_grand_concert`, caps 1600/1300/1300/1500/1300, Silence Suzuka as trainee (scenario link character), SSR [Passing the Dream On] Team Sirius banned from the deck, Performance Points balance not stored (no column, no payload), 17 test states G1–G17, 10 assertions, three deliberate refusals | Grand Concert walk or audit |
+| `scenario-information-gaps.md` | 17 gaps ranked by what they block, 9 source conflicts (row 9: preflight Happy Meek cap-tier vs +4-points copy), 4 rulings owed (§3.1 Result Points vocabulary, §3.2 Grand Concert finale name surface, §3.3 duel cap copy, §3.4 Trackblazer variant-track selector) | Before filing a scenario finding; to check whether a gap is deliberate |
+| `scenario-test-data-matrix.md` | Cross-scenario test matrix (18 rows × 4 scenarios), blocked-cell analysis, safe database strategy (session-private scratch copies, never `database/database.sqlite`), synthetic fixture rules, walk sequencing (Trackblazer → URA Finale → Grand Concert → Unity Cup retest) | Planning a scenario walk programme |
+
+**URA Finale fan gates, timing added from the test case.** The three gates run on a fixed Senior-year calendar rather than being continuous: Early February (turf 60,000 / dirt 40,000 → Unique Skill level up), Early April (70,000 / 60,000 plus a green Director Akikawa bond → Unique Skill level up), Late December (120,000 / 80,000 → Unique Skill level up). The April gate's bond half has no column in the app and cannot be evaluated; a surface must print the requirement and the absence of a reading, never a verdict.
+
+**Happy Meek duel, added from the test case.** She appears from Junior early May at random facilities. Her icon carries an orange duel mark; training with her opens the duel, and a failed training starts no duel. Three options per duel: one is always the facility's stat, the other two are random among the five stats and Energy. Four odds states: `◎` high, `〇` average, `△` small, `✕` very small. Win: stat +10 at level 1 rising to +25 at MAX, +30 SP, +4 max energy, and a hint on that stat's Racing Spirit skill. Loss: +5 to +15 of the challenged stat and +15 SP. Six wins escalate her to a powered-up state; beating that state at the finals raises the chance at an enhanced spirit spark.
+
+**Trackblazer `current_objective_index`, added from the test case.** The run column is 1-based; `1` is the debut race period. It is the one scenario-state column that exists (`training_runs.current_objective_index`).
+
+**Trackblazer variant point tracks, added from the test case.** Two variant yearly-target tracks are published but not selectable in the app because no column assigns a trainee to one: `dirt_leaning` (Junior 30 / Classic 200 / Senior 300, high dirt + low turf; Haru Urara reads turf G / dirt A / sprint A) and `limited_turf_range` (Junior 60 / Classic 200 / Senior 300, turf but poor outside short distances; Curren Chan reads turf A / dirt F / sprint A). Each named example lands unambiguously on its own track from columns the catalogue already carries. Whether the app may derive the track from aptitudes, or whether that inference is forbidden by the tool's non-goals, is a ruling owed at `scenario-information-gaps.md` §3.4.
+
+**Grand Concert banned card, added from the test case.** `SSR [Passing the Dream On] Team Sirius` cannot be used in a Grand Concert run. This is the only scenario with a banned support card, and it is the only one where the rule is testable in the deck picker.
+
+**Grand Concert Performance balance, added from the test case.** No column holds a Performance balance and no payload writes one. `TrainingRun::performanceObservations()` returns observations (turn + type + delta) and never a total. A surface that prints a "current Dance Performance" figure would be inventing it; each absence must render as a stated absence, never as `0` and never as blank.
+
 ## Section 3: Character Roster
 
 Counts read from the GameTora data export on 2026-09-27 (`characters.json`, `character-cards.json`).
@@ -2379,6 +2407,8 @@ State as of 2026-09-27 02:05 JST. Newest official GAME notice on `umamusume.jp/n
 * ストーリーイベント「ゆけゆけ、きらぼし調査隊！」: 2026-08-31 12:00 -> 2026-09-11 11:59 JST [S] opening notice 2026-08-31 12:00 (id 3428) and closing notice 2026-09-11 12:00 (id 3429); [B] `events__story-events.json` id 1056 (`name_ja` matches exactly, `start_ja`/`end_ja` match to the minute). Two domains agree, this is the strongest chain in the section.
 
 **How to re-check (4.1).** Official page: `https://umamusume.jp/news/?t=game` (JS rendered, read it in a browser, newest GAME notices on top; detail pages are `https://umamusume.jp/news/detail?id=NNNN`). Wiki page: `https://gamewith.jp/uma-musume/article/show/257332` for the gacha/event windows and `https://kamigame.jp/umamusume/` for the event list; both print their own 最終更新日, so record it when you re-read. Data page: `https://gametora.com/ja/umamusume/gacha` (last-updated date is in page text, 2026-09-24 when this draft was written).
+
+**tinyfish verification (added 2026-11-14).** `https://umamusume.jp/news/?t=game` is the JS-rendered SPA this section flags as unreadable by plain fetch; it was re-read through tinyfish_agent (run `a61fa72b-50be-4761-a3e4-44a2d8330359`), which returned live notices headed by 2026-11-13「Google Play版アップデートに伴うデータの再ダウンロードに関するお知らせ」(id 3549), 2026-11-10「育成ウマ娘&サポートカード新登場！ピックアップガチャ開催！」(id 3535), and 2026-11-10「イベント「アグネスタキオンの因子研究」開催中！」(id 3540). Source stream: https://ip-204-236-184-33.tetra-data.production.tinyfish.io/tf-6226102b-23e4-4fb2-b5b1-cc16160d2b25/stream/0. This confirms the page renders and notice ids increment from the 34xx range anchored in this section; it does not change any dated state above, which remains anchored 2026-09-27.
 
 ### 4.2 Current events `[Global]`
 

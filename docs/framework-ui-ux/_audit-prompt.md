@@ -292,7 +292,45 @@ If a framework demands something the product does not have at all — no undo, n
 
 A gap becomes a finding when a **specific screen** makes the absence harmful in a specific state. “No undo exists” is a gap; “the run screen commits a turn and offers no reversal, so a mis-entered turn requires a new run” is a finding against `SHR-6` on that screen.
 
+### 6.4 Absence claims require four layers of evidence
+
+**A claim that something is missing is the highest-risk claim an audit makes**, because it cannot be
+falsified from the screen it was made on. Measured 2026-11-11: four of sixteen "new" findings in the
+eight-walk programme were wrong in exactly this way — each reported *"no field for X"* when the honest
+statement was *"no field for X **on the screen I took**"*. The capability existed in every case.
+
+Before writing that a feature, field, data point or workflow is absent, investigate **all four
+layers**, in order, and record which ones you reached:
+
+| Layer | Question | How it is answered |
+| --- | --- | --- |
+| **1. Screen** | Is it on the screen being audited? | the rendered viewport and the whole scrollable page |
+| **2. Navigation and disclosure** | Is it reachable through a tab, a collapsed `<details>`, a dialog, a secondary page, or a strip? | open every disclosure; enumerate the route table; follow the intended workflow from its start |
+| **3. Implementation** | Is there code that supports it? | the Vue component, the form request, the controller, the model column, the config key |
+| **4. Data** | Is the underlying data present? | the seed files, `database/data`, and the persisted rows |
+
+Only when layers 2, 3 and 4 all fail may the capability be called absent from the application.
+
+**Absence is classified by the deepest layer reached:**
+
+| Classification | Meaning | Typical correct finding |
+| --- | --- | --- |
+| **Screen-level absence** | not on the visited screen, but reachable elsewhere | a discoverability or layout problem, never a missing feature |
+| **Workflow-level absence** | no accessible user-facing path found | a workflow gap; state the routes and disclosures checked |
+| **Application-level absence** | no supporting implementation found | a genuine unimplemented capability |
+| **Data-level absence** | the implementation exists but carries no data for it | a data-coverage finding, distinct from the above |
+| **Unverified** | the investigation did not reach layer 3 or 4 | record as unverified; never as absent |
+
+Two sentences that must never be written from a single screen: *"the application does not support X"*
+and *"X is unrepresentable"*. The first needs layers 3 and 4; the second needs all four.
+
+**Capability location and correctness are independent judgements.** A capability that exists but is
+hard to find is a discoverability finding (`REPRODUCED_EXPECTED`, location = off-path). A capability
+that is reachable but fails to persist is a defect (`REPRODUCED_DEFECT`, location = on-path). Never
+collapse the two into one verdict: they are fixed by different work and reviewed by different people.
+
 ---
+
 
 ## 7. Report template
 

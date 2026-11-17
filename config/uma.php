@@ -561,22 +561,37 @@ return [
     ],
 
     /*
-     * The fan ladder, as the bands a run can hold: a floor, the threshold that ends the band, and the
-     * class the client shows inside it.
+     * The fan class ladder, from the client's own nine-step pyramid
+     * (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:474`; restated in
+     * `docs/audits/ux-walkthroughs/rice-shower-unity-cup-ux-walk-9.md:194`, SR §1.15 frame-verified;
+     * `docs/research-scratch/DESIGN-CORPUS.md:1388-1400`, rule D-272 — one scale, never merged with
+     * race-entry gates). Half-open `[from, to)`, matching `FanLadder::bandFor()`.
      *
-     * `docs/audits/rice-shower-unity-cup-ux-walk.md:392-393` records one band and only one: a run at
-     * 209,245 fans holding the class `Star`, with the **Top Star** threshold at 240,000 and a
-     * 30,755-fan gap to it. That is the band below 240,000, and it is the only one any source this
-     * repository reads names - no tier below Star and no tier above Top Star is stated anywhere, so the
-     * ladder has one entry and `FanLadder` answers null past its top rather than inventing a tier.
+     * Each band's `from` is the tier's own published threshold: the client's pyramid prints a tier's
+     * name beside the count that REACHES it (the audited run sits at 209,245 inside the pyramid's
+     * 160,000..239,999 window and prints `Star` with a 30,755-fan gap to `Top Star` at 240,000, so
+     * `Star` spans [160000, 240000)). The last documented threshold is `Legend` 320,000, so the
+     * ceiling band's `to` is PHP_INT_MAX: `bandFor()` tests `< to`, and a finite pretend ceiling
+     * would answer null for a legitimate reading above it. `next_class` for the ceiling is `Legend`
+     * itself, which the renderer never prints because `gap` is null there and the gap template is
+     * keyed on it.
      *
-     * `next_class` is the name the band's `to` threshold opens, so the reading can state the gap
-     * against a name ("30,755 to Top Star") without a renderer carrying the string itself (R6-43).
+     * ponytail: `Beginner` (keyed on "1st place") and `Debut / Maiden` (keyed on an entry class)
+     * are a known ceiling — neither has a fan count to key on, so a run below 5,000 fans answers
+     * null and the renderer prints the bare number. Add them when a source states a fan count for
+     * them, or when the reading needs a key other than a fan count (a schema question, not a
+     * config edit).
      *
      * @var list<array{class: string, from: int, to: int, next_class: string}>
      */
     'fan_ladder' => [
-        ['class' => 'Star', 'from' => 0, 'to' => 240000, 'next_class' => 'Top Star'],
+        ['class' => 'Bronze',   'from' => 5000,        'to' => 20000,        'next_class' => 'Silver'],
+        ['class' => 'Silver',   'from' => 20000,       'to' => 50000,        'next_class' => 'Gold'],
+        ['class' => 'Gold',     'from' => 50000,       'to' => 100000,       'next_class' => 'Platinum'],
+        ['class' => 'Platinum', 'from' => 100000,      'to' => 160000,       'next_class' => 'Star'],
+        ['class' => 'Star',     'from' => 160000,      'to' => 240000,       'next_class' => 'Top Star'],
+        ['class' => 'Top Star', 'from' => 240000,      'to' => 320000,       'next_class' => 'Legend'],
+        ['class' => 'Legend',   'from' => 320000,      'to' => PHP_INT_MAX,  'next_class' => 'Legend'],
     ],
 
     /*

@@ -65,7 +65,7 @@ return [
         'energy' => 'Energy',
         'fans' => 'Fans',
         'team_rank' => 'Team Rank',
-        'spirit_bursts' => 'Spirit Bursts',
+        'spirit_bursts' => 'Spirit Bursts (combined)',
         /*
         | The publisher's word for this counter, restored 2026-11-12 under ruling E.
         |

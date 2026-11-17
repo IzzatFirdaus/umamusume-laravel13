@@ -4,10 +4,11 @@
 | --- | --- |
 | Purpose | Give an external reviewer (ChatGPT) a repository-grounded mental model of the application's UI/UX, IA, navigation, user flows, domain concepts, screen responsibilities, interaction patterns, and known usability issues. |
 | Method | Static repository inspection (routes, controllers, models, Vue pages/components/layouts, config, migrations, tests) plus the repository's own UX audits. No application code was modified. |
-| Date of writing | 2026-11-06 |
-| HEAD at writing | `67a4830` (`docs(audits): derived-rule sweep, and correct the SHR-7 diagnosis`) |
+| Date of writing | 2026-11-13 |
+| HEAD at writing | `f6845083` (`fix(career): ship the career length from its server-side owners (plan 3.6, walk 8 sub-finding 2)`) |
+| Last refresh | 2026-11-13, HEAD `f6845083` — §17 is the current-state addendum; §1–§16 are retained as historical. |
 | Branch | `master` |
-| Working tree at writing | Two untracked audit artifacts (`docs/audits/RS-UC-2026-10/`, `docs/audits/rice-shower-unity-cup-ux-walk-6.md`); otherwise clean. The earlier 12-file Dashboard/Veterans workstream and the implementation-backlog proposal have since landed or been consolidated. See §9 and §12. |
+| Working tree at writing | Clean except untracked image/audit directories now gitignored (`.scratch-audit/`, `docs/audits/**/screens/`, `docs/audits/**/screenshots/`) and source/doc changes (`KNOWN-ISSUES.md`, `SCREEN_SPEC.md`, `docs/framework-ui-ux/_audit-prompt.md`, `docs/research/ui-ux-application-context-brief.md`, `tests/browser/career-trainee-select.spec.ts`). Branch ahead of `origin/master` by 3. |
 | Reading conventions | Every claim is labelled **CONFIRMED** (read from code/routes/persistence/tests), **DOCUMENTED** (authoritative doc), **HISTORICAL** (audit/older claim), **INFERRED** (reasoned, not directly proven), or **PROPOSED** (design/plan, not built). Line numbers are accurate only at the time of writing. |
 
 ---
@@ -48,7 +49,7 @@
 | Frontend | Inertia.js + Vue 3 + TypeScript, Tailwind v4, Vite | `resources/js/`; `AGENTS.md` §1 |
 | Tests | Pest 4 (feature-first), Playwright (browser) | `tests/`; `AGENTS.md` §9 |
 | Static analysis | PHPStan level 6, Pint (`laravel` preset) | `AGENTS.md` §7, §9 |
-| Scale at writing | 65 Vue pages, 104 Vue components (36 top-level plus 78 in ten area folders), 3 layouts; 251 Feature tests, 11 Unit tests, 110 browser specs; 91 named routes in `routes/web.php` plus 6 read-only in `routes/api.php` | measured on this tree |
+| Scale at writing | 65 Vue pages, 117 Vue components (25 top-level plus 92 in ten area folders), 3 layouts; 249 Feature test files, 11 Unit test files, 120 browser specs; 91 named routes in `routes/web.php` plus 6 read-only in `routes/api.php` | measured on this tree |
 
 ### 2.2 Evidence hierarchy used in this brief
 
@@ -102,7 +103,7 @@ Where (2) and (1) disagree, this brief reports the disagreement rather than sile
 | Services | `app/Services/` (`ScenarioCaps`, `SkillSpendCoverage`, `Career/SetupDraft`, `Advisor/TrainerAdvisor`, `Advisor/NextDecision`, `Career/{RaceStrip,ScenarioSection,TeamPanel,TrackblazerPanel}Builder`, ...) | shared arithmetic/ownership |
 | Layouts | `resources/js/layouts/AppLayout.vue`, `CareerLayout.vue`, `SetupLayout.vue` | three navigation shells |
 | Pages | `resources/js/pages/` (65 Vue files) | grouped by area, incl. `Career/Cockpit/Panels/` (8 panel files) |
-| Components | `resources/js/components/` (104 Vue files) | 36 top-level plus ten area folders: `career/` 20, `ui/` 19, `scenario/` 16, `Form/` 8, `support/` 7, `catalog/` 3, `database/` 3, `legacy/` 3, `review/` 2, `skills/` 1 |
+| Components | `resources/js/components/` (117 Vue files) | 25 top-level plus ten area folders |
 
 ---
 
@@ -518,9 +519,9 @@ Source: `docs/audits/rice-shower-unity-cup-round3-reconciliation.md`. The regist
 | R3-31 | Trainee-step keyboard flash absent | **Confirmed, open, browser-only.** | `career-trainee-select.spec.ts`. |
 | R3-32 | Inertia DevTools cache makes first request fatal | **Confirmed, environmental, mitigated.** DevTools disabled in browser role (`696f444`). | `storage/inertia-devtools`.
 
-### 9.3 Relevant `KI-nn` entries (from `KNOWN-ISSUES.md`, which now runs through **KI-153**)
+### 9.3 Relevant `KI-nn` entries (from `KNOWN-ISSUES.md`, which now runs through **KI-160**)
 
-The register is far larger than this list and is authoritative; the entries below are the ones a reader of this brief would otherwise trip over. **KI-107 through KI-153 are not summarised here** — before citing any of them, read `KNOWN-ISSUES.md` directly.
+The register is far larger than this list and is authoritative; the entries below are the ones a reader of this brief would otherwise trip over. **KI-107 through KI-160 are not summarised here** — before citing any of them, read `KNOWN-ISSUES.md` directly.
 
 - **KI-60** — dev DB migrations vs the `:memory:` test DB (partially remediated; prevention half open).
 - **KI-61** — D7 wizard halves landed red (browser-spec gate missing at commit time).
@@ -569,7 +570,7 @@ The register is far larger than this list and is authoritative; the entries belo
 
 ## 11. Testing and verification map
 
-**CONFIRMED counts at HEAD `67a4830`:** 251 Feature test files, 11 Unit test files, 110 browser specs. A file count, not a case count: several files carry a dozen `it()` cases, and the suite total is what `php artisan test --compact` reports, not this table.
+**CONFIRMED counts at HEAD `f6845083`:** 249 Feature test files, 11 Unit test files, 120 browser specs. A file count, not a case count: several files carry a dozen `it()` cases, and the suite total is what `php artisan test --compact` reports, not this table.
 
 | Journey | Primary coverage | Notes |
 | --- | --- | --- |
@@ -582,7 +583,7 @@ The register is far larger than this list and is authoritative; the entries belo
 | G. Legacy/overlap | `NoStaleRunRecordLinksTest`, `SupportDeckBuilderTest`, `CareerLegacyDeckStepsTest`, `LegacyLabPageTest`, `GrandparentRanksTest` | Pins the retired-route, deck-copy, and ancestor-field invariants. |
 | Advisor / NextDecision | `NextDecisionTest` | Turn-choice contract. |
 
-**Verification actually performed in preparing this brief (CONFIRMED, in-memory SQLite only):** the round-3 reconciliation gates were run at `7c13bf9`/`f6f393f`: `php artisan test --compact` passed 1709 (post-closure), `pint --test` and PHPStan level 6 were clean on changed paths, `composer lore`/`lore-code` exited 0. **The browser/Playwright suite was NOT run for this brief** (it needs a session-private port and scratch DB per `KI-73`/`KI-80`/`KI-105`). No destructive command was run.
+**Verification actually performed in preparing this brief (CONFIRMED, in-memory SQLite only):** static reads at `f6845083` — `git log`/`git diff --stat`/`git show` for the commit delta since `25eea0e1` (123 commits); `git ls-tree` + `glob` recounts; template/grep checks for every surface named; `config/scenarios.php` re-parsed (1302 lines); `KNOWN-ISSUES.md` re-read for KI statuses (through KI-160). **Not run for this addendum:** the Pest suite, the browser suite (needs a session-private port + scratch DB per KI-73/KI-80/KI-105), `migrate:status` on the dev DB, and Pint/PHPStan/typecheck (no code changed). No destructive command was run.
 
 **Evidence gaps / not verified:**
 - Browser rendering of a current `npm run build` for the Phase 2 re-verification of R3-08/R3-12/R3-26 (round-3 notes these were expected to close as does-not-reproduce on a current build, pending a browser run).
@@ -770,3 +771,160 @@ A third-party fidelity note compared these flow documents at `67a4830` against t
 
 **What the note got right and is worth keeping.** Its three "already agree" calibrations check out against the tree: `TURNS_PER_CAREER` = `TURNS_PER_YEAR` (24) × `YEAR_SENIOR` (3) = 72, the three inheritance milestones are turns 1 / 31 / 55, and the `energy_state` three-way of exact/band/unknown matches a client that prints a bar and a warning line but no number. Its `S+` observation is also correct and worth stating explicitly: `TeamRankPayload::LETTERS` includes `S+` while `team_rank_ladder` tops out at `S`, and that is right rather than inconsistent, because S+ is the overall rank and grants a hint, not a facility level.
 
+---
+
+## 16. Current-state addendum (2026-11-10, HEAD `25eea0e1`)
+
+**CONFIRMED.** Written against `25eea0e1` with the working tree carrying only untracked audit/proposal artifacts (see §16.7). §1–§15 above are the 2026-11-06 text at `67a4830`, retained verbatim; this addendum re-measures what changed. 163 commits separate `67a4830` from `25eea0e1`; `routes/web.php` is untouched between the two (91 named routes, unchanged), and `routes/api.php` is untouched (6 `GET` routes; the file's 7 `->name(` matches include the group prefix name).
+
+### 16.1 Round 7 (the dominant change since the last refresh)
+
+Source: `docs/audits/rice-shower-unity-cup-round7-reconciliation.md` (tracked) and `docs/audits/rice-shower-unity-cup-round7-owner-calls.md`. Round 7 read the app again (walk 7 + a snapshot-door walk, both tracked now: `rice-shower-unity-cup-ux-walk-7.md`, `rice-shower-unity-cup-ux-walk-7-snapshot-door.md`), classified **99 rows** (`R7-01`…`R7-99`: 38 F, 24 E, 19 U, 18 extended), and landed **20 repair slices** (`S0`…`S22`), closing at `d8f75849`.
+
+| Status (§4, frozen at `8a3cf21c`) | Count |
+| --- | --- |
+| `Confirmed defect` | 53 |
+| `Known limitation` | 22 (one discoverability, per C3) |
+| `Unrepresented source data` | 10 |
+| `Does not reproduce` | 8 |
+| `Source conflict / open` | 3 (`R7-02`, `R7-64`, `R7-70`) |
+| `Ruled out` (sanctioned variant, C15) | 2 (`R7-07`, `R7-18`) |
+| `Walk-artifact + Confirmed defect` (variant, C15) | 1 (`R7-34`) |
+
+The §12 landing record moves **21 rows** `Confirmed defect` → `Confirmed fixed` (several rows are groups: `R7-82/R7-22/R7-25/R7-61` at `27a3d374`, `R7-84/R7-85/R7-88/R7-89` at `3f260461`, `R7-33/R7-34/R7-80` at `d487b83e`, `R7-27/R7-28/R7-32` at `dba72d62`+`bd5c769c`, and others). §13's close-out names the still-open facets: `R7-66`'s wizard-run null caps column (a schema item), `R7-22`'s current-run alert half, `R7-36`(b)/`R7-68`'s unrepresented ancestor vocabulary, `R7-87`'s seven undecodable condition keys, and a pre-existing `career-timeline.spec.ts` 44px case. **Round 7 supersedes round 6 as the current findings register**; §15.1's round-6 tally is HISTORICAL, and its "confirmed defects" list is largely the set round 7 re-measured and fixed.
+
+**The round's named pattern (§13):** five defects were *built-and-hidden* — editors behind closed `<details>` rendering none of their contents (`R7-57` preview readings, `R7-36` parent spark editor, `R7-68` four grandparent editors, plus two). `cdd0083a` opened them.
+
+### 16.2 Repairs a reader of §1–§15 must un-learn
+
+Corrections table — earlier claim (this brief, at `67a4830`) | measured at `25eea0e1`:
+
+| Earlier claim | Measured at `25eea0e1` |
+| --- | --- |
+| R6-05 manual parent name discarded (§15.1, blocking) | **Fixed** at `279381b5` (S1.3): `StoreLegacySelectionRequest` copies the name into the payload |
+| R6-11 wizard commit drops `card_level` (§15.1, blocking) | **Fixed** at `417315d6` (S1.2): Preflight carries all six levels |
+| R6-12 Timeline reads `after`/`after.sp`, no band (§5C, §15.1) | **Fixed** at `698d0fe4` (S1.1): Timeline projects each turn's own Energy reading and SP |
+| R6-03 picker filter redirect loses the query (§15.1) | **Fixed** at `e5e38468` (R7-01): the search term survives the pick (`/search=Rice/`) |
+| R6-04 build-target total mislabels the sum (§15.1) | **Fixed** at `e55f5458` (S2.3) and re-fixed `da61a04f` (R7-05): labels name the ceiling they print |
+| R6-08 literal spark note beside a derived counter (§15.1) | **Fixed** at `c70240cf` (S3.4) + `10576535` (S3.6, grandparent sparks in the tile) |
+| R6-15 `Hint Lvl Hint Lvl 1` (§15.1) | **Fixed** at `847e4cdb` (S3.1) |
+| R6-09/R6-10 Preflight form/parent count | **Fixed** at `b4731784` (S3.3) |
+| R6-23 `Pal slot` label | **Fixed** at `569f47e3` (S3.2): slot six says `Friends` |
+| Round-6 register = current findings (§15.1) | Round 7 is current; round 6 is re-measured in its §4.5 (17 rows) and superseded |
+| `career-trainee-select.spec.ts` keyboard flash open (R3-31) | **Still open as an open browser case**, but the spec gained a click-path flash case pinned at line 486 (`renders the same success flash when the card is clicked (R3-31)`); the keyboard-path absence itself is unchanged |
+| `KNOWN-ISSUES.md` runs through KI-153 (§9.3, §15.3) | Through **KI-158**. KI-154 (Spirit Bursts widget hardcoded absent, `5e39a1f0`), KI-155 (+30 is league placement, `990bdc7d`), KI-156 (band caveat vs corpus, `0166b23e`), KI-157 (bare `N/A` title, `ad3d94f3`), KI-158 (`UraPanelTest` pinned the superseded `missed` state, `fdf6452f`) — all five RESOLVED 2026-11-10. KI-60/KI-106 remain OPEN; KI-34 no longer matches in the register text |
+| The `correction` prop "declared and posted but unread" (§3.6, §7) | **Still true at this tree**: `CockpitController.php:318` builds `correction`, `Cockpit.vue:238` declares it, and the template never reads it. The correction disclosure now opens from the `?edit_turn=<id>` query string, but the prop remains a leftover |
+
+### 16.3 Scenario detail — the visual overhaul arc (S-RS-VISUAL-1)
+
+**CONFIRMED.** The scenario board suite moved from list panels to a card grid, on `runs.scenario-detail` and in `ScenarioPanel.vue` (which the Cockpit forwards untouched):
+
+- New `resources/js/components/scenario/ScenarioCardGrid.vue` (247 lines) renders seven new card components under `resources/js/components/scenario/cards/`: `BurstBandsCard`, `GoalGroupCard`, `ProgressCard`, `SpecialTrainingCard`, `SpiritCard`, `StatGradesCard`, `TeamCard`. Component totals move accordingly (§16.6).
+- `ScenarioPanel.vue`'s empty-strip gate changed: it used to read `onPanels.length === 0` (introduced `6a74f857`); the F-01 fix (`f16ffbe7`) gates the strip's `emptyText` on `onPanels.length` so a scenario with no panels gets an honest absence line.
+- KI-154–KI-157 all arise from, and were resolved in, this arc: the Spirit Bursts widget now sources run data (`5e39a1f0`, then merged into Burst bands as Move 3, `64c37c4f`); the `+30` bonus is attributed to league placement with a `ProvenanceBadge` (`990bdc7d`); the burst-band caveat matches the corpus (`0166b23e`); the stat-grade absence uses the shared disclosure (`ad3d94f3`).
+- `tests/browser/scenario-detail-order.spec.ts` (new, the 111th spec) pins the card order; `ba7ea3d0` fixed the last red browser case (`ura-panel.spec.ts` asserted the superseded `Missed` state; a past objective with no entry is `not_reached` per `27a3d374`).
+- A **collision record** (`round7` register §14): a sibling session built a parallel composer (`UnityCupComposer.vue` + six `UnityCup*Card.vue`) in the same worktree; this session's implementation survived, the sibling's files were retired (bytes preserved under `.scratch-uma/S-RS-VISUAL-1/collision/`), and two measurable defects in the sibling's composer are named (it rendered nothing at HFW positions 4–5; it dropped the `+30` provenance).
+- The scenario page banner rule sentence was relocated per owner ruling W.3=C (`1f73875f`, `ScenarioSectionBuilder`).
+
+**PROPOSED (not built, awaiting owner ruling).** `docs/proposals/2026-11-09-scenario-detail-upgrade.md` (untracked) and `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md` + `.md/` screenshot dir (untracked) propose a further upgrade; its §0 pre-flight reads settle several audit findings against `ADR-0025` and the strip's git history. Do not cite it as built.
+
+### 16.4 Other structural changes since `67a4830`
+
+- **`resources/js/lib/career/turnDisplay.ts` (new)** — the one derivation of "which turn is this run on" for undo labels and next-turn prefill (R7-27/R7-32). Four screens had spelled it four ways; `TrainingRun::nextTurnNumber()` is the server's matching owner.
+- **`app/Support/FormCount.php` (new)** — the single owner of the "N form(s)" sentence (R7-02), splitting `character_cards` on Global release date so picker (Global-only) and profile/catalog (all confirmed) counts stop reading as a contradiction.
+- **`TrainingRun::facilityLevel(?string $rank, ?string $stat = null)`** — now branches on `facility_level_source` (`f83fcfdd`) and falls back to latest recorded per-turn facility purchases; the per-turn columns are still never aggregated silently.
+- **`SeedRunSkills` action** — the wizard's deck door now seeds card skills, matching the legacy door (`39804efe`).
+- **Spark target picker** — `resources/js/components/legacy/SparkTargetPicker.vue` (new, 288 lines) wired into the run-scoped Builder and the four grandparent editors (S-A-P02.2/S-A-P02.3); the target list filters to the Global catalogue (S-A-P02.1) and searches by the Japanese name it prints (`662a0a42`, then Phase 7 `ef245171`); ancestor rank-star inputs are bounded to the spark ceiling (`36e010c1`, R7-06).
+- **Career-goals panel per scenario** — the goal ladder composes only for scenarios that ask for it; Unity Cup no longer shows URA goals (`955ff4f2`, S-A-P01.1). Config measured: `panels` true only `race_calendar` + `career_goals` (URA), `race_calendar` + `team_race` + `team_rank_ladder` + `career_goals` (Unity Cup), `grade_objectives` + `shop` + `epithet_routes` (Trackblazer), `career_goals` (OGC) — the §7 panel map is unchanged.
+- **Card starting stats** — the Cockpit shows the card's starting stats as a labelled reference (S-A-P01.3), backed by **ADR-0030** (accepted 2026-11-02; code landed; open items: re-fetch to populate existing rows, dev-DB application needs owner approval). `AGENTS.md` §2's binding-decisions row still ends at `0025` — the row is stale, the ADRs on disk run to `0030`.
+- **Skills planner** — reads the run's own SP and pool (`3f260461`); decodes a skill condition instead of printing the raw predicate (`6af4555c`); `1 skills` pluralisation fixed (`3f260461`).
+- **Snapshot door** — snapshot review renders trainee and scenario (`3aefce57`, R7-99); recorded races appear on Timeline (`598a4282`, R7-83); the off-calendar defaults and undo labels share the `turnDisplay` owner.
+- **Seeder** — `UraFinaleRunsSeeder` imports **all seventeen** URA Finale tracker runs (`8a3cf21c`); `TrackerVeteransSeeder` carries the corresponding eight veterans; `docs/imports/ura-finale-runs.md` documents the import contract.
+- **Record primaries** — both record primaries (event/inheritance) stay disabled until required fields are filled (`99d17545`, R7-31/R7-35); skipped targets read `Skipped` (`d2c15ca8`, R7-14); preflight names the scenario and trainee in its read-back.
+
+### 16.5 Documentation-set movement
+
+- `docs/audits/` gained (tracked): walks 7 + 7-snapshot-door, the round-7 reconciliation + owner calls, `round6-slice-audits.md`, and four screenshot directories (`RS-UC-2026-10/`, `RS-UC-2026-11-snapshot-door/`, `RS-UC-2026-12/`, `RS-UC-SCENARIO-DETAIL-2026-11-09/`). 17 `.md` files are tracked there now; walk-6 and the round-6 reconciliation, untracked at the last refresh, are **committed** (`3fb9c5f0`, `142bb171`).
+- The support-card audit `docs/audits/AUDIT-SUPPORT-CARDS-UIUX-2026-11-05.md` was **folded**: it no longer exists as a file; its content lives in `docs/research-scratch/AUDIT-AND-VERIFICATION.md`. Cite the master, not the deleted path (§2.3's row for it is stale).
+- `docs/proposals/PLAN_SLICES_6_7.md` deleted (consolidated); `docs/imports/ura-finale-runs.md` + a `.bak` backup added; framework audits (batches A–C) landed in the round-7 slice audits.
+- The eleven companion flow documents in this directory are unchanged and still current (they were written at `67a4830`; the delta since is recorded here rather than edited into them).
+
+### 16.6 Current counts (measured 2026-11-13 at `f6845083`; §15–§16 retained as HISTORICAL, superseded by §17)
+
+| Measure | Prior figure | Measured now |
+| --- | --- | --- |
+| Vue pages | 65 | 65 (unchanged) |
+| Vue components | 113 | **117**: 25 top-level + 92 in ten area folders |
+| Layouts | 3 | 3 |
+| Cockpit panels | 8 | 8 |
+| `components/scenario/` | 23 | 23 (unchanged) |
+| Feature test **files** | 251 | **249** (recursive count) |
+| Unit test files | 11 | 11 |
+| Browser specs | 111 | **120** |
+| Named routes `routes/web.php` | 91 | 91 (unchanged; `route:list` total 104) |
+| `routes/api.php` | 6 | 6 |
+| `config/scenarios.php` | 1227 lines | **1302** lines |
+| ADRs on disk | 0030 latest | **0030** latest (`AGENTS.md` §2 row stale at 0025) |
+| `KNOWN-ISSUES.md` | through KI-158 | through **KI-160** (KI-158 SUPERSEDED; KI-159/KI-160 OPEN) |
+| Migrations | clean through `2026_11_05_084524` | unchanged |
+
+### 16.7 Working tree at this refresh
+
+`git status --short`: source/doc changes only (`KNOWN-ISSUES.md`, `SCREEN_SPEC.md`, `docs/framework-ui-ux/_audit-prompt.md`, `docs/research/ui-ux-application-context-brief.md`, `tests/browser/career-trainee-select.spec.ts`); one deletion (`docs/research-scratch/rice-shower-unity-cup-capability-matrix.md`); one untracked markdown (`docs/audits/rice-shower-unity-cup-capability-matrix.md`). Image-only audit directories are now gitignored (`.scratch-audit/`, `docs/audits/**/screens/`, `docs/audits/**/screenshots/`). Branch `master`, ahead of `origin/master` by **3** (was 119 at `25eea0e1`).
+
+### 16.8 Lore gate (measured this pass)
+
+`composer lore`: **583 hits / 75 exempt** (docs mode). `composer lore-code`: **319 hits**. Both advisory, exit 0; the figures moved +28/+6 from the round-7 close-out's recorded 558/318 (`08f63c22` reconciled that figure), consistent with the corpus growth, not a regression signal. No ruling owed from this pass: the addendum's own text was written to avoid the banned families.
+
+### 16.9 Verification performed for this addendum
+
+All claims above are static reads at `25eea0e1`: `git log`/`git diff --stat`/`git show` for the 163-commit delta; `git ls-tree` + `glob` recounts for §16.6; template/`grep` checks for every moved surface named in §16.2–§16.4; `config/scenarios.php` re-parsed for the panel maps; `KNOWN-ISSUES.md` re-read for KI statuses; the round-7 register read for the status tally (§16.1's table is its own measured §2.4 tally, quoted not re-derived); lore gates run live (§16.8). **Not run for this addendum:** the Pest suite, the browser suite (needs a session-private port + scratch DB per KI-73/KI-80/KI-105), `migrate:status` on the dev DB, and Pint/PHPStan/typecheck (no code changed). No destructive command was run.
+
+---
+
+## 17. Current-state addendum (2026-11-13, HEAD `f6845083`)
+
+**CONFIRMED.** This addendum re-measures the tree against HEAD `f6845083` (`fix(career): ship the career length from its server-side owners (plan 3.6, walk 8 sub-finding 2)`), three commits ahead of `origin/master` (`ad3f8f40` → `f6845083` via `b9837da7`…`f6845083`). §1–§16 are retained as HISTORICAL; §17 supersedes them.
+
+### 17.1 Dominant changes since `25eea0e1`
+
+123 commits separate `25eea0e1` from `f6845083`. Key clusters:
+
+- **Walk 8 (career fixes):** `f6845083` ships `career_length` from server-side owners (`ScenarioCaps`/`CareerCalendar`), `ed1487bf` fixes passed-deadline ordering, `a5b5a493` fixes Type/Hints filters on the skills pool (F-29), `bc0d3ff9` fixes separator segments/pluralisation and a 44px edit door, `8176ff52` disables Event decision undo matching its three siblings, `9cc21b8f` moves the add-skill writer onto the open page (F-12), `6fe5e2ad` names why the target section is absent on preflight.
+- **Scenario/catalog fixes:** `c0321408` labels `va_en` as romanisation not English VA, `302dd58b` lands peer UC-1 burst-band work, `3ec0dee9` derives Trackblazer variant track from trainee aptitudes, `4ba014bf` prints the finale name the client renders, `30c21cfa` prints publisher's Result Points, `f080bb99` clears UI-hygiene violations unblocking the career journey.
+- **UX close-outs (S-RS-COMPLETE-1 / S-RS-REMAINING-1):** `08a1c69b` KI-145 lint re-measure (202 findings vs 209 baseline), `d8f3a2f1` names scenario on Preflight chip, `275a016a` cuts permanent N/A sample-build row, `694bfdb7` states Wit cap as fact, `e4db6619` drops duplicated 'selected' in savebar, `feffa1eb` states two turn readings without changelog, `9410e573` pins separated starting stats.
+- **KI closures:** `274eadfc` closes KI-133 (Spirit proxy two-halves), `efdbb88d` closes KI-161 after Spirit proxy deployment, `fa7ee796` closes KI-82 after catalogue title fix, `3253b8ea` records KI-76 `.env.example` half closed.
+- **New KI entries:** KI-159 OPEN (deck-step `title=` x6, `SupportSlot.vue:173/:240`, `DeckAnalysis.vue`), KI-160 OPEN (cockpit 88px overflow at 640px, Races 59px at 320px, proven pre-existing).
+- **Docs consolidation:** `1fbb7e61`/`0dbc5425` Round 27/28 post-commit evidence notes, `dca1b6a0` consolidates seven research/audit/inspection records, `33c85c54` consolidates Trainer Desk 3.x Phase-0 records into `PLANS-AND-BRIEFS.md`.
+- **Lore gate (this pass):** `composer lore`: **583 hits / 75 exempt** (docs mode); `composer lore-code`: **319 hits**. Unchanged from `25eea0e1`.
+
+### 17.2 Corrections table — earlier claim (this brief, at `25eea0e1`) vs measured at `f6845083`
+
+| Earlier claim | Measured at `f6845083` |
+| --- | --- |
+| `config/scenarios.php` is 1227 lines | 1302 lines |
+| `KNOWN-ISSUES.md` runs through KI-158 | Through KI-160 (KI-158 SUPERSEDED; KI-159/KI-160 OPEN) |
+| 111 browser specs | 120 specs |
+| 113 components | 117 components |
+| 251 Feature test files | 249 Feature test files |
+| Branch ahead of `origin/master` by 119 | Ahead by 3 |
+
+### 17.3 Scenario landscape (unchanged from §7/§16.3)
+
+Four `[Global]` scenarios remain modelled in `config/scenarios.php`: `ura_finale`, `unity_cup`, `trackblazer`, `our_grand_concert`. The scenario board suite (`ScenarioCardGrid.vue` + seven card components under `components/scenario/cards/`) remains on `runs.scenario-detail`. The panel map is unchanged: URA `race_calendar` + `career_goals`; Unity Cup `race_calendar` + `team_race` + `team_rank_ladder` + `career_goals`; Trackblazer `grade_objectives` + `shop` + `epithet_routes`; Grand Concert `career_goals` only.
+
+### 17.4 Key references (current)
+
+`SCREEN_SPEC.md` (screen authority), `PRD.md`, `ARCHITECTURE.md`, `DESIGN.md`, `KNOWN-ISSUES.md` (through KI-160), `config/scenarios.php` (1302 lines), `routes/web.php` (91 named routes), `routes/api.php` (6 GET routes), the walks and reconciliations under `docs/audits/` (rounds 1–8), `docs/research/` (this brief + eleven companion `flows-*.md` documents).
+
+### 17.5 Assumptions ChatGPT must NOT make
+
+- That the run-record screen still exists (`runs.show` redirects to Cockpit).
+- That `CONSTRAINTS.md` and `PLAN.md` root stubs exist (folded into `docs/research-scratch/` at `1e84b0c`).
+- That the wizard and the snapshot create equivalent careers (wizard = new; snapshot carries imported position).
+- That Super Creek and Haru Urara are interchangeable (Super Creek is the rented Friends-slot card; Haru Urara is the scenario-linked card).
+- That the Legacy Lab computes inheritance (it records only).
+- That `ADR-0001` withdrew the hint ladder (`ADR-0011`/`ADR-0014` own it; `ADR-0001` is Energy guidance only).
+- That the browser suite is green (not run for this addendum).
+
+---

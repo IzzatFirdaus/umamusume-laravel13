@@ -21308,3 +21308,338 @@ composer.json/package-lock.json drift was restored to HEAD, not updated).
 | P4 schemas | absent — no Kilo/MiniMax/DSH config schema files in tree. |
 | P5 G3 audit | dispatched — `docs/audits/browser-observation-2026-11-14/`, `docs/audits/browser-observation-2026-11-15/`, `docs/audits/browser-observation-2026-11-15-followup/` present. |
 | HEAD at close | `27800fa8` (peer advanced past own `86d649d3`). Own working tree clean at close; only peer-modified tracked files and peer untracked dirs remain. |
+
+### 67. Phase 0 reconciliation gate — index, BO-013, BO-008 reframe, lineage, command table (2026-11-16)
+
+Dispatch: execute `docs/plans/implementation-roadmap-v3.0.0.md` Phase 0.1–0.8. All eight sub-slices are
+read-only measurements except this ledger commit. Every ruling below was measured in this session; the
+SITREP figures it inherits are marked where they survived and where they did not.
+
+**Ruling — roadmap file provenance.** `docs/plans/implementation-roadmap-v3.0.0.md` did not exist at
+dispatch open (`ls docs/plans` returned four unrelated files). The owner's roadmap text arrived as the
+dispatch attachment; it was materialised verbatim at the dispatch's authoritative path before Phase 0
+began, so no agent-authored plan was substituted. Cost if wrong: if the attachment differs from the
+owner's final roadmap, the executed plan is the attachment.
+
+#### 0.1 — Stale index disposition: MOOT (index was reset by a peer mid-phase)
+
+| Fact | Value |
+|---|---|
+| At dispatch open (HEAD `8ef841fb`) | `git diff --cached --stat` = `resources/css/app.css -15`, `tests/browser/review-detail.spec.ts -53`, 2 files, **68 deletions** — SITREP §2 confirmed |
+| At HEAD `84325a5c` (peer commits `b5a7341e`, `84325a5c`) | `git diff --cached --stat` = **empty**; the `MM` markers became `M` |
+| BO-011 survived the reset? | Yes. `git grep "BO-011 (2026-11-15)" HEAD -- resources/css/app.css` → line 854; `git show HEAD:tests/browser/review-detail.spec.ts` = 238 lines |
+| Ruling | The stale index no longer exists. No `git restore --staged` was run (the roadmap's option (b) is unnecessary and would have touched peer files). **Private `GIT_INDEX_FILE` + pathspec-only `git add` remains the commit method** (L3) because the worktree still carries peer content. |
+
+#### 0.2 — BO-013: `correctly reverted, close`
+
+`1392e30f` restored the state-aware branch and its body quotes the owner's ratification verbatim
+("1300 floor vs 1325 cap"). The audit's expectation ("one noun for one number, in both states") is
+falsified by the domain: the scenario's published figure is a **floor**, the entered ceiling is the
+**cap**, so the two states print different nouns because they are different quantities.
+
+Current predicate — `resources/js/pages/Career/Cockpit.vue:779-787`:
+
+```ts
+const denominatorLabel = computed((): 'cap' | 'floor' | 'in-force' => {
+    const entered = props.identity.caps;
+    if (Object.values(entered).some((cap) => cap.entered !== null)) {
+        return 'cap';
+    }
+    return 'floor';
+});
+```
+
+Verification: `vendor/bin/pest --filter StatDenominatorConsistencyTest --compact` → **5 passed (42
+assertions), 25.61s**. `StatDenominatorConsistencyTest:112` asserts `return 'floor';` and is green.
+No edit. Phase 2.2 is therefore a no-op.
+
+Latent observation (not a finding, no edit): the return type and the docblock name a third state
+`in-force` that the computed never returns. R7-66 already records that no surface stores an in-force
+ceiling, so it is unreachable by data rather than by bug; inventing a data source to reach it would be
+fabrication.
+
+#### 0.3 — `5869d1a0` ancestry and content audit
+
+`git merge-base --is-ancestor 5869d1a0 HEAD` → **exit 0**. The SITREP §4 "orphan commit" wording is
+falsified; §2 is right. The commit is an ancestor of HEAD, `master`, and `origin/master`.
+
+| BO-ID | Code path present in `5869d1a0` | Still in HEAD | Classification |
+|---|---|---|---|
+| BO-001 | `app/Models/Umamusume.php` +9 (`getRouteKeyName(): 'slug'`) | y (`:110`) | fixed; no regression test seen — Phase 2 checks for one |
+| BO-008 | **none** | n | **OPEN — the commit message claims a fix with no code behind it (L6 violation)** |
+| BO-009 | `SupportSlot.vue`, `Runs/Index.vue` | y; peer `b5a7341e` widened to 7 files (colon → comma) | fixed |
+| BO-010 | `BuildTarget.vue` 3× `required` (`:407,:419,:431`) | y | fixed |
+| BO-013 | `Cockpit.vue` `denominatorLabel` → `'cap'` | reverted by `1392e30f` | correctly reverted (0.2) |
+| BO-017 | `config/scenarios.php` label `Spirit Bursts (combined)` + spec | y (`:68`) | fixed |
+
+Side observation: `5869d1a0`'s BO-009 diff also carried an unrelated `<search>` wrapper in
+`Runs/Index.vue` — one commit, two changes, but both are in HEAD and neither is a defect.
+
+#### 0.4 — `e712598c` / `5b8e1a83` lineage: PRESENT
+
+`git branch -a --contains <sha>` for both returns `master`, `origin/master`, `ci/pre-flight-gate`,
+`ci/register-acceptance-workflow`, `origin/ci/register-acceptance-workflow`. Their absence from
+`git log --oneline -15` was recency, not lineage. Ruling: the light-ink re-theme (`e712598c`, which
+touched `app.css` + `DesignTokensTest.php`) and the Stat Slice (`5b8e1a83`) **are current tree state**;
+the design-token assumptions may be cited. No recompute needed.
+
+#### 0.5 — `DesignTokensTest` scope: NO coverage of `--color-risk` on a surface
+
+`DesignTokensTest` asserts `on-risk on risk` (ink **on** the risk fill) at `:450`, and only that
+`--color-risk` **resolves to a colour** at `:836-863` ("Named-token coverage"). It contains **no**
+`risk on raised` / `risk on panel` / `risk on page` row and no ratio for `--color-risk` against
+`#333333`, `#2A2A2A` or `#09090B`.
+
+Ruling: the pair is uncovered → Phase 1 adds the assertion **to `DesignTokensTest`**, as a separate
+`it()` (not to the 48-row `g18ContractPairs()` list, whose exact count and key order are pinned at
+`:718-742` and re-read by `DesignDocEnforcementTest`). **Zero Playwright specs.** The SITREP's "write 2
+specs" deliverable is cancelled.
+
+#### 0.6 — Canonical command table (measured this session)
+
+| Purpose | Command | Observed result |
+|---|---|---|
+| PHP tests (targeted) | `vendor/bin/pest --filter <Name> --compact` | `StatDenominatorConsistencyTest` → 5 passed (42 assertions), 25.61s. `DesignTokensTest` → 16 passed (450 assertions), 33.22s. One process at a time. |
+| Style | `vendor/bin/pint --test --format agent <paths>` | not yet run; first use = Phase 1 commit gate |
+| Static analysis | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` | **exit 1 — 1 pre-existing error**: `app/Http/Middleware/EnforceNativePHPSecret.php:13` `larastan.noEnvCallsOutsideOfConfig`. Not mine. Config = `phpstan.neon` (root), level 6, paths `app`. |
+| TypeScript | `npm run typecheck` | **exit 1 — 2 pre-existing errors**: `tests/browser/nativephp-packaged.spec.ts(37,9)` and `(38,9)` TS18047 `'app.stdout'`/`'app.stderr'` possibly null. Not mine. |
+| UI lint (report-only) | `npm run lint:ui` | exit 0, **516 findings** (baseline; S66 recorded 509 → +7 peer drift) |
+| Build | `npm run build` | exit 0, 1109 modules, 30.99s |
+| Browser tests | `npx playwright test <spec> -g "<title>" --workers=1` | not yet run; first use = Phase 2 |
+| Lore | `composer lore` / `composer lore-code` | not run (no copy changed in Phase 0) |
+| GNU make | `make --version` | **exit 127, command not found** → KI-4 CONFIRMED. `Makefile` exists (13 targets) but is unusable on this host; the roadmap's "make test / make lint" is wrong, `QWEN.md` is right. |
+| Composer scripts that exist | `composer test` (config:clear + typecheck + artisan test), `test:pest`, `lint` (pint --test), `analyse`, `lore`, `lore-code` | names confirmed from `composer.json:46-76` |
+
+Deviation ledgered: 0.6's "each command run once" is satisfied for the commands that settle the
+`make`-vs-`composer` question and for every command Phase 1 consumes; `pint`, Playwright and lore are
+recorded at their first consuming slice rather than run speculatively here. Cost if wrong: a command
+name discovered to be wrong later is corrected in that slice's ledger line.
+
+#### 0.7 — BO-008: scope difference, labelling ticket (NOT a data bug)
+
+Quoted verbatim, `app/Http/Controllers/Career/TraineeSelectController.php:84-87`:
+
+```php
+$query = Umamusume::query()
+    ->where('release_status', ReleaseStatus::GlobalReleased->value)
+    ->whereNotNull('external_ref')
+    ->where('external_ref', '!=', '')
+```
+
+The same three predicates build `$catalogueTotal` at `:111-115` (the lede's "N trainees are
+catalogued"). Against them:
+
+| Surface | Predicate | Figure |
+|---|---|---|
+| Dashboard KPI (`Dashboard.vue:549` "Trainees catalogued") | `DashboardController.php:110` `Umamusume::whereNotNull('external_ref')->count()` | **133** (all sourced rows, Japan-only included) |
+| Catalogue `/umamusume` | `CatalogController.php:120` `where('release_status', GlobalReleased)` | **72 of 72** |
+| Wizard `/career/setup/trainee` | the three predicates above | **66** |
+
+Three surfaces, three deliberate scopes, one shared noun. Ruling: **scope difference → BO-008 is a
+labelling ticket (Phase 2.3)**, not a data correction. `unsourced-rows.py` was **not** run — it probes
+a non-bug, exactly as the roadmap warned. Phase 2.4 does not exist.
+
+#### 0.8 — Slice 8 identified (the roadmap's "largest unknown")
+
+`docs/audits/browser-observation-2026-11-15/03-code-change-plan.md:16` — prior slice 8 = **BO-011, "One
+focus-ring token"**. It is already fixed at `8ef841fb` (HEAD's parent at dispatch open): the commit
+carries both `resources/css/app.css` (+15, the `:where(...) { outline-color: var(--color-ring) }` seed)
+and `tests/browser/review-detail.spec.ts` (+53). Phase 2.1 is therefore **stale — already fixed**, no
+commit.
+
+#### STATE block (Phase 0 close)
+
+```
+head:            84325a5c (peer commits b5a7341e, 84325a5c landed during Phase 0)
+branch:          master
+phase0:          closed — all eight sub-slices ruled
+phase1:          not-started
+phase2:          slice 8 = BO-011 stale (8ef841fb); BO-013 close (no-op); BO-008 = labelling, Phase 2.3
+phase3:          not-started (3.1 audit pending)
+phase5:          not-started
+phases 4, 6:     gated (owner sign-off / Docker absent + no tool schemas)
+private index:   not yet used; real index clean at 84325a5c
+pre-existing failures not mine:
+                 npm run typecheck -> tests/browser/nativephp-packaged.spec.ts(37,9),(38,9) TS18047
+                 vendor/bin/phpstan analyse -> app/Http/Middleware/EnforceNativePHPSecret.php:13
+```
+
+### 68. Phase 1 (BO-004) shipped; Phase 2 closed; Phase 3 stopped at a design rule; Phase 5 premise falsified (2026-11-16)
+
+#### Phase 1 — Slice 9 / BO-004 → `69488c1f`
+
+`fix(a11y): lift the dark risk hue to clear AA as text on every surface (BO-004)`. Three files:
+`resources/css/app.css` (one line), `tests/Feature/DesignTokensTest.php` (+57, one new case),
+`DESIGN.md` (+15, §12 bullet + change-log erratum).
+
+RED then GREEN, both observed in this session:
+
+| Step | Command | Result |
+|---|---|---|
+| RED (old token `#FF4400`) | `vendor/bin/pest --filter DesignTokensTest --compact` | **1 failed, 16 passed (464 assertions)** — `dark theme: --color-risk on --color-raised measures 3.66:1` |
+| token edit | `app.css:531` `#FF4400` → `#FF6F3B` | one-line diff |
+| GREEN | same command | **17 passed (480 assertions)** |
+| adjacent | `vendor/bin/pest --filter DesignDocEnforcementTest --compact` | 2 passed (6 assertions) |
+| style | `vendor/bin/pint --test --format agent tests/Feature/DesignTokensTest.php` | passed |
+| UI lint | `npm run lint:ui` | 516 findings, unchanged from the Phase 0 baseline |
+| artifact | `grep -c ff6f3b public/build/assets/app-DbOaoGTn.css` | 1 (and `ff4400` = 0) |
+
+Ratios for the shipped value: raised `#333333` **4.566** (was 3.657), panel `#2A2A2A` **5.187** (was
+4.155), page `#09090B` **7.190** (was 5.759). `#FF6D38` rejected at 4.510 — a 0.010 margin is not
+headroom. Light (`#C62828`) and eva01 (`#FF7E8C`) already cleared 4.5 on all three surfaces; they did
+not move.
+
+Commit hygiene: the private index was seeded from `.git/index` and `resources/css/app.css` was staged
+as a **blob built from `git show HEAD:...` plus the one token line**, not from the worktree — the
+worktree file carries a peer MWG block at EOF (32+ lines) that must not enter this commit.
+`git show 69488c1f -- resources/css/app.css` is exactly the one-line hunk. **No Playwright spec was
+written** (0.5 ruling); the SITREP's "write 2 specs" deliverable is formally cancelled.
+
+Infrastructure note: one `DesignTokensTest` invocation hung for 420s and had to be killed. Cause:
+orphaned `php artisan serve` children left by earlier Pest browser runs (four processes on port 8190
+from 03:56, plus the hung runner). After killing them the same command returned 17 passed in 14.04s.
+Classified **infrastructure under load (KI-74 class)**, not a product defect — the identical command
+had passed 20 minutes earlier and passed again after cleanup.
+
+#### Phase 2 — closure table
+
+| Slice | Finding | Ruling | Evidence |
+|---|---|---|---|
+| 2.1 | Slice 8 = **BO-011** | **stale — already fixed** | `8ef841fb` carries `app.css` (+15, the `outline-color` seed at `:854`) and `tests/browser/review-detail.spec.ts` (+53). No commit. |
+| 2.2 | BO-013 | **close — no-op** | 0.2; `StatDenominatorConsistencyTest` 5 passed. |
+| 2.3 | BO-008 | **SKIPPED — peer active on the target files** | `resources/js/pages/Dashboard.vue` mtime 04:26:21 and `app/Http/Controllers/DashboardController.php` 04:25:12, measured at 04:31:15 → under the 5-minute rule. `git blame` shows the BO-008 scope line (`data-field="trainee-scope"`, `{{ globalTrainees }} on [Global]`) as **Not Committed Yet**, and the controller now supplies `globalTrainees`/`globalSupportCards` — the peer is landing this exact finding. Per §6 the slice is skipped, not raced. |
+| 2.4 | BO-008 data | **does not exist** | 0.7 ruled scope difference; `unsourced-rows.py` not run. |
+
+Remaining audit findings, each terminal:
+
+| Finding | Terminal state |
+|---|---|
+| BO-001 slug 404 | fixed (`5869d1a0`, `Umamusume::getRouteKeyName`) — see the caveat below |
+| BO-002 Cockpit null | fixed (prior slice; law 5 forbids re-fixing) |
+| BO-004 risk ink | **fixed (`69488c1f`)** |
+| BO-006 Preflight count | **escalated — not re-walkable in this dispatch.** Needs a filled-draft walk (a live wizard session), which this session did not have. The empty-draft half reads correctly (5 for five Missing rows). |
+| BO-007 → BO-013 | closed (0.2) |
+| BO-008 KPI scope | **escalated — peer-owned, in flight** (2.3) |
+| BO-009 bare colon | fixed (`5869d1a0`, widened by peer `b5a7341e` to 7 files, colon → comma) |
+| BO-010 required selects | fixed (`5869d1a0`, `BuildTarget.vue:407,419,431`) |
+| BO-011 focus ring | fixed (`8ef841fb`) |
+| BO-015 league bonus | fixed (prior slice; law 5) |
+| BO-016 countdown | **escalated on EX-15** — which figure is the target is an owner ruling, not a code decision |
+| BO-017 burst scope | fixed (`5869d1a0`, `config/scenarios.php:68` `Spirit Bursts (combined)`) |
+
+**BO-001 caveat (new, unverified as a defect).** `getRouteKeyName(): 'slug'` makes *every*
+`{umamusume}` binding resolve by slug, so the id form `/career/setup/trainee/33` — which the audit
+recorded as still working — now resolves to no row unless a slug `33` exists. Internal links are
+unaffected (they use `route()` with the model), but a bookmarked id URL breaks. No test asserts either
+form. Recorded as an open question for the owner: is the id form still promised? Not fixed here — it
+would be a second change to a file a peer touched today, and the answer is a product decision.
+
+#### Phase 3 — 3.1 done, 3.2/3.3 STOPPED on a ratified design rule
+
+**3.1 audit: `shared component`.** `resources/js/components/ArtworkSlot.vue` is the single owner,
+used by **19 call sites across 16 files** (catalog index/detail, support-card index/detail/compare,
+trainee select/profile, deck builder, veterans index/show, runs index, dashboard, card picker, support
+slot). Three render branches: link+img, img, and `v-else-if="reserve"` → a transparent empty span.
+With no `url` and no `reserve`, the component renders **nothing**. Not a divergence — one contract.
+
+**3.2 STOPPED — the placeholder contradicts `DESIGN.md` §4.7 and ruling R-31.** The roadmap's action
+("replace the empty branch with a sized placeholder, `alt='Artwork not mirrored'`, title with the retry
+hint") is a visible placeholder. The tree forbids it in three places:
+
+1. `ArtworkSlot.vue:23-29` — "Absence is a normal state, never an error state. A null `url` renders no
+   frame, no grey box, no loader, **no placeholder glyph**."
+2. `DESIGN.md` §4.7 — "That text-only rendering is what this section calls the fallback, and it is
+   **not a decorative gap waiting to be filled** — R-31 already rules that decoration costs reading
+   speed and buys nothing."
+3. `tests/Feature/CatalogDetailArtworkSlotTest.php:22` cites the same rule as the reason the absence
+   branch is tested the way it is.
+
+Documentation hierarchy (`QWEN.md`) puts `DESIGN.md` above slice plans. Ruling: **3.2 is not
+implementable without an owner-signed amendment to §4.7.** Cost if wrong: if the owner intended the
+placeholder to supersede R-31, one component edit plus a §4.7 amendment is the whole change.
+
+**3.3 not started — blocked on 3.2.** Its stated done-condition ("renders a labelled placeholder when
+network is unavailable") depends on the placeholder that 3.2 may not ship. The mirror itself is still
+manual (`uma:fetch-art`), so `QWEN.md`'s "Artwork mirror is manual" line remains **true** and was not
+edited.
+
+**Owner question (one line):** does a mirror miss become visible (placeholder) or stay silent
+(§4.7/R-31)? Everything in Phase 3.2/3.3 turns on that answer.
+
+#### Phase 5 — 5.1 premise falsified, 5.2 edited
+
+`git remote -v` → `origin https://github.com/IzzatFirdaus/umamusume-laravel13.git` (fetch + push).
+`ls .github/workflows/` → **three files**: `nativephp-windows.yml` (4100 B), `nativephp-windows-acceptance.yml`
+(2628 B), `release.yml` (7036 B), all dated 2026-11-15. Ruling: **`CI exists, QWEN.md stale`** — not
+"no remote", not "genuinely missing". The three CI commits in the log (`0cb81059`, `072bb52e`,
+`cc37e9bd`) were the pipeline being registered, exactly as the roadmap suspected.
+
+5.2: `QWEN.md` edited in place (untracked file, left untracked — see ruling). "No CI" replaced with the
+three-workflow fact; KI-4 confirmed by measurement; "Empty mirror is invisible" reworded as
+**by design** with the §4.7/R-31 citation; a measured gate-status table added (build 0, lint:ui 516,
+pint green, typecheck pre-existing red, phpstan pre-existing red).
+
+Ruling: `QWEN.md` stays **untracked**. It is a session-context file, not product, and its provenance
+was already recorded as unclear in the prior SITREP. Cost if wrong: the correction is lost if the file
+is deleted; the same facts are in this ledger either way.
+
+#### STATE block (dispatch close)
+
+```
+head:            69488c1f (own) + peer commits landed during the run
+branch:          master
+phase0:          closed (S67)
+phase1:          69488c1f — BO-004 fixed, DesignTokensTest guard RED->GREEN, DESIGN.md erratum
+phase2:          slice 8 stale (8ef841fb); BO-013 closed; BO-008 skipped (peer-active)
+                 BO-006 escalated (needs a filled-draft walk); BO-016 escalated (EX-15)
+phase3:          3.1 audit = shared component (19 call sites); 3.2/3.3 BLOCKED on DESIGN.md
+                 §4.7 / R-31 owner amendment
+phase5:          5.1 ruling = CI exists, QWEN.md stale; 5.2 QWEN.md edited (untracked)
+phases 4, 6:     gated (owner sign-off / Docker absent + no tool schemas)
+private index:   .scratch-uma/index-slice9 (app.css staged as a HEAD-derived blob);
+                 real index repaired to HEAD for the ledger path only
+peer files left untouched:
+                 resources/js/pages/Dashboard.vue, app/Http/Controllers/DashboardController.php
+                 (peer BO-008 work in flight), resources/js/components/support/CardPicker.vue,
+                 resources/css/app.css EOF MWG block
+pre-existing failures not mine:
+                 npm run typecheck -> tests/browser/nativephp-packaged.spec.ts(37,9),(38,9) TS18047
+                 vendor/bin/phpstan analyse -> app/Http/Middleware/EnforceNativePHPSecret.php:13
+```
+
+### 69. Commit-hygiene incident and correction (2026-11-16)
+
+`b1650b4e` (the S68 ledger commit) was built from an index seeded with `cp .git/index`. The real index
+still held the pre-Phase-1 blobs for the three files `69488c1f` had committed — a private-index commit
+does not update the real one — so the copied index carried those old blobs and the S68 commit's tree
+silently **reverted** the BO-004 work: `DESIGN.md` -15, `resources/css/app.css` back to `#FF4400`,
+`tests/Feature/DesignTokensTest.php` -57.
+
+Caught immediately by `git show --stat b1650b4e` ("4 files changed" where 1 was expected), which is
+exactly the check L6 requires and the reason it exists.
+
+Correction: `f737bc2b` restores all three files to their `69488c1f` content. `git diff 69488c1f HEAD --
+DESIGN.md resources/css/app.css tests/Feature/DesignTokensTest.php` is **empty**, so the net tree for
+those paths is the Phase 1 state. Fix-forward rather than amend/reset: `69488c1f` is not a protected
+SHA, but a reset would have raced the peer sessions committing to this branch every few minutes.
+
+**Corrected method (binding for every later commit):** build the private index with
+`GIT_INDEX_FILE=<path> git read-tree HEAD`, never `cp .git/index`. A copied real index is a stale
+snapshot by definition once any commit has been made from a private index; `read-tree HEAD` is the only
+seed that cannot carry a pre-commit blob. When a single path needs a worktree-independent version (the
+`app.css` case, where the worktree carries a peer block), stage it as
+`git update-index --cacheinfo 100644,<blob>,<path>` with a blob built from `git show HEAD:<path>`.
+
+Final STATE block for the dispatch:
+
+```
+head:            f737bc2b (own); 69488c1f = Phase 1; 58333135 = S67; d19f4da2 = roadmap
+branch:          master
+phase0:          closed (S67)
+phase1:          69488c1f, tree restored at f737bc2b
+phase2:          slice 8 stale; BO-013 closed; BO-008 skipped (peer-active); BO-006/BO-016 escalated
+phase3:          3.1 audit done (shared component, 19 call sites); 3.2/3.3 blocked on DESIGN.md §4.7
+phase5:          5.1 = CI exists, QWEN.md stale; 5.2 QWEN.md edited, untracked
+phases 4, 6:     gated
+real index:      clean at f737bc2b (repaired for the four touched paths only)
+```
