@@ -77,6 +77,13 @@ final class CreateSnapshotRun
                 'notes' => $data['notes'] ?? null,
                 'career_position' => $position,
                 'career_position_source' => 'imported',
+                // U-03 / R8 (E-04): the two identity facts a mid-career snapshot carries. They ride the
+                // run's own columns, never the position payload, because they are properties of the
+                // trainee the Trainer is partway through rather than of where the career stands. A
+                // snapshot that did not read them leaves the columns null, which the run renders as
+                // `Not stated` — the same absence vocabulary `RunSettings` uses.
+                'trainee_rarity' => isset($data['trainee_rarity']) ? (int) $data['trainee_rarity'] : null,
+                'potential_level' => isset($data['potential_level']) ? (int) $data['potential_level'] : null,
             ]);
 
             $state = $this->completeEntryState($values);

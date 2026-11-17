@@ -129,6 +129,14 @@ final class TeamPanelBuilder
                 'absence' => $turn === null
                     ? 'The calendar records no turn for this race, only its career year, so no turn is printed.'
                     : null,
+                // Same three keys every goal row carries, so the panel's row shape does not depend on
+                // which group it is drawing. All seven mandatory slots store `fans_needed = 0` at this
+                // HEAD, so this group prints `N/A` with its title and no row invents a threshold.
+                'fan_gate' => $slot->hasFanGate() ? (int) $slot->fans_needed : null,
+                'fan_gate_label' => $slot->hasFanGate() ? 'Fan gate: '.number_format((int) $slot->fans_needed).' fans.' : 'N/A',
+                'fan_gate_title' => $slot->hasFanGate()
+                    ? 'The fans this race requires, read off the calendar row it sits on.'
+                    : 'The calendar records no fan gate for this race, so none is printed.',
             ];
 
             // A race alerts only in the career year the run is standing in. `isAtOrBeforeTurn()` is an
@@ -308,6 +316,10 @@ final class TeamPanelBuilder
             $race = $slot !== null ? $slot->title : $goal->source_race_name;
             $phrase = $goal->requirementPhrase();
 
+            // The slot's own gate, through the model's single owner (`hasFanGate()`), so the ladder
+            // and the race card cannot disagree about what counts as a gate.
+            $fanGate = $slot !== null && $slot->hasFanGate() ? (int) $slot->fans_needed : null;
+
             $rows[] = [
                 // One reader for both surfaces, so the panel and the race strip cannot drift into two
                 // vocabularies for one objective (TraineeGoal::obligationLine()).
@@ -322,6 +334,17 @@ final class TeamPanelBuilder
                     : null,
                 // One owner for the sentence, shared with the catalog detail ladder (`TraineeGoal::absenceReason()`).
                 'absence' => $goal->absenceReason(),
+                // U-05b / R8: the fan gate the client prints beside a race objective. Read off the
+                // slot's own stored `fans_needed` — the same column the race card prints as
+                // `Fan gate: N fans.` — never derived from the race's grade, because the reference
+                // publishes fan *ranges* per grade (§1.2.6), and a lookup would invent a threshold the
+                // client never showed. Absence is a value: a slot with no gate yields null and the row
+                // prints `N/A` with a title, never `0 fans`.
+                'fan_gate' => $fanGate,
+                'fan_gate_label' => $fanGate === null ? 'N/A' : 'Fan gate: '.number_format($fanGate).' fans.',
+                'fan_gate_title' => $fanGate === null
+                    ? 'The calendar records no fan gate for this race, so none is printed.'
+                    : 'The fans this race requires, read off the calendar row it sits on.',
             ];
 
             // An objective alerts only when the race has not run at all. A recorded entry whose

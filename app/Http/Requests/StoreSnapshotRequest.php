@@ -49,6 +49,12 @@ class StoreSnapshotRequest extends FormRequest
             'career_year' => ['required', 'integer', Rule::in(array_column(CareerYear::cases(), 'value'))],
             'career_month' => ['required', 'integer', 'min:1', 'max:12'],
             'career_phase' => ['required', 'string', Rule::in(array_column(CareerPhase::cases(), 'value'))],
+            // U-03 / R8 (E-04): the two identity facts `RunSettings` already edits and persists. Their
+            // bounds are mirrored from `StoreTrainingRunRequest` rather than re-chosen, so the one place
+            // that owns the range keeps owning it: SSR rarity is ★1-★3 and Potential Lvl is 1-5 on the
+            // Global client. A future notice that widens either changes the bound in one file.
+            'trainee_rarity' => ['nullable', 'integer', 'between:1,3'],
+            'potential_level' => ['nullable', 'integer', 'between:1,5'],
             'speed' => ['nullable', 'integer', 'min:0'],
             'stamina' => ['nullable', 'integer', 'min:0'],
             'power' => ['nullable', 'integer', 'min:0'],

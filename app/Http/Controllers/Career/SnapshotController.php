@@ -112,6 +112,10 @@ class SnapshotController extends Controller
             'fields' => $this->reviewFields($data),
             'payload' => $data,
             'has_draft' => $data !== [],
+            // U-03 / R8 (narrowed): the client's own banner name for the scenario, printed under the
+            // read-back as a subtitle. Kept out of the `fields` list on purpose — those rows are the
+            // things the write records, and `SnapshotReviewTest` pins their order and wording.
+            'scenario_full_label' => $this->scenarioFullLabel($data),
             // The position the snapshot names, through the same owner the race header and the
             // Dashboard use, so the read-back and the cockpit cannot spell it two ways. A review
             // opened with no draft has no position to name rather than a wrong one.
@@ -207,6 +211,26 @@ class SnapshotController extends Controller
         $identity = [
             ['key' => 'umamusume_id', 'label' => 'Trainee', 'value' => $this->traineeName($data)],
             ['key' => 'scenario', 'label' => 'Scenario', 'value' => $this->scenarioLabel($data)],
+            // U-03 / R8 (E-04): the two facts the setup form now collects. They are read back in the
+            // same `Known · …` / `Not provided · …` vocabulary as everything else the review lists, so a
+            // Trainer confirms them before the write exactly as they confirm the stats. The value is a
+            // client word (`★3`, `Potential Lvl 2`) rather than the stored integer, because the review's
+            // own sentence is "This is exactly what will be written. Read it back" and an integer is not
+            // what the client shows.
+            [
+                'key' => 'trainee_rarity',
+                'label' => 'Rarity',
+                'value' => isset($data['trainee_rarity']) && $data['trainee_rarity'] !== ''
+                    ? '★'.(int) $data['trainee_rarity']
+                    : null,
+            ],
+            [
+                'key' => 'potential_level',
+                'label' => 'Potential Level',
+                'value' => isset($data['potential_level']) && $data['potential_level'] !== ''
+                    ? (string) (int) $data['potential_level']
+                    : null,
+            ],
         ];
 
         foreach ($identity as $row) {
@@ -284,5 +308,28 @@ class SnapshotController extends Controller
         $label = config('scenarios.scenarios.'.$key.'.label');
 
         return is_string($label) ? $label : null;
+    }
+
+    /**
+     * The client's own full scenario name, for the read-back's second line (U-03 / R8, narrowed).
+     *
+     * Kept separate from `scenarioLabel()` on purpose: that one is the short name every other surface
+     * prints and `SnapshotReviewTest` pins it deliberately ("Config's label, never the stored key"). This
+     * one is the in-game banner text the client shows — `Unity Cup: Shine On, Team Spirit!` — and it is
+     * a subtitle on the same row rather than a replacement for the identity the row already states.
+     *
+     * @param  array<string, mixed>  $data
+     */
+    private function scenarioFullLabel(array $data): ?string
+    {
+        $key = $data['scenario'] ?? null;
+
+        if (! is_string($key) || $key === '') {
+            return null;
+        }
+
+        $full = config('scenarios.scenarios.'.$key.'.full_label');
+
+        return is_string($full) && $full !== '' ? $full : null;
     }
 }
