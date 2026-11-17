@@ -108,8 +108,7 @@ Coverage: 8 of 8 runtimes have an applied control layer; 4 are live-fire/runtime
 
 Key files (committed): .tooling/policy.json (single classification table), .tooling/policy.mjs (fail-closed loader), .tooling/host-targets.json (16 targets, strategies + verification notes), .tooling/scripts/bootstrap-host.mjs (deep merge / copy-servers / append-hook / append-yaml-row strategies), .claude/hooks/* (6 adapters + 3 shims + dsh-hooks.json), .mcp.json (3 servers / 45 tools), .kilo/kilo.jsonc, .qoder/settings.json, .vscode/settings.json.
 
-Fresh machine: git clone then 
-ode .tooling/scripts/bootstrap-host.mjs (idempotent; backs up every file before write; never prints secret values). Machine-specific env (MCP API keys) is host-local and never committed - MiniMax Tavily key etc. copied at runtime by the copy-servers strategy.
+Fresh machine: git clone then `node .tooling/scripts/bootstrap-host.mjs` (idempotent; backs up every file before write; never prints secret values). Machine-specific env (MCP API keys) is host-local and never committed - MiniMax Tavily key etc. copied at runtime by the copy-servers strategy. `.env.mcp` (created during Phase 3) is a gitignored secret template for MCP server env values; it stays host-local and is NOT read by bootstrap-host.mjs.
 
 ## Slice M gate - fresh-clone verification (2026-11-14)
 
@@ -122,3 +121,55 @@ ode .tooling/scripts/bootstrap-host.mjs (idempotent; backs up every file before 
 ## PLAN COMPLETE (2026-11-14)
 
 All in-plan slices executed: A (shared core), B (hook reconciliation), C (Claude Code), D (Qoder pilot), E (Codex+DSH), F (Kilo), G (VS Code/Antigravity/DSH bridge), H (Hermes), I (MiniMax), M (fresh clone). Outcomes and evidence levels in the FINAL STATE entry above. Residual risks: DSH + MiniMax are engine/config-verified but not live-fire; MiniMax compound-command separator guard routes to ask (not hard deny); Kilo integrated-terminal bypass; Codex hooks.json is trust-hash sensitive (marker-based idempotency prevents churn).
+
+## Runtime evidence notes (completeness pass, 2026-11-14)
+
+Facts that were recorded in host-targets.json or chat but belong here, so this log is self-contained:
+
+- **Kilo (live proof)**: `kilo debug config` (Kilo CLI 7.8.12, binary at `%USERPROFILE%\.antigravity-ide\extensions\...\bin\kilo.exe`) resolved and displayed the permission map from `.kilo/kilo.jsonc`: `"*": "deny"` + allow rows for git/composer/php artisan/node, origin "local". The harness editor validator's ConfigInvalidError warning is schema-lag only - the runtime honors the file. Combined with the live map readout, Kilo's evidence level is **runtime-verified**.
+- **Qoder double-fire**: the home `~/.qoder/settings.json` carries a pre-existing PreToolUse Bash hook pointing at the same `.claude/hooks/qoder-pretooluse.mjs` the in-tree `.qoder/settings.json` registers. Both fire per Bash call (harmless duplicate denial); left as-is deliberately. Recorded in host-targets.json (qoder-settings note).
+- **Delegation logging coverage**: `.claude/hooks/delegation-log.mjs` (writes `.tooling/logs/delegation.jsonl`) is wired via SubagentStart on Claude Code, as a sibling PreToolUse `task|Task` hook on Qoder, and via the DSH hooks bridge (`dsh-hooks.json` SubagentStart). Codex delegates through plugins; MiniMax has no subagent seam (n/a). Hermes delegation logging was not wired (the plan's Step 5.5 scope covered Qoder; Hermes got toolsets/delegation config only). As of this pass `.tooling/logs/delegation.jsonl` does not exist yet - no SubagentStart event has fired since the logging hook landed. Baseline is therefore "no delegation events recorded".
+- **MiniMax compound-command behavior**: commands containing `&&`, `|`, `;`, redirects, or `$(...)` are rejected by the command matcher's separator guard and fall through to MiniMax's interactive ask flow. Still gated (the user is prompted); never a silent allow.
+- **Codex trust-hash mechanics**: `config.toml [hooks.state]` rows key `<path>:<event>:<idx>:<hookIdx>` with sha256 content hashes. Editing a hook's command invalidates its row and Codex re-prompts (or denies) on next run. The bootstrap's marker-based idempotency exists precisely to avoid churning those hashes.
+
+
+## Denial Telemetry Persistence — Verification (2026-11-14)
+
+### Deliverables
+1. **`.tooling/denial-log.mjs`** — created; exports `logDenial()` that appends JSONL to `.tooling/logs/denials.jsonl` with fields: `ts`, `runtime`, `tool`, `command`, `rule`, `replacement`, `cwd`. Write errors swallowed (try/catch) so deny path (exit 2) never breaks.
+2. **Four adapters updated** — `hermes-pretooluse.mjs`, `claude-pretooluse.mjs`, `qoder-pretooluse.mjs`, `codex-pretooluse.mjs` all import and call `logDenial()` before `exit 2`. Single shared helper in `.tooling/denial-log.mjs` (not four copies).
+3. **`measure-behavior.mjs` updated** — reads `.tooling/logs/denials.jsonl`, computes `denialRate` with `totalDenials`, `byRuntime`, `byRule`, `byReplacement`, `topDeniedCommands`. Empty log → `status: "insufficient data"`.
+
+### Verification Matrix Results
+
+| Check | Expected | Actual | Status |
+|-------|----------|--------|--------|
+| `cat composer.json` via Hermes adapter (simulated stdin) | exit 2; denials.jsonl gains one line | exit 2; line added with `runtime="hermes"`, `rule="file-read"`, `replacement="read"` | ✅ PASS |
+| `git status` via Hermes adapter | exit 0; denials.jsonl unchanged | exit 0; log unchanged (1 line before/after) | ✅ PASS |
+| `[object Object]` payload shape | exit 2 (fail-closed); denials.jsonl gains one line | exit 2; line added with `runtime="hermes"` | ✅ PASS |
+| Claude adapter with `cat composer.json` | exit 2; denials.jsonl gains one line with `runtime="claude"` | exit 2; line added with `runtime="claude"` | ✅ PASS |
+| Codex adapter with `cat composer.json` | exit 2; denials.jsonl gains one line with `runtime="codex"` | exit 2; line added with `runtime="codex"` | ✅ PASS |
+| Read-only logs dir, `cat composer.json` | exit 2 still fires; no crash; no exit 1 | exit 2; stderr block message; no crash (Windows read-only on dir doesn't block file append, but deny path intact) | ✅ PASS |
+| `measure-behavior.mjs --since 2026-11-14` | denialRate computes from the new log | `status: "ok"`, `totalDenials: 6`, `byRuntime: {hermes:3, claude:1, codex:1, qoder:1}`, `topDeniedCommands: [{rule:"file-read", count:6}]` | ✅ PASS |
+| Empty log test | `status: "insufficient data"` | `status: "insufficient data"` with needs message | ✅ PASS |
+
+### Hermes Self-Verification (LIVE-FIRE)
+- Ran `cat composer.json` through Hermes' own `pre_tool_call` hook from inside this Hermes session.
+- Hook denied with exit 2, wrote JSON block to stderr.
+- `.tooling/logs/denials.jsonl` gained entry with `runtime="hermes"`, `tool="terminal"`, `command="cat composer.json"`, `rule="file-read"`, `replacement="read"`.
+- Confirmed live-fire evidence from inside Hermes runtime.
+
+### Files Changed
+- `.tooling/denial-log.mjs` (new)
+- `.claude/hooks/hermes-pretooluse.mjs`
+- `.claude/hooks/claude-pretooluse.mjs`
+- `.claude/hooks/qoder-pretooluse.mjs`
+- `.claude/hooks/codex-pretooluse.mjs`
+- `.tooling/scripts/measure-behavior.mjs`
+
+### Constraints Honored
+- No host-local edits (no `~/.config/hermes/`, `~/.qoder/`, `~/.codex/`, etc.)
+- `.gitignore` already covers `.tooling/logs/` (line 78)
+- No bootstrap-host.mjs re-run
+- No staging/commit
+- Peer files untouched (KNOWN-ISSUES.md, SCREEN_SPEC.md, docs/plans/*, etc.)

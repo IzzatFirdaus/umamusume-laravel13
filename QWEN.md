@@ -340,6 +340,11 @@ When documents disagree:
 | `npm run typecheck` | **exit 1, pre-existing**: `tests/browser/nativephp-packaged.spec.ts(37,9)` and `(38,9)` TS18047 |
 | `vendor/bin/phpstan analyse --no-progress --memory-limit=1G` | **exit 1, pre-existing**: `app/Http/Middleware/EnforceNativePHPSecret.php:13` |
 
+*Dated erratum 2026-11-17 (HEAD `be8893a2`): the two "exit 1, pre-existing" rows above are superseded
+by measurement, not edited. Both gates now pass on this tree: `npm run typecheck` exit 0 and
+`vendor/bin/phpstan analyse --no-progress --memory-limit=1G` "[OK] No errors" (run 2026-11-17). The
+falsified rows are kept verbatim as the erratum's subject; treat the exit-0 measurement as current.*
+
 ## Quality Bar (C-1 to C-9)
 
 The binding quality bar lives in `docs/research-scratch/GOVERNANCE.md` §CONSTRAINTS.md:

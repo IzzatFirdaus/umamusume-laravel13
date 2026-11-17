@@ -7,9 +7,9 @@ here because the pair shares one status.
 
 KI-57 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-58 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-59 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-60 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-61 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-59 CLOSED — fixed by branch, not by deletion: `catalog-detail.spec.ts:271-281` now asserts `if (frame.count() === 0) { img count 0 } else { alt="" / src matches / no anchor }`, which is exactly the state-aware contract this entry asked for, so a populated mirror and an empty one can both pass. The surviving `:250` assertion targets an anchor around the frame (`a img`), not the frame's presence (measured 2026-11-17, S2 P6).
+KI-60 CLOSED — does not reproduce: `php artisan migrate:status --no-ansi` reports 0 Pending on database/database.sqlite (measured 2026-11-17, S2 P6); the four migrations named in this body have run
+KI-61 CLOSED — does not reproduce: career-preflight.spec.ts no longer drives an empty-body PUT (it waits on the deck PUT at :109); the enum-backing error is absent (measured 2026-11-17, S2 P6)
 KI-62 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-63 CLOSED — spa.ts progress:false + VisitProgressBar role="status" replacement (in tree pre-dispatch; verified against tree this session)
 KI-64 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
@@ -17,12 +17,12 @@ KI-65 CLOSED — pre-dispatch register state; outside this dispatch's scope, unc
 KI-66 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-67 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-68 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-69 OPEN — class-3 Veterans half re-measured 2026-11-10 (9/9 green, 34b1a0e2); remaining half not in scope
-KI-70 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-69 CLOSED — does not reproduce: playwright.config.ts:18 now pins DB_DATABASE to SCRATCH_DATABASE imported from global-setup, port default 8123 not 8127; the shared-dev-file harness this entry describes is gone (measured 2026-11-17, S2 P6)
+KI-70 TERMINAL — accepted process hazard, not a code defect: concurrent sessions still share one worktree, and AGENTS.md §9 now carries the scratch-directory, one-Pest-process and session-private-harness rules that answer it (2026-11-17, S2 P6)
 KI-71 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-72 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-73 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-74 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-74 TERMINAL — accepted as a class: the contended-box law is now enforced by the pre-flight in AGENTS.md §9 and tools/gate-preflight.php; this remains the governing rule, not a defect to fix (2026-11-17, S2 P6)
 KI-75 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-76 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-77 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
@@ -45,70 +45,76 @@ KI-93 CLOSED — pre-dispatch register state; outside this dispatch's scope, unc
 KI-94 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-95 CLOSED — 8f45e552 import_label provenance line (S-RS-REMAINING-1 slice 1.9)
 KI-96 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-97 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-98 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-99 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-100 OPEN — 22 undecoded objective rows disclosed on screen; opportunistic capture welcome, not scheduled
+KI-97 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged; index corrected 2026-11-17 (S2 P3): body: OPEN with root cause proven by reading; index records CLOSED. If the fix is not landed, reopen with a commit ref.
+KI-98 FIXED-IN-TREE — pre-dispatch register state; outside this dispatch's scope, unchanged; index corrected 2026-11-17 (S2 P2): body carries FIXED IN TREE, NOT LANDED (this entry, below)
+KI-99 FIXED-IN-TREE — pre-dispatch register state; outside this dispatch's scope, unchanged; index corrected 2026-11-17 (S2 P2): body carries FIXED IN TREE, NOT LANDED (this entry, below)
+KI-100 TERMINAL — accepted limitation: the 22 undecoded objective rows are disclosed on screen by owner ruling 4a, which chose disclosure over inference; the gap is tracked here by design (2026-11-17, S2 P6)
 KI-101 CLOSED — both halves: refresh counter 6c1c2b5d (merge of owner-decisions/KI-101-refresh, classification (a) test-side); staleness refusal ddd8c619 (B.1)
 KI-102 CLOSED — bd0a8693 status pass; .env.example half closed 3253b8ea
 KI-103 CLOSED — premise withdrawn: saved?: number[] declared and used in all seven wizard pages (bd0a8693 register correction)
-KI-104 OPEN — UnityCupEditor nested-details fix landed 005561c1 (2026-10-25); ADR-0027 still Proposed, owner signature is the remaining half
+KI-104 OPEN — UnityCupEditor nested-details fix landed 005561c1 (2026-10-25); ADR-0027 still Proposed, owner signature is the remaining half [S2 P3 2026-11-17: index and body agree — the fix is uncommitted, so the entry is live at HEAD.]
 KI-105 CLOSED — (a) push landed this session: origin/master advanced b16a7a50 -> ad3f8f40, `git rev-list --count origin/master..master` = 0 at close; (b) ddd8c619 session-private harness defaults plus stale-bundle refusal
-KI-106 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-107 OPEN — CLAUDE.md dead references; owner docs decision, not dispatched
+KI-106 OPEN — still live as a docs-debt ratchet: re-measure DocCitationParityTest against the current DOC_CITATION_BASELINE before acting; not re-measured in S2
+KI-107 CLOSED — does not reproduce: CLAUDE.md:12 and :257 no longer cite the two absent files as if they existed; :12 records the fold into GOVERNANCE.md and :257 forbids adding CLAUDE.local.md (measured 2026-11-17, S2 P6)
 KI-108 CLOSED — d662864b + e66d47c7: SLICE-RECORDS NUL region re-encoded, 0 NULs verified byte-exactly at HEAD
 KI-109 CLOSED — 6a1c9227: analysis_output.txt/base_veteran.vue deleted at 5d88a88c; dated note appended
-KI-110 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-110 TERMINAL — pre-dispatch register state; outside this dispatch's scope, unchanged; index corrected 2026-11-17 (S2 P2): body: ACCEPTED LIMITATION (documented)
 KI-111 CLOSED — 1f5f5d76 + 0563f1de: four real mistagged closers stripped; md_fence_check 0 invalid in 209 files
 KI-112 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-113 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-114 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-115 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-116 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-117 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-118 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-119 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-120 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-114 OPEN — still live: the two browser files named here are not re-measured in S2; run the session-private Playwright pair before any verdict
+KI-115 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged; index corrected 2026-11-17 (S2 P2): body: CLOSED - does not reproduce
+KI-116 OPEN — narrowed, not closed: DeckAnalysis:28-29 now contributes a reached value whenever a slot records a level and marks the catalogue maximum otherwise, so the remaining gap is only for slots with no level recorded
+KI-117 CLOSED — does not reproduce: migration 2026_10_25_130000_add_card_level_to_deck_slots_table.php adds `card_level`, DeckSlot #[Fillable] and casts carry it, and ADR-0015/SupportSlot surface it (measured 2026-11-17, S2 P6)
+KI-118 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged; index corrected 2026-11-17 (S2 P2): body: CLOSED 2026-11-10 (S-RS-REMAINING-1 slice 0.3 status pass)
+KI-119 OPEN — narrowed: `current_spirit_proxy` is now a typed prop on UnityCupPanel.vue:87, so the column question moved to KI-161 (CLOSED); the full Current Spirit gauge remains unmodelled
+KI-120 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged; index corrected 2026-11-17 (S2 P2): body: CLOSED 2026-11-10 (S-RS-REMAINING-1 slice 0.3 status pass)
 KI-121 CLOSED-WONTFIX — ruled out at filing; does not reproduce
 KI-122 CLOSED-WONTFIX — ruled out at filing; does not reproduce
 KI-123 CLOSED-WONTFIX — ruled out at filing; does not reproduce
-KI-124 OPEN — travel-note landed (R13); moves wontfix at next audit if unused
+KI-124 TERMINAL — accepted limitation per this body: a turn-level banner and a card-avatar list are both migrations needing an ADR; wonfix at next audit unless the owner schedules the schema
 KI-125 CLOSED-WONTFIX — R8 declined; roster reopens only if R8 reopens
 KI-126 CLOSED-WONTFIX — R8 declined; roster reopens only if R8 reopens
-KI-127 OPEN — pre-dispatch register state; outside this dispatch's scope, unchanged
+KI-127 OPEN — confirmed: TeamRaceFacilityPanel.vue:54 still renders a bare `<div class="flex flex-col gap-4">` with no card wrapper or capsule header, exactly as filed (measured 2026-11-17, S2 P6)
 KI-128 CLOSED — Delete moved to its own footer door /training-runs/{run}/delete (C6b.3 lineage, peer landing); delete flow green in this session's cockpit-forms walk
 KI-129 CLOSED — affirmed 2026-11-10 per owner dispatch: the capsule is intentional on the scenario section, DESIGN.md:497 sanction stands; extension and removal rejected. No code change
-KI-130 OPEN — not dispatched
+KI-130 TERMINAL — not dispatched; index corrected 2026-11-17 (S2 P2): body: TERMINAL - owner ruling A (2026-10-25)
 KI-131 CLOSED — 9674180d + 20df32a6: run-scoped aria-labels on the two colliding steps; consumers re-pinned (support-deck, section-nav); cockpit-forms pin edited in a peer-dirty file and rides that file's landing
-KI-132 OPEN — two-key split ruled by owner; slice not dispatched here, scheduled separately
+KI-132 TERMINAL — two-key split ruled by owner; slice not dispatched here, scheduled separately; index corrected 2026-11-17 (S2 P2): body: TERMINAL - deferred to R1 payload-contract pass
 KI-133 CLOSED 2026-11-13 — proxy DEPLOYED (`b9837da7`, migration applied via KI-161) and the per-member path delivered: the event-derived six-state board, pinned at `fe9fc421` (identity, ordering, latest-wins, no synthesis of unrecorded members, proxy independence; mutation-verified). The board lists only members with recorded burst events and never claims the 20/20 team. KI-125/A-0.13 (full-team enumeration, R8 declined) is a separate concern and was never this board's prerequisite. No numeric per-member gauge value or maximum is stored or claimed: the game publishes none.
 KI-134 RESOLVED — pre-dispatch register state
 KI-135 RESOLVED — pre-dispatch register state
-KI-136 OPEN — not dispatched
-KI-137 OPEN — not dispatched
-KI-138 RESOLVED — pre-dispatch register state
-KI-139 OPEN — not dispatched
+KI-136 TERMINAL — peer-owned
+KI-137 TERMINAL
+KI-138 RESOLVED @ `83105a45` — standing
+KI-139 RESOLVED @ `83105a45` — standing
 KI-140 CLOSED — d359e9d9 pre-dispatch: FilterContractTest re-baselined to the 25-row page-size contract (35/35 green, 138 assertions)
 KI-141 CLOSED — fa8c7eec + cd42c151: BuildTarget title= absences became AbsenceValue disclosures with visible reasons
 KI-142 CLOSED — 62f43094 + fb8266d6: word-form range copy restored; the rendered-copy gate decodes named character references; all six pins re-pinned
 KI-143 CLOSED — 76a08984 + 5e7ecf4e: dead CandidateForm row variant retired; review-detail header truthful; adjacent cold-load aria-busy fix
 KI-144 CLOSED — pre-dispatch register state
-KI-145 CLOSED — stale-figure: 202 findings vs 209 baseline, 7 under, exit 0; report at S-RS-COMPLETE-1-lint-remeasure-2026-11-10.md (08a1c69b)
+KI-145 CLOSED — measured 2026-11-17 (S2 P6): `node tools/ui-framework-check.mjs` exit 0 with **207 arbitrary-value findings against the 209 baseline** (2 under), 516 findings across all eight rules. The body's "282 vs 219" and the earlier "202 vs 209" are both superseded. The gate is correct: rule 8 counts `arbitrary-value` only, and a debt increase fails on its own without `--strict`.
 KI-146 CLOSED — pre-dispatch register state
 KI-147 CLOSED — ad3f8f40: RunRaceStrip mount restored with the pre-C6b.5 wrapper; spec 5/6 green; the 6th case fails on the pre-existing overflow filed as KI-160, proven with the mount reverted
 KI-148 RESOLVED — pre-dispatch register state
 KI-149 CLOSED-MEASURED — report at S-RS-COMPLETE-1-type-scale-measurement-2026-11-10.md (08a1c69b); no wrap regressions; the two overflow readings filed as KI-160
-KI-150 OPEN — not dispatched
+KI-150 TERMINAL — not dispatched; index corrected 2026-11-17 (S2 P2): body: TERMINAL - option 3, ruling 8B withdrawn
 KI-151 CLOSED-MEASURED — same report (08a1c69b); --text-kpi clamp measured 20px/28px, unchanged
 KI-152 CLOSED — base_stats/growth_rates rendered on catalog detail as a labelled Starting line (peer landing; the catalog-detail case green in this session's runs); audit-correction note rides the peer file
 KI-153 CLOSED — pre-dispatch register state
-KI-154 OPEN — not dispatched
-KI-155 OPEN — not dispatched
-KI-156 OPEN — not dispatched
-KI-157 OPEN — not dispatched
+KI-154 RESOLVED — not dispatched; index corrected 2026-11-17 (S2 P3): body: RESOLVED at 5e39a1f0 (2026-11-10)
+KI-155 RESOLVED — not dispatched; index corrected 2026-11-17 (S2 P3): body: RESOLVED at 990bdc7d (2026-11-10)
+KI-156 RESOLVED — not dispatched; index corrected 2026-11-17 (S2 P3): body: RESOLVED at 0166b23e (2026-11-10)
+KI-157 RESOLVED — not dispatched; index corrected 2026-11-17 (S2 P3): body: RESOLVED at ad3d94f3 (2026-11-10)
 KI-158 SUPERSEDED — pre-dispatch register state
-KI-159 OPEN — deck-step title= x6 (SupportSlot.vue:173/:240, DeckAnalysis.vue); mechanical, separate slice
-KI-160 OPEN — filed this dispatch (ad3f8f40): cockpit 88px overflow at 640px and Races 59px at 320px; proven pre-existing with the strip mount reverted
+KI-159 CLOSED — deck-step title= x6 (SupportSlot.vue:173/:240, DeckAnalysis.vue); mechanical, separate slice; index corrected 2026-11-17 (S2 P2): body: CLOSED 2026-11-16 - both redundant title= removed
+KI-160 RESOLVED (cockpit half) — 2026-11-17: mechanism found and fixed. `app.css`'s `.card:has(> table.t)` is a **direct-child** combinator; `NextDecision.vue`'s Obligations table sits two components deep (`AdvisorRail` -> `NextDecision` -> table), so no scroll container was ever established above it and the document panned by 88px (`728 - 640`). Fix: a bare `overflow-x-auto` wrapper (`NextDecision.vue:344`), matching `CareerStatePanel.vue:332` and `RacePlanner.vue:351`. Verified: `career-race-strip.spec.ts:203` reports no overflow at 320 **or** 640, and `career-cockpit.spec.ts:373` ("lays out at 1280, 768 and 320 without a horizontal scroll") is green. **The Races half is split out to KI-166** — nothing touched that surface. Original TERMINAL sentence is preserved below.
+KI-166 OPEN — the Race Decision page (`/training-runs/{run}/races`) overflows by 59px at the 320px reflow width (measured: `over=59`, clean at 768 and 1280), split out of KI-160 on 2026-11-17 so the resolved cockpit half could close honestly. **Probed 2026-11-17, and the cockpit's mechanism is REFUTED here** — see body. Not the (_.card:has(> table.t)_) direct-child miss: the offending table IS its card's direct child, the card's computed `overflow-x` is `auto`, and `card.matches(':has(> table.t)')` is `true`. No unclipped box widens the document (`culprits: []`), so the widening happens through a clipped ancestor's scroll extent, not through an escaping child. Cause still unknown; the diagnosis window is now much narrower. **`culprits: []` is itself a probe defect, not a finding** (owner ruling 2026-11-17): the filter exempted any element whose own `overflow` was not `visible`, including the offender, so a self-scrolling 379px box was dropped. Ship without gating the tag; next-probe spec in body.
+KI-161 CLOSED — migration deployed to `database/database.sqlite` 2026-11-12 under explicit owner approval; `current_spirit_proxy` column verified and writer exercised (body, this file)
+KI-162 OPEN — **not currently reproducing**: two Dashboard/Races cases failed once in a full suite (2026-11-17, `1 failed / 2453 passed`), but a complete run at the same HEAD with the same peer files later reported `2455 passed / 0 failed`. Same cases pass alone and in all pairings tried. Intermittent or already-resolved; re-verify before treating as live
+KI-163 OPEN — refactor debt: four duplicate `GoalRow`/`GoalGroup` interfaces (`GoalGroupCard.vue`, `ScenarioCardGrid.vue`, `UnityCupPanel.vue`, `CareerGoalsPanel.vue`) kept in agreement by hand
+KI-164 OPEN — test-shape debt: `SnapshotReviewTest` asserts `fields.N` by position, so any added payload row costs a re-derivation (two rows cost four assertion edits, 2026-11-17)
+KI-165 CLOSED 2026-11-17 — the ladder filled: `config('uma.fan_ladder')` now carries the seven fan-counted tiers (Bronze 5,000 → Legend 320,000, half-open bands keyed on each tier's own published threshold; see body for provenance and the divergence from plan-defects slice 3.2); service answers null below 5,000 and class-without-gap at the PHP_INT_MAX ceiling (PHP_INT_MAX leak caught by the new cases); audited 209,245 reading unchanged; FanLadderTest 22 passed / CockpitRunIdentityTest 30 passed. Two non-numeric tiers (`Beginner`, `Debut / Maiden`) stay unrepresentable by ruling — no fan count to key on. Rendered presence proven by `career-cockpit.spec.ts:870` (1 passed, 2026-11-17)
 
 # Known issues
 
@@ -193,8 +199,8 @@ those entries' current status; this line names them, it does not restate them.
 - KI-133 CLOSED (2026-11-13) - proxy deployed (`b9837da7`, migration applied via KI-161) AND the per-member board delivered: `fe9fc421` pins identity, ordering, latest-wins, no synthesis and proxy independence on the `turn_events`-derived roster, mutation-verified. Option A never needed A-0.13 (full-team enumeration; R8 declined); the numeric-per-member gauge was never this entry's acceptance criterion and stays unmodelled because no source publishes a value or maximum. Corrected 2026-11-12 (deployment + A-0.13 attribution), closed 2026-11-13.
 - KI-134 RESOLVED (previous session)
 - KI-135 RESOLVED 2026-10-30 (standing)
-- KI-136 OPEN, PEER-OWNED - full-career-journey locator; peer file, no touch
-- KI-137 OPEN (standing)
+- KI-136 TERMINAL, PEER-OWNED - full-career-journey locator; peer file, no touch
+- KI-137 TERMINAL (standing)
 - KI-138 RESOLVED @ `83105a45` (standing)
 - KI-139 RESOLVED @ `83105a45` (standing)
 - KI-140 CLOSED @ `d359e9d9` (pre-existing fix verified this pass: `FilterContractTest` -> `Tests: 35 passed (138 assertions)`; slice 0.3, `bd0a8693`)
@@ -1275,7 +1281,7 @@ not; a follow-up commit is the only safe shape here).
 
 **Closed 2026-10-09.** All twenty-seven census files named in this entry are now tracked in `HEAD`: the D11–D16 slices landed at `b494d6f` ("feat(career): land slices D5-D16, the career nav shell and the load-speed fixes"), committing the controllers, pages, components and tests listed in the census table. `git ls-files --error-unmatch` resolves all thirty named paths across the ten controller files, sixteen Vue/SFC files and seventeen test/spec files. `git status --short` on this working tree shows no staged or unstaged deletions of any of them, and the only untracked files are three new cockpit test files (`CockpitRunIdentityTest.php`, `CockpitTeamPanelTest.php`, `CockpitUnityCupCountersTest.php`) that postdate this entry. What closure does not cover: KI-70's process-hazard caveat still applies to any future concurrent edits, and KI-69's fixture-contract defect still blocks a full shared-harness browser run of the slices these files test.
 
-**Status: OPEN.** A `git checkout`, a `git clean`, or any session resetting the working tree deletes these
+**Status: OPEN. [Index records CLOSED for this entry; the body below keeps its filed history. Per this file's own convention (lines 2-4) the index line is the current state, so this status text is historical. Reconciled 2026-11-17, S2 P2.]** A `git checkout`, a `git clean`, or any session resetting the working tree deletes these
 slices outright: there is no commit to restore them from, and no CI, remote branch or bundle holds a copy.
 Filed because the KI-69 attribution depends on D12's untracked state, and because a reader of plan §8
 currently cannot tell which "Landed" rows are in `master` and which are in a directory.
@@ -1317,7 +1323,7 @@ not implied by a file edit.
 
 **Closed 2026-10-09.** The fix is in the tree: `database/migrations/2026_10_08_180000_add_tags_normalized_to_veterans_table.php` adds the folded column and backfills it, `Veteran` folds `tags` into `tags_normalized` in a `saving` hook so no writer can desync it, and `ListVeterans.php:63` filters with `whereJsonContains('tags_normalized', mb_strtolower($tag))`. `VeteranLibraryTest.php:163` pins the case-insensitivity across `Speed` / `speed` / `FRONT RUNNER` / `front runner`. What closure does not cover: `ListVeterans.php:19-20`'s docblock still says the tags are "searched through `tags`", which the code no longer does; that prose is stale and left for a docs pass.
 
-**Status: OPEN.** `StoreVeteranRequest::prepareForValidation()` de-duplicates tags by `mb_strtolower`
+**Status: OPEN. [Index records CLOSED for this entry; the body below keeps its filed history. Per this file's own convention (lines 2-4) the index line is the current state, so this status text is historical. Reconciled 2026-11-17, S2 P2.]** `StoreVeteranRequest::prepareForValidation()` de-duplicates tags by `mb_strtolower`
 (`app/Http/Requests/StoreVeteranRequest.php:131`) and stores the first spelling exactly as typed, so a
 Trainer who types `speed` keeps `speed`. The library's tag filter answers the `Speed` suggestion with
 `whereJsonContains('tags', 'Speed')` (`app/Actions/ListVeterans.php:61`), and SQLite compares JSON string
@@ -1393,7 +1399,7 @@ and in this file, so the collision is reported for the owner to settle rather th
 
 ### KI-71 The Grand Concert final is tagged with a scenario key no run carries - FILED 2026-10-07 (E5 hand-off), CLOSED 2026-10-09
 
-**Status: CLOSED 2026-10-09.** Not caused by E5 and not fixed by it. It is filed here because E5 reads
+**Status: CLOSED 2026-10-09. [Index records CLOSED for this entry; the body below keeps its filed history. Per this file's own convention (lines 2-4) the index line is the current state, so this status text is historical. Reconciled 2026-11-17, S2 P2.]** Not caused by E5 and not fixed by it. It is filed here because E5 reads
 the same career calendar D10 reads, and reading it whole is what made the mismatch visible. The fix below
 was uncommitted at filing but is now on `HEAD` at `480b711`.
 
@@ -1485,7 +1491,7 @@ entries) and the class's future re-creation on any scenario key rename.
 
 **Closed 2026-10-09.** The port is per session: `playwright.config.ts:12` reads `PLAYWRIGHT_PORT` (default 8127), and the harness's own webserver command resolves the same port, so a leaked server on the default no longer takes every other session's entry point down. What closure does not cover: a leaked server on a session's own port is still possible; the isolation is per session, not a reaper.
 
-**Status: OPEN.** Not caused by E6 and not fixed by it. E6 found it while trying to make `npm run
+**Status: OPEN. [Index records CLOSED for this entry; the body below keeps its filed history. Per this file's own convention (lines 2-4) the index line is the current state, so this status text is historical. Reconciled 2026-11-17, S2 P2.]** Not caused by E6 and not fixed by it. E6 found it while trying to make `npm run
 test:browser` work with no override, and the reason it is filed instead of fixed is in "Closure owed".
 
 `playwright.config.ts:7` pins one port (`const port = 8127`), `:36` starts the dev server on it, `:38`
@@ -1745,7 +1751,7 @@ future gate in the sequence that writes rather than reads inherits the same haza
 
 **Closed 2026-10-09.** `.env.example:74` sets `INERTIA_SSR_ENABLED=false` with the reason, and `AGENTS.md` §18 carries the trap. What closure does not cover: `config/inertia.php` stays unpublished, so a local `.env` that omits the key inherits the package default; the fix is the documented env var, not a published timeout.
 
-**Status: OPEN.** Not caused by F1, not fixed by it, and not fixed in the slice that filed it. The remedy is
+**Status: OPEN. [Index records CLOSED for this entry; the body below keeps its filed history. Per this file's own convention (lines 2-4) the index line is the current state, so this status text is historical. Reconciled 2026-11-17, S2 P2.]** Not caused by F1, not fixed by it, and not fixed in the slice that filed it. The remedy is
 shared configuration that every session reads, which is the same objection KI-73 records against a slice
 editing the shared harness. Filed with the owner's instruction: "File it; leave it."
 
@@ -2364,7 +2370,7 @@ any defect inside it travelled with the restore untouched.
 
 ### KI-87 The cockpit reads its finale through two queries that select different rows, and prints one scenario's client noun on all four - FILED 2026-10-09 (Slice 22 strip/reader agreement), OPEN
 
-**Status: OPEN.** Found by writing the agreement test this slice owes, not by reading the code for a
+**Status: OPEN. [Index records CLOSED for this entry; the body below keeps its filed history. Per this file's own convention (lines 2-4) the index line is the current state, so this status text is historical. Reconciled 2026-11-17, S2 P2.]** Found by writing the agreement test this slice owes, not by reading the code for a
 disagreement. Both halves are pinned green in `tests/Feature/CockpitFinaleStripTest.php` at `31d4af1`,
 which is why they are filed as defects rather than asserted as intent: a passing test records what the
 code does, and here what it does is two surfaces of one page answering about different races.
@@ -2440,7 +2446,7 @@ does not cover: the browser suite still cannot complete a full finished career o
 KI-88's own class-1 empty-table defect (KI-69) and KI-82's missing title are resolved, so the submit
 controls are component-tested and tree-pinned rather than browser-gated end to end.
 
-**Status: OPEN, with two independent halves.** (Dated record, retained.) Found by running the browser gates that KI-80 had held
+**Status: OPEN, with two independent halves. [Index records CLOSED for this entry; the body below keeps its filed history. Per this file's own convention (lines 2-4) the index line is the current state, so this status text is historical. Reconciled 2026-11-17, S2 P2.]** (Dated record, retained.) Found by running the browser gates that KI-80 had held
 `routes/web.php:116` makes `runs.show` a redirect (`TrainingRunController::redirect()` →
 `runs.cockpit`), and the cockpit's own header forms carry no submit control:
 `resources/js/pages/Career/Cockpit.vue` opens `<form @submit.prevent="saveStatus">` at `:310`,
@@ -2569,7 +2575,7 @@ by `Cockpit.vue`, so the browser run covers the whole blast radius.
 
 ### KI-91 The Skills planner has no link into it: the surface that carried the only entry point was retired and nothing replaced it - FILED 2026-10-10 (R2-07 copy sweep), OPEN
 
-**Status: OPEN.** Found while retargeting the instructions that named the retired run record screen. Not
+**Status: OPEN. [Index records CLOSED for this entry; the body below keeps its filed history. Per this file's own convention (lines 2-4) the index line is the current state, so this status text is historical. Reconciled 2026-11-17, S2 P2.]** Found while retargeting the instructions that named the retired run record screen. Not
 caused by that sweep, and not fixed by it.
 
 `routes/web.php:158` declares `runs.skills.planner` and `SkillsPlannerController::show()` renders it, and
@@ -2740,7 +2746,7 @@ because an audit happened to be run is a different decision.
 **2026-11-10 fix landed (S-RS-REMAINING-1 slice 1.9, `8f45e552`):** the live header renders `Imported {date} from {import_source}` again. The runbook's premise about the renderer is stale (corrected here rather than followed): `CareerHeader.vue` was renamed `CockpitIdentityCard.vue` (`48f2bfeb`) and that component was then DELETED outright (`530d62b9`, "Deleted, because no cockpit HFW draws them"), so the Cockpit's head is now `PageHeader` + a `lede` computed string inside `Cockpit.vue`. The derivation stays with the controller as the KI requires: `CockpitController::runSection()` now emits `import_label` (null when `imported_at` is null, else "Imported " + the date + " from " + the source), and `TrainingRun`'s docblock declares `imported_at` as `Carbon|null` beside the existing `created_at`/`updated_at` precedent (the column otherwise reads as string to the analyser). `Cockpit.vue`'s new `ledeWithImport` appends the label to the lede only when it exists, so the header shape is unchanged for the run nobody imported. Proving commands: `vendor/bin/pest --compact tests/Feature/HistoricalRunImportTest.php` -> `Tests: 17 passed (143 assertions)` with the new case "names the pasted body in the cockpit header the imported run lands on" asserting `run.import_label` for the imported run and null for a typed one; `npx playwright test tests/browser/run-import.spec.ts` -> `10 passed, 1 failed`, the one failure being ":123 refuses a file the app never wrote", which reproduces RED at HEAD with this slice stashed (same case, same error, `element(s) not found` on its refusal sentence), so it is pre-existing and unrelated; the KI-95-relevant case ":134 commits the previewed file" passes. `npm run typecheck` exit 0; `vendor/bin/pint --test` passed on both PHP files; PHPStan level 6 [OK] on both. What closure does not cover: the pre-existing ":123" refusal-case red (classified only as "reproduces at HEAD"; it belongs to its own pass) and `SCREEN_SPEC.md`'s record-screen section, which still describes the retired screen and is the doc half this entry named - that half stays open.
 
 
-**Status: OPEN.** Pre-existing, introduced by `b30906a` (2026-10-09, "chore: land peer's cockpit cutover as one
+**Status: OPEN. [Index records CLOSED for this entry; the body below keeps its filed history. Per this file's own convention (lines 2-4) the index line is the current state, so this status text is historical. Reconciled 2026-11-17, S2 P2.]** Pre-existing, introduced by `b30906a` (2026-10-09, "chore: land peer's cockpit cutover as one
 coherent unit"), not by the slice whose gate surfaced it. Found while classifying the ten failures of a full
 browser run; `run-import.spec.ts:124` is the one case that fails on it.
 
@@ -2830,7 +2836,7 @@ this entry's commit differ by that one block by design.
 
 ### KI-97 The Cockpit's Spirit Bursts rail is hard-wired to null, so a recorded counter pair prints as an absence on every Unity Cup run - FILED 2026-10-11 (Phase C.1 investigation), CLOSED 2026-10-11
 
-**Status: OPEN.** The root cause is proven by reading the display path end to end. It is not fixed here for one
+**Status: OPEN. [S2 P3 2026-11-17: the index records CLOSED; this body keeps its filed OPEN text as history. If the fix is not in the tree, reopen with a commit ref rather than by editing this line.]** The root cause is proven by reading the display path end to end. It is not fixed here for one
 reason named below, and the reason is the file's ownership, not the diagnosis.
 
 Found while chasing a contradiction on the run the Phase C walk created. Run 10 holds `spirit_bursts_count = 6`
@@ -3193,7 +3199,7 @@ adding it is a dependency decision, not a fix) would flag the undeclared read; u
 
 Measured 2026-10-16 05:18, from `cockpit-unity-cup-no-crash.png` and `git show HEAD:`.
 
-**Status: fixed uncommitted, so still live at HEAD.** `git show
+**Status: fixed uncommitted, so still live at HEAD. [S2 P3 2026-11-17: index OPEN and this body agree — the fix is uncommitted, so the entry stays live at HEAD.] [S2 P6 2026-11-17: ADR-0027 still reads Status: Proposed, so the owner signature remains the open half; index OPEN agrees.]** `git show
 HEAD:resources/js/components/career/UnityCupEditor.vue` carries `<details>` at 78, the summary text
 `Edit team state` at 80 and the closing tag at 168; `Cockpit.vue:757-772` wraps the same component in its
 own `<details data-region="team-state">` with the same summary. Two disclosures, one label, nested. The
@@ -3322,7 +3328,7 @@ the pre-rewrite line number.
 
 ### KI-108 `docs/research-scratch/SLICE-RECORDS.md` section `## execution-ledger-2026-10-17.md` contains NUL bytes in the working tree - FILED 2026-10-20 (citation-fix batch close-out), OPEN, PEER-OWNED
 
-**Status: OPEN, peer-owned.** `docs/research-scratch/SLICE-RECORDS.md` section `## execution-ledger-2026-10-17.md` carries approximately 6571
+**Status: OPEN, peer-owned. [Index records CLOSED for this entry; the body below keeps its filed history. Per this file's own convention (lines 2-4) the index line is the current state, so this status text is historical. Reconciled 2026-11-17, S2 P2.]** `docs/research-scratch/SLICE-RECORDS.md` section `## execution-ledger-2026-10-17.md` carries approximately 6571
 NUL bytes in the working tree. All committed versions (HEAD, bd9e2e5, 4db04fd) are clean UTF-8; the NULs
 exist only in the peer's uncommitted edits (git status: ` M`).
 
@@ -3400,7 +3406,7 @@ from the commit metadata.
 **2026-11-10 status pass (S-RS-REMAINING-1 slice 0.4b):** confirmed that neither file is tracked at current HEAD; disposition unchanged (owner); no action taken here beyond recording it. `git ls-files --error-unmatch analysis_output.txt base_veteran.vue` fails for both, and `git log --all --oneline -- analysis_output.txt base_veteran.vue` names `5d88a88c` ("fix(skills): Gate 1 - release_status fix for 7 JapanOnly skills + reconciliation record", 2026-10-20) as the deleting commit (its stat shows `base_veteran.vue` going to 0 bytes and the `analysis_output.txt` path leaving the tree). The entry's "OPEN, OWNER DECISION REQUIRED" stands as history: the `git rm` review question is now moot because the owner's own Gate 1 commit removed both; if either name reappears it re-enters through a new change, not through this register entry. No file was modified.
 
 
-**Status: OPEN.** Both files are UTF-16LE with byte order mark (first bytes `FF FE`) and contain NUL
+**Status: OPEN. [Index records CLOSED for this entry; the body below keeps its filed history. Per this file's own convention (lines 2-4) the index line is the current state, so this status text is historical. Reconciled 2026-11-17, S2 P2.]** Both files are UTF-16LE with byte order mark (first bytes `FF FE`) and contain NUL
 bytes. git treats both as binary: `git diff --stat` and `git grep` return no matches for either.
 
 **Gate impact:** `lore.php` uses `git grep`, so both files are silently skipped. `doc_census.py` only
@@ -3448,7 +3454,7 @@ doc scope.
 **2026-11-10 status pass (S-RS-REMAINING-1 slice 0.5):** fixed at HEAD. Measured with a fence state machine over the two named files plus the third instance found by the same sweep: `docs/UMAMUSUME_REFERENCE.md` carried closers with the `text` info string at lines 137, 2905 and 2913 (pairs opened at 130, 2899 and 2907), and `docs/imports/Umamusume_Progress_Tracker_Runs.md:2392` opened a `text` block that never closed, so the run-17 transcript and the provenance notes rendered as one code block. The runbook's named `PROCESS-PLANS.md:576`/`:921` sites were re-measured first and are NOT fences at current line numbers (a table row and a blank line; the fence checker reports no unbalanced block in that file), so they were left alone. Edits are the mechanical swap the KI describes: the three mis-tagged closers became bare ``` and the unclosed 2392 block gained its ``` closer before the `## Provenance notes` heading. `python tools/md_fence_check.py` reads `0 invalid closing fence(s) in 209 file(s)`; a state-machine scan reports every fence in both files balanced; `php tools/lore.php` delta is 0 (583 docs hits before and after).
 
 
-**Status: OPEN, reduced to two files.** A closing fence must be bare. CommonMark 0.31 section 4.5 says the
+**Status: OPEN, reduced to two files. [Index records CLOSED for this entry; the body below keeps its filed history. Per this file's own convention (lines 2-4) the index line is the current state, so this status text is historical. Reconciled 2026-11-17, S2 P2.]** A closing fence must be bare. CommonMark 0.31 section 4.5 says the
 line that ends a block is the run of backticks and nothing else, so a fence carrying an info string is
 always an opening. Where one sat where a closer belonged, the block never closed, and every line after it
 rendered as code until the next bare fence. The reader saw something the file did not say.
@@ -3659,7 +3665,7 @@ would have caught it, and no such gate exists.
 
 ### KI-116 The run's reached per-card effect values are unrecorded (Group A / A-0.4) - FILED 2026-10-24 (Group A + B audit pass)
 
-**Status: OPEN - blocked on A-0.5.** The builder's analysis uses catalog maxima.
+**Status: OPEN - blocked on A-0.5. [S2 P6 2026-11-17: narrowed — DeckAnalysis.php:28-29 contributes a reached value when a slot records a level and marks catalogue maximum otherwise; only unrecorded slots remain.]** The builder's analysis uses catalog maxima.
 
 **Current state.** `ADR-0014:8` states the reached effect values are still unrecorded and the deck analysis uses catalog anchors. A per-run reached value needs a card level first (A-0.5) plus an effect lookup.
 
@@ -3704,7 +3710,7 @@ would have caught it, and no such gate exists.
 
 ### KI-119 The Current Spirit gauge has no column (Group B / B-0.6, R4-14) - FILED 2026-10-24 (Group A + B audit pass)
 
-**Status: OPEN - blocked: ADR.** A Spirit value is a migration.
+**Status: OPEN - blocked: ADR. [S2 P6 2026-11-17: narrowed — current_spirit_proxy is now a typed prop at UnityCupPanel.vue:87.]** A Spirit value is a migration.
 
 **Current state.** `UnityCupPanel.vue:231-241` mounts `ResourceMeter` with `value: null, max: null` and the absence sentence; no column or payload reader. Ruling B-0.6 (2026-10-24): accepted; ADR first. See `docs/research-scratch/PLANS-AND-BRIEFS.md`, section `## group-ab-rulings-owed.md`, item `B-0.6`.
 
@@ -3847,7 +3853,7 @@ heading hierarchy; folding it in would have made one commit cover two different 
 
 ### KI-128 `Delete this career` sits inside the `Races in this run` region - FILED 2026-10-24 (capsule pass)
 
-**Status: OPEN - owner placement decision.** A run-level destructive control in a per-race container.
+**Status: OPEN - owner placement decision. [Index records CLOSED for this entry; the body below keeps its filed history. Per this file's own convention (lines 2-4) the index line is the current state, so this status text is historical. Reconciled 2026-11-17, S2 P2.]** A run-level destructive control in a per-race container.
 
 **Current state.** The danger-zone `<details data-region="danger-zone">` (`resources/js/pages/Career/Cockpit.vue:1157-1188`)
 renders at the bottom of the section whose heading is `Races in this run` (`:1108-1111`, section
@@ -4395,7 +4401,7 @@ spec is the residue, and it is a spec edit rather than a door.
 
 ## KI-145 — `npm run lint:ui` reports 282 arbitrary values against the recorded 219 baseline, and the debt is peer-owned
 
-**State:** TERMINAL — peer-owned lint debt: `npm run lint:ui` reports 282 arbitrary values against the recorded 219 baseline; 63 findings were added after the baseline, all on files outside this tree. AGENTS.md §9 treats that list as deferred debt with a named intent; clearing it is the peer's pass, not this one. The figure was named in `da59bdac` and `202e8753` before this entry existed.
+**State:** TERMINAL — peer-owned lint debt: `npm run lint:ui` reports 282 arbitrary values against the recorded 219 baseline; 63 findings were added after the baseline, all on files outside this tree. AGENTS.md §9 treats that list as deferred debt with a named intent; clearing it is the peer's pass, not this one. The figure was named in `da59bdac` and `202e8753` before this entry existed. [S2 P6 2026-11-17: index records CLOSED after re-measurement: 207 arbitrary-value findings vs the 209 baseline, 516 total across eight rules, exit 0; this body keeps its filed status as history.]
 
 **Defect.** `node tools/ui-framework-check.mjs` fails with `arbitrary-value count 282 exceeds baseline
 219`, so `npm run lint:ui` is red on every checkout carrying the 63 findings added since the baseline was
@@ -4981,6 +4987,32 @@ one page overflows at the WCAG 1.4.10 reflow width and one at the 640 two-track 
 here rather than as a new entry because the probe, the failure class and the closure command are
 one; a fix for either surface that does not re-read the other is incomplete.
 
+**Dated note 2026-11-17 (appended — the sentences above are preserved; two of them are now wrong).**
+
+The cockpit half is **RESOLVED**, and the mechanism is not a track-sizing problem. `resources/css/app.css:1339`
+gives a card its scroll container with `.card:has(> table.t)` — a **direct-child** combinator. The
+Obligations table is not the card's child: it sits two components deep
+(`AdvisorRail` -> `NextDecision` -> `table.t`), so the rule never matched, no ancestor scrolled, and the
+document panned by exactly the filed 88px (`728 - 640`). The body above guessed "the table's own width is
+261px but its left edge sits at 467px, which points at the track sizing" — that reading was right about
+where the table starts and wrong about why it mattered; nothing needed to change in the grid.
+
+Fix (one wrapper, no new class, no new arbitrary value, no `role`/`tabindex`):
+`resources/js/components/career/NextDecision.vue:344` — `<div class="mt-2 overflow-x-auto">` around the
+table, the same shape `CareerStatePanel.vue:332` and `RacePlanner.vue:351` already use. A named region with
+a tab stop was rejected: the Advisor card already carries both, and a second nested stop would add a stop to
+reach content the first one reaches.
+
+Verified, quoted: `career-race-strip.spec.ts` reports **no overflow error at 320 or at 640** (previously
+`Received: 88` at 640), and `career-cockpit.spec.ts:373` ("lays out at 1280, 768 and 320 without a horizontal
+scroll") passes. Gate output: `typecheck` exit 0, `build` 970 modules exit 0, `lint:ui` exit 0 with no new
+arbitrary value in `NextDecision.vue`.
+
+**The Races half is now its own row, KI-166.** It is untouched by this fix and stays undiagnosed; splitting
+it is what lets the cockpit half close without overclaiming. `TERMINAL` was the wrong status for a
+reproducible layout overflow with a named mechanism, and this note corrects that without rewriting the
+original line.
+
 ### KI-161 `current_spirit_proxy` shipped in code and validated, but its migration was Pending on the dev database - FILED 2026-11-12, DEPLOYED 2026-11-12
 **Status: CLOSED 2026-11-12 - migration deployed to `database/database.sqlite` under explicit owner approval; column verified, write path verified, existing data preserved.** Deployment and verification records are in the sections below. **This closure covers the persistence column only** (historical, 2026-11-12): KI-133's per-member Spirit shape question was then OPEN and blocked; it was resolved 2026-11-13 by the delivered event-derived board, and the manual proxy remains a labelled proxy rather than a game value.
 
@@ -5125,3 +5157,250 @@ and no such column is proposed.
 **mutation-tested**: making `spiritBurstRoster()` inject a phantom member fails 6 tests, so the assertions bite rather
 than passing vacuously.
 
+
+
+## KI-162 Two Dashboard/Races assertions fail only in a full-suite run, against an uncommitted peer refactor of the position label
+
+**State:** OPEN — peer-owned and mid-flight. Filed 2026-11-17 by the S2 register pass, from a full-suite run at **[S2 re-verification 2026-11-17: a complete `php artisan test --compact` at the same HEAD with the same three peer files in the tree reported `Tests: 2455 passed (37540 assertions)`, 0 failures, 445.02s (exit 1 came from a Playwright websocket teardown raised AFTER the summary, not from a test). Both named cases also pass alone and in three pairings. This entry therefore records a failure observed once and not since; it is intermittent or already-resolved, and the peer attribution below is unsupported rather than proven. Do not carry it to the release bar as a live failure. The suite is Unit + Feature only — `phpunit.xml` has no Browser suite, so this says nothing about `tests/browser/`.]**
+`be8893a2` plus working-tree changes.
+
+**Defect.** `php artisan test --compact` (one process, 465.68s) reports **1 failed, 2453 passed (37521 assertions)**.
+The failing case is `DashboardTest > it prints the imported position a snapshot stands at, not the count of turns
+it logged`: `activeCareer.position_label` expected `Senior Year · Early October` and received
+`Junior Year · Early January`. A second, independent case in the same class, `RunRaceStripTest > it stands at the
+imported position for a snapshot`, reports `raceStrip.this_turn.turn` absent when the two suites run together.
+
+**Isolation and pairings.** Each spec passes alone (`DashboardTest` 18 passed / 339 assertions; `RunRaceStripTest`
+18 passed / 286 assertions). Eight pairs were run — `Dashboard` against each of `SnapshotTraineeIdentity`,
+`SnapshotOwnedSkills`, `SnapshotDoorLink`, `TraineeGoalFanGate`, `SnapshotReview`, `CreateSnapshotRun`,
+`SnapshotEntry`, `SnapshotCockpit` — and all sixteen direction-pairs pass. So the S1 batch is **exonerated** by
+measurement, not by assertion.
+
+**Attribution, with its limit.** The working tree carries seven modified files under `app/`. Four are the S1 batch;
+**three are not**: `app/Http/Controllers/DashboardController.php`, `app/Models/Umamusume.php`,
+`app/Services/Career/RaceStripBuilder.php`. The peer diff rewrites precisely the field that fails —
+`'position_label' => $this->positionLabel($turn)` becomes `$this->positionLabel($position->turnIndex)` with a new
+`careerPosition()` owner. That is a strong inference, **not** proof: causality has not been established by revert or
+by a clean-worktree replay. Confirm by running the same two cases in a worktree at `be8893a2` with no working-tree
+changes; green there implicates the uncommitted diff, red means the defect pre-dates it.
+
+**Why it is not fixed here.** The three files belong to another session. Landing, reverting or parking that refactor
+is a scheduling decision, not an agent one. Until it is settled the suite cannot go green, and any verdict touching
+position or cockpit labels is unstable.
+
+**Release-bar consequence.** S4 requires either zero failures or a named set each carrying a filed row. This row is
+that filing for these two cases; it does not make the bar pass, it makes the failure **legible**.
+
+## KI-163 Four duplicate `GoalRow`/`GoalGroup` interface declarations must be kept in agreement by hand
+
+**State:** OPEN — refactor debt, no behavioural defect. Filed 2026-11-17 (S2 P5).
+
+**Defect.** The same payload shape is declared four times: `resources/js/components/scenario/cards/GoalGroupCard.vue`,
+`resources/js/components/scenario/ScenarioCardGrid.vue`, `resources/js/components/scenario/UnityCupPanel.vue` and
+`resources/js/pages/Career/Cockpit/Panels/CareerGoalsPanel.vue`. Adding one field to a goal row (`fan_gate`,
+`fan_gate_label`, `fan_gate_title`, R8 U-05b) required four separate edits, and `npm run typecheck` failed twice —
+once per missed copy — before all four agreed.
+
+**Why it is worth a row rather than a silent fix.** TypeScript caught the drift, so the defect is cost, not
+correctness: four edit sites per payload change, and a fleet of near-identical declarations that will diverge the
+day someone edits one. Consolidating them into one exported type is a pure refactor with no behaviour change, which
+is exactly why it does not belong inside a behaviour slice.
+
+**Verification of the claim.** `grep -rn "interface GoalGroup\|interface GoalRow" resources/js` -> four files;
+`npm run typecheck` exit 0 after the fourth was updated.
+
+## KI-164 `SnapshotReviewTest` asserts payload rows by array position, so every added row costs a re-derivation
+
+**State:** OPEN — test-shape debt. Filed 2026-11-17 (S2 P5).
+
+**Defect.** `tests/Feature/SnapshotReviewTest.php` reads its contract as `fields.2.display`, `fields.7.state` and so
+on. Adding Rarity and Potential Level to the review payload (R8 E-04) moved every state row from index 2 to 4, so
+`->has('fields', 10)` became 12 and six positional assertions needed re-deriving in the same change.
+
+**Why it is filed rather than fixed.** The assertions are correct — they pin the exact read-back the screen renders —
+but they express it positionally, where a keyed lookup (`fields` by `key`) would survive any insertion. The repair is
+a test-shape refactor across one file, and it belongs in a pass that is allowed to touch test structure rather than
+inside a feature slice.
+
+**Verification of the claim.** `grep -n "fields\." tests/Feature/SnapshotReviewTest.php` -> 11 positional
+assertions; the R8 E-04 change required edits at six of them and a corrected `has()` count.
+
+## KI-165 The fan ladder renders a correct class and gap, but the ladder itself is one band instead of nine
+
+**State:** CLOSED 2026-11-17 — the ladder filled from the sourced thresholds; the two non-numeric tiers stay unrepresentable by ruling. Filed 2026-11-17 (S2 follow-up, from a re-probe of R8 P-60). The historical one-band text below is kept as the filing record.
+
+**Closure, measured.** `config('uma.fan_ladder')` now carries the seven fan-counted tiers as half-open
+`[from, to)` bands keyed on each tier's own published threshold (reach N → that class): Bronze 5,000,
+Silver 20,000, Gold 50,000, Platinum 100,000, Star 160,000, Top Star 240,000, Legend 320,000 with a
+PHP_INT_MAX ceiling. Mapping provenance: `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:474` (the nine-step
+pyramid, frame-verified; restated `docs/audits/ux-walkthroughs/rice-shower-unity-cup-ux-walk-9.md:194`,
+SR §1.15) is the only source stating a *class for a known fan count*, and its audited run — 209,245
+fans printing `Star` with a 30,755-fan gap to `Top Star` — fixes the boundaries to the label's range,
+not the tier's own figure. That reading is unchanged and pinned by
+`FanLadderTest::keeps the audited reading unchanged after the ladder filled` (FanLadderTest: 22 passed /
+28 assertions; CockpitRunIdentityTest: 30 passed / 131 assertions with it). The service answers null
+below Bronze (a `Beginner`/"1st place" run and a `Debut / Maiden` run have no fan count to key on, so
+they render the bare number rather than a borrowed class) and class-without-gap inside the Legend
+ceiling — both edges are new (`FanLadder::nextThreshold()`/`::nextClassName()` return null when the
+band's `to` is PHP_INT_MAX), because the naive fill leaked PHP_INT_MAX through `nextThreshold()` and
+would have printed a 9.2e18-fan gap; the new cases catch it. Wire re-pinned:
+`CockpitRunIdentityTest` gains `test_reads_a_fan_count_below_the_first_fan_counted_band_as_a_bare_number`
+(4,999 → bare number) replacing the stale "above every band" case, and
+`test_reads_a_legend_count_with_the_class_and_no_gap_past_it` (500,000 → Legend, gap/threshold/nextClass
+all null). The browser copy (`career-cockpit.spec.ts:888`, `209,245 · Star (30,755 to Top Star)`) needed
+no change. One visible behaviour change to note in review: a run at 0..4,999 fans now prints the bare
+count where the old 0-floor band printed `Star`, and a 5,000-fan run prints `Bronze (15,000 to Silver)`
+where it printed nothing labelled before — both are the pyramid's own semantics, not a regression.
+
+**Divergence from `docs/plan/plan-defects-2026-11-17.md` slice 3.2, recorded:** that draft keyed Bronze
+at `from: 0` and Star at `[100000, 240000)`, treating the 160,000 tier figure as an interior boundary.
+This closure follows the source instead (each band starts at its tier's published threshold; Star spans
+`[160000, 240000)`), because the pyramid prints the tier name beside the count that reaches it and the
+draft's Star floor (100,000) is the Platinum tier's threshold, not a sourced Star figure. The draft's
+PHP_INT_MAX gap leak is also fixed at the service rather than accepted.
+
+**What is built, and verified end to end.** `app/Services/FanLadder.php` provides `classFor()`,
+`nextThreshold()`, `gapToNext()`, `nextClassName()` and `fromValue()`. `CockpitController.php:581` calls it and
+puts `fan_ladder` on the `identity` prop. `CareerStatePanel.vue:309` renders it behind a guard
+(`row.key === 'fans' && props.fanLadder && props.fanLadder.class !== null`), falling back to the bare count when
+the ladder cannot place the reading. All four files are committed and clean, and the prop is present in the served
+bundle (`public/build/assets/Cockpit-1FC9-BSb.js`).
+
+**Correction 2026-11-17 (measured, supersedes the causality sentence this row carried).** The row previously said
+the ladder "landed in `27800fa8` (2026-11-15), **after** walk-9 observed the absence at `248e1cbb`". That is
+backwards. `git merge-base --is-ancestor 27800fa8 248e1cbb` exits 0 and `git rev-list --count 27800fa8..248e1cbb`
+returns **76**: `27800fa8` (2026-11-15) is an **ancestor** of `248e1cbb` (2026-11-17), so the ladder was already in
+the tree walk-9 walked. Verified at `248e1cbb` directly: `git show 248e1cbb:config/uma.php` carries the
+`'fan_ladder'` band at `:578`, `git cat-file -e 248e1cbb:app/Services/FanLadder.php` exits 0, and
+`git show 248e1cbb:resources/js/pages/Career/Cockpit.vue` binds `:fan-ladder`, with
+`CareerStatePanel.vue`'s `row.key === 'fans'` guard present at the same commit.
+
+So walk-9's absence observation is explained by **state, not by commit order**. Its own evidence
+(`.scratch-uma/rs-uc-walk9/evidence.json`) shows the S04 review read `Not provided · Fans`, and run #36's only
+turn entry (`turn 67`) stores `fans = NULL`. `CockpitController.php:581` therefore emits `fan_ladder => null`, and
+the `props.fanLadder.class !== null` guard falls through to the bare `N/A, Fans has not been recorded for this
+run` tile. The walk was right to record the absence; the ladder was not missing from its build.
+
+**Rendered presence is proven, not inferred.** `tests/browser/career-cockpit.spec.ts:870` creates a career,
+records a turn with `fans: '209245'`, and asserts `209,245 · Star (30,755 to Top Star)` visible in
+`section[aria-labelledby="career-state-heading"]`. Run 2026-11-17 session-private
+(`PLAYWRIGHT_PORT=8311`, `PLAYWRIGHT_SCRATCH_DB=.scratch-uma/s18d/browser-8311.sqlite`):
+**1 passed (1.3m)**. Presence-only evidence is not needed again; the feature renders when a fan count exists.
+
+**What is missing.** `config/uma.php:578-580` holds exactly one band:
+
+```php
+'fan_ladder' => [
+    ['class' => 'Star', 'from' => 0, 'to' => 240000, 'next_class' => 'Top Star'],
+],
+```
+
+So for a run at 209,245 fans the answer is right: class `Star`, threshold 240,000, gap **30,755**, matching the
+source document exactly. But `FanLadder::classFor(240_000)` returns `null` by design (a count above the only band is
+deliberately unclassifiable rather than guessed), so every other tier the source prints is unrepresentable.
+
+| Tier | Source threshold (SR 2.3g) | Present in config? |
+| --- | --- | --- |
+| Legend | 320,000 | no |
+| Top Star | 240,000 | name only, as this band's `next_class` |
+| Star | 160,000 | **yes** (this band, floor 0) |
+| Platinum | 100,000 | no |
+| Gold | 50,000 | no |
+| Silver | 20,000 | no |
+| Bronze | 5,000 | no |
+| Beginner | 1st place | no |
+| Debut / Maiden | base | no |
+
+**Why it is filed rather than fixed.** Filling the band list is a data change in `config/uma.php` plus the thresholds
+the source publishes, and it needs a decision on the two non-numeric tiers (`Beginner` = "1st place",
+`Debut / Maiden` = base) which have no fan count to key on. That is a design question, not a mechanical one, so the
+row records the gap rather than inventing a schema for it.
+
+**What this does not change.** R8 P-60's *path* is closed: schema, writer, render and served asset are all present
+and the run's own reading is correct. Only the ladder's depth is missing. Do not re-open P-60 as an absence of the
+feature; the feature works and is one tier deep.
+
+**Verification.** `grep -rn "FanLadder" app/ resources/` gives the controller call at `:581` and the render guard at
+`CareerStatePanel.vue:309`; the `fan_ladder` block in `config/uma.php` carries exactly one `'class' =>` entry;
+`tests/Feature/FanLadderTest.php` asserts `classFor(240_000)` is `null`.
+
+
+## KI-166 The Race Decision page overflows by 59px at the 320px reflow width
+
+**State:** OPEN — split out of KI-160 on 2026-11-17 so KI-160's resolved cockpit half could close without claiming this surface was touched. Undiagnosed.
+
+**Defect.** `/training-runs/{run}/races` (`runs.races.decision`, `RaceDecisionController@show`) measures
+`over = 59` at a 320x900 viewport, and reads clean at 768 and 1280. That is the WCAG 1.4.10 reflow width, so
+this is the page panning sideways on the narrowest supported screen rather than a cosmetic gap.
+
+**Provenance.** KI-160's companion reading, recorded there on the same probe pass and carried here verbatim:
+*"one page overflows at the WCAG 1.4.10 reflow width and one at the 640 two-track width."* The 59px figure is
+KI-160's own measurement, not a re-derivation made when this row was split.
+
+**What is NOT known.** The mechanism. The cockpit's 88px had a specific cause (`.card:has(> table.t)` in
+`resources/css/app.css:1339` is a direct-child combinator, so a `table.t` nested inside a component never got
+a scroll container) and the same shape is a **candidate** here: `RaceDecision.vue` renders its own candidate
+race table. It is a candidate, not a finding — nobody has measured this page's overflowing boxes.
+
+**Proving command.** The pattern KI-160 used and that produced a named offender list:
+create a run, log turns over `runs.turns.store` (`tests/utils/record-turns.ts`), `goto('/training-runs/<id>/races')`,
+set 320x900, then enumerate `*` for `getBoundingClientRect().right > clientWidth + 1`, printing
+`tag` / `className` / nearest `[data-region]` / `right` / `width`. Run it session-private:
+`PLAYWRIGHT_PORT=83xx PLAYWRIGHT_SCRATCH_DB=.scratch-uma/<session>/probe.sqlite npx playwright test`.
+
+**No coverage exists to catch it.** `grep -n 'scrollWidth' tests/browser/career-race-*.spec.ts` finds one hit,
+`career-race-planner.spec.ts:119`, which measures the **planner** at 320 and passes. `career-race-decision.spec.ts`
+has no reflow case at all, so this page has never been measured by its own spec. Closing this row means adding
+that case, not only fixing the layout.
+
+**What closure needs.** The offending element named by a probe, the smallest fix that stops it (the cockpit's
+was a 3-line wrapper), a new 320px reflow case in `career-race-decision.spec.ts`, that case green alongside
+`career-race-planner.spec.ts:119` and `career-race-strip.spec.ts:203` still green, and this row's state line
+corrected with the measurement.
+
+**Dated note 2026-11-17 — the probe ran, and it refuted the candidate named above.** Measured on a 320x900
+viewport with a real 11-turn run, session-private (`PLAYWRIGHT_PORT=8308`/`8309`):
+
+```
+SUMMARY {"docOverflow":59,"cw":320,"sw":379,"tableDirectChild":true,
+         "cardOverflowX":"auto","cardHasRuleMatched":true,"offenderCount":20,"culprits":[]}
+```
+
+Read carefully, because it kills the easy answer:
+
+- `tableDirectChild: true` — `RaceDecision.vue:317`'s `table.t` **is** its `section.card`'s direct child, so
+  the combinator in `.card:has(> table.t)` matches it.
+- `cardHasRuleMatched: true`, `cardOverflowX: "auto"` — the rule **applied**; the card really is a scroll
+  container. The table is 411px wide inside a 288px card and is *clipped*, not escaping.
+- `culprits: []` — no unrescued box widens the document. All 20 elements whose `right > 320` (including the
+  table's own `right: 444`) sit under a scrolling ancestor.
+
+So the 59px does **not** come from a child escaping a non-scrolling card. `document.scrollWidth` is 379 while
+every offender is inside an `overflow-x: auto` box: the widening comes from a scroll extent still contributing
+through a clipped ancestor. Different failure mode from KI-160's, and the candidate above is wrong.
+
+**Coverage still owed, deliberately not added yet.** `career-race-decision.spec.ts` gains a 320px reflow case
+before this row closes — a page measuring 59px over should fail its own spec, not only a probe. It is not added
+now because it would be red, and a new red case blocks the tag for no gain until the cause is known.
+
+**What the next attempt should measure.** Not `right > clientWidth` — that class is resolved here. Walk *up*
+from `document.documentElement` comparing each element's `scrollWidth` against its `clientWidth`, and report the
+deepest element whose overflow is not itself clipped.
+
+**Dated note 2026-11-17 (owner ruling) — ship without gating; the empty `culprits` list is a probe defect.**
+`docOverflow: 59` alongside `culprits: []` is internally contradictory: something widens the document to 379, and
+an empty filtered list beside a nonzero overflow means the filter dropped the answer rather than proving no
+answer exists. The likely bug is that the filter exempted any element whose own computed `overflow` was not
+`visible` — **including the offender itself**. A scroll container whose own border-box is 379 wide is the
+culprit, and it was excluded for being a scroller.
+
+Containment exempts an element only when an **ancestor** clips it *and* its own box fits inside that ancestor's
+padding box. Being a scroller is not itself an exemption.
+
+Row state stands as *cockpit mechanism excluded; probe inconclusive — filter exempted self-scrollers*. It does not
+gate the tag.
+
+**Next-probe spec (write this, do not re-derive it).** Sort all 20 offenders by `right` descending. Print the top 5
+with `tag` / `class` / `data-region` / `right` / `width`, plus every ancestor's `overflowX`, `scrollWidth` and
+`clientWidth` up to `html`. The element whose `right` is ~379 is the answer. If none reaches 379, compare
+`document.documentElement.scrollWidth` against `body.scrollWidth` and check for any `100vw` width.

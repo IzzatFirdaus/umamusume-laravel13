@@ -1358,8 +1358,23 @@ system owns.
   minimum (2.5.8). Every control meets the 24px floor; 44px is the design intent.
 - **Colour is never the only signal.** Every state carries a word or a glyph beside its hue
   (§5, §6).
+- **Risk ink (BO-004, 2026-11-16).** `--color-risk` is printed as *text* on `panel` (the Dashboard's
+  `To do` pill), on `raised` (the risk rail) and on `page`, so it owes the 4.5:1 WCAG 2.2 AA text
+  threshold on all three, not the 3:1 non-text one. The dark value was `#FF4400`, which measured
+  **3.66:1 on raised** and **4.16:1 on panel** — both failures. It is now `#FF6F3B`: **4.57:1 on
+  raised**, **5.19:1 on panel**, **7.19:1 on page**. `#FF6D38` was rejected at 4.51:1 because a
+  0.01 margin does not survive subpixel rendering and display gamma. Enforced by
+  `tests/Feature/DesignTokensTest.php` → "keeps --color-risk legible as text on every surface it is
+  set on", which was observed failing at 3.66:1 on the old value before the token moved.
 
 ## Change log
+
+- **2026-11-16** — BO-004 erratum: dark `--color-risk` moved `#FF4400` → `#FF6F3B` so risk ink clears
+  WCAG AA 4.5:1 on all three surfaces it is set on (raised 3.66→4.57, panel 4.16→5.19, page
+  5.76→7.19). The light (`#C62828`) and eva01 (`#FF7E8C`) values already cleared it and did not move.
+  No layout, component or motion change; one token declaration in `resources/css/app.css` plus the
+  new DesignTokensTest case. The audit's measurement is
+  `docs/audits/browser-observation-2026-11-14/01-findings.md` §BO-004.
 
 - **2026-10-22** — UX-audit fix pass: the absence channel and the §10 enforcement index. Six `N/A`
   markers whose reason was reachable only by a `title` moved to `AbsenceValue` or to visible prose
