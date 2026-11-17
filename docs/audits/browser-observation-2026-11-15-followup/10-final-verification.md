@@ -1,16 +1,19 @@
 # 10 — Final verification: remaining roadmap execution
 
-**As of** HEAD `d56d0fdf` (`fix(ci): parallel port scan + 4 min deadline for packaged exe`) · branch `master`,
-level with `origin/master` · the last roadmap commit is `fe8747c9`, its parent. The working tree carries 80
-peer-owned paths (none staged by this dispatch); the only file this dispatch adds from here is this report.
+**As of** HEAD `d417a9a5` (`fix(a11y): lower-case the BO-009 continuation`) · branch `master`, four commits
+ahead of `origin/master` (`10dee9d7`). The last roadmap implementation commit before the review follow-ups is
+`fe8747c9`; `21568017` is this report. The working tree carries peer-owned paths (none staged by this
+dispatch).
 
 ## Status in one line
 
 Phases 0–4 and 6 are complete. Every roadmap slice has code, a test or browser walk, and evidence. Phase 5
-(BO-004) remains deferred for an owner ruling. The gates are green for every check this dispatch can own;
-six PHP failures and eleven browser failures remain, and every one is traced to peer-owned uncommitted
-worktree changes (`ProvenanceMark.vue`, `app.css`, `config/scenarios.php`, `Umamusume.php`, two CRLF files),
-not to the eight commits below.
+(BO-004) remains deferred for an owner ruling. A fresh-context review found **no Critical issues and two
+Important ones** — picker page position lost on reopen/equip, and a partial run-15 deck becoming permanent
+after a re-seed. Both are fixed with regression tests (`07ec79d9`, `4c13e0e0`), and one copy Minor is fixed
+(`d417a9a5`). The gates are green for every check this dispatch can own; six PHP failures and eleven browser
+failures remain, and every one is traced to peer-owned uncommitted worktree changes (`ProvenanceMark.vue`,
+`app.css`, `config/scenarios.php`, `Umamusume.php`, two CRLF files), not to the commits below.
 
 ## What was asked
 
@@ -37,11 +40,17 @@ Execute the remaining roadmap from the dispatch prompt and the v3.0.0 roadmap:
 | `d330c82e` | `fix(dashboard): annotate trainees KPI scope (BO-008)` | 2 | +14 / −5 |
 | `37fd9c88` | `feat(seeder): import deck for UraFinaleRunsSeeder run 15 (deck coverage)` | 2 | +90 / −0 |
 | `fe8747c9` | `fix(seeder): skip run-15 deck slots the catalogue cannot resolve` | 1 | +9 / −1 |
+| `21568017` | `docs(audit): record final roadmap verification (Phase 6.3)` | 1 | +407 / −0 |
+| `07ec79d9` | `fix(cards): keep the picker page across reopen and equip (R6-24)` | 3 | +61 / −5 |
+| `4c13e0e0` | `fix(seeder): fill missing run-15 deck slots on re-seed` | 2 | +43 / −9 |
+| `d417a9a5` | `fix(a11y): lower-case the BO-009 continuation` | 1 | +1 / −1 |
 
 The four commits `5156bc49`–`37fd9c88` were made earlier in this session and are on `master`; the three
 commits `1f4a9c5f`–`9f800577` were replayed from the salvage branches after a peer advance rewrote
 `master` around them. The replay preserved the exact diffs; it did not stage peer autocorrect attributes.
-`d56d0fdf` and the other CI commits above `b6b7bae8` are peer work, not this dispatch.
+`d56d0fdf` and the other CI commits above `b6b7bae8` are peer work, not this dispatch. The review follow-ups
+`07ec79d9`, `4c13e0e0` and `d417a9a5` sit on top of the report and address the fresh-context findings; they
+are not part of the original eight.
 
 ## Phase 1 — BO-009 (s56 comma normalisation)
 
