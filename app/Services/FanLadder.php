@@ -30,12 +30,21 @@ final class FanLadder
     /**
      * The threshold that ends the count's band - the next class's own threshold - or null when the
      * ladder names none.
+     *
+     * The ceiling band's `to` is PHP_INT_MAX (config carries no finite ceiling, so `bandFor()` can
+     * place any count); a ceiling threshold is not a next threshold anyone can reach, so a band
+     * whose `to` is PHP_INT_MAX answers null here rather than a 9.2e18 gap the renderer would
+     * print.
      */
     public static function nextThreshold(int $fans): ?int
     {
         $band = self::bandFor($fans);
 
-        return $band === null ? null : (int) $band['to'];
+        if ($band === null || (int) $band['to'] === PHP_INT_MAX) {
+            return null;
+        }
+
+        return (int) $band['to'];
     }
 
     /**
@@ -52,11 +61,18 @@ final class FanLadder
      * The class the next threshold opens ("Top Star"), or null when the ladder names no next band.
      *
      * The name rides the band itself (`next_class`) rather than a renderer's literal, so the number
-     * and the name it counts toward are always the same band's answer.
+     * and the name it counts toward are always the same band's answer. The ceiling band's
+     * `next_class` is the sentinel `Legend` (config carries nothing real to point at), and a class
+     * name nobody can reach is not an answer, so a PHP_INT_MAX ceiling answers null here too.
      */
     public static function nextClassName(int $fans): ?string
     {
         $band = self::bandFor($fans);
+
+        if ($band === null || (int) $band['to'] === PHP_INT_MAX) {
+            return null;
+        }
+
         $name = $band['next_class'] ?? null;
 
         return is_string($name) && $name !== '' ? $name : null;

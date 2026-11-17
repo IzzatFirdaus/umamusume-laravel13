@@ -88,11 +88,37 @@ final class CockpitRunIdentityTest extends TestCase
                 ->where('identity.fan_ladder', null));
     }
 
-    public function test_reads_a_fan_count_above_every_band_as_a_bare_number(): void
+    public function test_reads_a_fan_count_below_the_first_fan_counted_band_as_a_bare_number(): void
     {
-        // Above the highest documented threshold the ladder names no class, so the class and the gap
-        // are null while the count itself still crosses the wire: the row prints the number alone
-        // rather than a class nobody sourced (`FanLadder`'s own contract).
+        // `Beginner` and `Debut / Maiden` are keyed on "1st place" and an entry class, not a fan
+        // count (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:474`), so the filled ladder's first
+        // band starts at Bronze 5,000. Under it the ladder names no class, so the class and the
+        // gap are null while the count itself still crosses the wire: the row prints the number
+        // alone rather than a class nobody sourced (`FanLadder`'s own contract).
+        $run = TrainingRun::factory()->create([
+            'status' => RunStatus::Active,
+            'umamusume_id' => Umamusume::factory()->create()->id,
+        ]);
+
+        TurnEntry::factory()->create([
+            'training_run_id' => $run->id,
+            'turn' => 1,
+            'fans' => 4999,
+        ]);
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('identity.fans', 4999)
+                ->where('identity.fan_ladder.class', null)
+                ->where('identity.fan_ladder.gap', null));
+    }
+
+    public function test_reads_a_legend_count_with_the_class_and_no_gap_past_it(): void
+    {
+        // `Legend` 320,000 is the last documented threshold, so its band runs to PHP_INT_MAX and
+        // the service answers the class with no gap: a count inside the ceiling prints `Legend`
+        // alone, never a gap toward a class nobody published.
         $run = TrainingRun::factory()->create([
             'status' => RunStatus::Active,
             'umamusume_id' => Umamusume::factory()->create()->id,
@@ -108,8 +134,10 @@ final class CockpitRunIdentityTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->where('identity.fans', 500000)
-                ->where('identity.fan_ladder.class', null)
-                ->where('identity.fan_ladder.gap', null));
+                ->where('identity.fan_ladder.class', 'Legend')
+                ->where('identity.fan_ladder.gap', null)
+                ->where('identity.fan_ladder.nextThreshold', null)
+                ->where('identity.fan_ladder.nextClass', null));
     }
 
     /**

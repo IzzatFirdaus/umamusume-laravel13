@@ -106,6 +106,10 @@ const props = defineProps<{
                 turn: number | null;
                 race_url: string | null;
                 absence: string | null;
+                /** U-05b / R8: the fans this race requires; `null` when the calendar publishes none. */
+                fan_gate: number | null;
+                fan_gate_label: string;
+                fan_gate_title: string;
             }[];
             summary: string | null;
             empty_note: string | null;

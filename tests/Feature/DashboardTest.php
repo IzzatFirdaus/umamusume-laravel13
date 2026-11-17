@@ -203,6 +203,37 @@ it('reads the primary resource from the scenario config rather than from a scena
         ->assertInertia(fn (Assert $page) => $page->where('activeCareer.resource', null));
 });
 
+it('prints the imported position a snapshot stands at, not the count of turns it logged', function (): void {
+    /*
+     * A snapshot run: its Trainer named Senior Early October when it was created, and one turn has
+     * been recorded since. The resume card used to print the position derived from the recorded count
+     * (`Junior Year · Early January` for one logged turn) while the Cockpit for the same run read
+     * `Senior Year · Early October`, so the landing screen and the screen it resumes disagreed about
+     * where the career was. Both read `TrainingRun::decisionTurn()` now.
+     *
+     * The two facts stay separate on the card: `turn` is the recorded count the strip counts, and
+     * `position_turn` is the turn the run stands at. Neither is folded into the other.
+     */
+    $run = runWithTurns([
+        'scenario' => 'unity_cup',
+        'status' => RunStatus::Active,
+        'career_position' => CareerPosition::fromTurnIndex(67),
+        'career_position_source' => 'snapshot',
+        'umamusume_id' => Umamusume::factory()->state(['name' => 'Rice Shower', 'name_ja' => 'ライスシャワー']),
+    ], turns: 1, energy: 61);
+
+    $this->get('/')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('activeCareer.run_id', $run->id)
+            // Where the run stands: the imported position, in the Cockpit's own words.
+            ->where('activeCareer.position_label', 'Senior Year · Early October')
+            ->where('activeCareer.position_turn', 67)
+            ->where('activeCareer.cockpit_label', 'Senior Year · Turn 19')
+            // What this run logged, which is a different quantity.
+            ->where('activeCareer.turn', 1));
+});
+
 it('claims no position and no energy for an active career that has logged no turn', function (): void {
     $run = TrainingRun::factory()->create(['scenario' => 'trackblazer', 'status' => RunStatus::Active]);
 

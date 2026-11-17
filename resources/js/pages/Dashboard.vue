@@ -423,7 +423,7 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                         <Link
                             href="/career/snapshot"
                             class="inline-flex min-h-11 items-center px-1 text-sm font-semibold text-ink underline underline-offset-2 hover:decoration-2"
-                        >Import an existing career</Link>
+                        >Start from existing snapshot</Link>
                     </div>
                     <!-- R7-40 / walk-8 E-03: the other door's own line, so the one-word difference
                          between the two import labels is answered where each is read. -->
@@ -672,11 +672,22 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                         </ul>
                     </nav>
                     <!-- R7-40 / walk-8 E-03: `Import a historical career` and the resume card's
-                         `Import an existing career` differ by one word and neither stated what
-                         distinguishes them. One line per door, in each door's own card. -->
+                         differ by one word and neither stated what distinguishes them. One line per
+                         door, in each door's own card. -->
                     <p class="mt-2 text-xs text-ink-muted">
                         A historical career arrives as a CSV turn log; a career you are already partway
                         through is recorded at its current position instead.
+                    </p>
+                    <!-- E-02 / R8: the sentence above names the second door, and until now only the
+                         empty-resume branch actually linked it — so a Trainer with a career already
+                         running (the common case, and the one where recording a second is most likely)
+                         read about a door this page did not offer. The link is unconditional here
+                         because this card always renders. -->
+                    <p class="mt-2 text-xs">
+                        <Link
+                            href="/career/snapshot"
+                            class="inline-flex min-h-11 items-center font-semibold text-ink-strong underline underline-offset-2 hover:decoration-2"
+                        >Start from existing snapshot</Link>
                     </p>
                     <details class="mt-3">
                         <summary class="cursor-pointer list-none text-xs font-semibold text-ink-strong">

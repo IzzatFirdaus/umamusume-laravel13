@@ -26,6 +26,10 @@ interface GoalRow {
     turn: number | null;
     race_url: string | null;
     absence: string | null;
+    /** U-05b / R8: the fans this race requires, off the calendar row; `null` when it carries none. */
+    fan_gate: number | null;
+    fan_gate_label: string;
+    fan_gate_title: string;
 }
 
 interface GoalGroup {
@@ -106,6 +110,12 @@ const deadlineTitle = (row: GoalRow): string | undefined =>
                         {{ row.absence }}
                     </span>
                 </template>
+
+                <!-- U-05b / R8: the fan gate the client prints beside a race objective. Rendered for
+                     every row, with `N/A` + `title` where the calendar publishes no gate — never a `0`. -->
+                <span class="text-xs text-ink-muted" :title="row.fan_gate_title" data-fan-gate>
+                    {{ row.fan_gate_label }}
+                </span>
 
                 <a
                     v-if="row.race_url !== null"
