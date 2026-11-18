@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Enums\ReleaseStatus;
 use App\Models\MatchCandidate;
 use App\Models\Skill;
+use App\Services\DataPipeline\JapaneseNameNormalizer;
 use App\Services\DataPipeline\PipelineRunner;
 use Illuminate\Support\Collection;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -691,4 +692,56 @@ it('keeps the Japanese name search out of the default scope', function (): void 
             ->where('scope', 'global')
             ->has('skills.data', 0)
         );
+});
+
+/*
+ * S3.3 / ADR-0036 — the Japanese search key is populated, and a Japan-only row is reachable by the
+ * name the client prints.
+ *
+ * ADR-0036's open item says the column is never back-filled in the migration. The dev database was
+ * measured complete (`Skill::whereNull('match_key_ja')->count()` -> 0 across 1910 skills), but that
+ * only proves no row is NULL — it does not prove a Japan-only row can be FOUND by its printed name,
+ * which is the behaviour `?scope=japan_only` exists for. This case builds the row with its fold set
+ * the way `StoreSkills` sets it (`JapaneseNameNormalizer::normalize()`), searches by that fold, and
+ * asserts the row comes back with `name_ja` as its label.
+ */
+it('finds a Japan-only skill by its printed Japanese name', function (): void {
+    $nameJa = 'テスト専用スキル';
+    $fold = JapaneseNameNormalizer::normalize($nameJa);
+
+    $japanOnly = Skill::factory()->create([
+        'name' => 'Japan Only Search Sample',
+        'name_ja' => $nameJa,
+        'match_key_ja' => $fold,
+        'release_status' => ReleaseStatus::JapanOnly,
+        'name_is_client' => false,
+    ]);
+
+    expect($fold)->not->toBe('');
+
+    test()->get(route('skills.index', ['search' => $nameJa, 'scope' => 'japan_only']))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Skills/Index')
+            ->where('skills.data.0.id', $japanOnly->id)
+            // Ruling A: at `japan_only` the catalogue prints the source's own Japanese string.
+            ->where('skills.data.0.name_ja', $nameJa)
+            ->where('skills.data.0.name', null));
+});
+
+it('does not leak a Japan-only skill into the default Global scope', function (): void {
+    $nameJa = 'グローバル非対応';
+    $fold = JapaneseNameNormalizer::normalize($nameJa);
+
+    Skill::factory()->create([
+        'name' => 'Hidden Sample',
+        'name_ja' => $nameJa,
+        'match_key_ja' => $fold,
+        'release_status' => ReleaseStatus::JapanOnly,
+        'name_is_client' => false,
+    ]);
+
+    test()->get(route('skills.index', ['search' => $nameJa]))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('skills.data', []));
 });

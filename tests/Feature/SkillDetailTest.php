@@ -407,3 +407,23 @@ it('lists the runs that record the skill, newest first, with their stored status
                 && str_contains($label, 'Unity Cup')
                 && str_contains($label, 'run '.$older->id)));
 });
+
+/*
+ * S3.2 — the shipped hint-level copy states the recorded fact.
+ *
+ * Two sentences on this page said no run and no table stored a hint level. Both were wrong once
+ * `run_skills.hint_level` shipped (`2026_11_03_155641_add_hint_level_to_run_skills_table`, ADR-0035):
+ * the column exists, `SkillsPlannerController` prices from it, and the Skills planner re-prices a row
+ * that carries one. The page now says so, and this case keeps the stale claim from coming back —
+ * the copy lives in the Vue template, so the assertion is on the file's own text rather than on the
+ * Inertia payload, which never carried these strings.
+ */
+it('states that a run may record a hint level instead of denying the column exists', function (): void {
+    $page = file_get_contents(resource_path('js/pages/Skills/Show.vue'));
+
+    expect($page)->toBeString()
+        ->and($page)->not->toContain('No run stores a hint level')
+        ->and($page)->not->toContain('No table stores a hint level')
+        ->and($page)->toContain('A run may record a hint level for this skill')
+        ->and($page)->toContain('A run that records a hint level stores it on its own skill');
+});
