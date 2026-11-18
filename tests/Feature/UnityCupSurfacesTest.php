@@ -294,14 +294,20 @@ it('keeps the refused vocabulary and every number out of the two new components'
     }
 });
 
-it('says where Team Rank is recorded rather than leaving the editor silent (R4-13, ruling R2)', function (): void {
+it('writes the Team Rank through the editor as ADR-0034 rules, with S+ stated as no-facility-level', function (): void {
     $source = (string) file_get_contents(resource_path('js/components/career/UnityCupEditor.vue'));
 
-    // R2 = A: copy-only. The rank already has a writer — a turn's team-race event — so the defect is
-    // that the editor does not say so, not that it lacks an input. A rank field appearing here would be
-    // a second writer for one fact, which is what this case fails on.
-    expect($source)->toContain("Team Rank is recorded through a turn's team-race event, not through this editor.")
-        ->and($source)->not->toMatch('/name=\"team_rank\"|id=\"team_rank\"/');
+    // Ruling history: R2 (2026-10-25) made this a copy-only surface, but ADR-0034 (owner ruling
+    // R6-48, 2026-11-15, accepted under the owner delegation of 2026-11-18) stores the rank as
+    // current state on `training_runs.team_rank`, and this editor is its write door through
+    // `runs.update`. The case now pins the ADR's own requirements: the select exists, the letter
+    // vocabulary is complete, and `S+` is stated as the letter that maps to no facility level
+    // rather than an implied missing option.
+    expect($source)->toContain('name="team_rank"')
+        ->and($source)->toContain('id="team_rank"')
+        ->and($source)->toContain('S+ (no facility level)')
+        // The stale R2 sentence must not return: it names a turn-event path no UI reaches.
+        ->and($source)->not->toContain("Team Rank is recorded through a turn's team-race event");
 });
 
 it('leaves the ranking engine alone and reads a stat through the model rather than a new map', function (): void {

@@ -1,14 +1,14 @@
 # ADR-0032: Independent Training is an overlay row on a run, not a second run shape
 
 <!-- ADR-CONTRACT
-  decision: proposed — the idle mode is stored as one independent_training_runs row overlaying an ordinary training_runs row, carrying the three inputs fixed at start, the fifty-minute window and the two endings
+  decision: accepted (owner delegation 2026-11-18: "proceed with every owner gated tasks" — the written instruction to this session, recorded as the ruling source)
   code: built — migrations 2026_10_28_000000_create_independent_training_runs_table, 2026_10_28_000100_add_result_to_independent_training_runs (both with down()); IndependentTrainingRun, IndependentTrainingPolicy, IndependentTraining\Lifecycle, IndependentTraining\Simulator, CompleteIndependentTraining; tests/Feature/IndependentTraining{Schema,Lifecycle,Simulator,Store,Dashboard}Test.php
   superseded-by: —
   amended-by: —
   open: no PRD requirement covers the mode (the migration flags it to the owner in its own docblock), so its authorisation is unrecorded; the Preflight entry controls were cut at ae16ec88 (2026-10-28) and never replaced, so Lifecycle::start() now has no reachable door and the mode survives as a stored state the Dashboard, Cockpit and Result screens render; the completion payload is a calibrated approximation because the per-turn algorithm is unpublished
 -->
 
-Status: **Proposed.** Drafted 2026-11-18 from shipped code; the schema landed at `c50eccc3` (2026-10-28) and the
+Status: **accepted** (owner delegation 2026-11-18 — "proceed with every owner gated tasks"; the original draft note is preserved in the contract above).
 wizard door was cut the same day. **Nothing here binds until the owner records it as Accepted**, and the two gaps
 below are the reason the owner's ruling matters more than usual.
 

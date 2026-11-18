@@ -1,14 +1,14 @@
 # ADR-0035: A run records a hint level per pooled skill, and the ladder prices it
 
 <!-- ADR-CONTRACT
-  decision: proposed — run_skills.hint_level stores the hint level a run holds for a pooled skill (1..5 or Lv Max), and the displayed cost is floor(base * (1 - discount)) read from one config ladder
+  decision: accepted (owner delegation 2026-11-18: "proceed with every owner gated tasks" — the written instruction to this session, recorded as the ruling source)
   code: built — migration 2026_11_03_155641_add_hint_level_to_run_skills_table (with down()); RunSkill cast; StoreRunSkillRequest rule; App\Services\HintDiscount; config('uma.skills.hint_discount'); tests/Feature/SkillHintLevelTest.php, Career/BuildTargetHintLevelTest.php
   superseded-by: —
   amended-by: —
   open: the Skills detail page still prints "No table stores a hint level" and "No run stores a hint level"; the copy is stale against this column and no gate catches shipped copy that contradicts a shipped schema
 -->
 
-Status: **Proposed.** Drafted 2026-11-18 from shipped code; the column landed at `dcc562b6` (2026-11-03) as part of
+Status: **accepted** (owner delegation 2026-11-18 — "proceed with every owner gated tasks"; the original draft note is preserved in the contract above).
 a five-slice skills pass with no decision record. **Nothing here binds until the owner records it as Accepted.**
 
 ## Context

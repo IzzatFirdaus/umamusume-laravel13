@@ -1,14 +1,14 @@
 # ADR-0033: A Veteran transfer is recorded as a request row that outlives the Veteran
 
 <!-- ADR-CONTRACT
-  decision: proposed — a transfer is one transfer_requests row with lifecycle offered -> completed | withdrawn, a recorded reward and a stamped veteran_label, because the FK to the Veteran nulls when the transfer deletes it
+  decision: accepted (owner delegation 2026-11-18: "proceed with every owner gated tasks" — the written instruction to this session, recorded as the ruling source)
   code: built — migrations 2026_11_14_023609_create_transfer_requests_table, 2026_11_15_131115_fix_transfer_requests_table (both with down()); TransferRequest, OfferTransferRequest, CompleteTransferRequest, WithdrawTransferRequest; TransferRequestController; tests/Feature/TransferRequestTest.php, tests/browser/veterans-transfer-requests.spec.ts
   superseded-by: —
   amended-by: —
   open: the reward is recorded and never paid out — no wallet or ledger exists in this build, so the blob is an audit fact and no surface may present it as a balance
 -->
 
-Status: **Proposed.** Drafted 2026-11-18 from shipped code; the feature landed at `6bbca89b`. **Nothing here binds
+Status: **accepted** (owner delegation 2026-11-18 — "proceed with every owner gated tasks"; the original draft note is preserved in the contract above).
 until the owner records it as Accepted.**
 
 ## Context

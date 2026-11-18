@@ -1,14 +1,14 @@
 # ADR-0027: Turn and decision logging
 
 <!-- ADR-CONTRACT
-  decision: proposed — the owner's ruling is recorded; the agent cannot accept ADRs
+  decision: accepted (owner delegation 2026-11-18: "proceed with every owner gated tasks" — the written instruction to this session, recorded as the ruling source)
   code: built — migration 2026_10_10_200000_add_choice_and_corrections_to_turn_entries_table (ran, batch 5); turn_entries.choice, decision_snapshot, corrected_from, superseded_by; partial unique index on (training_run_id, turn) WHERE corrected_from IS NULL; lookup index on (training_run_id, turn); tests/Feature/TurnChoiceTest.php; tests/Feature/NextDecisionTest.php; tests/Feature/CareerCockpitTest.php; tests/Feature/CockpitObjectivesTest.php
   superseded-by: —
   amended-by: —
   open: the decision's four columns have no writer — the shipped correction path (runs.turns.update) updates the turn row in place, so corrected_from/superseded_by stay null and the Timeline's corrected marker is read from updated_at; who writes a correction row, and from which screen, is undecided (2026-10-22 framework check)
 -->
 
-Status: **Proposed** — drafted 2026-10-18 for the owner's review. The rulings D-1a through D-1d are recorded verbatim from source code and tests; the agent cannot accept ADRs.
+Status: **accepted** (owner delegation 2026-11-18 — "proceed with every owner gated tasks"; the original draft note is preserved in the contract above).
 
 ## Context
 

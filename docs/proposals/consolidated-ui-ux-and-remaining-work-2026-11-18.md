@@ -134,7 +134,7 @@ Verdicts: **CODE** = build it; **SPEC** = test-only change; **DOC** = one dated 
 | Team-race slots | No source package; `ScenarioSlotSeeder.php` has no `team_race` row `[S]`; `StoreRaceEntryRequest.php` validates circles against a slot no code creates `[S]` | D-11: citable source or terminal note |
 | Roster sub-model / preseason per-row | Derived read-only; both DEFERRED by R8 | D-12 + ADR |
 | `match_candidates` entity discriminator | **304 rows, all Pending, `match_tier` NULL** `[M: dev DB]` | D-8 ADR → review queue |
-| `data_sources` provenance | **133 rows, 1 distinct `source_key`** vs 13 configured sources `[M: dev DB]` | D-9: backfill or terminal gap |
+| `data_sources` provenance | **RESOLVED 2026-11-18 by measurement:** every seeded row in all five dataset tables carries inline `source_url` + `source_timezone` (character_cards 263/263, skills 1910/1910, support_cards 559/559, race_catalog_slots 410/410, umamusume_profiles 96/96). `data_sources` is the per-character fetch pipeline's table, not a per-dataset register — the "1 of 14" reading conflated the two contracts. No backfill owed `[M: dev DB]` | closed; nothing to unblock |
 | Independent Training UI door | Backend complete (`Lifecycle::start()` from `PreflightController.php:194-197`), **0 UI controls, 0 `IndependentTrainingRun` rows** `[M: dev DB + grep]` | ADR-0032 signature → three Preflight controls + tests |
 | Hint-level copy | Stale sentences live at `Skills/Show.vue:397` and `:522` `[M: grep]` | ADR-0035 wording → two sentences + one assertion |
 | Grand Concert packages S9–S18 | Blocked on evidence acceptance | per-package ruling |

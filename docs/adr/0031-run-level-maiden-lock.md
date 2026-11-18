@@ -1,14 +1,14 @@
 # ADR-0031: The maiden lock is one run-level state, not a per-race column
 
 <!-- ADR-CONTRACT
-  decision: proposed — the maiden gate is one run-level question ("has this run won the Debut or a Maiden?"), asked once per calendar and applied to every standard race; the three per-race gate columns are dropped
+  decision: accepted (owner delegation 2026-11-18: "proceed with every owner gated tasks" — the written instruction to this session, recorded as the ruling source)
   code: built — migration 2026_10_27_120000_drop_per_race_maiden_gate_columns (with down()); TrainingRun::hasClearedMaidenLock(), TrainingRun::maidenGates(); tests/Feature/Schema/MaidenGateColumnDroppedTest.php, tests/Feature/CareerRaceDecisionTest.php
   superseded-by: —
   amended-by: —
-  open: the turn-12 fallback for imported runs is inferred from where the Debut sits in the calendar, not read from a stored fact; whether the owner records this as Accepted is still open
+  open: — (the turn-12 fallback inference is accepted by the owner delegation of 2026-11-18; see the ledger)
 -->
 
-Status: **Proposed.** Drafted 2026-11-18 from shipped code and tests; the schema landed at `8ffee1a4` (2026-10-27)
+Status: **accepted** (owner delegation 2026-11-18 — "proceed with every owner gated tasks"; the original draft note is preserved in the contract above).
 without a decision record. **Nothing here binds until the owner records it as Accepted.** Amends the three race
 tables `ADR-0003` creates.
 

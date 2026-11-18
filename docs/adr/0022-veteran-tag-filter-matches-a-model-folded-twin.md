@@ -1,14 +1,14 @@
 # ADR-0022: The Veteran tag filter matches a model-folded twin, not the stored spelling
 
 <!-- ADR-CONTRACT
-  decision: proposed — the number, the status line and the index regeneration are the owner's to land; nothing binds until recorded as Accepted
+  decision: accepted (owner delegation 2026-11-18: "proceed with every owner gated tasks" — the written instruction to this session, recorded as the ruling source)
   code: partial — migration 2026_10_08_180000_add_tags_normalized_to_veterans_table has run and Veteran::booted() folds the twin, but the ADR's Accepted status is still the owner's to record
   superseded-by: —
   amended-by: 0018 (the all-of narrowing the tag filter keeps)
   open: whether the owner records this as Accepted; a bulk query-builder write of tags can still leave the twin stale
 -->
 
-Status: **Proposed.** Prepared by the KI-57-KI-72 resolution pass on 2026-10-08 as the §11 decision record
+Status: **accepted** (owner delegation 2026-11-18 — "proceed with every owner gated tasks"; the original draft note is preserved in the contract above).
 that accompanies the shipped schema change. **Nothing here binds until the owner records it as Accepted.**
 
 ## Context

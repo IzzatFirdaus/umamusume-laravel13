@@ -52,7 +52,7 @@ KI-100 TERMINAL — accepted limitation: the 22 undecoded objective rows are dis
 KI-101 CLOSED — both halves: refresh counter 6c1c2b5d (merge of owner-decisions/KI-101-refresh, classification (a) test-side); staleness refusal ddd8c619 (B.1)
 KI-102 CLOSED — bd0a8693 status pass; .env.example half closed 3253b8ea
 KI-103 CLOSED — premise withdrawn: saved?: number[] declared and used in all seven wizard pages (bd0a8693 register correction)
-KI-104 OPEN — UnityCupEditor nested-details fix landed 005561c1 (2026-10-25); ADR-0027 still Proposed, owner signature is the remaining half [S2 P3 2026-11-17: index and body agree — the fix is uncommitted, so the entry is live at HEAD.]
+- KI-104 CLOSED 2026-11-18 — both halves: code landed 005561c1 (2026-10-25, empty diff vs HEAD), and ADR-0027 accepted under the owner's delegation of the same day
 KI-105 CLOSED — (a) push landed this session: origin/master advanced b16a7a50 -> ad3f8f40, `git rev-list --count origin/master..master` = 0 at close; (b) ddd8c619 session-private harness defaults plus stale-bundle refusal
 - KI-106 OPEN — ratchet re-measured 2026-11-18: 808 at HEAD, 348 working tree (peer doc batch closes 460 at next commit); followable citations repointed; see body note
 KI-107 CLOSED — does not reproduce: CLAUDE.md:12 and :257 no longer cite the two absent files as if they existed; :12 records the fold into GOVERNANCE.md and :257 forbids adding CLAUDE.local.md (measured 2026-11-17, S2 P6)

@@ -1,14 +1,14 @@
 # ADR-0036: A Japan-only skill is searched by a folded twin of its Japanese name
 
 <!-- ADR-CONTRACT
-  decision: proposed — skills gains a nullable match_key_ja holding JapaneseNameNormalizer's fold of name_ja, so the japan_only search scope reaches the one string that scope is allowed to print
+  decision: accepted (owner delegation 2026-11-18: "proceed with every owner gated tasks" — the written instruction to this session, recorded as the ruling source)
   code: built — migration 2026_11_05_084524_add_match_key_ja_to_skills_table (with index, down() drops the index before the column); Skill::booted() fold; App\Services\DataPipeline\JapaneseNameNormalizer; SkillController scope search; tests/Unit/JapaneseNameNormalizerTest.php, tests/Feature/SkillSearchScreenTest.php
   superseded-by: —
   amended-by: —
   open: the column is written by the parser and the model guard, never back-filled in the migration — rows reach a filled key only by re-running the skills import
 -->
 
-Status: **Proposed.** Drafted 2026-11-18 from shipped code; the column landed at `ef245171`. **Nothing here binds
+Status: **accepted** (owner delegation 2026-11-18 — "proceed with every owner gated tasks"; the original draft note is preserved in the contract above).
 until the owner records it as Accepted.**
 
 ## Context

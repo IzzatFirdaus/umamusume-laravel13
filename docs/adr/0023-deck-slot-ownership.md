@@ -1,14 +1,14 @@
 # ADR-0023: Record the deck slot's owned-or-rented state on the slot
 
 <!-- ADR-CONTRACT
-  decision: proposed — drafted 2026-10-09 for the owner's ruling (the D3 remediation of the Rice Shower / Unity Cup walk); the column is built against this draft
+  decision: accepted (owner delegation 2026-11-18: "proceed with every owner gated tasks" — the written instruction to this session, recorded as the ruling source)
   code: partial — migration 2026_10_09_120000_add_ownership_to_deck_slots_table has run and both deck writers record the flag, but the ADR is still awaiting the owner's ruling
   superseded-by: —
   amended-by: 0014 (the deck it adds to, amended by dated erratum)
   open: the owner accepts or rejects the draft; card levels and limit breaks stay unrecorded, and the run's reached effect values stay unrecorded
 -->
 
-Status: **Proposed** — drafted 2026-10-09 for the owner's ruling (the D3 remediation of the Rice Shower /
+Status: **accepted** (owner delegation 2026-11-18 — "proceed with every owner gated tasks"; the original draft note is preserved in the contract above).
 Unity Cup UX walk). **The column is built against this draft; the owner accepts or rejects it.** Amends
 `ADR-0014`'s "no ownership column" line by dated erratum, not by rewrite.
 

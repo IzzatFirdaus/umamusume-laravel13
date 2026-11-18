@@ -104,7 +104,10 @@ const unstarred = computed(() => rows.value.filter((row) => row.stars === null).
                         <td>{{ row.family }}</td>
                         <td>
                             <span v-if="row.stars !== null">★{{ row.stars }}</span>
-                            <span v-else>N/A</span>
+                            <span
+                                v-else
+                                title="No star count was recorded for this spark."
+                            >N/A</span>
                         </td>
                         <td>{{ row.carriedBy }}</td>
                     </tr>
