@@ -65,6 +65,13 @@ const rows = computed(() => {
             : a.family.localeCompare(b.family),
     );
 });
+
+/*
+ * DESIGN.md §5 (the Tile.vue rule): a `title` is the accessible twin of the absence reason, never its
+ * only home — a tooltip is unreadable on touch and invisible in print. The cell prints N/A; this
+ * sentence is the visible twin, rendered once under the table when any row lacks a count.
+ */
+const unstarred = computed(() => rows.value.filter((row) => row.stars === null).length);
 </script>
 
 <template>
@@ -97,12 +104,16 @@ const rows = computed(() => {
                         <td>{{ row.family }}</td>
                         <td>
                             <span v-if="row.stars !== null">★{{ row.stars }}</span>
-                            <span v-else title="No star count was recorded for this spark.">N/A</span>
+                            <span v-else>N/A</span>
                         </td>
                         <td>{{ row.carriedBy }}</td>
                     </tr>
                 </tbody>
             </table>
+            <p v-if="unstarred > 0" class="mt-1 text-xs text-ink-muted">
+                {{ unstarred }} of the sparks above {{ unstarred === 1 ? 'carries' : 'carry' }} no star
+                count; none was recorded on the node that holds {{ unstarred === 1 ? 'it' : 'them' }}.
+            </p>
         </div>
     </section>
 </template>
