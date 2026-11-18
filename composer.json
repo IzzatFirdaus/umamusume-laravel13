@@ -67,6 +67,9 @@
             "npm run typecheck",
             "@php artisan test"
         ],
+        "gates": [
+            "bash tools/gates.sh"
+        ],
         "test:pest": "vendor/bin/pest --compact",
         "test:pest:warn": "vendor/bin/pest --compact --display-warnings",
         "lore": "@php tools/lore.php",

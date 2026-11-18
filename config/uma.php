@@ -42,6 +42,15 @@ return [
      * Adding a source requires a robots.txt/rate-limit review and one parser class
      * per source (PRD OQ-2, AGENTS.md Data Engineer rules).
      *
+     * Re-checked 2026-11-18 (source research): gametora.com/robots.txt allows every path
+     * except eight named exclusions (/404, /500, /patron-zone, two event paths,
+     * /cdn-cgi/, /loc/ and /sitemap-lastmod.json); no GameTora terms page was found at
+     * /terms or /privacy. The official umamusume.com host has no robots.txt (404) and
+     * its Terms of Use, effective 2025-06-24, assert Cygames copyright over site content;
+     * that host is not a configured source. This answers the robots half of the older
+     * note below, not the rate-limit half: per-source delay_ms, the retry ceiling and
+     * the fetch lock still bound request load.
+     *
      * Shape:
      *   'key' => [
      *       'url' => 'https://example.org/list',

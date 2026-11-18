@@ -19,7 +19,8 @@
     {
       "id": "file-write",
       "matcher": "Bash|PowerShell|code_execution",
-      "pattern": "\\b(Set-Content|Out-File|tee|Add-Content)\\b|(^|[^>])>\\s*\\S",
+      "ignoreQuoted": true,
+      "pattern": "\\b(Set-Content|Out-File|tee|Add-Content)\\b|(^|[^>0-9&])>>?\\s*\\S",
       "deny": true,
       "replacement": "write",
       "message": "Blocked: use the Write/Edit tool instead of shell redirection."

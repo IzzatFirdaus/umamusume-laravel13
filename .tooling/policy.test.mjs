@@ -232,3 +232,68 @@ test('extract command from top-level command key', () => {
   assert.strictEqual(exitCode, 0);
   assert.strictEqual(lastJson(stdout).decision, 'allow');
 });
+
+/* ---------------------------------------------------------------------------
+ * file-write rule: quoted operators and fd-duplication are not writes.
+ *
+ * Measured 2026-11-18 over 1018 unique denied commands in
+ * `.tooling/logs/denials.jsonl`: the unquoted-operator form denied 1028 of 1030
+ * matches as false positives (467 were `2>/dev/null`, 402 `2>&1`, 103 a PHP/JS
+ * `->` or `=>` inside a quoted pattern, 14 a `>/dev/null` sink). Only 23 unique
+ * commands were real writes to a file. Every case below is drawn from that
+ * corpus.
+ * ------------------------------------------------------------------------- */
+
+test('allow: stderr merge 2>&1 is not a write', () => {
+  const { exitCode, stdout } = runGuard(payload('npx playwright test tests/browser/dashboard.spec.ts --workers=1 2>&1 | tail -25'));
+  assert.strictEqual(exitCode, 0);
+  assert.strictEqual(lastJson(stdout).decision, 'allow');
+});
+
+test('allow: 2>/dev/null is a sink, not a write', () => {
+  const { exitCode, stdout } = runGuard(payload('ls docs/audits 2>/dev/null || echo "DIR NOT FOUND"'));
+  assert.strictEqual(exitCode, 0);
+  assert.strictEqual(lastJson(stdout).decision, 'allow');
+});
+
+test('allow: >/dev/null sink', () => {
+  const { exitCode, stdout } = runGuard(payload('node tools/ui-framework-check.mjs > /dev/null; echo exit=$?'));
+  assert.strictEqual(exitCode, 0);
+  assert.strictEqual(lastJson(stdout).decision, 'allow');
+});
+
+test('allow: PHP arrow inside a quoted grep pattern', () => {
+  const { exitCode, stdout } = runGuard(payload('grep -rn "runs.export\\|->export(" app tests --include=*.php | grep -v Transfer'));
+  assert.strictEqual(exitCode, 0);
+  assert.strictEqual(lastJson(stdout).decision, 'allow');
+});
+
+test('allow: => inside a single-quoted pattern', () => {
+  const { exitCode, stdout } = runGuard(payload("grep -rn 'taxonomy => value' docs/adr"));
+  assert.strictEqual(exitCode, 0);
+  assert.strictEqual(lastJson(stdout).decision, 'allow');
+});
+
+test('deny: redirect to a real file is still a write', () => {
+  const { exitCode, stdout } = runGuard(payload('php artisan test --compact > .scratch-uma/s1/full-suite.log 2>&1'));
+  assert.strictEqual(exitCode, 2);
+  assert.strictEqual(lastJson(stdout).decision, 'block');
+});
+
+test('deny: append to a real file is still a write', () => {
+  const { exitCode, stdout } = runGuard(payload('echo "EXIT=$?" >> .scratch-uma/s1/full-suite.log'));
+  assert.strictEqual(exitCode, 2);
+  assert.strictEqual(lastJson(stdout).decision, 'block');
+});
+
+test('deny: quoted text does not hide a real redirect', () => {
+  const { exitCode, stdout } = runGuard(payload('echo "hello world" > app/Models/Foo.php'));
+  assert.strictEqual(exitCode, 2);
+  assert.strictEqual(lastJson(stdout).decision, 'block');
+});
+
+test('deny: tee is still a write', () => {
+  const { exitCode, stdout } = runGuard(payload('npm run typecheck | tee .scratch-uma/tc.log'));
+  assert.strictEqual(exitCode, 2);
+  assert.strictEqual(lastJson(stdout).decision, 'block');
+});

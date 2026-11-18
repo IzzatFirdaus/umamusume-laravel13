@@ -25,6 +25,22 @@ function matchPattern(cmd, pattern) {
   }
 }
 
+// Remove single- and double-quoted spans (with backslash escapes) so a shell
+// operator INSIDE a quote is not read as one. `grep -n 'a -> b' file` is a read;
+// `echo x > file` is a write. Only rules that opt in with `ignoreQuoted: true`
+// see the stripped text, so rules matching quoted content keep working.
+const QUOTED = /'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"/g;
+
+// File-descriptor duplication (`2>&1`, `>&2`) and device sinks (`>/dev/null`,
+// `>nul`) redirect a stream but write no file the agent owns, so they are
+// removed before the write pattern runs. Measured 2026-11-18 over 1018 unique
+// denied commands: 883 of them were one of these two forms.
+const SINKS = /[0-9]?>>?\s*&[0-9]|[0-9]?>>?\s*\/dev\/null\b|[0-9]?>>?\s*nul\b/gi;
+
+export function normalizeForWriteCheck(cmd) {
+  return String(cmd).replace(QUOTED, "''").replace(SINKS, " ");
+}
+
 export function policyLoadError() {
   return loadError;
 }
@@ -40,7 +56,11 @@ export function classify(tool, command) {
   const cmd = command ?? '';
   for (const rule of rules) {
     if (rule.matcher && !new RegExp(rule.matcher).test(tool ?? '')) continue;
-    if (rule.pattern && matchPattern(cmd, rule.pattern)) {
+    // `ignoreQuoted` rules test the command with quoted spans blanked and
+    // stream sinks removed, so a shell operator inside a string literal or an
+    // fd-duplication is not mistaken for a write to a file.
+    const subject = rule.ignoreQuoted ? normalizeForWriteCheck(cmd) : cmd;
+    if (rule.pattern && matchPattern(subject, rule.pattern)) {
       return { ...rule };
     }
   }
