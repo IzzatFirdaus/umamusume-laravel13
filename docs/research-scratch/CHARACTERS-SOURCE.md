@@ -4,9 +4,9 @@
 
 This document consolidates the following source files verbatim (no summarization, no deduplication):
 
-- `docs/requests/reports/2026-09-30-characters-source-findings.md`
-- `docs/data/2026-09-30-characters-source-probe.md`
-- `docs/requests/reports/2026-09-30-port-and-cleanup.md`
+- `CHARACTERS-SOURCE.md` §2026-09-30-characters-source-findings.md
+- `CHARACTERS-SOURCE.md` §2026-09-30-characters-source-probe.md
+- `CHARACTERS-SOURCE.md` §2026-09-30-port-and-cleanup.md
 
 ---
 
@@ -559,7 +559,7 @@ banned C-4 term is typed in any changed file; the ten-key docblock lead uses "re
 
 #### 7. The three ports — and why the third artifact is a placement, not a branch edit
 
-1. **Probe record** — ported to `docs/data/2026-09-30-characters-source-probe.md` with the path correction,
+1. **Probe record** — ported to `CHARACTERS-SOURCE.md` §2026-09-30-characters-source-probe.md with the path correction,
    the saved-body/rotation disclosure (a live re-fetch may diverge; same shape as the roster `e9e9ee6d`
    correction — the source rotated once before, `679f7c2e`→`e9e9ee6d`), the `n=105` re-scope, the 8-key-set
    finding, and the `rl` obligation restated as a **tested parser+store guard** pointing at the now-landed

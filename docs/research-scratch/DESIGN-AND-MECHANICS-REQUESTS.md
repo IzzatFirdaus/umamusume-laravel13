@@ -4,9 +4,9 @@
 
 This document consolidates the following source files verbatim (no summarization, no deduplication):
 
-- `docs/requests/game-mechanics-condition-labels.md`
-- `docs/design-research/verification/design-pass-trainee-detail-2026-09-29.md`
-- `docs/flows/create-run-and-legacy-select.md`
+- `DESIGN-AND-MECHANICS-REQUESTS.md` §game-mechanics-condition-labels.md
+- `DESIGN-AND-MECHANICS-REQUESTS.md` §design-pass-trainee-detail-2026-09-29.md
+- `DESIGN-AND-MECHANICS-REQUESTS.md` §create-run-and-legacy-select.md
 
 ---
 
@@ -100,7 +100,7 @@ specification does not yet acknowledge.
 | ------ | ----------- | --------------------------------------- | ----------------------------------------------------------------------- |
 | 2      | `84faed8`   | `KNOWN-ISSUES.md`                       | KI-33 (+ R-2 and R-5 sub-findings), KI-35, KI-36, KI-37, status block   |
 | 3      | `bcd8abe`   | `DESIGN.md`                             | §4.2 rewrite, both stale clauses as one dated withdrawal                |
-| 4      | `da8d6c5`   | `docs/design-research/SKILLS-GAPS.md`   | G-SK-13's two stale clauses                                             |
+| 4      | `da8d6c5`   | `SKILLS-MECHANICS.md` §SKILLS-GAPS.md   | G-SK-13's two stale clauses                                             |
 | 5      | `d0422ce`   | `docs/research-scratch/DESIGN-CORPUS.md`   | D-289                                                                   |
 
 **Step 4 landed as an edit, not a no-op — and that was checked, not assumed.** The sequencing brief warned
@@ -332,7 +332,7 @@ Claim limit: nothing here asserts that six-slot Legacy data persists; see §7.
   change** (see KNOWN-ISSUES adjacent watch item in the 2026-09-28 audit).
 - Mood: nullable, must be a `MoodTier` enum value (measured client strings,
   a7cabc0). Condition pill **colours** for the lower three tiers remain
-  unverified: neutral tints only (`docs/requests/game-mechanics-condition-labels.md`).
+  unverified: neutral tints only (`DESIGN-AND-MECHANICS-REQUESTS.md` §game-mechanics-condition-labels.md).
 - Disclosure of untracked numbers: `N/A` + tooltip, never `0`, never an em dash
   (settled ruling; KI-7).
 

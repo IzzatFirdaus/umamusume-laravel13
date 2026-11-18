@@ -51,7 +51,7 @@ stays in place; nothing was deleted and no citation was repointed.
 > **NOT MERGED — TRIAGED 2026-09-27.** This file is retained for reference, not adopted as a source of
 > values. Its numbers are governed by `docs/research-scratch/DESIGN-CORPUS.md` **D-283** (a design write-up
 > supplies patterns, never values or copy), and the item-by-item audit is in
-> `docs/design-research/MECHANICS-TRANSLATION-TRIAGE.md` **§7**. Read that before seeding anything here:
+> `DESIGN-CORPUS.md` §MECHANICS-TRANSLATION-TRIAGE.md **§7**. Read that before seeding anything here:
 > roughly forty figures do not trace to any capture or dataset, this document's own vocabulary
 > ("Factor", "Motivation", "parents") fails `make lore-code` despite its own terminology map at line 1098,
 > and about a third of Part 1 specifies screens `PRD.md` §6 excludes. It also reproduces one error that
@@ -2214,7 +2214,7 @@ This evaluation assesses *Umamusume: Pretty Derby* against Nielsen's 10 Usabilit
 
 ## Part 2: UX Behavior Specification: Umamusume Trainer Companion
 
-> **Reviewed, largely sound, not merged — 2026-09-27.** Audit: `docs/design-research/FRONTEND-SPEC-DIVERGENCE.md` §6.
+> **Reviewed, largely sound, not merged — 2026-09-27.** Audit: `DESIGN-CORPUS.md` §FRONTEND-SPEC-DIVERGENCE.md §6.
 > Three corrections are load-bearing: preferences persist to **SQLite**, not `localStorage` (owner ruling, PRD §6.12;
 > see `CONSTRAINTS.md` D-104); the cap-stack example's `+0 breakthrough` is the value DESIGN.md §6.22 forbids
 > displaying; and "Run List = default landing" contradicts root DESIGN §4.1, where the catalog index is the desk's
@@ -2795,7 +2795,7 @@ This is the behavioral contract. Every input, option, toggle, state, and transit
 
 ## Part 3: Scenario-Specific User Flows & Frontend Specifications
 
-> **Reviewed, largely sound, not merged — 2026-09-27.** Audit: `docs/design-research/FRONTEND-SPEC-DIVERGENCE.md` §6.
+> **Reviewed, largely sound, not merged — 2026-09-27.** Audit: `DESIGN-CORPUS.md` §FRONTEND-SPEC-DIVERGENCE.md §6.
 > Most of this traces to the repo's sourced tables (Trackblazer caps in the corrected order, shop prices, the
 > 150-coin permanent facility raise, energy bands with the "30 is ours, not the game's" caveat). Fix before use: the
 > Race Fatigue chip prints single-source percentages as bare numbers (D-230), the resource strip carries more widgets
@@ -4046,10 +4046,10 @@ Where (2) and (1) disagree, this brief reports the disagreement rather than sile
 | `DESIGN.md` | tokens, components, surfaces, motion | Visual system |
 | `KNOWN-ISSUES.md` | live defect register `KI-nn` (KI-57 onward) | Defect register |
 | `config/scenarios.php` | the **only** place scenario names enter the layout path | Scenario composition |
-| `docs/audits/rice-shower-unity-cup-ux-walk.md` | first browser walk (Round 1) | HISTORICAL evidence |
-| `docs/audits/rice-shower-unity-cup-ux-walk-2.md` | second browser walk (Round 2) | HISTORICAL evidence |
-| `docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md` | remediation record | HISTORICAL evidence |
-| `docs/audits/rice-shower-unity-cup-round2-reconciliation.md` | R2-01..R2-15 classification vs code | HISTORICAL evidence (in-flight) |
+| `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk.md | first browser walk (Round 1) | HISTORICAL evidence |
+| `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk-2.md | second browser walk (Round 2) | HISTORICAL evidence |
+| `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk-resolutions.md | remediation record | HISTORICAL evidence |
+| `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-round2-reconciliation.md | R2-01..R2-15 classification vs code | HISTORICAL evidence (in-flight) |
 | `docs/UMAMUSUME_REFERENCE.md` | source-cited mechanics corpus | Reference (not a spec) |
 
 **Not authoritative / do not cite as a spec:** `docs/deprecated/**` (retired legacy PDFs; display text must never be copied), `PRODUCT.md` (generator-owned), and the `docs/design-research/` prototypes.
@@ -4373,7 +4373,7 @@ Each journey gives: (1) observed UI behavior, (2) backend behavior, (3) persiste
 
 #### 9.1 Round-2 reconciliation status at this tree (`9777531`)
 
-Source: `docs/audits/rice-shower-unity-cup-round2-reconciliation.md`. Status below reflects the **code at writing**; where the working tree carries a fix not yet committed, that is stated.
+Source: `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-round2-reconciliation.md. Status below reflects the **code at writing**; where the working tree carries a fix not yet committed, that is stated.
 
 | ID | Finding | Status at this tree | Evidence |
 | --- | --- | --- | --- |

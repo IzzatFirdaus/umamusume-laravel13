@@ -23,7 +23,7 @@ section `global-race-sources.md`, 225 lines, 40 em-dashes, 4 code fences.
    embedded here rather than left as a single-topic master of its own.
 
 `calendar-tables.md` is **not** embedded and deliberately stays at
-`docs/research-scratch/calendar-tables.md`. It is the generated data companion of this master: 400+
+`RACE-AND-SLICE-RESEARCH.md` §calendar-tables.md. It is the generated data companion of this master: 400+
 rows of per-scenario turn tables with no markdown headings, rendered by
 `research-scratch/scripts/gen_calendar.py` and re-synced in place by `research-scratch/scripts/resync_doc.py`,
 which matches its `@@Junior Year — 58 rows`-style markers. Both scripts live in the gitignored root
@@ -70,7 +70,7 @@ either an owner decision or another slice's call site. "Owner" below names who c
 not who will.
 
 Companion documents: `docs/scenarios/09-global-race-calendar.md` (the data and its evidence),
-`docs/design-research/HANDOFF-RACE-READ-PATH-2026-09-29.md` (why the read path moved).
+`RACE-AND-SLICE-RESEARCH.md` §HANDOFF-RACE-READ-PATH-2026-09-29.md (why the read path moved).
 
 ---
 
@@ -903,7 +903,7 @@ Each line is `file:line` plus the evidence, per instruction. **Filed, not fixed.
   33, 27. The caption at `:236` names the predicate, "skills whose condition set pins exactly one
   `running_style` value", and cites the export, but never names the set the count runs over, so a reader cannot
   tell which of the two it is. Every consumer downstream shows the smaller list: `app/Enums/ReleaseStatus.php`
-  renders Global states only, and `docs/design-research/skill-facts-2026-10-01.md` covers exactly the 623. So
+  renders Global states only, and `SKILLS-MECHANICS.md` §skill-facts-2026-10-01.md covers exactly the 623. So
   the reference's numbers would sit beside a list a third their size with nothing on the page saying so. Fix is
   one clause stating the denominator. Do not change the figures; they are correct for what they count. This is
   a Docs Writer item and not a KI, because no shipped behaviour reads those four cells. Filed here beside P-6
@@ -1345,7 +1345,7 @@ The verdicts above are left exactly as written; this records what a later read-o
 
 Rescuing `992016d` alone would have preserved two of eight commits. With the owner's authorization the chain was rescued at its tip: `git branch rescue/profiles-chain 8ffab63`, verified by `git rev-list rescue/profiles-chain --not --all --count` returning 0, and reversible with `git branch -D`. No history was changed and no working tree was touched.
 
-That changes §3.1 from a schema question into a product pick. There are two complete parallel implementations of the profiles feature. `master` carries `555b0cb` and everything after it, tracked and published. The chain carries the same four PHP classes under the same fully-qualified names — `App\Models\UmamusumeProfile` is declared at line 67 on master and line 48 on the chain — with a divergent migration shape (`name_ja` plus `three_sizes_b/h/w` against `height_cm`/`bust_cm`/`waist_cm`/`hip_cm`), its own `docs/adr/0013-character-profile-source.md`, and two review-fix commits. A read-only merge simulation of `master` with the chain tip yields **seven conflicting paths**: add/add on `app/Models/UmamusumeProfile.php`, `app/Actions/StoreCharacterProfiles.php`, `app/Services/DataPipeline/Parsers/GametoraCharacterProfileParser.php`, `database/factories/UmamusumeProfileFactory.php`, `docs/adr/0013-character-profile-source.md` and `docs/data/2026-09-30-characters-source-probe.md`, plus a content conflict in `app/Services/DataPipeline/PipelineRunner.php`. So §3.1 and §3.2 are no longer separable: adopting either side's shape is a merge decision against a real second implementation, not a choice between a column list and a rumor.
+That changes §3.1 from a schema question into a product pick. There are two complete parallel implementations of the profiles feature. `master` carries `555b0cb` and everything after it, tracked and published. The chain carries the same four PHP classes under the same fully-qualified names — `App\Models\UmamusumeProfile` is declared at line 67 on master and line 48 on the chain — with a divergent migration shape (`name_ja` plus `three_sizes_b/h/w` against `height_cm`/`bust_cm`/`waist_cm`/`hip_cm`), its own `docs/adr/0013-character-profile-source.md`, and two review-fix commits. A read-only merge simulation of `master` with the chain tip yields **seven conflicting paths**: add/add on `app/Models/UmamusumeProfile.php`, `app/Actions/StoreCharacterProfiles.php`, `app/Services/DataPipeline/Parsers/GametoraCharacterProfileParser.php`, `database/factories/UmamusumeProfileFactory.php`, `docs/adr/0013-character-profile-source.md` and `CHARACTERS-SOURCE.md` §2026-09-30-characters-source-probe.md, plus a content conflict in `app/Services/DataPipeline/PipelineRunner.php`. So §3.1 and §3.2 are no longer separable: adopting either side's shape is a merge decision against a real second implementation, not a choice between a column list and a rumor.
 
 On §1.1.4, the refutation answered a narrower question than session 3 asked. Against the merge state session 3 described, four PHP class files do appear on both sides, so the count was close; the mechanism was not. Git reports add/add conflicts rather than two definitions surviving in one tree, so there is no autoload collision to fix. PARTIAL is the accurate verdict now.
 

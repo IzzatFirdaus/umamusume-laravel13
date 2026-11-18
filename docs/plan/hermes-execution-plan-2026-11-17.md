@@ -21,9 +21,46 @@ worktree still holds the uncommitted ladder work). Every figure below is a comma
 | KI-165 register row | OPEN | **0 rows at `HEAD`, 2 in the worktree** (`CLOSED 2026-11-17`) — also uncommitted | `git show HEAD:KNOWN-ISSUES.md \| grep -c '^KI-165'` -> `0` |
 | Register OPEN set | 11 | **10** (KI-104, 106, 114, 116, 119, 127, 162, 163, 164, 166) | `audit_status_register.py` |
 | Register index rows | 110 | 110, with **6 contradictions still** | same |
-| Browser cases | 876 | **877** in 125 files | `npx playwright test --list` |
+| Browser cases | 876 | **876 in 124 files** (the 877/125 reading predates a peer's `testIgnore` for `nativephp-packaged`) | `npx playwright test --list` |
 | Working tree | 252 | **99** porcelain rows (1 `M ` staged, 63 ` M`, **2 ` D`**, 33 `??`) | `git status --porcelain -uall \| awk '{print substr($0,1,2)}' \| sort \| uniq -c` |
 | Deletions | 109 | **2** — the peer committed `e5fc0e1c docs(legacy): remove jev-inspect subtree` and `13ad587b`, so the 109 are gone from the status count | same |
+
+**`bash tools/gates.sh --fast` at `HEAD 2546689e`, final clean run — quoted summary: `GATES: all green`.**
+Every step exit 0: lore docs **611 hits / 75 exempt**, lore code **365**, pint **passed**, phpstan clean,
+typecheck clean, ui-lint reporting its known arbitrary-value findings (a report, not a failure), markdown fences
+**0 invalid in 292 files**. Wall clock ~4 min on a quiet box; earlier contended runs took 32 min, so **treat any
+duration as a property of the box, not of the gate.**
+
+**S-1.4's acceptance is met, and this is the evidence rather than the claim.** Three runs:
+
+| Run | Command | Result |
+| --- | --- | --- |
+| clean tree, early | `bash tools/gates.sh --fast` | `GATES: 1 failed: typecheck:1` — a peer's in-flight edit, attributed below |
+| **injected pint violation** (blank lines plus `$x=1;` appended to `app/Enums/AliasLanguage.php`) | `bash tools/gates.sh --fast` | **`GATES: 2 failed: pint:1 typecheck:1`** — the gate caught a defect it did not have before |
+| probe file restored byte-for-byte, tree clean again | `bash tools/gates.sh --fast` | **`GATES: all green`** |
+
+So the gate is **non-vacuous on the pint axis as well as the fence axis**, and the probe left the tree exactly as
+it found it (`git status --porcelain -- app/Enums/AliasLanguage.php` -> clean; `pint --test` on it -> `passed`).
+
+**An executor must not read an intermittent `pint:1` as a real defect.** One intermediate run reported
+`GATES: 2 failed: pint:1 typecheck:1` **because the probe file was still modified while a background gate was in
+flight**. That is the shared-worktree hazard AGENTS.md §9 warns about, observed live: **never run the gate while
+another process is editing the tree**, and treat a failure naming a path you did not touch as contention until
+proven otherwise.
+
+**The single early failure, recorded because the attribution matters if it recurs.** `npm run typecheck` exited 1
+with exactly one error:
+
+```
+resources/js/pages/Career/TeamEdit.vue:100:18 - error TS2741: Property 'rank' is missing in type
+'{ team_name: ...; stat_grades: { ...; }[]; }' but required in type '{ ...; rank: string | null; ... }'
+```
+
+At that moment `TeamEdit.vue` was **clean at HEAD** and `resources/js/types.ts` was **modified and uncommitted**,
+its diff adding 27 lines including `rank: string | null` at `resources/js/types.ts:218` — a peer had widened a shared type
+without yet threading it through the page that constructs the object. **Not this plan's slice, not the gate's
+defect, and not to be "fixed" by loosening the type.** Measured resolution: the peer then edited `TeamEdit.vue`
+too (both files now show ` M`) and `npm run typecheck` -> `TYPECHECK-OK`. **Do not file a KI for this.**
 
 **The peer's fan-ladder mapping is better-sourced than my plan's, and it wins — but it is uncommitted, so it is
 not yet in the tree any clean clone would build.** `plan-defects` slice 3.2 proposed `Star` spanning
@@ -72,7 +109,7 @@ sequentialthinking, memory, filesystem, context7, gitkraken, laravel-boost, play
 Pass 2 used 3 parallel readers on a frozen read-only brief and that was correct for *this* shape of work (three
 independent measurement surfaces). It also **cost ~62 minutes wall clock** for numbers a targeted grep later
 overtook: `annotation-sweep` case count, the ladder state, the OPEN set. **For execution, delegate only the one
-thing that cannot be inline**: the 877-case browser sweep, run against an isolated worktree.
+thing that cannot be inline**: the 876-case browser sweep, run against an isolated worktree.
 
 ### 1.4 Skills — four, and no more
 
@@ -145,7 +182,7 @@ dependency change (AGENTS.md §11). *Acceptance:* `npm ci --dry-run` exit 0; `np
 exit 0; `grep -ril polyfills public/build` finds the bundle.
 
 **S-0.3 — `.github/workflows/nativephp-windows.yml:95` calls a script the worktree deleted.**
-`composer run pre-native-build` is gone from `composer.json`; `tools/check-electron-env.php` still exists.
+`composer run pre-native-build` **is present again** at `composer.json:62-64` and exits 0; a peer restored it (`6634925c` dropped the hook, a later commit put the script back). `tools/check-electron-env.php` still exists.
 *Change:* restore the script block from `git show origin/master:composer.json`. *Acceptance:*
 `composer run pre-native-build` exit 0.
 
@@ -178,68 +215,116 @@ exactly 1 case and 0 files; `--config=playwright.nativephp.config.ts --list` sti
 required for a test deletion) with the reason in the commit body, or rewrite to the shipped preflight.
 *Acceptance:* listing total drops by 1, or the file is green in isolation.
 
-**S-1.3 — the out-of-product case group is 35 cases across 10 files, and every file carries a disposition.
-(Pass 1 said 9; pass 2 said 31 and left a file unruled. Both were wrong.)** Counted from
-`npx playwright test --list`, which prints one line per case against its file:
+**S-1.3 — the out-of-product group is 35 cases across 10 files, every file carries a disposition, and the
+arithmetic reconciles exactly to the runner's own total. (Pass 1 said 9 cases; pass 2 said 31 and left a file
+unruled; both wrong.)** Measured at `HEAD 2546689e`, parsing `npx playwright test --list` per file:
 
 | File | Cases | Disposition |
 | --- | --- | --- |
 | `annotation-sweep.spec.ts` | **19** | wireframe-apparatus sweep, one case per screen — a real regression class; **keep** |
-| `scratch-phase1-screenshots.spec.ts` | 4 | screenshot capture artefact for a landed dispatch; **park** — keep the file, exclude from the release sweep by name (its images are not a gate) |
+| `scratch-phase1-screenshots.spec.ts` | 4 | screenshot capture for a landed dispatch; **park** (images are not a gate, file stays) |
 | `scratch-isolation.spec.ts` | 3 | pins the scratch-DB contract (KI-80); **keep** |
 | `containment.spec.ts` | 3 | pins a deliberate limitation; **keep** |
 | `flash-name-{first,fix,mechanism,probe,probe-settled}.spec.ts` | 5 | single-use investigation artefacts; **retire** |
 | `containment-mechanism.spec.ts` | 1 | spins its own Vite server on port 5201; **retire** |
-| **sum** | **35** | 29 kept/parked, **6 retired** |
+| **sum** | **35** | **29 kept or parked, 6 retired** |
 
-**The arithmetic, stated so it can be checked:** 841 product cases + 35 group cases + 1 `nativephp-packaged`
-case = **877**, the runner's own total. Conventional daemonizing. After retiring 6: **871 cases remain**.
+**The reconciliation, and why the old 877 no longer appears:**
+
+| Component | Cases | Basis |
+| --- | --- | --- |
+| runner total | **876** | its own line: `Total: 876 tests in 124 files` |
+| minus the 35 group cases | 35 | every row above matched exactly, one by one |
+| minus `nativephp-packaged.spec.ts` | 1 | on disk, but **excluded** by `playwright.config.ts`'s `testIgnore: '**/nativephp-packaged.spec.ts'` — it holds no slot in the 876 |
+| **= product behaviour** | **840** | 876 - 35 - 1 |
+
+`845 + 31 + 1 = 877` — the figure both earlier passes reasoned from — **is not reproducible at this tree.** The
+cause is a peer edit, not arithmetic: `nativephp-packaged.spec.ts` was in the count when 877 was measured and the
+config now ignores it. **Do not "correct" 876 back to 877.** Re-run `--list` before quoting any of these numbers;
+this table is a measurement, not a constant.
+
 `annotation-sweep`'s 19 are **not** probe debris — pass 1 called it a single case and would have deleted a real
-gate.
+gate. After retiring the 6: **870 cases remain**.
 
-**S-1.4 — `composer test` is not a release gate, and the `gates` script must not use `@php` on a Python tool.**
-`composer test` runs `config:clear`, `npm run typecheck`, `artisan test` only. Add a `gates` script in this
-exact order, with these exact lines:
+**S-1.4 — translate S-1.4's `gates` script from a Composer script to `tools/gates.sh`. Three measurement rounds
+refuted the Composer-script form, and the first round also refuted my own proposed fix.** This slice is already
+executed in the working tree: `tools/gates.sh` exists and `composer.json` carries a `gates` entry. What follows is
+the evidence and the rule an executor must not undo.
 
-```json
-"gates": [
-    "@php tools/lore.php",
-    "@php tools/lore.php code",
-    "@php vendor/bin/pint --test --format agent",
-    "@php vendor/bin/phpstan analyse --no-progress --memory-limit=1G",
-    "npm run typecheck",
-    "node tools/ui-framework-check.mjs",
-    "python tools/md_fence_check.py tools/ tests/ docs/design-research/",
-    "@php artisan test --compact"
-]
+**What was measured, in order:**
+
+| Round | Command | Result |
+| --- | --- | --- |
+| 1 | `composer run gates` (no tty on stdin) | `stdin is not a tty`, `EXIT=1` |
+| 1 | `php <composer.phar> run lore` (single `@php` step) | **exit 0**, 610 hits printed |
+| 1 | `terminal` tool, `php artisan test` bare vs `< /dev/null` | bare -> `stdin is not a tty`; redirected -> `22 passed` |
+| 2 | each of the 8 steps as its own one-line composer script | **all exit 0**, including `@php artisan test --filter=FanLadderTest` |
+| 3 | `bash tools/gates.sh --fast` | completed; see S-1.6 for the quoted tail |
+
+**The conclusion that matters: the failure is not Composer, it is which process holds stdin.** A Composer script
+runs its children with whatever stdin the *caller* gave it. The `terminal` tool supplies a **closed** stdin, so
+`artisan test` — the only step that opens stdin — aborts, and Composer reports the whole script failed. Every other
+step tolerates it. Run the same script from a caller with a readable stdin and all eight steps pass. A tweak to the
+JSON cannot fix this because the defect is in the harness, not the script, so the gate is a shell script that
+redirects stdin **per step**:
+
+```bash
+step() {
+    local label="$1"; shift
+    printf '\n=== %s ===\n' "$label"
+    "$@" < /dev/null
+    ...
+}
 ```
 
-**Two traps in that block, both measured:**
+*Acceptance (all three, quoted):* `bash tools/gates.sh --fast` exits 0 with a duration; a deliberate pint violation
+somewhere under `app/` makes it exit 1 with `!!! pint FAILED` in the summary; and `bash tools/gates.sh` (no flag)
+exits 0 including the PHP suite. **A prose claim does not close this slice — the three runs do.**
 
-1. **`@php` must never prefix a Python script.** `@php` makes Composer run the **PHP binary** on the file. Measured:
-   `php tools/md_fence_check.py` -> `exit 0` while printing the file's 5,181-byte Python docstring and checking
-   nothing — a **false green**. The correct step is the bare `python tools/md_fence_check.py …` line above, which
-   on the same tree -> `exit 1` with the real `FileNotFoundError`. `build/` "fences step" written as
-   `"@php tools/md_fence_check.py"` is the bug; this block supersedes it.
-2. **`< /dev/null` is required only on the `terminal` tool path, not inside a Composer script.** Measured three
-   ways on the same filter: `execute_code` with an inherited pipe -> `exit 0, 22 passed`; `execute_code` with
-   `stdin=DEVNULL` -> `exit 0, 22 passed`; the Hermes `terminal` tool **without** the redirect -> `exit 1,
-   stdin is not a tty`; `terminal` **with** `< /dev/null` -> `exit 0, 22 passed`. A Composer script run via
-   `composer.bat run gates` was `exit 0, 22 passed` under **both** inherited stdin and `DEVNULL`. So
-   `composer run gates` is usable unattended, and a direct `php artisan test` from the `terminal` tool needs the
-   redirect.
+**Two traps carried forward, both measured:**
 
-*Acceptance:* `composer run gates` exit 0 quoted **with its duration and its per-step output**; a deliberate pint
-violation makes it exit non-zero; and the fences step is proven live by running
-`composer run gates 2>&1 | grep -c 'invalid closing fence'` and reading a non-zero count of the *real* checker's
-line, not a Python traceback. **Do not accept a prose claim for either trap — quote the run.**
+1. **`@php` must never prefix a Python script.** `@php` makes Composer run the **PHP binary** on the file.
+   `php tools/md_fence_check.py` -> exit 0 while printing the file's Python docstring and checking nothing, a
+   **false green**. The real form is `python tools/md_fence_check.py`.
+2. **`python tools/md_fence_check.py <directory>` used to be a second false green, and the tool is now fixed.**
+   `md_files()` filtered arguments through `os.path.isfile`, so `python tools/md_fence_check.py tools/ tests/ ...`
+   matched **0 files** and exited 0. Measured before the fix: `dir tools/ tests/` -> `exit 0` over `0 file(s)`.
+   `tools/md_fence_check.py` now expands a directory to the tracked markdown under it, reports an
+   argument it cannot read as `UNREADABLE` on stderr, and exits **2** in that case. Measured after:
+   `docs/roadmap/` -> exit 0 over N files; `nope/` -> exit **2**; a file with a mismatched closing fence ->
+   exit **1** with the line named. **Do not revert this to the `os.path.isfile` filter.**
 
-**S-1.5 — `tools/md_fence_check.py` crashes with no arguments** on the 25 tracked-but-deleted audit paths.
-*Change:* skip missing files and report them; exit 0 when the present files are clean.
+**The fence step is bare on purpose.** `python tools/md_fence_check.py` with no arguments checks every tracked
+markdown file (293 at `HEAD b86d4667`), which is the set §9's hand-off sequence means. Listing directories would
+re-introduce the second false green if anyone reverted the tool.
 
-**S-1.6 — the full sweep has never run at this tree.** 877 cases, `workers: 1`, 180 s per case, single-process
-`php artisan serve`, ~23 min on a quiet box. **Delegate this to a subagent against a worktree** — it is the one
-task where the 62-minute overhead buys something (isolation from edits).
+**S-1.5 — CLOSED by `2546689e`; the premise lapsed before the slice was written.** Pass 1 found the checker
+crashing on 25 tracked-but-deleted audit paths. A peer then committed the deletions (`e5fc0e1c`, `13ad587b`) and
+the checker was rewritten to expand directories, report `UNREADABLE` arguments and exit 2 on them. Measured at
+`HEAD 2546689e`: bare invocation -> `0 invalid closing fence(s) in 293 file(s)`, exit 0; `nope/` -> exit **2**;
+a file with a mismatched closing fence -> exit **1** and names the line. **Nothing to do. Do not re-open.**
+
+**S-1.6 — run the full sweep once and record what it costs.** 876 cases in 124 files, `workers: 1`, 180 s per case
+under a single-process `php artisan serve`. `annotation-sweep.spec.ts` alone contributes 19 cases and is the
+suspected wall-clock dominant; **measure it, and if it dominates give it its own config rather than dropping it**
+(it is a real regression class, not probe debris). Untested at this tree — do not assume ~23 min.
+
+**The delegation brief must carry plan-truth-gates §2.6's pre-flight**, because a subagent handed only "run the
+sweep" fails in three predictable ways: it runs `npm run build` cold against a stale manifest, it dirties
+`database/database.sqlite` instead of a session scratch file, and it collides with a peer's Playwright process.
+
+```
+Goal: run the Playwright suite once at an isolated worktree and report wall clock + per-file timings.
+Brief must state, verbatim:
+  - target: isolated worktree at <sha>, created under .scratch-uma/worktrees/ (in-repo, never outside)
+  - env: PLAYWRIGHT_PORT=<unused port> PLAYWRIGHT_SCRATCH_DB=.scratch-uma/<session>/browser-<port>.sqlite
+  - lock: mkdir .scratch-uma/<session>/playwright.lock before starting, rmdir after; one suite process only
+  - manifest: confirm public/build/manifest.json is newer than every resources/js file, else npm run build first
+  - ignore check: confirm .scratch-uma/ is gitignored before writing the scratch DB
+  - report shape: sha + dirty-path counts at start and end, exact command, total wall clock, the 10 slowest files,
+    and per-failure classification (regression / pre-existing / unrelated / infra / flaky / inconclusive)
+  - do NOT edit any product file, and do NOT run npm run build while a peer's Vite process holds public/hot
+```
 
 ### P2 — defects with a named site
 
@@ -250,7 +335,7 @@ then the smallest wrapper; then a 320 px case in that spec. *Acceptance:* new ca
 `tests/browser/career-race-planner.spec.ts:119` / `tests/browser/career-race-strip.spec.ts:216` still green.
 
 **S-2.2 — KI-163: goal-row shapes duplicated.** `resources/js/types.ts` has **0** `GoalRow`. Three declarations
-plus two inline shapes remain (`GoalGroupCard.vue:22/:35`, `CareerGoalsPanel.vue:21/:34`,
+plus two inline shapes remain (`resources/js/components/scenario/cards/GoalGroupCard.vue:22`, `resources/js/pages/Career/Cockpit/Panels/CareerGoalsPanel.vue:21`,
 `resources/js/components/scenario/ScenarioCardGrid.vue:99`, and the divergent `resources/js/pages/Catalog/Show.vue:91`). *Change:* export one shape from
 `types.ts`, import in four files. *Acceptance:* `npm run typecheck` exit 0; `grep -rc 'interface GoalRow' resources/js`
 -> 1.
@@ -320,6 +405,8 @@ or build.
 
 ```bash
 # allowed by the hook table, verified live
+bash tools/gates.sh --fast        # 7 of 8 green; typecheck red on a peer's in-flight edit
+bash tools/gates.sh               # adds the PHP suite (long; not yet run end to end at this tree)
 php artisan test --compact --filter=FanLadderTest < /dev/null     # 22 passed, 28 assertions
 php artisan tinker --execute="echo count(config('uma.fan_ladder'));"   # 7
 php vendor/bin/pint --test --format agent <paths>
@@ -348,17 +435,52 @@ git reset --hard        # forbidden by policy and by AGENTS.md §9
 **Flagged for approval (smart mode auto-approves, but state it):**
 `php -r '…'`, `php artisan tinker --execute=…`, `git rm -f <dirty file>`.
 
-**Lore-gate rulings for this file.** Two `tail` hits, both in the denied-command tables above and both class 2
-(substring in an ordinary word or a proper noun, software sense): the Unix tool name, not the banned sense.
-No marker added; both stay in the corpus count with this ruling.
+**Lore-gate rulings for the seven documents this pass produced.** Measured at this tree:
+`php tools/lore.php` -> **`lore-docs: 613 hit(s), 75 exempt line(s)`**; `php tools/lore.php code` ->
+**`lore-code: 365 hit(s)`**, unchanged because nothing here touches a scanned code path.
 
----
+Every hit inside these seven files is the word **`tail`**, and every one is **class 2** (substring in an ordinary
+word or a proper noun, software sense) — the Unix tool name or the ordinary noun for the end of a run's output,
+never the banned sense. The hits are self-referential: this ruling paragraph and the table of blocked commands both
+spell the word, so **writing the ruling raises the count it describes**. That is the known behaviour of an advisory
+gate scanning prose, not a new violation.
+
+| Site | Context | Ruling |
+| --- | --- | --- |
+| the blocked-command table and its code fence | `cat` / `head` / `tail` / `curl` listed as denied | class 2, Unix tool names |
+| the gates-run table | "see S-1.6 for the quoted tail" | class 2, ordinary noun |
+| this ruling block | naming the term to rule on it | class 2, self-reference |
+
+No `lore-ignore-line` marker was added: AGENTS.md §5 permits it in `docs/` only, and a ruling is preferred over a
+marker. The hits stay in the corpus count. **An executor must re-run `php tools/lore.php` and quote the figure
+rather than copying 613** — the number moves with every prose edit, including theirs.
 
 ## 5. Acceptance for this plan
 
 1. `npm ci --dry-run` exit 0 and a clean clone of the landed branch builds (S-0.1, S-0.2, S-0.5).
 2. `npx playwright test --list` contains no case that fails by construction (S-1.1, S-1.2).
-3. `composer run gates` exits 0 and exits non-zero on a deliberate violation (S-1.4).
+3. `bash tools/gates.sh --fast` exits 0 (**met: `GATES: all green`**) and exits non-zero on a deliberate
+   violation (**met: `GATES: 2 failed: pint:1 typecheck:1`** with a probe appended to an enum). The Composer-script
+   form originally planned here is **refuted** — see S-1.4.
+
+   `bash tools/gates.sh` **including the PHP suite was also run**, and this is its quoted result:
+   **`Tests: 2 failed, 2467 passed (37567 assertions)`, `Duration: 319.47s`.** Both failures were classified, and
+   the suite now reads **`1 failed, 2468 passed`**:
+
+   | Failure | Class | Resolved |
+   | --- | --- | --- |
+   | `LineEndingGuardTest` named `career-trainee-select.spec.ts` + `wizard-flow.spec.ts` as CRLF | **real, in the tree** — both files carried **762** and **112** CRLF pairs on disk while `git status` called them clean, because `.gitattributes` normalises on checkout | **fixed**: rewritten to LF, test re-run -> `1 passed (2 assertions)` |
+   | `DocCitationParityTest` — `808` dead citations against a `708` baseline | **pre-existing**, not this pass's | **not fixed, and must not be "fixed" by moving the constant**; see below |
+
+   **The citation failure is pre-existing, proven twice.** `tools/doc_census.py` in this working tree ->
+   `dead markdown links: 808 (808 GONE, 0 UNTRACKED)`; the same tool in a clean `git worktree` at `HEAD 2546689e`
+   -> **`808`** as well. The baseline constant `DOC_CITATION_BASELINE = 708` was pinned in `008a9190` on 2026-10-04
+   and has not moved since, so the drift happened across many later commits. This plan's seven documents
+   contribute **zero** dead links (each was checked by resolving every local markdown target).
+
+   **Raising the constant is the owner's call**, and it is the wrong first move anyway: the honest fix is to
+   resolve or annotate the drifted citations. Until then this one test is red at `HEAD` for everyone, and an
+   executor should report it as **pre-existing** rather than as a regression introduced by their slice.
 4. KI-166 has a 320 px case in its own spec and KI-165 is not re-opened (S-2.1, and §0).
 5. Team Rank is writable through `runs.update` and readable on both displays (S-3.1).
 6. `audit_status_register.py` reports 0 contradictions and every OPEN row carries a reason (S-4.1).
@@ -375,4 +497,9 @@ No marker added; both stay in the corpus count with this ruling.
 - **No second browser stack.** MCP Playwright for single screens; the repo config for suites.
 - **No ADR acceptance, no tag, no PR merge** — owner acts.
 - **No deletion of `annotation-sweep.spec.ts`** despite pass 1 calling it probe debris; its 19 cases are real.
-- **No re-execution of slice 3.2** from `plan-defects`; the peer's implementation supersedes it.
+- **No re-execution of slice 3.2** from `plan-defects`; the peer's implementation supersedes it, and the file now
+  says so in place with the shipped values quoted.
+- **No restoration of `jev-inspect/`.** It is committed away (`e5fc0e1c`); restoring it would resurrect a foreign
+  tree the owner removed.
+- **No new KI for the transient `typecheck`/`pint` failures.** Both were contention between concurrent processes on
+  one working tree, both are resolved, and filing them would put noise in the register.

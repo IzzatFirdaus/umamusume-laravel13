@@ -163,7 +163,7 @@ DOC-SYNC 22 closed and 21 open, UI/UX 37 closed and 42 open, against the 22/21 a
 2026-10-02. The text below stays verbatim because it is the record of what was decided that day and of the
 numbers current then.
 
-A request arrived to fold `docs/PLAN-DOC-SYNC-2026-10-02.md` and `docs/PLAN-UI-UX-2026-10-02.md`
+A request arrived to fold `PROCESS-PLANS.md` §PLAN-DOC-SYNC-2026-10-02.md and `PROCESS-PLANS.md` §PLAN-UI-UX-2026-10-02.md
 into the masters. Both stay where they are, and the reason is measurable rather than stylistic.
 
 - Both are open work: 21 and 62 unchecked steps respectively, against 22 and 17 checked.
@@ -202,8 +202,8 @@ are open.
 
 | Document                                                        | Why it stays out                                                                                                                                                                                                    |
 | --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/PLAN-DOC-SYNC-2026-10-02.md`                              | Task 4 is held on owner gate O-2 and Task 5 is partially executed; Tasks 1, 2, 3, 6, 7 and 8 are complete or scoped. Consolidating a plan with one held task would record a false completion.                       |
-| `docs/PLAN-UI-UX-2026-10-02.md`                                 | Milestone 1 is partly shipped (WS-1 controls, and the M1 register sweep), WS-2 landed at `80caefd`, and WS-3 through WS-6 are open. It owns its own workstreams and the register entries those workstreams close.   |
+| `PROCESS-PLANS.md` §PLAN-DOC-SYNC-2026-10-02.md                              | Task 4 is held on owner gate O-2 and Task 5 is partially executed; Tasks 1, 2, 3, 6, 7 and 8 are complete or scoped. Consolidating a plan with one held task would record a false completion.                       |
+| `PROCESS-PLANS.md` §PLAN-UI-UX-2026-10-02.md                                 | Milestone 1 is partly shipped (WS-1 controls, and the M1 register sweep), WS-2 landed at `80caefd`, and WS-3 through WS-6 are open. It owns its own workstreams and the register entries those workstreams close.   |
 | docs/design-research/slice-7-prd-revision-draft-2026-10-01.md   | A DRAFT awaiting an owner ruling on PRD shape and on R-02's scope. It is deliberately uncommitted, so it is not a tracked master and cannot be registered in `INDEX.md` without defeating its own review gate.      |
 
 **The condition for consolidating any of them:** every acceptance box closed or struck, and gates O-1 (push),
@@ -261,7 +261,7 @@ the master's 6,571 NUL bytes carried through unchanged). Two notes belong here b
 2. Five live citations were repointed before the delete, each at the master and its section anchor:
    `app/Services/Career/TeamPanelBuilder.php` (the S-A-P01.OG resolution comment),
    `docs/design-research/scenario-detail-hfw-2026-11-09/README.md` (the KI-154 sweep pointer),
-   `docs/proposals/2026-11-08-trainee-preset-autofill.md` (the S-A-P01.OG ledger row), and
+   `SLICE-RECORDS.md` §2026-11-08-trainee-preset-autofill.md (the S-A-P01.OG ledger row), and
    `KNOWN-ISSUES.md` twice (the KI-154 and KI-157 entries). The `KNOWN-ISSUES.md` edits were
    byte-safe binary splices preserving its 399 NUL bytes. Outside those five sites, every remaining
    reference to the thirteen deleted paths is either the round's own dated record or an embedded
@@ -272,8 +272,8 @@ the master's 6,571 NUL bytes carried through unchanged). Two notes belong here b
 Absorbed files and their destinations are above, in the Round 25 row of the routing table. Notes for
 the next pass:
 
- 1. The scenario-detail design-language survey (`docs/research/scenario-detail-design-language-survey-2026-11-09.md`)
-    and the RS-UC audit set (`docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md`, `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09/`,
+ 1. The scenario-detail design-language survey (`AUDIT-AND-VERIFICATION.md` §scenario-detail-design-language-survey-2026-11-09.md)
+    and the RS-UC audit set (`AUDIT-AND-VERIFICATION.md` §RS-UC-SCENARIO-DETAIL-2026-11-09.md, `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09/`,
     `docs/research/RS-UC-SCENARIO-DETAIL-2026-11-09/`) are untracked peer in-flight work and stay at their
     paths by design; their citations inside the folded upgrade plan are quoted verbatim as history.
  2. Twelve live citations were repointed before the delete (the twelve named in the INDEX Round 25
@@ -328,8 +328,8 @@ for the next pass:
     (`docs/research/ui-ux-application-context-brief.md`, `docs/UMAMUSUME_REFERENCE.md`,
     `docs/framework-ui-ux/_audit-prompt.md`, and the round-closing +346-line
     `docs/research-scratch/PLANS-AND-BRIEFS.md` edit whose inventory cites
-    `docs/audits/walk-8-follow-up-plan.md` and
-    `docs/audits/trainer-desk-v3-ux-retest/09-consolidated-remediation-plan.md` in
+    `AUDIT-AND-VERIFICATION.md` §walk-8-follow-up-plan.md and
+    `AUDIT-AND-VERIFICATION.md` §09-consolidated-remediation-plan.md in
     slash form) and were left untouched by design; those slash cites are GONE-class
     until the peer lands and repoints them.
 
@@ -374,8 +374,8 @@ Post-commit verification, each figure measured from the landed blobs:
     `docs/audits/trainer-desk-v3-ux-retest/04-ux-findings-retest.md:60-78`
     citing the deleted path; fixed to a folded-source locator in the same commit.
   - Wait-state remains: the peer session's uncommitted edits cite two deleted
-    paths in slash form (`docs/audits/walk-8-follow-up-plan.md` and
-    `docs/audits/trainer-desk-v3-ux-retest/09-consolidated-remediation-plan.md`
+    paths in slash form (`AUDIT-AND-VERIFICATION.md` §walk-8-follow-up-plan.md and
+    `AUDIT-AND-VERIFICATION.md` §09-consolidated-remediation-plan.md
     inside PLANS-AND-BRIEFS.md) and reference folded paths in
     ui-ux-application-context-brief.md / UMAMUSUME_REFERENCE.md / _audit-prompt.md;
     they are peer-owned GONE-class until that session lands and repoints them.
@@ -463,7 +463,7 @@ SLICE-RECORDS.md (20816/20871/20929/21056); +2 the plan's own document-home line
 its body into PLANS-AND-BRIEFS.md (8890/8913) and left verbatim by ruling; +1 the REMAINING-1
 record's own dead cite of `references/verification-patterns.md`, which moved with its body
 (SLICE-RECORDS.md:21141; net zero against its pre-fold home in the deleted source at :78); +1
-a pre-existing INDEX.md cite of `docs/design-research/_scratch/WEB-FINDINGS.md` that shifted
+a pre-existing INDEX.md cite of `DESIGN-CORPUS.md` §WEB-FINDINGS.md that shifted
 from line 985 to 1031 under the Round-28 section insert (net zero); +1 KNOWN-ISSUES.md:4039,
 where the committed register still cites the deleted plan path because the repoint to the
 section anchor is carried uncommitted with the register's concurrent peer edits, per the carry

@@ -159,12 +159,12 @@ already has a path (race entry).
 
 ---
 
-# Slices 4.3, 4.4, 4.5 - Owner-gated; record, do not build
+# Slice 4.3 / 4.4 / 4.5 - Owner-gated; record, do not build
 
 These three are recorded so they are not re-proposed. **No code change until an ADR or a terminal ruling.**
 Each is named here with its own id so the roadmap's row and this plan's section map one-to-one.
 
-## Slice 4.3 - Team-race slots cannot exist
+# Slice 4.3 - Team-race slots cannot exist
 
 | Field | Detail |
 | --- | --- |
@@ -172,7 +172,7 @@ Each is named here with its own id so the roadmap's row and this plan's section 
 | Why it is gated | `database/seeders/ScenarioSlotSeeder.php:18` says "Unity Cup: zero rows (no citable source yet)"; `config/scenarios.php:482` describes the team-race shape (categories, field size, opponents) but no per-round slot rows exist |
 | What the plan needs | A citable source for the round schedule, or a terminal ruling that the shape config is the whole record |
 
-## Slice 4.4 - Roster is derived, not recorded
+# Slice 4.4 - Roster is derived, not recorded
 
 | Field | Detail |
 | --- | --- |
@@ -180,7 +180,7 @@ Each is named here with its own id so the roadmap's row and this plan's section 
 | Why it is gated | R8 §8.3 keeps the roster half DEFERRED; `CockpitController::rosterSection()` derives it from the deck and its own comment says there is no stored roster and no column |
 | What the plan needs | An ADR for a sub-model (`team_members`) plus a write path |
 
-## Slice 4.5 - Preseason rounds collapse to a count
+# Slice 4.5 - Preseason rounds collapse to a count
 
 | Field | Detail |
 | --- | --- |

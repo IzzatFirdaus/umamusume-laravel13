@@ -4,8 +4,8 @@
 
 This document consolidates the following source files verbatim (no summarization, no deduplication):
 
-- `docs/design-research/support-cards-mechanics-2026-10-01.md` (176 lines)
-- `docs/design-research/support-cards-module-plan-2026-10-01.md` (207 lines)
+- `SUPPORT-CARDS.md` §support-cards-mechanics-2026-10-01.md (176 lines)
+- `SUPPORT-CARDS.md` §support-cards-module-plan-2026-10-01.md (207 lines)
 - `o8-per-card-state-proposal.md` (130 lines, 9 headings), folded in 2026-10-04 (Round 11) as the section
   `## o8-per-card-state-proposal.md` at the end of this file. It had been sitting standalone inside
   `docs/research-scratch/`, which §File discipline of `INDEX.md` does not allow, so this fold corrects a
@@ -206,7 +206,7 @@ Not the plan's content; the questions. Each names the side of the gap it answers
 This file replaced an earlier ten-section draft at the same path (restructured 2026-10-01). The draft's content is preserved in the sections below; nothing was dropped.
 
 **Role:** game-mechanics agent. This is a sourced plan, not an implementation and not an ADR.
-**Base:** `docs/design-research/support-cards-mechanics-2026-10-01.md` (the record), read once.
+**Base:** `SUPPORT-CARDS.md` §support-cards-mechanics-2026-10-01.md (the record), read once.
 **Fence held:** one file written, this one. No view, controller, model, migration, request, route, config, test, or ADR was edited. No commit, no push, no migration, no test run, no network fetch, and the shared database was not opened.
 **Verified against:** HEAD `4643eb7` at close. HEAD was `20364ae` when the first pass over this material opened; the plan's citations are line-anchored and were re-confirmed after the move.
 **PLAN.md checked:** no support-card or deck slice is scheduled there. `grep -i 'support.card|deck' PLAN.md` returns nothing across all 644 lines.

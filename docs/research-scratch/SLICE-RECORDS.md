@@ -25,11 +25,11 @@ This master file is a verbatim embedding of all 15 Group D slice verification re
 **Round 17 (2026-10-21, consolidation):** the owner ordered nine `docs/proposals/` files consolidated
 and their originals deleted. Four landed here as their own sections, each a dated state record
 measured against the tree rather than against a plan's wording:
-`docs/proposals/sync-2026-10-15.md` (28 lines, the six-pass stale-manifest re-sync),
-`docs/proposals/phase-5-state-2026-10-20.md` (245 lines, Phase 5 measured slice by slice),
-`docs/proposals/phase-6-state-2026-10-21.md` (63 lines, the 6.4 Dashboard verify closed by
+`SLICE-RECORDS.md` §sync-2026-10-15.md (28 lines, the six-pass stale-manifest re-sync),
+`SLICE-RECORDS.md` §phase-5-state-2026-10-20.md (245 lines, Phase 5 measured slice by slice),
+`SLICE-RECORDS.md` §phase-6-state-2026-10-21.md (63 lines, the 6.4 Dashboard verify closed by
 measurement, with the 6.3 re-scope and a dated erratum) and
-`docs/proposals/phase-8-state-2026-10-21.md` (68 lines, the per-slice verdicts for 8.1 to 8.8 and the
+`SLICE-RECORDS.md` §phase-8-state-2026-10-21.md (68 lines, the per-slice verdicts for 8.1 to 8.8 and the
 Step 9 Feature classification). Each embedded section was re-verified line-by-line against its source
 before the delete (28 of 28, 245 of 245, 63 of 63 and 68 of 68 non-blank lines matched in order with
 one-level heading demotion; 0 missing in each). The originals were then deleted from
@@ -39,7 +39,7 @@ routing table for all nine is in `docs/research-scratch/INDEX.md` §Round 17.
 
 **Round 18 (2026-10-21, consolidation):** the owner ordered eight more `docs/proposals/` files
 consolidated and the originals deleted. One landed here as its own section:
-`docs/proposals/execution-ledger-2026-10-17.md` (5,178 lines), the append-only dispatch ledger, whose
+`SLICE-RECORDS.md` §execution-ledger-2026-10-17.md (5,178 lines), the append-only dispatch ledger, whose
 67 numbered sections record every dispatch, the gates it ran, the decisions it took and what it
 deferred. The section was re-verified line-by-line before the delete (4,085 of 4,085 non-blank lines
 present, in order, with one-level heading demotion; 0 missing) and again after it.
@@ -1701,7 +1701,7 @@ slice-5 Â§4 and the costs that section already lists. It is the closing slice'
 criterion, not a transcription of the owner's wording, which was not recoverable in this session.
 If the owner's phrasing differs, the text at `PLAN.md` Â§Open Decisions is what changes.
 
-On (f): `docs/design-research/FRONTEND-BRIEF-AUDIT.md` is that session's untracked file, so it was
+On (f): `DESIGN-CORPUS.md` §FRONTEND-BRIEF-AUDIT.md is that session's untracked file, so it was
 read and not written. Its Â§5 note that both research docs are dirty still holds for the files it
 had not seen land.
 
@@ -2361,8 +2361,8 @@ fails the moment a recipe drops the pipe.
 Â§3.2 allowed-sense list (5) plus D-73, D-74, D-78, the NFR-6 artifact rule and the Legacies
 terminology row in `docs/research-scratch/DESIGN-CORPUS.md` (20 total); the two C-4 class rows in
 `GATE-REGISTRY.md`; the hit-itemization rows in the slice-3 (2), slice-5 (3), slice-6 (2) and slice-9
-(3) records; the rule lines in `flows/create-run-and-legacy-select.md` (3),
-`requests/game-mechanics-condition-labels.md` (1) and the frontend-review grep report (2); the JP-only
+(3) records; the rule lines in `DESIGN-AND-MECHANICS-REQUESTS.md` §create-run-and-legacy-select.md (3),
+`DESIGN-AND-MECHANICS-REQUESTS.md` §game-mechanics-condition-labels.md (1) and the frontend-review grep report (2); the JP-only
 warning rows in `scenarios/08` (3).
 
 **Left counted on purpose**, and the reason: the 20 `docs/UMAMUSUME_REFERENCE.md` lines and the
@@ -3625,7 +3625,7 @@ distribution match that a swapped mapping fails on every row â€” arithmetic
 second lookup of the same kind. On that reading only 700 is single-domain, and its own note says so
 because Game8's table is graded-only: silence, not agreement.
 
-The disagreement is left standing deliberately, in `docs/design-research/RACE-CALENDAR-GAPS.md` and in
+The disagreement is left standing deliberately, in `RACE-AND-SLICE-RESEARCH.md` §RACE-CALENDAR-GAPS.md and in
 the parser's map comment. It is a question about whether evidence outside the committed export is
 admissible, which is an owner call about the standard of evidence, and neither session can settle it
 alone. `docs/scenarios/09-global-race-calendar.md` is that session's file and was read here, never
@@ -3920,7 +3920,7 @@ the owner decided: "**KI-10 schema half closed, KI-17 closed, Legacy Select sche
 
 **Peer state at slice start.** The concurrent session was live in this shared worktree throughout. Its
 uncommitted surface at 10:14 was `app/Models/Skill.php`, `KNOWN-ISSUES.md`, `PRD.md`,
-`docs/adr/0011-skills-reference-import.md`, `docs/design-research/SKILLS-GAPS.md`,
+`docs/adr/0011-skills-reference-import.md`, `SKILLS-MECHANICS.md` §SKILLS-GAPS.md,
 `database/migrations/2026_09_29_021157_add_reference_fields_to_skills_table.php`, plus the three dirty
 `docs/scenarios/*.md`. None of it was staged, committed or pushed by this slice, and none of it is cited
 as provenance here. Â§10.1 records what the collision cost: the register was committed carrying their KI-23 and KI-24 lines, by the owner's direction.
@@ -3942,7 +3942,7 @@ The range carried one docs-only commit, `72e5157`, authored by this session.
 ### 1.1 R73 read list
 
 `git log 94e90ef..72e5157 --name-only` â€” the range is exactly one commit, touching
-`docs/design-research/verification/slice-14-2026-09-29.md`. It touches no path in `database/`, `config/`,
+`SLICE-RECORDS.md` §slice-14-2026-09-29.md. It touches no path in `database/`, `config/`,
 `app/Services/DataPipeline/` and no corpus file, so the R73 obligation is satisfied by reading it whole,
 which Slice 14 did: it is this session's own record.
 
@@ -4611,9 +4611,9 @@ silently â€” which is R70's rule, not a new one. Of the nine, two are this 
 | --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | `aa5b05c`                         | a `skills` migration, `config/uma.php`, `Parsers/GametoraSkillsParser`, `Contracts/SkillSourceParser`, `PipelineRunner`, `SourceFetcher`, `app/Actions/StoreSkills`, `app/Models/Skill`, `ADR-0011`   | the migration whole, the new source block whole, the `Skill` model diff                                                           |
 | `f71a10e`                         | `database/seeders/SkillSeeder.php`, `docs/research-scratch/DESIGN-CORPUS.md`                                                                                                                             | the seeder diff â€” it retires `Traightaways` and re-names three rows from `name_en`                                              |
-| `a9fe18c`                         | `KNOWN-ISSUES.md`, `docs/design-research/SKILLS-GAPS.md`                                                                                                                                              | the gap register's headings and **G-SK-5 in full**, which names `legacy_selection` as a dependency of another session's surface   |
+| `a9fe18c`                         | `KNOWN-ISSUES.md`, `SKILLS-MECHANICS.md` §SKILLS-GAPS.md                                                                                                                                              | the gap register's headings and **G-SK-5 in full**, which names `legacy_selection` as a dependency of another session's surface   |
 | `83086b0`                         | tests only                                                                                                                                                                                            | file list                                                                                                                         |
-| `c3bdda3`, `acab4d8`, `7eadf45`   | `docs/design-research/SKILLS-GAPS.md`                                                                                                                                                                 | commit messages and the G-SK-17 diff                                                                                              |
+| `c3bdda3`, `acab4d8`, `7eadf45`   | `SKILLS-MECHANICS.md` §SKILLS-GAPS.md                                                                                                                                                                 | commit messages and the G-SK-17 diff                                                                                              |
 | `3796c90`, `b8c0a54`              | this session's own                                                                                                                                                                                    | authored here                                                                                                                     |
 
 **Two of those reads invalidate an assumption Slice 16 was briefed on**, so they are recorded rather than
@@ -5920,7 +5920,7 @@ only the solo-reproduced purchase failure is claimed as real.
 
 ## sync-2026-10-15.md
 
-> **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `docs/proposals/sync-2026-10-15.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
+> **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `SLICE-RECORDS.md` §sync-2026-10-15.md, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
 
 ## Sync state — 2026-10-15
 
@@ -5960,7 +5960,7 @@ Read-only re-sync of the six-pass stale manifest. Evidence below is from greps a
 
 ## phase-5-state-2026-10-20.md
 
-> **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `docs/proposals/phase-5-state-2026-10-20.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
+> **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `SLICE-RECORDS.md` §phase-5-state-2026-10-20.md, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
 
 ## Phase 5 state against the Trainer Desk 2.0 remaining-implementation plan — 2026-10-20
 
@@ -6271,7 +6271,7 @@ dirty file in a shared tree is *someone's work*, not *mine*, unless the transcri
 
 ## phase-6-state-2026-10-21.md
 
-> **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `docs/proposals/phase-6-state-2026-10-21.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
+> **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `SLICE-RECORDS.md` §phase-6-state-2026-10-21.md, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
 
 ## Phase 6.4 — Dashboard verify, closed by measurement
 
@@ -6364,7 +6364,7 @@ destination, but a live desktop link, so the whole-aside count was brittle to an
 
 ## phase-8-state-2026-10-21.md
 
-> **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `docs/proposals/phase-8-state-2026-10-21.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
+> **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `SLICE-RECORDS.md` §phase-8-state-2026-10-21.md, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
 
 ## Phase 8 state — 2026-10-21
 
@@ -6457,7 +6457,7 @@ Step 14 (hidden-red audit) is the fix dispatch for #1-#4 (#5 and #7 need a sourc
 
 ## execution-ledger-2026-10-17.md
 
-> **Consolidated 2026-10-21 (Round 18, owner-ordered).** Source: `docs/proposals/execution-ledger-2026-10-17.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+> **Consolidated 2026-10-21 (Round 18, owner-ordered).** Source: `SLICE-RECORDS.md` §execution-ledger-2026-10-17.md, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
 
 ## Execution ledger — UI audit remediation and design-contract implementation (2026-10-17)
 
@@ -6472,14 +6472,14 @@ Deviation, recorded up front: `.scratch-uma/` is gitignored, so this ledger cann
 |---|---|
 | HEAD at start | `253f957` (`fix(wizard): remove the in-body title duplicating the layout h1`, 2026-10-17 17:11 +0800) |
 | `origin/master` | `0d3a69c` (local master ahead; nothing pushed by this batch) |
-| Working tree | clean except untracked `docs/audits/UX-AUDIT-REPORT.md` (peer artifact, not committed by this batch) |
+| Working tree | clean except untracked `AUDIT-AND-VERIFICATION.md` §UX-AUDIT-REPORT.md (peer artifact, not committed by this batch) |
 | Live peer | last peer commit 17:11 (≈32 min before this batch's first edit); `php artisan serve` PIDs 8196/27136 still answering `:8000` (the UX audit's server). Path-scoped commits only; no bare `git commit`; no `npm run build`. |
-| Read | `AGENTS.md`, `CLAUDE.md` (injected), `DESIGN.md` (full), `SCREEN_SPEC.md` (structure + SCR-CAR-001..012, §7, §8, §9), `AUDIT-AND-VERIFICATION.md` §§ cockpit/wizard/remaining-screens audits, `docs/audits/UX-AUDIT-REPORT.md` (full, 787 lines), `KNOWN-ISSUES.md` KI-103, `SetupLayout.vue`, `ScenarioSelect.vue`, `SetupDraft.php`, `app.css` (primary-action tokens), owner-check + premise-check reports |
+| Read | `AGENTS.md`, `CLAUDE.md` (injected), `DESIGN.md` (full), `SCREEN_SPEC.md` (structure + SCR-CAR-001..012, §7, §8, §9), `AUDIT-AND-VERIFICATION.md` §§ cockpit/wizard/remaining-screens audits, `AUDIT-AND-VERIFICATION.md` §UX-AUDIT-REPORT.md (full, 787 lines), `KNOWN-ISSUES.md` KI-103, `SetupLayout.vue`, `ScenarioSelect.vue`, `SetupDraft.php`, `app.css` (primary-action tokens), owner-check + premise-check reports |
 
 #### Reconciliation points (contract §2)
 
 1. **The supplied implementation plan is not on this machine.** "Implementation Plan — Design Contract First, Then the UI" is absent from the tree, `.scratch-uma/`, and all 215 local sessions (searched by title and by distinctive phrases). Phase 0's slice content is therefore reconstructed from the contract's own §3 Phase 0 validation list (topics + section anchors for 0.1–0.9, 0.11), the four UX audits, and recorded owner rulings. Every amendment cites its actual sources; none claims to quote the plan. **0.10 is not enumerated in the contract** and is reconstructed as the cross-agreement sweep (§8 authority row). If the plan text surfaces, re-check these amendments against it before Phase 1 relies on them.
-2. **UX-AUDIT-REPORT.md location drift.** The contract names `docs/audits/UX-AUDIT-REPORT.md`; the file is at `docs/audits/UX-AUDIT-REPORT.md`, untracked, authored by the audit session. Read there; not committed here (outside this batch's slices).
+2. **UX-AUDIT-REPORT.md location drift.** The contract names `AUDIT-AND-VERIFICATION.md` §UX-AUDIT-REPORT.md; the file is at `AUDIT-AND-VERIFICATION.md` §UX-AUDIT-REPORT.md, untracked, authored by the audit session. Read there; not committed here (outside this batch's slices).
 3. **Stepper (P0) is owner-held.** Owner ruling 2026-10-13 in `SetupDraft::visited()`: "'completed' means visited, not written to the draft". KI-103 (OPEN) documents the dead `saved` disjunct and the two disagreeing written rules. Phase 0 records the ruling and the hold (slice 0.6); the code fix is deferred-owner and not attempted.
 4. **Wizard heading state on HEAD.** `0d3a69c` replaced the step `<h1>` with a styled `<p>` (audit finding A-102); `66f2029` moved the six step titles to the owner-signed Critical tier; `253f957` removed the in-body title that duplicated the layout `h1`. Net: shell `#title` `h1` is the step's single title (verified `ScenarioSelect.vue:117-135`). A-102's fix landed as title-removal, not as an added `h2`; the contract records that mechanism.
 5. **Primary action tokens have landed.** `--color-primary-action` aliases `--color-brand-chrome` (`app.css:292`); 29 `bg-primary-action` consumers measured across `resources/js`. The 2026-10-17 UX audit's "lime primary" phrasing echoes the 2026-10-12 audit's pre-Track-2-D screenshots; the landed token is the blue pair. Recorded in slice 0.3.
@@ -6559,7 +6559,7 @@ The literal gate as written cannot pass on a spec that cites the §2 authority c
 | `php artisan test` full / PHPStan / `npm run typecheck` | not required by the change-class matrix (markdown only); typecheck was clean at baseline and no TS touched |
 | Browser/viewport screenshots | not captured: Phase 0 changes no rendered surface. §5's per-slice screenshot discipline applies from Phase 1's first code slice onward; the `:8000` server (PIDs 8196/27136) is still live for the next dispatch after a rebuild check |
 | `git rev-parse origin/master` | **`6690d15a373010f23e501cc4217e599c865b367a` - moved during this pass.** At the batch's start it read `0d3a69c`; by close it equals this batch's final commit. `git reflog show origin/master` records `update by push` at that tip, and the repository's `post-commit`/`post-checkout` hooks are empty shells (verified: one shebang line each, 10 bytes), so **this session ran no push** - the push happened outside it (peer agent or operator terminal). The batch itself pushed nothing; the fact is recorded rather than explained away. |
-| `git status -sb` | `## master...origin/master` (in sync). Tree carries one **peer working-tree edit**: `DESIGN.md:1` gained a leading space before the `#` heading (uncommitted, would break the heading render; not this batch's edit - every file this batch touched was verified with `git show --stat`, and no batch commit contains it). Left untouched per the shared-tree rule. Plus untracked `docs/audits/UX-AUDIT-REPORT.md` (peer artifact, deliberately not committed). |
+| `git status -sb` | `## master...origin/master` (in sync). Tree carries one **peer working-tree edit**: `DESIGN.md:1` gained a leading space before the `#` heading (uncommitted, would break the heading render; not this batch's edit - every file this batch touched was verified with `git show --stat`, and no batch commit contains it). Left untouched per the shared-tree rule. Plus untracked `AUDIT-AND-VERIFICATION.md` §UX-AUDIT-REPORT.md (peer artifact, deliberately not committed). |
 
 ### 6. Handoff to the Phase 1 dispatch
 
@@ -8335,7 +8335,7 @@ Fixed **137 renamed-path citations** across two commits:
 - docs/Unity-Cup-plan.md → `docs/proposals/Unity-Cup-plan.md` (11)
 - `docs/imports/Umamusume_Progress_Tracker_Runs.md` bare name (6)
 - `docs/research-scratch/SLICE-RECORDS.md` section `## execution-ledger-2026-10-17.md` bare name (4)
-- `docs/audits/UX-AUDIT-REPORT.md` (3)
+- `AUDIT-AND-VERIFICATION.md` §UX-AUDIT-REPORT.md (3)
 - Other individual renames (4)
 
 #### Step D — Decision 1, batch 2: deleted-file links
@@ -8714,7 +8714,7 @@ Prior dispatch: "3 passed (80 assertions)". This dispatch: "2 passed, 1 risky (6
 
 DocCitationParity: **726** (baseline 708, **18 over**). Owner ruling: **do not raise the limit**.
 
-**Option 1 applies**: 708 is the hard limit; 726 fails. The 18 remaining dead links are citations to genuinely deleted files (`RAW-FINDINGS.md` 29, `SKILLS-GAPS.md` 20, `provenance-and-absence-contracts.md` 15, `calendar-tables.md` 14, `design-research/SKILLS-GAPS.md` 13, etc.) whose content was not folded into any master. These require sentence-by-sentence review (repoint / replace with prose / delete sentence) — roughly 111 citations across 5 masters files.
+**Option 1 applies**: 708 is the hard limit; 726 fails. The 18 remaining dead links are citations to genuinely deleted files (`RAW-FINDINGS.md` 29, `SKILLS-GAPS.md` 20, `provenance-and-absence-contracts.md` 15, `calendar-tables.md` 14, `SKILLS-MECHANICS.md` §SKILLS-GAPS.md 13, etc.) whose content was not folded into any master. These require sentence-by-sentence review (repoint / replace with prose / delete sentence) — roughly 111 citations across 5 masters files.
 
 **Decision 1 remains OPEN** — accepted debt pending a dedicated sentence-by-sentence dispatch. Do NOT raise the limit. Do NOT add stub exemptions. CONSTRAINTS.md (171) and PLAN.md (55) stub-pointer cites left untouched.
 
@@ -9678,7 +9678,7 @@ the 718 lines in Sections 30 to 34 and the 711 lines in Sections 35 to 38.
 Seven machine-local paths and three case-mismatched pointers were repointed. Sentence text is
 unchanged in every case; only link formatting or path casing moved.
 
-- `docs/audits/full-audit-2026-10-16.md`, `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## ux-laws-audit-plan-2026-10-13.md`,
+- `AUDIT-AND-VERIFICATION.md` §full-audit-2026-10-16.md, `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## ux-laws-audit-plan-2026-10-13.md`,
   `docs/research-scratch/PROCESS-PLANS.md` and
   `docs/research-scratch/screenshot-notes/PHASE-B-REPORT.md`: seven citations to `.scratch-uma/`,
   `.copilot/` and `.qoder/` paths lost their backticks. Those are gitignored tool directories on
@@ -10008,7 +10008,7 @@ this section) and 1 from the peer (`8e30714`). Behind 0. Not pushed.
 
 Peer-dirty and untouched: `CLAUDE.md`, `SCREEN_SPEC.md`, `docs/UMAMUSUME_REFERENCE.md`,
 `docs/adr/0016-next-race-readiness-open-question.md`, five files under `docs/audits/`, this ledger,
-`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md`, `docs/proposals/implementation-backlog-2026-10-17.md`, one
+`docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md`, `PROCESS-PLANS.md` §implementation-backlog-2026-10-17.md, one
 `docs/research-scratch-source/` file, two `docs/scenarios/` files, and three `.vue` files. Untracked:
 `.worktrees/`, `all_dead_citations.txt`, `dead_HEAD.txt`, `dead_analysis.py`, `dead_b0b3ec9.txt`,
 `tools/list_dead.py`. `append_ledger.py` remains tracked, unreferenced and untouched; its disposition is
@@ -11325,7 +11325,7 @@ The `containment-mechanism.spec.ts` fixture kept above is the control that slice
 #### Close
 
 - Phase 5 slices: 5 (5.1, 5.2, 5.3, 5.4, 5.5).
-- State document: `docs/proposals/phase-5-state-2026-10-20.md`, committed as 38595de, recording
+- State document: `SLICE-RECORDS.md` §phase-5-state-2026-10-20.md, committed as 38595de, recording
   per slice the plan's claims, the tree's evidence, the verdict and what the ruling drops.
 - Landed in this arc before the side-agent plan was written: 5.1's range summary (a39a3fe5), 5.2's
   raw-engine disclosure and named effects (c61ef815), 5.3's provenance disclosure and canonical
@@ -11388,7 +11388,7 @@ The `containment-mechanism.spec.ts` fixture kept above is the control that slice
   subject the peer used, and the slice's content is the .txt's content.
 - Sections 51 to 54 (5.1, 5.2, 5.3, 5.4) and Section 57 (6.2) are unaffected by this erratum and
   stand as written.
-- The state document `docs/proposals/phase-5-state-2026-10-20.md` carries the same correction, as a
+- The state document `SLICE-RECORDS.md` §phase-5-state-2026-10-20.md carries the same correction, as a
   dated erratum appended to it rather than an edit to it (Rule 3: corrections as dated errata).
 
 ### 59. Dispatch 52 - 8.7 lands: every axe scan opens the disclosures first, 2026-10-20
@@ -11567,15 +11567,15 @@ routing, the verification, and the one class of reference left standing.
 
 | Absorbed file                                              | Lines | New home                                                                                   |
 | ---------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------ |
-| `docs/proposals/trainer-desk-implementation-plan-2026-10-17.md` | 415 | `PROCESS-PLANS.md`, section `## trainer-desk-implementation-plan-2026-10-17.md`        |
-| `docs/proposals/implementation-backlog-2026-10-17.md`      | 557   | `PROCESS-PLANS.md`, section `## implementation-backlog-2026-10-17.md`                      |
+| `PROCESS-PLANS.md` §trainer-desk-implementation-plan-2026-10-17.md | 415 | `PROCESS-PLANS.md`, section `## trainer-desk-implementation-plan-2026-10-17.md`        |
+| `PROCESS-PLANS.md` §implementation-backlog-2026-10-17.md      | 557   | `PROCESS-PLANS.md`, section `## implementation-backlog-2026-10-17.md`                      |
 | `docs/proposals/Trainer Desk 2.0 - Remaining implementation.txt` | 365 | `PROCESS-PLANS.md`, section `## Trainer Desk 2.0 - Remaining implementation.txt`    |
 | `docs/proposals/UXUI Update Phases and Slices.txt`         | 60    | `PROCESS-PLANS.md`, section `## UXUI Update Phases and Slices.txt`                          |
-| `docs/proposals/sync-2026-10-15.md`                        | 28    | `SLICE-RECORDS.md`, section `## sync-2026-10-15.md`                                         |
-| `docs/proposals/phase-5-state-2026-10-20.md`               | 245   | `SLICE-RECORDS.md`, section `## phase-5-state-2026-10-20.md`                                |
-| `docs/proposals/phase-6-state-2026-10-21.md`               | 63    | `SLICE-RECORDS.md`, section `## phase-6-state-2026-10-21.md`                                |
-| `docs/proposals/phase-8-state-2026-10-21.md`               | 68    | `SLICE-RECORDS.md`, section `## phase-8-state-2026-10-21.md`                                |
-| `docs/proposals/phase-8-7-remainder-findings-2026-10-21.md` | 120 | `AUDIT-AND-VERIFICATION.md`, section `## phase-8-7-remainder-findings-2026-10-21.md`      |
+| `SLICE-RECORDS.md` §sync-2026-10-15.md                        | 28    | `SLICE-RECORDS.md`, section `## sync-2026-10-15.md`                                         |
+| `SLICE-RECORDS.md` §phase-5-state-2026-10-20.md               | 245   | `SLICE-RECORDS.md`, section `## phase-5-state-2026-10-20.md`                                |
+| `SLICE-RECORDS.md` §phase-6-state-2026-10-21.md               | 63    | `SLICE-RECORDS.md`, section `## phase-6-state-2026-10-21.md`                                |
+| `SLICE-RECORDS.md` §phase-8-state-2026-10-21.md               | 68    | `SLICE-RECORDS.md`, section `## phase-8-state-2026-10-21.md`                                |
+| `AUDIT-AND-VERIFICATION.md` §phase-8-7-remainder-findings-2026-10-21.md | 120 | `AUDIT-AND-VERIFICATION.md`, section `## phase-8-7-remainder-findings-2026-10-21.md`      |
 
 #### Verification
 
@@ -11632,7 +11632,7 @@ got no edit.
 
 | ADR | Finding | Rules |
 |---|---|---|
-| 0002 (with 0015, 0025) | The two-marker ceiling condition has no surface: `StatBand.vue` was deleted in the frontend cutover (`b30906a`), the panel that replaced it is target-shaped by design, and `ScenarioCaps::ceilingsForRun()` is called only by its test. The supersession is recorded in `docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md` and not in the ADR set | UX-2, UI-3, GT-6, WCAG 1.4.11 |
+| 0002 (with 0015, 0025) | The two-marker ceiling condition has no surface: `StatBand.vue` was deleted in the frontend cutover (`b30906a`), the panel that replaced it is target-shaped by design, and `ScenarioCaps::ceilingsForRun()` is called only by its test. The supersession is recorded in `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk-resolutions.md and not in the ADR set | UX-2, UI-3, GT-6, WCAG 1.4.11 |
 | 0006 | The design-authority ruling predates the framework corpus, which states visual house rules of its own (three type sizes, one accent, 44px) and settles rule conflicts against a third document; no document says which wins | SHR-1, UI-1, UI-7, UX-1 |
 | 0007 (with 0020) | The loading ruling was never carried across the SPA rewrite: a client-side visit has no blank-to-paint, and the component that discharges it (`resources/js/components/VisitProgressBar.vue`) is named in no ADR | H1, TOG-1, TOG-3, NRM-6, GT-2 |
 | 0014 | The deck picker's one-copy rule is refused after the write, not by the control: the picker offers a card already equipped in another slot, and `StoreDeckRequest` refuses it afterwards | NRM-2, NRM-3, H5, NRM-4, GT-2 |
@@ -12218,7 +12218,7 @@ Cockpit unlanded. Both figures are wrong on this tree.
 1. Build inline in the shared master tree, waiving the AGENTS.md §9 no-build-while-a-peer
    works rule for this pass. Every `app/` screenshot therefore carries the peer's
    uncommitted `AppLayout.vue` (+194), `Preflight.vue` (+40) and `CardPicker.vue` (+4),
-   recorded in `.scratch-uma/hfw-parity-2026-11-01/README.md`.
+   recorded in `GOVERNANCE.md` §README.md.
 2. Evidence under `.scratch-uma/hfw-parity-2026-11-01/`, not `.scratch-parity/` (the brief
    asserted the latter is gitignored; `git check-ignore` says it is not).
 3. No root `TASKS.md`: the root set is closed, so the session record lands here.
@@ -12620,7 +12620,7 @@ double-encoded dashes in places now carries the correct character in the new sec
 ## 2026-11-02-followup-closeout.md
 
 > Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
-> `docs/proposals/2026-11-02-followup-closeout.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> `SLICE-RECORDS.md` §2026-11-02-followup-closeout.md. The source's own `#` title follows verbatim as `###`, and its headings keep
 > one level of demotion; the body is otherwise untouched. The source file was deleted from
 > its original location after this section was verified present and byte-identical; it
 > remains recoverable from the commit that deleted it.
@@ -12775,7 +12775,7 @@ change). No new owner decision is needed for this dispatch.
 ## 2026-11-02-legacy-builder-pass.md
 
 > Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
-> `docs/proposals/2026-11-02-legacy-builder-pass.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> `SLICE-RECORDS.md` §2026-11-02-legacy-builder-pass.md. The source's own `#` title follows verbatim as `###`, and its headings keep
 > one level of demotion; the body is otherwise untouched. The source file was deleted from
 > its original location after this section was verified present and byte-identical; it
 > remains recoverable from the commit that deleted it.
@@ -12806,7 +12806,7 @@ Session: resume Legacy builder side-by-side + stalled audit
 - **Classification:** PRE-EXISTING/UNRELATED — no regressions introduced by the layout change. Legacy Lab specs all green.
 
 ### Audit
-- **Report:** `docs/audits/AUD-20261102-029-legacy-builder-2026-11-02.md` (M2 screen audit)
+- **Report:** `AUDIT-AND-VERIFICATION.md` §AUD-20261102-029-legacy-builder-2026-11-02.md (M2 screen audit)
 - **Findings count by severity:** Severity 0: 6 findings (all observations, no defects). No severity ≥1 findings.
 - **Coverage:** Builder states inspected via code + shipped regression specs; layout behavior confirmed correct.
 
@@ -12836,7 +12836,7 @@ Session: resume Legacy builder side-by-side + stalled audit
 ## 2026-11-02-ui-ux-audit-implementation-pass-1.md
 
 > Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
-> `docs/proposals/2026-11-02-ui-ux-audit-implementation-pass-1.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> `SLICE-RECORDS.md` §2026-11-02-ui-ux-audit-implementation-pass-1.md. The source's own `#` title follows verbatim as `###`, and its headings keep
 > one level of demotion; the body is otherwise untouched. The source file was deleted from
 > its original location after this section was verified present and byte-identical; it
 > remains recoverable from the commit that deleted it.
@@ -12844,7 +12844,7 @@ Session: resume Legacy builder side-by-side + stalled audit
 ### UI/UX Audit Implementation — Pass 1 Report
 
 
-Dated 2026-11-02. Executes `docs/proposals/2026-11-02-ui-ux-audit-implementation.md`.
+Dated 2026-11-02. Executes `PROCESS-PLANS.md` §2026-11-02-ui-ux-audit-implementation.md.
 
 ### 1. Pre-flight results
 
@@ -12917,7 +12917,7 @@ Peer changes in PreflightController.php, CareerPreflightTest.php, KNOWN-ISSUES.m
 ## 2026-11-02-ui-ux-audit-implementation-pass-2.md
 
 > Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
-> `docs/proposals/2026-11-02-ui-ux-audit-implementation-pass-2.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> `SLICE-RECORDS.md` §2026-11-02-ui-ux-audit-implementation-pass-2.md. The source's own `#` title follows verbatim as `###`, and its headings keep
 > one level of demotion; the body is otherwise untouched. The source file was deleted from
 > its original location after this section was verified present and byte-identical; it
 > remains recoverable from the commit that deleted it.
@@ -12925,7 +12925,7 @@ Peer changes in PreflightController.php, CareerPreflightTest.php, KNOWN-ISSUES.m
 ### UI/UX Audit Implementation — Pass 2 Report
 
 
-Dated 2026-11-02. Executes `docs/proposals/2026-11-02-ui-ux-audit-implementation.md` (pass 2).
+Dated 2026-11-02. Executes `PROCESS-PLANS.md` §2026-11-02-ui-ux-audit-implementation.md (pass 2).
 
 ### Pre-flight results
 
@@ -13044,7 +13044,7 @@ Peer changes in 20+ files (Cockpit.vue, Preferences/Edit.vue, etc.) left unstage
 ## 2026-11-02-ui-ux-audit-implementation-pass-3.md
 
 > Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
-> `docs/proposals/2026-11-02-ui-ux-audit-implementation-pass-3.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> `SLICE-RECORDS.md` §2026-11-02-ui-ux-audit-implementation-pass-3.md. The source's own `#` title follows verbatim as `###`, and its headings keep
 > one level of demotion; the body is otherwise untouched. The source file was deleted from
 > its original location after this section was verified present and byte-identical; it
 > remains recoverable from the commit that deleted it.
@@ -13177,7 +13177,7 @@ about and it was caught by running the spec, not by inspection.
   F-08 requires, committed explicitly (`9d753b7a`)
 - Left untouched and unstaged: `KNOWN-ISSUES.md`, `SCREEN_SPEC.md`, `PreflightController.php`,
   `ResultController.php`, `CatalogController.php`, `config/*.php`, `tests/Feature/DashboardTest.php`,
-  the untracked `docs/audits/AUD-dashboard-2026-11-01.md` / `AUD-preferences-2026-11-01.md`
+  the untracked `AUDIT-AND-VERIFICATION.md` §AUD-dashboard-2026-11-01.md / `AUD-preferences-2026-11-01.md`
 - Every commit used an explicit pathspec; no `git add -A`
 
 ### Deviations from the dispatch
@@ -13267,7 +13267,7 @@ work accurately, and the additions below change the *best-effort* rows, not the 
 
 **RaceDecision-F-02 (AUD-20261102-002)** — the finding states missing values print as dashes. The page
 contains no U+2014 and already uses `N/A` or `-`, so there is no defect to fix. This belongs in
-`docs/audit-corrections.md` as a pass-3 retraction; the audit file itself is not edited here.
+`AUDIT-AND-VERIFICATION.md` §audit-corrections.md as a pass-3 retraction; the audit file itself is not edited here.
 
 #### Peak totals after continuation
 
@@ -13280,7 +13280,7 @@ contains no U+2014 and already uses `N/A` or `-`, so there is no defect to fix. 
 ## 2026-11-02-ui-ux-audit-implementation-pass-4.md
 
 > Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
-> `docs/proposals/2026-11-02-ui-ux-audit-implementation-pass-4.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> `SLICE-RECORDS.md` §2026-11-02-ui-ux-audit-implementation-pass-4.md. The source's own `#` title follows verbatim as `###`, and its headings keep
 > one level of demotion; the body is otherwise untouched. The source file was deleted from
 > its original location after this section was verified present and byte-identical; it
 > remains recoverable from the commit that deleted it.
@@ -13323,7 +13323,7 @@ Eight absence sites: four used words, **four used a hyphen**. The retraction was
 **Fixed in `1af9eb53`.** All four now render `AbsenceValue` with a stated reason. Verification:
 SOURCE — `Select-String` for `'-'` in the page returns no hits; the en-dash count is 0.
 
-**No `docs/audit-corrections.md` entry is filed**: the audit was right about F-02, so the correction
+**No `AUDIT-AND-VERIFICATION.md` §audit-corrections.md entry is filed**: the audit was right about F-02, so the correction
 record would have to carry a *retraction of the retraction*, and this report is that record.
 
 ### 2. Prior-pass corrections (pass 3)
@@ -13526,7 +13526,7 @@ Filed as **KI-149** in `KNOWN-ISSUES.md` rather than left in this report: thirte
 The audit filed F-01 on the premise that a per-parent spark-count ceiling exists. Nothing in the tree
 defines one (`MAX_SPARK_STARS = 3` is a star ceiling). Either the reference names a count and the
 finding is real pending that figure, or the finding is false and belongs in
-`docs/audit-corrections.md`. **Not resolved here** — reading `docs/UMAMUSUME_REFERENCE.md` for the
+`AUDIT-AND-VERIFICATION.md` §audit-corrections.md. **Not resolved here** — reading `docs/UMAMUSUME_REFERENCE.md` for the
 figure is what settles it.
 
 #### N-2 — RunsImport-F-01: recommendation stated
@@ -13551,7 +13551,7 @@ target the old bare-text assertion addressed — narrower, not weaker.
 ## 2026-11-02-ui-ux-audit-implementation-pass-5.md
 
 > Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
-> `docs/proposals/2026-11-02-ui-ux-audit-implementation-pass-5.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> `SLICE-RECORDS.md` §2026-11-02-ui-ux-audit-implementation-pass-5.md. The source's own `#` title follows verbatim as `###`, and its headings keep
 > one level of demotion; the body is otherwise untouched. The source file was deleted from
 > its original location after this section was verified present and byte-identical; it
 > remains recoverable from the commit that deleted it.
@@ -13701,7 +13701,7 @@ Prior-pass commits are not counted here.
 ## 2026-11-03-completion-phase-0.md
 
 > Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
-> `docs/proposals/2026-11-03-completion-phase-0.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> `SLICE-RECORDS.md` §2026-11-03-completion-phase-0.md. The source's own `#` title follows verbatim as `###`, and its headings keep
 > one level of demotion; the body is otherwise untouched. The source file was deleted from
 > its original location after this section was verified present and byte-identical; it
 > remains recoverable from the commit that deleted it.
@@ -13820,7 +13820,7 @@ Origin advanced from `ae97da9e` -> `34fd3c9e` between sessions; 6 local commits 
 ## 2026-11-03-deferred-items.md
 
 > Folded into this master in consolidation Round 22 (owner-ordered, 2026-11-03) from
-> `docs/proposals/2026-11-03-deferred-items.md`. The source's own `#` title follows verbatim as `###`, and its headings keep
+> `SLICE-RECORDS.md` §2026-11-03-deferred-items.md. The source's own `#` title follows verbatim as `###`, and its headings keep
 > one level of demotion; the body is otherwise untouched. The source file was deleted from
 > its original location after this section was verified present and byte-identical; it
 > remains recoverable from the commit that deleted it.
@@ -15636,7 +15636,7 @@ never read. Both commits are ancestors of the session base `6f95c476`.
 ### §s-a-p02-1 — S-A-P02.1: the Skill spark target list is the Global client's catalogue
 
 #### 1. Slice, rows, register reference
-**S-A-P02.1**, from `docs/proposals/2026-11-08-sparks-skill-picker.md` §4 item 3 and §7 decision 1
+**S-A-P02.1**, from `SLICE-RECORDS.md` §2026-11-08-sparks-skill-picker.md §4 item 3 and §7 decision 1
 (owner ruling: yes). **No register row.** Round 7's register closed at `ce204885`; this is post-close-out
 work following `§post-close-out-fix-F-01`'s precedent (`30eb2b4d`), which files a distinct ledger section
 and touches no register.
@@ -15759,7 +15759,7 @@ Peer set unchanged: `git status --short` showed only the three staged paths befo
 ### §s-a-p02-2 — S-A-P02.2: a searchable Target combobox on the wizard's parent rows
 
 #### 1. Slice, rows, register reference
-**S-A-P02.2**, from `docs/proposals/2026-11-08-sparks-skill-picker.md` §4 items 1, 2, 4 and §7
+**S-A-P02.2**, from `SLICE-RECORDS.md` §2026-11-08-sparks-skill-picker.md §4 items 1, 2, 4 and §7
 decisions 2-6. **No register row** — post-close-out, following `§post-close-out-fix-F-01`'s precedent.
 
 #### 2. Pre-flight
@@ -15951,7 +15951,7 @@ $ git commit -m "feat(legacy): wire picker run-scoped Builder and four grandpare
 ### §s-a-p01-1 — S-A-P01.1: the character goal ladder composes only for the scenario that carries it
 
 #### 1. Slice, rows, register reference
-**S-A-P01.1**, from `docs/proposals/2026-11-08-trainee-preset-autofill.md` §4.3 and §7 decision 4.
+**S-A-P01.1**, from `SLICE-RECORDS.md` §2026-11-08-trainee-preset-autofill.md §4.3 and §7 decision 4.
 **No register row.** **Not `KI-122`, not `R7-18`, not `R5-12`:** those settle `race_catalog_slots`, whose
 `scenario_key` column makes shared-vs-specific a real distinction. `trainee_goals` has no `scenario` column
 and holds one source's URA rows (P-01 §2 M-12/M-13), so this gate answers a different question about a
@@ -16286,7 +16286,7 @@ their slices, and the CRLF normalisation of the two files here is a git no-op (t
 ### §s-a-p02-close-out — P-02 implemented
 
 #### 1. Slice, rows, register reference
-Close-out for `docs/proposals/2026-11-08-sparks-skill-picker.md`. **No register row.**
+Close-out for `SLICE-RECORDS.md` §2026-11-08-sparks-skill-picker.md. **No register row.**
 
 #### 2. Pre-flight
 `git rev-parse HEAD` at open: `b33084f2`. Tree clean apart from the ledger this section appends.
@@ -16351,7 +16351,7 @@ Ledger section committed with this pass's final ledger commit.
 ### §s-a-p01-close-out — P-01 implemented, with one slice held
 
 #### 1. Slice, rows, register reference
-Close-out for `docs/proposals/2026-11-08-trainee-preset-autofill.md`. **No register row.**
+Close-out for `SLICE-RECORDS.md` §2026-11-08-trainee-preset-autofill.md. **No register row.**
 
 #### 2. Pre-flight
 `git rev-parse HEAD` at open: `1e13db35`. Tree clean apart from the ledger this section appends.
@@ -16665,7 +16665,7 @@ All dispatch items completed. Layout fix committed and verified, regression gate
 ## S-RS-SPAN-1-report-2026-11-10.md
 
 > **Folded into this master in consolidation Round 24 (owner-ordered, 2026-11-10) from**
-> `docs/research/S-RS-SPAN-1-report-2026-11-10.md`. It is the span-hole fix dispatch (02:15), the first commit of the 2026-11-10 arc.
+> `SLICE-RECORDS.md` §S-RS-SPAN-1-report-2026-11-10.md. It is the span-hole fix dispatch (02:15), the first commit of the 2026-11-10 arc.
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
 > demotion; the body is otherwise untouched.
 > The source was untracked at the fold, so this section is its only copy (the Round 13 E2 precedent). Its dated `git status` snapshots quote paths as they sat on the day and stay verbatim as history. It cites no sibling `docs/research/` file.
@@ -16826,7 +16826,7 @@ appears as modified because it is committed.
 ## ki-154-scenario-widget-sweep-2026-11-10.md
 
 > **Folded into this master in consolidation Round 24 (owner-ordered, 2026-11-10) from**
-> `docs/research/ki-154-scenario-widget-sweep-2026-11-10.md`. It is the KI-154 research pass (03:13).
+> `SLICE-RECORDS.md` §ki-154-scenario-widget-sweep-2026-11-10.md. It is the KI-154 research pass (03:13).
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
 > demotion; the body is otherwise untouched.
 > The source was tracked and clean at HEAD, so it remains recoverable at the commit that deleted it. Its dated `git status` snapshots quote paths as they sat on the day and stay verbatim as history. It cites no sibling `docs/research/` file.
@@ -17013,7 +17013,7 @@ recorded value.
 ## s-rs-ki154-1-report-2026-11-10.md
 
 > **Folded into this master in consolidation Round 24 (owner-ordered, 2026-11-10) from**
-> `docs/research/s-rs-ki154-1-report-2026-11-10.md`. It is the KI-154 fix dispatch (03:14–03:23), which closed KI-154 and filed KI-157.
+> `SLICE-RECORDS.md` §s-rs-ki154-1-report-2026-11-10.md. It is the KI-154 fix dispatch (03:14–03:23), which closed KI-154 and filed KI-157.
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
 > demotion; the body is otherwise untouched.
 > The source was tracked and clean at HEAD, so it remains recoverable at the commit that deleted it. Its dated `git status` snapshots quote paths as they sat on the day and stay verbatim as history. Its own cross-reference to a sibling `docs/research/` file is repointed at this master, the Round 18 approved departure.
@@ -17162,7 +17162,7 @@ workstream's files.
 ## s-a-p01-og-goal-source-2026-11-10.md
 
 > **Folded into this master in consolidation Round 24 (owner-ordered, 2026-11-10) from**
-> `docs/research/s-a-p01-og-goal-source-2026-11-10.md`. It is the OGC goal_source research record (03:14).
+> `SLICE-RECORDS.md` §s-a-p01-og-goal-source-2026-11-10.md. It is the OGC goal_source research record (03:14).
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
 > demotion; the body is otherwise untouched.
 > The source was tracked and clean at HEAD, so it remains recoverable at the commit that deleted it. Its dated `git status` snapshots quote paths as they sat on the day and stay verbatim as history. It cites no sibling `docs/research/` file.
@@ -17318,7 +17318,7 @@ expression reads is unchanged, and the payload is byte-identical.
 ## s-a-p01-og-1-report-2026-11-10.md
 
 > **Folded into this master in consolidation Round 24 (owner-ordered, 2026-11-10) from**
-> `docs/research/s-a-p01-og-1-report-2026-11-10.md`. It is the OGC resolution dispatch (03:23).
+> `SLICE-RECORDS.md` §s-a-p01-og-1-report-2026-11-10.md. It is the OGC resolution dispatch (03:23).
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
 > demotion; the body is otherwise untouched.
 > The source was tracked and clean at HEAD, so it remains recoverable at the commit that deleted it. Its dated `git status` snapshots quote paths as they sat on the day and stay verbatim as history. Its own cross-reference to a sibling `docs/research/` file is repointed at this master, the Round 18 approved departure.
@@ -17365,7 +17365,7 @@ proceed; if they disagree or the evidence is genuinely ambiguous, stop before an
 | File | Commit | Change |
 |---|---|---|
 | section `## s-a-p01-og-goal-source-2026-11-10.md` of `docs/research-scratch/SLICE-RECORDS.md` | `83d7df29` | New: the resolution, with every citation read fresh |
-| `docs/proposals/2026-11-08-trainee-preset-autofill.md` | `2845d82c` | Dated 2026-11-10 row closing `S-A-P01.OG` |
+| `SLICE-RECORDS.md` §2026-11-08-trainee-preset-autofill.md | `2845d82c` | Dated 2026-11-10 row closing `S-A-P01.OG` |
 | `config/scenarios.php` | — | **No change.** Already `'trainee_goals'` at `:1090` |
 | `app/Services/Career/TeamPanelBuilder.php` | — | Comment corrected in the working tree; **not committed** (file is in the peer set, see §7) |
 
@@ -17413,7 +17413,7 @@ lands the F-02 work, not this one. **Recorded here rather than silently swept.**
 ## S-RS-REMODEL-B1-summary-2026-11-10.md
 
 > **Folded into this master in consolidation Round 24 (owner-ordered, 2026-11-10) from**
-> `docs/research/S-RS-REMODEL-B1-summary-2026-11-10.md`. It is the four-workstream summary (03:40).
+> `SLICE-RECORDS.md` §S-RS-REMODEL-B1-summary-2026-11-10.md. It is the four-workstream summary (03:40).
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
 > demotion; the body is otherwise untouched. Its CRLF line endings are normalised to LF inside this section, recorded in the round entry.
 > The source was tracked and clean at HEAD, so it remains recoverable at the commit that deleted it. Its dated `git status` snapshots quote paths as they sat on the day and stay verbatim as history. It cites no sibling `docs/research/` file.
@@ -17523,14 +17523,14 @@ Nothing here is blocked on further work, and nothing further should proceed with
 ## s-rs-remodel-b1-report-2026-11-10.md
 
 > **Folded into this master in consolidation Round 24 (owner-ordered, 2026-11-10) from**
-> `docs/research/s-rs-remodel-b1-report-2026-11-10.md`. It is the B1 consolidation-plan dispatch (03:28).
+> `SLICE-RECORDS.md` §s-rs-remodel-b1-report-2026-11-10.md. It is the B1 consolidation-plan dispatch (03:28).
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
 > demotion; the body is otherwise untouched. Its CRLF line endings are normalised to LF inside this section, recorded in the round entry.
 > The source was tracked and clean at HEAD, so it remains recoverable at the commit that deleted it. Its dated `git status` snapshots quote paths as they sat on the day and stay verbatim as history. It cites no sibling `docs/research/` file.
 
 ### `S-RS-REMODEL-B1` (Workstream A) — report
 
-**Base HEAD:** `5e39a1f0`. **Deliverable:** `docs/proposals/2026-11-10-scenario-detail-remodel.md`
+**Base HEAD:** `5e39a1f0`. **Deliverable:** `PROCESS-PLANS.md` §2026-11-10-scenario-detail-remodel.md
 (commit `28d9afbf`).
 
 **Outcome: A.1 produced the plan and stopped at a named fork. A.2 did not run.** This is the
@@ -17560,7 +17560,7 @@ not rule for the page.
 
 ### 2. What the plan contains
 
-`docs/proposals/2026-11-10-scenario-detail-remodel.md`, 186 lines:
+`PROCESS-PLANS.md` §2026-11-10-scenario-detail-remodel.md, 186 lines:
 
 - §1 the five moves priced against the tree, with each file's **dirty state measured** — because a
   move whose file carries uncommitted work cannot be committed by pathspec without sweeping it.
@@ -17615,7 +17615,7 @@ end of the chain and reported in the top-level summary. Markdown fences:
 ## S-RS-REMODEL-B2-report-2026-11-10.md
 
 > **Folded into this master in consolidation Round 24 (owner-ordered, 2026-11-10) from**
-> `docs/research/S-RS-REMODEL-B2-report-2026-11-10.md`. It is the B2 Move-3/landing dispatch (04:38).
+> `SLICE-RECORDS.md` §S-RS-REMODEL-B2-report-2026-11-10.md. It is the B2 Move-3/landing dispatch (04:38).
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
 > demotion; the body is otherwise untouched. Its CRLF line endings are normalised to LF inside this section, recorded in the round entry.
 > The source was tracked and clean at HEAD, so it remains recoverable at the commit that deleted it. Its dated `git status` snapshots quote paths as they sat on the day and stay verbatim as history. Its own cross-references to sibling `docs/research/` files are repointed at this master, the Round 18 approved departure.
@@ -17829,7 +17829,7 @@ any commit (`git show --name-only` checked per commit).
 ## S-RS-CLEANUP-1-and-RULING-PREP-1-report-2026-11-10.md
 
 > **Folded into this master in consolidation Round 24 (owner-ordered, 2026-11-10) from**
-> `docs/research/S-RS-CLEANUP-1-and-RULING-PREP-1-report-2026-11-10.md`. It is the cleanup + ruling-prep dispatch (10:26).
+> `SLICE-RECORDS.md` §S-RS-CLEANUP-1-and-RULING-PREP-1-report-2026-11-10.md. It is the cleanup + ruling-prep dispatch (10:26).
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
 > demotion; the body is otherwise untouched.
 > The source was tracked and clean at HEAD, so it remains recoverable at the commit that deleted it. Its dated `git status` snapshots quote paths as they sat on the day and stay verbatim as history. It cites no sibling `docs/research/` file.
@@ -17948,7 +17948,7 @@ pre-existing failure relabelled.
 
 ### 3. Workstream W — memos
 
-**File:** `docs/proposals/2026-11-10-ruling-memos-scenario-detail.md`, commit `068c42d6`.
+**File:** `PLANS-AND-BRIEFS.md` §2026-11-10-ruling-memos-scenario-detail.md, commit `068c42d6`.
 
 | Memo | Status | Recommendation flag |
 |---|---|---|
@@ -18004,7 +18004,7 @@ owner rules from.
 ## S-RS-REMODEL-C1-phase1-2026-11-10.md
 
 > **Folded into this master in consolidation Round 24 (owner-ordered, 2026-11-10) from**
-> `docs/research/S-RS-REMODEL-C1-phase1-2026-11-10.md`. It is the C1 Phase 1 checkpoint (11:00), two stop conditions fired.
+> `SLICE-RECORDS.md` §S-RS-REMODEL-C1-phase1-2026-11-10.md. It is the C1 Phase 1 checkpoint (11:00), two stop conditions fired.
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
 > demotion; the body is otherwise untouched.
 > The source was tracked and clean at HEAD, so it remains recoverable at the commit that deleted it. Its dated `git status` snapshots quote paths as they sat on the day and stay verbatim as history. It cites no sibling `docs/research/` file.
@@ -18031,7 +18031,7 @@ memos, the HFW) — no path correction needed.
 
 The dispatch said to stop if the plan's own category definitions do not settle it. **They do.**
 
-`docs/proposals/2026-11-10-scenario-detail-remodel.md` (Move 1, "**After**") names it explicitly:
+`PROCESS-PLANS.md` §2026-11-10-scenario-detail-remodel.md (Move 1, "**After**") names it explicitly:
 
 > "burst bands, Spirit Burst and Special Training form the run-state row."
 
@@ -18044,7 +18044,7 @@ content is the energy-penalty removal, the Wit-burst bonus, and that absence. Fa
 
 **Fork 3: resolved — run-state.**
 
-The scheme the owner ruled from, `docs/proposals/2026-11-10-ruling-memos-scenario-detail.md` §W.2,
+The scheme the owner ruled from, `PLANS-AND-BRIEFS.md` §2026-11-10-ruling-memos-scenario-detail.md §W.2,
 calls the same panel run-state twice: in the "What each choice produces" table ("some run-state panels
 (burst bands, Spirit Burst, Special Training) promote above team panels") and in the measured-facts
 bullet. So plan and memo agree on this panel.
@@ -18147,7 +18147,7 @@ dispatch can have moved that figure. Markdown gates: no markdown written except 
 ## S-RS-REMODEL-C2-report-2026-11-10.md
 
 > **Folded into this master in consolidation Round 24 (owner-ordered, 2026-11-10) from**
-> `docs/research/S-RS-REMODEL-C2-report-2026-11-10.md`. It is the C2 Phase-2 dispatch (12:07).
+> `SLICE-RECORDS.md` §S-RS-REMODEL-C2-report-2026-11-10.md. It is the C2 Phase-2 dispatch (12:07).
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
 > demotion; the body is otherwise untouched. Its CRLF line endings are normalised to LF inside this section, recorded in the round entry.
 > The source was tracked and clean at HEAD, so it remains recoverable at the commit that deleted it. Its dated `git status` snapshots quote paths as they sat on the day and stay verbatim as history. It cites no sibling `docs/research/` file.
@@ -18314,7 +18314,7 @@ W.3 + W.4; W.2 and W.1 are blocked for the measured reasons above, not for lack 
 ## S-RS-VISUAL-1-report-2026-11-10.md
 
 > **Folded into this master in consolidation Round 24 (owner-ordered, 2026-11-10) from**
-> `docs/research/S-RS-VISUAL-1-report-2026-11-10.md`. It is the HFW visual-overhaul dispatch (15:58–17:27), the arc’s close.
+> `SLICE-RECORDS.md` §S-RS-VISUAL-1-report-2026-11-10.md. It is the HFW visual-overhaul dispatch (15:58–17:27), the arc’s close.
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
 > demotion; the body is otherwise untouched. Its CRLF line endings are normalised to LF inside this section, recorded in the round entry.
 > The source was tracked and clean at HEAD, so it remains recoverable at the commit that deleted it. Its dated `git status` snapshots quote paths as they sat on the day and stay verbatim as history. It cites no sibling `docs/research/` file.
@@ -18381,7 +18381,7 @@ Artifacts: `.scratch-uma/S-RS-VISUAL-1/before-1280.png`, `before-1280.dom.json`,
 
 ### 3. Component splits
 
-The HFW order interleaves cards that three components drew, so no arrangement of contiguous component blocks could produce it — the consequence `docs/proposals/2026-11-10-scenario-detail-remodel.md` §A.7 flagged as open. The split resolves it.
+The HFW order interleaves cards that three components drew, so no arrangement of contiguous component blocks could produce it — the consequence `PROCESS-PLANS.md` §2026-11-10-scenario-detail-remodel.md §A.7 flagged as open. The split resolves it.
 
 **Created — `resources/js/components/scenario/cards/` (one card each):**
 
@@ -18524,7 +18524,7 @@ Restored at `f2f0a8e5`: `resources/js/components/scenario/cards/BurstBandsCard.v
 ## S-RS-CLEANUP-2-report-2026-11-10.md
 
 > **Folded into this master in consolidation Round 24 (owner-ordered, 2026-11-10) from**
-> `docs/research/S-RS-CLEANUP-2-report-2026-11-10.md`. It is the arc close-out dispatch (17:12), landing last.
+> `SLICE-RECORDS.md` §S-RS-CLEANUP-2-report-2026-11-10.md. It is the arc close-out dispatch (17:12), landing last.
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
 > demotion; the body is otherwise untouched.
 > The source was tracked and clean at HEAD, so it remains recoverable at the commit that deleted it. Its dated `git status` snapshots quote paths as they sat on the day and stay verbatim as history. Its own cross-reference to a sibling `docs/research/` file is repointed at this master, the Round 18 approved departure.
@@ -18726,7 +18726,7 @@ python -c "import subprocess; raw=subprocess.run(['git','cat-file','blob','HEAD:
 ## 2026-11-02-race-enrichment-jp-only-completion-report.md
 
 > **Folded into this master in consolidation Round 25 (owner-ordered, 2026-11-10) from**
-> `docs/reports/2026-11-02-race-enrichment-jp-only-completion-report.md`. It is the race-catalog
+> `SLICE-RECORDS.md` §2026-11-02-race-enrichment-jp-only-completion-report.md. It is the race-catalog
 > enrichment and JP-only-trainee verification completion report, the dated close-out class the
 > 2026-11-02 rows above follow. The source's own `#` title follows verbatim as `###`, and its
 > remaining headings keep one level of demotion; the body is otherwise untouched. The source held a
@@ -18776,7 +18776,7 @@ All requested features implemented and verified. All tests, typecheck, and lint 
 ## 2026-11-08-sparks-skill-picker.md
 
 > **Folded into this master in consolidation Round 25 (owner-ordered, 2026-11-10) from**
-> `docs/proposals/2026-11-08-sparks-skill-picker.md`. It is the Sparks skill-picker proposal, whose
+> `SLICE-RECORDS.md` §2026-11-08-sparks-skill-picker.md. It is the Sparks skill-picker proposal, whose
 > `S-A-P02` slices and close-out the ledger sections above already record. Its body cites
 > `docs/audits/rice-shower-cup-round7-reconciliation.md:956` exactly as the source wrote it, a path
 > whose disk form is `rice-shower-unity-cup-round7-reconciliation.md`; the citation is quoted verbatim
@@ -19154,7 +19154,7 @@ Eleven derived-rule families exist across ten files; this section names only the
 ## 2026-11-08-trainee-preset-autofill.md
 
 > **Folded into this master in consolidation Round 25 (owner-ordered, 2026-11-10) from**
-> `docs/proposals/2026-11-08-trainee-preset-autofill.md`. It is the trainee preset auto-fill
+> `SLICE-RECORDS.md` §2026-11-08-trainee-preset-autofill.md. It is the trainee preset auto-fill
 > proposal, whose `S-A-P01` slices and close-out the ledger sections above already record. Its
 > 2026-11-10 resolution row already cites the `s-a-p01-og-goal-source` section of this master in
 > the form Round 24 repointed it to; the row is a dated ledger entry and stays verbatim. The
@@ -19734,7 +19734,7 @@ PLAYWRIGHT_PORT=8165 ... npx playwright test tests/browser/navigation-determinis
 ## remediation-phase-progress-report.md
 
 > **Folded into this master in consolidation Round 26 (owner-ordered, 2026-11-12) from**
-> `docs/audits/remediation-phase-progress-report.md` (329 lines). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched; headings inside fenced blocks were never demoted.
+> `SLICE-RECORDS.md` §remediation-phase-progress-report.md (329 lines). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched; headings inside fenced blocks were never demoted.
 > The source was untracked (a peer session's in-flight work), so this section is its only copy; containment was proven against the bytes being deleted. Live citation repoints were applied to this body before the fold: the two post-remediation-handoff section pointers now name the handoff section of `SLICE-RECORDS.md`. The 2026-11-11 audits organisation pass and the remediation workstream's own leave-untouched lists named this file's directory as peer in-flight; the owner's explicit 2026-11-12 consolidation order supersedes those rulings here. Dated inventories inside the body (embedded `git status` listings, the workstream-ownership tables with their untracked-column rows) are quoted history and stay verbatim; every `leave untouched` row they carry is superseded by the same owner order.
 
 ### Progress report — remediation phase
@@ -20027,15 +20027,15 @@ as the historical first-draft fix the ruling responded to.
 - `docs/framework-ui-ux/_audit-prompt.md` — the §6.4 four-layer capability rule added earlier in the
   reconciliation work.
 - `docs/research/ui-ux-application-context-brief.md` — predates this phase; left alone.
-- `docs/audits/remediation-phase-progress-report.md` — this report.
+- `SLICE-RECORDS.md` §remediation-phase-progress-report.md — this report.
 
 **Remaining untracked files:**
 
 - `docs/audits/RECONCILIATION-REGISTER.md`
-- `docs/audits/walk-8-follow-up-plan.md`
-- `docs/audits/audit-methodology-and-remediation-specs.md`
+- `AUDIT-AND-VERIFICATION.md` §walk-8-follow-up-plan.md
+- `AUDIT-AND-VERIFICATION.md` §audit-methodology-and-remediation-specs.md
 - `docs/audits/rice-shower-unity-cup-ux-walk-8.md` + `RS-UC-2026-13/screens/` (43 PNGs)
-- `docs/audits/README.md`, `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md` and its `screens/`
+- `docs/audits/README.md`, `AUDIT-AND-VERIFICATION.md` §RS-UC-SCENARIO-DETAIL-2026-11-09.md and its `screens/`
 
 These are the reconciliation and planning artifacts from the preceding workstream, listed so the tree
 is not mistaken for clean. They were not part of the six remediation items and are not folded into
@@ -20070,7 +20070,7 @@ documentation listed above.
 ## post-remediation-verification-handoff.md
 
 > **Folded into this master in consolidation Round 26 (owner-ordered, 2026-11-12) from**
-> `docs/audits/post-remediation-verification-handoff.md` (275 lines). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched; headings inside fenced blocks were never demoted.
+> `SLICE-RECORDS.md` §post-remediation-verification-handoff.md (275 lines). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched; headings inside fenced blocks were never demoted.
 > The source was untracked (a peer session's in-flight work), so this section is its only copy; containment was proven against the bytes being deleted. The 2026-11-11 audits organisation pass and the remediation workstream's own leave-untouched lists named this file's directory as peer in-flight; the owner's explicit 2026-11-12 consolidation order supersedes those rulings here. Dated inventories inside the body (embedded `git status` listings, the workstream-ownership tables with their untracked-column rows) are quoted history and stay verbatim; every `leave untouched` row they carry is superseded by the same owner order.
 
 ### Post-remediation verification handoff
@@ -20163,17 +20163,17 @@ correct at that moment. **It then changed to 31 during the dispatch**, for the r
 | `docs/research/ui-ux-application-context-brief.md` | modified | Pre-existing, predates this workstream | No | **Leave untouched** — ownership not established |
 | `docs/audits/README.md` | untracked | This workstream | Yes | **Commit with the audit docs** |
 | `docs/audits/RECONCILIATION-REGISTER.md` | untracked | This workstream | Yes | **Commit with the audit docs** |
-| `docs/audits/remediation-phase-progress-report.md` | untracked | This workstream | Yes | **Commit with the audit docs** |
-| `docs/audits/walk-8-follow-up-plan.md` | untracked | This workstream | Yes | **Commit with the audit docs** |
-| `docs/audits/audit-methodology-and-remediation-specs.md` | untracked | This workstream | Yes | **Commit with the audit docs** |
+| `SLICE-RECORDS.md` §remediation-phase-progress-report.md | untracked | This workstream | Yes | **Commit with the audit docs** |
+| `AUDIT-AND-VERIFICATION.md` §walk-8-follow-up-plan.md | untracked | This workstream | Yes | **Commit with the audit docs** |
+| `AUDIT-AND-VERIFICATION.md` §audit-methodology-and-remediation-specs.md | untracked | This workstream | Yes | **Commit with the audit docs** |
 | `docs/audits/rice-shower-unity-cup-ux-walk-8.md` | untracked | This workstream | Yes (walk-8 record) | **Commit with the audit docs** |
 | `docs/audits/RS-UC-2026-13/` | untracked | This workstream (43 PNGs) | Yes | **Commit with the audit docs** |
-| `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md` | untracked | Peer (scenario-detail audit) | No | **Leave untouched** |
+| `AUDIT-AND-VERIFICATION.md` §RS-UC-SCENARIO-DETAIL-2026-11-09.md | untracked | Peer (scenario-detail audit) | No | **Leave untouched** |
 | `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09/` | untracked | Peer | No | **Leave untouched** |
 | `docs/audits/trainer-desk-v3-ux/` (8 files + `screenshots/`) | untracked | **Peer-owned** | No | **Leave untouched** — explicit prohibition |
 | `docs/audits/trainer-desk-v3-ux-retest/` | untracked | **Peer-owned** | No | **Leave untouched** — explicit prohibition |
 | `docs/research/RS-UC-SCENARIO-DETAIL-2026-11-09/` | untracked | Peer | No | **Leave untouched** |
-| `docs/research/scenario-detail-design-language-survey-2026-11-09.md` | untracked | Peer | No | **Leave untouched** |
+| `AUDIT-AND-VERIFICATION.md` §scenario-detail-design-language-survey-2026-11-09.md | untracked | Peer | No | **Leave untouched** |
 
 **Nothing was staged or committed by this dispatch.** `git add -A` and `git add .` were not used;
 no path was staged on directory membership alone.
@@ -20282,7 +20282,7 @@ peer's `a9c2b142`, which touches two audit documents and no product code.
 
 - `docs/audits/trainer-desk-v3-ux/` and `docs/audits/trainer-desk-v3-ux-retest/` — peer-owned.
 - `docs/research/ui-ux-application-context-brief.md` — pre-existing change, ownership not established.
-- `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md`, its `screens/`, and
+- `AUDIT-AND-VERIFICATION.md` §RS-UC-SCENARIO-DETAIL-2026-11-09.md, its `screens/`, and
   `docs/research/RS-UC-SCENARIO-DETAIL-2026-11-09/` — peer scenario-detail work.
 - All 8 conflicted paths listed in §H — those were the peer's stash application, and they resolved
   themselves; nothing in them was touched by this dispatch.
@@ -20352,7 +20352,7 @@ plus this dispatch's disk correction.
 ## progress-report-2026-11-12.md
 
 > **Folded into this master in consolidation Round 26 (owner-ordered, 2026-11-12) from**
-> `docs/audits/progress-report-2026-11-12.md` (282 lines). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched; headings inside fenced blocks were never demoted.
+> `SLICE-RECORDS.md` §progress-report-2026-11-12.md (282 lines). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched; headings inside fenced blocks were never demoted.
 > The source was untracked (a peer session's in-flight work), so this section is its only copy; containment was proven against the bytes being deleted. The 2026-11-11 audits organisation pass and the remediation workstream's own leave-untouched lists named this file's directory as peer in-flight; the owner's explicit 2026-11-12 consolidation order supersedes those rulings here. Dated inventories inside the body (embedded `git status` listings, the workstream-ownership tables with their untracked-column rows) are quoted history and stay verbatim; every `leave untouched` row they carry is superseded by the same owner order.
 
 ### Progress report — remediation and verification phase
@@ -20571,17 +20571,17 @@ commits that fixed F-03's original defect class upstream.
 | --- | --- | --- |
 | `docs/framework-ui-ux/_audit-prompt.md` | modified | this workstream (§6.4 capability rule) |
 | `docs/research/ui-ux-application-context-brief.md` | modified | pre-existing, ownership not established |
-| `docs/audits/post-remediation-verification-handoff.md` | untracked | this workstream |
-| `docs/audits/progress-report-2026-11-12.md` | untracked | this workstream (this document) |
-| `docs/audits/remediation-phase-progress-report.md` | untracked | this workstream |
-| `docs/audits/audit-methodology-and-remediation-specs.md` | untracked | this workstream |
-| `docs/audits/walk-8-follow-up-plan.md` | untracked | this workstream |
+| `SLICE-RECORDS.md` §post-remediation-verification-handoff.md | untracked | this workstream |
+| `SLICE-RECORDS.md` §progress-report-2026-11-12.md | untracked | this workstream (this document) |
+| `SLICE-RECORDS.md` §remediation-phase-progress-report.md | untracked | this workstream |
+| `AUDIT-AND-VERIFICATION.md` §audit-methodology-and-remediation-specs.md | untracked | this workstream |
+| `AUDIT-AND-VERIFICATION.md` §walk-8-follow-up-plan.md | untracked | this workstream |
 | `docs/audits/rice-shower-unity-cup-ux-walk-8.md` + `RS-UC-2026-13/` (43 PNGs) | untracked | this workstream |
 | `docs/audits/trainer-desk-v3-ux/` (8 files + `screenshots/`) | untracked | **peer-owned, untouched** |
 | `docs/audits/trainer-desk-v3-ux-retest/` | untracked | **peer-owned, untouched** |
-| `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md` + `screens/` | untracked | peer, untouched |
+| `AUDIT-AND-VERIFICATION.md` §RS-UC-SCENARIO-DETAIL-2026-11-09.md + `screens/` | untracked | peer, untouched |
 | `docs/research/RS-UC-SCENARIO-DETAIL-2026-11-09/` | untracked | peer, untouched |
-| `docs/research/scenario-detail-design-language-survey-2026-11-09.md` | untracked | peer, untouched |
+| `AUDIT-AND-VERIFICATION.md` §scenario-detail-design-language-survey-2026-11-09.md | untracked | peer, untouched |
 
 `a9c2b142` indexed `audit-methodology-and-remediation-specs.md` and `RS-UC-2026-13/` in
 `docs/audits/README.md`, but **not** `remediation-phase-progress-report.md` or
@@ -20641,7 +20641,7 @@ Recording the void readings as defects would have produced three phantom finding
 ## progress-report-f-series-2026-11-12.md
 
 > **Folded into this master in consolidation Round 26 (owner-ordered, 2026-11-12) from**
-> `docs/audits/progress-report-f-series-2026-11-12.md` (165 lines). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched; headings inside fenced blocks were never demoted.
+> `SLICE-RECORDS.md` §progress-report-f-series-2026-11-12.md (165 lines). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched; headings inside fenced blocks were never demoted.
 > The source was untracked (a peer session's in-flight work), so this section is its only copy; containment was proven against the bytes being deleted. The 2026-11-11 audits organisation pass and the remediation workstream's own leave-untouched lists named this file's directory as peer in-flight; the owner's explicit 2026-11-12 consolidation order supersedes those rulings here. Dated inventories inside the body (embedded `git status` listings, the workstream-ownership tables with their untracked-column rows) are quoted history and stay verbatim; every `leave untouched` row they carry is superseded by the same owner order.
 
 ### Progress report — remediation, verification and F-series ownership
@@ -20813,7 +20813,7 @@ by measuring rather than trusting.
 ## S-RS-COMPLETE-1-type-scale-measurement-2026-11-10.md
 
 > **Folded into this master in consolidation Round 28 (owner-ordered, 2026-11-13) from**
-> `docs/research/S-RS-COMPLETE-1-type-scale-measurement-2026-11-10.md` (43 lines). It is the
+> `SLICE-RECORDS.md` §S-RS-COMPLETE-1-type-scale-measurement-2026-11-10.md (43 lines). It is the
 > S-RS-COMPLETE-1 arc's type-scale measurement pass (E.1) that closed KI-149 and KI-151 and
 > filed KI-160; the register cites it in its new home through this section.
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
@@ -20868,7 +20868,7 @@ and the cockpit at 640 with a completed run rather than an active one.
 ## S-RS-COMPLETE-1-lint-remeasure-2026-11-10.md
 
 > **Folded into this master in consolidation Round 28 (owner-ordered, 2026-11-13) from**
-> `docs/research/S-RS-COMPLETE-1-lint-remeasure-2026-11-10.md` (46 lines). It is the
+> `SLICE-RECORDS.md` §S-RS-COMPLETE-1-lint-remeasure-2026-11-10.md (46 lines). It is the
 > S-RS-COMPLETE-1 arc's lint re-measure pass (E.2) that closed KI-145 as a stale figure:
 > 202 findings against the 209 baseline, exit 0.
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
@@ -20926,7 +20926,7 @@ A future slice that adds an arbitrary value to a file this dispatch did not audi
 ## S-RS-COMPLETE-1-report-2026-11-10.md
 
 > **Folded into this master in consolidation Round 28 (owner-ordered, 2026-11-13) from**
-> `docs/research/S-RS-COMPLETE-1-report-2026-11-10.md` (116 lines). It is the S-RS-COMPLETE-1
+> `SLICE-RECORDS.md` §S-RS-COMPLETE-1-report-2026-11-10.md (116 lines). It is the S-RS-COMPLETE-1
 > session report of 2026-11-10: the phase-by-phase SHA ledger, the per-KI verdicts, the
 > gate-output block and the register-vs-tree divergences of that day.
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of
@@ -21053,7 +21053,7 @@ peer-dirty note and this report's pointer. Every closure names its SHA or provin
 ## S-RS-REMAINING-1-report-2026-11-10.md
 
 > **Folded into this master in consolidation Round 28 (owner-ordered, 2026-11-13) from**
-> `docs/research/S-RS-REMAINING-1-report-2026-11-10.md` (119 lines). It is the
+> `SLICE-RECORDS.md` §S-RS-REMAINING-1-report-2026-11-10.md (119 lines). It is the
 > S-RS-REMAINING-1 close-out dispatch report of 2026-11-10: commit inventory reconciliation,
 > the write-failure verifications, the stash incident and the gates of that pass.
 > The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of

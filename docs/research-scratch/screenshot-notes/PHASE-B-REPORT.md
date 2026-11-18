@@ -1,6 +1,6 @@
 # Phase B: screenshot extraction pass, report (revision 6)
 
-Phase B is closed for Stage 1. The §8 gate clears after the expansion, so Stage 2 ran and produced `docs/research-scratch/phase-c-synthesis.md`. Revision 6 records the corpus update and the trainee classification pass; see item 15. Phase C closes with that item.
+Phase B is closed for Stage 1. The §8 gate clears after the expansion, so Stage 2 ran and produced `DESIGN-CORPUS.md` §phase-c-synthesis.md. Revision 6 records the corpus update and the trainee classification pass; see item 15. Phase C closes with that item.
 
 Revision 5 was the provenance patch of 2026-10-03. It changed no finding, re-derived nothing and regenerated no CSV. It re-verified the two canonical SHAs at the paths the `_scratch/` reorganization moved them to, corrected every stale path reference forward while keeping the historical path in place, recorded the `clusters.json` misfiling, and added the sequencing rule in item 11.1.
 
@@ -156,7 +156,7 @@ This item authorizes Stage 2 for this dispatch. It does not authorize anything b
 
 ## 11. Fence
 
-**Written, 5 files:** `docs/research-scratch/screenshot-notes/Screenshot 2026-07-17 233332.md`, `233339.md`, `233344.md`; `research-scratch/phase-c-synthesis.md`; `docs/research-scratch/screenshot-notes/PHASE-B-REPORT.md`.
+**Written, 5 files:** `docs/research-scratch/screenshot-notes/Screenshot 2026-07-17 233332.md`, `233339.md`, `233344.md`; `DESIGN-CORPUS.md` §phase-c-synthesis.md; `docs/research-scratch/screenshot-notes/PHASE-B-REPORT.md`.
 
 **Read, not written:** `docs/design-research/_scratch/clusters.json`, `signatures.json`, `cluster.py`, `sheet.py`, `REORGANIZATION_PLAN.md` (read-only folder); `docs/game-screenshots/` frames `233332`, `233339`, `233344`; `docs/research-scratch/DESIGN-CORPUS.md` (the `## SCREENSHOT-MANIFEST.md` section); all 49 notes; `database/database.sqlite` hashed only.
 
@@ -221,7 +221,7 @@ The pattern across all three is the same: the synthesis summarized its notes and
 | Cluster table              | `docs/research-scratch/screenshot-notes/_screen-clusters.csv`                                                                                                                                                                                            | regenerated in revision 3                                          | 751 rows, `full_size` yes on 44, `source_sha` on every row. Not touched by this dispatch                                                                                                                                                                                                                   |  |
 | Readability sample         | `docs/research-scratch/screenshot-notes/_readability-sample.csv`                                                                                                                                                                                         | regenerated in revision 3                                          | 46 canonical rows. Does not carry the expansion, see item 10.6                                                                                                                                                                                                                                             |  |
 | Derivation script          | `docs/research-scratch/screenshot-notes/_derive-csvs.py`                                                                                                                                                                                                 | from revision 3                                                    | Reproduction path for the two CSVs above                                                                                                                                                                                                                                                                   |  |
-| Phase C synthesis          | `research-scratch/phase-c-synthesis.md`                                                                                                                                                                                                                  | this revision                                                      | Handoff. Cites note ids throughout                                                                                                                                                                                                                                                                         |  |
+| Phase C synthesis          | `DESIGN-CORPUS.md` §phase-c-synthesis.md                                                                                                                                                                                                                  | this revision                                                      | Handoff. Cites note ids throughout                                                                                                                                                                                                                                                                         |  |
 
 `research-scratch/` is excluded by `.gitignore:87`, so everything this pass wrote is untracked. `docs/design-research/_scratch/` is tracked, and no revision of this pass wrote into it.
 
@@ -231,7 +231,7 @@ Applied 2026-10-03 on the owner's rulings 1(a), 2(a), 3(a) and 4(a), with 4(c) r
 
 **Corpus file edited:** `docs/research-scratch/DESIGN-CORPUS.md`, section `## SCREENSHOT-MANIFEST.md` only. SHA before `d9e5c681283f6e345a3eeb3169a4630b25a6e598b9ab7d17b2638b910f489c3b`. SHA after the first three edits `79f380119665b4cded92951fc2fc0f2d0319a48e6276efd858da2abb4115556b`. SHA after the owner's two follow-up edits `fb9bb295e500438262d4d8526d7ef4451ad687e81857112ebc512deb011a0136`.
 
-**Diff-level audit trail:** `docs/research-scratch/corpus-edit-summary.md`. That file is the record; this item is the index.
+**Diff-level audit trail:** `DESIGN-CORPUS.md` §corpus-edit-summary.md. That file is the record; this item is the index.
 
 **Five edits applied to the corpus:**
 
@@ -273,4 +273,4 @@ Of the 16 stat-bearing unattributed rows, 9 carry a run-specific stat band with 
 
 **No stat correction was applied.** The pass is classification only and the corpus values from Edit C stand with the hazard attached inline.
 
-**Phase C output set:** `docs/research-scratch/DESIGN-CORPUS.md` (edited), `docs/research-scratch/corpus-edit-summary.md`, `docs/research-scratch/trainee-classification.csv`, `research-scratch/phase-c-synthesis.md` (section 6 and the closeout line), and this report.
+**Phase C output set:** `docs/research-scratch/DESIGN-CORPUS.md` (edited), `DESIGN-CORPUS.md` §corpus-edit-summary.md, `docs/research-scratch/trainee-classification.csv`, `DESIGN-CORPUS.md` §phase-c-synthesis.md (section 6 and the closeout line), and this report.

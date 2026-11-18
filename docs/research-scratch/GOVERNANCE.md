@@ -8,8 +8,8 @@ This master file is compiled from 7 source files, embedded verbatim with heading
 2. `docs/research-scratch/GOVERNANCE.md`
 3. `docs/research-scratch/GOVERNANCE.md`
 4. `docs/research-scratch/screenshot-registry/README.md`
-5. `docs/deprecated/frontend-review/2026-09-28/DECISIONS-NEEDED.md`
-6. `docs/deprecated/frontend-review/2026-09-28/RESOLUTIONS.md`
+5. `GOVERNANCE.md` §DECISIONS-NEEDED.md
+6. `GOVERNANCE.md` §RESOLUTIONS.md
 7. `docs/research-scratch/GOVERNANCE.md` (root quality bar C-1 to C-9, 48 lines, added 2026-10-03 in Round 8; see the
    section "CONSTRAINTS.md (root quality bar, C-1 to C-9)" at the end of this file)
 
@@ -545,7 +545,7 @@ Evidence | Exceptions | Owner | Status
 - **Checked (active) paths:** root `DESIGN.md`, the root quality bar in `docs/research-scratch/GOVERNANCE.md`, `app/`,
   `resources/`, `config/`, routes, database, tests, shipped prototypes.
 - **Ignored (historical) paths:** `docs/adr/**`,
-  `docs/design-research/MECHANICS-TRANSLATION-TRIAGE.md`,
+  `DESIGN-CORPUS.md` §MECHANICS-TRANSLATION-TRIAGE.md,
   `docs/research-scratch/GOVERNANCE.md`, `docs/design-research/_scratch/**`, `.kilo/**`, `vendor/`,
   `node_modules/`. These record what changed and why; quoting a retired value to
   retire it is correct ADR hygiene (precedent: `ADR-0001` §6 RESOLVED block).
@@ -621,8 +621,8 @@ opening reading, carried by `slice-10-2026-09-29.md`.
 Baseline moved 147 → 98 on 2026-09-29 by marking 41 ruling-table lines across 10 `docs/` files:
 the §3.1 vocabulary table and the §3.2 allowed-sense list in `design-research/CONSTRAINTS.md`, the
 two C-4 class rows here, the hit-itemization rows in the slice-3, slice-5, slice-6 and slice-9
-records, the rule lines in `flows/create-run-and-legacy-select.md`,
-`requests/game-mechanics-condition-labels.md` and the frontend-review grep report, and the JP-only
+records, the rule lines in `DESIGN-AND-MECHANICS-REQUESTS.md` §create-run-and-legacy-select.md,
+`DESIGN-AND-MECHANICS-REQUESTS.md` §game-mechanics-condition-labels.md and the frontend-review grep report, and the JP-only
 warning in `scenarios/08`.
 
 What stays counted, on purpose: the 20 `docs/UMAMUSUME_REFERENCE.md` lines and the

@@ -218,7 +218,7 @@ Every task satisfies all of these. Exact values, verbatim from `CONSTRAINTS.md`,
 
 #### New docs and tests
 
-`docs/adr/0008-character-card-catalog-layer.md`, `docs/data/2026-09-29-global-roster-crosscheck.md`, `tools/roster-crosscheck.php`, `docs/design-research/verification/slice-11-2026-09-29.md`; `tests/Feature/CharacterCardSchemaTest.php`, `CharacterCardParserTest.php`, `CharacterCardFetchTest.php`, `CatalogRosterTreeTest.php`, `TraineeSelectorTest.php`, `tests/Fixtures/gametora-character-cards.global.sample.json`.
+`docs/adr/0008-character-card-catalog-layer.md`, `docs/data/2026-09-29-global-roster-crosscheck.md`, `tools/roster-crosscheck.php`, `SLICE-RECORDS.md` §slice-11-2026-09-29.md; `tests/Feature/CharacterCardSchemaTest.php`, `CharacterCardParserTest.php`, `CharacterCardFetchTest.php`, `CatalogRosterTreeTest.php`, `TraineeSelectorTest.php`, `tests/Fixtures/gametora-character-cards.global.sample.json`.
 
 ---
 
@@ -2107,7 +2107,7 @@ If the JSON 403s or either page 403s, returns a stub, or will not parse: **stop 
 
 - [ ] **Step 2: Extract the Tier A rows**
 
-From each page, per trainee and per card: English name, Japanese name, rarity, Global release date, card title. Save the result as `research-scratch/data/json/tier-a-rows.json`, one object per row, and record for each value **which page and which row number it came from**. Without the pointer the table is unsources, which is the failure mode `docs/design-research/MECHANICS-TRANSLATION-TRIAGE.md` exists to catch.
+From each page, per trainee and per card: English name, Japanese name, rarity, Global release date, card title. Save the result as `research-scratch/data/json/tier-a-rows.json`, one object per row, and record for each value **which page and which row number it came from**. Without the pointer the table is unsources, which is the failure mode `DESIGN-CORPUS.md` §MECHANICS-TRANSLATION-TRIAGE.md exists to catch.
 
 Note before you start: `umamusu.wiki` is Tier A but is not infallible â€” a prior pass found it misassigning three Grand Masters bonus entries against two JP guides that agreed. Where a Tier A page and the client string disagree, rule 1 in Step 4 decides, and the disagreement gets recorded.
 
@@ -2183,7 +2183,7 @@ The load-bearing finding, restated because it is the premise of the owner's ruli
 
 **Files:**
 
-- Modify: `docs/design-research/verification/slice-11-2026-09-29.md` (the run record)
+- Modify: `SLICE-RECORDS.md` §slice-11-2026-09-29.md (the run record)
 - No application code changes at all in this task.
 
 **Interfaces:**
@@ -2517,7 +2517,7 @@ Expected: `flagged N of 107`. Put the list of `N` card ids in the slice record a
 
 - [ ] **Step 10: Write the run record**
 
-In `docs/design-research/verification/slice-11-2026-09-29.md`: the `git branch --show-current` and `git status --porcelain` opening snapshot from Task 1, every command above with its **real output pasted**, the filled count table, the FR-B-3/US-5 reasoning from Step 4, and `PLAN.md`'s "Slice Exit Criteria" push-verification line (`git ls-remote origin master` equals the sha pushed) once pushed.
+In `SLICE-RECORDS.md` §slice-11-2026-09-29.md: the `git branch --show-current` and `git status --porcelain` opening snapshot from Task 1, every command above with its **real output pasted**, the filled count table, the FR-B-3/US-5 reasoning from Step 4, and `PLAN.md`'s "Slice Exit Criteria" push-verification line (`git ls-remote origin master` equals the sha pushed) once pushed.
 
 - [ ] **Step 11: Commit the record**
 
@@ -3955,7 +3955,7 @@ Everything in Part 3 that a PHP test cannot prove is proven here, against the re
 
 **Files:**
 
-- Modify: `docs/design-research/verification/slice-11-2026-09-29.md`
+- Modify: `SLICE-RECORDS.md` §slice-11-2026-09-29.md
 - Modify: `KNOWN-ISSUES.md` (close or file what this slice found)
 - Create: `docs/requests/2026-09-29-catalog-roster-report.md`
 

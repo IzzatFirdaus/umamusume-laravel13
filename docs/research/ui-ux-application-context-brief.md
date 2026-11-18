@@ -73,10 +73,10 @@ Where (2) and (1) disagree, this brief reports the disagreement rather than sile
 | `DESIGN.md` | tokens, components, surfaces, motion | Visual system |
 | `KNOWN-ISSUES.md` | live defect register `KI-nn` (through KI-153) | Defect register |
 | `config/scenarios.php` | the **only** place scenario names enter the layout path | Scenario composition |
-| `docs/audits/rice-shower-unity-cup-ux-walk.md` | first browser walk (Round 1) | HISTORICAL evidence |
-| `docs/audits/rice-shower-unity-cup-ux-walk-2.md` | second browser walk (Round 2) | HISTORICAL evidence |
+| `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk.md | first browser walk (Round 1) | HISTORICAL evidence |
+| `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk-2.md | second browser walk (Round 2) | HISTORICAL evidence |
 | `docs/audits/rice-shower-unity-cup-ux-walk-3.md` | third browser walk (Round 3) | HISTORICAL evidence |
-| `docs/audits/rice-shower-unity-cup-round2-reconciliation.md` | R2-01..R2-21 classification vs code | HISTORICAL evidence |
+| `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-round2-reconciliation.md | R2-01..R2-21 classification vs code | HISTORICAL evidence |
 | `docs/audits/rice-shower-unity-cup-round3-reconciliation.md` | R3-01..R3-29 classification vs code | HISTORICAL evidence |
 | `docs/audits/rice-shower-unity-cup-round4-reconciliation.md` | round 4 reconciliation | HISTORICAL evidence |
 | `docs/audits/rice-shower-unity-cup-round5-reconciliation.md` | round 5 reconciliation | HISTORICAL evidence |
@@ -84,8 +84,8 @@ Where (2) and (1) disagree, this brief reports the disagreement rather than sile
 | `docs/audits/rice-shower-unity-cup-ux-walk-4.md` | fourth browser walk | HISTORICAL evidence |
 | `docs/audits/rice-shower-unity-cup-ux-walk-5.md` | fifth browser walk | HISTORICAL evidence |
 | `docs/audits/rice-shower-unity-cup-ux-walk-6.md` | sixth browser walk (untracked) | HISTORICAL evidence |
-| `docs/audits/AUDIT-SUPPORT-CARDS-UIUX-2026-11-05.md` | support-card surfaces audit (AUD-20261105-001) | HISTORICAL evidence |
-| `docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md` | remediation record | HISTORICAL evidence |
+| `AUDIT-AND-VERIFICATION.md` §AUDIT-SUPPORT-CARDS-UIUX-2026-11-05.md | support-card surfaces audit (AUD-20261105-001) | HISTORICAL evidence |
+| `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk-resolutions.md | remediation record | HISTORICAL evidence |
 | `docs/UMAMUSUME_REFERENCE.md` | source-cited mechanics corpus (2786 lines) | Reference (not a spec) |
 | `docs/research/SYSTEM-FLOWS.md` + `flows-*.md` | the companion flow set: 11 documents covering navigation, career creation, the career workspace, veterans/legacy, catalogs, the database hub, review, preferences, the fetch pipeline, `/api/v1`, and Help | Implementation-level flow description |
 
@@ -457,7 +457,7 @@ Every other panel key is explicitly `false` in each entry, so a scenario cannot 
 
 ### 9.1 Round-2 reconciliation status at this tree (`67a4830`)
 
-Source: `docs/audits/rice-shower-unity-cup-round2-reconciliation.md`, with Round 3 findings classified in `docs/audits/rice-shower-unity-cup-round3-reconciliation.md`. Status below reflects the **code at writing**.
+Source: `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-round2-reconciliation.md, with Round 3 findings classified in `docs/audits/rice-shower-unity-cup-round3-reconciliation.md`. Status below reflects the **code at writing**.
 
 | ID | Finding | Status at this tree | Evidence |
 | --- | --- | --- | --- |
@@ -670,7 +670,7 @@ R2-06 (deck-ownership copy, `dd179ba`), R2-09 (stat denominator labels, `44a7b13
 >
 > **Active workstream / protected files.** At `67a4830` the tree is clean except **two untracked audit artifacts** (`docs/audits/RS-UC-2026-10/` and `docs/audits/rice-shower-unity-cup-ux-walk-6.md`), which belong to the audit workstream. Do not `git add` them; do not run `pint --dirty` in this shared tree.
 >
-> **Key references.** `SCREEN_SPEC.md` (screen authority), `PRD.md`, `ARCHITECTURE.md`, `DESIGN.md`, `KNOWN-ISSUES.md` (through KI-153), `config/scenarios.php`, `routes/web.php`, the walks and reconciliations under `docs/audits/` (rounds 1–6), `docs/audits/AUDIT-SUPPORT-CARDS-UIUX-2026-11-05.md`, `docs/research-scratch/screenshot-notes/PHASE-B-REPORT.md`, and the companion flow set in this directory — `SYSTEM-FLOWS.md` as the index plus `flows-navigation.md`, `flows-career-creation.md`, `flows-career-workspace.md`, `flows-veterans-legacy.md`, `flows-catalogs.md`, `flows-database-hub.md`, `flows-review.md`, `flows-preferences.md`, `flows-fetch-pipeline.md`, `flows-api.md`, `flows-help.md`.
+> **Key references.** `SCREEN_SPEC.md` (screen authority), `PRD.md`, `ARCHITECTURE.md`, `DESIGN.md`, `KNOWN-ISSUES.md` (through KI-153), `config/scenarios.php`, `routes/web.php`, the walks and reconciliations under `docs/audits/` (rounds 1–6), `AUDIT-AND-VERIFICATION.md` §AUDIT-SUPPORT-CARDS-UIUX-2026-11-05.md, `docs/research-scratch/screenshot-notes/PHASE-B-REPORT.md`, and the companion flow set in this directory — `SYSTEM-FLOWS.md` as the index plus `flows-navigation.md`, `flows-career-creation.md`, `flows-career-workspace.md`, `flows-veterans-legacy.md`, `flows-catalogs.md`, `flows-database-hub.md`, `flows-review.md`, `flows-preferences.md`, `flows-fetch-pipeline.md`, `flows-api.md`, `flows-help.md`.
 >
 > **Assumptions ChatGPT must NOT make.** That the run-record screen still exists. That a "previously fixed" label means a UI write path exists (columns/rendering ≠ input — the earlier R2-13/R2-14 reading was true of different halves, and both now have write paths at this tree). That the wizard and the snapshot create equivalent careers (wizard = new; snapshot carries imported position). That Super Creek and Haru Urara are interchangeable (Super Creek is the rented Friends-slot card, Haru Urara the scenario-linked card). That the Legacy Lab computes inheritance (it records only). That the browser suite is green (it was not run for this brief). That `CONSTRAINTS.md` and `PLAN.md` exist (folded into `docs/research-scratch/` at `1e84b0c`). That `ADR-0001` withdrew the hint ladder (R3-15 corrects: `ADR-0011`/`ADR-0014` own it; `ADR-0001` is Energy guidance only).
 
@@ -711,7 +711,7 @@ Source: `docs/audits/rice-shower-unity-cup-ux-walk-6.md` (untracked) and `docs/a
 
 ### 15.2 Support-card audit (AUD-20261105-001)
 
-Source: `docs/audits/AUDIT-SUPPORT-CARDS-UIUX-2026-11-05.md`. M2 screen + M3 flow audit over `SupportCardCatalog`, `CardPicker`, `CardCompare`, `DeckSummary`, `SupportSlot`, `Index`, `Show`, `DeckSelect`. Rendered evidence TRUE (18/19 browser spec pass; 1 pre-existing page-size failure).
+Source: `AUDIT-AND-VERIFICATION.md` §AUDIT-SUPPORT-CARDS-UIUX-2026-11-05.md. M2 screen + M3 flow audit over `SupportCardCatalog`, `CardPicker`, `CardCompare`, `DeckSummary`, `SupportSlot`, `Index`, `Show`, `DeckSelect`. Rendered evidence TRUE (18/19 browser spec pass; 1 pre-existing page-size failure).
 
 In-fence fixes: compare checkbox accessible name (WCAG 4.1.2/2.5.3, `SupportCardCatalog.vue:347-353`); two `N/A` values in `SupportSlot.vue` gained required `title` (house copy rule); `CardCompare.vue` gained `role="dialog"` + `aria-labelledby`. Unmeasured: dark-theme contrast beyond one span; CardPicker/CardCompare target sizes and reflow; CardCompare focus trap/return.
 
@@ -779,7 +779,7 @@ A third-party fidelity note compared these flow documents at `67a4830` against t
 
 ### 16.1 Round 7 (the dominant change since the last refresh)
 
-Source: `docs/audits/rice-shower-unity-cup-round7-reconciliation.md` (tracked) and `docs/audits/rice-shower-unity-cup-round7-owner-calls.md`. Round 7 read the app again (walk 7 + a snapshot-door walk, both tracked now: `rice-shower-unity-cup-ux-walk-7.md`, `rice-shower-unity-cup-ux-walk-7-snapshot-door.md`), classified **99 rows** (`R7-01`…`R7-99`: 38 F, 24 E, 19 U, 18 extended), and landed **20 repair slices** (`S0`…`S22`), closing at `d8f75849`.
+Source: `docs/audits/rice-shower-unity-cup-round7-reconciliation.md` (tracked) and `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-round7-owner-calls.md. Round 7 read the app again (walk 7 + a snapshot-door walk, both tracked now: `rice-shower-unity-cup-ux-walk-7.md`, `rice-shower-unity-cup-ux-walk-7-snapshot-door.md`), classified **99 rows** (`R7-01`…`R7-99`: 38 F, 24 E, 19 U, 18 extended), and landed **20 repair slices** (`S0`…`S22`), closing at `d8f75849`.
 
 | Status (§4, frozen at `8a3cf21c`) | Count |
 | --- | --- |
@@ -826,7 +826,7 @@ Corrections table — earlier claim (this brief, at `67a4830`) | measured at `25
 - A **collision record** (`round7` register §14): a sibling session built a parallel composer (`UnityCupComposer.vue` + six `UnityCup*Card.vue`) in the same worktree; this session's implementation survived, the sibling's files were retired (bytes preserved under `.scratch-uma/S-RS-VISUAL-1/collision/`), and two measurable defects in the sibling's composer are named (it rendered nothing at HFW positions 4–5; it dropped the `+30` provenance).
 - The scenario page banner rule sentence was relocated per owner ruling W.3=C (`1f73875f`, `ScenarioSectionBuilder`).
 
-**PROPOSED (not built, awaiting owner ruling).** `docs/proposals/2026-11-09-scenario-detail-upgrade.md` (untracked) and `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md` + `.md/` screenshot dir (untracked) propose a further upgrade; its §0 pre-flight reads settle several audit findings against `ADR-0025` and the strip's git history. Do not cite it as built.
+**PROPOSED (not built, awaiting owner ruling).** `PROCESS-PLANS.md` §2026-11-09-scenario-detail-upgrade.md (untracked) and `AUDIT-AND-VERIFICATION.md` §RS-UC-SCENARIO-DETAIL-2026-11-09.md + `.md/` screenshot dir (untracked) propose a further upgrade; its §0 pre-flight reads settle several audit findings against `ADR-0025` and the strip's git history. Do not cite it as built.
 
 ### 16.4 Other structural changes since `67a4830`
 
@@ -845,8 +845,8 @@ Corrections table — earlier claim (this brief, at `67a4830`) | measured at `25
 ### 16.5 Documentation-set movement
 
 - `docs/audits/` gained (tracked): walks 7 + 7-snapshot-door, the round-7 reconciliation + owner calls, `round6-slice-audits.md`, and four screenshot directories (`RS-UC-2026-10/`, `RS-UC-2026-11-snapshot-door/`, `RS-UC-2026-12/`, `RS-UC-SCENARIO-DETAIL-2026-11-09/`). 17 `.md` files are tracked there now; walk-6 and the round-6 reconciliation, untracked at the last refresh, are **committed** (`3fb9c5f0`, `142bb171`).
-- The support-card audit `docs/audits/AUDIT-SUPPORT-CARDS-UIUX-2026-11-05.md` was **folded**: it no longer exists as a file; its content lives in `docs/research-scratch/AUDIT-AND-VERIFICATION.md`. Cite the master, not the deleted path (§2.3's row for it is stale).
-- `docs/proposals/PLAN_SLICES_6_7.md` deleted (consolidated); `docs/imports/ura-finale-runs.md` + a `.bak` backup added; framework audits (batches A–C) landed in the round-7 slice audits.
+- The support-card audit `AUDIT-AND-VERIFICATION.md` §AUDIT-SUPPORT-CARDS-UIUX-2026-11-05.md was **folded**: it no longer exists as a file; its content lives in `docs/research-scratch/AUDIT-AND-VERIFICATION.md`. Cite the master, not the deleted path (§2.3's row for it is stale).
+- `PROCESS-PLANS.md` §PLAN_SLICES_6_7.md deleted (consolidated); `docs/imports/ura-finale-runs.md` + a `.bak` backup added; framework audits (batches A–C) landed in the round-7 slice audits.
 - The eleven companion flow documents in this directory are unchanged and still current (they were written at `67a4830`; the delta since is recorded here rather than edited into them).
 
 ### 16.6 Current counts (measured 2026-11-13 at `f6845083`; §15–§16 retained as HISTORICAL, superseded by §17)

@@ -24,7 +24,7 @@ Internal headings have been demoted by one level. Large files are split into num
 
 **Type of document:** extracted facts, no recommendations. Phase B1 of the skill-reasoning work.
 
-**Source:** `database/seeders/data/skills.609afe88.json`, the GameTora skills export, read only. No network source was consulted and no source search was run. The `best_for` question is closed by `docs/design-research/slice-5-phase-a-best-for-2026-10-01.md` and was not reopened here.
+**Source:** `database/seeders/data/skills.609afe88.json`, the GameTora skills export, read only. No network source was consulted and no source search was run. The `best_for` question is closed by `RACE-AND-SLICE-RESEARCH.md` §slice-5-phase-a-best-for-2026-10-01.md and was not reopened here.
 
 **Coverage predicate:** a row is Global when the export carries no `unreleased` key for it. That is the rule at `docs/adr/0011-skills-reference-import.md:34`: "Array of server codes. Every populated value contains en; absence is the Global statement."
 
@@ -748,7 +748,7 @@ When it fires holds the activation DSL verbatim, one entry per condition group, 
 
 ### 1. Method, and the marker question answered first
 
-**There are zero `TODO`, `FIXME` and `XXX` markers in `app/` and `resources/views/`.** The grep was run 2026-10-01, scoped per directory after a repo-wide pattern timed out. The zero is genuine and it is not an accident: this repository records unfinished work in prose registers (`KNOWN-ISSUES.md`, `docs/design-research/SKILLS-GAPS.md`, dated review documents), never in code markers. A marker grep on this repo cannot find the incomplete work, because the work was never written down in code markers. The registers are the index; this audit reads the code against them.
+**There are zero `TODO`, `FIXME` and `XXX` markers in `app/` and `resources/views/`.** The grep was run 2026-10-01, scoped per directory after a repo-wide pattern timed out. The zero is genuine and it is not an accident: this repository records unfinished work in prose registers (`KNOWN-ISSUES.md`, `SKILLS-MECHANICS.md` §SKILLS-GAPS.md, dated review documents), never in code markers. A marker grep on this repo cannot find the incomplete work, because the work was never written down in code markers. The registers are the index; this audit reads the code against them.
 
 Two rules followed throughout:
 
@@ -836,7 +836,7 @@ Not part of master `6476a22`, present in the working tree when read:
 
 - `app/Http/Controllers/TrainingRunController.php` - `syncSkills` now scoped: `Skill::availableOnGlobal()->find(...)` with the comment "The same scope the request rule applies, so the two cannot disagree" (working copy `:698-712`). Fixes review F-2 for the write path.
 - `resources/views/runs/show.blade.php` - the skills repeater rehydrates `old()` (`:500-502`) with pre-built `@error` keys (`:507-509`). Fixes F-1 and F-10.
-- `docs/design-research/skills-section-review-2026-10-01.md` - untracked; the F-1..F-11 review this audit cross-checks against.
+- `SKILLS-MECHANICS.md` §skills-section-review-2026-10-01.md - untracked; the F-1..F-11 review this audit cross-checks against.
 - KI-49's three untracked source bodies and KI-51's three untracked seeders remain on disk; no ref carries them.
 
 Every working-tree-sensitive claim in this report was verified with `git show HEAD:` against the same path; the at-HEAD state is what is reported for `6476a22`, and the working-tree deltas above are the peer's.
@@ -856,7 +856,7 @@ This file is untracked; committing it is the owner's call.
 ## Skills-mechanics audit: verification pass, and the items the audit's index does not carry, 2026-10-01
 
 **Verified against:** master `d6ed712`. `git diff --stat 6476a22..d6ed712` is a single file, `KNOWN-ISSUES.md`,
-+22 lines (the KI-51 entry), so the code claims in `docs/design-research/skills-mechanics-audit-2026-10-01.md`
++22 lines (the KI-51 entry), so the code claims in `SKILLS-MECHANICS.md` §skills-mechanics-audit-2026-10-01.md
 (anchored at `6476a22`) hold at HEAD as written. Working-tree files that differ from HEAD are listed in section 4.
 Read-only apart from this file: no register, PRD, ADR or `CONSTRAINTS.md` edit, and nothing committed.
 
@@ -915,7 +915,7 @@ pass's call, and nothing there was edited. For set boundaries: KI-26 and KI-29 (
   but neither names a skill and no panel reads the burst reward ladder at a given team rank. A UI decision, not
   an import. Open in the register's own section 9 list; owner on record: Frontend with the Planner Domain
   Specialist; absent from the audit's section 4.
-- **Files.** `docs/design-research/SKILLS-GAPS.md` section 8, G-SK-11 (`:321-331`); the two components above;
+- **Files.** `SKILLS-MECHANICS.md` §SKILLS-GAPS.md section 8, G-SK-11 (`:321-331`); the two components above;
   `docs/scenarios/02`, `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md`, and `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Twinkle Star Climax (The Finale)".
 - **Missing.** One row per the section 4.1 ladder keyed to the reported team rank; an "It's On!" row for S/S+;
   the Trackblazer Climax name from `04:246`. Constraints already recorded: do not render the Zenith names
@@ -1109,6 +1109,8 @@ value, not the ladder's ceiling, and the step is not constant past Lv3 (+5 to Lv
 read is the in-client check §2.2 conditions on, and it supersedes §2.3 as a statement about sources:
 an in-client source now carries Lv4 and Max captions. The §2.2 rendering position and conflict row 16
 are the owner's to revisit against it; this section records the read only.
+
+**Cross-reference added 2026-11-18.** A second, independent client read is now the shipped source for the ladder: `config/uma.php` `skills.hint_discount` holds Lv1 10, Lv2 20, Lv3 30, Lv4 35 and Max 40, with `hint_discount_measured_at` = 2026-11-02 and a docblock recording that it was read off 68 `[Global]` Learn-screen frames. The screenshot corpus also captures the client badges `Hint Lv 1 / 10% OFF!` and `Hint Lv 2 / 20% OFF!`. Web guides disagree with each other (10% per hint or about 8% per hint, both capping at 40%); they are lower-authority than either client read. Do not replace this ladder from a guide, and do not re-open §2.2's "no source" premise: the premise was true when written and is false now.
 
 ---
 
@@ -1705,13 +1707,13 @@ footnote: **`is_unique` 294** is the code rule (rarity 3/4/5) while the card joi
 - `docs/UMAMUSUME_REFERENCE.md` — the mechanics authority. Skill-adjacent: §1.1.4 `:142`, §1.2 gating
   `:208`–`:312`, §1.3.5 `:378`, §1.4.4 `:463`, §1.4.7 `:550`, §1.5.1–1.5.4 `:582`, §1.6.9–1.6.10 `:748`,
   §2.2 `:849`, §2.3 `:863`, Conflict Log rows 12, 16, 43, 44, 45, 46, §8.4 `:2083`.
-- `docs/design-research/MECHANICS-TRANSLATION-TRIAGE.md` — rulings this file must not reopen: §1
+- `DESIGN-CORPUS.md` §MECHANICS-TRANSLATION-TRIAGE.md — rulings this file must not reopen: §1
   terminology, §3 out-of-scope, §4 `:88`, §7.2 `:172`/`:182`.
 - `docs/research-scratch/DESIGN-CORPUS.md` — D-20 (no unverified strings in UI copy), D-30 (render only what
   exists), D-44 (planned vs actual in one view), D-62..D-65 (skill search), D-192, D-210 (the ten names),
   D-223, D-224, D-229, D-253, G-16, G-49.
 - `DESIGN.md` §6.11 (skill row), §8.4 (Screen D), §3 (sparkle = `is_unique` only).
-- `docs/design-research/RACE-CALENDAR-GAPS.md` — the sibling register this file follows.
+- `RACE-AND-SLICE-RESEARCH.md` §RACE-CALENDAR-GAPS.md — the sibling register this file follows.
 - `docs/research-scratch/GOVERNANCE.md` §3 (Spark / Inspiration / Legacies; `Hint Lvl N, NN% OFF`), §4.1 (supersedence
   and the JP-only import filter), §5 (tier ladder: a `[B]` dataset needs `[A]`/`[S]` confirmation).
 - `PRD.md` §4 C-3 `:58`, FR-D `:62-64`, NFR-3 `:73`, §6 item 9 `:91`.
@@ -2396,7 +2398,7 @@ without coordination produces the same collision this document recorded in F-1 a
 | `config/uma.php`                                                                                               | `M`, and it is where every `seed_file` pointer lives   | Peer-dirty before this review began. KI-49's fix options both rewrite it.                                                                                                        |
 | `phpunit.xml`                                                                                                  | `M`, holds the `:memory:` pin at `:41`                 | Peer-dirty. Changing it silently re-points every test run in the worktree.                                                                                                       |
 | `database/seeders/DatabaseSeeder.php`, `UmamusumeSeeder.php`, the four untracked `database/seeders/**` files   | `M` / `??`                                             | Batch 2 extraction in flight, and three of the bodies are the untracked ones KI-49 names.                                                                                        |
-| `docs/design-research/skill-facts-2026-10-01.md`                                                               | committed at `b1fd0f4`, 715 lines                      | Phase B1's fact set. Its own provenance warning covers the untracked body.                                                                                                       |
+| `SKILLS-MECHANICS.md` §skill-facts-2026-10-01.md                                                               | committed at `b1fd0f4`, 715 lines                      | Phase B1's fact set. Its own provenance warning covers the untracked body.                                                                                                       |
 | `docs/scenarios/03-trackblazer.md`                                                                             | untouched here                                         | Standing exclusion from the Screen D brief, still in force.                                                                                                                      |
 | `docs/deprecated/**`, `docs/frontend-review/**`, the slice deliverables, the consolidation doc                 | untouched here                                         | Fence exclusions, unchanged.                                                                                                                                                     |
 | `database/database.sqlite` and its `-wal` / `-shm` sidecars                                                    | read-only, hash proved unchanged                       | Shared with every concurrent session, and the WAL state is exactly what KI-50's neighbour commits are filing hazards about. Use a scratch file.                                  |
@@ -2406,7 +2408,7 @@ without coordination produces the same collision this document recorded in F-1 a
 
 - HEAD moved during the review, from `adf6a6d` to `b1fd0f4 docs(skills): extract the Global skill
   fact set for Phase B1`. That commit adds only
-  `docs/design-research/skill-facts-2026-10-01.md`, 715 insertions, no code. Every `file:line`
+  `SKILLS-MECHANICS.md` §skill-facts-2026-10-01.md, 715 insertions, no code. Every `file:line`
   above was read against the working tree and is unaffected. Three further doc-only commits landed on top
   before this section was finalised: `6253a34 docs(issues): file KI-49`, `9ef1b3a docs(slice-6): file
   P-7`, and `2d42f4b docs(consolidation): erratum on the CHECK scan claim`. A subsequent commit
@@ -2502,17 +2504,17 @@ one exists, per `CONSTRAINTS.md` D-289.
 
 Read in full:
 
-- `docs/design-research/skills-section-review-2026-10-01.md` (706 lines). Its sections A, C, E, F, H and I
+- `SKILLS-MECHANICS.md` §skills-section-review-2026-10-01.md (706 lines). Its sections A, C, E, F, H and I
   are the evidence base for everything below. Its measurements are quoted, not re-run, and each figure
   inherited from it in this proposal names it as the source.
-- `docs/design-research/skills-mechanics-audit-2026-10-01.md` (109 lines, untracked), added by the first
+- `SKILLS-MECHANICS.md` §skills-mechanics-audit-2026-10-01.md (109 lines, untracked), added by the first
   steer. Its §3 mechanic matrix and §5 Findings A, B, C were each checked against the source before being
   used; where my reading differs from the audit's, §12 item P-10 says so.
 - `docs/research-scratch/DESIGN-CORPUS.md` D-30 (the permitted render surface, §5 "Data-model binding") and
   the `KNOWN-ISSUES.md` status block that routes the D-30 gap to a future register pass.
 - `database/seeders/SkillSeeder.php` (whole file) and `git show HEAD:database/seeders/DatabaseSeeder.php`,
   which reaches `SkillSeeder` at its line 15. This is the basis of the picker's empty state in §4.9.
-- `docs/design-research/skill-facts-2026-10-01.md` (715 lines): the Provenance warning, Method, the
+- `SKILLS-MECHANICS.md` §skill-facts-2026-10-01.md (715 lines): the Provenance warning, Method, the
   coverage table with its canaries, the token and code lists, and the worked example at export id
   `201241`. The 623-row table itself was sampled, not read line by line.
 - `DESIGN.md` §6.11 (Skill row), §6.14 (Form field), §6.16 (Advisory and
@@ -2520,7 +2522,7 @@ Read in full:
   (Accessibility).
 - `KNOWN-ISSUES.md`: the KI-33 heading and its closure, the "One open end, and it is not this entry's"
   paragraph inside KI-33, the KI-36 closure, the whole of KI-37, and the KI-29, KI-38, KI-39 headings.
-- `docs/design-research/SKILLS-GAPS.md`: G-SK-19, G-SK-20, G-SK-21, and the "Still open after Screen D
+- `SKILLS-MECHANICS.md` §SKILLS-GAPS.md: G-SK-19, G-SK-20, G-SK-21, and the "Still open after Screen D
   landed the same day" list.
 - Code, read not changed: `resources/views/runs/show.blade.php:427-558`, the whole of
   `resources/views/components/deck-panel.blade.php`, `resources/views/skills/index.blade.php`,
@@ -2634,7 +2636,7 @@ rendering problem the renderer can solve.
 Two of the three un-stored facts are **already ruled off the display path**, and a proposal that ignored
 the ruling would be re-litigating it.
 
-G-SK-20 (`docs/design-research/SKILLS-GAPS.md`, the entry headed "G-SK-20") measures `desc_en` failing the
+G-SK-20 (`SKILLS-MECHANICS.md` §SKILLS-GAPS.md, the entry headed "G-SK-20") measures `desc_en` failing the
 terminology table 189 times and `endesc` failing it 72 times, concludes that neither field is `[Global]`
 prose, and states the rule: **no description column may be added until a client-string source for
 descriptions exists, an in-client capture, not a re-read of the export.** `resources/views/skills/index.blade.php:9-13`
@@ -3050,7 +3052,7 @@ over-claimed once in this area (F-8: three `h3` headings are not a picker).
   as "her innate / her unique / her awakening / everything else". `GametoraCharacterCardParser.php:92-93`
   stores `skills_innate` and `skills_unique` and nothing else. The word `awakening` appears once in all of
   `app/` and `resources/`, in a comment at `resources/views/catalog/show.blade.php:215`. The
-  mechanics audit of the same date (`docs/design-research/skills-mechanics-audit-2026-10-01.md` §3, the
+  mechanics audit of the same date (`SKILLS-MECHANICS.md` §skills-mechanics-audit-2026-10-01.md §3, the
   Awakening row, and §6-C for the event array) records that the source card document does carry
   `skills_awakening` / `skills_awakening_en` and that they are **dropped at parse**, deliberately and
   unfiled. So: three of four bands are buildable on stored data; the fourth has a source that is
@@ -3325,7 +3327,7 @@ three blocks at once. It grows them **vertically only**. The run screen already 
 independently, and the race calendar's and turn log's wrappers are focusable regions precisely so a
 keyboard user can scroll them (`show.blade.php`, and `tests/Feature/TurnLogScrollRegionTest.php`).
 Vertical growth is what a scroll region is for. What a 44px row cannot do is drop a column, and nothing
-here drops one, so the replan's refusal (`docs/design-research/replan-mobile-first.md` §1, 768px as the
+here drops one, so the replan's refusal (`PLANS-AND-BRIEFS.md` §replan-mobile-first.md §1, 768px as the
 supported minimum, and `CONSTRAINTS.md:171` refusing mobile compromise bought with desktop density) is not
 engaged by this change at all. KI-37 already makes this argument in its "What the fix has to say"
 paragraph; the recommendation is to land the fix, not to keep debating it.
@@ -3435,17 +3437,17 @@ review's list is now stale in three places and those are marked.
 | `config/uma.php`                                                                                                                                                                                                        | `M`                          | Peer-dirty before the review. Every `seed_file` pointer lives here.                                                                                                                                                                                      |
 | `phpunit.xml`                                                                                                                                                                                                           | `M`                          | Peer-dirty. `:41` pins `DB_DATABASE=:memory:`; changing it silently re-points every run in the worktree.                                                                                                                                                 |
 | `database/seeders/DatabaseSeeder.php`, `UmamusumeSeeder.php`, and the four untracked `database/seeders/**` files                                                                                                        | `M` / `??`                   | Batch 2 in flight; three bodies are KI-49's untracked ones.                                                                                                                                                                                              |
-| `docs/design-research/skill-facts-2026-10-01.md`                                                                                                                                                                        | clean, committed             | Phase B1's fact set. Read-only input here.                                                                                                                                                                                                               |
+| `SKILLS-MECHANICS.md` §skill-facts-2026-10-01.md                                                                                                                                                                        | clean, committed             | Phase B1's fact set. Read-only input here.                                                                                                                                                                                                               |
 | `KNOWN-ISSUES.md`                                                                                                                                                                                                       | `M`                          | Contended register. Nothing here proposes an entry; §6 item 7 defers even the erratum wording.                                                                                                                                                           |
-| `docs/design-research/skills-section-review-2026-10-01.md`                                                                                                                                                              | **`??`, untracked**          | **The review's own §Final report says "Files modified 1"; it is not committed.** Anyone citing it cites a file that a clean checkout does not have.                                                                                                      |
-| `docs/design-research/SKILLS-GAPS.md`                                                                                                                                                                                   | clean                        | G-SK-19 and G-SK-20 govern Q1. Read, do not amend.                                                                                                                                                                                                       |
+| `SKILLS-MECHANICS.md` §skills-section-review-2026-10-01.md                                                                                                                                                              | **`??`, untracked**          | **The review's own §Final report says "Files modified 1"; it is not committed.** Anyone citing it cites a file that a clean checkout does not have.                                                                                                      |
+| `SKILLS-MECHANICS.md` §SKILLS-GAPS.md                                                                                                                                                                                   | clean                        | G-SK-19 and G-SK-20 govern Q1. Read, do not amend.                                                                                                                                                                                                       |
 | `DESIGN.md`                                                                                                                                                                                        | clean                        | Read, not changed, per this dispatch's fence.                                                                                                                                                                                                            |
 | `resources/js/trainee-combobox.ts`, `resources/views/runs/create.blade.php`                                                                                                                                             | clean                        | Q2's prerequisite and its pattern. Untouched by this proposal; the refactor is a future slice.                                                                                                                                                           |
 | `docs/scenarios/03-trackblazer.md`                                                                                                                                                                                      | clean                        | Standing exclusion.                                                                                                                                                                                                                                      |
 | `docs/deprecated/**`, `docs/frontend-review/**`, slice deliverables, the consolidation doc                                                                                                                              | excluded                     | Fence exclusions, unchanged.                                                                                                                                                                                                                             |
 | `database/database.sqlite` + `-wal` / `-shm`                                                                                                                                                                            | read-only, hash unchanged    | Shared with every session. `.bak` is the 4 KiB WAL decoy, not a database.                                                                                                                                                                                |
 | `resources/views/components/deck-panel.blade.php`                                                                                                                                                                       | clean                        | Q2's precedent. Not a Q1 or Q3 target.                                                                                                                                                                                                                   |
-| `docs/design-research/skills-mechanics-audit-2026-10-01.md`                                                                                                                                                             | **`??`, untracked**          | Named nowhere in the original dispatch and read because the first steer added it. Its awakening and event findings are cited in §4.7 and §9 and were checked against the parser before use. Its Finding A's third claim is qualified in §9.2 and P-11.   |
+| `SKILLS-MECHANICS.md` §skills-mechanics-audit-2026-10-01.md                                                                                                                                                             | **`??`, untracked**          | Named nowhere in the original dispatch and read because the first steer added it. Its awakening and event findings are cited in §4.7 and §9 and were checked against the parser before use. Its Finding A's third claim is qualified in §9.2 and P-11.   |
 | `resources/views/catalog/show.blade.php`                                                                                                                                                                                | clean at HEAD                | Q5's target and the home of the stale sentence at `:225-229`. Read only. The fence names it explicitly, and §9.4's copy is a draft awaiting the owner.                                                                                                   |
 | `resources/views/components/guided-step.blade.php`, `race-panel.blade.php`, `epithet-checklist.blade.php`, `race-calendar.blade.php`, `team-rank-gauge.blade.php`, `spirit-burst-roster.blade.php`                      | clean                        | Cited for convention (`h-11`, the absence vocabulary) or excluded by G-SK-11 and the race findings. No change proposed to any of them.                                                                                                                   |
 | `docs/research-scratch/DESIGN-CORPUS.md`, root `DESIGN.md`                                                                                                                                                                 | clean                        | Read for D-30, D-220 and §4.2. Both are design records this dispatch may not amend, and §4.8 plus §9.5 ask the owner to.                                                                                                                                 |
@@ -3968,7 +3970,7 @@ Read-only reconciliation at `HEAD` `4e179978`. One new untracked file (this memo
 
 ### 1. Method note
 
-Read in full: `docs/design-research/skills-mechanics-audit-2026-10-01.md` (108 lines) and `docs/design-research/skills-mechanics-audit-verification-2026-10-01.md` (122 lines), plus the proposal's section 9 at `docs/design-research/skills-section-phase-b2-2026-10-01.md:972-1099` (heading found by `grep` at `:998`). Read in part: `docs/adr/0012-card-detail-fields-and-images.md` whole, its revision at `555b0cbd` via `git show 555b0cbd:docs/adr/0012-card-detail-fields-and-images.md`, `resources/views/catalog/show.blade.php:200-239`, `app/Services/DataPipeline/Parsers/GametoraCharacterCardParser.php:70-110`, and migration `database/migrations/2026_09_30_073029_add_skill_lists_to_character_cards_table.php`.
+Read in full: `SKILLS-MECHANICS.md` §skills-mechanics-audit-2026-10-01.md (108 lines) and `SKILLS-MECHANICS.md` §skills-mechanics-audit-verification-2026-10-01.md (122 lines), plus the proposal's section 9 at `docs/design-research/skills-section-phase-b2-2026-10-01.md:972-1099` (heading found by `grep` at `:998`). Read in part: `docs/adr/0012-card-detail-fields-and-images.md` whole, its revision at `555b0cbd` via `git show 555b0cbd:docs/adr/0012-card-detail-fields-and-images.md`, `resources/views/catalog/show.blade.php:200-239`, `app/Services/DataPipeline/Parsers/GametoraCharacterCardParser.php:70-110`, and migration `database/migrations/2026_09_30_073029_add_skill_lists_to_character_cards_table.php`.
 
 Commands run, all read-only: `git log --format='%h %ad %s' --date=format:'%Y-%m-%d %H:%M' -n1 555b0cbd` (03:44) and `-n1 dd90330` (16:09); `git merge-base --is-ancestor dd90330 HEAD && echo ancestor-of-HEAD` (printed) and `git merge-base --is-ancestor dd90330 555b0cbd; echo $?` (exit 1); `git merge-base dd90330 555b0cbd` (returned `555b0cbd`); `git show HEAD:resources/views/catalog/show.blade.php | grep -n 'Skill lists are not shown'` (line 226); `git rev-parse HEAD` (`4e179978`); `sed -n '145,165p' docs/adr/0012-card-detail-fields-and-images.md`; `git log -- docs/adr/0012-card-detail-fields-and-images.md` and `git log -- resources/views/catalog/show.blade.php`; `git show dd90330 --stat`; `git show 038dd43 --stat`; `git merge-base --is-ancestor 038dd43 HEAD`; `git status --porcelain` on the touched paths (three design-research docs untracked, no working-tree diff vs `HEAD` under `docs/adr`, `resources/views/catalog` or the parser).
 

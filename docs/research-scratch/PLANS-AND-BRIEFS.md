@@ -4,17 +4,17 @@
 
 This document consolidates the following source files verbatim (no summarization, no deduplication):
 
-- `docs/design-research/TASK-16-RUN-VIEW-FRAME-BRIEF.md` (481 lines)
-- `docs/design-research/replan-mobile-first.md` (372 lines)
-- `docs/design-research/d-30-amendment-draft-2026-10-01.md` (51 lines)
-- `docs/proposals/audit-decisions-2026-10.md` (389 lines, 16 headings), folded in 2026-10-04 (Round 11)
+- `PLANS-AND-BRIEFS.md` §TASK-16-RUN-VIEW-FRAME-BRIEF.md (481 lines)
+- `PLANS-AND-BRIEFS.md` §replan-mobile-first.md (372 lines)
+- `PLANS-AND-BRIEFS.md` §d-30-amendment-draft-2026-10-01.md (51 lines)
+- `PLANS-AND-BRIEFS.md` §audit-decisions-2026-10.md (389 lines, 16 headings), folded in 2026-10-04 (Round 11)
   as the section `## audit-decisions-2026-10.md` at the end of this file. Chosen home: this master already
   carries the O-2 and O-3 owner-gate packages, and the file is a third one, options and recommendations
   with a named owner per item and no ruling recorded. It is live, not closed. Three of its twelve items
   were settled by peer commits before the fold and are marked as such in the section itself. Its `O-2`
   and `O-3` labels are its own numbering and collide with the O-2/O-3 packages above and with the
   `O-1` to `O-3` gates in `PROCESS-PLANS.md`; read the section heading before following an `O-n`.
-- `docs/superpowers/plans/2026-10-05-image-slot-display.md` (911 lines, 18 headings), folded in
+- `PLANS-AND-BRIEFS.md` §2026-10-05-image-slot-display.md (911 lines, 18 headings), folded in
   2026-10-06 as the section `## 2026-10-05-image-slot-display.md` at the end of this file. Chosen home:
   it is a bite-sized slice plan with a per-task progress table, a slice log and a filed erratum, which is
   the class of the Task 16 brief and the replan above, and its subject is owned elsewhere
@@ -23,33 +23,33 @@ This document consolidates the following source files verbatim (no summarization
   fully executed: the progress table records all ten tasks, Task 9 as blocked with no placeable surface
   and Task 4, 5, 6 and 8 as superseded in part by the Inertia port. The original was tracked, so its
   deletion after this fold is recoverable from git history.
-- `docs/proposals/provenance-and-absence-contracts.md` (839 lines, appended 2026-10-10, Round 14,
+- `PLANS-AND-BRIEFS.md` §provenance-and-absence-contracts.md (839 lines, appended 2026-10-10, Round 14,
   augment-only) as the section `## provenance-and-absence-contracts.md`, and
   `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` (1,787 lines, appended 2026-10-10, Round 14, augment-only) as the
   section `## screen-spec-2.0.md`: both are live Trainer Desk 2.0 reference documents (a pre-ruling
   reconciliation proposal and the 2.0 screen-set target, reference-only, not authorization) that stay at
   their own paths; nothing was deleted and no citation was repointed.
-- `docs/proposals/provenance-and-absence-contracts.md` (839 lines) and `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md`
+- `PLANS-AND-BRIEFS.md` §provenance-and-absence-contracts.md (839 lines) and `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md`
   (1,787 lines), embedded verbatim 2026-10-10 (Round 14, augment-only) as the sections
   `## provenance-and-absence-contracts.md` and `## screen-spec-2.0.md`. The first is the reconciliation
   proposal with its ten owner rulings; the second is the 2.0 screen-set target with its governance holds.
   Both stay live at their own paths; nothing was deleted and no citation was repointed.
-- `docs/proposals/provenance-and-absence-contracts.md` refreshed and consolidated 2026-10-15 (Round 16,
+- `PLANS-AND-BRIEFS.md` §provenance-and-absence-contracts.md refreshed and consolidated 2026-10-15 (Round 16,
   owner-ordered): the source had grown to 889 lines (§22, the 2026-10-11 Phase G preflight, added after
   the Round 14 embed), so the section above was re-embedded from the current source, verified line by
   line (0 missing), and the original was deleted from `docs/proposals/`. Live citations were repointed to
   this section; `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` stays live at its own path.
 - Round 18 (2026-10-21, owner-ordered): two more `docs/proposals/` files were consolidated here, and
   the Round 14 embed of a third was refreshed.
-  - `docs/proposals/frontend-fidelity-2026-10-13.md` (476 lines) as the section
+  - `PLANS-AND-BRIEFS.md` §frontend-fidelity-2026-10-13.md (476 lines) as the section
     `## frontend-fidelity-2026-10-13.md`, and
-    `docs/proposals/ux-laws-audit-plan-2026-10-13.md` (626 lines) as the section
+    `PLANS-AND-BRIEFS.md` §ux-laws-audit-plan-2026-10-13.md (626 lines) as the section
     `## ux-laws-audit-plan-2026-10-13.md`. The first is the two-track fidelity plan (why the shipped
     surface reads as a wireframe, and the two-track path); the second is its sibling, the 27-law
     checklist with its coverage matrix, instruments and output contract. Both were re-verified
     line-by-line before the delete (399 of 399 and 521 of 521 non-blank lines present, in order, with
     one-level heading demotion; 0 missing) and again after it.
-  - `docs/proposals/screen-spec-2.0.md` (1,788 lines) was already embedded by Round 14 and was measured
+  - `PLANS-AND-BRIEFS.md` §screen-spec-2.0.md (1,788 lines) was already embedded by Round 14 and was measured
     on 2026-10-21 as already containing every source body line, so it was not re-embedded; only the
     framing note was refreshed, to record that the source is now deleted.
   - The owner approved one departure from verbatim: each source's own cross-references inside the
@@ -99,7 +99,7 @@ This document consolidates the following source files verbatim (no summarization
 
 - Round 21 (2026-10-26, owner-ordered): the two rulings-owed briefs of the Group A + Group B / remaining-work thread were consolidated here and their originals deleted — `docs/proposals/group-ab-rulings-owed.md` (223 lines, 184/184 verified) and `docs/proposals/remaining-work-rulings-owed.md` (305 lines, 217/217 verified), each as its own `## <filename>` section. Chosen home: this master already carries the O-2, O-3 and `audit-decisions` packages, and a two-option write-up with a recommendation per item is that same class. The plans went to `PROCESS-PLANS.md`, the audits to `AUDIT-AND-VERIFICATION.md`; see `docs/research-scratch/INDEX.md` section `### Round 21`. <!-- census: quoted-original -->
 
-- Round 29 (2026-11-14, owner-ordered): four plan/findings files consolidated here from `docs/plans/` and `docs/proposals/`, originals deleted — `docs/plans/tinyfish-improvement-scan.md` (21 lines), `docs/plans/tinyfish-improvement-findings.md` (56 lines), `docs/plans/reference-sync-findings.md` (51 lines), and `docs/proposals/Transfer-Requests-plan.md` (39 lines), each as its own `## <filename>.md` section. Chosen home: this master is the plans-and-briefs master and these are all plan/findings documents; see `docs/research-scratch/INDEX.md` section `### Round 29`.
+- Round 29 (2026-11-14, owner-ordered): four plan/findings files consolidated here from `docs/plans/` and `docs/proposals/`, originals deleted — `PLANS-AND-BRIEFS.md` §tinyfish-improvement-scan.md (21 lines), `PLANS-AND-BRIEFS.md` §tinyfish-improvement-findings.md (56 lines), `PLANS-AND-BRIEFS.md` §reference-sync-findings.md (51 lines), and `PLANS-AND-BRIEFS.md` §Transfer-Requests-plan.md (39 lines), each as its own `## <filename>.md` section. Chosen home: this master is the plans-and-briefs master and these are all plan/findings documents; see `docs/research-scratch/INDEX.md` section `### Round 29`.
 
 ---
 
@@ -111,7 +111,7 @@ Revised 2026-09-29 against the tree at `a8a52cd`, after a pre-dispatch verificat
 in §R were returned by the owner the same day; §0.5 records what was read from the files rather than assumed.
 
 **Dispatch gate.** This brief is not runnable until the replan's acceptance is a fact on disk.
-`docs/design-research/replan-mobile-first.md` currently reads **"Status: proposal. Nothing here is landed."**
+`PLANS-AND-BRIEFS.md` §replan-mobile-first.md currently reads **"Status: proposal. Nothing here is landed."**
 Step 0 halts on that line, correctly, and the fix is the owner's to write — not the agent's to infer. The
 wording proposed for acceptance is in §0; if the header still reads `proposal` at execution time, stop and
 report rather than proceeding on a chat message.
@@ -150,7 +150,7 @@ grid must not render.
 
 Verify each and report any that fails rather than working around it.
 
-- `docs/design-research/replan-mobile-first.md` exists on disk **and its header records the owner's
+- `PLANS-AND-BRIEFS.md` §replan-mobile-first.md exists on disk **and its header records the owner's
   acceptance**. The acceptance proposed on 2026-09-29 is:
 
   > **Status: §1 accepted 2026-09-29; §3 and §5 remain proposal.** The D-40 addendum in §1 is accepted and
@@ -327,7 +327,7 @@ Written 2026-10-01 against HEAD `4e17997`, read-only. This one untracked file wa
 
 #### 1. Method note
 
-**Read.** `docs/research-scratch/DESIGN-CORPUS.md` §5 (D-30 at `:138`, plus D-31 through D-37 and the D-40 and D-230 amendment paragraphs for voice); `docs/adr/0012-card-detail-fields-and-images.md` (`:7`, `:73`, `:142-145`, `:157-159`, `:243-244`); `docs/adr/0008-character-card-catalog-layer.md` (`:236`, `:439`); `KNOWN-ISSUES.md` (status block `:10-17`, KI-33 `:1516-1573`, KI-35 `:1625-1644`); `docs/design-research/skills-section-phase-b2-2026-10-01.md` (§4.7 `:554-583`, §4.8 `:585-620`, §9.5 `:1089-1109`, §6 items 12-13 at `:898-905`, §10 at `:1136`); `docs/design-research/skills-mechanics-audit-verification-2026-10-01.md` §3.3 (`:82-96`); root `DESIGN.md` §4.2 (`:226-268`, page section 2 at `:246-247`); `DESIGN.md` (section list only, to keep the two `DESIGN.md` files apart); `PRD.md` (A-5 at `:46`); `app/Models/Umamusume.php` (`:31-40`, `:49`), `app/Models/CharacterCard.php` (`:35-36`, `:40`, `:66-67`), `app/Services/DataPipeline/Parsers/GametoraCharacterParser.php` (`:34-45`, `:83`), `app/Services/DataPipeline/Parsers/GametoraCharacterCardParser.php` (`:92-93`); migrations `2026_09_30_073029_...:41-42` and `2026_09_27_090000_...:16-20`.
+**Read.** `docs/research-scratch/DESIGN-CORPUS.md` §5 (D-30 at `:138`, plus D-31 through D-37 and the D-40 and D-230 amendment paragraphs for voice); `docs/adr/0012-card-detail-fields-and-images.md` (`:7`, `:73`, `:142-145`, `:157-159`, `:243-244`); `docs/adr/0008-character-card-catalog-layer.md` (`:236`, `:439`); `KNOWN-ISSUES.md` (status block `:10-17`, KI-33 `:1516-1573`, KI-35 `:1625-1644`); `SKILLS-MECHANICS.md` §skills-section-phase-b2-2026-10-01.md (§4.7 `:554-583`, §4.8 `:585-620`, §9.5 `:1089-1109`, §6 items 12-13 at `:898-905`, §10 at `:1136`); `SKILLS-MECHANICS.md` §skills-mechanics-audit-verification-2026-10-01.md §3.3 (`:82-96`); root `DESIGN.md` §4.2 (`:226-268`, page section 2 at `:246-247`); `DESIGN.md` (section list only, to keep the two `DESIGN.md` files apart); `PRD.md` (A-5 at `:46`); `app/Models/Umamusume.php` (`:31-40`, `:49`), `app/Models/CharacterCard.php` (`:35-36`, `:40`, `:66-67`), `app/Services/DataPipeline/Parsers/GametoraCharacterParser.php` (`:34-45`, `:83`), `app/Services/DataPipeline/Parsers/GametoraCharacterCardParser.php` (`:92-93`); migrations `2026_09_30_073029_...:41-42` and `2026_09_27_090000_...:16-20`.
 
 **Ran, all read-only.** `git log -1 dd90330` and `git show --stat dd90330` (2026-09-30, KI-33 storage and pre-populate); `grep` for `skills_innate`, `skills_unique` and `aptitude_` across `app/`, `docs/` and `tests/`; a PDO read of `character_cards` and `umamusume` against `database/database.sqlite`; `php artisan config:show database.default` (sqlite, matching `.env:9-10`); `git status --porcelain` to separate tracked from untracked writers. No mutating git command was run.
 
@@ -576,7 +576,7 @@ by a peer commit and needs only to be acknowledged. Where a finding has already 
 that is stated first so the owner does not re-decide it.
 
 Re-verification of the whole 2026-10-01 audit list, with the file:line each verdict was read from, is in
-`.scratch-uma/audit-status.md` (untracked, disposable). The committed half of that work is the nine fix
+`AUDIT-AND-VERIFICATION.md` §audit-status.md (untracked, disposable). The committed half of that work is the nine fix
 commits this pass landed; this file is the other half.
 
 > **Corrected forward 2026-10-06.** The sentence above is left verbatim as the 2026-10-04 record of where
@@ -860,14 +860,14 @@ Recorded here because a later pass will otherwise re-find them.
   `resources/views/runs/import.blade.php:153` prints only the first message per column (Blade's `@error`
   resolves through `MessageBag::first()`), so two broken rows still show one line. That file is peer-dirty.
 - **Two `KNOWN-ISSUES.md` forward notes are drafted and unapplied.** The welcome.blade.php sweep and the
-  KI-23 versus KI-23b reconciliation are written out in `.scratch-uma/audit-status.md` §5. Root
+  KI-23 versus KI-23b reconciliation are written out in `AUDIT-AND-VERIFICATION.md` §audit-status.md §5. Root
   `KNOWN-ISSUES.md` is in the working tree as a 71-line pointer stub against a 2,655-line committed
   register, a peer's 2,722-line change in progress. Appending to it and committing would land that
   restructure under a docs-fix message, which `AGENTS.md` §11 and the shared-worktree rule both forbid.
 - **`runs/import.blade.php` and `form-detail.blade.php` are peer-dirty**, so any copy fix on those screens
   needs the peer's change landed first.
 
-> **Corrected forward 2026-10-06.** The bullet above that names `.scratch-uma/audit-status.md` §5 is left
+> **Corrected forward 2026-10-06.** The bullet above that names `AUDIT-AND-VERIFICATION.md` §audit-status.md §5 is left
 > verbatim as the 2026-10-04 record, but that file was folded into `AUDIT-AND-VERIFICATION.md` (section
 > `## audit-status.md`, and the forward notes sit in the `For the welcome.blade sweep` and
 > `For KI-23 vs KI-23b` blocks near the end of it) and deleted from `.scratch-uma/` the same day on the
@@ -2177,7 +2177,7 @@ use the ActionGrid only; no other scenario-actions entries are added by E4.
 
 Written before code. The dispatch brief for this slice is
 `docs/research-scratch/PROCESS-PLANS.md`, section `## Trainer-Docs-2.0-E-Prompts.md`, §"PROMPT E6"
-(repointed 2026-10-12 when the original `docs/Trainer-Docs-2.0-E-Prompts.md` was consolidated and
+(repointed 2026-10-12 when the original `PROCESS-PLANS.md` §Trainer-Docs-2.0-E-Prompts.md was consolidated and
 deleted). Three of its premises do not hold on
 this tree; they are corrected in the section below rather than followed, because following
 them would put a false sentence in shipped copy and would take a ruling the plan reserves
@@ -2542,7 +2542,7 @@ stay untouched.
 
 ## provenance-and-absence-contracts.md
 
-> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/proposals/provenance-and-absence-contracts.md` (839 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `PLANS-AND-BRIEFS.md` §provenance-and-absence-contracts.md (839 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
 >
 > **Refreshed and consolidated 2026-10-15 (Round 16, owner-ordered).** By 2026-10-12 the source had grown to 889 lines (§22, the 2026-10-11 Phase G preflight, plus a citation repoint inside §22), so this section was re-embedded from the current source and the original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Line and section numbers inside this section follow the 889-line source. Cite this anchor, not the deleted path.
 
@@ -3390,7 +3390,7 @@ form versus autosave on change, which changes what the 44px sweep and the axe sc
 
 The G prompt set forbids taking a previous agent's word for §20(h) and requires the current state instead
 (`docs/research-scratch/PROCESS-PLANS.md`, section `## Trainer-Desk-2.0-G-Prompts.md`, source line 60;
-repointed 2026-10-12 when the original `docs/Trainer-Desk-2.0-G-Prompts.md` was consolidated and
+repointed 2026-10-12 when the original `PROCESS-PLANS.md` §Trainer-Desk-2.0-G-Prompts.md was consolidated and
 deleted). This pass measured it rather than reasoning from §16.
 
 **§20(h), measured.** The question asks which session owns rulings 2a/3b/5a/7a/8a/9b. All six are committed,
@@ -3439,7 +3439,7 @@ is attributable to neither session. It is stated here rather than assumed resolv
 
 ## screen-spec-2.0.md
 
-> **Refreshed 2026-10-21 (Round 18, owner-ordered).** Source: `docs/proposals/screen-spec-2.0.md`. The section below was embedded by Round 14 and was measured on 2026-10-21 as already containing every source body line, so it is not re-embedded. The original was deleted from `docs/proposals/` after that measurement. Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+> **Refreshed 2026-10-21 (Round 18, owner-ordered).** Source: `PLANS-AND-BRIEFS.md` §screen-spec-2.0.md. The section below was embedded by Round 14 and was measured on 2026-10-21 as already containing every source body line, so it is not re-embedded. The original was deleted from `docs/proposals/` after that measurement. Cite this anchor, not the deleted path. <!-- census: quoted-original -->
 
 ## Uma Trainer Desk — Screen Specification (2.0 design target)
 
@@ -5233,7 +5233,7 @@ For each screen that changed in this pass, the following states must be defined 
 
 ## frontend-fidelity-2026-10-13.md
 
-> **Consolidated 2026-10-21 (Round 18, owner-ordered).** Source: `docs/proposals/frontend-fidelity-2026-10-13.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+> **Consolidated 2026-10-21 (Round 18, owner-ordered).** Source: `PLANS-AND-BRIEFS.md` §frontend-fidelity-2026-10-13.md, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
 
 ## Frontend fidelity — why the shipped surface reads as a wireframe, and the two-track path to a product
 
@@ -5715,7 +5715,7 @@ before it starts.
 
 ## ux-laws-audit-plan-2026-10-13.md
 
-> **Consolidated 2026-10-21 (Round 18, owner-ordered).** Source: `docs/proposals/ux-laws-audit-plan-2026-10-13.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+> **Consolidated 2026-10-21 (Round 18, owner-ordered).** Source: `PLANS-AND-BRIEFS.md` §ux-laws-audit-plan-2026-10-13.md, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
 
 ## Laws of UX audit — plan (canonical checklist, coverage matrix, instruments, output contract)
 
@@ -6040,7 +6040,7 @@ Two cautions:
 
 #### 2.9 Against the 2026-10-13 live-capture laws pass (`UX-AUDIT-REPORT.md`)
 
-A first **partial laws pass** already exists: `docs/audits/UX-AUDIT-REPORT.md` (2026-10-13),
+A first **partial laws pass** already exists: `AUDIT-AND-VERIFICATION.md` §UX-AUDIT-REPORT.md (2026-10-13),
 framework "Laws of UX (lawsofux.com)", produced from the same session-private harness this plan adopts in
 §4.2 (21 screens × 4 widths, 81 captures). It is the plan's output contract (§1.5, §6) already prototyped:
 a summary, per-screen findings tables with a law column and P0-P3 severity, cross-page findings, and a
@@ -6329,7 +6329,7 @@ Per `AGENTS.md` §9's cost-aware escalation. Nothing below was run for this plan
   `UX-DELIVERABLES.md:1729-2182` (the Nielsen-style heuristic evaluation) and `DESIGN-CORPUS.md:4091-4098,
   5614-5622, 6503, 6538`. `docs/research-scratch-source/` was scanned and holds **no** UX-law material (0
   markdown files; raw scrapes, game JSON, a screenshot inventory and build scripts), so nothing was drawn
-  from it beyond the merge-tool provenance of `UX-DELIVERABLES.md`; `docs/audits/UX-AUDIT-REPORT.md`
+  from it beyond the merge-tool provenance of `UX-DELIVERABLES.md`; `AUDIT-AND-VERIFICATION.md` §UX-AUDIT-REPORT.md
   (2026-10-13) is a first partial laws pass, reconciled in §2.9 with a durability caveat, and
   .scratch-uma/ui-audit-2026-10-13/rubric.md supplies the cluster-audit cognitive-load checklist.
 - **Not delivered, stated plainly:** no law verdict was produced here; this is the plan that says how to
@@ -7094,7 +7094,7 @@ Date: 2026-11-03 (final closure pass)
 
 ### Phase 4.1 — Unity Training evaluator
 
-**Current state:** `docs/Unity-Cup-plan.md` §"Not implemented" records: *"Nothing. The absence is the finding."* The evaluator is unimplemented and the plan itself says the absence is the finding.
+**Current state:** `PROCESS-PLANS.md` §Unity-Cup-plan.md §"Not implemented" records: *"Nothing. The absence is the finding."* The evaluator is unimplemented and the plan itself says the absence is the finding.
 
 **What's missing (the spec gap):**
 - Input shape: what state the evaluator reads (Unity Cup training parameters, spirit burst state, team board)
@@ -7492,7 +7492,7 @@ User Task
 ## 2026-11-10-ruling-memos-scenario-detail.md
 
 > **Folded into this master in consolidation Round 25 (owner-ordered, 2026-11-10) from**
-> `docs/proposals/2026-11-10-ruling-memos-scenario-detail.md`. It is the rulings-owed brief for the
+> `PLANS-AND-BRIEFS.md` §2026-11-10-ruling-memos-scenario-detail.md. It is the rulings-owed brief for the
 > scenario-detail remodel: the W.1..W.4 ruling menus the owner settled on 2026-11-10, the class the
 > `2026-11-03-owner-decisions.md` section above set. One citation to the remodel-plan sibling was
 > repointed at this round's PROCESS-PLANS section before the fold. The source's own `#` title follows
@@ -7801,7 +7801,7 @@ if a component-level regression appears that Playwright cannot express.
 **Question.** Roadmap 1.6 asks for one 13-field implementation-ready backlog. Four registers already serve
 that purpose and are maintained: `SCREEN_SPEC.md` §7 (27 numbered entries), `KNOWN-ISSUES.md` (4,993 lines;
 69 OPEN `KI-nn`), `docs/audits/RECONCILIATION-REGISTER.md` (422 lines, cross-walk identity),
-`docs/audits/walk-8-follow-up-plan.md` (416) and `docs/audits/trainer-desk-v3-ux-retest/09-consolidated-remediation-plan.md` (370).
+`AUDIT-AND-VERIFICATION.md` §walk-8-follow-up-plan.md (416) and `AUDIT-AND-VERIFICATION.md` §09-consolidated-remediation-plan.md (370).
 
 | Option | Consequence |
 |---|---|
@@ -8192,7 +8192,7 @@ resolved.
 ## trainer-desk-v3x-roadmap-baseline-2026-11-12.md
 
 > **Folded into this master in consolidation Round 27 (owner-ordered, 2026-11-12) from**
-> `docs/audits/trainer-desk-v3x-roadmap-baseline-2026-11-12.md` (275 lines, tracked, recoverable at the delete commit). It is the Trainer Desk 3.x Phase-0 baseline map: the class this master holds (roadmap rulings and their grounding records; its sibling sections `## trainer-desk-3x-roadmap-rulings-2026-11-12.md` and `## ruling-j-twinkle-star-climax-2026-11-12.md` live directly above). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched. Live citations to the sibling records were repointed at this master's sections before the fold (7 repoint sites across the set: this master's own grounding cite in the rulings section, `phase0-close` :87/:88 sibling cites, `change-boundary` :5/:75/:230, `roadmap-baseline` :161); the staging-manifest rows in `phase0-close` :140-142 and the dated tree enumeration in `roadmap-baseline` :44-58 stay verbatim as history. The appended region was written with CRLF terminators to match this master's fold-time working-tree convention; the repository's `.gitattributes` (`text=auto eol=lf`) normalises the master to LF on commit, so the landed section reads LF like every earlier fold section in the repository. The source file was deleted from its original location after this section was verified present and byte-identical; it remains recoverable from the commit that deleted it.
+> `PLANS-AND-BRIEFS.md` §trainer-desk-v3x-roadmap-baseline-2026-11-12.md (275 lines, tracked, recoverable at the delete commit). It is the Trainer Desk 3.x Phase-0 baseline map: the class this master holds (roadmap rulings and their grounding records; its sibling sections `## trainer-desk-3x-roadmap-rulings-2026-11-12.md` and `## ruling-j-twinkle-star-climax-2026-11-12.md` live directly above). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched. Live citations to the sibling records were repointed at this master's sections before the fold (7 repoint sites across the set: this master's own grounding cite in the rulings section, `phase0-close` :87/:88 sibling cites, `change-boundary` :5/:75/:230, `roadmap-baseline` :161); the staging-manifest rows in `phase0-close` :140-142 and the dated tree enumeration in `roadmap-baseline` :44-58 stay verbatim as history. The appended region was written with CRLF terminators to match this master's fold-time working-tree convention; the repository's `.gitattributes` (`text=auto eol=lf`) normalises the master to LF on commit, so the landed section reads LF like every earlier fold section in the repository. The source file was deleted from its original location after this section was verified present and byte-identical; it remains recoverable from the commit that deleted it.
 
 ### Trainer Desk 3.x roadmap — Phase 0.1 repository baseline
 
@@ -8246,10 +8246,10 @@ and its "Trainer Desk 2.0" framing are wrong on the version, and two of its deli
 - `docs/audits/trainer-desk-v3-ux/` — 8 sibling reports + `screenshots/` (59 PNG) + `scenario-research/` (6
   files, 1,533 lines). Only `04-ux-findings.md` is tracked in that directory.
 - `docs/audits/trainer-desk-v3-ux-retest/` — 10 reports + `screenshots/` (72 PNG). Nothing tracked.
-- `docs/audits/RS-UC-2026-13/`, `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md`,
+- `docs/audits/RS-UC-2026-13/`, `AUDIT-AND-VERIFICATION.md` §RS-UC-SCENARIO-DETAIL-2026-11-09.md,
   `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09/`, `docs/research/RS-UC-SCENARIO-DETAIL-2026-11-09/`,
-  `docs/research/scenario-detail-design-language-survey-2026-11-09.md` — peer-owned.
-- `docs/audits/audit-methodology-and-remediation-specs.md`, `post-remediation-verification-handoff.md`,
+  `AUDIT-AND-VERIFICATION.md` §scenario-detail-design-language-survey-2026-11-09.md — peer-owned.
+- `AUDIT-AND-VERIFICATION.md` §audit-methodology-and-remediation-specs.md, `post-remediation-verification-handoff.md`,
   `progress-report-2026-11-12.md`, `remediation-phase-progress-report.md`, `walk-8-follow-up-plan.md` —
   audit records from the remediation phase.
 
@@ -8472,7 +8472,7 @@ These block the affected slices. Each is a one-line owner call.
 ## trainer-desk-v3x-change-boundary-2026-11-12.md
 
 > **Folded into this master in consolidation Round 27 (owner-ordered, 2026-11-12) from**
-> `docs/audits/trainer-desk-v3x-change-boundary-2026-11-12.md` (241 lines, tracked, recoverable at the delete commit). It is the Trainer Desk 3.x Phase-0 change-boundary plan: the class this master holds (roadmap rulings and their grounding records; its sibling sections `## trainer-desk-3x-roadmap-rulings-2026-11-12.md` and `## ruling-j-twinkle-star-climax-2026-11-12.md` live directly above). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched except for one post-fold addition recorded in the section's own text: the 2026-11-12 tally re-derivation paragraph in its `### 3. Tally` subsection, added by the scenario-research session under the owner's Decision-6 instruction after this section had landed in the working tree, with its counts re-verified by the fold pass (49 table rows; by slice 36 / 14 / 9 / 1 = 60). Live citations to the sibling records were repointed at this master's sections before the fold (7 repoint sites across the set: this master's own grounding cite in the rulings section, `phase0-close` :87/:88 sibling cites, `change-boundary` :5/:75/:230, `roadmap-baseline` :161); the staging-manifest rows in `phase0-close` :140-142 and the dated tree enumeration in `roadmap-baseline` :44-58 stay verbatim as history. The appended region was written with CRLF terminators to match this master's fold-time working-tree convention; the repository's `.gitattributes` (`text=auto eol=lf`) normalises the master to LF on commit, so the landed section reads LF like every earlier fold section in the repository. The source file was deleted from its original location after this section was verified present and byte-identical; it remains recoverable from the commit that deleted it.
+> `PLANS-AND-BRIEFS.md` §trainer-desk-v3x-change-boundary-2026-11-12.md (241 lines, tracked, recoverable at the delete commit). It is the Trainer Desk 3.x Phase-0 change-boundary plan: the class this master holds (roadmap rulings and their grounding records; its sibling sections `## trainer-desk-3x-roadmap-rulings-2026-11-12.md` and `## ruling-j-twinkle-star-climax-2026-11-12.md` live directly above). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched except for one post-fold addition recorded in the section's own text: the 2026-11-12 tally re-derivation paragraph in its `### 3. Tally` subsection, added by the scenario-research session under the owner's Decision-6 instruction after this section had landed in the working tree, with its counts re-verified by the fold pass (49 table rows; by slice 36 / 14 / 9 / 1 = 60). Live citations to the sibling records were repointed at this master's sections before the fold (7 repoint sites across the set: this master's own grounding cite in the rulings section, `phase0-close` :87/:88 sibling cites, `change-boundary` :5/:75/:230, `roadmap-baseline` :161); the staging-manifest rows in `phase0-close` :140-142 and the dated tree enumeration in `roadmap-baseline` :44-58 stay verbatim as history. The appended region was written with CRLF terminators to match this master's fold-time working-tree convention; the repository's `.gitattributes` (`text=auto eol=lf`) normalises the master to LF on commit, so the landed section reads LF like every earlier fold section in the repository. The source file was deleted from its original location after this section was verified present and byte-identical; it remains recoverable from the commit that deleted it.
 
 ### Trainer Desk 3.x — Phase 0.3 change-boundary plan
 
@@ -8728,7 +8728,7 @@ inside a peer-owned directory and its commit belongs to that owner.
 ## trainer-desk-v3x-phase0-close-2026-11-12.md
 
 > **Folded into this master in consolidation Round 27 (owner-ordered, 2026-11-12) from**
-> `docs/audits/trainer-desk-v3x-phase0-close-2026-11-12.md` (155 lines, tracked, recoverable at the delete commit). It is the Trainer Desk 3.x Phase-0 closing record: the class this master holds (roadmap rulings and their grounding records; its sibling sections `## trainer-desk-3x-roadmap-rulings-2026-11-12.md` and `## ruling-j-twinkle-star-climax-2026-11-12.md` live directly above). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched. Live citations to the sibling records were repointed at this master's sections before the fold (7 repoint sites across the set: this master's own grounding cite in the rulings section, `phase0-close` :87/:88 sibling cites, `change-boundary` :5/:75/:230, `roadmap-baseline` :161); the staging-manifest rows in `phase0-close` :140-142 and the dated tree enumeration in `roadmap-baseline` :44-58 stay verbatim as history. The appended region was written with CRLF terminators to match this master's fold-time working-tree convention; the repository's `.gitattributes` (`text=auto eol=lf`) normalises the master to LF on commit, so the landed section reads LF like every earlier fold section in the repository. The source file was deleted from its original location after this section was verified present and byte-identical; it remains recoverable from the commit that deleted it.
+> `PLANS-AND-BRIEFS.md` §trainer-desk-v3x-phase0-close-2026-11-12.md (155 lines, tracked, recoverable at the delete commit). It is the Trainer Desk 3.x Phase-0 closing record: the class this master holds (roadmap rulings and their grounding records; its sibling sections `## trainer-desk-3x-roadmap-rulings-2026-11-12.md` and `## ruling-j-twinkle-star-climax-2026-11-12.md` live directly above). The source's own `#` title follows verbatim as `###`, and its remaining headings keep one level of demotion; the body is otherwise untouched. Live citations to the sibling records were repointed at this master's sections before the fold (7 repoint sites across the set: this master's own grounding cite in the rulings section, `phase0-close` :87/:88 sibling cites, `change-boundary` :5/:75/:230, `roadmap-baseline` :161); the staging-manifest rows in `phase0-close` :140-142 and the dated tree enumeration in `roadmap-baseline` :44-58 stay verbatim as history. The appended region was written with CRLF terminators to match this master's fold-time working-tree convention; the repository's `.gitattributes` (`text=auto eol=lf`) normalises the master to LF on commit, so the landed section reads LF like every earlier fold section in the repository. The source file was deleted from its original location after this section was verified present and byte-identical; it remains recoverable from the commit that deleted it.
 
 ### Trainer Desk 3.x — Phase 0.4 closing record
 
@@ -8818,7 +8818,7 @@ Two appended sections from earlier in this pass, neither edited since:
 
 - `PLANS-AND-BRIEFS.md` section `## trainer-desk-v3x-roadmap-baseline-2026-11-12.md` (0.1, 269 lines)
 - `PLANS-AND-BRIEFS.md` section `## trainer-desk-v3x-change-boundary-2026-11-12.md` (0.3, 241 lines)
-- `docs/audits/trainer-desk-v3x-phase0-close-2026-11-12.md` (this file)
+- `PLANS-AND-BRIEFS.md` §trainer-desk-v3x-phase0-close-2026-11-12.md (this file)
 
 ---
 
@@ -8869,9 +8869,9 @@ Staged by explicit paths only, never `git add -A`:
 
 - `docs/UMAMUSUME_REFERENCE.md`
 - `docs/research-scratch/PLANS-AND-BRIEFS.md`
-- `docs/audits/trainer-desk-v3x-roadmap-baseline-2026-11-12.md`
-- `docs/audits/trainer-desk-v3x-change-boundary-2026-11-12.md`
-- `docs/audits/trainer-desk-v3x-phase0-close-2026-11-12.md`
+- `PLANS-AND-BRIEFS.md` §trainer-desk-v3x-roadmap-baseline-2026-11-12.md
+- `PLANS-AND-BRIEFS.md` §trainer-desk-v3x-change-boundary-2026-11-12.md
+- `PLANS-AND-BRIEFS.md` §trainer-desk-v3x-phase0-close-2026-11-12.md
 
 **Explicitly not staged, peer-owned** (`post-remediation-verification-handoff.md` §C):
 
@@ -8879,7 +8879,7 @@ Staged by explicit paths only, never `git add -A`:
 - `docs/audits/trainer-desk-v3-ux-retest/` (10 reports + 72 PNG)
 - `docs/audits/RS-UC-2026-13/`, `docs/audits/RS-UC-SCENARIO-DETAIL-*`, `docs/research/RS-UC-*`,
   `docs/research/scenario-detail-design-language-survey-*`
-- `docs/audits/audit-methodology-and-remediation-specs.md`, `post-remediation-verification-handoff.md`,
+- `AUDIT-AND-VERIFICATION.md` §audit-methodology-and-remediation-specs.md, `post-remediation-verification-handoff.md`,
   `progress-report-2026-11-12.md`, `progress-report-f-series-2026-11-12.md`,
   `remediation-phase-progress-report.md`, `walk-8-follow-up-plan.md`
 
@@ -8889,7 +8889,7 @@ a peer note disputes it) and `docs/research/ui-ux-application-context-brief.md`.
 ## ki-82-ki-133-resolution-plan.md
 
 > **Folded into this master in consolidation Round 28 (owner-ordered, 2026-11-13) from**
-> `docs/plans/ki-82-ki-133-resolution-plan.md` (349 lines). It is the KI-82 and KI-133
+> `PLANS-AND-BRIEFS.md` §ki-82-ki-133-resolution-plan.md (349 lines). It is the KI-82 and KI-133
 > investigation and resolution plan of 2026-11-12 that the owner approved; its Option A became
 > the dispatch behind the KI-133 closure commits, and the register's KI-82 and KI-133 lines
 > cite it through this section. The plan's own document-home note names this master as its
@@ -8912,7 +8912,7 @@ Labels used throughout: **VERIFIED** (directly supported by repository, publishe
 unresolved) · **PROPOSED** (recommended future work, not done).
 
 > **Document-home note, stated because it affects where this file lives.** The assignment names
-> `docs/plans/ki-82-ki-133-resolution-plan.md`. That directory does not exist, and
+> `PLANS-AND-BRIEFS.md` §ki-82-ki-133-resolution-plan.md. That directory does not exist, and
 > `docs/research-scratch/INDEX.md` §File discipline says content that fits no master "should be proposed to
 > the owner with a recommendation for which master to extend, rather than creating a new file". The owner
 > named this exact path, which is the authorization the rule asks for, so it is written here. The subject's
@@ -9254,7 +9254,7 @@ against it.
 
 ## tinyfish-improvement-scan.md
 
-> **Consolidated 2026-11-14 (Round 29, owner-ordered).** Source: `docs/plans/tinyfish-improvement-scan.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/plans/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+> **Consolidated 2026-11-14 (Round 29, owner-ordered).** Source: `PLANS-AND-BRIEFS.md` §tinyfish-improvement-scan.md, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/plans/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
 
 ## Tinyfish fullstack improvement scan — plan
 
@@ -9265,14 +9265,14 @@ against it.
 **Acceptance criteria:**
 - A list of fullstack improvements (backend + frontend + tests), each with: tinyfish source evidence, target file paths in this tree, why it's implementable now.
 - Every named path verified against the tree before being listed.
-- Findings written to `docs/plans/tinyfish-improvement-findings.md`.
+- Findings written to `PLANS-AND-BRIEFS.md` §tinyfish-improvement-findings.md.
 
 **TODO:**
 1. Confirm tinyfish availability (tool_search / manage_connections).
 2. Browse Umamusume JP + Global official news/sites via tinyfish for recently announced features/mechanics absent from Trainer Desk.
 3. Cross-reference each new feature against codebase (`app/`, `resources/js/`, `tests/`, `routes/`, `config/`) to find gaps.
 4. Propose implementable fullstack improvements with paths; verify each path via `git ls-files`.
-5. Write findings to `docs/plans/tinyfish-improvement-findings.md`.
+5. Write findings to `PLANS-AND-BRIEFS.md` §tinyfish-improvement-findings.md.
 
 **Verification:** `git ls-files <path>` for every proposed file; `git status --short` clean of unintended changes; no code edited in this phase.
 
@@ -9282,7 +9282,7 @@ against it.
 
 ## tinyfish-improvement-findings.md
 
-> **Consolidated 2026-11-14 (Round 29, owner-ordered).** Source: `docs/plans/tinyfish-improvement-findings.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/plans/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+> **Consolidated 2026-11-14 (Round 29, owner-ordered).** Source: `PLANS-AND-BRIEFS.md` §tinyfish-improvement-findings.md, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/plans/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
 
 ## Tinyfish fullstack improvement findings
 
@@ -9350,7 +9350,7 @@ Read JP tinyfish scan (run b913b2f1…) when a poll method is available; re-scan
 
 ## reference-sync-findings.md
 
-> **Consolidated 2026-11-14 (Round 29, owner-ordered).** Source: `docs/plans/reference-sync-findings.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/plans/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+> **Consolidated 2026-11-14 (Round 29, owner-ordered).** Source: `PLANS-AND-BRIEFS.md` §reference-sync-findings.md, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/plans/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
 
 ## Reference-doc sync findings — docs/UMAMUSUME_REFERENCE.md vs codebase
 
@@ -9408,11 +9408,11 @@ No code, frontend, UI/UX, backend, or test file needed updating. The Independent
 
 ## Transfer-Requests-plan.md
 
-> **Consolidated 2026-11-14 (Round 29, owner-ordered).** Source: `docs/proposals/Transfer-Requests-plan.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+> **Consolidated 2026-11-14 (Round 29, owner-ordered).** Source: `PLANS-AND-BRIEFS.md` §Transfer-Requests-plan.md, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
 
 ## Transfer Requests — implementation plan
 
-**Source:** `docs/plans/tinyfish-improvement-findings.md` (tinyfish Global news scan run b021a49c, notice 1157, 2026-11-05). Announced mechanic: trainers transfer Veteran Umamusume meeting requested conditions for rewards (Star Pieces, Monies, Support Points); transferred Umamusume disappear permanently; requests update every 2 days; limited transfer counts.
+**Source:** `PLANS-AND-BRIEFS.md` §tinyfish-improvement-findings.md (tinyfish Global news scan run b021a49c, notice 1157, 2026-11-05). Announced mechanic: trainers transfer Veteran Umamusume meeting requested conditions for rewards (Star Pieces, Monies, Support Points); transferred Umamusume disappear permanently; requests update every 2 days; limited transfer counts.
 
 **Goal:** Add Transfer Requests to the Veteran library — offer a filed Veteran for transfer, complete a transfer (Veteran removed, reward banked), withdraw an offer.
 

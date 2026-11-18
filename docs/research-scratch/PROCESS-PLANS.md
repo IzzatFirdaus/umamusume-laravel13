@@ -4,12 +4,12 @@
 
 This document consolidates the following source files verbatim (no summarization, no deduplication):
 
-- `docs/requests/2026-10-01-scratch-tree-reorganization-plan.md`
-- `docs/requests/reports/2026-09-30-c5-down-enforcement-gap.md`
-- `docs/PLAN-UI-UX-2026-10-02.md` (embedded 2026-10-02, working file deleted 2026-10-03; this section is live)
-- `docs/PLAN-DOC-SYNC-2026-10-02.md` (embedded 2026-10-03 and the working file deleted in the same commit; this section is live)
+- `PROCESS-PLANS.md` §2026-10-01-scratch-tree-reorganization-plan.md
+- `PROCESS-PLANS.md` §2026-09-30-c5-down-enforcement-gap.md
+- `PROCESS-PLANS.md` §PLAN-UI-UX-2026-10-02.md (embedded 2026-10-02, working file deleted 2026-10-03; this section is live)
+- `PROCESS-PLANS.md` §PLAN-DOC-SYNC-2026-10-02.md (embedded 2026-10-03 and the working file deleted in the same commit; this section is live)
 - `PLAN.md` (root frontend slice plan, 712 lines, added 2026-10-03 in Round 8; see the section "PLAN.md (root frontend slice plan and owner rulings)")
-- `docs/proposals/trainer-advisor.md` (149 lines, 10 headings), added 2026-10-04 in Round 11 as the
+- `PROCESS-PLANS.md` §trainer-advisor.md (149 lines, 10 headings), added 2026-10-04 in Round 11 as the
   section `## trainer-advisor.md` at the end of this file. Subsystem 1 of the Trainer Desk 2.0 program:
   the `BuildTarget` column and the headless `TrainerAdvisor` ranking engine. Status is **Spec, awaiting
   owner review**, no code exists, so §6 owner-input items and §9 deferred slices are open steps that
@@ -29,7 +29,7 @@ This document consolidates the following source files verbatim (no summarization
   an approved move. The source was untracked and gitignored, so the embedded copy here is now its only
   durable one.
 
-- `docs/proposals/PLAN_SLICES_6_7.md` (252 lines, 33 headings), consolidated 2026-11-07 as the section `## PLAN_SLICES_6_7.md` at the end of this file. Plan for Slice 6 (Deck Summary / Hud), Slice 7 (Cross-links + Vocabulary) and the Final Project Gate. Embedded verbatim with one-level heading demotion, verified line-by-line against the source before the delete; the section is now the only copy and the citation target. The source was tracked and clean at HEAD.
+- `PROCESS-PLANS.md` §PLAN_SLICES_6_7.md (252 lines, 33 headings), consolidated 2026-11-07 as the section `## PLAN_SLICES_6_7.md` at the end of this file. Plan for Slice 6 (Deck Summary / Hud), Slice 7 (Cross-links + Vocabulary) and the Final Project Gate. Embedded verbatim with one-level heading demotion, verified line-by-line against the source before the delete; the section is now the only copy and the citation target. The source was tracked and clean at HEAD.
 
 **Round 8 (2026-10-03), owner-authorized:** the root `PLAN.md` is now a pointer stub whose full text is
 the PLAN.md section above. New plan content continues in the live sections here, as `INDEX.md` §File
@@ -63,8 +63,8 @@ here raises a threshold to make a gate pass.
 **Round 14 (2026-10-10, augment-only):** the four scenario implementation plans and the three Trainer
 Desk 2.0 prompt sets, all live documents that remain in place, embedded verbatim as their own sections:
 `docs/proposals/Our-Grand-Concert-plan.md` (1145 lines), `docs/proposals/Trackblazer-plan.md` (583), `docs/proposals/Unity-Cup-plan.md`
-(561), `docs/proposals/URA-Finale-plan.md` (381), `docs/Trainer-Desk-2.0-G-Prompts.md` (1046),
-`docs/Trainer-Docs-2.0-D-Prompts.md` (542), `docs/Trainer-Docs-2.0-E-Prompts.md` (230). Each section is
+(561), `docs/proposals/URA-Finale-plan.md` (381), `PROCESS-PLANS.md` §Trainer-Desk-2.0-G-Prompts.md (1046),
+`PROCESS-PLANS.md` §Trainer-Docs-2.0-D-Prompts.md (542), `PROCESS-PLANS.md` §Trainer-Docs-2.0-E-Prompts.md (230). Each section is
 the canonical reading copy while the source stays the live working file; nothing was deleted and no
 citation was repointed.
 
@@ -72,18 +72,18 @@ citation was repointed.
 consolidated and their originals deleted. Each embedded section was re-verified line-by-line against
 its source before the delete (G: 687 of 687 non-blank lines matched in order, D: 380 of 380, E: 166 of
 166, one-level heading demotion allowed; 0 missing in each). The originals
-`docs/Trainer-Desk-2.0-G-Prompts.md` (untracked, so its deletion is not recoverable from history),
-`docs/Trainer-Docs-2.0-D-Prompts.md` and `docs/Trainer-Docs-2.0-E-Prompts.md` (both tracked and clean
+`PROCESS-PLANS.md` §Trainer-Desk-2.0-G-Prompts.md (untracked, so its deletion is not recoverable from history),
+`PROCESS-PLANS.md` §Trainer-Docs-2.0-D-Prompts.md and `PROCESS-PLANS.md` §Trainer-Docs-2.0-E-Prompts.md (both tracked and clean
 at HEAD, recoverable from history) were then deleted from `docs/`; these sections are now the only
 copies and the citation targets. Two live citations were repointed in the same pass:
-`docs/proposals/provenance-and-absence-contracts.md` §22 and
+`PLANS-AND-BRIEFS.md` §provenance-and-absence-contracts.md §22 and
 `docs/research-scratch/PLANS-AND-BRIEFS.md` §"E6 — Our Grand Concert baseline strip". The four scenario
 implementation plans above remain live and in place; only the three prompt sets were deleted.
 
 **Round 17 (2026-10-21, consolidation):** the owner ordered nine `docs/proposals/` files consolidated
 and their originals deleted. Four landed here as their own sections:
-`docs/proposals/trainer-desk-implementation-plan-2026-10-17.md` (415 lines, the implementation
-instructions of record), `docs/proposals/implementation-backlog-2026-10-17.md` (557 lines, the code-only
+`PROCESS-PLANS.md` §trainer-desk-implementation-plan-2026-10-17.md (415 lines, the implementation
+instructions of record), `PROCESS-PLANS.md` §implementation-backlog-2026-10-17.md (557 lines, the code-only
 backlog and its standing rules), `docs/proposals/Trainer Desk 2.0 — Remaining implementation.txt` (365
 lines, the remaining-implementation playbook) and `docs/proposals/UXUI Update Phases and Slices.txt` (60
 lines, the phase-and-slice map). Each embedded section was re-verified line-by-line against its source
@@ -102,7 +102,7 @@ The other five files of this round landed in `SLICE-RECORDS.md` (four) and
 
 **Round 18 (2026-10-21, consolidation):** the owner ordered eight more `docs/proposals/` files
 consolidated and the originals deleted. One landed here as its own section:
-`docs/proposals/frontend-development-plan.md` (3,553 lines), the Phase A to E plan of record, whose §8
+`PROCESS-PLANS.md` §frontend-development-plan.md (3,553 lines), the Phase A to E plan of record, whose §8
 promises a fresh bite-sized plan per later slice and which several other masters cite by section. The
 section was re-verified line-by-line before the delete (2,901 of 2,901 non-blank lines present, in
 order, with one-level heading demotion; 0 missing) and again after it. The source also carried 6
@@ -185,7 +185,7 @@ Read this as the plan's central finding: of roughly 600 files in the named direc
 
 - Produces: `HEAD` sha, a tracked-state verdict, and a baseline gate result that Tasks 5 and 6 compare against.
 
-- [ ] **Step 1: Confirm no other session is committing.** This is the concurrency escalation in `docs/design-research/SESSION-CONSOLIDATION-2026-09-30.md` §6: peers landed 12 commits during one read-only pass earlier. Bulk moves during live peers guarantee citation churn.
+- [ ] **Step 1: Confirm no other session is committing.** This is the concurrency escalation in `RACE-AND-SLICE-RESEARCH.md` §SESSION-CONSOLIDATION-2026-09-30.md §6: peers landed 12 commits during one read-only pass earlier. Bulk moves during live peers guarantee citation churn.
 
 ```bash
 git log --oneline -1
@@ -204,7 +204,7 @@ Expected: empty output. Any ` M ` line is someone's uncommitted work in a shared
 
 **Observed at plan-writing time, `9b63e8a`: this gate fails right now.** Five tracked files are dirty and none of them is this plan's work: `app/Services/DataPipeline/PipelineRunner.php`, `config/uma.php`, `database/seeders/DatabaseSeeder.php`, `database/seeders/UmamusumeSeeder.php`, `phpunit.xml`. A peer session is mid-change in application code. Do not run Tasks 3 through 5 until that clears.
 
-The cost of skipping this gate is not hypothetical. The authorized append to `docs/design-research/SESSION-CONSOLIDATION-2026-09-30.md` §6 left this session uncommitted, on the owner's no-commit fence, and a peer swept it into `9b63e8a`, whose message is about KI-47 and KI-48. The line survived and is in `HEAD`; its provenance is now attributed to an unrelated commit.
+The cost of skipping this gate is not hypothetical. The authorized append to `RACE-AND-SLICE-RESEARCH.md` §SESSION-CONSOLIDATION-2026-09-30.md §6 left this session uncommitted, on the owner's no-commit fence, and a peer swept it into `9b63e8a`, whose message is about KI-47 and KI-48. The line survived and is in `HEAD`; its provenance is now attributed to an unrelated commit.
 
 - [ ] **Step 3: Record the baseline gates.**
 
@@ -1337,13 +1337,13 @@ Documentation–Register Synchronization Execution Plan
 | A-2    | **Seven OPEN entries describe a state the tree no longer has.** KI-32 (fix shipped `ed71741`: `resources/css/app.css:219` light, `:229` dark), KI-48 (fix shipped `79d5f6f`, errata in `ARCHITECTURE-ESSENTIALS.md:36` and `ARCHITECTURE.md:158`), KI-49 and KI-51 (all nine `database/seeders/data/*.json` bodies and the seeder code tracked at `8b17703` / `30b3a08`), KI-53 and KI-54 (fixture tracked, no `.held-aside`, tree clean, the 11-red state no longer reproduces), KI-45 (headline "no offline population path" superseded by `8b17703`: `'seed_file' => 'race_instances.json'` at `config/uma.php:138-145`).                                                                                                                              | 20 entries carry OPEN in a heading without CLOSED/RESOLVED; 7 of them are wrong                                    | **Blocker**                    |
 | A-3    | **A doc already asserts what the register denies.** `docs/research-scratch/RACE-AND-SLICE-RESEARCH.md:843` calls KI-48 "the one finding this slice was told to fix — done in §3" while the register keeps KI-48 OPEN. Two sources of truth disagree in public.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | `RACE-AND-SLICE-RESEARCH.md:843` vs `KNOWN-ISSUES.md:2362`                                                         | **Major**                      |
 | A-4    | **The documentation precedence chain points at files that do not exist.** `AGENTS.md:178` ranks `docs/research-scratch/GOVERNANCE.md` second of five authorities; `AGENTS.md:5` names `docs/research-scratch/GOVERNANCE.md` as the risk record; `AGENTS.md:94` says "see GATE-REGISTRY C-5"; `README.md:18` maps `docs/research-scratch/GOVERNANCE.md`. Neither file is on disk. Both are recoverable at `22e5135^` (13 and 6 commits touch them).                                                                                                                                                                                                                                                                                                                                                        | `git show 22e5135^:docs/GATE-REGISTRY.md` succeeds                                                                 | **Blocker**                    |
-| A-5    | **512 dead markdown links**, concentrated on sources the consolidation absorbed without repointing the readers: `docs/research-scratch/DESIGN-CORPUS.md` 56, `DESIGN.md` 42, `docs/research-scratch/GOVERNANCE.md` 22, `RAW-FINDINGS.md` 20, `docs/research-scratch/GOVERNANCE.md` 19, `SKILLS-GAPS.md` 19, `docs/research-scratch/GOVERNANCE.md` 17, `docs/design-research/SKILLS-GAPS.md` 11. 38 files carry citations into `design-research/`, `deprecated/`, `requests/`, `data/`, `flows/`, `frontend-review/`. Densest citing files: `CATALOG-ROSTER-WORKSTREAM.md` 57, `SKILLS-MECHANICS.md` 44, `SLICE-RECORDS.md` 29, `KNOWN-ISSUES.md` 26.                                                                                                                               | `python tools/doc_census.py`                                                                                       | **Major**                      |
+| A-5    | **512 dead markdown links**, concentrated on sources the consolidation absorbed without repointing the readers: `docs/research-scratch/DESIGN-CORPUS.md` 56, `DESIGN.md` 42, `docs/research-scratch/GOVERNANCE.md` 22, `RAW-FINDINGS.md` 20, `docs/research-scratch/GOVERNANCE.md` 19, `SKILLS-GAPS.md` 19, `docs/research-scratch/GOVERNANCE.md` 17, `SKILLS-MECHANICS.md` §SKILLS-GAPS.md 11. 38 files carry citations into `design-research/`, `deprecated/`, `requests/`, `data/`, `flows/`, `frontend-review/`. Densest citing files: `CATALOG-ROSTER-WORKSTREAM.md` 57, `SKILLS-MECHANICS.md` 44, `SLICE-RECORDS.md` 29, `KNOWN-ISSUES.md` 26.                                                                                                                               | `python tools/doc_census.py`                                                                                       | **Major**                      |
 | A-6    | **The repoint targets are already known, not guessed.** `docs/research-scratch/INDEX.md` records which master absorbed which source, and the section headings exist: `DESIGN-CORPUS.md:18` `## DESIGN.md`, `:1665` `## CONSTRAINTS.md`; `GOVERNANCE.md:16` `## SOURCE-OF-TRUTH.md`; `SKILLS-MECHANICS.md:2410` `## skills-section-phase-b2-2026-10-01.md`. Only Round 3 repointed its citations (`SCENARIO-PUBLISHER-REFERENCES.md`: 26 inbound); Round 1 and 2 masters sit at 1 inbound each.                                                                                                                                                                                                                                                            | `INDEX.md` tables; census inbound counts                                                                           | **Major**                      |
 | A-7    | **The dead-link check exists but gates nothing.** `tools/doc_census.py:54` computes `dead_links()` and prints only the first 20 (`:112`), and no composer script or test invokes it. `composer.json:56` registers `lore` the same way a `docs` script could be registered. Citation rot is therefore invisible after it lands. (prevention gap)                                                                                                                                                                                                                                                                                                                                                                                                                            | `grep -n census composer.json` returns nothing                                                                     | **Major**                      |
 | A-8    | **Two KI ids are cited as entries and are not.** `KI-34` (8 citations) is a deliberate reservation with no entry (`KNOWN-ISSUES.md:21-24`); `KI-16` (6 citations) is a renumbering hole the register itself admits: "a genuine renumbering hole, KI-30's pre-merge number" (`:23`). 51 distinct ids are cited outside the register against 54 entries.                                                                                                                                                                                                                                                                                                                                                                                                    | set difference of cited ids vs heading ids                                                                         | **Major**                      |
 | A-9    | **Five entries are never referenced outside the register:** KI-31, KI-46, KI-52, KI-53, KI-54. KI-52 (OPEN) is the two-`DESIGN.md`-basename ambiguity, and the register's own headings exhibit it: KI-29 (`:1390`) and KI-37 (`:1781`) both cite "DESIGN.md §6.14", which resolves nowhere — root `DESIGN.md` has no §6.14 and the 44px rule is `DESIGN-CORPUS.md:904`. KI-46 (`turns.0.speed` leaked to the Trainer) has no reflection in the copy rules; its only trace is a test comment at `tests/Feature/SupportCardTest.php:19`.                                                                                                                                                                                                                    | `comm -23` of entry ids vs cited ids                                                                               | **Major**                      |
 | A-10   | **The corpus was consolidated on a false premise.** `CONSOLIDATION-LOG.md:4-6` states the governing file `docs/research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md` "is absent from disk and from all git history (verified: `git log --all -- '*DOCUMENTATION-INVENTORY*'` returns nothing)", so sections 6/7/10/11 "could not be read" and a filesystem survey was substituted. The file is **on disk** at `research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md` (101.5 KB, 644 lines), with §6 "Cross-reference map" at `:353` — in the repo-root `research-scratch/` folder, which `.gitignore:87` ignores (`/research-scratch/`). The verification command cannot see an ignored file, so a history-only probe was reported as disk absence.   | `ls research-scratch/`; `git check-ignore -v research-scratch/...`                                                 | **Blocker**                    |
-| A-11   | **Seven citations resolve only to untracked files**, so they work on this machine and break on a fresh clone: `README.md:122` → `README.md`; `docs/SKILL_AUTOMATION.md:29` → .copilot/instructions.md; `docs/UMAMUSUME_REFERENCE.md:996,:1042` and `docs/scenarios/09:727,:729` → files inside the ignored root `research-scratch/`; `docs/research-scratch/PROCESS-PLANS.md:27` → the inventory above. `docs/PLAN-UI-UX-2026-10-02.md` is also untracked and unregistered in `INDEX.md`.                                                                                                                                                                                                                                                       | census UNTRACKED list                                                                                              | **Major**                      |
+| A-11   | **Seven citations resolve only to untracked files**, so they work on this machine and break on a fresh clone: `README.md:122` → `README.md`; `docs/SKILL_AUTOMATION.md:29` → .copilot/instructions.md; `docs/UMAMUSUME_REFERENCE.md:996,:1042` and `docs/scenarios/09:727,:729` → files inside the ignored root `research-scratch/`; `docs/research-scratch/PROCESS-PLANS.md:27` → the inventory above. `PROCESS-PLANS.md` §PLAN-UI-UX-2026-10-02.md is also untracked and unregistered in `INDEX.md`.                                                                                                                                                                                                                                                       | census UNTRACKED list                                                                                              | **Major**                      |
 | A-12   | **Every closure is gated on an unpushed branch.** Local master is 17 commits ahead of `origin/master`, which carries no `docs/research-scratch/` at all. Register discipline closes a KI only when the fix is on `origin/master`, so A-2 cannot be actioned until the push is decided. (owner gate O-1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | `git rev-list --left-right --count HEAD...origin/master` = `17 0`                                                  | **Blocker**                    |
 
 **Not a gap:** the 505 GONE count is not 505 broken instructions. Most are provenance lines inside masters naming the source they absorbed, which are records. The census says so itself (`tools/doc_census.py:109-111`): "Most GONE lines are historical citations inside masters naming the sources they absorbed... repoint only the lines a reader would actually follow." Task 5 triages rather than bulk-rewrites; that distinction is the difference between a repair and a lore-gate-wide vandalism of dated records.
@@ -1581,7 +1581,7 @@ python tools/doc_census.py 2>&1 | sed -n '/most-cited dead targets/,$p'
 | `docs/research-scratch/GOVERNANCE.md`                                      | 22         | per Task 2                                                                                       |
 | `RAW-FINDINGS.md`                                            | 20         | `docs/research-scratch/DESIGN-CORPUS.md` §`RAW-FINDINGS.md`                                      |
 | `docs/research-scratch/GOVERNANCE.md`                                         | 19         | per Task 2                                                                                       |
-| `SKILLS-GAPS.md` (+ `docs/design-research/SKILLS-GAPS.md`)   | 19 + 11    | `docs/research-scratch/SKILLS-MECHANICS.md` §`SKILLS-GAPS.md`                                    |
+| `SKILLS-GAPS.md` (+ `SKILLS-MECHANICS.md` §SKILLS-GAPS.md)   | 19 + 11    | `docs/research-scratch/SKILLS-MECHANICS.md` §`SKILLS-GAPS.md`                                    |
 | `docs/research-scratch/GOVERNANCE.md`                                    | 17         | `docs/research-scratch/GOVERNANCE.md` §`docs/research-scratch/GOVERNANCE.md` (`:16`)                              |
 | `docs/design-research/verification/slice-*.md`               | 15 files   | `docs/research-scratch/SLICE-RECORDS.md` §`slice-NN-YYYY-MM-DD.md`                               |
 
@@ -1730,7 +1730,7 @@ git commit -m "feat(docs): ratchet dead citation counts in a Pest gate"
 **Files:**
 
 - Decide: `README.md`, .copilot/instructions.md, root `research-scratch/*` (`gitignored at .gitignore:87`).
-- Modify: `docs/research-scratch/INDEX.md`; commit `docs/PLAN-UI-UX-2026-10-02.md`.
+- Modify: `docs/research-scratch/INDEX.md`; commit `PROCESS-PLANS.md` §PLAN-UI-UX-2026-10-02.md.
 
 **Interfaces:**
 
@@ -1768,7 +1768,7 @@ python tools/doc_census.py 2>&1 | grep -E 'tracked markdown|dead markdown links'
 - Any code, migration, or view change. This plan edits documentation and one test.
 - `CONSTRAINTS.md` thresholds, in any direction.
 - Rewriting ADR or slice-record history, resolving KI-15's source contradiction, or ruling on the KI-25 768px floor (R82) — each is a product or schema decision, not a citation repair.
-- The `docs/PLAN-UI-UX-2026-10-02.md` workstreams themselves; that plan owns them.
+- The `PROCESS-PLANS.md` §PLAN-UI-UX-2026-10-02.md workstreams themselves; that plan owns them.
 
 ### Self-review against the analysis
 
@@ -1825,7 +1825,7 @@ Every slice now opens and closes with two mechanical lines, per R38. **Opening s
 **Branch attribution (R44):** Slice 8 was built on `docs/frontend-review` after a concurrent session switched the shared worktree there mid-slice; `master` was fast-forwarded to `122d12b` at the start of Slice 9, so every Slice 8 commit is now on `master`. One of them, `4c6486a`, also carries `docs/scenarios/09-global-race-calendar.md`, which is that session’s file and their words: it entered through the shared index, and the attribution stands here rather than in a rewrite.
 
 **Subject-prefix erratum (R50, 2026-09-29):** `68fa190` is prefixed `docs(slice-7)` and is a Slice 9
-commit. Its diff adds `docs/design-research/verification/slice-9-2026-09-28.md` and re-baselines this
+commit. Its diff adds `SLICE-RECORDS.md` §slice-9-2026-09-28.md and re-baselines this
 file's Slice 9 header; nothing in it belongs to Slice 7, whose docs commit is `94db315`. The prefix is
 wrong on its face, so read the body and the diffstat, not the subject line, when a slice is traced
 through `git log --grep`. Left as shipped because the only other fix is rewriting a commit that is
@@ -1965,7 +1965,7 @@ the base theme), KI-11 (empty `ScenarioSlotSeeder`, orphaned `--color-green-tint
 | S2: panels fed from slots and the race log           | `83084ab`              | 7 tests in `RaceSlotPanelComposerTest`; live page shows `Apr Early: Fan gate` + `15,000 fans`, `Apr Late: Mandatory goal`, `May Early: Run`                |
 | S3: red pennant, warm outline, height, named state   | `bb6eec6`              | `RaceCalendarTest` 17 passed; browser-measured 13.24/5.02/5.74 light, 15.15/6.15/4.49 dark, +14px over neighbours                                          |
 | S4: KI-2 closed                                      | `d53a4b1`              | 3 tests drive `CACHE_STORE=database`; live server `/umamusume -> 200`                                                                                      |
-| S5: gates + R9 manual contrast pass                  | `70f9218`, `9451659`   | `docs/design-research/verification/slice-2-2026-09-28.md` — full sequence with outputs, the 1.62:1 bar defect found and fixed, 2 skips reported as skips   |
+| S5: gates + R9 manual contrast pass                  | `70f9218`, `9451659`   | `SLICE-RECORDS.md` §slice-2-2026-09-28.md — full sequence with outputs, the 1.62:1 bar defect found and fixed, 2 skips reported as skips   |
 | S6: docs                                             | (this commit)          | ADR-0003 R2, KI-2 resolved with its wrong cause corrected, KI-8 to KI-11 opened, PLAN re-baselined here                                                    |
 
 **End state:** `php artisan test --compact` → 2 skipped, 235 passed, 751 assertions.
@@ -1991,7 +1991,7 @@ Stabilisation slice: it cleared the blockers Slice 2 filed, then tried to reconc
 | T6: welcome page offline (KI-3)                     | `5548b9e`                                    | both `<link>` lines deleted; live response 39,987 bytes with 0 `bunny` matches and every asset same-origin                                                                                                                                            |
 | T7: gate portability (KI-4)                         | `ee97869`, `cc3f963`, `21f9906`, `ee6786c`   | `composer lore` / `composer lore-code` via `tools/lore.php` (Process array, no shell); parity with the Makefile measured at 131/131 and 4/4; `LoreGateParityTest` proven non-vacuous by deleting a pattern                                            |
 | T8: branch reconciliation (R11, R20–R21)            | `dc13d8d` (merge) + `35fb0c7` (commit)       | `feat/scenario-races-is-manual` merged (single commit `46b8d3e`); untracked `is_manual` duplicate deleted; five load-bearing files committed; coherence checks pass (20/20 migrations, ScenarioSlot+Preference defs, 23 tables on fresh scratch DB)   |
-| T9: gates + docs                                    | `33949f5`                                    | `docs/design-research/verification/slice-3-2026-09-28.md`                                                                                                                                                                                             |
+| T9: gates + docs                                    | `33949f5`                                    | `SLICE-RECORDS.md` §slice-3-2026-09-28.md                                                                                                                                                                                             |
 
 **End state.** `php artisan test --compact` → 2 skipped, 255 passed, 796 assertions.
 `pint --dirty` → passed. `phpstan analyse --no-progress` → `[OK] No errors`.
@@ -2034,7 +2034,7 @@ instead (§Open Decisions).
 | T2: two-region frame             | `71bbb4b`              | `RunViewFrameTest` (DOM containment); strip box 992×92 at both ends of the scroll, 9/9 `elementFromPoint` probes inside the pinned region   |
 | T3: keyboard path                | `6a53c15`              | `KeyboardPathTest`; skip link, digits, Escape; roving left to the native radio group and verified with pressed keys                         |
 | T1c/T1d: browser-found defects   | `edeb8cd`, `03a5d05`   | mood delta sign inverted; Hint badge white-on-green at 1.99:1                                                                               |
-| T4: gates + browser pass         | this commit            | `docs/design-research/verification/slice-5-2026-09-28.md`                                                                                   |
+| T4: gates + browser pass         | this commit            | `SLICE-RECORDS.md` §slice-5-2026-09-28.md                                                                                   |
 | T5: docs + housekeeping          | this commit            | KI-11 both halves closed, KI-14 filed and closed, audit rows 7.2 and 9 updated, root scratch moved                                          |
 
 **End state.** `php artisan test --compact` → 2 skipped, 292 passed (923 assertions).
@@ -2082,7 +2082,7 @@ residuals, push. Frontend and docs only: no schema, no config, no new screen, no
 | T2: mood tokens, pill, legibility         | `51d29d4`              | Five `--color-mood-*` + `--color-on-mood`; `x-mood-pill` with the D-259 arrow; `MoodTier::arrow()`; timeline column and state-region readout; pairs measured in both themes, floor 5.82:1                                                                                                                                                  |
 | T3: the green ink borrow                  | `e80c6f2`              | `--color-on-green` #1F1508, 9.02:1 measured in both themes; the advisory badge and two stale comments corrected; `TokenPairHygieneTest` pins the naming                                                                                                                                                                                    |
 | T4: gates + browser pass                  | this commit            | 2 skipped, 374 passed (1,247 assertions); pint passed; PHPStan level 6 clean; `gate.py` PASS; lore-code 6 all adjudicated in §3.2, `composer lore` 137 → 140 with all three new lines being this plan and the record quoting a banned word to rule on it; build 57.37 kB CSS, all seven new utilities in the bundle; token count 53 → 60   |
-| T5: record, second push                   | this commit + push     | `docs/design-research/verification/slice-6-2026-09-28.md`; PLAN and KNOWN-ISSUES re-baselined                                                                                                                                                                                                                                              |
+| T5: record, second push                   | this commit + push     | `SLICE-RECORDS.md` §slice-6-2026-09-28.md; PLAN and KNOWN-ISSUES re-baselined                                                                                                                                                                                                                                              |
 
 **Deviation the reviewer should look at first.** The mood pill does not use §3.4's tint-and-border
 pattern; it keeps the client's saturated fill and steps the ink. The pale-fill reading produced five
@@ -2380,7 +2380,7 @@ which is out of every frontend slice's scope.
 
 ### Corrections Owed to FRONTEND-BRIEF-AUDIT, Not Applied
 
-`docs/design-research/FRONTEND-BRIEF-AUDIT.md` is an untracked file authored by the concurrent
+`DESIGN-CORPUS.md` §FRONTEND-BRIEF-AUDIT.md is an untracked file authored by the concurrent
 session, so it is not this slice's to edit. Two of its §3 rows now describe a tree they did not
 see, and the owner or that session should land these before the audit is cited again:
 
@@ -2456,7 +2456,7 @@ against a C-8 dependency, a reversed vanilla-JS stack line, `PRE-MORTEM.md:73`'s
 loading and error state per wired region (C-7), the motion budget moving from CSS review into
 component review (D-90 to D-92), a D-66 loopback ruling, and re-verifying every recorded
 `getComputedStyle()` pair over a morphing DOM while the gate that would catch it is the one that
-skips. Full numbers and method: `docs/design-research/verification/slice-5-2026-09-28.md` §4.
+skips. Full numbers and method: `SLICE-RECORDS.md` §slice-5-2026-09-28.md §4.
 
 **Reopen criterion, the owner's words (R34, 2026-09-28), quoted verbatim:**
 
@@ -5488,7 +5488,7 @@ A page that renders is not verified. A verified calculation can still rest on an
 
 ## Trainer-Desk-2.0-G-Prompts.md
 
-> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/Trainer-Desk-2.0-G-Prompts.md` (1046 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `PROCESS-PLANS.md` §Trainer-Desk-2.0-G-Prompts.md (1046 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
 >
 > **Consolidated 2026-10-12 (Round 15).** The original was deleted after line-by-line verification (687 of 687 non-blank source lines found in this section, in order, 0 missing). The original was untracked, so this section is the only copy. Cite this anchor, not the deleted path.
 
@@ -5539,7 +5539,7 @@ Complete preflight before running any G slice.
 
 #### 2.1 Shared-worktree coordination
 
-Read `docs/proposals/provenance-and-absence-contracts.md` §15 and inspect the actual repository state.
+Read `PLANS-AND-BRIEFS.md` §provenance-and-absence-contracts.md §15 and inspect the actual repository state.
 
 Confirm:
 
@@ -5577,7 +5577,7 @@ If no such authorization exists, stop and report. Do not reinterpret this except
 
 #### 2.3 Open decisions
 
-Read `docs/proposals/provenance-and-absence-contracts.md` §9 and §20.
+Read `PLANS-AND-BRIEFS.md` §provenance-and-absence-contracts.md §9 and §20.
 
 Treat unresolved owner decisions as follows:
 
@@ -5620,7 +5620,7 @@ Read the following in order, recording any missing or contradictory authority in
 2. `docs/research-scratch/PROCESS-PLANS.md` section `## frontend-development-plan.md` — Global Constraints, §3, §4, §8, §9, §9a, §10, §12, and §13.
 3. `docs/research-scratch/PLANS-AND-BRIEFS.md` section `## screen-spec-2.0.md` — the relevant SCREEN-nnn sections, the Product Direction Corrections table, and §18–20.
 4. `docs/research-scratch/DESIGN-CORPUS.md` section `## design-2.0.md` — §2, §4, §5, §13, §19–24, §25–28, §29, §35, §36, §40, §45, and §49, plus any additional sections named in the slice specification.
-5. `docs/proposals/provenance-and-absence-contracts.md` — §1, §2, §9, §12, §15, and §20 as relevant.
+5. `PLANS-AND-BRIEFS.md` §provenance-and-absence-contracts.md — §1, §2, §9, §12, §15, and §20 as relevant.
 6. `config/scenarios.php` — inspect actual configuration keys and structures.
 7. `SCREEN_SPEC.md` and `DESIGN.md`.
 8. The relevant scenario plans:
@@ -6543,7 +6543,7 @@ This section records the specific amendments from your review, so a reader can s
 
 ## Trainer-Docs-2.0-D-Prompts.md
 
-> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/Trainer-Docs-2.0-D-Prompts.md` (542 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `PROCESS-PLANS.md` §Trainer-Docs-2.0-D-Prompts.md (542 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
 >
 > **Consolidated 2026-10-12 (Round 15).** The original was deleted after line-by-line verification (380 of 380 non-blank source lines found in this section, in order, 0 missing). It was tracked and clean at HEAD, so the delete is recoverable from history. Cite this anchor, not the deleted path.
 
@@ -7094,7 +7094,7 @@ NOTES
 
 ## Trainer-Docs-2.0-E-Prompts.md
 
-> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `docs/Trainer-Docs-2.0-E-Prompts.md` (230 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
+> **Augmented 2026-10-10 (Round 14, augment-only).** Source: `PROCESS-PLANS.md` §Trainer-Docs-2.0-E-Prompts.md (230 lines), reproduced verbatim below with headings demoted one level. The source file remains in place; no citation was repointed and nothing was deleted.
 >
 > **Consolidated 2026-10-12 (Round 15).** The original was deleted after line-by-line verification (166 of 166 non-blank source lines found in this section, in order, 0 missing). It was tracked and clean at HEAD, so the delete is recoverable from history. Cite this anchor, not the deleted path.
 
@@ -7333,7 +7333,7 @@ NOTES
 
 ## screenshot-research-registry-implementation-plan.md
 
-> **Consolidated 2026-10-15 (Round 16, owner-ordered).** Source: `docs/proposals/screenshot-research-registry-implementation-plan.md` (417 lines), reproduced verbatim below with headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
+> **Consolidated 2026-10-15 (Round 16, owner-ordered).** Source: `PROCESS-PLANS.md` §screenshot-research-registry-implementation-plan.md (417 lines), reproduced verbatim below with headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
 
 ## Screenshot Research Registry — Remaining Implementation Plan
 
@@ -7757,7 +7757,7 @@ The registry is implementation-ready when:
 
 ## trainee-goals-fullstack-plan-2026-10-13.md
 
-> **Consolidated 2026-10-15 (Round 16, owner-ordered).** Source: `docs/proposals/trainee-goals-fullstack-plan-2026-10-13.md` (621 lines), reproduced verbatim below with headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. The original was untracked, so this section is the only copy.
+> **Consolidated 2026-10-15 (Round 16, owner-ordered).** Source: `PROCESS-PLANS.md` §trainee-goals-fullstack-plan-2026-10-13.md (621 lines), reproduced verbatim below with headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. The original was untracked, so this section is the only copy.
 
 ## Trainee personal goals — the fullstack plan (data, ingest, surfaces, frontend coordination)
 
@@ -8385,7 +8385,7 @@ disposable; the plan is the durable artifact.
 
 ## trainer-desk-remaining-implementation-plan.md
 
-> **Consolidated 2026-10-15 (Round 16, owner-ordered).** Source: `docs/proposals/trainer-desk-remaining-implementation-plan.md` (693 lines), reproduced verbatim below with headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
+> **Consolidated 2026-10-15 (Round 16, owner-ordered).** Source: `PROCESS-PLANS.md` §trainer-desk-remaining-implementation-plan.md (693 lines), reproduced verbatim below with headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
 
 ## Trainer Desk — Remaining Implementation Plan
 ### Phase-and-slice execution instructions for `umamusume-laravel13`
@@ -9137,7 +9137,7 @@ tree, and the baseline they were measured against has moved.
 
 ## trainer-desk-implementation-plan-2026-10-17.md
 
-> **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `docs/proposals/trainer-desk-implementation-plan-2026-10-17.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
+> **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `PROCESS-PLANS.md` §trainer-desk-implementation-plan-2026-10-17.md, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
 
 ## Trainer Desk: Implementation Instructions
 
@@ -9879,7 +9879,7 @@ Slices 7.1 through 7.15 depend on Phase 1 primitives only, so they may be pulled
 
 ## implementation-backlog-2026-10-17.md
 
-> **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `docs/proposals/implementation-backlog-2026-10-17.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
+> **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `PROCESS-PLANS.md` §implementation-backlog-2026-10-17.md, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
 
 ## Trainer Desk — implementation backlog (code only)
 
@@ -11141,7 +11141,7 @@ The rules are the arc's most durable output. A dispatch that violates one of the
 
 > **Consolidated 2026-10-21 (Round 17, owner-ordered).** Source: `docs/proposals/UXUI Update Phases and Slices.txt`, a plain-text source, reproduced verbatim below inside a fenced block (a text file has no headings to demote). The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path.
 >
-> One pointer inside the body is left as it was written, and the body is not edited to fix it: the text names `docs/proposals/trainer-desk-implementation-plan-2026-10-17.md` as the plan-of-record, and that file was consolidated in the same round. The plan-of-record is now the section `## trainer-desk-implementation-plan-2026-10-17.md` above; the ledger it also names is still at `docs/research-scratch/SLICE-RECORDS.md` section `## execution-ledger-2026-10-17.md`.
+> One pointer inside the body is left as it was written, and the body is not edited to fix it: the text names `PROCESS-PLANS.md` §trainer-desk-implementation-plan-2026-10-17.md as the plan-of-record, and that file was consolidated in the same round. The plan-of-record is now the section `## trainer-desk-implementation-plan-2026-10-17.md` above; the ledger it also names is still at `docs/research-scratch/SLICE-RECORDS.md` section `## execution-ledger-2026-10-17.md`.
 
 ```text
 UXUI Update Phases and Slices
@@ -11219,7 +11219,7 @@ peer's actual pull-forward (7.1-7.6 landed during Phases 3-4). Record the observ
 
 ## frontend-development-plan.md
 
-> **Consolidated 2026-10-21 (Round 18, owner-ordered).** Source: `docs/proposals/frontend-development-plan.md`, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
+> **Consolidated 2026-10-21 (Round 18, owner-ordered).** Source: `PROCESS-PLANS.md` §frontend-development-plan.md, reproduced verbatim below with its headings demoted one level. The original was deleted from `docs/proposals/` after line-by-line verification (0 missing). Cite this anchor, not the deleted path. <!-- census: quoted-original -->
 
 ## Trainer Desk 2.0 — Frontend Development Plan
 
@@ -15573,7 +15573,7 @@ This proposal consolidates **31 audit reports** (3 pre-existing from 2026-11-01,
 
 **Evidence:** `RENDERED_EVIDENCE = FALSE` for 30 of 31 reports (`spawn EPERM`/`spawn ENOENT`); Database pass 2 (`AUD-20261102-004`) probed TRUE via Playwright MCP (`3 passed, 357 assertions`). Career setup (`AUD-20261102-005`) is two-session: FALSE during audit writing, TRUE during implementation `c60af3a1`. All visual/contrast/target-size/reflow claims on FALSE reports are `UNMEASURED`.
 
-**This proposal is not an implementation.** It references the 29 `.kilo/plans/` files by name without copying them; it does not edit any audit report (those stand as records; corrections stay in `docs/audit-corrections.md`); it does not touch `resources/`, `app/`, `tests/`, `public/`, or `config/`. The proposal lives at `docs/proposals/2026-11-02-ui-ux-audit-implementation.md` (top-level `proposals/` does not exist; `docs/proposals/` is the tracked documentation root — see §B-10 note).
+**This proposal is not an implementation.** It references the 29 `.kilo/plans/` files by name without copying them; it does not edit any audit report (those stand as records; corrections stay in `AUDIT-AND-VERIFICATION.md` §audit-corrections.md); it does not touch `resources/`, `app/`, `tests/`, `public/`, or `config/`. The proposal lives at `PROCESS-PLANS.md` §2026-11-02-ui-ux-audit-implementation.md (top-level `proposals/` does not exist; `docs/proposals/` is the tracked documentation root — see §B-10 note).
 
 ### §2 — Record reconciliation
 
@@ -15837,7 +15837,7 @@ Acceptance: owner sign-off per deferred item.
 
 ### §6 — Verification requirements
 
-Formalizing the sequence's build-verification policy (`docs/audit-corrections.md` entry 6):
+Formalizing the sequence's build-verification policy (`AUDIT-AND-VERIFICATION.md` §audit-corrections.md entry 6):
 
 - Every post-build claim must record: `npm run build` exit code, `public/build/manifest.json` mtime, `ls public/hot` output, seven-source-URL verification (or per-finding URL).
 - Every Playwright claim must run against the **built artifact**, not HMR'd source.
@@ -15940,11 +15940,11 @@ All plans are gitignored working notes; this proposal is the durable record. Pla
 
 | Correction file | What this proposal inherits | What this proposal does not |
 |-----------------|----------------------------|----------------------------|
-| `docs/audit-corrections.md` | Five audit-record defects (RENDERED_EVIDENCE truth, ID scheme, SHR-8/UI-9/UI-10 non-existence, GP-2 as operative rule, Database pass 2 corrections) | Resolution of the defects themselves (deferred per prior pass) |
-| `docs/audit-fix-pass-addendum.md` | Pass-1/pass-2 dispositions for Database audit (F-01..F-13 status, build/landing verification, PHPStan pre-existing red) | Re-running pass verification; editing the Database audit report |
+| `AUDIT-AND-VERIFICATION.md` §audit-corrections.md | Five audit-record defects (RENDERED_EVIDENCE truth, ID scheme, SHR-8/UI-9/UI-10 non-existence, GP-2 as operative rule, Database pass 2 corrections) | Resolution of the defects themselves (deferred per prior pass) |
+| `AUDIT-AND-VERIFICATION.md` §audit-fix-pass-addendum.md | Pass-1/pass-2 dispositions for Database audit (F-01..F-13 status, build/landing verification, PHPStan pre-existing red) | Re-running pass verification; editing the Database audit report |
 | `KNOWN-ISSUES.md` (KI-144..KI-148) | Known-issue register entries referenced by plans | Creation of new KI entries (owner decision) |
 
-**Dependency:** `docs/audit-corrections.md` entry 6 (`public/build/` gitignore correction) means Phase 1's landing verification cannot rely on a committed build artifact until that correction is applied. The proposal cites this dependency explicitly.
+**Dependency:** `AUDIT-AND-VERIFICATION.md` §audit-corrections.md entry 6 (`public/build/` gitignore correction) means Phase 1's landing verification cannot rely on a committed build artifact until that correction is applied. The proposal cites this dependency explicitly.
 
 ### Rules the proposal holds to
 
@@ -15957,13 +15957,13 @@ All plans are gitignored working notes; this proposal is the durable record. Pla
 7. Effort estimates honest (S/M/L).
 8. Owner questions named, not assumed (§7).
 9. Tracked in git: commit as `docs(proposals): consolidated UI/UX audit implementation plan`.
-10. No audit-report edits. Corrections stay in `docs/audit-corrections.md`.
+10. No audit-report edits. Corrections stay in `AUDIT-AND-VERIFICATION.md` §audit-corrections.md.
 
 ### Definition of done
 
 The proposal is complete when all §1-§11 sections exist, all 31 audits and 29 plans are cross-referenced, all five reconciliation tasks (§2.1-§2.5) have outputs, all findings have status + phase, all owner questions are named (§7), and the file is committed to `docs/proposals/` with a body citing this dispatch.
 
-**Commit status (owner action required):** The file is on disk at `docs/proposals/2026-11-02-ui-ux-audit-implementation.md` and has not been committed. Owner action required: `git add docs/proposals/2026-11-02-ui-ux-audit-implementation.md && git commit -m 'docs(proposals): consolidated UI/UX audit implementation plan'`. The proposal is complete on disk; committal is an owner step because `git commit` is not available to the agent writing this file.
+**Commit status (owner action required):** The file is on disk at `PROCESS-PLANS.md` §2026-11-02-ui-ux-audit-implementation.md and has not been committed. Owner action required: `git add docs/proposals/2026-11-02-ui-ux-audit-implementation.md && git commit -m 'docs(proposals): consolidated UI/UX audit implementation plan'`. The proposal is complete on disk; committal is an owner step because `git commit` is not available to the agent writing this file.
 
 ## PLAN_SLICES_6_7.md
 
@@ -18822,7 +18822,7 @@ This plan is the second half: rewrite every page in `resources/js/pages/` and th
 3. No `dark:` utilities (theme flips via `html[data-theme='dark']` variable swap only). No skeleton loaders. No placeholder grey boxes (ArtworkSlot rule, §8.4).
 4. Lore gate: displayed vocabulary comes from `lang/en/uma.php` / enum labels. Run `php tools/lore.php` after any copy-carrying slice and record hit count + delta.
 5. AGENTS.md §9 validation matrix applies per slice. Behavior changes ship with a test; layout-only changes run the browser gates listed in §9 of each slice below.
-6. Do not touch `assets/shell.css`, `assets/shell.js`, or `assets/data/*` — they are reference artifacts. Do not hand-edit the four `assets/data/*.js` files; regenerate via `php build-data.php` only if a page needs a figure the dataset lacks (see `assets/data/README.md` for the regeneration contract).
+6. Do not touch `assets/shell.css`, `assets/shell.js`, or `assets/data/*` — they are reference artifacts. Do not hand-edit the four `assets/data/*.js` files; regenerate via `php build-data.php` only if a page needs a figure the dataset lacks (see `GOVERNANCE.md` §README.md for the regeneration contract).
 7. One `h1` per document, in the shell's `role="banner"` region (DESIGN.md §2.2 amendment 2026-10-17). The `.phead` block replaces the current `#head`/`#title` slot band.
 8. The `@container` + `data-layout-container` contract on `<main>` is load-bearing (`@2xl:`–`@5xl:` variants in 21 files; sticky descendants are deliberately dead, pinned by `tests/browser/containment.spec.ts`). HFW layouts resolve against the same container breakpoints — verify against the measured content box (1088px @1440 viewport, 960px @1280, 638px @958), not the viewport.
 
@@ -19194,7 +19194,7 @@ Prop deltas collected per slice. Rules: additive only within this major (old key
 | `needsYou.reviewCount` | add (int) | pending review candidates count |
 | `needsYou.dataStatus` | reshape from `dataStatus` | reuse existing `dataStatus` payload; add `stale: bool` if the tile's risk border needs a flag the label doesn't carry |
 | `counts.forms` | optional add | catalogue forms count, only if a kept card needs it |
-| `counts.trainees` | **ruling needed** | HFW prints the catalogue count (67); app counter reads 71 (dev fixture rows). Catalogue count source: `assets/data` build or a sourced-join query per `assets/data/README.md` "rules a consumer inherits". Recommend: keep app count, add `counts.catalogueTrainees`, print catalogue figure with a footnote — owner ruling recorded in slice report. |
+| `counts.trainees` | **ruling needed** | HFW prints the catalogue count (67); app counter reads 71 (dev fixture rows). Catalogue count source: `assets/data` build or a sourced-join query per `GOVERNANCE.md` §README.md "rules a consumer inherits". Recommend: keep app count, add `counts.catalogueTrainees`, print catalogue figure with a footnote — owner ruling recorded in slice report. |
 
 #### 7.3 Other controllers
 
@@ -19563,7 +19563,7 @@ Three facts matter for the plan:
 >
 > - **Confirmed: 67 trainees, 106 forms, 559 cards, 35 effects, 1,910 skills.** 37 of the 67 trainees carry more than one form. `description` is **null on all 1,910** skill rows (0 `undefined`, 0 empty), which is G-SK-20 holding as stated.
 > - **A15 — `sourceText` is an object, and its English half is absent on half the rows.** Fact 2 above says "`sourceText` carries the publisher's English as quarantined reference". It carries `{ en, end }`: `.end` is present on **1,910/1,910**, but `.en` on **985/1,910**. A surface that binds `sourceText.en` and assumes presence would render an absence on 925 rows; one that binds `.end` would not. The distinction is load-bearing for any page Phase 3 migrates.
-> - **A16 — the capture date is in none of the five locations Phase 5 requires.** Phase 5 step 1 says "`assets/data/README.md` and each generated file's header carry the capture date". Measured: **0 of 5**. None of the four generated files' 25-line headers contains a `2026-10-` date, and `assets/data/README.md` contains no date, no "capture", no "frozen" and no "snapshot". The only dates in the set are read-dates in other files (`shell.css:3,38,59` — "read 2026-10-21"; `build-index.js:5`; the set `README.md`). Phase 5's gate ("the captured date is present in all five locations") is currently red, and this is the whole substance of the freeze ruling.
+> - **A16 — the capture date is in none of the five locations Phase 5 requires.** Phase 5 step 1 says "`GOVERNANCE.md` §README.md and each generated file's header carry the capture date". Measured: **0 of 5**. None of the four generated files' 25-line headers contains a `2026-10-` date, and `GOVERNANCE.md` §README.md contains no date, no "capture", no "frozen" and no "snapshot". The only dates in the set are read-dates in other files (`shell.css:3,38,59` — "read 2026-10-21"; `build-index.js:5`; the set `README.md`). Phase 5's gate ("the captured date is present in all five locations") is currently red, and this is the whole substance of the freeze ruling.
 > - **A17 — `build-data.php` records no source identity.** Fact 1 is right that it reads the dev database joined with the committed export bodies (documented at `build-data.php:11-23`), and it does refuse the three sum failures. But it records **no commit, no seed hash, and no generated-at stamp**: a grep for `git`/`commit`/`rev-parse`/`seed` identity over the file finds only the instruction "Run `php artisan migrate:fresh --seed` first". So a catalogue regenerated tomorrow is indistinguishable from this one, which is exactly the ageing risk the freeze ruling names — and `README.md` carries nothing to close it.
 > - **Fixture provenance, named:** `[Sample Form]` is written by `database/factories/CharacterCardFactory.php:27`; `Form Counted N` by `tests/Feature/CatalogRosterTreeTest.php:212` and `tests/Feature/CareerTraineeSelectTest.php:227`. Factories invoked from **tests**, not from a seeder — so the contamination is a test-run artifact, and `migrate:fresh --seed` alone does not reproduce it.
 > - **The live "71" is displayed on the Dashboard.** `DashboardController.php:72` computes `'trainees' => Umamusume::count()` into `counts`, and `pages/Dashboard.vue:577` renders it as a `KpiCard` labelled "Trainees". Divergence 4 in §6 therefore has a named screen, not just a controller.
@@ -20216,7 +20216,7 @@ With the primitive layer in place, build the eight absent components and **all s
 
 Owner ruling 5: the dataset is a **frozen dated snapshot**, not a second source of truth.
 
-1. **Date-stamp it.** `assets/data/README.md` and each generated file's header carry the capture date; the set's README states that the numbers are a dated observation and not current.
+1. **Date-stamp it.** `GOVERNANCE.md` §README.md and each generated file's header carry the capture date; the set's README states that the numbers are a dated observation and not current.
 2. **Keep `data-check.mjs`** as the catalogue's invariant test. Its counts and sums are checks the app does not run, and they are cheap to keep.
 3. **Do not point `build-data.php` at the live pipeline.** Regeneration happens only when the set is revised, and the header date moves with it.
 4. **State the ageing rule** in the set's README: a reader must not quote a catalogue figure as current without re-deriving it, the same rule `docs/research-scratch/GOVERNANCE.md`, section `## coverage.md` already carries for host-local figures.
@@ -20224,7 +20224,7 @@ Owner ruling 5: the dataset is a **frozen dated snapshot**, not a second source 
 **Gate:** the captured date is present in all five locations; `node data-check.mjs` is green; no page in the set implies its figures are live.
 
 > **Phase 5 gate — closed 2026-10-23.** All five locations carry the capture (`e6d63d3d`): the four
-> generated files and `assets/data/README.md`. Each header states the capture instant in ISO 8601 with its
+> generated files and `GOVERNANCE.md` §README.md. Each header states the capture instant in ISO 8601 with its
 > offset (`2026-10-23T05:53:07+08:00`), the source commit the inputs were read at, and a sha256 digest per
 > seed file in `database/seeders/data/`; the README carries the ageing rule and says explicitly that
 > staleness is a fact about the (capture, seed set) pair, not about age. The record is written by the
@@ -20386,7 +20386,7 @@ Five scope questions were put to the owner. All five are now ruled, and the ruli
 
 - **Ruling 3 is the only behaviour change in the whole plan.** Everything else is a re-spelling or an addition. It therefore needs the narrowest possible blast radius: one new route, one controller action, one page, one browser spec, and a `SCREEN_SPEC.md` row for the new screen. If the owner later reverses it, the queue's inline detail is restored by reverting one commit.
 - **Ruling 4 raises the HFW's page count from 49 to 55** (six new pages) and makes the registry claim true for the first time. It also means the three Snapshot screens enter the check loop, so their layouts must satisfy `framework-check`'s law rules rather than merely existing.
-- **Ruling 5 removes the drift risk but adds an ageing risk.** A frozen snapshot with no capture date becomes a lie the moment someone reads it as current. The label is therefore part of the ruling, not a nicety: `assets/data/README.md` and each generated file's header must carry the capture date, and the set's README must say the numbers are a dated observation.
+- **Ruling 5 removes the drift risk but adds an ageing risk.** A frozen snapshot with no capture date becomes a lie the moment someone reads it as current. The label is therefore part of the ruling, not a nicety: `GOVERNANCE.md` §README.md and each generated file's header must carry the capture date, and the set's README must say the numbers are a dated observation.
 - **Ruling 1 keeps the plan honest about what it cannot fix.** The app's 200 Feature tests and 77 browser specs remain the authority for behaviour; this plan only closes the *visual-system* enforcement gap.
 
 #### Literal inventory (the check's rule set)
@@ -21430,7 +21430,7 @@ contract intact except where §7 (Backend Integration) names a prop delta.
 6. Do not touch `assets/shell.css`, `assets/shell.js`, or `assets/data/*` — they are
    reference artifacts. Do not hand-edit the four `assets/data/*.js` files; regenerate via
    `php build-data.php` only if a page needs a figure the dataset lacks (see
-   `assets/data/README.md` for the regeneration contract). The collection root
+   `GOVERNANCE.md` §README.md for the regeneration contract). The collection root
    `README.md`, `build-data.php`, `framework-check.mjs`, and `render-check.mjs` are
    reference tooling — read them, never run them from slices.
 7. One `h1` per document, in the shell's `role="banner"` region (DESIGN.md §2.2 amendment
@@ -22056,7 +22056,7 @@ has a query source named; no prop invented to satisfy a static HFW figure.
 | `needsYou.reviewCount` | add (int) | pending review candidates count |
 | `needsYou.dataStatus` | reshape from `dataStatus` | reuse existing `dataStatus` payload; add `stale: bool` if the tile's risk border needs a flag the label doesn't carry |
 | `counts.forms` | optional add | catalogue forms count, only if a kept card needs it |
-| `counts.trainees` | **ruling needed** | HFW prints the catalogue count (67); app counter reads 71 (dev fixture rows). Catalogue count source: `assets/data` build or a sourced-join query per `assets/data/README.md` "rules a consumer inherits". Recommend: keep app count, add `counts.catalogueTrainees`, print catalogue figure with a footnote — owner ruling recorded in slice report. |
+| `counts.trainees` | **ruling needed** | HFW prints the catalogue count (67); app counter reads 71 (dev fixture rows). Catalogue count source: `assets/data` build or a sourced-join query per `GOVERNANCE.md` §README.md "rules a consumer inherits". Recommend: keep app count, add `counts.catalogueTrainees`, print catalogue figure with a footnote — owner ruling recorded in slice report. |
 
 #### 7.3 Other controllers
 
@@ -24266,7 +24266,7 @@ dirties the tree is not a gate") is owner-authored and handed over separately.
 ## 2026-11-09-scenario-detail-upgrade.md
 
 > **Folded into this master in consolidation Round 25 (owner-ordered, 2026-11-10) from**
-> `docs/proposals/2026-11-09-scenario-detail-upgrade.md`. It is the scenario-detail page upgrade
+> `PROCESS-PLANS.md` §2026-11-09-scenario-detail-upgrade.md. It is the scenario-detail page upgrade
 > plan (the round-7 `F-01`/`F-02` fixes), the plan of record the 2026-11-10 remodel sections that
 > follow it priced their moves against. The source was untracked at the fold, so this section is its
 > only copy (the Round 13 E2 precedent). Its dated `git status` snapshots quote paths as they sat on
@@ -24278,7 +24278,7 @@ dirties the tree is not a gate") is owner-authored and handed over separately.
 
 **Status:** plan, not dispatch. Awaiting owner ruling on §7's decisions.
 **Date opened:** 2026-11-09
-**Audit input:** `docs/audits/RS-UC-SCENARIO-DETAIL-2026-11-09.md`
+**Audit input:** `AUDIT-AND-VERIFICATION.md` §RS-UC-SCENARIO-DETAIL-2026-11-09.md
 **Audit corrections applied:** six (`§1.3` of the brief), each with a disposition in §0 below.
 **Reference corpus:** `docs/UMAMUSUME_REFERENCE.md` §1.3.4, §1.6, §1.8; `docs/scenarios/02-unity-cup.md`
 **Framework rules cited:** `SHR-1` (shneiderman-golden-rules-2026-10-21.md:135), `TOG-3` (tognazzini-first-principles-2026-10-21.md:253), `NRM-2`/`NRM-3` (norman-interaction-principles-2026-10-21.md:144-145), `GP-2`/`GP-3` (gerhardt-powals-principles-2026-10-21.md:118-119), `IA-5` (information-architecture-principles-2026-10-21.md:146)
@@ -24489,7 +24489,7 @@ Additional populated-state observations that confirm the audit's honesty verdict
 ## 2026-11-10-scenario-detail-remodel.md
 
 > **Folded into this master in consolidation Round 25 (owner-ordered, 2026-11-10) from**
-> `docs/proposals/2026-11-10-scenario-detail-remodel.md`. It is the `S-RS-REMODEL-B1` consolidation
+> `PROCESS-PLANS.md` §2026-11-10-scenario-detail-remodel.md. It is the `S-RS-REMODEL-B1` consolidation
 > plan, priced against the tree and stopped where the owner's rulings were owed; its Addendum
 > records the four W-rulings the shipped page follows, and its `S-RS-REMODEL-B1` dispatch report
 > sits in the slice-records master. One citation to the ruling-memos sibling was repointed at this

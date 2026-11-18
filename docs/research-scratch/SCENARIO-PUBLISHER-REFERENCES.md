@@ -536,6 +536,8 @@ Distinct mechanic from both URA Finale and Unity Cup:
 
 Global players should not assume the higher Stamina/Wisdom caps apply immediately — check current patch notes, as this may be adjusted post-launch (Unity Cup received a similar later adjustment on Global, see the Unity Cup GameTora file in this set).
 
+**Re-check 2026-11-18 (source research).** The five figures above are corroborated: GameTora prints them on a page stamped 2026-03-12, and the community wiki prints the same table with the English release date in the same infobox. The narrower claim that the raised caps are live on the post-2026-07-01 Global client is **still open**. GameTora's page is the only one that discusses the server split and it calls the flat Global caps an expectation at launch; no fetched publisher prints a post-rework Global cap for this scenario. Keep the launch-day wording above as the dated position it records; do not promote either reading to Verified on the wiki alone, and do not change the shipped cap values without a client or patch-note check.
+
 ### Quick-Reference Differences vs. URA Finale / Unity Cup
 
 | Aspect                     | URA Finale                    | Unity Cup                                              | Trackblazer                                  |
