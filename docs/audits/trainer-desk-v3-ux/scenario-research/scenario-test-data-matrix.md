@@ -77,7 +77,7 @@ but it is the baseline every other scenario descends from. **Grand Concert last*
 an absence, and an absence is the cheapest thing to confirm — but see §5, because that ordering interacts with a
 blocked cell.
 
-**This inverts the earlier plan.** `docs/audits/audit-methodology-and-remediation-specs.md` §4.4 sequences
+**This inverts the earlier plan.** `AUDIT-AND-VERIFICATION.md` §audit-methodology-and-remediation-specs.md §4.4 sequences
 `Trackblazer → Our Grand Concert → URA Finale`. The change is Grand Concert moving from second to last, on the
 ground that its three most expensive states (§3) are all BLOCKED and its reachable states are cheap.
 
@@ -263,7 +263,7 @@ application still behaves. The retest re-walked it and confirmed; a third walk i
 ```
 
 **The binding dependency is not ordering, it is `F-03` and `F-08`.** Both were specified in
-`docs/audits/audit-methodology-and-remediation-specs.md` §2 and §3, and both are silent data-loss defects on
+`AUDIT-AND-VERIFICATION.md` §audit-methodology-and-remediation-specs.md §2 and §3, and both are silent data-loss defects on
 surfaces all four walks cross:
 
 | Id | Defect | Surface every walk crosses |
@@ -321,8 +321,8 @@ Five conditions, and a walk that meets four is not done.
 | `trackblazer-test-case.md` | Trackblazer's mechanics, the vocabulary conflict, 20 states, 10 assertions |
 | `our-grand-concert-test-case.md` | Grand Concert's mechanics, the closed `❌` list, 17 states, 10 assertions |
 | `scenario-information-gaps.md` | 17 gaps, 9 conflicts, 4 rulings owed, 8 missing-data needs |
-| `../04-ux-findings.md` | The prior register these walks extend |
-| `../09-consolidated-remediation-plan.md` | The owner-ordered fix sequence the walks must not pre-empt |
+| `AUDIT-AND-VERIFICATION.md` §04-ux-findings.md | The prior register these walks extend |
+| `AUDIT-AND-VERIFICATION.md` §09-consolidated-remediation-plan.md | The owner-ordered fix sequence the walks must not pre-empt |
 
 **Counts in this document, re-derivable:** 3 blocked Result cells + 1 blocked Veteran cell (§3); 3 added matrix
 rows (§4); 4 walk steps (§7); 5 done conditions (§8).

@@ -352,10 +352,10 @@ hypothesis the code disproves is replaced by the code read, exactly as rounds 3 
 | --- | --- | --- |
 | Walk 5 audit | `docs/audits/rice-shower-unity-cup-ux-walk-5.md` (`RS-UC-UXWALK-2026-11-03-05`) | The observations to reconcile. **Immutable; never edited.** 33 findings: 13 functional (`F2-01..F2-13`), 11 experiential (`E2-01..E2-11`), 9 unrepresented (`U2-01..U2-09`). |
 | Walk 5 tree | commit `34fd3c9e7a4ae12aaa85d9e15e451369ed4b184b` | The audit's own commit and the tree the reconciliation reads. |
-| Round 2 register | `docs/audits/rice-shower-unity-cup-round2-reconciliation.md` (`R2-01..R2-21`) | Prior dispositions; several are live again on this tree (§5). |
+| Round 2 register | `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-round2-reconciliation.md (`R2-01..R2-21`) | Prior dispositions; several are live again on this tree (§5). |
 | Round 3 register | `docs/audits/rice-shower-unity-cup-round3-reconciliation.md` (`R3-01..R3-32` + dated corrections) | Prior dispositions, incl. the 2026-10-13 `ADR-0011`/`ADR-0014` citation correction. |
 | Round 4 register | `docs/audits/rice-shower-unity-cup-round4-reconciliation.md` (`R4-01..R4-32` + dated corrections) | Most recent prior pass; walk 5's Appendix D is the pass-over-pass delta. |
-| Walk 1 audit + resolutions | `docs/audits/rice-shower-unity-cup-ux-walk.md`, `...-ux-walk-resolutions.md` | Baseline (`D1..D9`) and the landed-slice commit map. |
+| Walk 1 audit + resolutions | `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk.md, `...-ux-walk-resolutions.md` | Baseline (`D1..D9`) and the landed-slice commit map. |
 
 **A claim is the code read.** Every status in the produced register must be a read of a named file at
 `34fd3c9e` (or the commit the row names), with the command recorded — the rule all prior registers

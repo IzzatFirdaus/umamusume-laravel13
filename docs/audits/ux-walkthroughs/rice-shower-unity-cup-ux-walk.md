@@ -29,7 +29,7 @@ choice**. The run was never marked Completed, never filed as a Veteran, and neve
 **Nothing was fixed.** No route, controller, view, component, migration, model, seeder, test,
 validation rule, label, field, or schema was changed. `git status` after the walk shows the same
 pre-existing uncommitted files that were present before it began (a shared working tree carrying
-other work); this audit added one file, `docs/audits/rice-shower-unity-cup-ux-walk.md`, and nothing
+other work); this audit added one file, `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk.md, and nothing
 else.
 
 ---

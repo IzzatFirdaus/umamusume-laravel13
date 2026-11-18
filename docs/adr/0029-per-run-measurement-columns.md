@@ -2,10 +2,10 @@
 
 <!-- ADR-CONTRACT
   decision: accepted (owner ruling R4, 2026-10-25) — authorise eight per-run measurement facts as storage, one column or table each, with deck_slots.card_level holding the numerator only
-  code: three built (A-0.5 at df624cca, B-0.5 at 005561c1, B-0.7 at b102581a); three declined (A-0.13/A-0.14 per R8, B-0.6 per R9); A-0.4 code-open; A-0.12 awaiting ruling
+  code: four built (A-0.4 at 550fd542 via SupportCardEffects::forLevel()/atLevel()/valueAt(); A-0.5 at df624cca; B-0.5 at 005561c1; B-0.7 at b102581a); three declined (A-0.13/A-0.14 per R8, B-0.6 per R9); A-0.12 awaiting ruling
   superseded-by: —
   amended-by: —
-  open: A-0.4 is code-open and needs SupportCardEffects::forLevel() (atCap() is the only method); A-0.12 awaits an owner ruling (travel note on FR-C-2 or decline); B-0.6 is shape-blocked by KI-133; A-0.13/A-0.14 are declined per R8; A-0.5's US-12 travel note landed at 06d9515e
+  open: A-0.12 awaits an owner ruling (travel note on FR-C-2 or decline); B-0.6 is shape-blocked by KI-133; A-0.13/A-0.14 are declined per R8; A-0.5's US-12 travel note landed at 06d9515e
 -->
 
 Status: **accepted** (owner ruling R4, 2026-10-25). Drafted 2026-10-24 for the owner's review; the agent drafts an ADR, the owner accepts it. Nothing here builds a column, a table, a model, or a slice.
@@ -46,13 +46,13 @@ Eight facts, eight storages. Each row authorises a column or a table; none build
 | B-0.6 | KI-119 | `training_runs.current_spirit` | integer, nullable | entered | FR-C-1 (travel note) |
 | B-0.7 | KI-120 | `skill_levels` | table | entered | FR-C-3, US-4 (travel note) |
 
-**D1 — A-0.5 stores the numerator only.** `deck_slots.card_level` holds the level the card was at in this run, as the client showed it at record time. It is not the cap, not the limit-break count, not the perk level. Those three are collection state, and the collection stays declined by `ADR-0014`. A slice that wants the cap returns for a new ruling.
+**D1 — A-0.5 stores the numerator only.** `deck_slots.card_level` holds the level the card was at in this run, as the client showed it. Not the cap, the limit-break count, or the perk level: those are collection state, declined by `ADR-0014`.
 
-**D2 — A-0.4 is a derivation, not a column.** The reached effect values are computed from `deck_slots.card_level` and the catalog anchors, with floor-interpolation between them, exactly as `ADR-0005` correction 4 already ruled. No per-level effect table is authorised. The anchors this reads are already stored, so A-0.4's blocker is `A-0.5` plus a level-parameterised reader rather than a table — the 2026-10-25 note (item 1) records the verification and governs that prerequisite.
+**D2 — A-0.4 is a derivation, not a column.** Reached effect values are computed from `deck_slots.card_level` and the catalog anchors, floor-interpolated, as `ADR-0005` correction 4 already ruled. No per-level effect table is authorised; A-0.4's blocker is `A-0.5` plus a level-parameterised reader (2026-10-25 note, item 1).
 
 **D3 — B-0.6 stores the reading, not the band.** `training_runs.current_spirit` holds the integer the client showed. It carries no maximum, because no source states one; the gauge's maximum stays null and the panel keeps saying so. No readiness band is derived.
 
-**D4 — B-0.7 stores the level and nothing else.** `skill_levels` is run × skill → level integer. No percentage, no hint-pool import, no rarity re-derivation: `ADR-0011`'s "level only, no percentage" is the copy rule, and the R37 cut in `ADR-0005` stands.
+**D4 — B-0.7 stores the level and nothing else.** `skill_levels` is run × skill to a level integer: no percentage, no hint-pool import, no rarity re-derivation (`ADR-0011`; R37 cut in `ADR-0005` stands).
 
 **D5 — A-0.12 stores two entered facts.** `facility_banner` is the banner string the tile showed; `training_card_ids` is the set of cards whose avatars the tile showed. Both are entered readings of a turn, in the grain of `failure_rate` and `preview_gains`.
 
@@ -104,6 +104,7 @@ The three addendum items (`A-0.12`, `A-0.13`, `A-0.14`) and the four prior `bloc
 - Source: `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md` §1.3, §1.4, §1.7, §1.8, §1.9
 - PRD: `PRD.md` — `US-3`, `US-4`, `US-12`; `FR-C-1`, `FR-C-2`, `FR-C-3`, `FR-C-6`; §6.9, §6.11
 - Standing rulings referenced here and left unchanged: `ADR-0004`, `ADR-0005`, `ADR-0011`, `ADR-0014`, `ADR-0016`, `ADR-0025`, `ADR-0027`
+- Related: `ADR-0034` (B-0.5's per-stat grades sit beside the overall rank letter, which `S+` makes a different fact)
 
 ## Ledger
 
@@ -113,6 +114,8 @@ The three addendum items (`A-0.12`, `A-0.13`, `A-0.14`) and the four prior `bloc
   surfaced against `docs/research-scratch/PROCESS-PLANS.md`, section `## remaining-work-roadmap.md` by
   `docs/research-scratch/PROCESS-PLANS.md`, section `## group-ab-consolidated-plan.md`, each ruled in this ADR's favour, plus one correction to
   this ADR's own A-0.4 reasoning. Status stays `Proposed`.
+
+- 2026-11-18 · **code-state correction, measured at `cfd8bd78`** (roadmap slice 3.10). The two contract lines above originally read "A-0.4 code-open" and "A-0.4 is code-open and needs `SupportCardEffects::forLevel()` (atCap() is the only method)". Both were accurate when written and are preserved here rather than rewritten away. They are now stale: `app/Services/SupportCardEffects.php` defines `forLevel()`, `atLevel()` and `valueAt()` (floor interpolation between stated anchors, clamping at both ends), and `tests/Feature/DeckAnalysisReachedEffectsTest.php` covers interpolation, flooring and the at-cap equivalence. The code half is therefore built; only A-0.12 still awaits the owner ruling. `python tools/adr-check.py docs/adr` is the gate for this block.
 
 - 2026-10-25 · **accepted** (owner ruling R4) — Status flipped to accepted 2026-10-25 by owner ruling R4.
   This supersedes the two sentences above and below it that read "Status stays `Proposed`" and "this ADR

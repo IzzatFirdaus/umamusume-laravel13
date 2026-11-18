@@ -1,6 +1,6 @@
 # Resolution record: Rice Shower / Unity Cup UX walk
 
-What happened to each finding in `docs/audits/rice-shower-unity-cup-ux-walk.md` after the
+What happened to each finding in `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk.md after the
 remediation began. The audit is the historical baseline and is **not** rewritten; this file records
 only what came afterwards, and a finding whose text later proves wrong is corrected by a dated
 erratum in its own document, never by editing the audit.

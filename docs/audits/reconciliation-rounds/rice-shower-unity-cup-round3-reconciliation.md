@@ -1,8 +1,8 @@
 # Round 3 Reconciliation: Rice Shower / Unity Cup UX Walk — Third Pass
 
 Reconciles `docs/audits/rice-shower-unity-cup-ux-walk-3.md` (the third browser walk) against the two
-earlier registers — `docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md` (walk 1, `D1`–`D9` and the
-remediation slices) and `docs/audits/rice-shower-unity-cup-round2-reconciliation.md` (walk 2, `R2-01`–`R2-21`)
+earlier registers — `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk-resolutions.md (walk 1, `D1`–`D9` and the
+remediation slices) and `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-round2-reconciliation.md (walk 2, `R2-01`–`R2-21`)
 — and against the code.
 
 The audit names its own tree as `2c2fd0e` (`2026-10-11T23:30:34+0800`). This reconciliation reads the code at

@@ -254,8 +254,8 @@ No earlier file is edited. The original sentences stand where they are.
 Round 5 records `All seven slices landed in a single commit at da6e6367`
 (`rice-shower-unity-cup-round5-reconciliation.md:271`, and the tables at `:154-160`, `:275-281`).
 Measured this pass: `da6e6367` changes **one** file,
-`docs/proposals/2026-11-03-full-project-state.md` (+3/−2); `34fd3c9e` changes **one** file,
-`docs/proposals/2026-11-03-completion-phase-0.md` (+10). Neither touches `app/`, `resources/`,
+`SLICE-RECORDS.md` §2026-11-03-full-project-state.md (+3/−2); `34fd3c9e` changes **one** file,
+`SLICE-RECORDS.md` §2026-11-03-completion-phase-0.md (+10). Neither touches `app/`, `resources/`,
 `tests/`, `database/`, `routes/` or `config/`. The code those slices describe is in `dcc562b6`
 (2026-11-04, 164 files, 59 code commits follow `34fd3c9e`), which is also the commit that added
 walk 5 and the round-5 register (`git log --diff-filter=A` on both paths). Three of round 5's
@@ -872,7 +872,7 @@ All rule IDs below exist in `docs/framework-ui-ux/`, re-verified this pass:
 
 Two corpus defects stand as recorded in §11.4 and §11.5 and are **not** repaired here:
 `SHR-8` is undefined (cite `SHR-7`), and `GP-2` has no routing-table row (cite it anyway; the
-routing gap is the prompt's, not the finding's). `docs/audit-corrections.md`, named in
+routing gap is the prompt's, not the finding's). `AUDIT-AND-VERIFICATION.md` §audit-corrections.md, named in
 `PROCESS-PLANS.md:15941` as the home for these five framework defects, does not exist; this
 register does not create it, and the defects stay homed in §11.4, §11.5 and here.
 
@@ -1028,7 +1028,7 @@ no-logged-turn facility policy is `null`). **None of them is implemented by this
 - **Section 4 is unchanged**: 54 rows, statuses 26 `Confirmed defect` / 13 `Known limitation` /
   8 `Unrepresented source data` / 6 `Does not reproduce` / 1 `Source conflict / open` /
   0 `Confirmed fixed`.
-- **`docs/audit-corrections.md` was not created.** The corpus defects (`SHR-8` undefined, `GP-2` unrouted)
+- **`AUDIT-AND-VERIFICATION.md` §audit-corrections.md was not created.** The corpus defects (`SHR-8` undefined, `GP-2` unrouted)
   stay homed in Section 11.4, Section 11.5 and Section 13.10, and the owner decision is still open.
 - **The walk-6 audit and its 27 screenshots stay untracked** at the pinned hash `9a88fe39`, which remains
   the owner's call.

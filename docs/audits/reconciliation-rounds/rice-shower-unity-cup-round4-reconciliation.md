@@ -2,8 +2,8 @@
 
 Reconciles `docs/audits/rice-shower-unity-cup-ux-walk-4.md` (the fourth browser walk, audit ID
 `RS-UC-UXWALK-2026-10-24-04`) against the three earlier registers —
-`docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md` (walk 1, `D1`–`D9`),
-`docs/audits/rice-shower-unity-cup-round2-reconciliation.md` (walk 2, `R2-01`–`R2-21`) and
+`AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk-resolutions.md (walk 1, `D1`–`D9`),
+`AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-round2-reconciliation.md (walk 2, `R2-01`–`R2-21`) and
 `docs/audits/rice-shower-unity-cup-round3-reconciliation.md` (walk 3, `R3-01`–`R3-32`) — and against
 the code.
 

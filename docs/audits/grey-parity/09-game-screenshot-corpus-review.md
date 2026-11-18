@@ -8,7 +8,7 @@ client have a tier ramp, and does it have any dark surfaces at all.** Read-only;
 - **Corpus:** `docs/game-screenshots/` — 1159 PNGs, 787 MB, **untracked** (gitignored), capture span
   2026-07-14 02:53 → 2026-07-18 16:19. Registry: `screenshot-registry/inventory.jsonl` — one record
   per frame (`sid` = sha256-12, `ref` = capture timestamp, sha256, dims, dhash, cluster, review
-  state, `screen` stratum, `provenance`, `note_refs`). Schema per `registry/README.md`.
+  state, `screen` stratum, `provenance`, `note_refs`). Schema per `GOVERNANCE.md` §README.md.
 - **Count verified:** 1159 records == 1159 files on disk; **0 exact duplicates** (per-record
   sha256; COVERAGE.md agrees: "Unique content 1159").
 - **Sampling frame (declared before sampling):** (1) dark scan = **all 1159 frames**, metric = mean

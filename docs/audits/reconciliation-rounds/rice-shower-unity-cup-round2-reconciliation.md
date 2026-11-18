@@ -1,7 +1,7 @@
 # Round 2 Reconciliation: Rice Shower / Unity Cup UX Walk — Second Pass
 
-Reconciles `docs/audits/rice-shower-unity-cup-ux-walk-2.md` (the second browser walk) against
-`docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md` (the remediation record) and the current
+Reconciles `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk-2.md (the second browser walk) against
+`AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk-resolutions.md (the remediation record) and the current
 codebase at `aedfc30`.
 
 ## Method
@@ -75,7 +75,7 @@ Each observation from the second audit is classified as one of:
 
 ## Concurrent Changes Constraint
 
-The working tree has one modified file: `docs/audits/rice-shower-unity-cup-ux-walk.md` (uncommitted). This is the first audit document, which should not be edited. The second audit (`rice-shower-unity-cup-ux-walk-2.md`) is untracked and will be committed separately.
+The working tree has one modified file: `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk.md (uncommitted). This is the first audit document, which should not be edited. The second audit (`rice-shower-unity-cup-ux-walk-2.md`) is untracked and will be committed separately.
 
 No other sessions' work is present in the tree, so edits to controllers and Vue components are safe.
 
@@ -102,7 +102,7 @@ The persistence path was already read end to end and the regression test exists 
 | Related regression | `vendor/bin/pest tests/Feature/CareerScenarioSelectTest.php tests/Feature/CareerPreflightTest.php`: 22 passed (336 assertions), which covers the cards' prop derivation and the Preflight contract that reads the same config key. `CareerScenarioSelectTest` alone: 10 passed (161 assertions), the figure `SCREEN_SPEC.md` cites. |
 | Browser | `PLAYWRIGHT_PORT=8146 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/cited/browser-8146.sqlite npx playwright test career-scenario-select.spec.ts` after `npm run build`: 7 passed (25.6s). The new case asserts the rendered Unity Cup card shows `Ruleset version · N/A` beside `Rule family · Team`, and that no element on the page is headed bare `Ruleset`. Card inspected in Chromium, so the fix is browser-verified, not only source-verified. |
 | Static analysis | `npm run typecheck` exit 0. `vendor/bin/pint --test --format agent tests/Feature/ScenarioMetadataTest.php` passed (explicit path only, never `--dirty`, KI-75). `vendor/bin/phpstan analyse --no-progress --memory-limit=1G`: `[OK] No errors`. `composer lore` exit 0 (303 doc hits, its standing count; the two `SCREEN_SPEC.md` hits are lines 20 and 1000, neither edited here) and `composer lore-code` exit 0 (118 hits; no hit falls on any file this slice changed, so no new ruling is owed). |
-| Commit | `9777531`, four paths by explicit pathspec, verified after the fact as `git diff 9777531 -- <those paths>` returning nothing and the commit touching nothing else. The audit documents and the prior session's `CareerLegacyDeckStepsTest.php` change were deliberately left uncommitted: they are not this slice, and `docs/audits/rice-shower-unity-cup-ux-walk.md` (the first audit, modified in the tree by another hand) must not land as part of a code fix. |
+| Commit | `9777531`, four paths by explicit pathspec, verified after the fact as `git diff 9777531 -- <those paths>` returning nothing and the commit touching nothing else. The audit documents and the prior session's `CareerLegacyDeckStepsTest.php` change were deliberately left uncommitted: they are not this slice, and `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk.md (the first audit, modified in the tree by another hand) must not land as part of a code fix. |
 | Not covered | `ScenarioPanel.vue:160` still heads the same tool-wide version row plain `Ruleset` on the Cockpit's scenario strip. There it is the only ruleset fact on the surface, so nothing contradicts it and the second audit reported no defect; left alone rather than widened into a second screen. If a future slice puts a rule family beside it, the same collision returns and the heading should follow this one. |
 
 ### Next action
@@ -113,7 +113,7 @@ R2-06 (obsolete support-deck ownership copy) is the next slice in the queue and 
 
 ### Pre-flight, re-recorded
 
-HEAD was `9777531` with exactly the four peer artifacts uncommitted (`docs/audits/rice-shower-unity-cup-ux-walk.md`, `tests/Feature/CareerLegacyDeckStepsTest.php`, the two untracked audit documents). Browser harness available and used: `npx playwright test` with `PLAYWRIGHT_PORT` and `PLAYWRIGHT_SCRATCH_DB` pairs, `npm run build` first whenever a `.vue` file changed. New in the tree during this slice and not mine: `docs/research/ui-ux-application-context-brief.md` (untracked).
+HEAD was `9777531` with exactly the four peer artifacts uncommitted (`AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk.md, `tests/Feature/CareerLegacyDeckStepsTest.php`, the two untracked audit documents). Browser harness available and used: `npx playwright test` with `PLAYWRIGHT_PORT` and `PLAYWRIGHT_SCRATCH_DB` pairs, `npm run build` first whenever a `.vue` file changed. New in the tree during this slice and not mine: `docs/research/ui-ux-application-context-brief.md` (untracked).
 
 ### R2-06, closed
 
@@ -260,7 +260,7 @@ number replacing the earlier one.
 two test assertions that pin the old wording named in the row. R2-20 / **KI-92**: three Cockpit 44px sweeps
 measure DOM presence rather than rendered targets, red since `91494a1` put a `<details>`-held confirm button on
 the page `6a74f85`'s sweep reads, with the repo's own remedy already sitting in `ura-panel.spec.ts:206-223`.
-`docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md` and `SCREEN_SPEC.md` took no edit from these two
+`AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk-resolutions.md and `SCREEN_SPEC.md` took no edit from these two
 slices, and neither did `rice-shower-unity-cup-ux-walk.md`, which was already dirty in the tree before this
 sitting opened; SCR-001's door row and the strip's heading row are left as the next author's one-line changes,
 stated here instead of silently stale.
@@ -1500,7 +1500,7 @@ worktree delta against HEAD empty afterwards.
 
 **Two things deliberately not committed, with the reason named rather than left silent.**
 
-- `docs/audits/rice-shower-unity-cup-ux-walk.md` carries an uncommitted **one-line edit to a historical audit's
+- `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk.md carries an uncommitted **one-line edit to a historical audit's
   header**: `Date/time of walk` changed from `2026-10-09` to `2026-10-10`. This program did not make that edit
   and does not land it. The rule this program has followed throughout is that a historical audit is evidence and
   later status changes are appended as dated notes, and the second audit it sits beside says plainly that the

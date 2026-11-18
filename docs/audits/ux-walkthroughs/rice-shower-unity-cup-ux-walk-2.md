@@ -14,7 +14,7 @@
 | Run created          | `training_runs` id **9** (`/training-runs/9`), status Active, scenario Unity Cup                                         |
 | Screens visited      | 20 in visit order (19 belonging to run 9 plus one labelled cross-check against run 8)                                   |
 
-**Relationship to the first audit.** `docs/audits/rice-shower-unity-cup-ux-walk.md` is the first pass. This
+**Relationship to the first audit.** `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk.md is the first pass. This
 is a fresh walk of the same source run through the same flow, written to its own file. Where the two
 passes disagree, both readings are recorded with the pass that produced them; neither is silently
 overwritten.
@@ -35,7 +35,7 @@ filed as a Veteran and never filed as a Legacy.
 
 **Nothing was fixed.** No route, controller, view, component, migration, model, seeder, test, validation
 rule, label, field or schema was changed. The only file this pass added is
-`docs/audits/rice-shower-unity-cup-ux-walk-2.md`.
+`AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk-2.md.
 
 ---
 

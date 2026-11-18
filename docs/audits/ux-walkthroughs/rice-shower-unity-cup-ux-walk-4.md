@@ -4,7 +4,7 @@
 
 **Source document:** `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md`
 
-**Deliverable path note:** the procedure template names `docs/audits/rice-shower-unity-cup-ux-walk.md`, but that path is the existing round-1 audit and this task forbids editing prior audits. Rounds 1 to 3 already exist (`-ux-walk.md`, `-ux-walk-2.md`, `-ux-walk-3.md`), so this pass lands as round 4. Nothing in the prior audits was read for this walk; every observation below comes from this browser session.
+**Deliverable path note:** the procedure template names `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk.md, but that path is the existing round-1 audit and this task forbids editing prior audits. Rounds 1 to 3 already exist (`-ux-walk.md`, `-ux-walk-2.md`, `-ux-walk-3.md`), so this pass lands as round 4. Nothing in the prior audits was read for this walk; every observation below comes from this browser session.
 
 ## 7.1 Header
 
