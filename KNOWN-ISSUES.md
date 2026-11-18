@@ -1053,7 +1053,7 @@ up the breach. The D12 author owns the fix.
 
 ### KI-69 The browser suite has no fixture-data contract: five cases assert an empty-state surface, seven need a populated Veteran library and one reads the artwork mirror off the disk - FILED 2026-10-07 (D13 session, on the owner's D11 close-out review), OPEN
 
-**Status: OPEN.** Filed while answering the D11 review's question "is the suite flaky, or did something
+**Status: OPEN.** 2026-11-18 register reconciliation: the index records closed-family CLOSED (fixture contract is pinned in playwright.config.ts); this historical OPEN line is retained, not current status.  Filed while answering the D11 review's question "is the suite flaky, or did something
 regress after those closures". The answer is neither: every one of the fourteen failures is
 **deterministic**, and each is a harness precondition rather than a product defect. Nothing here is
 flaky across runs on a fixed harness.
@@ -1576,7 +1576,7 @@ the worktree already uses, and the result recorded here rather than inferred.
 
 ### KI-74 A gate run on a contended worktree is void as a signal, and a red sweep under load reads as a product regression - FILED 2026-10-08 (E6 follow-up 3), OPEN
 
-**Status: OPEN.** This is the class, not one run. It invalidated two different gates in one night on this
+**Status: OPEN.** 2026-11-18 register reconciliation: the index records closed-family TERMINAL (contended-box law is a rule, not a defect); this historical OPEN line is retained, not current status.  This is the class, not one run. It invalidated two different gates in one night on this
 worktree, and each time the first reading was "the product is broken".
 
 `AGENTS.md` §1 describes the shape of the problem: this is a local-only, single-Trainer tool with **no CI**,
@@ -2994,7 +2994,7 @@ Two defects, one column. The builder (`Legacy/Builder.vue`) was a narrower secon
 
 ## KI-100 Twenty-two stored career objectives state a requirement this tool cannot read, and the display says so rather than guessing the client's words - FILED 2026-10-13 (trainee_goals slice 4, on the owner's ruling 4a), OPEN
 
-**Status: OPEN.** Found while building the ladder (`ADR-0026`, PRD FR-A-10), and disclosed on the surface
+**Status: OPEN.** 2026-11-18 register reconciliation: the index records closed-family TERMINAL (ruling 4a chose disclosure of the 22 rows over inference); this historical OPEN line is retained, not current status.  Found while building the ladder (`ADR-0026`, PRD FR-A-10), and disclosed on the surface
 from the first commit: an unread row prints its race and its deadline and names its own requirement as
 undecoded. The owner's ruling 4a chose that over an inference and asked for the register entry, on the
 grounds that a gap disclosed only in a widget is a gap the repository does not track.
@@ -3299,7 +3299,7 @@ also reports (397 invalid closing fences across 13 files), which `tools/md_fence
 
 ### KI-107 Peer CLAUDE.md carries two dead references to files that do not exist - FILED 2026-10-20 (Phase 8.8 close-out), OPEN, PEER-OWNED
 
-**Status: OPEN, peer-owned.** `CLAUDE.md` line 12 cites CONSTRAINTS.md inside backticks, and line 248
+**Status: OPEN, peer-owned.** 2026-11-18 register reconciliation: the index records closed-family CLOSED (the two dead CLAUDE.md references are gone); this historical peer-owned OPEN line is retained, not current status.  `CLAUDE.md` line 12 cites CONSTRAINTS.md inside backticks, and line 248
 cites CLAUDE.local.md inside backticks. Neither target exists: neither file is on disk, and neither is
 tracked by git. CONSTRAINTS.md was folded into `docs/research-scratch/GOVERNANCE.md` in `1e84b0c`, and
 CLAUDE.local.md is a user-level file this repository has never had.
@@ -3679,7 +3679,7 @@ would have caught it, and no such gate exists.
 
 ### KI-117 The run's per-run card level is not stored (Group A / A-0.5) - FILED 2026-10-24 (Group A + B audit pass)
 
-**Status: OPEN - blocked: ADR.** A per-run card level is a migration; §11 needs an ADR first.
+**Status: OPEN - blocked: ADR.** 2026-11-18 register reconciliation: the index records closed-family CLOSED (deck_slots.card_level migration measured at 2026-11-17); this historical ADR-blocked OPEN line is retained, not current status.  A per-run card level is a migration; §11 needs an ADR first.
 
 **Current state.** `ADR-0014:24` declines the collection half (`user_support_cards` - level, breaks, perk) as the §6.9-cut feature; `ADR-0014:8` leaves "card levels and limit breaks are still unrecorded" open. `deck_slots` carries `support_card_id`, `slot_position`, `ownership` and no level column.
 
@@ -3776,7 +3776,7 @@ existing input. The separate pending-turn-state question remains open and is not
 **What this does not cover.** The separate R4-08 question - a pending-turn state on the guided turn form - is a different shape and is not addressed here.
 ### KI-124 Training-tile banner and the three card avatars are not stored (Group A / A-0.12) - FILED 2026-10-24 (audit addendum)
 
-**Status: OPEN - blocked: ADR.** A turn-level banner and a card-avatar list are both migrations.
+**Status: OPEN - blocked: ADR.** 2026-11-18 register reconciliation: the index records closed-family TERMINAL (A-0.12 is an accepted limitation per R13; schema opens only on owner scheduling); this historical ADR-blocked OPEN line is retained, not current status.  A turn-level banner and a card-avatar list are both migrations.
 
 **Current state.** `app/Models/TurnEntry.php:61` `Fillable` stores the facility levels, `preview_gains` and
 `failure_rate`, but no facility banner and no list of the cards whose avatars the tile showed;
@@ -5327,7 +5327,7 @@ feature; the feature works and is one tier deep.
 
 ## KI-166 The Race Decision page overflows by 59px at the 320px reflow width
 
-**State:** OPEN — split out of KI-160 on 2026-11-17 so KI-160's resolved cockpit half could close without claiming this surface was touched. Undiagnosed.
+**State:** RESOLVED in working tree (uncommitted) 2026-11-18; see dated closure note below. Retained for history: OPEN — split out of KI-160 on 2026-11-17 so KI-160's resolved cockpit half could close without claiming this surface was touched. Undiagnosed.
 
 **Defect.** `/training-runs/{run}/races` (`runs.races.decision`, `RaceDecisionController@show`) measures
 `over = 59` at a 320x900 viewport, and reads clean at 768 and 1280. That is the WCAG 1.4.10 reflow width, so
@@ -5404,3 +5404,14 @@ gate the tag.
 with `tag` / `class` / `data-region` / `right` / `width`, plus every ancestor's `overflowX`, `scrollWidth` and
 `clientWidth` up to `html`. The element whose `right` is ~379 is the answer. If none reaches 379, compare
 `document.documentElement.scrollWidth` against `body.scrollWidth` and check for any `100vw` width.
+
+**Dated closure note 2026-11-18 (PLAN-UIUX-20261118-001, HEAD `cfd8bd78`).** Mechanism found, fixed and measured; the row closes in the working tree with the commit deliberately pending (no commit was authorized). The earlier probe was right that the card was already a scroller and wrong about what escaped it.
+
+- `probe.log` (session `uiux-2026-11-18`, ports 8318/8320) measured `docOverflow: 59`, `sw: 379` at 320x900 on `/training-runs/1/races` and `40` on the planner. The box dump lists `span.sr-only` with `right: 379`, `width: 1`, `position: absolute`, `overflowX: hidden`, and every ancestor `static` up to `html`.
+- `culprits.log` names the exact spans: the `sr-only` reason inside the `Fans needed` summary (`right: 330`) and the one inside `Skill Pt` (`right: 379`); on the planner, a `sr-only` table caption and the `Compare` header.
+- Cause: an absolutely positioned descendant whose containing block was the initial one because every ancestor, including `.card:has(> table.t)`, was `static`. The card already had `overflow-x: auto` and clipped its table, but the 1px spans resolved elsewhere and still contributed to `document.documentElement.scrollWidth`.
+- Fix: one declaration, `position: relative` on `.card:has(> table.t)` in `resources/css/app.css`, with the mechanism recorded in the block comment. `fixcheck.log` A/B: `{"/training-runs/1/races","before":59,"after":0}` and `{"/training-runs/1/races/planner","before":40,"after":0}`, 1 passed.
+- Coverage: a new 320px case at `tests/browser/career-race-decision.spec.ts:302` naming KI-166 and WCAG 1.4.10; the planner case at `:115` now asserts the explicit delta. Final run on port 8334 (session-private DB, `targets canonical: no`): `31 passed, 2 skipped, 0 failed` across `accessibility.spec.ts`, `career-race-decision.spec.ts`, `career-race-planner.spec.ts` and `career-race-strip.spec.ts`.
+- Not re-measured: the 640x512 reading for Race Decision was not taken in this pass. The Cockpit and strip 640px case remains green from its own spec.
+
+The owner's 2026-11-17 ruling is confirmed: the empty `culprits` list was a probe defect because the filter exempted the offending scroller itself. The prescribed walk-up is what found the spans.

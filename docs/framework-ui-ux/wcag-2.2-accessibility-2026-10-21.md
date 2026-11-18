@@ -162,7 +162,7 @@ The whole of **1.2 Time-based Media** (no media), **1.4.2 Audio Control** (no au
 | 2.1.4 Character Key Shortcuts | **the help page states `1`–`5` and offers Escape** | The shortcut is focus-scoped in the flow. |
 | 2.4.11 Focus Not Obscured | the sticky footer rule | Sticky UI must not cover a focused control. |
 | 2.5.3 Label in Name | visible label equals accessible name | No icon-only control without a text label in the same element. |
-| 2.5.7 Daraging Movements | no drag operation in the product | Not applicable, stated rather than assumed. |
+| 2.5.7 Dragging Movements | no drag operation in the product | Not applicable, stated rather than assumed. |
 | 2.5.8 Target Size | the 44px rule, **exceeding** the 24px minimum | Every control. |
 | 3.3.1 / 3.3.3 / 3.3.7 | the import preview's per-field found/missing tags | Ask only for the miss. |
 | 3.2.6 Consistent Help | **the `?` in the same top-bar position on every page** | Added with the help page. |

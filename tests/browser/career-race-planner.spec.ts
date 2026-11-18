@@ -116,7 +116,14 @@ test('reflows at 320px without pushing the page sideways', async ({ page }) => {
     await openPlanner(page);
     await page.setViewportSize({ width: 320, height: 900 });
 
-    expect(await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1)).toBe(false);
+    // The same absolute `sr-only` escape that widened Race Decision by 59px (KI-166) widened this
+    // page by 40px. Reading the delta, rather than a boolean against innerWidth, keeps the
+    // measurement explicit and fails if the shared card scroller loses its containing block.
+    const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+
+    expect(overflow, 'the Race Planner document pans sideways at the WCAG 1.4.10 width').toBeLessThanOrEqual(1);
 });
 
 test('passes an axe scan at WCAG A and AA', async ({ page }) => {

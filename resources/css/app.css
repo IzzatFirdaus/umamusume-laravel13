@@ -1335,10 +1335,18 @@ table.t tr.is-current td {
    320px and so carry `role="region"`, a name and `tabindex="0"` on the authority of WCAG 2.1.1, which
    asks whether the content is reachable and not which surfaces a design file listed: Events (213px),
    the three Scenarios matrices (168/99/26px), the Sources ledger (160px) and Shop items (35px).
-   Sparks and Help measure no overflow and carry no tab stop. */
+   Sparks and Help measure no overflow and carry no tab stop.
+
+   KI-166 / PLAN-UIUX-20261118-001: the card must also be the containing block for its absolutely
+   positioned descendants. An `sr-only` span inside a table cell is `position:absolute`; while every
+   ancestor stayed `static`, its containing block was the initial one, so its 1px box escaped this
+   scroller and widened the document by 59px on Race Decision and 40px on Race Planner at 320px.
+   `relative` makes those spans resolve against the card, which already clips them. Measured before
+   and after in a browser: 59→0 and 40→0, with the table scroller and all desktop readings intact. */
 .card:has(> table.t) {
     overflow-x:auto;
     scroll-padding:6px;
+    position:relative;
 }
 
 /* .tiles: ported from shell.css; resolves to house tokens. */

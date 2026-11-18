@@ -62,9 +62,11 @@ test.describe('Accessibility', () => {
 
         await page.waitForURL(/\/review$/);
 
-        // Settled: the indicator leaves the tree entirely, so the settled scans above scan a
-        // document with no progress control in it.
-        await expect(page.getByRole('progressbar')).toHaveCount(0);
+        // Settled: the visit indicator leaves the tree entirely. Name it: the Review page owns a
+        // separate, legitimate "Review progress" bar, and an unnamed locator would report that
+        // control as a failure here. The named bar above was visible mid-visit, so this still proves
+        // the indicator came and went rather than never rendering.
+        await expect(page.getByRole('progressbar', { name: 'Page load progress' })).toHaveCount(0);
     });
 
     /*
@@ -105,11 +107,11 @@ test.describe('Accessibility', () => {
             await page.locator('#app > *').first().waitFor();
 
             if (path === '/career/setup/scenario') {
-                // Every card renders the same facts markup from one template, so opening one puts the
-                // container in the tree; the count is read off what rendered rather than hardcoded.
-                const summaries = page.locator('summary').filter({ hasText: 'Facts and mechanics' });
-                await expect(summaries, 'the step renders a facts disclosure per scenario card').not.toHaveCount(0);
-                await summaries.first().click();
+                // The cards used to put their fact grid behind a "Facts and mechanics" disclosure,
+                // which the HFW-alignment pass deliberately removed. Assert that the cards rendered
+                // so the scan below cannot pass on an empty step; openAllDisclosures still opens any
+                // disclosure the current cards do render.
+                await expect(page.locator('[data-scenario-card]'), 'the step renders scenario cards').not.toHaveCount(0);
             }
 
             await openAllDisclosures(page);
@@ -159,5 +161,23 @@ test.describe('Accessibility', () => {
             open.violations.filter((rule) => rule.id === 'aria-required-children').length,
             'the opened disclosure puts the violation in front of the scan',
         ).toBeGreaterThan(0);
+    });
+
+    /*
+     * PLAN-UIUX-20261118-001 S9. The global reduced-motion path lives in app.css, not in a Vue file,
+     * so a source grep of resources/js cannot prove it. Emulate the OS setting and read the computed
+     * duration on the shell's own transition: the rule must leave no author motion behind.
+     */
+    test('honours prefers-reduced-motion on the shell transition', async ({ page }) => {
+        await page.emulateMedia({ reducedMotion: 'reduce' });
+        await page.goto('/');
+        await page.locator('#app > *').first().waitFor();
+
+        const seconds = await page.locator('aside').first().evaluate((el) => {
+            const value = getComputedStyle(el).transitionDuration.split(',')[0].trim();
+            return value.endsWith('ms') ? parseFloat(value) / 1000 : parseFloat(value);
+        });
+
+        expect(seconds, 'the 180ms rail transition must collapse under reduced motion').toBeLessThan(0.001);
     });
 });

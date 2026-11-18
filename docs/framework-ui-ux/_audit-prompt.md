@@ -114,7 +114,7 @@ When a question arises, route it through this table. Cite the framework and the 
 | Is state readable without colour?                                    | **WCAG 1.4.1**, **Laws of UI 8**, or **Tognazzini 3**                     | `WCAG 1.4.1`, `UI-3`, `TOG-?` | WCAG is normative; Tognazzini names the three cone deficiencies.                                   |
 | Can the user get out?                                                | **H3**, **Shneiderman 6**, **Tognazzini 7**                               | `H3`, `SHR-6`, `TOG-6`        | Shneiderman 6 and Tognazzini 7 add the *reversibility* half that H3 alone does not.                |
 | Does the screen make the user think?                                 | **Gerhardt-Powals 1 and 3**                                               | `GP-1`, `GP-3`                | No other framework asks whether the product left arithmetic in the user’s head.                    |
-| Does the user have to remember something across screens?             | **Shneiderman 8**, **Laws of UX 17**                                      | `SHR-8`, `UX-?`               | The cross-display clause is Shneiderman’s; Mental Model is the compressed model it protects.       |
+| Does the user have to remember something across screens?             | **Shneiderman 8**, **Laws of UX 17**                                      | `SHR-7`, Mental Model (no derived ID) | The cross-display clause is Shneiderman’s; Mental Model is the compressed model it protects. Shneiderman's rule 8 is derived as `SHR-7` because rule 7 has no derived ID. |
 | Is the structure between the screens right?                          | **IA 1, 2, 6, 7, 8**                                                      | `IA-1` to `IA-6`              | Every other framework is about a screen.                                                           |
 | Will two things be read as one group?                                | **Gestalt**, **Laws of UI 1, 7, 9, 10**                                   | `GT-1` to `GT-6`, `UI-?`      | The Laws of UI carry the visual-style half of Gestalt, and publish Closure and Continuity.         |
 | Can the user act, and can they tell what happened?                   | **Norman’s two gulfs**                                                    | `NRM-6`                       | The only instrument that separates the two failures.                                               |
@@ -162,7 +162,7 @@ For each screen in scope, sweep the following dimensions. Not every dimension ap
 | **B. Control and target**                   | `UX-1`, `TOG-5`, `WCAG 2.5.8`, `2.5.7`, `2.1.1`, `2.4.7`, `2.4.11`           | 44px house rule vs 24px AA; target count before target size; keyboard operability; focus visible and not obscured.                        |
 | **C. Error prevention and recovery**        | `H5`, `H9`, `SHR-5`, `SHR-6`, `NRM-2`, `NRM-3`, `WCAG 3.3.1`, `3.3.3`        | Constraint vs validation; refused write leaves state intact; undo; specific recovery; no premature error; no blame.                       |
 | **D. Consistency and signifiers**           | `H4`, `SHR-1`, `NRM-1`, `NRM-4`, `GT-4`, `UX-5`, `UI-6`                      | One component per role; exceptions named and few; every action signified; position maps to meaning; look-alikes behave alike.             |
-| **E. Cognitive load and memory**            | `GP-1`, `GP-3`, `H6`, `SHR-7`, `SHR-8`, `UX-2`, `UX-4`                       | Arithmetic left in the user’s head; summation labelled; value on the decision screen; cross-display memory; distance to goal.             |
+| **E. Cognitive load and memory**            | `GP-1`, `GP-3`, `H6`, `SHR-7`, `UX-2`, `UX-4`                       | Arithmetic left in the user’s head; summation labelled; value on the decision screen; cross-display memory; distance to goal.             |
 | **F. Visual grouping and hierarchy**        | `GT-1` to `GT-6`, `UI-1`, `UI-2`, `UI-3`, `UI-4`, `UI-5`, `UI-6`, `UI-7`     | Closed region; honest partial indicators; one glyph one meaning; common fate; unbroken spine; three type sizes; semantic hue; one accent. |
 | **G. Accessibility semantics and contrast** | `WCAG 1.4.1`, `1.4.3`, `1.4.11`, `1.3.1`, `4.1.2`, `4.1.3`, `3.2.6`, `3.3.7` | Colour not sole channel; contrast ratios; name/role/value; status messages; consistent help; redundant entry.                             |
 | **H. Content and language**                 | `H2`, `H9`, `WCAG 3.3.2`, `3.3.3`, `2.4.6`                                   | Client vocabulary, not internal jargon; error copy plain and constructive; labels and headings descriptive.                               |
@@ -179,7 +179,7 @@ Only relevant when the mode is M3 or M4, or when a change moves a destination or
 - `IA-4` index previews, detail holds, density exemption named;
 - `IA-5` empty states show an example of what would fill them;
 - `IA-6` adding a scenario costs configuration, not layout;
-- `SHR-8` nothing requires carrying a figure from one display to another;
+- `SHR-7` nothing requires carrying a figure from one display to another;
 - `TOG-7` a session can be left and resumed where it stopped;
 - `GT-6` an unbroken spine across the sequence.
 
@@ -440,7 +440,7 @@ Use the IDs exactly as the framework files define them. Do not invent an ID.
 | `UX-`   | `laws-of-ux-2026-10-21.md`                          | `UX-1` 44px and nearest primary; `UX-3` incomplete state visible; `UX-4` provenance beside the number        |
 | `UI-`   | `uilaws-2026-10-21.md`                              | `UI-1` three type sizes; `UI-2` semantic hue; `UI-3` never colour alone; `UI-4` partial indicator honest     |
 | `H`     | `usability-heuristics-2026-10-21.md`                | `H1` status; `H3` control; `H5` error prevention; `H9` error recovery                                        |
-| `SHR-`  | `shneiderman-golden-rules-2026-10-21.md`            | `SHR-1` named exceptions; `SHR-4` closure statement; `SHR-6` reversal; `SHR-8` value on the decision screen  |
+| `SHR-`  | `shneiderman-golden-rules-2026-10-21.md`            | `SHR-1` named exceptions; `SHR-4` closure statement; `SHR-6` reversal; `SHR-7` value on the decision screen (golden rule 8) |
 | `TOG-`  | `tognazzini-first-principles-2026-10-21.md`         | `TOG-1` 50ms acknowledgement; `TOG-3` status never wrong; `TOG-5` target count; `TOG-6` undo-or-confirmation |
 | `GP-`   | `gerhardt-powals-principles-2026-10-21.md`          | `GP-1` product computes; `GP-3` summation labelled; `GP-4` two codings                                       |
 | `IA-`   | `information-architecture-principles-2026-10-21.md` | `IA-1` front door; `IA-2` banded nav; `IA-5` exemplar in empty state                                         |
@@ -467,7 +467,7 @@ For M1, run this before the change is committed and name the result in the commi
 | 9   | Does it add a new destination, a new landmark or a new control type? | WCAG 2.4.1, 4.1.2, H4, Laws of UI 6           |                                |
 | 10  | Does it change the words?                                            | WCAG 3.3.1, 3.3.3, H9, D-79                   |                                |
 
-**The check that catches the most, and the one easiest to skip:** *does the change make the user carry something between two places?* That is `SHR-8` and `GP-3`, and it is the failure behind “Step 1 of 6” appearing in three places at once.
+**The check that catches the most, and the one easiest to skip:** *does the change make the user carry something between two places?* That is `SHR-7` and `GP-3`, and it is the failure behind “Step 1 of 6” appearing in three places at once.
 
 **A change that cannot be checked is recorded as unchecked.** Do not claim a pass because the check was skipped; name the limit in the commit body.
 

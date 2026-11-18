@@ -291,3 +291,22 @@ test('defaults the off-calendar half to the run position, not the turn being dec
     await expect(form.locator('select[name="half"]')).toHaveValue('Early');
     await expect(form.locator('select[name="month"]')).toHaveValue('6');
 });
+
+/*
+ * KI-166 / WCAG 1.4.10. The page measured 59px of document-level sideways scroll at 320x900,
+ * while its candidate table was already inside a scrolling card. The cause was an `sr-only` span
+ * whose absolute position resolved against the initial containing block: `position:relative` on
+ * `.card:has(> table.t)` now contains it. This case measures the document, not the table, so the
+ * original failure returns if either half of that fix is removed.
+ */
+test('reflows at 320px without pushing the document sideways (KI-166)', async ({ page }) => {
+    await openDecision(page);
+    await page.setViewportSize({ width: 320, height: 900 });
+
+    const overflow = await page.evaluate(
+        () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    );
+
+    expect(overflow, 'the Race Decision document pans sideways at the WCAG 1.4.10 width').toBeLessThanOrEqual(1);
+    await expect(page.getByRole('heading', { name: 'Available this turn', level: 2 })).toBeVisible();
+});
