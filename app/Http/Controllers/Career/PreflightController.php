@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Career;
 
 use App\Actions\SeedRunSkills;
+use App\Enums\IndependentTrainingPolicy;
+use App\Enums\ReleaseStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Career\StartCareerRequest;
 use App\Models\Advisor\BuildTargetPayload;
 use App\Models\CharacterCard;
 use App\Models\DeckSlot;
+use App\Models\IndependentTrainingRun;
 use App\Models\Legacy\LegacySelectionPayload;
 use App\Models\RaceCatalogSlot;
 use App\Models\Skill;
@@ -153,6 +156,34 @@ class PreflightController extends Controller
                 'deck' => route('career.deck'),
             ],
             'startAction' => route('career.preflight.store'),
+            // Independent Training (§1.1.7). The mode is built end to end in the backend
+            // (`Lifecycle::start()` via `store()`), but the wizard had no control that set the flag,
+            // so no Trainer could reach it: `IndependentTrainingRun` had 0 rows while every service,
+            // model and Result-screen section existed. These two props are what the three controls
+            // need and nothing more - the policies are the enum's own cases and labels, and the skill
+            // list is the same Global-client catalogue the Legacy step offers as Spark targets, capped
+            // at the ceiling the request enforces.
+            'independent' => [
+                'policies' => array_map(
+                    static fn (IndependentTrainingPolicy $policy): array => [
+                        'value' => $policy->value,
+                        'label' => $policy->label(),
+                    ],
+                    IndependentTrainingPolicy::cases(),
+                ),
+                'maxPrioritySkills' => IndependentTrainingRun::MAX_PRIORITY_SKILLS,
+                'defaultPolicy' => IndependentTrainingPolicy::Balanced->value,
+                // The same Global-client catalogue the Legacy step offers as Skill Spark targets, so
+                // a priority skill a Trainer can pick here is one the shipped client can award
+                // (`ADR-0011` §2). Capped by the request, listed whole here: the picker is a native
+                // select and the ceiling is enforced on both sides.
+                'skills' => Skill::query()
+                    ->where('release_status', ReleaseStatus::GlobalReleased)
+                    ->orderBy('name')
+                    ->get(['id', 'name'])
+                    ->map(static fn (Skill $skill): array => ['id' => $skill->id, 'name' => $skill->name])
+                    ->all(),
+            ],
         ]);
     }
 

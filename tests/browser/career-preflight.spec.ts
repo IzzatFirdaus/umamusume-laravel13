@@ -271,7 +271,7 @@ test('prints the duel reward the config states, not a hardcoded tier', async ({ 
     await expect(duel).not.toContainText('tier');
 });
 
-test('draws the eight tiles and the single caution, and no Career mode switch (Phase E2)', async ({ page }) => {
+test('draws the eight tiles, the single caution, and the Independent Training card beside Commit', async ({ page }) => {
     await walkWizard(page, 'ura_finale');
     await openPreflight(page);
 
@@ -296,14 +296,19 @@ test('draws the eight tiles and the single caution, and no Career mode switch (P
     // name: `parentsSummary` prints "empty" only once a legacy section exists with a blank slot.
     await expect(tiles.nth(4)).toContainText('Not entered');
 
-    // Phase E2 cut: `career-preflight.html:176-186` draws the Commit card and nothing else. The mode
-    // switch, the policy radios and their explanatory copy are gone, so the write carries no choice of
-    // its own and the label is the wireframe's one label.
-    await expect(page.getByText('Career mode')).toHaveCount(0);
-    await expect(page.getByText('Independent Training')).toHaveCount(0);
-    await expect(page.getByText('Training policy')).toHaveCount(0);
-    await expect(page.getByRole('radio')).toHaveCount(0);
+    // S3.1 restored the Independent Training door into its OWN card, closed by default. The Commit
+    // card is unchanged: `career-preflight.html:176-186` draws it and the write, and the mode's three
+    // inputs are not in it, so the page still reads as the wireframe draws it. What is asserted here
+    // is the separation, which is what keeps this case's own card ceiling meaningful.
     await expect(page.getByRole('button', { name: 'Create the run' })).toBeVisible();
+
+    const commit = page.locator('section[aria-labelledby="commit-heading"]');
+    await expect(commit.locator('[data-independent-training]')).toHaveCount(0);
+
+    const independent = page.locator('section[aria-labelledby="independent-training-heading"]');
+    await expect(independent).toHaveCount(1);
+    await expect(independent.locator('[data-independent-training]')).toHaveCount(1);
+    await expect(independent.locator('[data-independent-training]')).not.toHaveAttribute('open', '');
 });
 
 test('the commit card stays a card, not a document', async ({ page }) => {

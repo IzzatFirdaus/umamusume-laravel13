@@ -3,11 +3,13 @@
 declare(strict_types=1);
 
 use App\Enums\CardRarity;
+use App\Enums\IndependentTrainingPolicy;
 use App\Enums\ReleaseStatus;
 use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
 use App\Models\CharacterCard;
 use App\Models\DeckSlot;
+use App\Models\IndependentTrainingRun;
 use App\Models\RaceCatalogSlot;
 use App\Models\Skill;
 use App\Models\SupportCard;
@@ -803,4 +805,68 @@ it('ships the career length from its server-side owners rather than letting the 
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('careerTurns', TrainingRun::TURNS_PER_YEAR * RaceCatalogSlot::YEAR_SENIOR));
+});
+
+/*
+ * S3.1 — the Independent Training door.
+ *
+ * `Lifecycle::start()` has been called from `store()` and `StartCareerRequest` has validated
+ * `independent`/`policy`/`priority_skills` since the mode was built, but the wizard carried no control
+ * that set the flag: the mode switch and policy radios were cut in Phase E2 and never restored, so
+ * `IndependentTrainingRun` held 0 rows and a Trainer had no way to start the mode. These two cases are
+ * the half a browser cannot prove — that the page's own PUT creates the overlay row, and that the
+ * ceiling is refused by the request rather than by the control.
+ */
+it('creates the Independent Training overlay row from the wizard PUT', function (): void {
+    $fixture = preflightFixture();
+    $skill = Skill::factory()->create([
+        'name' => 'Priority Skill',
+        'release_status' => ReleaseStatus::GlobalReleased,
+        'name_is_client' => true,
+    ]);
+
+    session([SetupDraft::SESSION_KEY => preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents'])]);
+
+    test()->put(route('career.preflight.store'), [
+        'independent' => true,
+        'policy' => 'sprint',
+        'priority_skills' => [$skill->id],
+    ])->assertRedirect();
+
+    $run = TrainingRun::query()->where('umamusume_id', $fixture['trainee']->id)->sole();
+    $overlay = IndependentTrainingRun::query()->where('training_run_id', $run->id)->sole();
+
+    expect($overlay->policy)->toBe(IndependentTrainingPolicy::Sprint)
+        ->and($overlay->priority_skills)->toBe([$skill->id])
+        ->and($overlay->completed_at)->toBeNull()
+        ->and($overlay->abandoned_at)->toBeNull()
+        // The window is the lifecycle's, not the page's: 50 minutes from now.
+        ->and($overlay->completes_at->isSameMinute(now()->addMinutes(50)))->toBeTrue();
+});
+
+it('writes no overlay row when the flag is absent, which is the ordinary career', function (): void {
+    $fixture = preflightFixture();
+    session([SetupDraft::SESSION_KEY => preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents'])]);
+
+    test()->put(route('career.preflight.store'))->assertRedirect();
+
+    $run = TrainingRun::query()->where('umamusume_id', $fixture['trainee']->id)->sole();
+
+    expect(IndependentTrainingRun::query()->where('training_run_id', $run->id)->count())->toBe(0);
+});
+
+it('refuses an unknown policy and an eleventh priority skill at the request, not the control', function (): void {
+    $fixture = preflightFixture();
+    session([SetupDraft::SESSION_KEY => preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents'])]);
+
+    test()->put(route('career.preflight.store'), [
+        'independent' => true,
+        'policy' => 'nonsense',
+    ])->assertSessionHasErrors('policy');
+
+    test()->put(route('career.preflight.store'), [
+        'independent' => true,
+        'policy' => 'balanced',
+        'priority_skills' => range(1, 11),
+    ])->assertSessionHasErrors('priority_skills');
 });

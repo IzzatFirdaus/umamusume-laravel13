@@ -88,7 +88,39 @@ const choosing = ref<string | null>(null);
 
 const form = useForm<{ scenario: string | null }>({ scenario: null });
 
+/*
+ * The whole card is the selection surface. Only the heading row was inside the radio's `<label>`,
+ * which made 4% of a 561x216 card clickable while the card is bordered, tinted and marked
+ * `is-chosen` as one option: a Trainer clicking the summary or the tags got nothing. The label stays
+ * as narrow as it is because widening it would swallow the summary into the radio's accessible name,
+ * so the card takes the click instead and the input's own activation is skipped to avoid a second
+ * PUT. Interactive children are excluded: a future link or disclosure inside the card keeps its own
+ * behaviour rather than selecting the scenario.
+ */
+function onCardClick(event: MouseEvent, card: ScenarioCard): void {
+    const target = event.target as HTMLElement | null;
+    if (target === null) {
+        return;
+    }
+    if (target.closest('input, a, button, select, textarea, details, summary, label') !== null) {
+        return;
+    }
+    choose(card);
+}
+
 function choose(scenario: ScenarioCard): void {
+    // Re-entry guard, in place of the `:disabled` binding the inputs used to carry.
+    //
+    // `:disabled="form.processing"` on the radio looked correct and broke WCAG 2.4.3: `put()` flips
+    // `processing` to true synchronously, so the control that had focus was disabled mid-press and
+    // the browser moved focus to `body`. `onSuccess` then tried to focus that same radio, which was
+    // still disabled, so the restore was a silent no-op and the spec's `toBeFocused()` read
+    // `inactive` — exactly KI-167. Disabling the element under the Trainer's finger is never the
+    // right way to prevent a second submission; a guard is.
+    if (form.processing) {
+        return;
+    }
+
     choosing.value = scenario.key;
     form.scenario = scenario.key;
     // The write URL is supplied by the server (`career.scenario.store`) so the page never states
@@ -228,8 +260,9 @@ function continueStep(): void {
                     :key="card.key"
                     data-scenario-card
                     data-region="card"
-                    class="card"
+                    class="card cursor-pointer"
                     :class="props.selected === card.key ? 'is-chosen' : ''"
+                    @click="onCardClick($event, card)"
                 >
                 <div class="flex flex-wrap items-center gap-x-2 gap-y-1">
                     <label
@@ -245,7 +278,6 @@ function continueStep(): void {
                             :checked="props.selected === card.key"
                             :aria-checked="props.selected === card.key"
                             :aria-describedby="form.errors.scenario ? 'scenario-error' : undefined"
-                            :disabled="form.processing"
                             @change="choose(card)"
                             @keydown.arrow.left="prevCard"
                             @keydown.arrow.right="nextCard"

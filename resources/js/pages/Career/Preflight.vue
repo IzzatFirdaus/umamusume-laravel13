@@ -209,6 +209,17 @@ const props = defineProps<{
     };
     edit: Record<'scenario' | 'trainee' | 'target' | 'legacy' | 'deck', string>;
     startAction: string;
+    /**
+     * The Independent Training inputs (§1.1.7): the enum's own policy cases and labels, the ceiling the
+     * request enforces, and the Global-client skill catalogue a priority can name. Server-resolved so the
+     * page never restates the vocabulary, and so a label change cannot drift between the two sides.
+     */
+    independent: {
+        policies: { value: string; label: string }[];
+        maxPrioritySkills: number;
+        defaultPolicy: string;
+        skills: { id: number; name: string }[];
+    };
 }>();
 
 /** One row of the review checklist: a step, its state, its summary, and its one door back. */
@@ -229,7 +240,18 @@ interface ChecklistRow {
  * inputs (`independent`, `policy`, `rotation`) are gone with their controls (Phase E2): the HFW draws
  * neither the mode switch nor the policy radios, and the request's rules for them stay nullable.
  */
-const form = useForm({});
+// The page's one write. The draft supplies every other fact server-side, so the form carries only the
+// idle-mode inputs (§1.1.7); typing them here is what lets the refusal print under its own control
+// instead of behind `errors: Record<string, string>`. `transform()` in `start()` adds them to the PUT.
+const form = useForm<{
+    independent: boolean;
+    policy: string | null;
+    priority_skills: number[];
+}>({
+    independent: false,
+    policy: null,
+    priority_skills: [],
+});
 const alert = ref<HTMLElement | null>(null);
 
 // A refused write comes back with the section's message. The alert is focused rather than left for a
@@ -456,10 +478,63 @@ const startBlocker = computed((): string | null => {
         : `${list} are not entered, and a career cannot start without both.`;
 });
 
+/*
+ * Independent Training's three inputs (§1.1.7), held on the page because they are the only facts the
+ * draft does not already hold: the trainee, deck and scenario all come from `SetupDraft` server-side,
+ * while the idle-mode policy and its priority skills are fixed at the moment the run is created
+ * (`Lifecycle::start()`).
+ *
+ * `prioritySkills` is a list of skill ids, capped at `props.independent.maxPrioritySkills` (10). The
+ * picker disables at the ceiling rather than accepting an eleventh and letting the server refuse it:
+ * a control that can enter a value the write refuses is the defect `DESIGN.md` §5 names.
+ */
+const independent = ref(false);
+const policy = ref<string>(props.independent.defaultPolicy);
+const prioritySkills = ref<number[]>([]);
+
+/** The chosen priority skills as rows, in the order they were added. */
+const prioritySkillRows = computed(() =>
+    prioritySkills.value
+        .map((id) => props.independent.skills.find((skill) => skill.id === id))
+        .filter((skill): skill is { id: number; name: string } => skill !== undefined),
+);
+
+/** Add the skill the select named, then reset the control so the same list can offer it again later. */
+const addPrioritySkill = (event: Event): void => {
+    const select = event.target as HTMLSelectElement;
+    const id = Number(select.value);
+    select.value = '';
+
+    if (! Number.isInteger(id) || id <= 0) {
+        return;
+    }
+
+    if (prioritySkills.value.includes(id)) {
+        return;
+    }
+
+    if (prioritySkills.value.length >= props.independent.maxPrioritySkills) {
+        return;
+    }
+
+    prioritySkills.value = [...prioritySkills.value, id];
+};
+
+const removePrioritySkill = (id: number): void => {
+    prioritySkills.value = prioritySkills.value.filter((held) => held !== id);
+};
+
 const start = (): void => {
     if (form.processing || !acknowledged.value) {
         return;
     }
+
+    // The three idle-mode facts ride on this same PUT, which is the page's only write: a second form
+    // would be a second door to one act (`SHR-1`). Absent `independent` is the ordinary career, and
+    // `independentConfig()` reads it as null.
+    form.independent = independent.value;
+    form.policy = independent.value ? policy.value : null;
+    form.priority_skills = independent.value ? prioritySkills.value : [];
 
     form.put(props.startAction);
 };
@@ -586,6 +661,20 @@ const CAREER_TURNS = props.careerTurns;
             >
                 Back to deck
             </Link>
+            <!-- A disabled primary action with no stated reason is a dead end: the acknowledgement it
+                 waits on sits most of a page further down, so a Trainer who reaches the footer finds a
+                 dead button and no explanation (WCAG 3.3.1). The sentence names the control that
+                 enables it. It is text, not a link, on purpose: the head band's contract is one back
+                 door and one forward door (`wizard-actions.spec.ts`), and a third anchor here would
+                 break that invariant. Gated on `canStart` so it does not compete with
+                 `startBlocker`'s own sentence when a required step is missing. -->
+            <p
+                v-if="canStart && !acknowledged"
+                data-ack-hint
+                class="basis-full text-xs text-ink-muted sm:order-first sm:basis-auto sm:mr-auto"
+            >
+                Tick the confirmation below to enable Create the run.
+            </p>
             <button
                 type="button"
                 class="inline-flex min-h-11 items-center justify-center rounded-md border border-primary-action bg-primary-action px-4 text-sm font-semibold text-on-primary-action hover:bg-primary-action/90 disabled:opacity-60"
@@ -947,6 +1036,115 @@ const CAREER_TURNS = props.careerTurns;
                     </p>
                 </section>
 
+                <!--
+                  Independent Training (`UMAMUSUME_REFERENCE.md` §1.1.7), restored by S3.1 of the master
+                  roadmap.
+
+                  The mode switch and the policy radios were cut in Phase E2 because the wireframe draws
+                  only the Commit card beside them, and that cut is what left the mode unreachable:
+                  `Lifecycle::start()` has been called from `store()` the whole time and
+                  `StartCareerRequest` has validated the three fields, yet no control ever set
+                  `independent`, so `independent_training_runs` held 0 rows and only a seeder or a test
+                  could start the mode.
+
+                  It sits in its own card rather than inside Commit for two measured reasons: the Commit
+                  card is held to a 25-descendant and 900-character ceiling by
+                  `career-preflight.spec.ts` ("the commit card stays a card, not a document"), and
+                  putting three controls and their help text inside it would break both. The card is a
+                  closed disclosure, so the page still reads as the wireframe draws it and the Commit
+                  card remains the only place the write happens.
+
+                  Rotation is deliberately not offered: `Lifecycle::start()` reads a null rotation as the
+                  scenario's own target races, the documented default in `ADR-0032`, and a second
+                  race-editing surface here would duplicate the Race Planner.
+                -->
+                <section class="card" aria-labelledby="independent-training-heading">
+                    <h2 id="independent-training-heading">Independent Training</h2>
+                    <details data-independent-training>
+                        <summary class="flex min-h-11 cursor-pointer items-center text-sm font-medium text-ink">
+                            Start this run as an Independent Training session
+                        </summary>
+                        <p class="mt-1 text-xs text-ink-muted">
+                            The session plays itself out over {{ 50 }} minutes with the app closed. One
+                            session runs at a time, and the run's Result screen reports what it earned.
+                        </p>
+
+                        <label class="mt-2 flex items-start gap-2 text-sm">
+                            <input
+                                id="independent"
+                                v-model="independent"
+                                type="checkbox"
+                                class="mt-0.5"
+                            />
+                            <span>Run this career as an idle session</span>
+                        </label>
+
+                        <template v-if="independent">
+                            <div class="mt-2">
+                                <label for="policy" class="text-xs font-medium text-ink">Training policy</label>
+                                <select
+                                    id="policy"
+                                    v-model="policy"
+                                    class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring"
+                                >
+                                    <option v-for="option in props.independent.policies" :key="option.value" :value="option.value">
+                                        {{ option.label }}
+                                    </option>
+                                </select>
+                                <p class="mt-1 text-xs text-ink-muted">
+                                    Balanced is the recommended policy: the other two skew stats and cost win rate.
+                                </p>
+                            </div>
+
+                            <div class="mt-2">
+                                <label for="priority-skills" class="text-xs font-medium text-ink">
+                                    Priority skills ({{ prioritySkills.length }} of {{ props.independent.maxPrioritySkills }})
+                                </label>
+                                <select
+                                    id="priority-skills"
+                                    class="mt-1 block min-h-11 w-full rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:ring"
+                                    :disabled="prioritySkills.length >= props.independent.maxPrioritySkills"
+                                    @change="addPrioritySkill"
+                                >
+                                    <option value="">Add a skill…</option>
+                                    <option
+                                        v-for="skill in props.independent.skills"
+                                        :key="skill.id"
+                                        :value="String(skill.id)"
+                                        :disabled="prioritySkills.includes(skill.id)"
+                                    >
+                                        {{ skill.name }}
+                                    </option>
+                                </select>
+                                <ul v-if="prioritySkills.length > 0" class="mt-2 space-y-1">
+                                    <li
+                                        v-for="skill in prioritySkillRows"
+                                        :key="skill.id"
+                                        class="flex items-center justify-between gap-2 text-sm"
+                                    >
+                                        <span>{{ skill.name }}</span>
+                                        <button
+                                            type="button"
+                                            class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-3 text-xs font-semibold text-ink hover:bg-panel"
+                                            :aria-label="`Remove ${skill.name}`"
+                                            @click="removePrioritySkill(skill.id)"
+                                        >
+                                            Remove
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+
+                            <p v-if="form.errors.independent" class="mt-1 text-xs text-risk">{{ form.errors.independent }}</p>
+                            <p v-if="form.errors.policy" class="mt-1 text-xs text-risk">{{ form.errors.policy }}</p>
+                            <p v-if="form.errors.priority_skills" class="mt-1 text-xs text-risk">
+                                {{ form.errors.priority_skills }}
+                            </p>
+                        </template>
+                    
+                    </details>
+                </section>
+
                 <!-- The commitment itself. `Start career` is the page's only filled action, and it is honest
                      about what it needs: a scenario and a trainee, which is exactly what
                      `StartCareerRequest` refuses without. -->
@@ -973,9 +1171,23 @@ const CAREER_TURNS = props.careerTurns;
                         Acknowledge the above to enable "Create the run".
                     </p>
 
-                    <!-- The mode switch and the policy radios are cut (Phase E2): `career-preflight.html:176-186`
-                         draws the Commit card and nothing else. The write and its back door live in the head
-                         band above (`#actions`), where the wireframe draws them. -->
+                    <!--
+                      The three Independent Training inputs (`UMAMUSUME_REFERENCE.md` §1.1.7).
+
+                      The mode switch and the policy radios were cut in Phase E2 because the wireframe
+                      draws only the Commit card here, and that cut is what left the mode unreachable:
+                      `Lifecycle::start()` has been called from `store()` the whole time, and
+                      `StartCareerRequest` has validated the three fields, but no control ever set
+                      `independent`. A Trainer could not start the mode; only a seeder or a test could.
+                      Restored here as a disclosure inside the Commit card, so the wireframe's one
+                      filled action stays the page's one filled action (`wizard-actions.spec.ts`) and
+                      nothing new competes with it.
+
+                      Rotation is deliberately not offered: `Lifecycle::start()` reads a null rotation as
+                      the scenario's own target races, which is the documented default (`ADR-0032`), and
+                      a second race-editing surface on this screen would duplicate the Race Planner.
+                    -->
+                    
                 </section>
             </div>
         </div>
