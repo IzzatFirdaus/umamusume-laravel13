@@ -28,6 +28,24 @@ const GRADE_OPTIONS = [
     { value: 'S', label: 'S' },
 ];
 
+/*
+ * ADR-0034's vocabulary, mirrored here so the select states the whole set: `S+` is a letter the
+ * client's board shows and the ladder deliberately gives no facility level, so its label says so
+ * rather than implying a missing option.
+ */
+const RANK_OPTIONS = [
+    { value: '', label: 'Not recorded' },
+    { value: 'G', label: 'G' },
+    { value: 'F', label: 'F' },
+    { value: 'E', label: 'E' },
+    { value: 'D', label: 'D' },
+    { value: 'C', label: 'C' },
+    { value: 'B', label: 'B' },
+    { value: 'A', label: 'A' },
+    { value: 'S', label: 'S' },
+    { value: 'S+', label: 'S+ (no facility level)' },
+];
+
 const props = defineProps<{
     /** `route('runs.update', $run)`, supplied by the server like the header forms' own action. */
     action: string;
@@ -36,6 +54,8 @@ const props = defineProps<{
     status: string;
     /** The run's team payload as `CockpitController` sends it, every field nullable. */
     team: {
+        /** The run's current league letter, seeded into the select; null is "not stated". */
+        rank: string | null;
         team_name: string | null;
         team_motto: string | null;
         team_league_placement: number | null;
@@ -58,6 +78,7 @@ const numeric = (value: number | null): string => (value === null ? '' : String(
 const form = useForm({
     umamusume_id: String(props.umamusumeId),
     status: props.status,
+    team_rank: props.team.rank ?? '',
     team_name: text(props.team.team_name),
     team_motto: text(props.team.team_motto),
     team_league_placement: numeric(props.team.team_league_placement),
@@ -214,17 +235,28 @@ const save = (): void => {
                 </div>
                 <!-- R10: per-stat ranks stop at S; S+ is the overall team rank and is not this column. -->
                 <p class="text-xs text-ink-muted">
-                    Per-stat grades are G to S. S+ is the overall team rank, recorded elsewhere.
+                    Per-stat grades are G to S. S+ is the overall Team Rank field above, never a
+                    per-stat value.
                 </p>
             </fieldset>
 
-            <!-- R4-13 / ruling R2 (2026-10-25): the editor offers no rank input, and silence about that
-                 leaves a Trainer who read the client's rank with no path from this panel. The rank has an
-                 owner already — a turn's team-race event records it — so the fix is this sentence rather
-                 than a second writer for one fact. -->
-            <p class="text-xs text-ink-muted @3xl:col-span-2">
-                Team Rank is recorded through a turn's team-race event, not through this editor.
-            </p>
+            <!-- ADR-0034 (owner ruling R6-48, 2026-11-15): the Team Rank is stored current state, so
+                 this editor is its write door. The letter is entered, never inferred; `S+` is a legal
+                 letter and the ladder gives it no facility level, which the option's own label states.
+                 The turn-event path stays as `latestTeamRank()`'s fallback, not as a second writer. -->
+            <div class="@3xl:col-span-2">
+                <BaseSelect
+                    id="team_rank"
+                    v-model="form.team_rank"
+                    name="team_rank"
+                    label="Team Rank"
+                    :options="RANK_OPTIONS"
+                />
+                <p class="mt-1 text-xs text-ink-muted">
+                    The run's current league standing, exactly as the client's board prints it. Blank
+                    means not stated, never a default letter.
+                </p>
+            </div>
 
             <div class="flex flex-col gap-1">
                 <button

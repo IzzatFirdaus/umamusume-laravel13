@@ -9,6 +9,7 @@ use App\Enums\RunStatus;
 use App\Http\Requests\Concerns\ValidatesEnteredCaps;
 use App\Models\RaceEntry;
 use App\Models\TrainingRun;
+use App\Models\TurnEvents\TeamRankPayload;
 use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -82,6 +83,13 @@ class StoreTrainingRunRequest extends FormRequest
              * (D-220). Placement is a rank, so zero is not one; the bound matches the race-entry
              * placement rule rather than inventing a second one.
              */
+            /*
+             * The run's current league rank letter, stored current state (ADR-0034, owner ruling
+             * R6-48): one value the Trainer reads off the league board, not a per-turn history.
+             * `S+` is a legal letter (`TeamRankPayload::LETTERS`) and deliberately maps to no
+             * facility level, so the ladder prints it without inventing a rung.
+             */
+            'team_rank' => ['nullable', 'string', Rule::in(TeamRankPayload::LETTERS)],
             'team_name' => ['nullable', 'string', 'max:255'],
             'team_motto' => ['nullable', 'string', 'max:255'],
             'team_league_placement' => ['nullable', 'integer', 'min:1', 'max:99'],

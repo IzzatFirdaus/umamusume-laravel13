@@ -51,5 +51,47 @@ it('carries every field the editor binds', function (): void {
             ->has('team.spirit_bursts_count')
             ->has('team.extreme_bursts_count')
             // The five grade selects read one entry per stat from the scenario's own stat order.
-            ->has('team.stat_grades', 5));
+            ->has('team.stat_grades', 5)
+            // ADR-0034: the run's current league letter seeds the editor's select.
+            ->has('team.rank'));
+});
+
+it('writes the Team Rank letter through runs.update and reads it back on the cockpit team section', function (): void {
+    $run = TrainingRun::factory()->create(['scenario' => 'unity_cup']);
+
+    $this->put(route('runs.update', $run), [
+        'umamusume_id' => $run->umamusume_id,
+        'status' => $run->status->value,
+        'team_rank' => 'A',
+    ])
+        ->assertRedirect();
+
+    expect($run->fresh()->team_rank)->toBe('A');
+    expect($run->fresh()->latestTeamRank()?->rank)->toBe('A');
+});
+
+it('refuses a letter the league board does not show', function (): void {
+    $run = TrainingRun::factory()->create(['scenario' => 'unity_cup']);
+
+    $this->put(route('runs.update', $run), [
+        'umamusume_id' => $run->umamusume_id,
+        'status' => $run->status->value,
+        'team_rank' => 'Z',
+    ])
+        ->assertSessionHasErrors('team_rank');
+
+    expect($run->fresh()->team_rank)->toBeNull();
+});
+
+it('accepts S plus and stores it as the letter it is', function (): void {
+    $run = TrainingRun::factory()->create(['scenario' => 'unity_cup']);
+
+    $this->put(route('runs.update', $run), [
+        'umamusume_id' => $run->umamusume_id,
+        'status' => $run->status->value,
+        'team_rank' => 'S+',
+    ])
+        ->assertRedirect();
+
+    expect($run->fresh()->team_rank)->toBe('S+');
 });

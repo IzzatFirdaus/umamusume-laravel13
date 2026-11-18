@@ -37,6 +37,8 @@ const props = defineProps<{
     };
     /** The team section the cockpit's panel reads, built by `TeamPanelBuilder::teamSection()`. */
     team: {
+        /** The run's current league letter (ADR-0034); null is "not stated". */
+        rank: string | null;
         team_name: string | null;
         team_motto: string | null;
         team_league_placement: number | null;
