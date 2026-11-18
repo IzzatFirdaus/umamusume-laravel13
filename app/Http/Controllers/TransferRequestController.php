@@ -60,10 +60,35 @@ final class TransferRequestController extends Controller
             }
         }
 
+        // Dates are composed here, not in the page: the house pattern (`VeteranRow::savedAt`,
+        // `CatalogController::fetched_at_display`) renders a datetime through
+        // `config('uma.display_timezone')` on the server, so the rendered string is the same
+        // whatever the Trainer's browser locale or timezone would have chosen
+        // (`06-static-candidates.md` C-09).
+        $shape = fn ($page) => $page->through(fn (TransferRequest $transfer) => [
+            'id' => $transfer->id,
+            'status' => $transfer->status,
+            'reward' => $transfer->reward,
+            'veteran_label' => $transfer->veteran_label,
+            'veteran' => $transfer->veteran === null ? null : [
+                'training_run' => [
+                    // Veteran::trainingRun() and its umamusume relation are non-nullable per the
+                    // model's own PHPDoc types; the shape mirrors what the page's type declares.
+                    'umamusume' => [
+                        'name' => $transfer->veteran->trainingRun->umamusume->name,
+                        'name_ja' => $transfer->veteran->trainingRun->umamusume->name_ja,
+                    ],
+                ],
+            ],
+            'created_at_display' => $transfer->created_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
+            'completed_at_display' => $transfer->completed_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
+            'withdrawn_at_display' => $transfer->withdrawn_at?->timezone(config('uma.display_timezone'))->format('M j, Y'),
+        ]);
+
         return Inertia::render('Veterans/TransferRequests', [
-            'offered' => $offered,
-            'completed' => $completed,
-            'withdrawn' => $withdrawn,
+            'offered' => $shape($offered),
+            'completed' => $shape($completed),
+            'withdrawn' => $shape($withdrawn),
             // URLs composed server-side so the page spells none (`AUD-20261102-028 F-01`): the
             // shell carries no Ziggy, so `route()` is not callable from page code.
             'veteransIndexUrl' => route('veterans.index'),

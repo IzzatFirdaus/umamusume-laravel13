@@ -20,9 +20,10 @@ interface TransferRequest {
     id: number;
     status: 'offered' | 'completed' | 'withdrawn';
     reward: { star_pieces?: number; monies?: number; support_points?: number } | null;
-    created_at: string;
-    completed_at: string | null;
-    withdrawn_at: string | null;
+    /** Server-composed through `config('uma.display_timezone')` (C-09): the string the page prints. */
+    created_at_display: string | null;
+    completed_at_display: string | null;
+    withdrawn_at_display: string | null;
     /** Who was transferred, stamped at completion because `veteran_id` nulls once the row goes. */
     veteran_label: string | null;
     veteran: {
@@ -156,13 +157,12 @@ const rewardText = (transfer: TransferRequest): { text: string; absent: boolean 
     return parts.length === 0 ? { text: 'N/A', absent: true } : { text: parts.join(', '), absent: false };
 };
 
-const formatDate = (value: string | null): { text: string; absent: boolean } => {
-    if (value === null) {
-        return { text: 'N/A', absent: true };
-    }
-
-    return { text: new Date(value).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }), absent: false };
-};
+const formatDate = (value: string | null): { text: string; absent: boolean } => ({
+    // The server composed the string through `config('uma.display_timezone')`; the page prints it
+    // verbatim instead of re-parsing a timestamp in whatever zone the browser runs in (C-09).
+    text: value ?? 'N/A',
+    absent: value === null,
+});
 </script>
 
 <template>
@@ -171,7 +171,7 @@ const formatDate = (value: string | null): { text: string; absent: boolean } => 
 
         <header class="flex flex-wrap items-baseline justify-between gap-2">
             <div class="min-w-0">
-                <h1 class="text-lg font-semibold text-ink-strong">Transfer Requests</h1>
+                <h1 class="text-3xl font-semibold text-ink-strong">Transfer Requests</h1>
                 <p class="mt-1 text-sm text-ink-muted">
                     Offers to transfer a banked career. Completing one removes the Veteran permanently;
                     the reward is recorded for the record, and no wallet pays it out in this build.
@@ -226,23 +226,23 @@ const formatDate = (value: string | null): { text: string; absent: boolean } => 
                         <p class="font-medium text-ink-strong">{{ veteranDisplay(transfer) }}</p>
                         <p class="text-sm text-ink-muted">
                             <template v-if="activeTab === 'offered'">
-                                Offered {{ formatDate(transfer.created_at).text }}
+                                Offered {{ formatDate(transfer.created_at_display).text }}
                             </template>
                             <template v-else-if="activeTab === 'completed'">
                                 Completed
                                 <span
-                                    :title="formatDate(transfer.completed_at).absent
+                                    :title="formatDate(transfer.completed_at_display).absent
                                         ? 'This record states no completion date.'
                                         : undefined"
-                                >{{ formatDate(transfer.completed_at).text }}</span>
+                                >{{ formatDate(transfer.completed_at_display).text }}</span>
                             </template>
                             <template v-else>
                                 Withdrawn
                                 <span
-                                    :title="formatDate(transfer.withdrawn_at).absent
+                                    :title="formatDate(transfer.withdrawn_at_display).absent
                                         ? 'This record states no withdrawal date.'
                                         : undefined"
-                                >{{ formatDate(transfer.withdrawn_at).text }}</span>
+                                >{{ formatDate(transfer.withdrawn_at_display).text }}</span>
                             </template>
                         </p>
                     </div>
