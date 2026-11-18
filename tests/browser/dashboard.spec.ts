@@ -272,7 +272,10 @@ test('an active career draws the resume card the wireframe draws', async ({ page
     // index.html:87-100: three tiles, the Turn tile's "of 72" beside the figure.
     await expect(card.getByText('Turn', { exact: true })).toBeVisible();
     const turn = card.locator('[data-tile="turn"] [data-tile-value]');
-    await expect(turn).toHaveText(/^\d+of \d+$/);
+    // The separator is part of the text, not only of the visual gap: `ml-1` on the suffix span spaces
+    // it on screen, but with no space in the accessible string the tile announced "3of 72". The
+    // regex used to pin the missing space, which made the defect the expectation.
+    await expect(turn).toHaveText(/^\d+ of \d+$/);
 
     // index.html:96-99: absence keeps its tile and prints a word, never a blank.
     const rank = card.locator('[data-tile="team_rank"] [data-tile-value]');

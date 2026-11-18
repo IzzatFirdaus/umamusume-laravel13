@@ -1349,6 +1349,18 @@ table.t tr.is-current td {
     position:relative;
 }
 
+/* KI-166, the same defect one level down: a horizontal scroller that is not itself a containing
+   block cannot clip its absolutely positioned descendants, so an `sr-only` span inside a table cell
+   resolves against the initial containing block and widens the document. `Legacy/Index.vue:73`
+   nests its table inside `div.overflow-x-auto` rather than placing it directly in a `.card`, which
+   the rule above does not reach: measured 41px of document overflow at 390px on `/legacy`, with the
+   1px span reporting `right: 431` against a 390px viewport. Making every table scroller a
+   containing block closes the class instead of the instance; four call sites had already been
+   patched individually (`relative` in the tag) and stay correct under this rule. */
+:where(.card, [class*="overflow-x-auto"]):has(table) {
+    position:relative;
+}
+
 /* .tiles: ported from shell.css; resolves to house tokens. */
 .tiles {
     display:grid;

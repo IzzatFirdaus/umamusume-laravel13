@@ -256,7 +256,7 @@ const finaleText = computed(() => {
             <p v-if="props.entries.length === 0" class="mt-1 text-sm text-ink">{{ props.empty }}</p>
             <p v-else-if="filteredEntries.length === 0" class="mt-1 text-sm text-ink">No entry matches those filters.</p>
             <template v-else>
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto" role="region" tabindex="0" aria-label="Turn log, scrollable">
                     <table class="t w-full min-w-[44rem] border-collapse text-sm">
                         <thead>
                             <tr><th class="text-right">Turn</th><th class="text-left">Position</th><th class="text-left">Kind</th><th class="text-left">What happened</th><th class="text-right">Energy</th><th class="text-right">SP</th><th class="text-right">Momentum</th></tr>

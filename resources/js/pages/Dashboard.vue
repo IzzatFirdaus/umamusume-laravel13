@@ -159,6 +159,34 @@ const group = (n: number): string => n.toLocaleString('en-US');
 
 const totalTurns = computed<number>(() => props.activeCareer?.total_turns ?? 0);
 
+/*
+ * Tile.vue's docblock pins the rule: a `title` is the accessible twin of the word, not the only
+ * place an absence reason lives, and callers pair every absent tile with a sentence in the card.
+ * The Energy and Team rank tiles were the named remaining title-only instances (DESIGN.md §5).
+ * Rendering the same hint as visible prose puts it in the keyboard, touch and print paths without
+ * changing the tile's look or the word it prints.
+ */
+const tileAbsenceNotes = computed<string[]>(() => {
+    const career = props.activeCareer;
+    if (career === null) {
+        return [];
+    }
+    const notes: string[] = [];
+    if (career.turn === 0) {
+        notes.push('No turn has been logged for this career yet.');
+    }
+    if (career.resource !== null && career.resource.value === null && career.resource.value_hint !== '') {
+        notes.push(career.resource.value_hint);
+    }
+    if (career.resource === null && career.energy === null) {
+        notes.push('No logged turn has recorded Energy for this career.');
+    }
+    if (career.team_rank.value === null && career.team_rank.value_hint !== '') {
+        notes.push(career.team_rank.value_hint);
+    }
+    return notes;
+});
+
 // The 50-minute countdown for an Independent Training session (§1.1.7), computed from the stored
 // completion instant and advanced once per second so the value actually moves. `mm:ss`, clamped at
 // zero. Cleared on unmount to avoid leaks; guarded by onMounted so it never runs during SSR.
@@ -397,6 +425,12 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                             data-tile="team_rank"
                         />
                     </div>
+
+                    <p
+                        v-for="note in tileAbsenceNotes"
+                        :key="note"
+                        class="mt-1 text-xs text-ink-muted"
+                    >{{ note }}</p>
 
                     <Note v-if="careerNote" class="mt-2.5">{{ careerNote }}</Note>
                 </section>

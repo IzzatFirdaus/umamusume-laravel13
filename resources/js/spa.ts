@@ -1,5 +1,5 @@
-import { createApp, defineComponent, h, type DefineComponent } from 'vue';
-import { createInertiaApp } from '@inertiajs/vue3';
+import { createApp, defineComponent, h, nextTick, type DefineComponent } from 'vue';
+import { createInertiaApp, router } from '@inertiajs/vue3';
 import { useTheme } from './composables/useTheme';
 // Feature-detected polyfills for non-Baseline tooltip platform features
 // (popover="hint" + interestfor). Each polyfill self-aborts when native
@@ -21,6 +21,46 @@ import '../css/layout-grid.css';
 // component rather than `unknown`.
 const pages = import.meta.glob<{ default: DefineComponent }>('./pages/**/*.vue');
 
+/*
+ * A page change inside the SPA leaves focus on the old control (or on `body`), so a keyboard or
+ * screen-reader Trainer has no signal that the destination changed. The wizard already solves this
+ * by focusing its own `h1` on mount (`SetupLayout.vue:128-169`); this is the same policy for the
+ * pages that share the persistent shell, where an `onMounted` hook never fires again.
+ *
+ * Two guards keep it from stealing focus from work already in progress:
+ *  - only a change of Inertia component counts. A filter, sort or search that re-renders the same
+ *    page must leave the Trainer's input focused.
+ *  - a validation response carries `errors`; those pages focus their own `role="alert"` and that
+ *    correction must win.
+ */
+function registerNavigationFocus(): void {
+    let previousComponent: string | null = null;
+
+    router.on('navigate', (event) => {
+        const { page } = event.detail;
+        const changed = previousComponent !== null && previousComponent !== page.component;
+        previousComponent = page.component;
+
+        if (!changed) {
+            return;
+        }
+
+        const errors = page.props.errors as Record<string, unknown> | undefined;
+        if (errors !== undefined && Object.keys(errors).length > 0) {
+            return;
+        }
+
+        void nextTick(() => {
+            const heading = document.querySelector<HTMLElement>('main h1, h1');
+            if (heading === null) {
+                return;
+            }
+            heading.setAttribute('tabindex', '-1');
+            heading.focus({ preventScroll: true });
+        });
+    });
+}
+
 createInertiaApp({
     // Inertia's bundled NProgress draws `role="bar"`, an invalid ARIA role that fails a page-wide
     // axe scan whenever a visit is in flight (KI-63). The default is off; the replacement is the
@@ -41,5 +81,7 @@ createInertiaApp({
         createApp({ render: () => h(Root) })
             .use(plugin)
             .mount(el);
+
+        registerNavigationFocus();
     },
 });

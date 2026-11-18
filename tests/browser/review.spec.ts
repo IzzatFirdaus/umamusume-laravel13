@@ -49,6 +49,27 @@ test('every control on the queue meets the 44px floor', async ({ page }) => {
     await expectTapTargets(page.locator('main a, main button, main select, main input'), 4);
 });
 
+test('populated review cells remain readable at 320px without page overflow', async ({ page }) => {
+    seedPendingCandidates(2, { suggested: true });
+    seedPendingCandidates(2);
+    await page.setViewportSize({ width: 320, height: 800 });
+    await page.goto('/review');
+    await expect(page.locator('#review-results tr')).toHaveCount(4);
+
+    const region = page.getByRole('region', { name: 'Pending match candidates, scrollable', exact: true });
+    const overflow = await region.locator('th, td').evaluateAll(cells =>
+        cells.filter(cell => cell.scrollWidth > cell.clientWidth + 1).map(cell => cell.textContent?.trim()),
+    );
+    expect(overflow).toEqual([]);
+    expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
+    await region.focus();
+    await page.keyboard.press('ArrowRight');
+    await expect.poll(() => region.evaluate(el => el.scrollLeft)).toBeGreaterThan(0);
+    const review = page.locator('#review-results tr').first().getByTestId('review-detail-link');
+    await review.click();
+    await expect(page).toHaveURL(/\/review\/\d+$/);
+});
+
 test('each row explains itself: confidence, source, match and the door to the decision', async ({ page }) => {
     seedPendingCandidates(2, { suggested: true });
     seedPendingCandidates(2);
@@ -107,9 +128,11 @@ test('holds both halves of the queue in one table, suggested rows first', async 
     expect(total, 'the table holds the whole page of candidates').toBe(5);
 
     const suggested = await page.getByText('Suggested id:').count();
-    const noMatch = await page.getByText('No match', { exact: true }).count();
+    // One provenance word per fact: the badge owns it. The old second "No match" pill was
+    // A-96's duplicate-label defect, removed in DESIGN.md §5(b).
+    const unknown = await page.locator('#review-results').getByText('Unknown', { exact: true }).count();
     expect(suggested, 'two seeded rows carry a suggestion').toBe(2);
-    expect(noMatch, 'three seeded rows carry none').toBe(3);
+    expect(unknown, 'three seeded rows carry no suggestion and one unknown badge each').toBe(3);
 
     // Every suggested row precedes every no-match row: the first `suggested` rows are the decidable
     // ones, and the rest state the absence.
@@ -118,7 +141,7 @@ test('holds both halves of the queue in one table, suggested rows first', async 
         if (index < suggested) {
             await expect(row, `row ${index} should carry a suggestion`).toContainText('Suggested id:');
         } else {
-            await expect(row, `row ${index} should state no match`).toContainText('No match');
+            await expect(row, `row ${index} should carry one provenance word`).toContainText('Unknown');
         }
     }
 });

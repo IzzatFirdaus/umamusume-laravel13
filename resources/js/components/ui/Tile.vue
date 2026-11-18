@@ -37,6 +37,6 @@ withDefaults(
         >{{ value }}<span
             v-if="suffix && !absent"
             class="ml-1 font-mono text-xs font-semibold text-ink-muted"
-        >{{ suffix }}</span></div>
+        >{{ ' ' + suffix }}</span></div>
     </div>
 </template>

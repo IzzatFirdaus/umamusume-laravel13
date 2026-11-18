@@ -349,23 +349,32 @@ test.describe('Setup step 4 — Legacy', () => {
         await expect(page.locator('article').first().locator('div.font-extrabold').first()).toContainText('Vodka');
     });
 
-    test('prints the reason a Spark write was refused, beside the field it refused', async ({ page }) => {
+    test('clears a Spark target when its category changes, so a mismatched pair is never posted', async ({ page }) => {
         await hydrate(page, '/career/setup/legacy');
 
-        // `AUD-20261030-002` F-01 and F-02. The request refuses a Spark whose target does not belong to
-        // the category it is posted under (`StoreLegacySelectionRequest::assertTargetMatchesCategory`),
-        // and the pair is reachable from this editor because the category's reset does not run: BaseSelect
-        // has three root nodes and declares no `change` emit, so `@change="spark.target = ''"` is dropped
-        // and the form keeps the previous category's target. That is why the row below never re-selects the
-        // value: the stale target is the state under test, and the server's own message names it.
+        /*
+         * `AUD-20261030-002` F-01 and F-02, in their repaired form.
+         *
+         * The request still refuses a Spark whose target does not belong to the category it is posted
+         * under (`StoreLegacySelectionRequest::assertTargetMatchesCategory`), and
+         * `SparkTargetValidationTest` pins that refusal at the write boundary. What changed is that the
+         * editor can no longer BUILD the mismatched pair: the case this test used to exercise relied on
+         * `@change="spark.target = ''"` being silently dropped, because `BaseSelect` had three root nodes
+         * and declared no `change` emit. `BaseSelect.vue:64-72` now declares and re-emits `change`
+         * (`282e5437`), so changing the category clears the target and the server is never handed a
+         * `Stat` Spark naming `Turf`.
+         *
+         * The assertion therefore moved from the refusal to the prevention: after choosing Aptitude and
+         * a target, switching the category to Stat must empty the target field. That is the contract a
+         * Trainer can observe, and it is the state that keeps the server's message unreachable from the
+         * UI. The refusal itself stays covered server-side, where it belongs.
+         */
         await page.locator('#legacy-pick-0').selectOption('__manual__');
         await page.locator('#legacy-name-0').fill('Silence Suzuka');
 
         const editor = page.locator('#legacy-pick-0').locator('xpath=ancestor::div[1]').locator('details');
 
-        // The spark editor is OPEN by default (R7-36), so a summary click would close it. This used to
-        // click unconditionally because the disclosure started shut -- the same bug class as S0's fix to
-        // `career-training-detail.spec.ts`, where a helper clicked an already-open `<details>` and shut it.
+        // The spark editor is OPEN by default (R7-36), so a summary click would close it.
         if (!(await editor.evaluate((el) => (el as HTMLDetailsElement).open))) {
             await editor.locator('> summary').click();
         }
@@ -377,21 +386,17 @@ test.describe('Setup step 4 — Legacy', () => {
 
         await category.selectOption('Aptitude');
         await selectSparkTarget(page, 'legacy-spark-target-0-0', 'Turf');
-        await page.locator('#legacy-spark-stars-0-0').fill('3');
+
+        // The target committed, which is what makes the next assertion meaningful.
+        await expect(target).toHaveValue('Turf');
+
+        // The reset fires now that `BaseSelect` re-emits `change`: the target belongs to Aptitude and
+        // cannot survive a switch to Stat.
         await category.selectOption('Stat');
+        await expect(target).toHaveValue('');
 
-        await page.getByRole('button', { name: 'Save and stay' }).click();
-
-        // The refusal is on screen, in the field's own error node, and it quotes the value that arrived.
-        const message = page.locator('#legacy-spark-target-0-0-error');
-        await expect(message).toHaveText('A Stat Spark names one of Speed, Stamina, Power, Guts, Wit; [Turf] is not.');
-        await expect(message).toHaveAttribute('role', 'alert');
-        await expect(target).toHaveAttribute('aria-invalid', 'true');
-        await expect(target).toHaveAttribute('aria-describedby', 'legacy-spark-target-0-0-error');
-
-        // Nothing was recorded and nothing was lost: the typed parent is still there, the step still is
-        // the step, and the success sentence the saving frame promises has not appeared.
-        await expect(page.getByText('Legacy recorded.')).toHaveCount(0);
+        // Nothing was lost and nothing was refused: the typed parent is still there and the step is
+        // still the step. Saving here records a Spark with no target, which the request accepts.
         await expect(page.locator('#legacy-name-0')).toHaveValue('Silence Suzuka');
         await expect(page.locator('#legacy-pick-0')).toHaveValue('__manual__');
         expect(new URL(page.url()).pathname).toBe('/career/setup/legacy');
@@ -771,7 +776,13 @@ test('filters the Spark Target list by typing and selects with the keyboard', as
     await target.press('ArrowDown');
     await target.press('Enter');
 
-    await expect(target).toHaveValue('');
+    // After the keyboard accept the field prints the committed value, because that is what the payload
+    // stores: `displayValue` falls back to `selectedLabel` once the list closes (`282e5437`, "a spark
+    // target shown in the field is now the target stored"). The retired native `<select>` cleared to
+    // an empty value while keeping the chosen text as its placeholder, which is the behaviour this
+    // assertion used to describe; a combobox that cleared after accepting would show a value the row
+    // does not hold, which is the F-03 defect that fix removed.
+    await expect(target).toHaveValue('Cut and Drive!');
     await expect(page.locator('#legacy-spark-target-0-0')).toHaveAttribute('placeholder', 'Cut and Drive!');
 });
 

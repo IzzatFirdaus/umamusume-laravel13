@@ -42,10 +42,15 @@ for (const pilot of PILOTS) {
         const h1 = headings.first();
         await expect(h1).toHaveText(pilot.title);
 
-        // The Critical tier as the HFW draws it: 28px, extra-bold, strong ink.
-        await expect(h1).toHaveClass(/text-\[28px\]/);
-        await expect(h1).toHaveClass(/font-extrabold/);
+        // The Critical tier as `DESIGN.md:368` specifies it and `PageHeader.vue:68` renders it:
+        // `text-3xl font-semibold text-ink-strong`. The `text-[28px]` / `font-extrabold` pair this case
+        // used to assert is the retired pre-token tier; the component and the design doc have agreed on
+        // the token since the type-scale migration, and only this assertion was left behind.
+        await expect(h1).toHaveClass(/text-3xl/);
+        await expect(h1).toHaveClass(/font-semibold/);
         await expect(h1).toHaveClass(/text-ink-strong/);
+        await expect(h1).not.toHaveClass(/text-\[28px\]/);
+        await expect(h1).not.toHaveClass(/font-extrabold/);
 
         // The eyebrow is the quiet line above the name, not a second title. `data-region="eyebrow"`
         // is the component's own marker, so a rail link with the same word cannot be picked up. Its
