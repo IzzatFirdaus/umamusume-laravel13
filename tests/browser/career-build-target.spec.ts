@@ -345,7 +345,7 @@ test('the shared skill picker filters, moves, selects and closes from the keyboa
     await page.goto('/career/setup/target');
     await page.locator('#app > *').first().waitFor();
 
-    const picker = page.getByRole('textbox', { name: 'Skill priorities' });
+    const picker = page.getByRole('combobox', { name: 'Skill priorities' });
     const listbox = page.getByRole('listbox', { name: 'Skill priorities' });
 
     await picker.fill('Gourmand');
@@ -353,7 +353,11 @@ test('the shared skill picker filters, moves, selects and closes from the keyboa
     await expect(listbox.getByRole('option')).toHaveCount(1);
 
     await picker.press('ArrowDown');
-    await expect(listbox.getByRole('option', { name: /Gourmand/ })).toHaveAttribute('aria-selected', 'true');
+    const highlighted = listbox.getByRole('option', { name: /Gourmand/ });
+    await expect(highlighted).toHaveAttribute('aria-selected', 'true');
+    await expect(picker).toHaveAttribute('aria-expanded', 'true');
+    await expect(picker).toHaveAttribute('aria-controls', (await listbox.getAttribute('id'))!);
+    await expect(picker).toHaveAttribute('aria-activedescendant', (await highlighted.getAttribute('id'))!);
 
     await picker.press('Enter');
     await expect(page.getByText('Chosen:').locator('..')).toContainText('Gourmand');
@@ -379,7 +383,7 @@ test('never offers a JapanOnly skill in the picker', async ({ page }) => {
         await page.goto('/career/setup/target');
         await page.locator('#app > *').first().waitFor();
 
-        const picker = page.getByRole('textbox', { name: 'Skill priorities' });
+        const picker = page.getByRole('combobox', { name: 'Skill priorities' });
         await picker.fill('Japan Only Fixture');
 
         // The listbox either stays closed or opens with no match; either way the row is not offered.

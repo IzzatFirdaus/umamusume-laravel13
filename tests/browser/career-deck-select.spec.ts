@@ -79,6 +79,22 @@ test('carries exactly one filled action: continue to preflight', async ({ page }
     await expect(filled.first()).toHaveText(/Continue to preflight/i);
 });
 
+test('card names remain readable in the picker at 320px', async ({ page }) => {
+    await page.setViewportSize({ width: 320, height: 800 });
+    const opener = page.locator('#deck-slot-1 button[aria-label^="Choose a card"]');
+    await opener.click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    expect(await dialog.locator('li p').count()).toBeGreaterThan(0);
+    const clippedNames = await dialog.locator('li p').evaluateAll(names =>
+        names.filter(name => name.scrollWidth > name.clientWidth + 1).map(name => name.textContent),
+    );
+    expect(clippedNames).toEqual([]);
+    expect(await dialog.evaluate(el => el.scrollWidth)).toBeLessThanOrEqual(320);
+    await page.keyboard.press('Escape');
+    await expect(opener).toBeFocused();
+});
+
 test('opens the picker as a modal dialog and closes it with Escape', async ({ page }) => {
     await page.getByRole('button', { name: /Choose a card for/i }).first().click();
 

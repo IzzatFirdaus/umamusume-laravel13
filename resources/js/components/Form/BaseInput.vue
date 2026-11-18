@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 
+defineOptions({ inheritAttrs: false });
+
 interface Props {
     modelValue: string | number | File | null;
     type?: 'text' | 'number' | 'email' | 'password' | 'search' | 'file';
@@ -40,6 +42,10 @@ interface Props {
     title?: string;
     error?: string;
     list?: string;
+    /** Extra classes for the control itself; the legacy call sites pass these as `value-class`. */
+    valueClass?: string;
+    /** Declared only so `v-model.number`'s modifiers never render as a DOM attribute. */
+    modelModifiers?: Record<string, boolean>;
 }
 
 const props = withDefaults(defineProps<Props>(), {
@@ -137,6 +143,8 @@ function onKeydown(event: KeyboardEvent): void {
                 @blur="onBlur"
                 @focus="onFocus"
                 @keydown="onKeydown"
+                v-bind="$attrs"
+                :class="valueClass"
                 class="mt-1 block w-full min-h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring transition-colors duration-150 ease-out disabled:bg-sunken disabled:text-ink-muted disabled:cursor-not-allowed"
             />
     </label>
@@ -170,6 +178,8 @@ function onKeydown(event: KeyboardEvent): void {
         @blur="onBlur"
         @focus="onFocus"
         @keydown="onKeydown"
+        v-bind="$attrs"
+        :class="valueClass"
         class="mt-1 block w-full min-h-11 rounded-md border border-rule bg-raised px-2 text-ink focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring transition-colors duration-150 ease-out disabled:bg-sunken disabled:text-ink-muted disabled:cursor-not-allowed"
     />
     <p v-if="hint" :id="`hint-${id.replace(/^field-/, '')}`" class="mt-1 text-sm text-ink-muted">{{ hint }}</p>

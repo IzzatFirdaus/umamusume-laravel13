@@ -242,12 +242,12 @@ defineExpose({ open, openAt });
                     <li
                         v-for="option in groupData.options"
                         :key="option.id"
-                        class="flex items-center gap-3 rounded-md border-rule p-2"
+                        class="flex flex-wrap items-center gap-3 rounded-md border-rule p-2"
                     >
                         <ArtworkSlot :url="option.artworkURL" alt="" size="size-12" reserve />
-                        <div class="min-w-0 flex-1">
-                            <p class="truncate text-sm font-semibold text-ink-strong">{{ option.name }}</p>
-                            <p v-if="option.name_ja" lang="ja" class="truncate text-xs text-ink-muted">{{ option.name_ja }}</p>
+                        <div class="min-w-0 flex-1 basis-1/2">
+                            <p class="break-words text-sm font-semibold text-ink-strong">{{ option.name }}</p>
+                            <p v-if="option.name_ja" lang="ja" class="break-words text-xs text-ink-muted">{{ option.name_ja }}</p>
                         </div>
                         <SupportTypeMark :type="option.type" :label="option.type_label" />
 

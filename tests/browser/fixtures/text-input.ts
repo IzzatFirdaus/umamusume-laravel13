@@ -1,5 +1,6 @@
 import { createApp, h, ref } from 'vue';
 import TextInput from '../../../resources/js/components/ui/TextInput.vue';
+import BaseInput from '../../../resources/js/components/Form/BaseInput.vue';
 
 /*
  * TextInput mounted with the two types it must render.
@@ -35,5 +36,20 @@ createApp({
                 modelValue: text.value,
                 'onUpdate:modelValue': (v: string) => (text.value = v),
             }),
+
+            ...['base-labelled', 'base-unlabelled'].map(id => h(BaseInput, {
+                id,
+                label: id === 'base-labelled' ? 'Labelled input' : undefined,
+                hint: 'Input hint',
+                maxlength: 4,
+                role: 'combobox',
+                'aria-controls': `${id}-options`,
+                'aria-expanded': false,
+                class: 'caller-input',
+                valueClass: 'font-mono',
+                modelValue: text.value,
+                'onUpdate:modelValue': (value: string | number | File | null) => (text.value = String(value ?? '')),
+            })),
+
         ]),
 }).mount('#text-input-mount');

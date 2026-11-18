@@ -184,6 +184,7 @@ function handleClickOutside(event: MouseEvent): void {
 
         <div ref="containerRef" class="relative" :class="{ 'ring-2 ring-brand-chrome': isOpen }">
             <BaseInput
+                role="combobox"
                 :id="inputId"
                 :name="inputId"
                 autocorrect="off"
@@ -197,8 +198,8 @@ function handleClickOutside(event: MouseEvent): void {
                 @blur="onBlur"
                 @keydown="onKeydown"
                 :aria-autocomplete="'list'"
-                :aria-controls="listId"
-                :aria-expanded="isOpen && filteredOptions.length > 0"
+                :aria-controls="isOpen ? listId : undefined"
+                :aria-expanded="isOpen"
                 :aria-activedescendant="highlightedIndex >= 0 ? `${listId}-option-${highlightedIndex}` : undefined"
                 :aria-describedby="describedBy"
                 :error="error"

@@ -58,6 +58,20 @@ test('a number input renders type=number and takes min/max through attribute fal
     await expect(input).toHaveAttribute('max', '10');
 });
 
+for (const id of ['base-labelled', 'base-unlabelled']) {
+    test(`${id} forwards attributes to its input rather than its label or hint`, async ({ page }) => {
+        await open(page);
+        const input = page.locator(`#${id}`);
+        await expect(input).toHaveAttribute('maxlength', '4');
+        await expect(input).toHaveAttribute('aria-controls', `${id}-options`);
+        await expect(input).toHaveAttribute('aria-expanded', 'false');
+        await expect(input).toHaveClass(/caller-input/);
+        await expect(input).toHaveClass(/font-mono/);
+        await input.fill('abcdef');
+        await expect(input).toHaveValue('abcd');
+    });
+}
+
 test('a text input still renders type=text', async ({ page }) => {
     await open(page);
 
