@@ -62,11 +62,9 @@ them, read them as unread.
 `config('uma.sources')` with a parser, a store action and a seventh `PipelineRunner` branch, so the rows carry
 real `source_url` / `snapshot_path` / `fetched_at` / `source_timezone` (`ADR-0003` Amendment R3) and refresh
 through `uma:fetch` and `uma:reparse` like every other reference table. `ADR-0009:44`'s "standing instruction
-not to add tables" is read for what it is: `ARCHITECTURE-ESSENTIALS.md:63` scopes it to the repo #4 planner
-consolidation, and seven reference tables have landed since under their own ADRs. The host is already
-allowlisted, so no new origin is introduced and the SSRF floor is unchanged; `gametora.com/robots.txt` read on
-2026-10-13 does not disallow `/data/` and publishes no crawl-delay, and the entry says plainly that the approval
-that host carries was given without that check.
+not to add tables" is scoped by `ARCHITECTURE-ESSENTIALS.md:63` to the repo #4 planner consolidation. The host
+is already allowlisted, so no new origin is introduced and the SSRF floor is unchanged; `gametora.com/robots.txt`
+read on 2026-10-13 does not disallow `/data/` and publishes no crawl-delay.
 
 **Trainee grain, no run scope.** `trainee_goals` keys on `umamusume_id`, not on `character_card_id` and not on
 `training_run_id`. `RACE-AND-SLICE-RESEARCH.md:250` sketched a nullable `training_run_id`; the sourced ladder

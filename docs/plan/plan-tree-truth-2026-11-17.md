@@ -19,151 +19,64 @@
 
 ---
 
-# Slice 0.1 - Land the worktree's product content on a branch from `origin/master`
+# Slice 0.1 - Reconcile the divergence (re-scoped; the land itself already happened)
 
-## Objective
+## What changed since this slice was written
 
-Produce one branch whose diff against `origin/master` is exactly the unlanded product work: the S18 batch,
-the peer refactor the two position tests depend on, and the four untracked feature tests. `origin/master`
-already carries S1, so S1 must **not** appear in that diff.
+The original objective was "produce one branch whose diff against `origin/master` is exactly the unlanded product
+work". **That work is now committed on `master`.** Measured at `HEAD 2546689e`:
 
-## Pre-flight (blocking; run all five)
+- the S18 product batch is committed (`f4e7adc6`, `7e34a711`, `50e31d14`, `1a1aeca3`, and others);
+- Inertia v3 and the polyfill landed as `f82b6bd0`;
+- the worktree's 109 deletions are committed (`e5fc0e1c`);
+- `npm ci --dry-run` exits **0** and `npm ls @inertiajs/vue3 --depth=0` prints **3.11.0**.
 
-```bash
-cd /d/Projects/umamusume-laravel13
-git rev-parse --short HEAD                       # expect be8893a2
-git rev-parse --short origin/master              # expect 0bb3efd0
-git rev-list --left-right --count origin/master...HEAD   # expect 8  15
-git status --porcelain -uall | awk '{print substr($0,1,2)}' | sort | uniq -c
-git stash list                                   # record; do NOT pop anything that is not yours
-```
+So there is no branch to cut and no content to land. **What remains is the divergence itself.**
 
-If `origin/master` has moved past `0bb3efd0`, re-read §0 of the roadmap and re-derive every figure named here.
+## Objective now
 
-## Worktree creation (in-repo)
+Get `master` and `origin/master` back into a state where a release is possible, without rewriting history and
+without committing another session's uncommitted work.
 
 ```bash
-mkdir -p .scratch-uma/worktrees
-git worktree add .scratch-uma/worktrees/land-2026-11-17 -b feat/land-s18 origin/master
+git rev-list --left-right --count origin/master...HEAD    # measured: 8  36
 ```
 
-Then scaffold the worktree so it can run anything (this is the documented trap):
-
-```bash
-cd .scratch-uma/worktrees/land-2026-11-17
-# Copies, not links: bootstrap/cache/services.php is what stops "Class not found" on every artisan call.
-cp ../../../.env .env
-mkdir -p bootstrap/cache
-cp ../../../bootstrap/cache/services.php ../../../bootstrap/cache/packages.php bootstrap/cache/ 2>/dev/null || true
-# vendor and node_modules may be junctions on Windows; if junction creation is unavailable, copy is acceptable
-# for a one-off gate run but costs ~10 minutes.
-```
-
-## File inventory to apply
-
-**A. S18 batch** (worktree differs from `HEAD`, carries product change): the roadmap's §1 already establishes
-these are the S18 surface fixes. Apply from the shared tree by explicit path:
-
-```
-resources/js/pages/Career/Snapshot/Entry.vue
-resources/js/pages/Career/Snapshot/Review.vue
-resources/js/pages/Career/Timeline.vue
-resources/js/pages/Career/TraineeSelect.vue
-resources/js/pages/Dashboard.vue
-resources/js/pages/Help.vue
-resources/js/pages/Preferences/Edit.vue
-resources/js/pages/Runs/Index.vue
-resources/js/pages/Catalog/Show.vue
-resources/js/components/Form/SearchableSkillPicker.vue
-resources/js/components/catalog/TraineeCatalog.vue
-resources/js/components/career/NextDecision.vue
-resources/js/composables/useVisitState.ts
-tests/browser/{help,catalog,career-timeline,career-trainee-select,trainee-profile,dashboard,runs,review-detail,career-profile,wizard-parity}.spec.ts
-```
-
-**B. Peer refactor the position tests depend on** (apply as its own commit, attributed to that session):
-
-```
-app/Http/Controllers/DashboardController.php
-app/Services/Career/RaceStripBuilder.php
-app/Models/Umamusume.php
-tests/Feature/DashboardTest.php
-tests/Feature/RunRaceStripTest.php
-```
-
-**C. Untracked feature tests** (new files; `git add` them explicitly):
-
-```
-tests/Feature/ShippedCopyTruthTest.php
-tests/Feature/SnapshotDoorLinkTest.php
-tests/Feature/SnapshotOwnedSkillsTest.php
-tests/Feature/SnapshotTraineeIdentityTest.php
-tests/Feature/TraineeGoalFanGateTest.php
-```
-
-**D. Untracked build inputs and their consumers** (required for the tree to build; see slice 0.3):
-
-```
-resources/js/polyfills.js
-resources/js/components/ui/Sparkline.vue
-resources/js/components/ui/StatRing.vue
-resources/js/spa.ts                     (already modified: imports ./polyfills)
-resources/views/app.blade.php           (already modified)
-tests/browser/stat-visuals.spec.ts
-tests/browser/fixtures/stat-visuals.ts
-tests/browser/fixtures/stat-visuals.html
-```
-
-**E. Fixes that are worktree-only but already applied:** `resources/js/pages/Career/RunSettings.vue`,
-`resources/js/pages/Career/Snapshot/Setup.vue`, `resources/js/pages/Career/Cockpit/Panels/CareerGoalsPanel.vue`,
-`resources/js/components/scenario/{ScenarioCardGrid,UnityCupPanel}.vue`,
-`resources/js/components/scenario/cards/GoalGroupCard.vue`, `tests/browser/career-snapshot.spec.ts`.
-
-**F. Deliberately NOT applied:** the 109 worktree deletions (slice 0.5 decides those), the peer's
-`app/Models/Umamusume.php` `resolveRouteBinding()` if that session lands it first (check
-`git log origin/master -- app/Models/Umamusume.php`), and any `docs/` file under another session's ownership.
+**36 ahead, 8 behind.** The 8 origin-side commits are the S1 snapshot pipeline (PR #27) plus docs. The 36 are the
+S18 batch, the fan ladder, Inertia v3, the nativephp and housekeeping work, and this pass's documents.
 
 ## Steps
 
-1. Copy each file from the shared tree into the worktree with the same relative path, then
-   `git -C .scratch-uma/worktrees/land-2026-11-17 status --short` to see exactly what landed.
-2. Verify S1 is absent from the diff:
-   `git -C .scratch-uma/worktrees/land-2026-11-17 diff --name-only origin/master -- app/Actions/CreateSnapshotRun.php app/Http/Controllers/Career/SnapshotController.php app/Http/Requests/StoreSnapshotRequest.php`
-   -> **must print nothing**.
-3. Commit in four series with conventional subjects:
-   - `feat(snapshot): S18 scenario-flow surface corrections` (group A)
-   - `fix(career): resolve career position from the stored decision turn` (group B, naming the peer session)
-   - `test(copy): pin shipped copy, snapshot doors, owned skills, trainee identity, goal fan gates` (group C)
-   - `build(assets): add tooltip polyfills and stat-visual primitives` (group D)
-4. Re-run the type gate inside the worktree: `npm run typecheck` -> expect exit 0.
-5. Run the narrow Pest set the batch touches:
-   `php artisan test --compact --filter='ShippedCopyTruth|SnapshotDoorLink|SnapshotOwnedSkills|SnapshotTraineeIdentity|TraineeGoalFanGate|DashboardTest|RunRaceStripTest' < /dev/null`
-6. Push the branch and open a PR. **PR merge is the owner's remote write; do not merge without it.**
-
-## Files created / modified
-
-Branch content only. No file in the shared tree is modified by this slice.
+1. **Read what the 8 carry before touching anything.** `git log --oneline HEAD..origin/master` and
+   `git diff --stat HEAD...origin/master -- app resources config routes database tests`. If any origin-side commit
+   touches a file this branch has also changed, the merge is a conflict-resolution task, not a fast-forward.
+2. **Decide the landing shape with the owner**, because it is a history decision, not a technical one: merge
+   `origin/master` into `master`, or rebase the 36 onto `origin/master`. AGENTS.md §14 forbids rewriting shared
+   history without instruction, so **merge is the default** and rebase needs an explicit ruling.
+3. **Merge on a quiet tree.** The working tree carries peers' uncommitted edits (`resources/js/types.ts`,
+   `resources/js/pages/Career/TeamEdit.vue`, `docs/proposals/Unity-Cup-plan.md`, and others). A merge with those
+   present cannot be attributed per session. Either wait for them to land or stash **only your own** paths.
+4. **Verify after the merge** with the gate rather than by inspection:
+   ```bash
+   bash tools/gates.sh --fast                 # every static check
+   bash tools/gates.sh                        # adds the PHP suite
+   npm ci --dry-run                           # lockfile and manifest agree
+   php artisan migrate:status --no-ansi       # 0 pending on the dev DB
+   ```
+5. **Only then** is a push or a release tag meaningful. Both are owner acts (§14, and slice 5.4).
 
 ## Acceptance
 
-- `git diff --stat origin/master <branch> -- app resources config routes database tests` lists only
-  groups A-E; the six S1 paths are absent.
-- `npm run typecheck` exit 0 **inside the worktree**.
-- The five named feature-test files exist in the branch and pass.
-- `git show --name-only --format= <each new commit>` shows no path outside the list above.
+- `git rev-list --left-right --count origin/master...HEAD` reads a state the owner has approved (a clean
+  fast-forward `0 0`, or a merge commit whose diff is reviewed).
+- `bash tools/gates.sh` green apart from the pre-existing `DocCitationParityTest` (see the execution plan).
+- A fresh clone of the resulting branch passes `npm ci --dry-run`.
 
-## Risks
+## Risk
 
-- **`DashboardController.php` conflict.** Both sides touch it: `origin/master` has S1's snapshot-door change,
-  the worktree adds `careerPosition()`. Resolve in the worktree, never in the shared tree. The worktree's
-  version is measured **identical to `origin/master`** except for the peer refactor, so the collision is
-  narrower than it looks.
-- **`app/Models/Umamusume.php` is the one file that differs from both refs.** Land the union: `getRouteKeyName()`
-  plus `resolveRouteBinding()`, because moving binding to `slug` alone 404s every id-shaped link.
-- **A peer may land their own branch first.** Check `git log origin/master -- <path>` before applying group B;
-  equivalent content landed by another path means the diff comes back empty, which is success, not a failure.
-
----
+**Do not resolve the divergence by force-pushing or resetting.** 36 commits carry work from several sessions, and
+`git reset --hard` is forbidden by AGENTS.md §9 and by this repository's policy. The only safe shapes are merge or
+owner-approved rebase on a branch that has been backed up with `git branch backup/pre-rebase-<date>`.
 
 # Slice 0.2 - Regenerate `package-lock.json`
 
@@ -265,36 +178,28 @@ is green. Never both halves removed.
 
 ---
 
-# Slice 0.5 - Dispose of the 109 deletions (owner decision P-2)
+# Slice 0.5 - CLOSED: the 109 deletions are committed (owner decision P-2)
 
-## Objective
+**Nothing to execute. The premise lapsed.** Pass 1 measured 109 worktree deletions (90 `jev-inspect/`, 25
+`docs/audits/`). A peer committed all of them before this plan was acted on:
 
-The worktree deletes 90 `jev-inspect/` files (a foreign subproject, still tracked at `HEAD`) and 25
-`docs/audits/*.md` paths that were **moved** into subdirectories whose replacements are untracked. Neither
-class is this session's work, and both break tooling that walks `git ls-files`.
+- `e5fc0e1c docs(legacy): remove jev-inspect subtree`
+- `13ad587b` (the audit-document moves)
 
-## Steps
+Measured at `HEAD 2546689e`:
 
-1. Enumerate with their class:
-   ```bash
-   git status --porcelain -uall | grep '^ D' | awk '{print $2}' | sed 's|/.*||' | sort | uniq -c
-   ```
-   Expect `jev-inspect` 90, `docs/` 25.
-2. For each of the 25 `docs/audits` deletions, prove the replacement exists and is tracked in the branch
-   (`git ls-files docs/audits/reconciliation-rounds/...`). A deletion whose replacement is untracked is not
-   a move.
-3. Commit the deletion of `jev-inspect/` **with its reason in the commit body** (a foreign subproject that
-   duplicates another repository), or restore it (`git restore --source=HEAD -- jev-inspect`) if the owner
-   wants it kept.
-4. Verify no tracked path is left dangling:
-   `git status --porcelain -uall | grep -c '^ D'` -> a stated number, each explained.
+```
+git ls-tree -r --name-only HEAD -- jev-inspect   -> 0 files
+test -d jev-inspect                              -> absent
+git status --porcelain -uall | D rows            -> 1  (docs/research-scratch/INDEX.md, unrelated)
+```
 
-## Acceptance
+The worktree no longer carries any `jev-inspect/` deletion to dispose of, and the foreign subproject is gone from
+the repository rather than merely deleted on disk. **An executor must not run `git restore --source=HEAD --
+jev-inspect`**: that would resurrect a foreign tree the owner already removed.
 
-`git status --porcelain -uall | grep -c '^ D'` equals the number the owner ruled on; every remaining deletion
-is named in the commit body with its reason.
-
----
+The one remaining ` D` row, `docs/research-scratch/INDEX.md`, is a different question (a generated index awaiting
+regeneration) and is **not** part of this slice.
 
 # Slice 0.6 - Tree hygiene
 

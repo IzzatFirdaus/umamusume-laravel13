@@ -203,39 +203,47 @@ copy still exits non-zero (prove the guard did not swallow the signal).
 lore, no fences, no browser. The project therefore has no single command whose exit code means "the gates
 passed".
 
-## Steps
+## SUPERSEDED — EXECUTED, AND THE COMPOSER FORM WAS REFUTED
 
-1. Add a `gates` script to `composer.json`. Order matters: cheap and deterministic first, so a formatting
-   failure does not cost six minutes.
-   ```json
-   "gates": [
-       "@php artisan config:clear --ansi",
-       "@php tools/lore.php",
-       "@php tools/lore.php code",
-       "@php vendor/bin/pint --test --format agent",
-       "@php vendor/bin/phpstan analyse --no-progress --memory-limit=1G",
-       "npm run typecheck",
-       "node tools/ui-framework-check.mjs",
-       "@php tools/md_fence_check.py",
-       "@php artisan test --compact"
-   ]
-   ```
-   Notes that make this correct rather than plausible:
-   - `pint --test` with **no paths** checks the whole tree. That is safe **as a gate** because `--test`
-     writes nothing; the ban on `pint --dirty` is about a **writing** run in a shared worktree.
-   - `lore.php` is advisory and exits 0 by design; it belongs in the sequence for its *count*, and a reader
-     compares the figure. Do not make the gate fail on a count.
-   - The PHP suite needs a tty: `php artisan test --compact` inside a composer script inherits one. A
-     backgrounded run needs `< /dev/null`, which a composer script cannot express; document that.
-2. Do **not** include the browser suite. 876 cases at `workers: 1` is ~23 minutes; it is a checkpoint gate
-   (slice 2.6), not a pre-commit one.
-3. Verify:
-   ```bash
-   composer gates; echo "EXIT=$?"
-   ```
-   Expect exit 0 and the nine steps' summaries. Time it and record the duration.
-4. Prove it fails on what it claims: add a deliberate formatting violation to a scratch file under `app/`,
-   re-run, confirm non-zero, revert.
+The `gates` script this slice planned **does not work on this host**, and the reason is in the harness rather than
+in the JSON. Measured, in order:
+
+| Round | Command | Result |
+| --- | --- | --- |
+| 1 | `composer run gates` | `stdin is not a tty`, exit 1 |
+| 1 | `composer run lore` (single `@php` step) | exit 0, 610 hits |
+| 1 | each of the 9 steps as its own one-line Composer script | **all exit 0**, including `@php artisan test --filter=FanLadderTest` |
+| 2 | `bash tools/gates.sh --fast` (per-step `< /dev/null`) | 7 of 8 green; `typecheck` red on a peer's in-flight edit |
+
+A Composer script passes its caller's stdin straight through. The agent `terminal` tool supplies a **closed**
+stdin, and `artisan test` is the only step that opens it, so the whole script reports failure. Every individual
+step passes when run any other way. A tweak to the JSON cannot fix that, so the step shipped as a shell script that
+redirects stdin per step, and `composer.json` now just delegates:
+
+```json
+"gates": ["bash tools/gates.sh"]
+```
+
+**Two lines in the JSON above are actively dangerous and must not be reintroduced:**
+
+1. **`"@php tools/md_fence_check.py"` is a false green.** `@php` runs the PHP binary on a Python file: it prints
+   the source and **exits 0** while checking nothing. Measured `php tools/md_fence_check.py` -> exit 0, docstring
+   printed. The correct step is `python tools/md_fence_check.py`.
+2. **`"@php artisan test --compact"` inside a Composer script fails unattended** for the stdin reason above.
+
+**What actually shipped, and passes:**
+
+```
+bash tools/gates.sh        # all checks including the PHP suite
+bash tools/gates.sh --fast # everything except the PHP suite
+```
+
+The script also drops `config:clear` (it mutates `bootstrap/cache` for no gate value) and keeps the order cheap
+and deterministic first. Measured `--fast` summary: **`GATES: 1 failed: typecheck:1`**, with lore docs 610/75,
+lore code 365, pint passed, phpstan clean, ui-lint reporting findings, fences 0 invalid in 292 files. The single
+failure is a peer's uncommitted widening of a shared type, attributed in the execution plan.
+
+**Do not re-plan this slice. Read `tools/gates.sh`.**
 
 ## Files modified
 

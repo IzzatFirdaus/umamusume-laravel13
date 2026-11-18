@@ -54,4 +54,4 @@ read must not be invented.
 - `ADR-0020` (the 2.0 program), `ADR-0001` (§2 R4, §3 band vs numeric; its carve-out is left as it was),
   `ADR-0003` (the `turn_entries.energy` column this extends)
 - migration `2026_10_09_170000_add_energy_state_to_turn_entries`; `App\Enums\EnergyState`; `TurnEntry` casts
-- `docs/audits/rice-shower-unity-cup-ux-walk.md` (the D6 row); `AGENTS.md` §5, §11
+- `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk.md (the D6 row); `AGENTS.md` §5, §11

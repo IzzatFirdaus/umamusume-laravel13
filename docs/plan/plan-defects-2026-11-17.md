@@ -236,10 +236,50 @@ class) have no fan count and stay unrepresentable.
 only document that states a *class for a known fan count*, and it is what decides whether `Star` starts at
 100,000 or 160,000. The table above is derived from it; if the sentence has changed, the table changes with it.
 
-## Tests
+## SUPERSEDED — DO NOT EXECUTE ANY OF THE ABOVE
 
-`tests/Feature/FanLadderTest.php:41` currently asserts `classFor(240_000)` is `null`. That assertion **pins
-the one-band behaviour** and must be re-pinned, not deleted:
+**Landed and committed by a peer at `2546689e`'s line.** `config/uma.php` on disk and at `HEAD` both carry **7
+bands**, and `tests/Feature/FanLadderTest.php` is committed with the new boundary table. Measured
+`php artisan tinker --execute="echo count(config('uma.fan_ladder'));"` -> `7`.
+
+The shipped ladder keys each band's `from` to **that tier's own threshold**, which is what the client prints — a
+tier name sits beside the count that *reaches* it:
+
+```php
+['class' => 'Bronze',   'from' => 5000,       'to' => 20000,  'next_class' => 'Silver'],
+['class' => 'Silver',   'from' => 20000,      'to' => 50000,  'next_class' => 'Gold'],
+['class' => 'Gold',     'from' => 50000,      'to' => 100000, 'next_class' => 'Platinum'],
+['class' => 'Platinum', 'from' => 100000,     'to' => 160000, 'next_class' => 'Star'],
+['class' => 'Star',     'from' => 160000,     'to' => 240000, 'next_class' => 'Top Star'],
+['class' => 'Top Star', 'from' => 240000,     'to' => 320000, 'next_class' => 'Legend'],
+['class' => 'Legend',   'from' => 320000,     'to' => PHP_INT_MAX, 'next_class' => 'Legend'],
+```
+
+Note **`Bronze` starts at 5,000, not 0** — a count below 5,000 answers `null` and the renderer prints the bare
+count. That is deliberate and documented in the config comment.
+
+**Both of this slice's original artefacts are superseded, not just the array.** The config array above and the
+test table below both pin `Star` at `[100_000, 240_000)` and `Bronze` at `0`; the shipped values are
+`Star [160_000, 240_000)` and a null below 5,000. The committed test dataset, quoted from the file:
+
+```
+[5_000,'Bronze'] [19_999,'Bronze'] [20_000,'Silver'] [49_999,'Silver'] [50_000,'Gold'] [99_999,'Gold']
+[100_000,'Platinum'] [159_999,'Platinum'] [160_000,'Star'] [209_245,'Star'] [239_999,'Star']
+[240_000,'Top Star'] [319_999,'Top Star'] [320_000,'Legend'] [396_191,'Legend']
+```
+
+`FanLadderTest` runs **22 passed / 28 assertions** at this tree. **Do not rewrite it.** If a later slice needs the
+ladder changed, change it against `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:474` and re-pin the whole table in
+one edit, never one threshold at a time.
+
+**Everything below is kept as the record of what was planned, so the next reader can see why it lost.** It is not
+an instruction.
+
+## Original (superseded) plan
+
+## Tests (SUPERSEDED — the committed table is quoted above)
+
+The text below plans a re-pin that has since landed with different values. Read it as history:
 
 ```php
 it('places a count at each documented threshold in that threshold\'s class', function (int $fans, string $class): void {
@@ -296,16 +336,25 @@ with zero fans is Bronze per the pyramid), but a reviewer seeing it without the 
 
 Three declarations plus two inline shapes agree by hand today; one of them has already diverged.
 
-## Measured
+## Measured (re-read at `HEAD 2546689e` — most of this slice has already landed)
 
-| Site | Shape |
+| Site | State now |
 | --- | --- |
-| `resources/js/components/scenario/cards/GoalGroupCard.vue:22` | `GoalRow` with fan-gate fields |
-| `resources/js/components/scenario/cards/GoalGroupCard.vue:35` | `GoalGroup` |
-| `resources/js/pages/Career/Cockpit/Panels/CareerGoalsPanel.vue:21` | `GoalRow`, same fields |
-| `resources/js/pages/Career/Cockpit/Panels/CareerGoalsPanel.vue:34` | `GoalGroup` |
-| `resources/js/components/scenario/ScenarioCardGrid.vue:99` | `GoalGroup` with rows **inline**, same fields |
-| `resources/js/pages/Catalog/Show.vue:91` | `GoalRow` **diverged**: `year_label: string`, `turn: number`, no fan-gate fields |
+| `resources/js/types.ts:96` | **`export interface GoalRow`** — the single owner |
+| `resources/js/types.ts:109` | **`export interface GoalGroup`** — the single owner |
+| `resources/js/components/scenario/cards/GoalGroupCard.vue` | imports both; **no local declaration** |
+| `resources/js/pages/Career/Cockpit/Panels/CareerGoalsPanel.vue` | imports both; **no local declaration** |
+| `resources/js/components/scenario/ScenarioCardGrid.vue` | imports both; **no inline shape** |
+| `resources/js/pages/Catalog/Show.vue:91` | **still declares its own `GoalRow`**, and it genuinely differs: `label, state, year_label, turn, race_url, absence` — no fan-gate fields |
+
+**So five of the six sites are already unified. The whole remaining slice is `Catalog/Show.vue`.** `git grep
+'interface GoalRow' resources/js` returns exactly two hits, and one of them is the shared owner.
+
+**Do not extend the shared `GoalRow` to absorb `Catalog/Show.vue`'s shape.** They are different records that happen
+to share a name: the catalog one is a goal row for a *character's* goal list keyed on `turn`/`year_label`; the
+career one is a scenario goal keyed on its fan gate. Either rename the catalog shape (for example
+`CatalogGoalRow`) and leave it local, or give it its own exported interface in `types.ts` alongside the other. The
+first is the smaller change and the one this plan recommends.
 
 ## Steps
 

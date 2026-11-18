@@ -109,6 +109,8 @@ of the schema until a screen needs them.
   `tests/Feature/SkillSearchScreenTest.php`, `tests/Feature/EpithetRewardNamesTest.php`
 - docs/design-research/SKILLS-GAPS.md; docs/UMAMUSUME_REFERENCE.md §1.2.6, §2.7
 - `CONSTRAINTS.md` C-4, D-20, D-30, D-210; KI-5, KI-23, KI-24
+- Related: `ADR-0035` (the per-run hint level column and the price ladder), `ADR-0036` (the
+  Japanese-name search key added for the `japan_only` scope's own visible string)
 
 ## Dated amendment · 2026-10-27 · the hint discount ladder supersedes "no discounts"
 

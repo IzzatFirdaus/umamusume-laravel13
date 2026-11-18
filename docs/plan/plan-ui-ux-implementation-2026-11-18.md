@@ -276,3 +276,20 @@ skipped.
 
 **Repository state.** All changes remain uncommitted in the shared worktree; no commit or stage was
 authorized. `cfd8bd78` explicitly excluded this pair and the browser specs as peer-owned.
+## 11. Second browser pass: executed result at `816e923e`
+
+| Acceptance criterion | Status | Evidence |
+|---|---|---|
+| Every page-rendering route renders without a console error or a failed request | **MET** | 54 routes at 1440x900, 48 at 390x844; 0 of each |
+| No route scrolls sideways at 390 px | **MET** | 48-route post-fix sweep, 0 with document overflow. `/legacy` went `41` to `0`; the other routes were swept after the fix only, not before and after per route |
+| A tile never announces a figure and its bound as one run | **MET** | `1of 72` to `1 of 72`, pinned by `browser-walk-2026-11-18.spec.ts` |
+| An option card is selectable wherever it presents as one option | **MET** | 1/12 to 12/12 probe points; selection persists across reload |
+| A disabled primary action states its reason at the point of use | **MET on the Preflight footer** | `[data-ack-hint]` within 120 px of the button; absent when `canStart` is false so it does not compete with the page's own blocker sentence |
+| The suite is green for every file this work touched | **MET with one exception** | `wizard-actions`, `career-preflight`, `career-preflight-indep` 26/26; `dashboard`, `wizard-flow`, `accessibility` 29/30; the one red case (`career-scenario-select:147`) fails identically at HEAD and is KI-167 |
+| Contrast, target size and focus visibility re-measured | **PARTIAL** | Not re-measured in this pass beyond the axe scan in `accessibility.spec.ts` (7 cases, all green). The audit's own numbers are unchanged by this work |
+| Reduction under `prefers-reduced-motion` | **MET** | `accessibility.spec.ts` shell-transition case green |
+
+**Withdrawn from this pass as untrue:** the claim that no disabled control lacks a stated reason
+anywhere in the app. Only the Preflight footer was inspected for that property; the other surfaces
+were not swept for it.
+

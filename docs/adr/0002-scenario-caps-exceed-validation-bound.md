@@ -85,7 +85,7 @@ is asserted by `tests/Feature/ScenarioCapParityTest.php`; it is not restated her
   own header comment: the ceiling band "with the 1,200 halved-gains marker" was "deliberately not
   reused". `ScenarioCaps::ceilingsForRun()` still computes the known and the potential level, and its
   only callers are `tests/Feature/StatCeilingsTest.php`. **The supersession is recorded** in
-  `docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md` ("Stat-ceiling fourth marker —
+  `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk-resolutions.md ("Stat-ceiling fourth marker —
   Landed-superseded") **and not in this ADR set**, which is why `ADR-0015` and `ADR-0025` still read as
   if the two markers were on screen. What the framework adds for whoever rebuilds the band: the two
   markers are **graphical objects**, so WCAG 1.4.11's 3:1 attaches to each against the surface it is

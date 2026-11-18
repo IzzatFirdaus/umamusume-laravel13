@@ -1,7 +1,7 @@
 # ADR-0019: A semver label, a tag, and a release branch for a local-only tool
 
 <!-- ADR-CONTRACT
-  decision: proposed — the owner set the version (2.0.0) and the constraint that the release must not target master; the pre-release mechanism, the tag/branch scheme and the AGENTS.md correction await that ruling
+  decision: advisory (corrected 2026-10-23 by owner ruling) — the owner set the version (2.0.0) and the constraint that the release must not target master; the pre-release mechanism, the tag/branch scheme and the AGENTS.md correction await that ruling
   code: not built — nothing was tagged and nothing was published; VERSION.md and CHANGELOG.md exist at the root by owner direction
   superseded-by: —
   amended-by: —
@@ -120,6 +120,8 @@ conditions in the Decision.
 - Semantic Versioning 2.0.0 items 5, 6 and 9
 
 ## Ledger
+
+- 2026-11-18 · **contract/status alignment (roadmap slice 4.4)**. The contract line above originally read "decision: proposed — the owner set the version (2.0.0) ..."; it is preserved here. The Status line at :11 was corrected on 2026-10-23 by owner ruling from `Proposed` to `Advisory`, so the contract token was stale. The three awaited choices are still awaited; no tag or release branch is claimed by this field edit.
 
 - 2026-10-04 · **erratum — `VERSION.md` and `CHANGELOG.md` are at the root after all.** The owner directed
   that both be written at the root on the same day this ADR was drafted, which overrides the §3 objection the

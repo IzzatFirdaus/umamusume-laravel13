@@ -137,8 +137,37 @@ ids are the corpus's own.
 | **Do not** read ADR-0007 clause 1 as covering a client-side visit | it describes a server-rendered first navigation; on an Inertia visit the previous screen stays on screen | 0007, 0020 | `resources/js/spa.ts` | 0007 §Ledger |
 | The deck picker's one-copy rule is refused after the write, not by the control | the picker offers a card already equipped in another slot; `StoreDeckRequest` refuses the duplicate | 0014 | `DeckSelectController::picker()`; `StoreDeckRequest` | 0014 §Ledger |
 | A committed turn's correction is an in-place update | `runs.turns.update` writes the row in place; ADR-0027's `corrected_from`/`superseded_by` have no writer, and the Timeline reads `updated_at` | 0027 | `TrainingRunController::updateTurn()`; `Career/TimelineController` | 0027 §Ledger |
-| The two-marker ceiling condition is unbuilt | no shipped component draws the 1,200 halved-gains line or the ceiling marker | 0002 | `docs/audits/rice-shower-unity-cup-ux-walk-resolutions.md`; `CareerStatePanel.vue` | 0002 §Ledger |
+| The two-marker ceiling condition is unbuilt | no shipped component draws the 1,200 halved-gains line or the ceiling marker | 0002 | `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk-resolutions.md; `CareerStatePanel.vue` | 0002 §Ledger |
 | The design-authority ruling predates the framework corpus | `docs/framework-ui-ux/` states visual rules of its own (type scale, one accent, 44px) and no document says which wins | 0006 | `docs/framework-ui-ux/design-framework-index-2026-10-21.md` | 0006 §Ledger |
 | **Do not** read the SPA accessibility carry-across as covering contrast | ADR-0020 names four behaviours and cites no success criterion; no contrast pair is measured | 0020 | `DESIGN.md` §2.1; gate G-18 | 0020 §Ledger |
 | **Do not** read ADR-0021's pre-run pick blocker as a control-type problem | the pick screen mounts `TraineeCombobox`; the blocker is that it renders no frame | 0021 | `resources/js/pages/Runs/Create.vue` | 0021 §Ledger |
 | The filter refusal is presented in text and announced | `role="alert"`, `aria-invalid` and `aria-describedby` on the picker; the Decision pins the landing place, not the presentation | 0018 | `resources/js/components/catalog/TraineeCatalog.vue`; `Form/BaseSelect.vue` | 0018 §Ledger |
+
+## 11. Race gating, the idle mode, and the Veteran's one destructive door
+
+Six decisions whose schema shipped before their record did. Each was written on 2026-11-18 from the code and
+its tests; the date in `decision` is the ruling's date where one exists, and `proposed` where none does.
+
+| Fact | Value | decision | code | owner |
+|---|---|---|---|---|
+| The maiden lock is one run-level state, not a per-race column | `hasClearedMaidenLock()` answers once per surface; `maidenGates()` gates only grades 100/200/300/400/700, since 800 and 900 are the gate-clearers | 0031 | `TrainingRun::hasClearedMaidenLock()`, `maidenGates()`; migration `2026_10_27_120000_drop_per_race_maiden_gate_columns`; `MaidenGateColumnDroppedTest` | 0031 §Decision |
+| An imported run past the Debut's slot counts as cleared | the record check cannot fire for turns never played, so position is the fallback | 0031 | `TrainingRun::hasClearedMaidenLock()` (boundary `> 12`) | 0031 §Decision |
+| **Do not** restore a per-race gate column | the source states the rule once, for every standard race | 0031 | `MaidenGateColumnDroppedTest` pins all three absences | 0031 §What this does not license |
+| Independent Training is an overlay row on a run | one `independent_training_runs` row; the run still carries trainee, deck and scenario | 0032 | migration `2026_10_28_000000_create_independent_training_runs_table`; `IndependentTrainingRun`; `TrainingRun::isIndependent()` | 0032 §Decision |
+| The idle window closes by a scheduled tick, not a browser timer | the mode is meant to finish with the app closed | 0032 | `App\Console\Commands\CompleteIndependentTraining`; `IndependentTraining\Lifecycle` | 0032 §Decision |
+| **The mode has no Trainer-facing entry control** | the Preflight switch and policy radios were cut at `ae16ec88`; `StartCareerRequest::independentConfig()` is nullable and unreachable from any shipped control | 0032 | `resources/js/pages/Career/Preflight.vue`; `tests/browser/career-preflight-indep.spec.ts` | 0032 §Decision |
+| The completion payload is stored, not recomputed | the per-turn algorithm is unpublished, so `Simulator` is a calibrated approximation | 0032 | migration `2026_10_28_000100_add_result_to_independent_training_runs`; `IndependentTrainingSimulatorTest` | 0032 §Decision |
+| **Owed**: Independent Training has no PRD requirement | the migration flags it to the owner; US-10 is the closest anchor and does not cover it | 0032 | not landed | 0032 §Context |
+| A Veteran transfer is a request row that outlives the Veteran | lifecycle `offered` → `completed` \| `withdrawn`; `veteran_id` nullable with `nullOnDelete` | 0033 | migration `2026_11_14_023609_create_transfer_requests_table`; `TransferRequest` | 0033 §Decision |
+| A completed transfer stamps `veteran_label` before deleting the Veteran | the link nulls, so nothing else can resolve who was transferred | 0033 | `CompleteTransferRequest`; migration `2026_11_15_131115_fix_transfer_requests_table` | 0033 §Decision |
+| The reward is recorded, never paid out | no wallet or ledger exists in this build | 0033 | `TransferRequest::$reward`; `CompleteTransferRequest` | 0033 §What this does not license |
+| The Team Rank is the run's stored current state | `training_runs.team_rank`; the turn-event path stays for the editor's route | 0034 | migration `2026_11_15_143000_add_team_rank_to_training_runs`; `TrainingRun::latestTeamRank()` | 0034 §Decision |
+| One accessor resolves the rank for every surface | column first, latest reported turn event as fallback | 0034 | `TrainingRun::latestTeamRank()`; `CockpitTeamPanelTest` | 0034 §Decision |
+| `S+` is accepted as a rank and maps to no facility level | a panel must print the letter and invent no rung | 0034 | `TeamRankPayload::LETTERS`; `team_rank_ladder` | 0034 §Open |
+| A run records a hint level per pooled skill | `run_skills.hint_level`, nullable; null prices at base | 0035 | migration `2026_11_03_155641_add_hint_level_to_run_skills_table`; `RunSkill` cast; `StoreRunSkillRequest` | 0035 §Decision |
+| The hint ladder has one home and one reader | `config('uma.skills.hint_discount')`; `HintDiscount` | 0035 | `app/Services/HintDiscount.php`; `SkillHintLevelTest` | 0035 §Decision |
+| The hinted price is integer arithmetic | `intdiv($base * (100 - $discount), 100)`; the float form drifts at 180 SP Lv3 | 0035 | `HintDiscount::price()`; `tests/Feature/SkillHintLevelTest.php` | 0035 §Decision |
+| **Do not** import hint pools | a hint pool is a support-card fact; `ADR-0005` R37 stands | 0035, 0005 | — | 0035 §What this does not license |
+| A Japan-only skill is searched by a folded twin of `name_ja` | `skills.match_key_ja`, nullable, no default | 0036 | migration `2026_11_05_084524_add_match_key_ja_to_skills_table`; `App\Services\DataPipeline\JapaneseNameNormalizer` | 0036 §Decision |
+| Each search scope reads only the keys whose text it prints | `japan_only` reads `match_key_ja`; `all` reads all three | 0036 | `SkillController` scope search; `SkillSearchScreenTest` | 0036 §Decision |
+| **Do not** back-fill `match_key_ja` in SQL | a second fold implementation would drift from the normalizer | 0036 | migration leaves the column to the parser | 0036 §Decision |

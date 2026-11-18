@@ -4,7 +4,7 @@
   decision: accepted (owner ruling 2026-09-27) — Energy, TurnEvent, race/slot and race-entry tables land as one amendment
   code: built — migrations 2026_09_26_162818 (turn_entries), 2026_09_27_153416 (scenario_slots), tests/Feature/Adr0003SchemaTest.php
   superseded-by: —
-  amended-by: 0009 (R3 narrowed: URA Finale slot seeding became Option A), 0015 (decision 6's bound, read per-stat), 0024 (adds energy_state/energy_band beside turn_entries.energy)
+  amended-by: 0009 (R3 narrowed: URA Finale slot seeding became Option A), 0015 (decision 6's bound, read per-stat), 0024 (adds energy_state/energy_band beside turn_entries.energy), 0031 (drops the per-race maiden gate columns this ADR created)
   open: RaceEntry's retired scenario_race_id column is still to be dropped, blocked on a populated scenario_slots and the Trackblazer attribution question (KI-10)
 -->
 
@@ -107,7 +107,8 @@ Trainer-chosen races have no slot in any future, sourced version of this table e
 ## Links
 
 - `ADR-0004` (aptitudes and the `scenarios` table), `ADR-0001` (its §5 schema lives here), `ADR-0002`
-  (bound), `ADR-0009` (slot seeding, which narrowed R3), `ADR-0015` (decision 6)
+  (bound), `ADR-0009` (slot seeding, which narrowed R3), `ADR-0015` (decision 6), `ADR-0031` (drops the
+  per-race maiden gate columns created here, for one run-level state)
 - `PRD.md` US-3, US-4, US-10, FR-C, OQ-4, §6.11; `docs/UMAMUSUME_REFERENCE.md` §1.3.4
 - `tests/Feature/Adr0003SchemaTest.php`, `tests/Feature/Schema/RaceEntrySlotLinkTest.php`
 - `config/scenarios.php` (`grade_objectives` carries all three Grade Point tracks)

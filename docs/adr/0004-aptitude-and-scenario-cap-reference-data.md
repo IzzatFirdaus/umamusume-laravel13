@@ -76,7 +76,7 @@ Which reading wins when a scenario document and the stored catalogue disagree:
   and no edit of stored data to match a document (`AGENTS.md` §5 gates the display path and forbids
   renaming or rewriting dataset values to satisfy a reading).
 
-Applied once so far: D8 of `docs/audits/rice-shower-unity-cup-ux-walk.md` reported the picker showing
+Applied once so far: D8 of `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk.md reported the picker showing
 Mile C / Front B / Late C against the `[Rosy Dreams]` document's B / A / B. The committed export carries
 `["A","G","E","C","A","A","B","A","C","G"]`, the seed and the mapping reproduce it letter for letter, and
 `TraineeSelectController::aptitudes()` is faithful — so the catalogue stands, the document carries the

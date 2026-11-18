@@ -109,7 +109,7 @@ held last month.
 - migration `2026_10_12_140000_add_entered_caps_to_training_runs_table`; `App\Services\ScenarioCaps`
   (`ENTERED_CAPS`, `forRun()`); `App\Http\Requests\Concerns\ValidatesEnteredCaps`
 - `tests/Feature/EnteredStatCapsTest.php`, `tests/Feature/StatCeilingsTest.php`
-- `docs/audits/rice-shower-unity-cup-ux-walk.md` §1.2 and §1.5 (the run report's own correction)
+- `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk.md §1.2 and §1.5 (the run report's own correction)
 - `docs/framework-ui-ux/design-framework-index-2026-10-21.md` (the re-check table); rules UX-4, UX-2,
   GP-2, TOG-3
 

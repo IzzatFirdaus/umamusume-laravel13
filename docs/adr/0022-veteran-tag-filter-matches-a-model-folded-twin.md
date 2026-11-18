@@ -65,3 +65,4 @@ the same reason.
   `app/Actions/ListVeterans.php`; `app/Actions/RecordVeteran.php`
 - `tests/Feature/VeteranLibraryTest.php`, `tests/Feature/LegacyLabPageTest.php`;
   `ARCHITECTURE-ESSENTIALS.md` (the `veterans` line)
+- Related: `ADR-0033` (the transfer request, the one door that deletes a Veteran from the library this ADR filters)

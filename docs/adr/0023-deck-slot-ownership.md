@@ -79,4 +79,4 @@ with separate sources, and this column says nothing about them.
 - `ADR-0014` (the deck it adds to; the erratum there), `ADR-0020` (the 2.0 program), `PRD.md` FR-A-4, FR-A-9
 - migration `2026_10_09_120000_add_ownership_to_deck_slots_table`; `DeckSlot::OWNERSHIP`,
   `DeckSlot::booted()`; `StartCareerRequest::ownershipByPosition()`, `StoreDeckRequest::ownershipByPosition()`
-- `docs/audits/rice-shower-unity-cup-ux-walk.md` (the D3 measurement)
+- `AUDIT-AND-VERIFICATION.md` §rice-shower-unity-cup-ux-walk.md (the D3 measurement)

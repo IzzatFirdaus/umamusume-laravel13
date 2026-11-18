@@ -1,7 +1,7 @@
 # ADR-0028: Frontend architecture — named primitives over utility spells
 
 <!-- ADR-CONTRACT
-  decision: proposed — adopt the HFW's design-system architecture (tokens, named primitives, components, checked pages) inside the existing Inertia + Vue 3 + Tailwind v4 stack, with the HFW as a source of measurements rather than an implementation
+  decision: accepted (2026-10-22) — adopt the HFW's design-system architecture (tokens, named primitives, components, checked pages) inside the existing Inertia + Vue 3 + Tailwind v4 stack, with the HFW as a source of measurements rather than an implementation
   code: not built — no primitive layer exists in resources/css/app.css; tools/ui-lint.mjs (2 rules, 2-entry allowlist) is the only visual check
   superseded-by: —
   amended-by: —
@@ -151,6 +151,8 @@ Recorded so a later pass does not re-propose them.
 8. **No re-litigation** of `ADR-0006`, `ADR-0021`, `G-SK-20`, `D-101` or `G-19`.
 
 ## Ledger
+
+- 2026-11-18 · **contract/status alignment (roadmap slice 4.4)**. The contract line above originally read "decision: proposed — adopt the HFW's design-system architecture ..."; that was true of the draft and is preserved here. The Status line at :11 has read "Accepted (2026-10-22)" since the owner accepted it, so the machine-readable field was stale. Only the standing token changed; the `code: not built` line stands, because the named primitive layer is still post-tag work (roadmap slice 5.4), and FQ-01..FQ-09 remain unanswered.
 
 - 2026-10-22 · **correction pass** — the Context's "115 literal hex colours" is the **whole-file**
   figure; the number the framework check will forbid is **21**, the literals inside rules, because the

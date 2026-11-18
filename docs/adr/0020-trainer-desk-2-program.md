@@ -121,6 +121,7 @@ shape 1 and is a separate, later slice; **it is not authorized by this ADR.**
 - `docs/UMAMUSUME_REFERENCE.md` §1.1 (Energy constants), §1.5 (Sparks/affinity)
 - `docs/framework-ui-ux/design-framework-index-2026-10-21.md` (the re-check table); rules WCAG-1, WCAG-2,
   WCAG-8, H1, TOG-1, NRM-6
+- Related: `ADR-0032` (the idle mode's overlay row, a run shape this program's cockpit renders beside a career)
 
 ## Ledger
 
