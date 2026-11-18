@@ -125,6 +125,11 @@ class StoreLegacySelectionRequest extends FormRequest
             'legacies.*.ancestors_rank_letters' => ['nullable', 'array'],
             'legacies.*.ancestors_rank_letters.*' => ['nullable', 'string', Rule::in(LegacySelectionPayload::RANK_LETTERS)],
             'legacies.*.ancestors_rank' => ['nullable', 'array'],
+            // C3's distinguishing labels: one optional word per ancestor, aligned by index. The
+            // payload's own normaliser refuses a row over 255 characters, so the request states the
+            // same bound the storage enforces.
+            'legacies.*.ancestors_labels' => ['nullable', 'array'],
+            'legacies.*.ancestors_labels.*' => ['nullable', 'string', 'max:255'],
             'legacies.*.ancestors_rank.*' => ['nullable', 'integer', 'min:0'],
             'legacies.*.sparks' => ['present', 'array'],
             'legacies.*.sparks.*.kind' => ['required', 'string', Rule::in(LegacySelectionPayload::SPARK_KINDS)],

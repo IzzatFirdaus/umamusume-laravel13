@@ -189,7 +189,7 @@ final readonly class LegacySelectionPayload
         self::assertKeysAllowing(
             $legacy,
             self::LEGACY_KEYS,
-            ['ancestors_meta', 'rank_letter', 'ancestors_sparks', 'ancestors_rank_letters', 'ancestors_rank', 'name', 'pick'],
+            ['ancestors_meta', 'rank_letter', 'ancestors_sparks', 'ancestors_rank_letters', 'ancestors_rank', 'ancestors_labels', 'name', 'pick'],
             "Legacy #{$index}",
         );
 
@@ -289,6 +289,14 @@ final readonly class LegacySelectionPayload
 
         if ($ancestorRanks !== null) {
             $record['ancestors_rank'] = $ancestorRanks;
+        }
+
+        // The distinguishing labels, the same aligned-by-index shape the ranks and Sparks use; stored
+        // only when the Trainer stated at least one, so an unlabelled payload keeps its exact shape.
+        $ancestorLabels = self::ancestorsLabels($index, $legacy['ancestors_labels'] ?? null, $record['ancestors']);
+
+        if ($ancestorLabels !== null) {
+            $record['ancestors_labels'] = $ancestorLabels;
         }
 
         return $record;
@@ -400,6 +408,57 @@ final readonly class LegacySelectionPayload
         }
 
         return array_filter($rows) === [] ? null : $rows;
+    }
+
+    /**
+     * The optional per-ancestor distinguishing label, aligned by index with the ancestor names.
+     *
+     * Two ancestors the client spells the same are storable only if the Trainer can say which is
+     * which on read-back (plan §C3): the label is that word, entered never computed, and a row that
+     * states none stores nothing rather than an empty string.
+     *
+     * @param  list<string|null>  $ancestors
+     * @return list<string|null>|null
+     */
+    private static function ancestorsLabels(int|string $index, mixed $value, array $ancestors): ?array
+    {
+        if ($value === null) {
+            return null;
+        }
+
+        if (! is_array($value)) {
+            throw new InvalidArgumentException("Legacy #{$index} ancestors_labels is not a list.");
+        }
+
+        if (count($value) !== count($ancestors)) {
+            throw new InvalidArgumentException(
+                "Legacy #{$index} names ".count($ancestors).' ancestors but carries '.count($value).' labels.',
+            );
+        }
+
+        $rows = [];
+
+        foreach (array_values($value) as $labelIndex => $label) {
+            $where = "Legacy #{$index} ancestor label #{$labelIndex}";
+
+            if ($label === null || $label === '') {
+                $rows[] = null;
+
+                continue;
+            }
+
+            if (! is_string($label)) {
+                throw new InvalidArgumentException("{$where} is a string or null.");
+            }
+
+            if (mb_strlen($label) > 255) {
+                throw new InvalidArgumentException("{$where} exceeds 255 characters.");
+            }
+
+            $rows[] = $label;
+        }
+
+        return array_filter($rows, static fn ($row): bool => $row !== null) === [] ? null : $rows;
     }
 
     /**

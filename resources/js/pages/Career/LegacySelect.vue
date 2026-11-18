@@ -77,6 +77,8 @@ const props = defineProps<{
             rank_letter: string | null;
             is_guest: boolean;
             ancestors: (string | null)[];
+            /** C3's distinguishing labels, aligned by index; absent on an unlabelled payload. */
+            ancestors_labels?: (string | null)[];
             ancestors_rank_letters: (string | null)[];
             ancestors_rank: (number | null)[];
             ancestors_sparks: { kind: string; target: string | null; stars: number | null }[][];
@@ -154,6 +156,7 @@ const form = useForm({
         rank_letter: legacy.rank_letter ?? '',
         is_guest: legacy.is_guest,
         ancestors: [(legacy.ancestors[0] ?? '') as string, (legacy.ancestors[1] ?? '') as string] as [string, string],
+        ancestors_labels: (legacy.ancestors_labels ?? []).map((label) => label ?? ''),
         ancestors_rank_letters: (legacy.ancestors_rank_letters ?? []).map((letter) => letter ?? ''),
         ancestors_rank: (legacy.ancestors_rank ?? []).map((rank) => (rank === null ? '' : String(rank))),
         ancestors_sparks: (legacy.ancestors_sparks ?? []).map((list) =>
@@ -187,6 +190,7 @@ while (form.legacies.length < 2) {
         rank_letter: '',
         is_guest: false,
         ancestors: ['', ''],
+        ancestors_labels: ['', ''],
         ancestors_rank_letters: [],
         ancestors_rank: [],
         ancestors_sparks: [],
@@ -209,6 +213,9 @@ const saving = (): void => {
             rank: legacy.rank === '' ? null : Number(legacy.rank),
             rank_letter: legacy.rank_letter === '' ? null : legacy.rank_letter,
             ancestors_rank_letters: legacy.ancestors_rank_letters.map((letter: string) => (letter === '' ? null : letter)),
+            // C3: a blank label is the absence, so the payload's own all-null drop keeps an
+            // unlabelled payload byte-identical to the shape it had before the key existed.
+            ancestors_labels: legacy.ancestors_labels.map((label: string) => (label === '' ? null : label)),
             ancestors_rank: legacy.ancestors_rank.map((rank: string) => (rank === '' ? null : Number(rank))),
             ancestors_sparks: legacy.ancestors_sparks.map((list) =>
                 list
@@ -237,7 +244,12 @@ const saving = (): void => {
         // so an `onMounted` hook would never re-run, and taking focus on a cold load would steal it
         // from a Trainer who has not acted yet (WCAG 2.4.3). The `id` is on the button itself, because
         // an `id` on a non-focusable wrapper makes `.focus()` a silent no-op.
-        onSuccess: () => {
+        //
+        // `onFinish`, not `onSuccess`: the button carries `:disabled="form.processing"`, and the
+        // browser refuses `.focus()` on a disabled control. `processing` is still true inside
+        // `onSuccess`, so focusing there was a silent no-op that left focus on `body` — the exact
+        // WCAG 2.4.3 failure this line exists to prevent. `onFinish` runs after the flag clears.
+        onFinish: () => {
             nextTick(() => document.getElementById('legacy-save')?.focus());
         },
     });

@@ -144,6 +144,8 @@ final class AncestryGraph
         $ancestorRankLetters = $legacy['ancestors_rank_letters'] ?? [];
         /** @var list<mixed> $ancestorRanks */
         $ancestorRanks = $legacy['ancestors_rank'] ?? [];
+        /** @var list<mixed> $ancestorLabels */
+        $ancestorLabels = $legacy['ancestors_labels'] ?? [];
 
         // `$ancestorName`, not `$name`: the loop variable must not shadow the parent node's own name
         // parameter, or the last ancestor read wins and Parent A renders as her own grandparent. That
@@ -170,6 +172,11 @@ final class AncestryGraph
             $ancestors[] = [
                 'slot' => $label,
                 'name' => $ancestorName === null ? null : (string) $ancestorName,
+                // The Trainer's distinguishing word for this node (plan §C3): printed beside the name
+                // on read-back, and null when no label was stated — never a computed stand-in.
+                'label' => isset($ancestorLabels[$index]) && is_string($ancestorLabels[$index])
+                    ? $ancestorLabels[$index]
+                    : null,
                 // The grandparent's own rank, stated the way a parent's is: the letter, the star count the
                 // Trainer read, and the sentence the read-back prints when no letter was recorded (R3-09).
                 'rank' => $ancestorRanks[$index] ?? null,

@@ -32,6 +32,8 @@ interface AncestorSparkDraft {
 /** The slice of a legacy draft row this node edits. The page's own type satisfies it. */
 interface AncestorLegacyDraft {
     ancestors: (string | null)[];
+    /** C3's distinguishing label per ancestor, aligned by index; null is "not stated". */
+    ancestors_labels: (string | null)[];
     ancestors_rank_letters: (string | null)[];
     ancestors_rank: (number | string | null)[];
     ancestors_sparks: AncestorSparkDraft[][];
@@ -117,6 +119,23 @@ function removeSpark(sparkIndex: number): void {
         <p v-if="props.error" :id="`${id('ancestor')}-error`" class="mt-1 text-xs text-risk">
             {{ props.error }}
         </p>
+
+        <!--
+          The distinguishing label (plan §C3): when the client spells two grandparents the same, this
+          one word is what read-back prints beside the stored name so a Trainer can tell which node a
+          recorded Spark came from. Entered, never computed; blank stores nothing.
+        -->
+        <label class="mt-2 block text-xs font-medium text-ink" :for="id('ancestor-label')">
+            Distinguishing label (optional)
+        </label>
+        <BaseInput
+            :id="id('ancestor-label')"
+            v-model="props.legacy.ancestors_labels[props.ancestorIndex]"
+            type="text"
+            autocomplete="off"
+            placeholder="e.g. Daiwa A"
+            maxlength="255"
+        />
 
         <!--
           The node's two rank fields. Ranks are unbounded and a blank stays not recorded (ADR-0010

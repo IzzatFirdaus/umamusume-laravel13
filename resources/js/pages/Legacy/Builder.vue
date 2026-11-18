@@ -82,6 +82,8 @@ interface ParentNode {
     ancestors: {
         slot: string;
         name: string | null;
+        /** The Trainer's distinguishing word for this node; null when none was stated (plan §C3). */
+        label: string | null;
         rank: number | null;
         rank_letter: string | null;
         rank_label: string;
@@ -214,6 +216,8 @@ const form = useForm({
         // an absent array is a render-time throw that empties the whole editor subtree), and the server
         // requires `legacies.*.ancestors` to be present, so omitting it would refuse every save.
         ancestors: parent.ancestors.map((ancestor) => ancestor.name ?? ''),
+        // The graph's own distinguishing labels, when the stored payload carried them (plan §C3).
+        ancestors_labels: parent.ancestors.map((ancestor) => ancestor.label ?? ''),
         ancestors_rank_letters: parent.ancestors.map((ancestor) => ancestor.rank_letter ?? ''),
         ancestors_rank: parent.ancestors.map((ancestor) =>
             ancestor.rank === null || ancestor.rank === undefined ? '' : String(ancestor.rank),
