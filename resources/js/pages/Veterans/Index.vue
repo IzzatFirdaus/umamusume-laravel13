@@ -400,7 +400,7 @@ const factorGrades: { family: string; note: string }[] = [
             <!-- `relative` is load-bearing, not decoration: the table's `sr-only` spans are absolutely
                  positioned, and without a positioned scroll container they resolve against the initial
                  containing block and add their static offset to the document's scrollable overflow. -->
-            <div class="relative min-w-0 overflow-x-auto">
+            <div class="relative min-w-0 overflow-x-auto" role="region" tabindex="0" aria-label="Veterans, scrollable">
                 <table class="t">
                     <thead>
                         <tr>
@@ -537,7 +537,7 @@ const factorGrades: { family: string; note: string }[] = [
         <div class="mt-3.5 grid grid-cols-1 gap-3.5 min-[821px]:grid-cols-2">
             <Card as="section" aria-labelledby="veteran-spark-grades" class="min-w-0">
                 <h2 id="veteran-spark-grades">Spark grades</h2>
-                <div class="min-w-0 overflow-x-auto">
+                <div class="min-w-0 overflow-x-auto" role="region" tabindex="0" aria-label="Spark grades, scrollable">
                 <table class="t">
                     <thead>
                         <tr><th scope="col">Family</th><th scope="col">Carries</th></tr>

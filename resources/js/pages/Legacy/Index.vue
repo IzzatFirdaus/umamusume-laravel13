@@ -70,7 +70,7 @@ const tdNum = 'border-b border-rule px-2 py-3 text-right align-top font-mono tex
                     becomes a pair this list can compare.
                 </p>
 
-                <div v-else class="mt-3 overflow-x-auto">
+                <div v-else class="mt-3 overflow-x-auto" role="region" tabindex="0" aria-label="Saved legacies, scrollable">
                     <table class="w-full border-collapse">
                         <caption class="sr-only">Recorded inheritance pairs, with each parent and the blue sparks the pair carries</caption>
                         <thead>

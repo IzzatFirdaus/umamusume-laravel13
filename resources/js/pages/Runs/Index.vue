@@ -217,7 +217,7 @@ const fieldControl = 'min-h-11 rounded-md border border-rule bg-panel px-3 text-
             </template>
         </div>
 
-        <div v-else class="card mt-4 overflow-x-auto">
+        <div v-else class="card mt-4 overflow-x-auto" role="region" tabindex="0" aria-label="Training runs, scrollable">
             <table class="w-full text-sm">
                 <thead>
                     <tr class="border-b border-rule text-left text-xs font-semibold uppercase tracking-wider text-ink-muted">

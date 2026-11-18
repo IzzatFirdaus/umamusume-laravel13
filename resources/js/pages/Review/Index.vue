@@ -151,15 +151,10 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                      no inset of its own, and a card's `p-4` plus its border is 17px of inset. The
                      parity comparison does not need the wrapper: its leading `card` marker already
                      resolves to the reference cards below. -->
-                <!-- `min-w-0` is load-bearing: a block-level `overflow-x-auto` still refuses to shrink
-                     below its table's intrinsic width once it sits in a flex or grid item. Without it
-                     the wrapper scrolled its own content but the page scrolled with it (UX-07's mobile
-                     half). `table-fixed` below `md` is the second half: a table's intrinsic width comes
-                     from its longest unbreakable cell, and `w-full` alone cannot beat that, so the page
-                     still reported 431px of scroll on a 390px viewport. -->
-                <div class="mt-3 min-w-0 overflow-x-auto rounded-md border border-rule bg-raised">
+                <!-- Keep narrow-screen columns readable inside the keyboard-scrollable region. -->
+                <div class="mt-3 min-w-0 overflow-x-auto rounded-md border border-rule bg-raised" role="region" tabindex="0" aria-label="Pending match candidates, scrollable">
                     <h2 id="review-queue-heading" class="text-lg font-semibold text-ink-strong">Pending</h2>
-                    <table class="w-full table-fixed border-collapse md:table-auto">
+                    <table class="w-full min-w-2xl border-collapse md:min-w-0">
                         <caption class="sr-only">Pending match candidates, with the question each answers and the best match found</caption>
                         <thead>
                             <tr>
@@ -196,7 +191,10 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                                             :source-key="candidate.source_key"
                                         />
                                     </template>
-                                    <span v-else class="pill pill-neutral">No match</span>
+                                    <!-- DESIGN.md §5(b): the badge owns the one provenance word. A
+                                         second "No match" pill for a non-Fuzzy row stated the same
+                                         tier fact twice (A-96), so it is dropped here. -->
+                                    <span v-else-if="candidate.match_tier === 'Fuzzy'" class="pill pill-neutral">No match</span>
                                 </td>
                                 <td :class="[tdNum, 'text-right']">
                                     <!-- `ProvenanceBadge` is the single owner of the state word
@@ -227,7 +225,7 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                 <section class="card" aria-labelledby="review-signals-heading">
                     <h2 id="review-signals-heading">How a match is decided</h2>
 
-                    <div class="mt-3 overflow-x-auto">
+                    <div class="mt-3 overflow-x-auto" role="region" tabindex="0" aria-label="How a match is decided, scrollable">
                         <table class="t w-full text-sm">
                             <caption class="sr-only">The signals a match is decided on and what each is worth</caption>
                         <thead>

@@ -11,8 +11,9 @@
  *
  * The page pattern is `Career/RaceDecision.vue`'s: `CareerLayout`, page-level loading and error
  * roles, and every figure composed server-side. The hint-discount ladder (UMAMUSUME_REFERENCE.md
- * §1.1.4) renders from a server prop, but the base prices above it stay base: a discount applies
- * only when a hint level sits on the skill, and no column records one, so no row is re-priced.
+ * §1.1.4) renders from a server prop. A discount applies once a hint level sits on the skill, and
+ * `run_skills.hint_level` records one per run, so a row that carries a level is re-priced from the
+ * ladder and a row that carries none stays at its base price (ADR-0035).
  */
 import CareerLayout from '../../layouts/CareerLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
@@ -579,7 +580,7 @@ const coverageConstants = computed(() =>
             <h2 id="skills-table-heading" class="sr-only">Skills</h2>
             <p v-if="filteredRows.length === 0" class="text-sm text-ink">{{ search === '' ? 'No skill is recorded on this run yet.' : 'No skill matches that search.' }}</p>
             <template v-else>
-                <div class="overflow-x-auto">
+                <div class="overflow-x-auto" role="region" tabindex="0" aria-labelledby="skills-table-heading">
                     <table class="t w-full min-w-[44rem] border-collapse text-sm">
                         <thead>
                             <tr>

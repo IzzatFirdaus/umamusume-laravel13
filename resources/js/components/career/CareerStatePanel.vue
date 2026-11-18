@@ -329,7 +329,7 @@ function percent(stat: Stat): number {
                 Mood effect at every tier
             </summary>
 
-            <div class="mt-2 overflow-x-auto">
+            <div class="mt-2 overflow-x-auto" role="region" tabindex="0" aria-label="Mood bonus by tier, scrollable">
                 <table class="w-full text-sm">
                     <caption class="sr-only">The training and pre-race bonus at each of the five mood tiers</caption>
                     <thead>

@@ -279,7 +279,7 @@ const isPal = (card: Card): boolean => card.type === 'friend';
             <!-- `relative` is load-bearing: the sr-only cell label below is absolutely positioned, and an
              absolutely positioned child of a static `overflow-x-auto` box escapes the scroller and widens
              the document, which is the 1.4.10 reflow failure this card had at 320px. -->
-            <div class="card relative mt-4 overflow-x-auto">
+            <div class="card relative mt-4 overflow-x-auto" role="region" tabindex="0" aria-label="Support cards, scrollable">
                 <table class="w-full border-collapse">
                     <thead>
                         <tr>
@@ -378,7 +378,7 @@ const isPal = (card: Card): boolean => card.type === 'friend';
             </div>
 
             <div class="mt-4 grid gap-4 g-2">
-                <div class="card overflow-x-auto">
+                <div class="card overflow-x-auto" role="region" tabindex="0" aria-label="The seven types, scrollable">
                     <h2>The seven types</h2>
                     <table class="w-full border-collapse">
                         <thead>
@@ -407,7 +407,7 @@ const isPal = (card: Card): boolean => card.type === 'friend';
                     </p>
                 </div>
 
-                <div class="card overflow-x-auto">
+                <div class="card overflow-x-auto" role="region" tabindex="0" aria-label="Effects that decide a deck slot, scrollable">
                     <h2>Effects that decide a deck slot</h2>
                     <table class="w-full border-collapse">
                         <tbody>

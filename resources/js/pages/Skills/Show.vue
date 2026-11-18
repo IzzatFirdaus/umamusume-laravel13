@@ -394,7 +394,8 @@ function relatedCount(type: 'sameCondition' | 'sameClassCode' | 'sameClassCodeAn
                             <template v-else>
                                 This skill's class states no SP cost, so no hint-level price can be computed.
                             </template>
-                            No run stores a hint level, so no row is marked as a level a run holds.
+                            A run may record a hint level for this skill, and when it does the price is
+                            read from the configured ladder rather than from the base cost.
                         </span>
                     </p>
                 </section>
@@ -519,8 +520,9 @@ function relatedCount(type: 'sameCondition' | 'sameClassCode' | 'sameClassCodeAn
                         <span class="g" aria-hidden="true">○</span>
                         <span class="flex-1">
                             A hint belongs to the run that earned it, so it is shown per run and not as a
-                            catalogue property. No table stores a hint level; the level column is the
-                            unique-skill level the run recorded, where one exists.
+                            catalogue property. A run that records a hint level stores it on its own skill
+                            row; the level column is the unique-skill level the run recorded, where one
+                            exists.
                         </span>
                     </p>
                 </section>
@@ -599,7 +601,7 @@ function relatedCount(type: 'sameCondition' | 'sameClassCode' | 'sameClassCodeAn
                             View {{ props.compareSkill.name }} alone →
                         </a>
                     </div>
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto" role="region" tabindex="0" aria-label="Skill comparison, scrollable">
                         <table class="t w-full table-fixed border-collapse text-sm">
                             <thead>
                                 <tr class="border-b border-rule">

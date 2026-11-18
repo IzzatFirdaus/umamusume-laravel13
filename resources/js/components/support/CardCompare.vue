@@ -127,7 +127,7 @@ const getStage = (card: { stages: EffectStage[] }, effectId: number): EffectStag
 
         <template v-else>
             <!-- Card headers -->
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto" role="region" tabindex="0" aria-label="Card effects, side by side, scrollable">
                 <table class="t min-w-max">
                     <thead>
                         <tr>

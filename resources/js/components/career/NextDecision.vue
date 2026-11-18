@@ -343,7 +343,7 @@ const incompleteData = computed(
                  wrapper, not a named region with a tab stop: the Advisor card already carries both
                  (`AdvisorRail.vue`), and a second nested region would add a second stop to reach the
                  same content. Same shape `CareerStatePanel` and `RacePlanner` use. -->
-            <div class="mt-2 overflow-x-auto">
+            <div class="mt-2 overflow-x-auto" role="region" tabindex="0" aria-label="Obligations, scrollable">
             <table class="t mt-2 w-full border-collapse text-sm">
                 <thead>
                     <tr><th class="text-left">Obligation</th><th class="text-left">State</th><th class="text-right">Due</th></tr>

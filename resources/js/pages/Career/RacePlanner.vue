@@ -251,11 +251,14 @@ const racesUrl = computed(() => props.run.races_url);
             <section class="card" aria-labelledby="held-heading">
                 <h2 id="held-heading">Held figures</h2>
                 <p class="mt-1 text-sm">Win probability: <b class="nai" :title="props.held.win_probability.title">{{ props.held.win_probability.label }}</b></p>
+                <p class="mt-1 text-xs text-ink-muted">{{ props.held.win_probability.title }}</p>
                 <p class="mt-1 text-sm">Expected risk: <b class="nai" :title="props.held.expected_risk.title">{{ props.held.expected_risk.label }}</b></p>
+                <p class="mt-1 text-xs text-ink-muted">{{ props.held.expected_risk.title }}</p>
             </section>
             <section class="card" aria-labelledby="readiness-heading">
                 <h2 id="readiness-heading">Readiness</h2>
                 <p class="mt-1 text-sm"><span :title="props.readiness.title">{{ props.readiness.label }}</span></p>
+                <p class="mt-1 text-xs text-ink-muted">{{ props.readiness.title }}</p>
             </section>
         </div>
 
@@ -348,7 +351,7 @@ const racesUrl = computed(() => props.run.races_url);
                     <span class="text-ink-muted">{{ chosen.length }} races selected</span>
                     <button type="button" class="btn btn-sm min-h-11" @click="clearSelection">Clear selection</button>
                 </div>
-                <div class="mt-2 overflow-x-auto">
+                <div class="mt-2 overflow-x-auto" role="region" tabindex="0" aria-label="Race plan, scrollable">
                     <table class="t w-full min-w-[40rem] border-collapse text-sm">
                         <thead>
                             <tr>
@@ -378,7 +381,7 @@ const racesUrl = computed(() => props.run.races_url);
                      is the question a target exists to answer. -->
                 <p class="mt-3 text-[10px] font-extrabold uppercase tracking-[0.06em] text-ink-muted">Target alignment</p>
                 <p v-if="!props.alignment.recorded" class="text-sm text-ink-muted">{{ props.alignment.absence }}</p>
-                <div v-else class="mt-1 overflow-x-auto">
+                <div v-else class="mt-1 overflow-x-auto" role="region" tabindex="0" aria-label="Race comparison and alignment, scrollable">
                     <table class="t w-full min-w-[40rem] border-collapse text-sm">
                         <thead>
                             <tr>
