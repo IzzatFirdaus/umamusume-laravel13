@@ -18,20 +18,20 @@ re-derive before executing, and treat each `[M]` as a reading at a stated moment
 
 | Item | Reading | Re-derive with |
 | --- | --- | --- |
-| `HEAD` | `be8893a2` | `git rev-parse --short HEAD` |
+| `HEAD` | **`2546689e`** (`be8893a2` when this baseline was first taken; a peer has since landed 21 commits) | `git rev-parse --short HEAD` |
 | `origin/master` | `0bb3efd0` (PR #27, the S1 snapshot pipeline, merged) | `git rev-parse --short origin/master` |
-| Divergence | **8 behind / 15 ahead** | `git rev-list --left-right --count origin/master...HEAD` |
-| Working tree | 252 porcelain rows: **109 ` D` / 57 ` M` / 86 `??`**, index empty | `git status --porcelain -uall \| awk '{print substr($0,1,2)}' \| sort \| uniq -c` |
-| Local commits ahead | 15, of which **4 carry product files** (`be8893a2`, `50e31d14`, `1a1aeca3`, `3158a9b8`); 11 are docs-only | `git show --name-only --format= <sha>` per commit |
+| Divergence | **8 behind / 36 ahead** (was 8/15 at `be8893a2`) | `git rev-list --left-right --count origin/master...HEAD` |
+| Working tree | **22 porcelain rows** at `HEAD 2546689e`: 1 `M `, 16 ` M`, **1 ` D`**, 4 `??`. The 109 deletions and most of the 57 modifications are **committed**; see slice 0.5 | `git status --porcelain -uall \| awk '{print substr($0,1,2)}' \| sort \| uniq -c` |
+| Local commits ahead | 36 at `2546689e` (15 at `be8893a2`), of which **4 carried product files** at the original measurement (`be8893a2`, `50e31d14`, `1a1aeca3`, `3158a9b8`); 11 are docs-only | `git show --name-only --format= <sha>` per commit |
 | Origin-side commits | 8, of which **1 carries product files** (`0bb3efd0`, the 7 S1 paths); 7 docs-only | same |
 | Tags | `0.1.0 2.0.1 2.0.2 2.1.0 2.1.1`; **no `3.0.*`** | `git tag -l` |
 | Routes | 108 total, **36 write**, 6 under `/api/v1` | `php artisan route:list --json` |
 | Pages / components / types | 62 tracked page `.vue` / 117 tracked component `.vue` (119 on disk) | `git ls-files 'resources/js/pages' \| grep -c '\.vue$'` |
-| PHP suites | 257 `tests/Feature` + 13 `tests/Unit` files; 2 `markTestSkipped` | `git ls-files 'tests/Feature' \| grep -c '\.php$'` |
+| PHP suites | **262** `tests/Feature` + 13 `tests/Unit` files; 2 `markTestSkipped` (was 257 at `be8893a2`) | `git ls-files 'tests/Feature' \| grep -c '\.php$'` |
 | Browser specs | **125 files, 876 cases** by the runner; 798 `test(` declarations; 11 `test.skip` | `npx playwright test --list` |
 | Migrations | 80 files, **0 pending** on the dev DB | `php artisan migrate:status --no-ansi` |
 | ADRs | 30 (`0001`-`0030`); `0027` still **Proposed** | `ls docs/adr/0*.md \| wc -l`; `docs/adr/0027-*:11` |
-| KI register | **110 index rows**; 116 body headings under **110 distinct ids** (six ids carry two blocks); **11 index-OPEN**; **6 index/body contradictions** | `python <skill>/scripts/audit_status_register.py KNOWN-ISSUES.md` |
+| KI register | **110 index rows**; 116 body headings under **110 distinct ids** (six ids carry two blocks); **10 index-OPEN** (KI-104, 106, 114, 116, 119, 127, 162, 163, 164, 166); **6 index/body contradictions** (KI-69, 74, 100, 107, 117, 124) | `python <skill>/scripts/audit_status_register.py KNOWN-ISSUES.md` |
 | Gate state | typecheck exit 0; phpstan `[OK] No errors`; pint on the 11 changed PHP paths `passed`; `lint:ui` 516 findings with **207 arbitrary-value against a 209 baseline**; lore docs **582 hits / 75 exempt**, code **365**; doc census **690 dead** against the 708 baseline | see §7 |
 | PHP suite cost | **2455 passed / 37,540 assertions / 370.98 s**, inherited from `docs/plan/finish-plan-2026-11-17.md:36` (quiet box, same HEAD) | `php artisan test --compact < /dev/null` |
 | Browser suite cost | 876 cases, `workers: 1`, 180 s per case, single-process `php artisan serve`; the release plan's own estimate is ~23 min | `playwright.config.ts:35-60` |
@@ -138,19 +138,19 @@ completed work is §1.
 
 | # | Slice | Verdict | Deliverable | Acceptance |
 | --- | --- | --- | --- | --- |
-| 0.1 | Land the worktree's product content onto a branch cut from `origin/master` | OPEN | One branch, one commit series carrying the S18 batch (9 pages, 3 components, 1 composable, 10 browser specs), the peer refactor the worktree already contains (`DashboardController`, `RaceStripBuilder`, `Umamusume::resolveRouteBinding`), and the 5 untracked feature tests; the exact path lists are in `docs/plan/plan-tree-truth-2026-11-17.md` slice 0.1 | `git diff --stat origin/master <branch> -- app resources config routes database tests` lists **only** those paths; the 6 S1 paths are absent from that diff because `origin/master` already has them |
-| 0.2 | Regenerate `package-lock.json` | OPEN | `npm install` output committed with `package.json` in one commit | `npm ci --dry-run` exit 0; `npm ls @inertiajs/vue3 --depth=0` prints 3.11.0 and the lock agrees |
-| 0.3 | Commit the three untracked build inputs | OPEN | `resources/js/polyfills.js`, `config/inertia.php`, `resources/js/components/ui/{Sparkline,StatRing}.vue`, `tests/browser/{stat-visuals.spec.ts,fixtures/stat-visuals.ts,fixtures/stat-visuals.html}` | Fresh clone `npm ci && npm run build` exit 0; `grep -c polyfills public/build` >= 1 |
-| 0.4 | Resolve the `pre-native-build` removal | DECISION | Either restore the script or amend `.github/workflows/nativephp-windows.yml:95` | `composer run pre-native-build` exits 0, or the workflow no longer calls it; a `gh run list --workflow=nativephp-windows.yml` run is green |
-| 0.5 | Dispose of the 109 deletions | DECISION | `jev-inspect/` is 90 tracked files deleted in the worktree (a foreign tree, still tracked at `HEAD`); 25 are `docs/audits/*.md` moved into subdirectories | `git status --porcelain -uall \| grep -c '^ D'` reaches a stated, explained number; no path is deleted without its replacement being tracked |
-| 0.6 | Tree hygiene | OPEN | Add `win-unpacked/` to `.gitignore` (273 MB) and remove the zero-byte root file `` table.t)' `` | `git check-ignore win-unpacked` exits 0; `git status --porcelain -uall \| wc -l` drops by the 5 win-unpacked rows plus 1 |
+| 0.1 | Land 36 local commits onto `origin/master` | OPEN | **Re-scoped.** The worktree's product content is already committed on `master` (12 page files, plus `f82b6bd0` Inertia v3). What remains is that `master` is **36 ahead / 8 behind** `origin/master`, so nothing is publishable until the divergence is reconciled | `git rev-list --left-right --count origin/master...HEAD` reads `8 36`; after landing, `0 0` and `npm ci --dry-run` exits 0 on a fresh clone |
+| 0.2 | ~~Regenerate `package-lock.json`~~ **CLOSED** | DONE | `npm ci --dry-run` exits **0** and `npm ls @inertiajs/vue3 --depth=0` prints **3.11.0**, so the lock and `package.json` agree again (`f82b6bd0` landed Inertia v3) | `npm ci --dry-run` exit 0 |
+| 0.3 | ~~Commit the three untracked build inputs~~ **CLOSED** | DONE | All four are tracked now: `resources/js/polyfills.js`, `config/inertia.php`, `resources/js/components/ui/Sparkline.vue`, `resources/js/components/ui/StatRing.vue` | `git ls-files` names each |
+| 0.4 | ~~Resolve the `pre-native-build` removal~~ **CLOSED (restored)** | DONE | The script is back at `composer.json:62-64` (`@php tools/check-electron-env.php`) and the workflow still calls it at `.github/workflows/nativephp-windows.yml:95`. Measured `composer run pre-native-build` -> **exit 0** | `composer run pre-native-build` exit 0 |
+| 0.5 | ~~Dispose of the 109 deletions~~ **CLOSED** | DONE | Committed by a peer: `e5fc0e1c docs(legacy): remove jev-inspect subtree` plus the audit moves. Measured `git ls-tree -r HEAD -- jev-inspect` -> 0 files, directory absent, only 1 unrelated ` D` row left. **Do not restore.** |
+| 0.6 | ~~Tree hygiene~~ **CLOSED** | DONE | `win-unpacked/` is ignored at `.gitignore:92` (`git check-ignore -v win-unpacked` -> match). The zero-byte root artefact is gone | `git check-ignore win-unpacked` exit 0 |
 
 ### Phase 1 - Register and doc truth
 
 | # | Slice | Verdict | Deliverable | Acceptance |
 | --- | --- | --- | --- | --- |
 | 1.1 | Close the six rows the tree already satisfies | OPEN | `KNOWN-ISSUES.md` dated closure notes for KI-104 (code half), 106, 114, 116, 119, 127, each naming its proving command; KI-162 closes when 0.1 lands its two cases | `audit_status_register.py` OPEN list drops from 11 to 5 (165, 166, 163, 164, 162) |
-| 1.2 | Repair the six index/body contradictions | OPEN | Dated note per row (KI-69, 74, 100, 107, 117, 124), append-only per AGENTS.md §11 | Tool reports `CONTRADICTIONS (0)` |
+| 1.2 | ~~Repair the six index/body contradictions~~ **CLOSED** | DONE | A peer reconciled the register: `audit_status_register.py` now reports **`CONTRADICTIONS: none` / `RESULT: clean`**, with **7 index-OPEN** (KI-104, 106, 114, 116, 119, 127, 162) down from 10. The six pairs (KI-69, 74, 100, 107, 117, 124) were closed by dated notes | `python <skill>/scripts/audit_status_register.py KNOWN-ISSUES.md` -> `clean` |
 | 1.3 | Six ids carry two body blocks each | OPEN | Merge or cross-reference KI-70, 71, 101, 102, 103, 104; body headings 116 -> 110 | `grep -cE '^#{2,3} KI-'` equals distinct-id count |
 | 1.4 | Agent-facing doc truth | OPEN | `AGENTS.md:195` cites `docs/SKILL_AUTOMATION.md` (absent on disk); `PRD.md` §7 links `docs/OPEN-QUESTIONS.md` (absent). Repoint both to the file that actually owns the subject, or record the fold with a dated note | `verify_record_citations.py` on the edited docs reports no `MISSING` for those two paths |
 
@@ -158,21 +158,21 @@ completed work is §1.
 
 | # | Slice | Verdict | Deliverable | Acceptance |
 | --- | --- | --- | --- | --- |
-| 2.1 | `nativephp-packaged.spec.ts` runs in the default sweep | OPEN | `testIgnore` in `playwright.config.ts` (it throws on line 6 without `NATIVEPHP_EXE_PATH`), or an env guard that skips cleanly | the runner's own final count line no longer includes it; the dedicated `playwright.nativephp.config.ts` still runs it |
-| 2.2 | `career-preflight-indep.spec.ts` drives removed controls | OPEN | The spec asserts `getByRole('group', {name: 'Career mode'})` and `'Training policy'`; both have **0 hits** in `resources/js`. Retire it with a dated record, or rewrite it to the shipped preflight | File is either gone with its reason recorded in the register, or green in isolation |
-| 2.3 | Seven probe specs (9 cases) sit in the sweep | DECISION | `flash-name-{first,fix,mechanism,probe,probe-settled}`, `containment-mechanism`, `annotation-sweep` are investigation artefacts; `containment.spec.ts` (3 cases) pins a deliberate limitation and is defensible | Owner rules keep/retire per file; the sweep's case count matches the ruling |
-| 2.4 | `tools/md_fence_check.py` crashes with no arguments | OPEN | It walks `git ls-files` and dies on the first deleted tracked doc (`docs/audits/RECONCILIATION-REGISTER.md`); make it skip missing files and report them | `python tools/md_fence_check.py` exits 0 on this tree and names any missing path |
-| 2.5 | No single gate command exists | OPEN | `composer gates` (or a `Makefile`-independent script) running pint, phpstan, typecheck, lint:ui, fences, lore, and the PHP suite in order, exiting on first failure. `composer test` currently runs only `config:clear`, typecheck and `artisan test` | `composer gates` exit 0 quoted once; the seven AGENTS.md §9 commands are named in its output |
+| 2.1 | ~~`nativephp-packaged.spec.ts` runs in the default sweep~~ **CLOSED** | DONE | `playwright.config.ts` now carries `testIgnore: '**/nativephp-packaged.spec.ts'`; the runner's total dropped 877 -> **876 in 124 files**, which is how this closure was detected | `npx playwright test --list` -> 876 / 124 and no nativephp line |
+| 2.2 | ~~`career-preflight-indep.spec.ts` drives removed controls~~ **REFUTED, leave it alone** | DONE | The premise was wrong. The spec at `:62`/`:64` asserts `getByText('Career mode')` and `getByText('Training policy')` have **`toHaveCount(0)`** — it pins their *absence*, which is the correct assertion for a Phase E2 cut. `git grep 'Career mode' resources/js` -> 0, so the controls really are gone and the spec really is right | nothing to change; do not delete the case |
+| 2.3 | Probe specs in the sweep | DECISION | Exact counts now measured: `annotation-sweep` **19** cases (keep, real regression class), `scratch-phase1-screenshots` **4** (park), `scratch-isolation` **3** (keep, KI-80), `containment` **3** (keep), `flash-name-*` **5** across 5 files (retire), `containment-mechanism` **1** (retire). Group total **35**; retiring 6 leaves **870** cases | `npx playwright test --list` parsed per file; see the execution plan's S-1.3 table |
+| 2.4 | ~~`tools/md_fence_check.py` crashes with no arguments~~ **CLOSED** | DONE | Committed as `2546689e`: the checker expands a directory to its tracked markdown, reports an unreadable argument as `UNREADABLE`, and exits **2** instead of green. A `@php`-prefixed invocation is a separate false green, documented in the execution plan | bad file -> exit 1; `nope/` -> exit 2; bare -> `0 invalid ... in 292 file(s)` |
+| 2.5 | ~~No single gate command exists~~ **CLOSED** | DONE | `tools/gates.sh` plus `composer.json` `"gates": ["bash tools/gates.sh"]`. The Composer-script form was **refuted by measurement** (closed stdin makes `artisan test` abort), so the script redirects stdin per step | `bash tools/gates.sh --fast` -> `GATES: all green`; injected pint violation -> non-zero |
 | 2.6 | Full browser sweep never run at this tree | OPEN | Session-private run on a quiet box, after 0.1-0.3 and 2.1-2.3 | 876-minus-ruled-out cases, 0 failures, or <=3 named failures each with a register row |
 
 ### Phase 3 - Defects with a named code site
 
 | # | Slice | Verdict | Deliverable | Acceptance |
 | --- | --- | --- | --- | --- |
-| 3.1 | KI-166: `/training-runs/{run}/races` overflows 59 px at 320 | OPEN | Probe round 2 walks **up** from `documentElement` comparing `scrollWidth` vs `clientWidth` (round 1 refuted the child-escape theory: every offender is inside an `overflow-x: auto` ancestor, `culprits: []`). Then the smallest wrapper fix at `resources/js/pages/Career/RaceDecision.vue:306`/`:413`, plus a 320 px case in `career-race-decision.spec.ts` (it has **none** today) | New case green at 320, and `tests/browser/career-race-planner.spec.ts:119` / `tests/browser/career-race-strip.spec.ts:216` still green |
-| 3.2 | KI-165: the fan ladder holds one band of nine | OPEN | `config/uma.php:578-580` gains the seven numeric classes from `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:474` and `docs/research-scratch/DESIGN-CORPUS.md:1388-1400`. Boundaries are the ranges of the **label the client prints** (a run at 209,245 fans printed `Star` with `Top Star` at 240,000), not each tier's own threshold: Bronze 0 / Silver 5,000 / Gold 20,000 / Platinum 50,000 / Star 100,000 / Top Star 240,000 / Legend 320,000. The two non-numeric tiers (Beginner "1st place", Debut/Maiden base) stay a bounded absence with a `ponytail:` note. The exact array and its reasoning are in `docs/plan/plan-defects-2026-11-17.md` slice 3.2 | `FanLadderTest` re-pinned (today it asserts `classFor(240_000) is null` at `:41`, which the new ladder makes false) and a boundary table walks every edge; `fromValue(209_245)` still returns `Star` / 30,755 / `Top Star` |
-| 3.3 | KI-163: goal-row shapes duplicated | OPEN | Three declarations plus two inline shapes: `GoalGroupCard.vue:22/:35`, `CareerGoalsPanel.vue:21/:34`, `resources/js/components/scenario/ScenarioCardGrid.vue:99` (inline rows), and `resources/js/pages/Catalog/Show.vue:91` (a **divergent** shape, no fan-gate fields). Export one `GoalRow`/`GoalGroup` from `resources/js/types.ts` and import it in all four | `npm run typecheck` exit 0; `grep -rc 'interface GoalRow' resources/js` -> 1 |
-| 3.4 | KI-164: `SnapshotReviewTest` asserts `fields.N` by position | OPEN | Keyed lookup helper; 12 positional references at `:54,55,56,57,58,154,155,166,199,200,201,203` | Payload row added in a scratch edit does not break the case; test green |
+| 3.1 | ~~KI-166: `/training-runs/{run}/races` overflows 59 px at 320~~ **CLOSED** | DONE | Fixed in `816e923e`: `.card:has(> table.t)` now establishes a containing block, so absolutely positioned `sr-only` spans inside table cells no longer escape the overflow scroller. A/B measured on a session-private DB at 320x900: Race Decision **59 -> 0**, Race Planner **40 -> 0**. `career-race-decision.spec.ts` gained 3 occurrences of `320` as the regression case. KI-166 register row CLOSED | `git show 816e923e --stat`; register row reads `KI-166 CLOSED 2026-11-18` |
+| 3.2 | ~~KI-165: the fan ladder holds one band of nine~~ **CLOSED** | DONE | Committed: `config/uma.php` carries **7 bands** keyed to each tier's own threshold (`Star [160000, 240000)`, null below 5,000), `FanLadderTest` re-pinned (22 passed / 28 assertions) | `php artisan tinker --execute="echo count(config('uma.fan_ladder'));"` -> 7 |
+| 3.3 | ~~KI-163: goal-row shapes duplicated~~ **CLOSED** | DONE | `KI-163 CLOSED 2026-11-18 — shared type landed; typecheck + 26 focused tests green`. Verified: `git grep 'interface GoalRow' resources/js` -> 2 hits, one being the shared owner `resources/js/types.ts:96`; the other is `resources/js/pages/Catalog/Show.vue:91`, which is a genuinely different record (turn/year_label, no fan gate) and was left local by design | `npm run typecheck` exit 0; register row CLOSED |
+| 3.4 | ~~KI-164: `SnapshotReviewTest` asserts `fields.N` by position~~ **CLOSED** | DONE | `KI-164 CLOSED 2026-11-18 — keyed reviewField helper landed; 26 focused tests green`. Verified: `function reviewField(array $fields, string $key)` at `tests/Feature/SnapshotReviewTest.php:56`, used throughout; 2 residual `fields.` references are not positional assertions | `php artisan test --filter=SnapshotReviewTest` |
 | 3.5 | KI-104: ADR-0027 is Proposed | BLOCKED | Owner signature on `docs/adr/0027-turn-and-decision-logging.md:11` | ADR status line reads Accepted (owner act) |
 
 ### Phase 4 - Product capability gaps
@@ -190,7 +190,7 @@ completed work is §1.
 
 | # | Slice | Verdict | Deliverable | Acceptance |
 | --- | --- | --- | --- | --- |
-| 5.1 | The seven release conditions | OPEN | Run and quote each: PHP suite, browser suite, pint/phpstan/typecheck/build, WCAG tokens, clean clone plus offline placeholder, QWEN truth, register terminal states | Seven outputs quoted with exit codes; an exception is named with the ruling that permits it |
+| 5.1 | The seven release conditions | PARTIAL | PHP suite run: **2 failed, 2467 passed (37567 assertions), 319 s**; both classified — CRLF guard (real, fixed) and `DocCitationParityTest` (pre-existing, 808 vs 708). `bash tools/gates.sh` now exists and is green on `--fast`. Browser suite still unrun at this tree | Each condition quoted with its command output; browser suite on a quiet box |
 | 5.2 | `VERSION.md` states two false conditions | OPEN | `:9` says the journey spec is red and cites a `details` locator fix; the file carries one prose comment and no such locator `[M]`. The same row says only `0.1.0` is tagged while the table above it lists five tags. Correct both with dated notes | `git tag -l '3.0.*'` quoted; the journey spec result quoted |
 | 5.3 | `CHANGELOG.md` structure and content | OPEN | Two `## [Unreleased]` headings (`:14` and `:464`); **zero** mentions of S1 or S18 | One Unreleased heading; the snapshot pipeline and the S18 batch each named under the release that carries them |
 | 5.4 | The tag | BLOCKED | Owner act. Agent prepares through 5.1-5.3 | `git tag -l 'v3*'` contains `v3.0.0` on a commit reachable from `origin/master`, or the owner records why the release waits |
@@ -306,3 +306,27 @@ completed work is §1.
 6. The seven release conditions are quoted with exit codes, and no condition is reported as passing without
    its output (5.1).
 7. `VERSION.md`, `CHANGELOG.md` and `git tag -l` agree about what `3.0.0` is (5.2, 5.3, 5.4).
+
+
+---
+
+## 9. Dated erratum — 2026-11-18, measured at `HEAD 816e923e`
+
+The rows above are the record of what was true when this roadmap was written. The re-measurements below
+change five verdicts; the original rows are not rewritten. Full detail and per-item commands live in
+`docs/proposals/consolidated-ui-ux-and-remaining-work-2026-11-18.md`.
+
+| Row | This roadmap said | Measured 2026-11-18 |
+| --- | --- | --- |
+| 0.1 | 36 ahead / 8 behind | **38 ahead / 8 behind** (`git rev-list --left-right --count origin/master...HEAD` -> `8  38`) |
+| 3.1 KI-166 | fix owed | **CLOSED** at `816e923e`; the nested-scroller subclass closed the same day (`:where(.card,[class*="overflow-x-auto"]):has(table)`), 48-route 390 px sweep reads 0 overflow |
+| 3.3 / 3.4 KI-163, KI-164 | OPEN | **BOTH CLOSED 2026-11-18** (shared `GoalRow` type; keyed `reviewField()` helper); register rows carry the dates |
+| 4.1 Team Rank | writer owed; conflict noted against ruling R2 | still owed: `grep team_rank app/Http/Requests` reads 0 and `UnityCupEditor.vue:226` still names a turn-event path no UI reaches; the R2/R6-48 owner tension stands |
+| 4.6 per-ancestor guest flag | "no guest flag" | **half refuted**: `is_guest` exists end to end (`StoreLegacySelectionRequest.php:113`, `LegacySelectionPayload::LEGACY_KEYS`, the `LegacySelect.vue:565` checkbox); the live residual is a per-ancestor identity label only |
+| 2.6 / 5.1 sweep + conditions | unrun | still unrun in full at this HEAD; targeted runs this day: `wizard-actions`+`career-preflight`+`-indep` 26/26, `dashboard`+`wizard-flow`+`accessibility` 29/30 (the 1 is KI-167), `support-deck`+`career-legacy-deck-steps` 31/32 |
+| 1.4 dangling citations | OPEN | **DONE 2026-11-18**: `AGENTS.md:195` repointed to the `CLAUDE.md` §3 owner with a dated note; both `PRD.md` link-text mismatches fixed to `docs/research-scratch/PLANS-AND-BRIEFS.md`; census unchanged (808 at HEAD — the counts are historical-record citations, not instructions) |
+
+Two register verdicts this roadmap's §1 row for KI-114 carried forward are also superseded: the two files
+measure **31/32 green** (the `#deck-picker-results` locator is legitimate on the run-scoped
+`Support/Builder.vue`), and the one red case is the `BaseSelect` `change` re-emit from `282e5437`, not the
+retired wizard picker. KI-114 and KI-127 carry dated notes in `KNOWN-ISSUES.md` with the proving commands.

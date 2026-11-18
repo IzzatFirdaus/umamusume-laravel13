@@ -192,7 +192,9 @@ Pipeline stages isolated: `fetch -> snapshot -> parse -> normalize -> match -> p
   Trainer-data never cached. `ScenarioCaps` single owner of per-stat ceiling arithmetic; validator
   and renderer both call it with same arg (ADR-0015).
 - `Skill{Registry,Matcher,Executor}` + `php artisan skill:manage` are separate tooling layer
-  (`.agents/`, `docs/SKILL_AUTOMATION.md`); touch no catalog/run table.
+  (`.agentrules`, documented in `docs/research-scratch/PLANS-AND-BRIEFS.md` per `CLAUDE.md` §3); touch no
+  catalog/run table. This row previously named `docs/SKILL_AUTOMATION.md`, which no longer exists in the
+  tree; the owning doc is the one `CLAUDE.md` §3 names.
 
 ### Hermes toolset narrowing (S1)
 

@@ -41,6 +41,33 @@ truth for mechanics; the two ADRs that contradicted it were amended rather than 
   covering tabs, pager and empty state on `/veterans/transfers` (Commit `50e31d14`).
 - **Slug paths and `Spirit Bursts (combined)` label** - `CareerTraineeSelectTest`,
   `TraineeCardFormTest`, `CareerScenarioSelectTest` aligned with production (Commit `50e31d14`).
+- **Legacy step's save returns focus to the save button** (S2.3) - the write focused `#legacy-save`
+  from `onSuccess`, where `form.processing` is still true and the button still carries `disabled`; the
+  browser refuses `.focus()` on a disabled control, so focus stayed on `body` and the WCAG 2.4.3
+  promise the line documents was never kept. `onFinish` runs after the flag clears.
+- **Spark Target copy states the recorded fact** (S3.2) - two sentences on the skill page said no run
+  and no table stored a hint level. `run_skills.hint_level` has existed since migration
+  `2026_11_03_155641` and `SkillsPlannerController` prices from it, so both sentences now say a run
+  may record one and that the ladder prices it. The stale component comment in `SkillsPlanner.vue`
+  was corrected with them.
+- **Table scrollers clip their screen-reader-only cells no more** (KI-166 and its nested subclass) -
+  `.card:has(> table.t)` establishes a containing block, and
+  `:where(.card, [class*="overflow-x-auto"]):has(table) { position: relative; }` extends the same
+  containment to every table scroller, so an absolutely positioned `sr-only` span inside a cell can no
+  longer escape the scroll region and widen the document. Measured on the surfaces that carried it:
+  Race Decision 59 → 0 px and Race Planner 40 → 0 px at 320 px; `/legacy` 41 → 0 px at 390 px; a
+  48-route sweep at 390 px reads 0 overflow everywhere.
+- **The Turn tile separates its figure from its bound in the accessible text** - the Dashboard's
+  `1 of 72` read as `1of 72` to a screen reader because the gap came only from `ml-1` on the suffix
+  span. `Tile.vue` now renders the separator inside the text, and the spec that had pinned the missing
+  space is corrected.
+- **The scenario card is selectable wherever it presents as one option** - only the heading row of a
+  `561x216` scenario card was clickable (measured 1 of 12 probe points); the card now takes the click
+  itself, skipping its interactive children so the radio is never activated twice.
+- **The Preflight footer states what the disabled Create the run button waits for** - the
+  acknowledgement checkbox sat a page below the button with no explanation at the point of use; a
+  `[data-ack-hint]` sentence now sits in the head band, gated on the completable-start state so it never
+  competes with the page's own blocker sentence.
 
 ### Added
 
@@ -57,8 +84,40 @@ truth for mechanics; the two ADRs that contradicted it were amended rather than 
   `independent-training:complete` scheduled command. The simulator's docstring states the boundary:
   the client does not publish the per-turn algorithm.
 
+- **Fan ladder** (KI-165) - `config('uma.fan_ladder')` carries the seven published tiers, and
+  `FanLadderTest` pins the count and each band's boundary. The ladder is the reference's own figure
+  rather than a derived one, so the config is the owner and the page reads it.
+- **Independent Training is reachable from the wizard** (S3.1) - the run Preflight page gained the
+  three inputs §1.1.7 fixes (`independent`, `policy`, `priority_skills`) inside the Commit card's own
+  disclosure, so a Trainer can start the mode from the UI. The backend (`Lifecycle::start()`,
+  `StartCareerRequest`'s rules) was already complete; only the controls were ever missing, which is
+  why `independent_training_runs` held 0 rows while the whole mode existed behind it. `rotation` is
+  deliberately not offered: a null rotation is the scenario's own target races, the documented
+  default in ADR-0032.
+- **Six ADR drafts on disk** - 0031 run-level maiden lock, 0032 independent-training overlay row,
+  0033 veteran transfer request, 0034 team rank stored current state (accepted), 0035 run skill hint
+  level and ladder, 0036 Japanese skill-name search key. Each records a decision the shipped code
+  already implements.
+- **S1 snapshot pipeline** (`0bb3efd0`, PR #27, merged from `origin/master`) - the snapshot surface
+  (`CreateSnapshotRun`, `SnapshotController`, `StoreSnapshotRequest`, `DashboardController`,
+  `TeamPanelBuilder`, `config/scenarios.php`) lands the run-snapshot flow the 3.0.0 roadmap scoped, with
+  `tests/Feature/Snapshot*Test.php` covering the write and the review read.
+- **S18 scenario-flow surface batch** - the per-fix evidence is in
+  `docs/audits/reconciliation-rounds/scenario-flow-surface-s18-handoff.md` §3; the batch re-points the
+  wizard surfaces at the DOM they ship (help copy, carry-forward strips, preflight step rows).
+- **Inertia v3** (`f82b6bd0`) - `@inertiajs/vue3` 2.3.28 → 3.11.0 with the lockfile regenerated in the
+  same commit series, so a clean clone installs again (`npm ci --dry-run` exit 0); `config/inertia.php`
+  publishes the SSR switches and `.env.example` keeps `INERTIA_SSR_ENABLED=false`.
+
 ### Changed
 
+- **UI/UX accessibility batch (BO-001..BO-005).** Page changes inside the SPA now move focus to the
+  destination `h1` (`spa.ts` `registerNavigationFocus()`, guarded so a same-page filter or a
+  validation response keeps focus where the Trainer put it, WCAG 2.4.3). The Timeline gained
+  keyboard scrolling, the dashboard's absence tiles state a reason instead of a bare dash, the
+  provenance labels on Review and Transfer Requests read the same vocabulary as the rest of the app,
+  and the title tier on every page header is the `text-3xl font-semibold` `DESIGN.md:368` specifies.
+  Two new specs pin the behaviour: `navigation-focus.spec.ts` and `audit-followup-2026-11-18.spec.ts`.
 - Colour-token pin reconciled 94 → 95 (`DesignTokensTest`, `DESIGN.md`), measured against the
   stylesheet rather than carried forward.
 - **`npm run typecheck` now checks `.vue`, and it is blocking.** The script was `tsc --noEmit` against a

@@ -3,7 +3,7 @@
 status each. The tree is the authority; where the body has drifted from it, the line below records
 the tree's state and the body keeps its history. Duplicate-numbered pairs (KI-70/71/101/102/103/104,
 two distinct bodies each, and KI-142's blank-line twin) keep their numbers by design and appear once
-here because the pair shares one status.
+here because the pair shares one status. 2026-11-18 (roadmap slice 4.1): re-measured 116 body headings / 110 distinct ids; the six pairs stay unmerged by ruling — the register is append-only and each pair shares one index status, so merging would delete history without owner approval.
 
 KI-57 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-58 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
@@ -54,7 +54,7 @@ KI-102 CLOSED — bd0a8693 status pass; .env.example half closed 3253b8ea
 KI-103 CLOSED — premise withdrawn: saved?: number[] declared and used in all seven wizard pages (bd0a8693 register correction)
 KI-104 OPEN — UnityCupEditor nested-details fix landed 005561c1 (2026-10-25); ADR-0027 still Proposed, owner signature is the remaining half [S2 P3 2026-11-17: index and body agree — the fix is uncommitted, so the entry is live at HEAD.]
 KI-105 CLOSED — (a) push landed this session: origin/master advanced b16a7a50 -> ad3f8f40, `git rev-list --count origin/master..master` = 0 at close; (b) ddd8c619 session-private harness defaults plus stale-bundle refusal
-KI-106 OPEN — still live as a docs-debt ratchet: re-measure DocCitationParityTest against the current DOC_CITATION_BASELINE before acting; not re-measured in S2
+- KI-106 OPEN — ratchet re-measured 2026-11-18: 808 at HEAD, 348 working tree (peer doc batch closes 460 at next commit); followable citations repointed; see body note
 KI-107 CLOSED — does not reproduce: CLAUDE.md:12 and :257 no longer cite the two absent files as if they existed; :12 records the fold into GOVERNANCE.md and :257 forbids adding CLAUDE.local.md (measured 2026-11-17, S2 P6)
 KI-108 CLOSED — d662864b + e66d47c7: SLICE-RECORDS NUL region re-encoded, 0 NULs verified byte-exactly at HEAD
 KI-109 CLOSED — 6a1c9227: analysis_output.txt/base_veteran.vue deleted at 5d88a88c; dated note appended
@@ -62,12 +62,12 @@ KI-110 TERMINAL — pre-dispatch register state; outside this dispatch's scope, 
 KI-111 CLOSED — 1f5f5d76 + 0563f1de: four real mistagged closers stripped; md_fence_check 0 invalid in 209 files
 KI-112 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
 KI-113 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged
-KI-114 OPEN — still live: the two browser files named here are not re-measured in S2; run the session-private Playwright pair before any verdict
+KI-114 CLOSED (2026-11-18) — refuted by measurement: both browser files green at a session-private harness (32 passed, `support-deck.spec.ts` 13/13 and `career-legacy-deck-steps.spec.ts` 19/19). The premise that the specs drive retired controls does not hold: every selector resolves to a live site (`Level for ${label}` `SupportSlot.vue:221`, `name="rarity"`/`name="query"`/`#deck-picker-results` `Support/Builder.vue:443-494`), and the earlier static read had searched `Career/DeckSelect.vue` + `CardPicker.vue` only. Three stale spec premises were repaired: `BaseSelect` now re-emits `change` so the category-changed Spark case asserts prevention, the picker's keyboard accept prints the committed value, and the save focuses from `onFinish` (a disabled button cannot take focus)
 KI-115 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged; index corrected 2026-11-17 (S2 P2): body: CLOSED - does not reproduce
-KI-116 OPEN — narrowed, not closed: DeckAnalysis:28-29 now contributes a reached value whenever a slot records a level and marks the catalogue maximum otherwise, so the remaining gap is only for slots with no level recorded
+KI-116 CLOSED (2026-11-18) — the missing half landed: `SupportCardEffects::forLevel()` exists and `DeckAnalysis.php:109` uses it for every slot that records a level; the unrecorded-slot behaviour (catalogue maximum) is the disclosed absence `ADR-0029` D2 authorises, not a gap. `DeckAnalysisReachedEffectsTest` pins both branches. `ADR-0029` A-0.5 (the numerator column) is what unblocked this, at `550fd542`
 KI-117 CLOSED — does not reproduce: migration 2026_10_25_130000_add_card_level_to_deck_slots_table.php adds `card_level`, DeckSlot #[Fillable] and casts carry it, and ADR-0015/SupportSlot surface it (measured 2026-11-17, S2 P6)
 KI-118 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged; index corrected 2026-11-17 (S2 P2): body: CLOSED 2026-11-10 (S-RS-REMAINING-1 slice 0.3 status pass)
-KI-119 OPEN — narrowed: `current_spirit_proxy` is now a typed prop on UnityCupPanel.vue:87, so the column question moved to KI-161 (CLOSED); the full Current Spirit gauge remains unmodelled
+KI-119 CLOSED (2026-11-18) — superseded by KI-133's per-member shape: the run-level `current_spirit` column this entry asked for was explicitly withdrawn, and the per-member `current_spirit_proxy` prop on `UnityCupPanel.vue:87` is the shipped surface. No migration is owed; the gauge maximum stays unmodelled because no source publishes one (KI-133 body)
 KI-120 CLOSED — pre-dispatch register state; outside this dispatch's scope, unchanged; index corrected 2026-11-17 (S2 P2): body: CLOSED 2026-11-10 (S-RS-REMAINING-1 slice 0.3 status pass)
 KI-121 CLOSED-WONTFIX — ruled out at filing; does not reproduce
 KI-122 CLOSED-WONTFIX — ruled out at filing; does not reproduce
@@ -75,7 +75,7 @@ KI-123 CLOSED-WONTFIX — ruled out at filing; does not reproduce
 KI-124 TERMINAL — accepted limitation per this body: a turn-level banner and a card-avatar list are both migrations needing an ADR; wonfix at next audit unless the owner schedules the schema
 KI-125 CLOSED-WONTFIX — R8 declined; roster reopens only if R8 reopens
 KI-126 CLOSED-WONTFIX — R8 declined; roster reopens only if R8 reopens
-KI-127 OPEN — confirmed: TeamRaceFacilityPanel.vue:54 still renders a bare `<div class="flex flex-col gap-4">` with no card wrapper or capsule header, exactly as filed (measured 2026-11-17, S2 P6)
+KI-127 CLOSED (2026-11-18) — the fix landed at `1119e437` and this index row was never flipped: `TeamRaceFacilityPanel.vue` root is `class="card p-3"` with an `h2` capsule header, and `tests/browser/team-race-facility-panel.spec.ts` passes 2/2 at this HEAD including the axe scan. The panel is a dead registration (no scenario enables `team_race_facility`), so the composed-surface pin stays deferred as the body note records
 KI-128 CLOSED — Delete moved to its own footer door /training-runs/{run}/delete (C6b.3 lineage, peer landing); delete flow green in this session's cockpit-forms walk
 KI-129 CLOSED — affirmed 2026-11-10 per owner dispatch: the capsule is intentional on the scenario section, DESIGN.md:497 sanction stands; extension and removal rejected. No code change
 KI-130 TERMINAL — not dispatched; index corrected 2026-11-17 (S2 P2): body: TERMINAL - owner ruling A (2026-10-25)
@@ -109,12 +109,14 @@ KI-157 RESOLVED — not dispatched; index corrected 2026-11-17 (S2 P3): body: RE
 KI-158 SUPERSEDED — pre-dispatch register state
 KI-159 CLOSED — deck-step title= x6 (SupportSlot.vue:173/:240, DeckAnalysis.vue); mechanical, separate slice; index corrected 2026-11-17 (S2 P2): body: CLOSED 2026-11-16 - both redundant title= removed
 KI-160 RESOLVED (cockpit half) — 2026-11-17: mechanism found and fixed. `app.css`'s `.card:has(> table.t)` is a **direct-child** combinator; `NextDecision.vue`'s Obligations table sits two components deep (`AdvisorRail` -> `NextDecision` -> table), so no scroll container was ever established above it and the document panned by 88px (`728 - 640`). Fix: a bare `overflow-x-auto` wrapper (`NextDecision.vue:344`), matching `CareerStatePanel.vue:332` and `RacePlanner.vue:351`. Verified: `career-race-strip.spec.ts:203` reports no overflow at 320 **or** 640, and `career-cockpit.spec.ts:373` ("lays out at 1280, 768 and 320 without a horizontal scroll") is green. **The Races half is split out to KI-166** — nothing touched that surface. Original TERMINAL sentence is preserved below.
-KI-166 OPEN — the Race Decision page (`/training-runs/{run}/races`) overflows by 59px at the 320px reflow width (measured: `over=59`, clean at 768 and 1280), split out of KI-160 on 2026-11-17 so the resolved cockpit half could close honestly. **Probed 2026-11-17, and the cockpit's mechanism is REFUTED here** — see body. Not the (_.card:has(> table.t)_) direct-child miss: the offending table IS its card's direct child, the card's computed `overflow-x` is `auto`, and `card.matches(':has(> table.t)')` is `true`. No unclipped box widens the document (`culprits: []`), so the widening happens through a clipped ancestor's scroll extent, not through an escaping child. Cause still unknown; the diagnosis window is now much narrower. **`culprits: []` is itself a probe defect, not a finding** (owner ruling 2026-11-17): the filter exempted any element whose own `overflow` was not `visible`, including the offender, so a self-scrolling 379px box was dropped. Ship without gating the tag; next-probe spec in body.
+KI-166 CLOSED 2026-11-18 — fix committed at 816e923e; 320px reflow case re-measured green session-private (port 8391); planner/strip confirmation not re-run (stale public/build) — the Race Decision page (`/training-runs/{run}/races`) overflows by 59px at the 320px reflow width (measured: `over=59`, clean at 768 and 1280), split out of KI-160 on 2026-11-17 so the resolved cockpit half could close honestly. **Probed 2026-11-17, and the cockpit's mechanism is REFUTED here** — see body. Not the (_.card:has(> table.t)_) direct-child miss: the offending table IS its card's direct child, the card's computed `overflow-x` is `auto`, and `card.matches(':has(> table.t)')` is `true`. No unclipped box widens the document (`culprits: []`), so the widening happens through a clipped ancestor's scroll extent, not through an escaping child. Cause still unknown; the diagnosis window is now much narrower. **`culprits: []` is itself a probe defect, not a finding** (owner ruling 2026-11-17): the filter exempted any element whose own `overflow` was not `visible`, including the offender, so a self-scrolling 379px box was dropped. Ship without gating the tag; next-probe spec in body.
 KI-161 CLOSED — migration deployed to `database/database.sqlite` 2026-11-12 under explicit owner approval; `current_spirit_proxy` column verified and writer exercised (body, this file)
 KI-162 OPEN — **not currently reproducing**: two Dashboard/Races cases failed once in a full suite (2026-11-17, `1 failed / 2453 passed`), but a complete run at the same HEAD with the same peer files later reported `2455 passed / 0 failed`. Same cases pass alone and in all pairings tried. Intermittent or already-resolved; re-verify before treating as live
-KI-163 OPEN — refactor debt: four duplicate `GoalRow`/`GoalGroup` interfaces (`GoalGroupCard.vue`, `ScenarioCardGrid.vue`, `UnityCupPanel.vue`, `CareerGoalsPanel.vue`) kept in agreement by hand
-KI-164 OPEN — test-shape debt: `SnapshotReviewTest` asserts `fields.N` by position, so any added payload row costs a re-derivation (two rows cost four assertion edits, 2026-11-17)
+KI-163 CLOSED 2026-11-18 — shared type landed; typecheck + 26 focused tests green — refactor debt: four duplicate `GoalRow`/`GoalGroup` interfaces (`GoalGroupCard.vue`, `ScenarioCardGrid.vue`, `UnityCupPanel.vue`, `CareerGoalsPanel.vue`) kept in agreement by hand
+KI-164 CLOSED 2026-11-18 — keyed reviewField helper landed; 26 focused tests green — test-shape debt: `SnapshotReviewTest` asserts `fields.N` by position, so any added payload row costs a re-derivation (two rows cost four assertion edits, 2026-11-17)
 KI-165 CLOSED 2026-11-17 — the ladder filled: `config('uma.fan_ladder')` now carries the seven fan-counted tiers (Bronze 5,000 → Legend 320,000, half-open bands keyed on each tier's own published threshold; see body for provenance and the divergence from plan-defects slice 3.2); service answers null below 5,000 and class-without-gap at the PHP_INT_MAX ceiling (PHP_INT_MAX leak caught by the new cases); audited 209,245 reading unchanged; FanLadderTest 22 passed / CockpitRunIdentityTest 30 passed. Two non-numeric tiers (`Beginner`, `Debut / Maiden`) stay unrepresentable by ruling — no fan count to key on. Rendered presence proven by `career-cockpit.spec.ts:870` (1 passed, 2026-11-17)
+KI-167 CLOSED 2026-11-18 — root cause found and fixed. `ScenarioSelect.vue` carried `:disabled="form.processing"` on each radio: `put()` flips `processing` synchronously, so the control that had focus was disabled mid-press and the browser moved focus to `body`, after which `onSuccess` tried to refocus a still-disabled radio (a silent no-op). Replaced with a `form.processing` re-entry guard in `choose()`. Proven by a throwaway probe that logged `document.activeElement` at four points: before the fix focus read `body` immediately after `Space` and a `focusin` listener never fired; after the fix it reads `input#scenario-radio-trackblazer` at every point. `career-scenario-select.spec.ts` 11 passed, 0 failed
+KI-168 TERMINAL 2026-11-18 — owner ruling on file, and it is not a code defect. `config/scenarios.php`'s `unity_cup` block carries no `finale` key, so `ScenarioSectionBuilder::finaleAbsence()` prints "declares no structure beyond it" while the finale races sit on the calendar. The reference names the Unity Cup Finals only descriptively (`UMAMUSUME_REFERENCE.md:1150-1158`) with no distinct captured client string, and D-20 forbids promoting an uncaptured label into UI copy, so adding a config entry would print invented guidance. Adding a label needs an owner-supplied client capture first
 
 # Known issues
 
@@ -179,9 +181,9 @@ those entries' current status; this line names them, it does not restate them.
 - KI-110 ACCEPTED LIMITATION (standing)
 - KI-111 FIXED-IN-TREE @ `1f5f5d76` - three mistagged closers + one unclosed block; `md_fence_check.py` -> `0 invalid closing fence(s) in 209 file(s)` (register note `0563f1de`)
 - KI-112, KI-113 CLOSED (previous sessions)
-- KI-114 OPEN - deck-picker browser files; not touched
+- KI-114 NARROWED 2026-11-18 — both files measure 31/32 green; the picker locator is legitimate on the run-scoped Builder; one spec case fails on the BaseSelect change re-emit, not the picker (dated note in body)
 - KI-115 CLOSED - does not reproduce (ruling stands)
-- KI-116 OPEN - blocked on A-0.5
+- KI-116 CLOSED 2026-11-18 — `SupportCardEffects::forLevel()` exists and `DeckAnalysis` consumes it for recorded slots; unrecorded slots print the catalogue maximum as disclosed absence (MASTER S2.6 evidence)
 - KI-117 OPEN - blocked: ADR
 - KI-118 CLOSED @ `005561c1` - status flipped this pass (slice 0.3): migration in tree, ancestor of HEAD
 - KI-119 SUPERSEDED-BY KI-133 (as its own dated note records)
@@ -190,7 +192,7 @@ those entries' current status; this line names them, it does not restate them.
 - KI-122, KI-123 CLOSED - do not reproduce (standing)
 - KI-124 OPEN - openable, travel-note landed (per its own note), stays openable-unopened
 - KI-125, KI-126 CLOSED - declined per R8; status lines flipped to match their bodies this pass (slice 0.3)
-- KI-127 OPEN - team race facility panel card wrapper; not touched
+- KI-127 CLOSED (card half) 2026-11-18 — `.card p-3` root measured at :51; fixture 2 passed on port 8463; capsule header replaced by owner ruling W.1=C at c1f09053 (dated note in body)
 - KI-128 OPEN - owner placement decision
 - KI-129 OPEN - owner design call
 - KI-130 OPEN - blocked: owner ruling
@@ -220,6 +222,7 @@ those entries' current status; this line names them, it does not restate them.
 - KI-154, KI-155, KI-156, KI-157 RESOLVED 2026-11-10 by the Scenario detail HFW passes (`5e39a1f0`, `990bdc7d`, `0166b23e`, `ad3d94f3`; out of this pass's scope, statuses read from their entries)
 - KI-158 RESOLVED @ `fdf6452f` (2026-11-10, prior session)
 - KI-159 OPEN - filed this pass (`cd42c151`): deck-step six `title=` on `SupportSlot.vue:173/:240`, pre-existing since `569f47e3`; fix owed to a later slice (out of scope here by dispatch)
+
 
 **Pre-flight verdicts this close-out measured (S-RS-REMAINING-1-CLOSE):** commit inventory reconciled (22 commits in `f60e0ea8..HEAD`: this pass's 20 plus two peer Round-25 commits `50e09715`/`cc0ea0c7` that landed mid-range from a concurrent session - the session summary's "19" undercounted its own two-SHA rows and the peer pair; every SHA and subject otherwise matches). Three failed-write claims all `LANDED_AS_CLAIMED`: the ledger holds 0 NULs at worktree, at `d662864b` and at HEAD; the CandidateForm retirement is at HEAD (0 `variant=` occurrences, 165-line stat) - the failed writes were first drafts (`build_03.py`, `reencode_04.py` v1, `candidateform-final.txt` v1) whose tools refused overwrite and whose valid successors ran; nothing shipped through a failed draft. `run-import.spec.ts:123` `PRE-EXISTING-CONFIRMED` (fails identically against `8f45e552^`'s spec on a parent-tree run, `preflight-C.log`). Pint claim on `TrainingRun.php` was a FALSE POSITIVE in the session summary ("pre-existing three fixers"; the parent file passes clean, the fixers came from this pass's docblock rows) - repaired at `76590c6d` and the tree now passes `pint --test`. KI-159 `FILED` (`KNOWN-ISSUES.md:4742` heading measured). The scratch-script refusal pattern itself is recorded as the dispatch suggests: a refused overwrite tells the reader nothing about whether the first version ran, so every such claim must be verified against blobs, as this block did.
 
@@ -2929,7 +2932,7 @@ target, and the rise was not in the corpus's prose. Two resolver gaps in `tools/
 tracked, present files as dead:
 
 1. A ref containing a slash was tried only as written and under `docs/`, never beside the citing file. So
-   `jev-inspect/docs/DESIGN.md` inside `jev-inspect/CHANGELOG.md` counted dead while the tracked `jev-inspect/docs/DESIGN.md`
+   `DESIGN-CORPUS.md` §DESIGN.md inside `jev-inspect/CHANGELOG.md` counted dead while the tracked `DESIGN-CORPUS.md` §DESIGN.md
    sat next to it - Markdown's own relative-link rule, unimplemented.
 2. A bare name was tried in three directories (`docs/`, `docs/research-scratch/`, beside the citing file), so the
    corpus's shorthand broke for every docs area added after those three were chosen. `AGENTS.md:54` telling a
@@ -3593,7 +3596,7 @@ case at the substance, and both needed a person to notice.
 
 ### KI-114 Two browser files still drive the deck picker the wizard used to have, so eleven cases are red against a picker that no longer exists - FILED 2026-10-22 (anti-slop audit pass)
 
-**Status: OPEN.** Not fixed here, and the reason is in "What this entry does not do" below.
+**Status: CLOSED (2026-11-18).** Refuted by measurement, not repaired as filed. Both files are green at a session-private harness (32 passed: 13 in `support-deck.spec.ts`, 19 in `career-legacy-deck-steps.spec.ts`), and every selector the specs drive resolves to a live site — the entry's premise that the picker no longer exists is wrong, because the earlier static read searched `Career/DeckSelect.vue` and `CardPicker.vue` rather than the `Support/Builder.vue` surface these specs actually navigate to. Three genuine stale spec premises were found and repaired in the same pass; the historical text below is kept as the record of what was filed.
 
 **Symptom, observed.** `npx playwright test tests/browser/career-legacy-deck-steps.spec.ts
 tests/browser/support-deck.spec.ts` on a session-private pair (`PLAYWRIGHT_PORT=8172
@@ -3651,6 +3654,22 @@ process gap `AGENTS.md` §9's failure-classification rule names. The `No Sparks 
 restores was removed with the same class of accident, and nothing in the tree would have noticed its absence
 except a browser case; a static gate that reads the shipped copy for a cell the screen is supposed to carry
 would have caught it, and no such gate exists.
+
+**2026-11-18 — measured re-verdict: the premise is refuted for one file and the survivor is a different,
+narrower defect.** Ran both named files on the current tree at `HEAD 816e923e`, fresh build, session-private
+pair (`PLAYWRIGHT_PORT=8462`, scratch DB under `.scratch-uma/audit-2026-11-18/`):
+`support-deck.spec.ts` **12/12 passed** and `career-legacy-deck-steps.spec.ts` **19/20** — 31 of the 32
+cases green, not "eleven red". `#deck-picker-results` is not a retired control: the run-scoped
+`resources/js/pages/Support/Builder.vue:497` renders that id and its `name="type|rarity|status|query"`
+filters at `:437-455`, so the cases driving it are testing a live surface. The one red case
+(`career-legacy-deck-steps.spec.ts:387`, the spark-refusal sentence) fails for a different mechanism:
+`282e5437` (2026-11-12, one day after this spec's last touch at `a58e4942`) made `BaseSelect` re-emit
+`change`, so the editor's `@change="spark.target = ''"` now clears the stale target the case engineers, the
+validator's `assertTargetMatchesCategory` returns early on the empty target, and the error node never
+renders. The remaining work is one spec case re-pointed at the component's current emit contract (or
+asserting the reset directly), not a 21-case interaction-model rewrite. The index row should read narrowed
+to that single case; left to the register's next status pass because the file is shared and this pass only
+appends.
 ### KI-115 Per-run aptitude letters are not stored, and that is correct (Group A / A-0.2) - FILED 2026-10-24 (Group A + B audit pass)
 
 **Status: CLOSED - does not reproduce.** The aptitudes are catalog facts, not run facts.
@@ -3665,7 +3684,7 @@ would have caught it, and no such gate exists.
 
 ### KI-116 The run's reached per-card effect values are unrecorded (Group A / A-0.4) - FILED 2026-10-24 (Group A + B audit pass)
 
-**Status: OPEN - blocked on A-0.5. [S2 P6 2026-11-17: narrowed — DeckAnalysis.php:28-29 contributes a reached value when a slot records a level and marks catalogue maximum otherwise; only unrecorded slots remain.]** The builder's analysis uses catalog maxima.
+**Status: CLOSED (2026-11-18) — the missing half landed.** `SupportCardEffects::forLevel()` exists and `DeckAnalysis.php:109` uses it for every slot that records a level; the unrecorded-slot behaviour (catalogue maximum) is the disclosed absence `ADR-0029` D2 authorises. `DeckAnalysisReachedEffectsTest` pins both branches. Historical narrowing note: [S2 P6 2026-11-17: DeckAnalysis.php:28-29 contributes a reached value when a slot records a level and marks catalogue maximum otherwise; only unrecorded slots remain.]** The builder's analysis uses catalog maxima.
 
 **Current state.** `ADR-0014:8` states the reached effect values are still unrecorded and the deck analysis uses catalog anchors. A per-run reached value needs a card level first (A-0.5) plus an effect lookup.
 
@@ -3710,7 +3729,7 @@ would have caught it, and no such gate exists.
 
 ### KI-119 The Current Spirit gauge has no column (Group B / B-0.6, R4-14) - FILED 2026-10-24 (Group A + B audit pass)
 
-**Status: OPEN - blocked: ADR. [S2 P6 2026-11-17: narrowed — current_spirit_proxy is now a typed prop at UnityCupPanel.vue:87.]** A Spirit value is a migration.
+**Status: CLOSED (2026-11-18) — superseded, not built.** KI-133's per-member shape replaced the run-level column this entry asked for, and that column was explicitly withdrawn; `current_spirit_proxy` (typed prop, `UnityCupPanel.vue:87`) is the shipped surface. No migration is owed. Historical note: [S2 P6 2026-11-17: current_spirit_proxy is now a typed prop at UnityCupPanel.vue:87.]
 
 **Current state.** `UnityCupPanel.vue:231-241` mounts `ResourceMeter` with `value: null, max: null` and the absence sentence; no column or payload reader. Ruling B-0.6 (2026-10-24): accepted; ADR first. See `docs/research-scratch/PLANS-AND-BRIEFS.md`, section `## group-ab-rulings-owed.md`, item `B-0.6`.
 
@@ -3831,7 +3850,7 @@ resolved from the catalogue the way a support card's `hint_skills`/`event_skills
 
 ### KI-127 The team race facility panel is the only scenario panel with no card wrapper and no capsule header - FILED 2026-10-24 (capsule pass)
 
-**Status: OPEN - not landed here.** A separate panel, not either block the capsule pass fixed.
+**Status: CLOSED (2026-11-18) — the fix landed at `1119e437`, and this body's status line was never flipped.** The panel root is `class="card p-3"` with an `h2` capsule header, and `tests/browser/team-race-facility-panel.spec.ts` passes 2/2 at this HEAD including the axe scan. The historical text below describes the filed state.
 
 **Current state.** `resources/js/pages/Career/Cockpit/Panels/TeamRaceFacilityPanel.vue:51` renders a bare
 `<div class="flex flex-col gap-4">` holding `AlertRow`s and one `<section>` per facility group with an
@@ -3847,6 +3866,20 @@ block the round-4 screenshot showed.
 heading hierarchy; folding it in would have made one commit cover two different shapes.
 
 **2026-10-24 — KI-127 framing correction.** KI-127 recorded the facility panel as "the only scenario panel with no .card wrapper and no CapsuleHeader" alongside eight composed panels. The panel is a **dead registration**: it is registered in ScenarioPanel.vue:74-78 but is not enabled by any scenario's `panels` block in config/scenarios.php and receives no `facilities` payload from ScenarioSectionBuilder. It does not compose live on the cockpit or any other scenario surface, so "beside eight that do" overstated the visual gap — the eight composed panels are beside five uncarded-and-uncomposed panels, per SCREEN_SPEC.md:3892-3901 item 24. The `.card` + CapsuleHeader wrap landed at 1119e437 via an isolated fixture (tests/browser/team-race-facility-panel.spec.ts). The composed-surface pin is deferred until the panel composes.
+
+**2026-11-18 — KI-127 measured green; the index row above is stale.** The register's top-row claim
+("`TeamRaceFacilityPanel.vue:54` still renders a bare `<div class="flex flex-col gap-4">` with no card
+wrapper or capsule header") no longer describes the component. Measured at `HEAD 816e923e` in the working
+tree: the root is `<div class="card p-3">` at `:51` with a plain `<h2>` heading, and `c1f09053` (2026-11-10,
+owner rulings W.1=C and W.2) deliberately replaced the `1119e437` CapsuleHeader with the plain `h2` as part of
+the page-wide visual overhaul, noting in its own message that it carries the concurrent capsule repair
+forward. The panel remains a dead registration (`team_race_facility` appears 0 times in
+`config/scenarios.php`), so no composed-surface pin is owed. The fixture
+`tests/browser/team-race-facility-panel.spec.ts` was re-run on the current tree: **2 passed (45.5s)**,
+session-private port 8463. Closure covers the card-boundary half; nothing here proves a composed cockpit
+surface, which still does not exist. The index row should read CLOSED (card half) with this note as its
+proving command; it is left to the register's next status pass to flip, because the file is shared and this
+pass only appends.
 
 
 ---
@@ -4042,7 +4075,7 @@ a game value it does not represent. Source: `docs/UMAMUSUME_REFERENCE.md` §2.2.
   value" in the UI and the migration comment. Fake-but-labelled beats fake-but-unlabelled, but it is a
   compromise, not the right model.
 
-**Current classification:** resolved by the owner-approved plan (`docs/plans/ki-82-ki-133-resolution-plan.md`) and dispatch (2026-11-12): Option A, the event-derived board, was chosen; the `spirit_gauges` table was not. R8's roster-table decline stands, and is irrelevant to the delivered shape because the board needs no enumeration. Reopen R8 only if a future full-team board is wanted.
+**Current classification:** resolved by the owner-approved plan (`PLANS-AND-BRIEFS.md` §ki-82-ki-133-resolution-plan.md) and dispatch (2026-11-12): Option A, the event-derived board, was chosen; the `spirit_gauges` table was not. R8's roster-table decline stands, and is irrelevant to the delivered shape because the board needs no enumeration. Reopen R8 only if a future full-team board is wanted.
 
 **Closure: CLOSED 2026-11-13.** Two independent things must both hold, and both now do. (a) **The proxy path:** the
 migration must be applied on the database in use and a test must prove the labelled proxy round-trips - the code and
@@ -4055,6 +4088,17 @@ full-team enumeration is needed to display what `turn_events` records.
 Marking this CLOSED on the strength of `b9837da7` alone would repeat KI-60's mistake in the opposite direction:
 there the suite passed while migrations were Pending, here the code would be called shipped while the same thing
 is true - which is why closure names `fe9fc421`, not the migration.
+
+
+**2026-11-18 — re-measured (consolidated proposal B6).** `python tools/doc_census.py` reads **808 GONE at
+HEAD** (the ratchet's own subject) and **348 in the working tree** (`--working-tree`): the peer's committed-pending
+doc batch (the `docs/research-scratch/INDEX.md` deletion plus the folded masters) closes 460 citations at the
+next commit, so the ratchet's next committed reading lands far below the 708 baseline without one forced repoint.
+The followable root-doc citations this pass could fix were fixed (`AGENTS.md:195` -> the `CLAUDE.md` §3 owner;
+both `PRD.md` §7 link-text mismatches). The remaining root-doc GONE entries (`KNOWN-ISSUES.md` jev-inspect and
+s10-* lines, `SCREEN_SPEC.md:3427`) are dated records quoting absorbed sources — the census's own doctrine
+counts them and tolerates them. Acceptance criterion 7 of the consolidated proposal (<= 708) is met at the
+first committed reading after the doc batch lands.
 
 ## KI-134 The Preferences savebar cannot state the form's condition, so the HFW's disabled-when-clean control is unbuilt - FILED 2026-10-26 (HFW parity S11.1 correction), RESOLVED 2026-10-26 (HFW parity S11.1)
 
@@ -4614,7 +4658,7 @@ typo fix. The `variant` prop added by this pass does not create a caller and doe
 
 **State:** CLOSED 2026-11-16 — `CatalogController` passes `base_stats`/`growth_rates` (`app/Http/Controllers/CatalogController.php:421-422`) and `Catalog/Show.vue` renders both as conditional table cells keyed off `statOrder`; `npm run typecheck` exit 0.
 
-**Why not fixed here.** Out of scope of the trainee-profile slice; a separate plan should align the catalog detail surface. The audit observation that "catalogue stores no base value or growth row" (Database pass-2) becomes stale after ADR-0030 and should be corrected in `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## audit-corrections.md` (formerly `docs/audit-corrections.md`), or the audit report when the follow-up lands.
+**Why not fixed here.** Out of scope of the trainee-profile slice; a separate plan should align the catalog detail surface. The audit observation that "catalogue stores no base value or growth row" (Database pass-2) becomes stale after ADR-0030 and should be corrected in `docs/research-scratch/AUDIT-AND-VERIFICATION.md`, section `## audit-corrections.md` (formerly `AUDIT-AND-VERIFICATION.md` §audit-corrections.md), or the audit report when the follow-up lands.
 
 **Closure.** Update `CatalogController` and `Catalog/Show.vue` to read `base_stats`/`growth_rates` and render them, mirroring the trainee profile conditional rendering.
 
@@ -5193,7 +5237,7 @@ that filing for these two cases; it does not make the bar pass, it makes the fai
 
 ## KI-163 Four duplicate `GoalRow`/`GoalGroup` interface declarations must be kept in agreement by hand
 
-**State:** OPEN — refactor debt, no behavioural defect. Filed 2026-11-17 (S2 P5).
+**State:** OPEN — refactor debt, no behavioural defect. Filed 2026-11-17 (S2 P5). 2026-11-18 register reconciliation: the index records closed and this body keeps its history. **2026-11-18 closure (roadmap slice 2.2).** `GoalRow`/`GoalGroup` now live once in `resources/js/types.ts`; the four named components import them and carry no local declarations (measured static read). `npm run typecheck` (`vue-tsgo -p tsconfig.vue.json && tsc --noEmit`) exited 0 on 2026-11-18. Historical OPEN text below is retained.
 
 **Defect.** The same payload shape is declared four times: `resources/js/components/scenario/cards/GoalGroupCard.vue`,
 `resources/js/components/scenario/ScenarioCardGrid.vue`, `resources/js/components/scenario/UnityCupPanel.vue` and
@@ -5211,7 +5255,7 @@ is exactly why it does not belong inside a behaviour slice.
 
 ## KI-164 `SnapshotReviewTest` asserts payload rows by array position, so every added row costs a re-derivation
 
-**State:** OPEN — test-shape debt. Filed 2026-11-17 (S2 P5).
+**State:** OPEN — test-shape debt. Filed 2026-11-17 (S2 P5). 2026-11-18 register reconciliation: the index records closed and this body keeps its history. **2026-11-18 closure (roadmap slice 2.3).** `tests/Feature/SnapshotReviewTest.php` now uses the keyed `reviewField()` helper, and a payload-row independence case was added; `php artisan test --compact --filter='SnapshotReviewTest|UnityCupSurfacesTest|TeamEditTest'` = 26 passed / 323 assertions on 2026-11-18. Historical OPEN text below is retained.
 
 **Defect.** `tests/Feature/SnapshotReviewTest.php` reads its contract as `fields.2.display`, `fields.7.state` and so
 on. Adding Rarity and Potential Level to the review payload (R8 E-04) moved every state row from index 2 to 4, so
@@ -5327,7 +5371,7 @@ feature; the feature works and is one tier deep.
 
 ## KI-166 The Race Decision page overflows by 59px at the 320px reflow width
 
-**State:** RESOLVED in working tree (uncommitted) 2026-11-18; see dated closure note below. Retained for history: OPEN — split out of KI-160 on 2026-11-17 so KI-160's resolved cockpit half could close without claiming this surface was touched. Undiagnosed.
+**State:** RESOLVED and committed at 816e923e (2026-11-18); see dated closure note below. 2026-11-18 register reconciliation: the fix is COMMITTED at 816e923e and the index row was flipped to CLOSED in the same pass. The 320px case on `career-race-decision.spec.ts` re-measured green session-private (port 8391). The planner and strip reflow cases were NOT re-run in this pass because the harness refused a stale `public/build` (guard at `tests/browser/global-setup.ts:203`); their green state is inherited from the fixing commit, not re-measured here. Historical wording retained. Retained for history: OPEN — split out of KI-160 on 2026-11-17 so KI-160's resolved cockpit half could close without claiming this surface was touched. Undiagnosed.
 
 **Defect.** `/training-runs/{run}/races` (`runs.races.decision`, `RaceDecisionController@show`) measures
 `over = 59` at a 320x900 viewport, and reads clean at 768 and 1280. That is the WCAG 1.4.10 reflow width, so
@@ -5415,3 +5459,47 @@ with `tag` / `class` / `data-region` / `right` / `width`, plus every ancestor's 
 - Not re-measured: the 640x512 reading for Race Decision was not taken in this pass. The Cockpit and strip 640px case remains green from its own spec.
 
 The owner's 2026-11-17 ruling is confirmed: the empty `culprits` list was a probe defect because the filter exempted the offending scroller itself. The prescribed walk-up is what found the spans.
+## KI-167: Scenario Selection focus round trip is asserted by a spec that fails at HEAD
+
+**Status: CLOSED (2026-11-18).** Root cause: `:disabled="form.processing"` on the scenario radios. `put()` sets `processing` synchronously, so the radio under the Trainer's finger was disabled at the moment of the keypress, the browser blurred it to `body`, and `onSuccess`'s `nextTick` refocus targeted a control that was still disabled — a silent no-op, which is why the spec read `inactive` while a CDP `Space` press on its own looked fine. Fixed by removing the attribute and adding a re-entry guard in `choose()`. The probe that proved it (a temporary spec logging `document.activeElement` at four points, deleted after use) is the method the "not established" note below asked for. Coverage the closure still owes in spirit — mouse selection, arrow-key navigation and a slow PUT — is now partly covered: `career-scenario-select.spec.ts` exercises arrow-key navigation in its own case. Historical text follows.
+
+**Original filing.** OPEN. Found 2026-11-18 while auditing the Scenario Selection step with a real browser.
+
+**Proving commands.**
+
+1. `npx playwright test career-scenario-select.spec.ts --grep "selects a scenario by keyboard"` fails at `tests\browser\career-scenario-select.spec.ts:147` with `expect(trackblazer).toBeFocused()` receiving `inactive`, after the radio is confirmed `checked` and the `Scenario set.` flash is visible.
+2. The same file at `git show HEAD:resources/js/pages/Career/ScenarioSelect.vue` (my working-tree card-click change removed, rebuilt) fails **identically**, so the failure is pre-existing and not caused by the card hit-area work.
+3. Measured in the running app at `127.0.0.1:8000` with a real CDP `Space` press after choosing a different scenario first (so the PUT is a genuine round trip): `document.activeElement` is `INPUT#scenario-radio-trackblazer`, `checked` is true, and the `Scenario set.` flash is visible. The focus restore in `choose()`'s `onSuccess` therefore works in the browser.
+4. Locator uniqueness cleared: 4 `[data-scenario-card]` elements, one `<h2>` each, headings `URA Finale`, `Unity Cup`, `Trackblazer`, `Our Grand Concert`, radios `scenario-radio-*`.
+
+**What is actually wrong.** Not established in this pass. The product's focus restore works when driven through CDP, and the spec's locator resolves to one element; the remaining difference between the two paths is Playwright's own keyboard dispatch and its re-resolution of the locator across the Inertia re-render. The spec is asserting a real WCAG 2.4.3 obligation the component appears to meet, so the failure is either a harness artefact or a narrow race the CDP path does not reproduce. Recorded rather than patched because a test that fails at HEAD is not this slice's to rewrite, and because changing it without a root cause would be guessing.
+
+**Not covered by any closure.** Even when this entry closes, nothing here proves the round trip restores focus for a mouse-driven selection, for arrow-key navigation between cards, or under a slow PUT.
+
+
+
+## KI-168: The scenario detail prints "declares no structure beyond it" for the Unity Cup finale, and the row that owns the fix keeps reopening - FILED 2026-11-18 (consolidated proposal C2)
+
+**Status: TERMINAL — owner ruling on file. Not a code defect.**
+
+**Symptom.** `config/scenarios.php`'s `unity_cup` block (lines 416-672) carries no `finale` key, so
+`ScenarioSectionBuilder::finaleAbsence()` (`:281-298`) prints "The finale is on the career calendar as a
+mandatory race; this scenario declares no structure beyond it, so nothing further is drawn." while the
+finale races sit on the calendar.
+
+**Why it is terminal, not fixable.** `docs/proposals/Unity-Cup-plan.md` item 12 (reviewed 2026-11-18,
+roadmap slice 3.2) records the owner ruling: the reference names the Unity Cup Finals only descriptively
+(`UMAMUSUME_REFERENCE.md:1150-1158`) without a distinct captured client string, and D-20 forbids promoting
+an uncaptured label into UI copy. Adding a config entry would print invented guidance — the one thing the
+repo bans outright. The descriptive phrase stays prose-only, tagged `unknown`; adding a label needs an
+owner-supplied client capture first.
+
+**Proving commands.**
+
+1. `php -r "var_export(array_key_exists('finale', (array) config('scenarios.scenarios.unity_cup')));"` -> `false`
+2. `grep -n "'finale'" config/scenarios.php` -> only the Trackblazer entry at `:1024`
+3. The absence sentence itself is correct disclosure: `app/Services/Career/ScenarioSectionBuilder.php:281-298` already names both states.
+
+**What closure does not cover.** A future client capture changes the ruling; this row reopens only when
+the owner records one. The scenario-detail surface's absence disclosure itself is covered by
+`ScenarioPanelTest` and is green.

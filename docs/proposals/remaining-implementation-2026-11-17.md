@@ -40,7 +40,7 @@ Measured 2026-11-17, 20:00-21:00 MPST, at `HEAD be8893a2` / `origin/master 0bb3e
 | # | Fact | Command / file | Output |
 | --- | --- | --- | --- |
 | M-1 | Divergence | `git rev-list --left-right --count origin/master...HEAD` | `8  15` |
-| M-2 | Working tree | `git status --porcelain -uall \| awk '{print substr($0,1,2)}'` | 109 ` D`, 57 ` M`, 86 `??`; index empty |
+| M-2 | Working tree | `git status --porcelain -uall \| awk '{print substr($0,1,2)}'` | **measured 2026-11-17 at `be8893a2`: 109 ` D`, 57 ` M`, 86 `??`**; **superseded at `HEAD 2546689e`: 22 rows (1 `M ` / 16 ` M` / 1 ` D` / 4 `??`)** because a peer committed the deletions |
 | M-3 | S1 already on `origin/master` | `git diff --name-only origin/master -- <3 S1 paths>` | empty |
 | M-4 | Six S1 paths identical to origin | per-file `git show origin/master:<f>` vs worktree | `CreateSnapshotRun`, `SnapshotController`, `DashboardController`, `StoreSnapshotRequest`, `TeamPanelBuilder`, `scenarios.php` all True |
 | M-5 | `npm ci` cannot install | `npm ci --dry-run` | exit 1, `EUSAGE`, `lock file's @inertiajs/vue3@2.3.28 does not satisfy 3.11.0`, missing `interestfor`, `@oddbird/popover-polyfill` |
@@ -188,7 +188,7 @@ without an owner ruling (2.3 asks for one).
 | --- | --- |
 | **Tag `be8893a2` directly** | It lacks the 7 S1 files and the 15 local commits are 11 docs-only; the tag path must be `origin/master` plus the landed S18 series (D-1). Tagging `HEAD` publishes a tree that cannot `npm ci`. |
 | **Cut a branch from `HEAD` and cherry-pick S1** | S1 is already byte-identical in six of seven paths (M-4). Cherry-picking re-applies merged work and manufactures conflicts in `DashboardController.php`, which both sides touch. |
-| **Apply the worktree diff wholesale with `git stash`/`commit -a`** | AGENTS.md §14: naming a path commits that path's working-tree content, other sessions' lines included. The worktree holds a peer's unfinished refactor and 109 deletions. |
+| **Apply the worktree diff wholesale with `git stash`/`commit -a`** | AGENTS.md §14: naming a path commits that path's working-tree content, other sessions' lines included. The worktree at `be8893a2` holds a peer's unfinished refactor and 109 deletions. |
 | **Raise `DOC_CITATION_BASELINE`** | The gate is 18 links *under* baseline. Raising it is the "weaken a threshold to pass" class the quality bar forbids in writing. |
 | **Delete the five flash-name probes silently** | A test deletion needs an owner approval plus a stated reason in the commit (AGENTS.md §9/FLOOR). D-5 asks rather than acts. |
 | **Fill the fan ladder with nine bands including invented thresholds** | Two tiers have no fan count to key on. Fabricating a stat table is the repo's hardest ban; R-5 ships seven and discloses two. |

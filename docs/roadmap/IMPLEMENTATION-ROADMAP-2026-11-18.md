@@ -173,17 +173,27 @@ No phase 1+ slice may start until 0.1, 0.2, 0.4 and 0.6 are green. Owner decisio
 - **Verification:** `python tools/adr-check.py docs/adr`; focused `TurnChoiceTest` / `NextDecisionTest`.
 
 ### Slice 2.5 - KI-114 browser cases on a retired picker
-- **Objective:** re-measure the two browser specs named in KI-114 against the current deck-picker surface; rewrite or close with a dated ruling.
-- **Dependencies:** 1.6 baseline.
-- **Acceptance:** no spec drives a control the shipped screen no longer renders.
-- **Verification:** session-private Playwright for the two files.
+- **Status at HEAD `816e923e`: RE-MEASURED, and this slice's premise was wrong in both directions. Closed as no-op; the remaining action is a KI-114 register correction, not a spec rewrite.**
+- **Measured 2026-11-18:**
+  - `tests/browser/career-legacy-deck-steps.spec.ts` drives **zero** deck-picker selectors (`grep -c deck-picker-results` = 0, `deck-filter-type` = 0, `select[name=type]` = 0). It drives `#legacy-*`, `#deck-slot-N` and `#affinity` only. There is nothing to retarget.
+  - `tests/browser/support-deck.spec.ts` drives `#deck-picker-results` five times, and that id is **live**, not retired: `resources/js/pages/Support/Builder.vue:494` renders `<ul id="deck-picker-results">`, reached from `TrainingRunController::300` (`Inertia::render('Support/Builder')`). The spec matches the shipped screen.
+  - The genuinely retired control is a **different** one: `CardPicker.vue` (`resources/js/components/support/CardPicker.vue`) owns `#deck-filter-type` and `#deck-filter-search`, and **no** browser spec references either. So the presumed stale surface is unreferenced, and the referenced surface is current.
+- **What the earlier reading got wrong.** It claimed both specs "still drive the retired picker (`#deck-picker-results`, `select[name=type]`)". Neither selector appears in the legacy spec, `select[name=type]` appears in neither file, and `#deck-picker-results` is the live Builder list. Rewriting 21 cases would have replaced correct selectors with untested ones.
+- **Deliverables:** a dated KI-114 body correction quoting the three greps above; no spec edit.
+- **Acceptance:** KI-114 no longer asserts that a live selector is retired.
+- **Verification:** `grep -c 'deck-picker-results' tests/browser/support-deck.spec.ts resources/js/pages/Support/Builder.vue`; `grep -c 'deck-picker-results\|select\[name=type\]' tests/browser/career-legacy-deck-steps.spec.ts`.
 
 ### Slice 2.6 - KI-106 citation re-measure
 - **Objective:** re-run the doc-citation parity check against the current baseline and record the figure.
 - **Deliverables:** updated KI row with command output and either a clean result or a queued correction slice.
 - **Acceptance:** figure quoted with commit and date; baseline not raised without a written reason.
 - **Verification:** `php artisan test --compact --filter=DocCitationParityTest`; `python tools/doc_census.py`.
-- **Measured 2026-11-18 at HEAD `2546689e`:** `php artisan test --compact --filter=DocCitationParityTest` = **1 failed / 1 passed**, `Failed asserting that 808 is equal to 708 or is less than 708` (`tests/Feature/DocCitationParityTest.php:56`); `python tools/doc_census.py --working-tree` = `dead markdown links: 808 (761 GONE, 47 UNTRACKED)`. The gate measures the committed tree, so the new files in this slice's working tree cannot have caused the rise. `DOC_CITATION_BASELINE` stays at 708: lowering rot is a queued correction slice, raising the bar to pass is a quality-bar violation (C-8/KI-106). This roadmap document itself adds 0 dead citations (checked with the census resolver).
+- **Measured 2026-11-18 at HEAD `816e923e`** (a re-measurement of the `2546689e` reading below; the two census modes are now reported separately, because the earlier line conflated them):
+  - `php artisan test --compact --filter=DocCitationParityTest` = **1 failed / 1 passed (5 assertions)**, `Failed asserting that 808 is equal to 708 or is less than 708` at `tests/Feature/DocCitationParityTest.php:56`. Unchanged from the `2546689e` reading: the gate is still red and the baseline is still 708.
+  - `python tools/doc_census.py` (committed tree, the mode the gate measures) = **`dead markdown links: 808 (808 GONE, 0 UNTRACKED)`**.
+  - `python tools/doc_census.py --working-tree` = **`dead markdown links: 347 (298 GONE, 49 UNTRACKED)`**, not the `808 (761 GONE, 47 UNTRACKED)` figure recorded earlier. The working tree resolves far more citations than HEAD does because it holds 2815 files under `docs/` against 805 tracked at HEAD, so most locally-present targets satisfy a link the committed tree reports GONE. The `47`/`49` UNTRACKED figure did hold; the `761`/`808` pair did not, and only the committed-tree number is what the gate enforces.
+  - Prior reading, preserved: **measured 2026-11-18 at HEAD `2546689e`** — `DocCitationParityTest` **1 failed / 1 passed**, `Failed asserting that 808 is equal to 708 or is less than 708` (`:56`); `--working-tree` = `808 (761 GONE, 47 UNTRACKED)`.
+  - `DOC_CITATION_BASELINE` stays at `708` in both readings: lowering rot is a queued correction slice, and raising the bar to pass is a quality-bar violation (C-8/KI-106).
 
 ---
 
@@ -395,3 +405,40 @@ Every arrow is a verification checkpoint, not just an ordering hint. A slice tha
 **Full suite result:** one run before the slice 3.1 revert read 2467 passed / 4 failed. Two failures were the reverted `TeamRankWriterTest`; `UnityCupSurfacesTest` passed again in the focused run after the revert. The 2 remaining failures are **pre-existing or peer-owned, not from this session's edits**: `DocCitationParityTest` (808 vs 708, recorded at slice 2.6) and `LineEndingGuardTest` (`tests/browser/career-trainee-select.spec.ts`, `tests/browser/wizard-flow.spec.ts` carry CRLF in the working tree while HEAD blobs are LF; both outside this session's diff). A post-revert full suite was not re-run; no pass is claimed for it.
 
 **Blocked, with reasons:** 0.1 (needs owner D-1 and a push, not performed); 0.5 (owner D-2); 1.3 (owner D-5); 1.4 (a peer owns the `gates` script and `tools/gates.sh` in the shared tree; not overwritten); 1.6 (full baseline not green because of the two failures above); 2.1 (needs a browser probe and a session-private Playwright run); 2.4 (owner signature for ADR-0027); 2.6 (baseline not raised, queued correction slice); 3.1 (see the slice's BLOCKED note); 3.3-3.8 and Phase 4.5/5.x (owner rulings, evidence packages, or post-tag per the roadmap's own dependency order).
+
+
+---
+
+## 14. Execution record 2026-11-18 (verification-and-closeout pass)
+
+**Baseline for this pass:** started at `cfd8bd78`; peer commit `816e923e` (KI-160/KI-166 reflow fix) landed during it. All figures below are command output, not inherited claims. Per-slice verdicts:
+
+| Slice | Verdict | Evidence |
+|---|---|---|
+| 0.1 | BLOCKED | Requires owner D-1 and a publish/push — a side effect outside this worktree. No publish performed. |
+| 0.2 / 0.3 / 0.4 / 0.6 | VERIFIED | `package-lock.json` resolves `@inertiajs/vue3` 3.11.0; `pre-native-build` present in `composer.json` and called by the Windows workflow; `.gitignore` ignores `win-unpacked/`, `*.json.bak`, `.workbuddy-ai/`; `npm run typecheck` exit 0. |
+| 0.5 | VERIFIED (peer) | `git ls-tree -r HEAD -- jev-inspect` = 0 files; closure commit `e5fc0e1c` is an ancestor of HEAD. Owner D-2 is moot. |
+| 1.1 / 1.2 / 1.5 | VERIFIED | `composer.json` keeps `php ^8.3` with the §1.3 ruling; `playwright.config.ts:28` ignores the packaged spec; `tools/md_fence_check.py` exists and `python tools/md_fence_check.py` over the six docs this pass changed = 0 invalid fences in 6 file(s). |
+| 1.3 | BLOCKED | Owner D-5 rules per probe spec; six retirement candidates require owner approval since the Floor forbids deleting tests without it. |
+| 1.4 | BLOCKED | `tools/gates.sh` (untracked, peer-owned) still runs bare `pint --test --format agent` at :33 (KI-75) and omits `adr-check.py`, `check_untracked.py`, `doc_census.py` and audits. Not overwritten in a shared tree. |
+| 1.6 | MEASURED, not green | Frozen worktree at `cfd8bd78` (`vendor`, `node_modules`, `public/build`, `.env`, DB copy; dirty 0→0): `php artisan test --compact` = **6 failed / 7 skipped / 2456 passed (37543 assertions)**, artifact `.scratch-uma/roadmap-2026-11-18/baseline-pest-2.txt`. Five failures are frozen-worktree path fixtures (`DatabaseSafetyTest` hardcodes the main canonical path at `tests/Feature/DatabaseSafetyTest.php:13`; `storage/app/backups` absent): focused re-run in the canonical tree = **47 passed / 288 assertions**. The sixth is the pre-existing citation ratchet: 808 GONE links against the 708 bar (`DocCitationParityTest.php:56`, `tools/doc_census.py`). No pass is claimed. |
+| 2.1 | VERIFIED (peer fix, independent check); KI-166 CLOSED | Commit `816e923e` put `position:relative` on `.card:has(> table.t)` and added the 320px case. Session-private `PLAYWRIGHT_PORT=8391` run of `career-race-decision.spec.ts --grep 'reflows at 320px'` = **1 passed**. The planner and strip reflow cases were NOT re-run: the harness refused a stale `public/build` (`tests/browser/global-setup.ts:203`) and `npm run build` was not run in the shared tree. KI-166's index row was flipped to CLOSED on the strength of the run above, with the unmeasured pair named in its body. |
+| 2.2 / 2.3 | VERIFIED + register closed | One shared `GoalRow`/`GoalGroup` in `resources/js/types.ts`, no local copies; keyed `reviewField()` in `SnapshotReviewTest`. `npm run typecheck` exit 0; focused suite = **26 passed / 323 assertions**. KI-163/KI-164 index rows flipped to CLOSED with dated body notes. |
+| 2.4 | BLOCKED | ADR-0027 status is still `Proposed`; owner signature first (no code invents the writer). |
+| 2.5 | OPEN | `career-legacy-deck-steps.spec.ts` and `support-deck.spec.ts` are clean/tracked but still drive the retired picker (`#deck-picker-results`, `select[name=type]`) whose shipped replacement is `CardPicker.vue`'s dialog (`#deck-filter-type`, `#deck-filter-search`). Rewriting 21 cases is an interaction-model change, not a string swap; no test was deleted. |
+| 2.6 | OPEN | Fresh census = 808 dead links, ratchet = 708. Baseline not raised; the correction slice is still owed. |
+| 3.1 | BLOCKED | Owner R2 (2026-10-25) and R6-48 tension; the conflicting editor edit was already reverted and `UnityCupSurfacesTest` kept. |
+| 3.2 | VERIFIED | Terminal note in `docs/proposals/Unity-Cup-plan.md` §14 item 12; no unsourced client label added. |
+| 3.3 / 3.4 / 3.5 / 3.6 / 3.7 | BLOCKED | Owner decisions D-11/D-12, ADR acceptance, and evidence packages respectively. No invented value or schema migration. |
+| 3.8 | OPEN | Per-item verified/terminal rulings not completed; the source packages and owner terminal notes are still owed. |
+| 3.9 | VERIFIED | ADR-0030 `code: built` and measured 263/263 provenance rows. |
+| 3.10 | DONE in code, doc corrected | `SupportCardEffects::forLevel()/atLevel()/valueAt()` and `DeckAnalysisReachedEffectsTest` are already at HEAD (commit `550fd542`), contrary to §2's stale "capability gap" claim. ADR-0029's contract was corrected to `four built` with a dated note preserving the old wording. A-0.12 is dispositioned by R13 (permissive, no schema owed) and stays unopened. |
+| 4.1 | PARTIAL implemented | Six index/body contradictions reconciled with dated body clauses. `audit_status_register.py` = **CONTRADICTIONS: none / RESULT: clean**, 110 index rows, 116 headings / 110 ids, **OPEN 7** (KI-104, 106, 114, 116, 119, 127, 162) after closing KI-163, KI-164 and KI-166. Six duplicate-id pairs stay unmerged by ruling (append-only register; one shared status). |
+| 4.2 / 4.3 | VERIFIED | Version/count claims re-baselined at `cfd8bd78`; `grep -c '^## \[Unreleased\]' CHANGELOG.md` = 1. |
+| 4.4 | PARTIAL implemented | ADR-0019 (`Advisory`) and ADR-0028 (`Accepted`) contract tokens aligned with Status; ADR-0029 corrected earlier; ADR-0030 already aligned. `tools/adr-index.py --write` regenerated the derived index; `python tools/adr-check.py docs/adr` = 2 pre-existing word-cap findings (0026, 0029), no new finding. ADR-0022/0023/0027 owner signatures still absent. |
+| 4.5 | BLOCKED | Owner D-13 plus the 1.6 red; no tag cut. |
+| 5.1–5.9 | BLOCKED | Roadmap §9 forbids starting Phase 5 before the tag; individual slices also need D-8/D-9, FQ rulings, OQ rulings and a quiet-box baseline. |
+
+**Gates run in this pass:** `npm run typecheck` exit 0; `php artisan test --compact --filter='DatabaseSafetyTest|PreferenceControlsTest'` = 47 passed / 288 assertions (canonical-tree reproduction); `php artisan test --compact --filter='SnapshotReviewTest|UnityCupSurfacesTest|TeamEditTest'` = 26 passed / 323 assertions; session-private Playwright KI-166 case = 1 passed; `python tools/adr-check.py docs/adr` = 2 pre-existing findings; `python tools/md_fence_check.py` over the same six docs = 0 invalid fences in 6 file(s); `python tools/lore.php` = 613 hits / 75 exempt, `php tools/lore.php code` = 365 hits (both report-only, 0 new hits in the lines added by this pass); `audit_status_register.py` = clean.
+
+**Not run:** the full browser sweep (one process at a time; only the focused KI-166 case was needed), `composer gates` (its script is peer-owned and still has the KI-75 defect), and any tag/push.

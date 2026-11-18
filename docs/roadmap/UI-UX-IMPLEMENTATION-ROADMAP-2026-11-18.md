@@ -202,3 +202,24 @@ asserts `[data-scenario-card]` so the scan cannot pass on an empty step. Both we
 
 **Not measured, explicitly retained:** the audit's §6 contrast, target-size, focus-visibility and
 keyboard-pass claims are unchanged by this pass. No WCAG conformance verdict is claimed.
+## 11. Second browser pass at `816e923e` (2026-11-18)
+
+A driven-browser pass in Chromium against `127.0.0.1:8000`, after the first pass's slices were closed.
+Detail and provenance labels are in `docs/audits/uiux-comprehensive-walk-2026-11-18/07-browser-verified-2026-11-18.md`.
+
+| Slice | Verdict | Evidence |
+|---|---|---|
+| 4.1 full route sweep | DONE | 54 routes at 1440x900 and 48 at 390x844; 0 console errors, 0 failed requests, exactly one `h1` per page. Two 404s were probe error (no `/trainees` route, `/umamusume` takes a slug), and the 404 page renders correctly. |
+| 4.2 overflow class closed | DONE | `/legacy` measured `41` px of document overflow at 390 px from an `sr-only` span escaping a `position: static` scroller. KI-166's rule required the table to be a direct child of `.card`, which this page is not. `:where(.card, [class*="overflow-x-auto"]):has(table)` closes the class; re-measured `0`, wrapper still scrolls. Post-fix sweep of 48 routes: 0 overflow. |
+| 4.3 tile suffix separator | DONE | `Tile.vue` announced `1of 72`; `ml-1` spaced it visually only. Now `1 of 72`, and `dashboard.spec.ts:275` no longer pins the defect. |
+| 4.4 scenario card hit area | DONE | Probe grid measured 1/12 points inside the card (4% of 561x216). The card now takes the click and skips interactive children; 12/12 measured, selection persisted across reload. |
+| 4.5 preflight dead end | DONE | The acknowledgement that enables `Create the run` sat 952 px below the button with no explanation at the point of use. A `[data-ack-hint]` sentence now sits in the head band, gated on `canStart` so it never competes with `startBlocker`'s own sentence. |
+| 4.6 regression coverage | DONE | `tests/browser/browser-walk-2026-11-18.spec.ts`, 3 cases, green. |
+| 4.7 pre-existing red recorded | DONE | `career-scenario-select.spec.ts:147` fails identically at HEAD with this work reverted. Filed as KI-167; not fixed, root cause not established. |
+
+**Cleared as false positives in the same pass:** bottom-nav clipping the CTA (nav 45 px, `main`
+reserves 96 px, content ends above it), the empty cockpit being a dead end (it carries a "Record the
+first turn through Training" link), a "future" verification date (2026-11-02 is 16 days past), and the
+Dashboard's repeated absence wording (required by `Tile.vue` and `DESIGN.md` §5). Vision-model verdicts
+in this pass were wrong four times and are treated as leads only.
+

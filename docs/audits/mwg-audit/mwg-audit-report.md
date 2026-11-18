@@ -43,3 +43,21 @@
 ## Stop
 
 Audit complete. No source files were modified. Awaiting approval before any remediation phase.
+
+---
+
+## Dated erratum — 2026-11-18
+
+The findings table above is the record of the audit as written. Three of its ten rows describe patterns that the tree has since changed, and grep over `resources/` on 2026-11-18 measures them as remediated. The original sentences are not rewritten.
+
+| Row | Row claimed | Measured 2026-11-18 |
+|---|---|---|
+| 1 | `TrainingDetail.vue:475` triggers Enter without IME gating | **Remediated.** `resources/js/pages/Career/TrainingDetail.vue:479` guards with `event.isComposing || event.keyCode === 229`. |
+| 4 | `ArtworkSlot.vue:85,91` lazy-loads every image | **Remediated.** The component gained an `eager` prop; both `<img>` branches bind `loading`/`fetchpriority` from it (`ArtworkSlot.vue:91,98`). |
+| 6 | Dialogs have no overscroll containment | **Remediated.** `resources/css/app.css:2077-2084` carries `dialog:modal { overscroll-behavior: contain }` and the `::backdrop` rule. |
+
+Two further rows closed without code, deliberately: row 5 (intrinsic `width`/`height`) rests on the recorded `DESIGN.md` §4.7 decision, and row 10 (`content-visibility`) was filed optional and no measured problem motivates it.
+
+Row 9 is **not** closed. `closedby="any"` shipped on two dialogs (`RaceCard.vue:242`, `CardPicker.vue:181`) without the fallback this audit's own guide marks MANDATORY. Dated detail, verified compatibility data and the two closing options are in `docs/audits/mwg-audit/mwg-verified-research-2026-11-18.md` §5.
+
+`legacy-scan resources --json` reports `totalFindings: 0` across 35 rules and 33 guides at this date.

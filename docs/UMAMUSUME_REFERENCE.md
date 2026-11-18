@@ -1170,6 +1170,8 @@ therefore not a game value. Sources: [GameTora Unity Cup](https://gametora.com/u
 [Game8 update guide 563657](https://game8.co/games/Umamusume-Pretty-Derby/archives/563657), and
 [uma.guide Unity Cup](https://uma.guide/guides/unity-cup-career-guide), fetched 2026-10-25.
 
+**Confidence note added 2026-11-18.** Re-reading the same three publishers confirms the rank vocabulary and that S and S+ carry the sourced hint behaviour. None of the fetched pages prints the letter-to-facility mapping in the previous paragraph. The mapping `F/G → 1, D/E → 2, B/C → 3, A → 4, S → 5` is therefore an **app inference from a sourced vocabulary**, not a publisher-stated table; keep it, but label it as constructed when it is quoted. `S+` remains outside that ladder by ruling. Team Trials is a separate mode with its own missions (official notice 1168, 2026-11-09), so its rank ladder must not be merged with this one.
+
 #### 2.2.3 Trackblazer `[Global]`
 
 * **Open career, no race goals, no scenario link.** The export agrees: this scenario has zero linked
