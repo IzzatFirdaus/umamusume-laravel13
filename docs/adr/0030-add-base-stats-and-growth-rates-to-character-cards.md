@@ -2,10 +2,10 @@
 
 <!-- ADR-CONTRACT
   decision: accepted (2026-11-02) — add nullable base_stats and growth_rates json columns to character_cards, populated from GameTora base_stats and stat_bonus fields, stored as keyed objects
-  code: pending — migration 2026_11_02_141639, parser, store, controller, Vue all in flight
+  code: built — migration 2026_11_02_141639 (with down()), CharacterCard casts + fillable, GametoraCharacterCardParser, StoreCharacterCards, CatalogController + TraineeProfileController, Catalog/Show.vue + TraineeProfile.vue; measured 2026-11-18 at HEAD 2546689e: 263/263 rows non-null with keyed objects and source_url/snapshot_path/fetched_at
   superseded-by: —
   amended-by: —
-  open: re-fetch required to populate existing rows; owner approval needed for dev DB application
+  open: none — the 2026-11-18 measurement closed the re-fetch item; provenance backfill for the wider data_sources table is tracked separately (Phase 5.1 of IMPLEMENTATION-ROADMAP-2026-11-18.md)
 -->
 
 - **Status:** Accepted

@@ -18,29 +18,15 @@
  * goal card, so their position relative to the goals is unchanged.
  */
 import { computed } from 'vue';
+import type { GoalGroup, GoalRow } from '../../../types';
 
-interface GoalRow {
-    label: string;
-    state: string | null;
-    year_label: string | null;
-    turn: number | null;
-    race_url: string | null;
-    absence: string | null;
-    /** U-05b / R8: the fans this race requires, off the calendar row; `null` when it carries none. */
-    fan_gate: number | null;
-    fan_gate_label: string;
-    fan_gate_title: string;
-}
-
-interface GoalGroup {
-    group: string;
-    rows: GoalRow[];
-    summary: string | null;
-    empty_note: string | null;
-}
+// KI-163: one canonical shape in types.ts; local aliases because vue-tsgo cannot expand an
+// imported interface inside defineProps<> in this build.
+type LocalGoalRow = GoalRow;
+type LocalGoalGroup = GoalGroup;
 
 const props = defineProps<{
-    group: GoalGroup;
+    group: LocalGoalGroup;
 }>();
 
 const glyphs: Record<string, string> = {

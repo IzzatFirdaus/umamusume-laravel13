@@ -12,7 +12,7 @@ A local-only Laravel 13 tool for Trainers of the Global English version of *Umam
 
 ## Current Status
 
-Current version: `2.1.0`, pre-release (see `VERSION.md`). Phase 1 of `PRD.md` is substantially implemented and in active development; the tool is a local deliverable only. The catalog, fetch engine, review queue, training-run domain, support-card deck surface, import/export, and the read-only `/api/v1` are built and covered by the Pest suite. Feature status and non-goals are authoritative in `PRD.md` §6; open decisions are tracked there (§7) and in `docs/adr/` (notably `ADR-0016`, next-race readiness, is an open question).
+Current version: `3.0.0`, pre-release and untagged (see `VERSION.md`). Phase 1 of `PRD.md` is substantially implemented and in active development; the tool is a local deliverable only. The catalog, fetch engine, review queue, training-run domain, support-card deck surface, import/export, and the read-only `/api/v1` are built and covered by the Pest suite. Feature status and non-goals are authoritative in `PRD.md` §6; open decisions are tracked there (§7) and in `docs/adr/` (notably `ADR-0016`, next-race readiness, is an open question).
 
 ## Technology Stack
 
@@ -209,7 +209,7 @@ app/Services/             ScenarioCaps (per-stat ceilings), SupportCardEffects (
 config/uma.php            fetch allowlist, politeness, thresholds; config/scenarios.php scenario layout data
 database/                 migrations, factories for every model, seeders, seeders/data (committed source bodies)
 resources/views/          Blade: `app.blade.php` (the Inertia shell) and `errors/{404,419,500}.blade.php`; `resources/views/components/` is empty since slice B1
-resources/js/             Inertia + Vue 3 + TypeScript: `spa.ts`, `bootstrap.ts`, `types.ts`, `pages/**/*.vue` (60), `components/**/*.vue` (97), `layouts/`
+resources/js/             Inertia + Vue 3 + TypeScript: `spa.ts`, `bootstrap.ts`, `types.ts`, `pages/**/*.vue` (62), `components/**/*.vue` (119), `layouts/`
 routes/                   web.php, api.php (named routes throughout)
 tests/                    Pest: Feature (100+ files) + Unit; tests/Fixtures stored bodies
 docs/                     adr/, scenarios/, UMAMUSUME_REFERENCE.md, research-scratch/ (governance masters)

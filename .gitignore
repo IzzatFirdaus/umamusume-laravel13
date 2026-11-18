@@ -86,6 +86,11 @@ Homestead.yaml
 # Local-only agent config / state (never committed):
 /.mcp.local.json
 /.tooling/logs/
+.workbuddy-ai/
+
+# NativePHP/Electron packaging output and local editor backup files (regenerable, not source)
+/win-unpacked/
+/*.json.bak
 # Project-specific MCP configs (kept tracked):
 .mcp.json
 .mcp.example.json

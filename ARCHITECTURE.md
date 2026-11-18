@@ -582,7 +582,7 @@ says so.
 | Project | Trainer Desk |
 | Repository | `umamusume-laravel13` |
 | Runtime | PHP 8.5.8, Laravel 13.32.0, SQLite only |
-| Browser surface | Inertia 2.3 + Vue 3.5, Tailwind v4, Vite 7 |
+| Browser surface | Inertia v3 (`@inertiajs/vue3 ^3.11.0`) + Vue 3.5, Tailwind v4, Vite 7 |
 | Deployment | **None.** Loopback only, by design (`PRD.md` §6) |
 | Last updated | 2026-10-22 (revision 0.3) |
 

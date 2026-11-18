@@ -2,7 +2,7 @@
 
 Status: the requirements below are current as written. The most recent dated record this file carries is the
 2026-10-12 `ADR-0025` ceiling travel in C-1 and C-2; A-10's `ADR-0026` objectives line is later but carries no
-date here. The version label is `2.0.0` pre-release ([VERSION.md](VERSION.md)) and the web surface is
+date here. The version label is `3.0.0` pre-release, untagged ([VERSION.md](VERSION.md); measured 2026-11-18 at HEAD `2546689e`) and the web surface is
 Inertia + Vue 3 ([ADR-0020](docs/adr/0020-trainer-desk-2-program.md)), so this is no longer a
 documentation-and-scaffolding document. Whether Phase 1 exit (§8) has been declared: **to be confirmed**.
 Product name: **Trainer Desk**, owner decision 2026-09-27, closing OQ-1.

@@ -14,7 +14,7 @@ of *Umamusume Pretty Derby*. Consolidates four legacy apps (three trackers + the
 - No auth surface, no multi-user, no public deploy; loopback only (`PRD.md` §6.10).
 - SQLite only (`database/database.sqlite`, WAL + `busy_timeout`); framework `users`/`User` unused.
 - Web surface: Inertia + Vue 3 + TS, Tailwind v4, Vite. Blade only as `app.blade.php` shell + errors.
-  JSON is read-only `/api/v1` (3 controllers). ~119 components / ~66 pages under `resources/js/`.
+  JSON is read-only `/api/v1` (3 controllers). ~119 components / ~62 pages under `resources/js/`.
 - Data via stage-isolated fetch engine (JP↔Global cross-ref, snapshots, provenance on promote).
 - No CI; every gate in §9 runs locally and its output is the only evidence.
 

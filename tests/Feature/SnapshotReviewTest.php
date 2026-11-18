@@ -44,18 +44,57 @@ function reviewPayload(array $overrides = []): array
     ];
 }
 
+/**
+ * KI-164: read one review row by the key its controller wrote, never by its array position.
+ * The identity block grew twice (R7-99, then U-03's rarity and Potential Level) and each growth
+ * cost edits to `fields.N` in four tests that had nothing to do with identity. A keyed read makes
+ * an added row invisible to assertions about unrelated fields.
+ *
+ * @param  list<array{key: string, display: string, state: string}>  $fields
+ * @return array{key: string, display: string, state: string}
+ */
+function reviewField(array $fields, string $key): array
+{
+    $row = collect($fields)->firstWhere('key', $key);
+
+    expect($row, "review fields carry no row keyed {$key}")->not->toBeNull();
+
+    return $row;
+}
+
 it('renders the three confidence states as three distinct labels', function (): void {
     $this->post(route('career.snapshot.review'), reviewPayload())
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('Career/Snapshot/Review')
-            // The identity rows lead (trainee, scenario, then R8's rarity and Potential Level), so the
-            // state rows start at index 4 rather than 0.
-            ->where('fields.4.display', 'Known · Speed 607')
-            ->where('fields.7.display', 'Unknown · Guts')
-            ->where('fields.9.display', 'Not provided · Energy')
-            ->where('fields.7.state', 'unknown')
-            ->where('fields.9.state', 'not_provided'));
+        ->assertInertia(function (Assert $page): void {
+            $page->component('Career/Snapshot/Review');
+
+            $fields = $page->toArray()['props']['fields'];
+
+            expect(reviewField($fields, 'speed')['display'])->toBe('Known · Speed 607')
+                ->and(reviewField($fields, 'guts')['display'])->toBe('Unknown · Guts')
+                ->and(reviewField($fields, 'energy')['display'])->toBe('Not provided · Energy')
+                ->and(reviewField($fields, 'guts')['state'])->toBe('unknown')
+                ->and(reviewField($fields, 'energy')['state'])->toBe('not_provided');
+        });
+});
+
+it('keeps keyed assertions valid when a new row is prepended', function (): void {
+    // KI-164's acceptance case: a payload row added ahead of the stat rows must not require any
+    // assertion about speed or energy to be re-derived.
+    $this->post(route('career.snapshot.review'), reviewPayload())
+        ->assertOk()
+        ->assertInertia(function (Assert $page): void {
+            $fields = $page->toArray()['props']['fields'];
+            $withNewRow = array_merge([
+                ['key' => 'new_fact', 'display' => 'Known · New fact', 'state' => 'known'],
+            ], $fields);
+
+            expect(reviewField($withNewRow, 'speed')['display'])
+                ->toBe(reviewField($fields, 'speed')['display'])
+                ->and(reviewField($withNewRow, 'energy')['display'])
+                ->toBe('Not provided · Energy')
+                ->and(reviewField($withNewRow, 'new_fact')['display'])->toBe('Known · New fact');
+        });
 });
 
 it('keeps Unknown and Not provided apart rather than rendering both as one absence', function (): void {
@@ -66,10 +105,10 @@ it('keeps Unknown and Not provided apart rather than rendering both as one absen
 
             $fields = $page->toArray()['props']['fields'];
 
-            expect(collect($fields)->firstWhere('key', 'guts')['display'])->toBe('Unknown · Guts')
-                ->and(collect($fields)->firstWhere('key', 'energy')['display'])->toBe('Not provided · Energy')
-                ->and(collect($fields)->firstWhere('key', 'guts')['display'])
-                ->not->toBe(collect($fields)->firstWhere('key', 'energy')['display']);
+            expect(reviewField($fields, 'guts')['display'])->toBe('Unknown · Guts')
+                ->and(reviewField($fields, 'energy')['display'])->toBe('Not provided · Energy')
+                ->and(reviewField($fields, 'guts')['display'])
+                ->not->toBe(reviewField($fields, 'energy')['display']);
         });
 });
 
@@ -146,14 +185,18 @@ it('opens on a bare visit with every field not provided instead of bouncing to t
     // "Not provided" there.
     $this->get(route('career.snapshot.review'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('Career/Snapshot/Review')
-            ->where('has_draft', false)
-            ->where('position_label', null)
-            ->has('fields', 12)
-            ->where('fields.4.display', 'Not provided · Speed')
-            ->where('fields.11.display', 'Not provided · Skill Points')
-            ->where('entry', route('career.snapshot')));
+        ->assertInertia(function (Assert $page): void {
+            $page->component('Career/Snapshot/Review')
+                ->where('has_draft', false)
+                ->where('position_label', null)
+                ->has('fields', 12)
+                ->where('entry', route('career.snapshot'));
+
+            $fields = $page->toArray()['props']['fields'];
+
+            expect(reviewField($fields, 'speed')['display'])->toBe('Not provided · Speed')
+                ->and(reviewField($fields, 'skill_points')['display'])->toBe('Not provided · Skill Points');
+        });
 });
 
 it('reads back the session draft after the setup form opened the review once', function (): void {
@@ -161,9 +204,12 @@ it('reads back the session draft after the setup form opened the review once', f
 
     $this->get(route('career.snapshot.review'))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->where('has_draft', true)
-            ->where('fields.4.display', 'Known · Speed 607'));
+        ->assertInertia(function (Assert $page): void {
+            $page->where('has_draft', true);
+
+            expect(reviewField($page->toArray()['props']['fields'], 'speed')['display'])
+                ->toBe('Known · Speed 607');
+        });
 });
 
 it('reads the submitted body and refuses to read a payload carried in the query string', function (): void {
@@ -192,13 +238,17 @@ it('reads back the trainee and the scenario it will write (R7-99)', function ():
 
     $this->post(route('career.snapshot.review.submit'), reviewPayload(['umamusume_id' => $trainee->id]))
         ->assertOk()
-        ->assertInertia(fn (Assert $page) => $page
-            ->component('Career/Snapshot/Review')
-            // The two identity rows come first: they are what the write is about, and the read-back's
-            // contract is that the top of the list is the thing being confirmed.
-            ->where('fields.0.key', 'umamusume_id')
-            ->where('fields.0.display', 'Known · Trainee Rice Shower')
-            ->where('fields.1.key', 'scenario')
-            // Config's label, never the stored slug.
-            ->where('fields.1.display', 'Known · Scenario '.config('scenarios.scenarios.unity_cup.label')));
+        ->assertInertia(function (Assert $page): void {
+            $page->component('Career/Snapshot/Review');
+
+            $fields = $page->toArray()['props']['fields'];
+
+            expect(reviewField($fields, 'umamusume_id')['key'])->toBe('umamusume_id')
+                ->and(reviewField($fields, 'umamusume_id')['display'])
+                ->toBe('Known · Trainee Rice Shower')
+                ->and(reviewField($fields, 'scenario')['key'])->toBe('scenario')
+                // Config's label, never the stored slug.
+                ->and(reviewField($fields, 'scenario')['display'])
+                ->toBe('Known · Scenario '.config('scenarios.scenarios.unity_cup.label'));
+        });
 });

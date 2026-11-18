@@ -14,33 +14,16 @@
 import AlertRow from '../../../../components/scenario/AlertRow.vue';
 import ProvenanceBadge from '../../../../components/ProvenanceBadge.vue';
 import SubCell from '../../../../components/SubCell.vue';
-import type { ProvenanceState } from '../../../../types';
+import type { GoalGroup, GoalRow, ProvenanceState } from '../../../../types';
 
 type Badge = ProvenanceState;
 
-interface GoalRow {
-    label: string;
-    state: string | null;
-    year_label: string | null;
-    turn: number | null;
-    race_url: string | null;
-    absence: string | null;
-    /** U-05b / R8: the fans this race requires, off the calendar row; `null` when it carries none. */
-    fan_gate: number | null;
-    fan_gate_label: string;
-    fan_gate_title: string;
-}
-
-interface GoalGroup {
-    group: string;
-    rows: GoalRow[];
-    summary: string | null;
-    empty_note: string | null;
-}
+// KI-163: canonical goal shapes live in types.ts; local alias for the defineProps build limit.
+type LocalGoalGroup = GoalGroup;
 
 const props = defineProps<{
     scenario: {
-        objectives: GoalGroup[];
+        objectives: LocalGoalGroup[];
         alerts: { level: string; text: string; detail: string | null }[];
     };
     label: string;

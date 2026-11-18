@@ -22,6 +22,10 @@ const webServerEnv = {
 
 export default defineConfig({
     testDir: './tests/browser',
+    // The packaged-app spec needs NATIVEPHP_EXE_PATH and a built Windows binary; the dedicated
+    // config `playwright.nativephp.config.ts` runs it in the acceptance workflow. Keep it out of
+    // the default sweep so `npm run test:browser` measures the app, not the packaging harness.
+    testIgnore: '**/nativephp-packaged.spec.ts',
     // The suite owns its data: five cases assert empty-state surfaces and the rest read the seeded
     // reference data, so the database is built from nothing before the first test (KI-69).
     globalSetup: './tests/browser/global-setup.ts',

@@ -76,6 +76,81 @@ truth for mechanics; the two ADRs that contradicted it were amended rather than 
 - **`npm audit` is clean.** `follow-redirects` 1.16.0 → 1.16.2 (high, via `axios`) and `qs`
   6.16.0 → 6.17.1 (moderate, via `@inertiajs/vue3`).
 
+### Earlier entries (2026-10-18/19, previously listed under a second Unreleased heading)
+
+
+**Added**
+
+- `.ai/rules/eloquent.md`: casts are declared with a `casts()` method on the model, not a `$casts`
+  property. Measured at 17 models against 2.
+- `.ai/rules/architecture.md`: enums live in `app/Enums/`; there is no authorization layer, with no
+  `app/Policies/` and no custom middleware; browser routes and the `Api/V1` JSON controllers are separate.
+- `docs/adr/0019-semver-label-tag-and-release-branch.md`: the version label, the pre-release mechanism, the
+  target branch scheme, and the gate to `1.0.0`. Status is Proposed; the owner has not ruled on the open
+  items it lists.
+- `VERSION.md` and this file.
+
+**Changed**
+
+- `.ai/rules/index.md` no longer reads "No rules recorded yet". It is a glob to rule-file table, which is
+  the mechanism `AGENTS.md` §2 tells agents to use. Before this change the index had no rows, so
+  `code-style.md` and `testing-standards.md` were unreachable through it.
+- `.ai/rules/testing-standards.md` describes the database binding that this project actually uses. The
+  file previously showed a per-file `use RefreshDatabase;` example importing `Pest\TestCases\TestCase`,
+  which is not the path and not how isolation works here. Feature tests inherit
+  `uses(TestCase::class, RefreshDatabase::class)->in('Feature')` from `tests/Pest.php`, which also applies
+  `withoutVite()` globally and provides the `actingAsAdmin()` helper.
+- `docs/adr/README.md`: rows for `ADR-0018` and `ADR-0019` added and the file count corrected to nineteen.
+  The table stopped at 0017 while 0018 was on disk, and the prose said seventeen.
+- `PRD.md` restructured 2026-10-18 to state current requirements only: superseded text, dated errata,
+  amendment notes and open-question history moved out of the requirement lines and into the section
+  "PRD history relocated from `PRD.md`" at the foot of this file, and the open-question register into
+  docs/OPEN-QUESTIONS.md. No requirement, ID, number or acceptance test was removed or renumbered; the §6
+  non-goal numbering is unchanged because `DESIGN.md`, `README.md`, `SCREEN_SPEC.md`, `CLAUDE.md` and
+  several ADRs cite `PRD §6.x` by number.
+- Seven `.ai/skills/*/SKILL.md` files gained the trailing newline `code-style.md` §Formatting Standards
+  requires. Content is unchanged, and the copies now match `.agents/skills/` byte for byte.
+
+- `SKILL.md` renamed to `SKILL_REGISTRY.md` 2026-10-19 and restructured: frontmatter removed (a <!-- census: quoted-original -->
+  repository root is not one of the five skill scopes, so the file never loaded as a skill), body cut
+  to the six-section skeleton (run first, reading the output, coverage gaps, installed/scanned/
+  available, violations and `--repair`, provenance), and the seven-row coverage table moved to
+  `coverage.md`. History moved out with it: the 2026-10-02 and 2026-10-11 rewrite record, the pinned <!-- census: quoted-original -->
+  example totals it once carried as warnings (each stale within days of being written - deleted
+  rather than relocated, git history keeps them), and the rebuttal paragraphs against `AGENTS.md` §3
+  and `GOVERNANCE.md` §6, replaced in the file by one provenance line pointing at `AGENTS.md` §2 (the
+  code wins) for the stale generated-file rule. The pairing named there is real: `.agents/skills.json`
+  inventories `php artisan skill:manage` commands, not agent skills, so `GOVERNANCE.md` §6's
+  machine-readable-half pairing is a naming collision (`AGENTS.md` §8, `docs/research-scratch/PLANS-AND-BRIEFS.md`).
+
+- The dashboard's active career reads its progress as a rail of 72 discrete turn marks instead of a
+  progress bar, and the rail carries the career's own length: the client's grid is 24 turns to a
+  career year over three career years.
+- The dashboard's grid follows the shell's layout width, so the Wide layout renders at the wide
+  shell's measure instead of self-capping at the standard one.
+- The dashboard's active career is weight-emphasized: the trainee's name is the largest thing in its
+  card, and the card headings beside it stay at their muted size.
+- The dashboard's data-freshness line moved from the Data Status card to the page header, beside the
+  page title. The card keeps the live state and the ruleset version.
+
+**Fixed**
+
+- The dashboard's turn progress was measured against 24 turns, which is one career year, so the bar
+  read as complete from turn twenty-four onward in a seventy-two turn career. The rail now carries
+  the model's own career length.
+
+**Notes on these entries**
+
+The four `.ai` entries above are committed, at `cb34264 docs(rules): record the project conventions and
+index them by glob`. `VERSION.md`, this file, and `ADR-0019` are the working-tree state as of `b6fd4e1`. A
+concurrent session is active in the same checkout, so the base moves while these files are written.
+
+No application code, schema, or copy changed in this set, so no test was added: `AGENTS.md` §9 requires
+none for documentation-only work.
+
+The documentation suites that guard these files pass: `DocCitationParityTest`, `DocSchemaDriftTest`, and
+`DocCensusResilienceTest`, 8 tests, 20 assertions. The lore gate reports no hits in the files added here.
+
 ## [3.0.0] - unreleased
 
 **Not tagged.** `git tag -l '3.0.*'` is empty. The 2026-10-28 parity audit against the HFW found 32
@@ -461,79 +536,6 @@ not bind; the label is applied because the owner directed this pass to ship as i
 - `SCREEN_SPEC.md`: the Database hub's area count, dated notes on `SCR-REV-001`, `SCR-CAR-010`,
   `SCR-CAR-011`, and a new `§7-38` register entry.
 
-## [Unreleased]
-
-### Added
-
-- `.ai/rules/eloquent.md`: casts are declared with a `casts()` method on the model, not a `$casts`
-  property. Measured at 17 models against 2.
-- `.ai/rules/architecture.md`: enums live in `app/Enums/`; there is no authorization layer, with no
-  `app/Policies/` and no custom middleware; browser routes and the `Api/V1` JSON controllers are separate.
-- `docs/adr/0019-semver-label-tag-and-release-branch.md`: the version label, the pre-release mechanism, the
-  target branch scheme, and the gate to `1.0.0`. Status is Proposed; the owner has not ruled on the open
-  items it lists.
-- `VERSION.md` and this file.
-
-### Changed
-
-- `.ai/rules/index.md` no longer reads "No rules recorded yet". It is a glob to rule-file table, which is
-  the mechanism `AGENTS.md` §2 tells agents to use. Before this change the index had no rows, so
-  `code-style.md` and `testing-standards.md` were unreachable through it.
-- `.ai/rules/testing-standards.md` describes the database binding that this project actually uses. The
-  file previously showed a per-file `use RefreshDatabase;` example importing `Pest\TestCases\TestCase`,
-  which is not the path and not how isolation works here. Feature tests inherit
-  `uses(TestCase::class, RefreshDatabase::class)->in('Feature')` from `tests/Pest.php`, which also applies
-  `withoutVite()` globally and provides the `actingAsAdmin()` helper.
-- `docs/adr/README.md`: rows for `ADR-0018` and `ADR-0019` added and the file count corrected to nineteen.
-  The table stopped at 0017 while 0018 was on disk, and the prose said seventeen.
-- `PRD.md` restructured 2026-10-18 to state current requirements only: superseded text, dated errata,
-  amendment notes and open-question history moved out of the requirement lines and into the section
-  "PRD history relocated from `PRD.md`" at the foot of this file, and the open-question register into
-  docs/OPEN-QUESTIONS.md. No requirement, ID, number or acceptance test was removed or renumbered; the §6
-  non-goal numbering is unchanged because `DESIGN.md`, `README.md`, `SCREEN_SPEC.md`, `CLAUDE.md` and
-  several ADRs cite `PRD §6.x` by number.
-- Seven `.ai/skills/*/SKILL.md` files gained the trailing newline `code-style.md` §Formatting Standards
-  requires. Content is unchanged, and the copies now match `.agents/skills/` byte for byte.
-
-- `SKILL.md` renamed to `SKILL_REGISTRY.md` 2026-10-19 and restructured: frontmatter removed (a <!-- census: quoted-original -->
-  repository root is not one of the five skill scopes, so the file never loaded as a skill), body cut
-  to the six-section skeleton (run first, reading the output, coverage gaps, installed/scanned/
-  available, violations and `--repair`, provenance), and the seven-row coverage table moved to
-  `coverage.md`. History moved out with it: the 2026-10-02 and 2026-10-11 rewrite record, the pinned <!-- census: quoted-original -->
-  example totals it once carried as warnings (each stale within days of being written - deleted
-  rather than relocated, git history keeps them), and the rebuttal paragraphs against `AGENTS.md` §3
-  and `GOVERNANCE.md` §6, replaced in the file by one provenance line pointing at `AGENTS.md` §2 (the
-  code wins) for the stale generated-file rule. The pairing named there is real: `.agents/skills.json`
-  inventories `php artisan skill:manage` commands, not agent skills, so `GOVERNANCE.md` §6's
-  machine-readable-half pairing is a naming collision (`AGENTS.md` §8, `docs/research-scratch/PLANS-AND-BRIEFS.md`).
-
-- The dashboard's active career reads its progress as a rail of 72 discrete turn marks instead of a
-  progress bar, and the rail carries the career's own length: the client's grid is 24 turns to a
-  career year over three career years.
-- The dashboard's grid follows the shell's layout width, so the Wide layout renders at the wide
-  shell's measure instead of self-capping at the standard one.
-- The dashboard's active career is weight-emphasized: the trainee's name is the largest thing in its
-  card, and the card headings beside it stay at their muted size.
-- The dashboard's data-freshness line moved from the Data Status card to the page header, beside the
-  page title. The card keeps the live state and the ruleset version.
-
-### Fixed
-
-- The dashboard's turn progress was measured against 24 turns, which is one career year, so the bar
-  read as complete from turn twenty-four onward in a seventy-two turn career. The rail now carries
-  the model's own career length.
-
-### Notes on these entries
-
-The four `.ai` entries above are committed, at `cb34264 docs(rules): record the project conventions and
-index them by glob`. `VERSION.md`, this file, and `ADR-0019` are the working-tree state as of `b6fd4e1`. A
-concurrent session is active in the same checkout, so the base moves while these files are written.
-
-No application code, schema, or copy changed in this set, so no test was added: `AGENTS.md` §9 requires
-none for documentation-only work.
-
-The documentation suites that guard these files pass: `DocCitationParityTest`, `DocSchemaDriftTest`, and
-`DocCensusResilienceTest`, 8 tests, 20 assertions. The lore gate reports no hits in the files added here.
 
 ## [2.0.0] - not released
 

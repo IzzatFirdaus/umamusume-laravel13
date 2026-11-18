@@ -59,6 +59,9 @@
         "serve:browser": [
             "@php -r \"putenv('SESSION_DRIVER=file'); putenv('CACHE_STORE=file'); passthru('php artisan serve', $exit); exit($exit);\""
         ],
+        "pre-native-build": [
+            "@php tools/check-electron-env.php"
+        ],
         "test": [
             "@php artisan config:clear --ansi",
             "npm run typecheck",

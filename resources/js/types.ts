@@ -86,6 +86,33 @@ export interface DecisionValue {
     title: string;
 }
 
+/*
+ * KI-163: the career-goal ladder row and its group, canonical here so the four surfaces that draw
+ * goals (GoalGroupCard, CareerGoalsPanel, ScenarioCardGrid, UnityCupPanel) cannot drift by hand.
+ * An SFC that needs the name inside `defineProps<>` aliases it locally (vue-tsgo cannot expand an
+ * imported interface there); the shape itself has one owner now. Nullable fields stay required:
+ * the controller always sends the key and uses null for an unrecorded value, never a default.
+ */
+export interface GoalRow {
+    label: string;
+    state: string | null;
+    year_label: string | null;
+    turn: number | null;
+    race_url: string | null;
+    absence: string | null;
+    /** U-05b / R8: fans this race requires; null when the calendar publishes none. */
+    fan_gate: number | null;
+    fan_gate_label: string;
+    fan_gate_title: string;
+}
+
+export interface GoalGroup {
+    group: string;
+    rows: GoalRow[];
+    summary: string | null;
+    empty_note: string | null;
+}
+
 export interface NextDecision {
     /** One sentence naming which priority fired. Not a ranking of the seven §29 tiers. */
     priority: string;

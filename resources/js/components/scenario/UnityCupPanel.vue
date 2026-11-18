@@ -27,6 +27,10 @@ import { computed } from 'vue';
 import AlertRow from './AlertRow.vue';
 import ScenarioCardGrid from './ScenarioCardGrid.vue';
 import TeamRacePanel from '../TeamRacePanel.vue';
+import type { GoalGroup } from '../../types';
+
+// KI-163: canonical goal shape; alias for the defineProps build limit.
+type LocalGoalGroup = GoalGroup;
 
 type BurstState =
     | 'Chargeable'
@@ -97,23 +101,7 @@ const props = defineProps<{
         team: TeamSection;
         panels: Record<string, { on: boolean }>;
         /** The career-goal groups the grid places at positions 4 and 5 (URA adds a third). */
-        objectives: {
-            group: string;
-            rows: {
-                label: string;
-                state: string | null;
-                year_label: string | null;
-                turn: number | null;
-                race_url: string | null;
-                absence: string | null;
-                /** U-05b / R8: the fans this race requires; `null` when the calendar publishes none. */
-                fan_gate: number | null;
-                fan_gate_label: string;
-                fan_gate_title: string;
-            }[];
-            summary: string | null;
-            empty_note: string | null;
-        }[];
+        objectives: LocalGoalGroup[];
     };
     label: string;
     kind: 'panel';

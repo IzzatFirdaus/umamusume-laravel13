@@ -38,6 +38,10 @@ import TeamRankGauge from '../TeamRankGauge.vue';
 import UnityCupTeamBoard from './UnityCupTeamBoard.vue';
 import UnityCupTournamentReadiness from './UnityCupTournamentReadiness.vue';
 import AlertRow from './AlertRow.vue';
+import type { GoalGroup } from '../../types';
+
+// KI-163: one canonical goal shape in types.ts; alias for the defineProps build limit.
+type LocalGoalGroup = GoalGroup;
 
 type BurstState =
     | 'Chargeable'
@@ -96,27 +100,9 @@ interface TeamSection {
     burst_band: string | null;
 }
 
-interface GoalGroup {
-    group: string;
-    rows: {
-        label: string;
-        state: string | null;
-        year_label: string | null;
-        turn: number | null;
-        race_url: string | null;
-        absence: string | null;
-        /** U-05b / R8: the fans this race requires, off the calendar row; `null` when it carries none. */
-        fan_gate: number | null;
-        fan_gate_label: string;
-        fan_gate_title: string;
-    }[];
-    summary: string | null;
-    empty_note: string | null;
-}
-
 const props = defineProps<{
     team: TeamSection;
-    objectives: GoalGroup[];
+    objectives: LocalGoalGroup[];
     /** Whether the matrix composes the burst machine for this run (`spirit_bursts` widget). */
     burstsEnabled: boolean;
 }>();
