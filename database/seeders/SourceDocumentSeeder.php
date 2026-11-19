@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Seeders;
 
+use App\Services\DataPipeline\Contracts\RaceEnrichmentSourceParser;
 use App\Services\DataPipeline\PipelineRunner;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Log;
@@ -61,6 +62,22 @@ class SourceDocumentSeeder extends Seeder
             // decide what "no match" means. Routing it here would file the whole roster
             // as pending review candidates.
             if ($sourceKey === UmamusumeRosterSeeder::SOURCE_KEY) {
+                continue;
+            }
+
+            /*
+             * An enrichment source is not a roster source, and `PipelineRunner` runs the generic
+             * character loop for anything it is handed. The four race-enrichment parsers implement
+             * `RaceEnrichmentSourceParser`, whose contract names `uma:enrich-races` as the only
+             * consumer: that command joins their records by id into `race_catalog_slots`.
+             *
+             * Skipping them here is the same rule `UmaFetch` applies at its own boundary, for the same
+             * reason. Without it the committed race bodies made this seeder parse races as characters:
+             * race-fans and race-rewards carry no name key and threw, which turned a clean seed into
+             * "Seeding left the catalogue incomplete" - a failure the offline catalogue never had,
+             * introduced by giving those sources the seed bodies they were declared with.
+             */
+            if (is_a($sourceConfig['parser'], RaceEnrichmentSourceParser::class, true)) {
                 continue;
             }
 

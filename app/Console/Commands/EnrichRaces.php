@@ -11,6 +11,7 @@ use App\Services\DataPipeline\Parsers\GametoraRaceRewardParser;
 use App\Services\DataPipeline\Parsers\GametoraRacetrackParser;
 use App\Services\DataPipeline\SourceFetcher;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
@@ -22,45 +23,53 @@ class EnrichRaces extends Command
 
     public function handle(SourceFetcher $fetcher): int
     {
+        // 1 & 2: read/fetch snapshots and parse. Each body is kept beside the path it came from,
+        // because that path is the provenance stamped on every row the body enriches.
+        $tracks = $this->snapshot('gametora-racetracks', $fetcher);
+        $fans = $this->snapshot('gametora-race-fans', $fetcher);
+        $races = $this->snapshot('gametora-races', $fetcher);
+        $rewards = $this->snapshot('gametora-race-rewards', $fetcher);
 
-        // 1 & 2: read/fetch snapshots and parse.
-        $tracksBody = $this->snapshotBody('gametora-racetracks', $fetcher);
-        $fansBody = $this->snapshotBody('gametora-race-fans', $fetcher);
-        $racesBody = $this->snapshotBody('gametora-races', $fetcher);
-        $rewardsBody = $this->snapshotBody('gametora-race-rewards', $fetcher);
+        /** @var array<string, array{url: string}> $provenance */
+        $provenance = [
+            'gametora-racetracks' => ['url' => $tracks['url']],
+            'gametora-race-fans' => ['url' => $fans['url']],
+            'gametora-races' => ['url' => $races['url']],
+            'gametora-race-rewards' => ['url' => $rewards['url']],
+        ];
 
-        $tracksParsed = (new GametoraRacetrackParser)->parse($tracksBody ?? '');
-        $fansParsed = (new GametoraRaceFansParser)->parse($fansBody ?? '');
-        $racesParsed = (new GametoraRaceParser)->parse($racesBody ?? '');
-        $rewardsParsed = (new GametoraRaceRewardParser)->parse($rewardsBody ?? '');
+        $tracksParsed = (new GametoraRacetrackParser)->parse($tracks['body'] ?? '');
+        $fansParsed = (new GametoraRaceFansParser)->parse($fans['body'] ?? '');
+        $racesParsed = (new GametoraRaceParser)->parse($races['body'] ?? '');
+        $rewardsParsed = (new GametoraRaceRewardParser)->parse($rewards['body'] ?? '');
 
         // 3: build lookup maps.
-        $tracks = [];
+        $trackMap = [];
         foreach ($tracksParsed as $t) {
             if (! isset($t['id'])) {
                 continue;
             }
-            $tracks[$t['id']] = ['name_en' => $t['name_en'] ?? null];
+            $trackMap[$t['id']] = ['name_en' => $t['name_en'] ?? null];
         }
 
-        $fans = [];
+        $fanMap = [];
         foreach ($fansParsed as $f) {
             if (! isset($f['id'])) {
                 continue;
             }
-            $fans[$f['id']] = [
+            $fanMap[$f['id']] = [
                 'first' => $f['first'] ?? null,
                 'second' => $f['second'] ?? null,
                 'third' => $f['third'] ?? null,
             ];
         }
 
-        $races = [];
+        $raceMap = [];
         foreach ($racesParsed as $r) {
             if (! isset($r['id'])) {
                 continue;
             }
-            $races[$r['id']] = [
+            $raceMap[$r['id']] = [
                 'course' => $r['course'] ?? null,
                 'direction' => $r['direction'] ?? null,
                 'season' => $r['season'] ?? null,
@@ -70,12 +79,12 @@ class EnrichRaces extends Command
             ];
         }
 
-        $rewards = [];
+        $rewardMap = [];
         foreach ($rewardsParsed as $rw) {
             if (! isset($rw['id'])) {
                 continue;
             }
-            $rewards[$rw['id']] = $rw['rewards'];
+            $rewardMap[$rw['id']] = $rw['rewards'];
         }
 
         $directionMap = [1 => 'Right-Handed', 2 => 'Left-Handed', 4 => null];
@@ -84,32 +93,49 @@ class EnrichRaces extends Command
 
         $enriched = 0;
         $skipped = 0;
+        $skippedManual = 0;
         $unchanged = 0;
 
         DB::transaction(function () use (
-            $tracks, $fans, $races, $rewards,
+            $trackMap, $fanMap, $raceMap, $rewardMap, $provenance,
             $directionMap, $courseMap, $seasonMap,
-            &$enriched, &$skipped, &$unchanged
+            &$enriched, &$skipped, &$skippedManual, &$unchanged
         ): void {
             foreach (RaceCatalogSlot::all() as $slot) {
+                // PRD B-4 / FR-B-4: `is_manual` rows are immutable to the engine, the same stop sign
+                // every sibling writer honours (`StoreRaceCatalogSlots`, `StoreSkills`,
+                // `StoreCharacterCards`, `PromoteMatchedRecord`). Counted apart from `$skipped`, which
+                // means "no source matched this row": an operator reading the summary needs to know
+                // whether a figure is low because the datasets stopped covering a race or because the
+                // Trainer corrected it by hand.
+                if ($slot->is_manual) {
+                    $skippedManual++;
+
+                    continue;
+                }
+
                 $matched = false;
+                /** @var list<string> $contributors */
+                $contributors = [];
                 $new = [];
 
-                if (array_key_exists($slot->track_id, $tracks)) {
-                    $new['track_name'] = $tracks[$slot->track_id]['name_en'];
+                if (array_key_exists($slot->track_id, $trackMap)) {
+                    $new['track_name'] = $trackMap[$slot->track_id]['name_en'];
+                    $contributors[] = 'gametora-racetracks';
                     $matched = true;
                 }
 
-                if (array_key_exists($slot->fans_gain_curve, $fans)) {
-                    $f = $fans[$slot->fans_gain_curve];
+                if (array_key_exists($slot->fans_gain_curve, $fanMap)) {
+                    $f = $fanMap[$slot->fans_gain_curve];
                     $new['fans_first'] = $f['first'];
                     $new['fans_second'] = $f['second'];
                     $new['fans_third'] = $f['third'];
+                    $contributors[] = 'gametora-race-fans';
                     $matched = true;
                 }
 
-                if (array_key_exists($slot->race_id, $races)) {
-                    $r = $races[$slot->race_id];
+                if (array_key_exists($slot->race_id, $raceMap)) {
+                    $r = $raceMap[$slot->race_id];
                     $new['course'] = $r['course'];
                     $new['direction'] = $r['direction'];
                     $new['season'] = $r['season'];
@@ -119,11 +145,13 @@ class EnrichRaces extends Command
                     $new['direction_label'] = array_key_exists($r['direction'], $directionMap) ? $directionMap[$r['direction']] : null;
                     $new['course_label'] = array_key_exists($r['course'], $courseMap) ? $courseMap[$r['course']] : null;
                     $new['season_label'] = array_key_exists($r['season'], $seasonMap) ? $seasonMap[$r['season']] : null;
+                    $contributors[] = 'gametora-races';
                     $matched = true;
                 }
 
-                if (array_key_exists($slot->race_id, $rewards)) {
-                    $new['reward_summary'] = json_encode($rewards[$slot->race_id]);
+                if (array_key_exists($slot->race_id, $rewardMap)) {
+                    $new['reward_summary'] = json_encode($rewardMap[$slot->race_id]);
+                    $contributors[] = 'gametora-race-rewards';
                     $matched = true;
                 }
 
@@ -153,6 +181,13 @@ class EnrichRaces extends Command
                     continue;
                 }
 
+                // Provenance travels with the write, not beside it. Before this the row kept the
+                // calendar document's `source_url` while carrying four other publishers' facts, so a
+                // reader checking "where did this track name come from" was sent to a file that does
+                // not contain it. Written only when a value changed, which is what `fetched_at` then
+                // truthfully means: the last time this row's enrichment columns moved.
+                $new = [...$new, ...$this->provenance($contributors, $provenance)];
+
                 foreach ($new as $key => $value) {
                     $slot->{$key} = $value;
                 }
@@ -162,17 +197,89 @@ class EnrichRaces extends Command
         });
 
         $this->info(sprintf(
-            'Enrichment complete: %d enriched, %d skipped (no match), %d unchanged.',
+            'Enrichment complete: %d enriched, %d skipped (no match), %d skipped (manual), %d unchanged.',
             $enriched,
             $skipped,
+            $skippedManual,
             $unchanged
         ));
 
         return self::SUCCESS;
     }
 
-    private function snapshotBody(string $sourceKey, SourceFetcher $fetcher): ?string
+    /**
+     * The provenance this command stamps on a slot it changed.
+     *
+     * Four documents contribute to one calendar row, and `race_catalog_slots` carries one set of the
+     * four `ADR-0003` Amendment R3 columns, so the row names every dataset that contributed rather
+     * than whichever one happened to run last: a comma-joined list, which is the only shape a single
+     * provenance column can hold for a fact with four publishers. Before this the row kept the
+     * calendar document's `source_url` while carrying four other publishers' facts, so a reader
+     * checking "where did this track name come from" was sent to a file that does not contain it.
+     *
+     * `snapshot_path` names each source's snapshot **directory**, not a file, for two reasons that
+     * point the same way. Four full `<hash>.html` paths run to roughly 390 characters against a
+     * column declared `string()` (255), and a path cut at the column boundary is a provenance record
+     * pointing at bytes that are not there. The directory is also exactly what `snapshot()` resolves:
+     * it reads the newest body inside it, so "the newest body in `snapshots/gametora-races`" stays
+     * true after the next fetch adds a file, where a pinned filename would not.
+     *
+     * A `data_sources` row per source is not available to this writer: that table is
+     * `umamusume_id`-scoped and the column is NOT NULL with a foreign key to `umamusume`
+     * (`2026_09_26_162819`), while a calendar slot belongs to no trainee. `ADR-0008` states the same
+     * reading from the other side: `data_sources` is the character-level table behind FR-A-4, not a
+     * home for reference-row provenance, which is why `race_catalog_slots`, `scenario_races` and
+     * `scenario_slots` each carry the four columns inline instead — the pattern
+     * `StoreRaceCatalogSlots::provenance()` writes, and the one this mirrors.
+     *
+     * @param  list<string>  $contributors  the source keys whose values this slot now holds
+     * @param  array<string, array{url: string}>  $provenance
+     * @return array{source_url: string, snapshot_path: string, fetched_at: Carbon, source_timezone: string|null}
+     */
+    private function provenance(array $contributors, array $provenance): array
     {
+        $urls = [];
+        $directories = [];
+        $timezone = null;
+
+        foreach ($contributors as $key) {
+            $urls[] = $provenance[$key]['url'];
+            $directories[] = "snapshots/{$key}";
+            $timezone ??= $this->sourceTimezone($key);
+        }
+
+        return [
+            'source_url' => implode(', ', array_filter($urls)),
+            'snapshot_path' => implode(', ', $directories),
+            'fetched_at' => now(),
+            'source_timezone' => $timezone,
+        ];
+    }
+
+    private function sourceTimezone(string $sourceKey): ?string
+    {
+        /** @var array<string, mixed>|null $source */
+        $source = config("uma.sources.{$sourceKey}");
+
+        return is_array($source) && isset($source['timezone']) ? (string) $source['timezone'] : null;
+    }
+
+    /**
+     * The newest stored body for one source, with the address it came from.
+     *
+     * The address travels with the body because the caller stamps it as provenance. A body read back
+     * from disk has no address of its own, so the source's declared URL stands in for it; a body
+     * fetched now carries the address that actually answered, redirect hops included (`SourceFetcher`
+     * reports it for exactly this reason).
+     *
+     * @return array{body: string|null, url: string}
+     */
+    private function snapshot(string $sourceKey, SourceFetcher $fetcher): array
+    {
+        /** @var array<string, mixed>|null $source */
+        $source = config("uma.sources.{$sourceKey}");
+        $declared = is_array($source) && isset($source['url']) ? (string) $source['url'] : '';
+
         $directory = "snapshots/{$sourceKey}";
 
         if (Storage::disk('local')->exists($directory)) {
@@ -184,7 +291,10 @@ class EnrichRaces extends Command
                 ->last();
 
             if ($newest !== null) {
-                return (string) Storage::disk('local')->get($newest);
+                return [
+                    'body' => (string) Storage::disk('local')->get($newest),
+                    'url' => $declared,
+                ];
             }
         }
 
@@ -195,7 +305,7 @@ class EnrichRaces extends Command
         if (! isset($sources[$sourceKey])) {
             $this->warn("Source '{$sourceKey}' not declared in config; skipping fetch.");
 
-            return null;
+            return ['body' => null, 'url' => $declared];
         }
 
         $fetched = $fetcher->fetch($sourceKey, $sources[$sourceKey]);
@@ -203,9 +313,12 @@ class EnrichRaces extends Command
         if ($fetched === null) {
             $this->error("Fetch failed for '{$sourceKey}'.");
 
-            return null;
+            return ['body' => null, 'url' => $declared];
         }
 
-        return $fetched['body'];
+        return [
+            'body' => $fetched['body'],
+            'url' => $fetched['url'],
+        ];
     }
 }

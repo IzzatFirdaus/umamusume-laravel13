@@ -8,10 +8,12 @@ use App\Enums\MatchTier;
 use App\Models\DataSource;
 use App\Models\MatchCandidate;
 use App\Models\Umamusume;
+use App\Services\DataPipeline\Contracts\RaceEnrichmentSourceParser;
 use App\Services\DataPipeline\NameNormalizer;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Storage;
 use Tests\Fixtures\TestSourceParser;
+use Tests\Fixtures\ThrowingSourceParser;
 
 const FETCH_URL = 'https://source.test/list';
 
@@ -197,4 +199,91 @@ it('stores the source link on the row it updates and keeps one a later fetch sto
 
     expect($stored->external_ref)->toBe('gametora:char:1008')
         ->and($stored->name_ja)->toBe('スペシャルウィーク');
+});
+
+/*
+ * S1.5: `uma:fetch` must not read the enrichment sources, and one bad source must not end the run.
+ *
+ * The four enrichment parsers implement `RaceEnrichmentSourceParser`, whose contract names
+ * `uma:enrich-races` as the only consumer. None of them was skipped, so they fell through
+ * `PipelineRunner`'s generic character loop: race-fans and race-rewards carry no name key and threw
+ * (killing the run on the first one), while racetracks and races carry `name_en` and filed a Pending
+ * review row per record. The 304-row backlog in the dev DB is that leak.
+ */
+
+it('skips every enrichment source and still fetches the rest of the run', function (): void {
+    // The declared keys are read from config rather than listed here, so the case fails if someone
+    // "fixes" the abort by deleting an entry instead of skipping it.
+    /** @var array<string, array{parser?: class-string}> $sources */
+    $sources = config('uma.sources');
+    $enrichment = array_keys(array_filter(
+        $sources,
+        static fn (array $entry): bool => isset($entry['parser'])
+            && is_a($entry['parser'], RaceEnrichmentSourceParser::class, true),
+    ));
+
+    // Non-vacuity: the four are still declared. A config with none of them would make this case pass
+    // by having nothing to skip.
+    expect($enrichment)->toHaveCount(4)
+        ->and($enrichment)->toContain('gametora-racetracks', 'gametora-race-fans', 'gametora-races', 'gametora-race-rewards');
+
+    // The declared list is narrowed to what this case fakes. A no-argument run visits EVERY configured
+    // key, so leaving the real ones in place would have the case reaching gametora.com through
+    // `preventStrayRequests()` and failing for a reason that is not the skip.
+    $narrowed = [];
+    foreach ($enrichment as $key) {
+        $narrowed[$key] = $sources[$key];
+    }
+    $narrowed['test-source'] = $sources['test-source'];
+    config(['uma.sources' => $narrowed]);
+
+    Http::preventStrayRequests();
+    Http::fake([FETCH_URL => Http::response(json_encode([['name' => 'Special Week']]))]);
+
+    // No argument: every remaining key is visited. The enrichment four must be skipped, and the
+    // ordinary test source must still be fetched, which is the half a blanket early-exit would break.
+    $this->artisan('uma:fetch')
+        ->expectsOutputToContain('is an enrichment source; read by uma:enrich-races. Skipped.')
+        ->assertExitCode(0);
+
+    foreach ($enrichment as $key) {
+        $this->assertDatabaseMissing('match_candidates', ['source_key' => $key]);
+    }
+});
+
+it('refuses an enrichment key asked for by name, naming the command that reads it', function (): void {
+    // A RuntimeeException about a missing `name` key was the old answer, from inside the parser. The
+    // refusal now happens before any fetch, and it names the door the Trainer actually wants.
+    $this->artisan('uma:fetch gametora-race-fans')
+        ->expectsOutputToContain('is read by uma:enrich-races, not uma:fetch.')
+        ->assertExitCode(1);
+});
+
+it('continues past a source that throws and reports the run as degraded', function (): void {
+    config([
+        'uma.sources.throws-source' => [
+            'url' => 'https://source.test/throws',
+            'parser' => ThrowingSourceParser::class,
+            'delay_ms' => 0,
+            'timeout_s' => 5,
+            'timezone' => 'Asia/Tokyo',
+        ],
+    ]);
+
+    Http::preventStrayRequests();
+    Http::fake([
+        'https://source.test/throws' => Http::response('{"records":[]}', 200, ['Content-Type' => 'application/json']),
+        FETCH_URL => Http::response(json_encode([['name' => 'Special Week']])),
+    ]);
+
+    // The throwing source is declared first in the merged config, so a run that stops at it never
+    // reaches the healthy one.
+    $this->artisan('uma:fetch')
+        ->expectsOutputToContain("Source 'throws-source' failed:")
+        ->expectsOutputToContain('source(s) failed and were skipped')
+        ->assertExitCode(1);
+
+    // The healthy source still ran: the failure was contained, which is what NFR-2 asks for. A run
+    // that reports FAILURE while having fetched everything else is the correct degraded outcome.
+    expect(MatchCandidate::query()->count())->toBeGreaterThan(0);
 });
