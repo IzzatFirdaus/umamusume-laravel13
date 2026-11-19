@@ -116,3 +116,86 @@ it('registers the scheduler to complete sessions every minute', function (): voi
     expect($out)->toContain('independent-training:complete')
         ->and($out)->toContain('* * * * *');
 });
+
+/*
+ * Two invariants the class declared and did not enforce.
+ *
+ * `canStart()` was covered here and called by nothing in `app/`, so "you cannot start another session
+ * while one is open" lived in a docblock. And neither transition ran in a transaction: `complete()` and
+ * `abandon()` each wrote the overlay and then the parent run, so a failure between the two left the pair
+ * disagreeing, a state `completeExpired()` never revisits because it only selects rows holding both
+ * nulls.
+ */
+it('refuses a second session while another window is open', function (): void {
+    $lifecycle = new Lifecycle;
+
+    $first = itrRun();
+    $lifecycle->start($first, ['policy' => 'stamina']);
+
+    // A different run, one session already open: refused by the one-at-a-time rule.
+    expect(fn () => $lifecycle->start(itrRun(), ['policy' => 'stamina']))
+        ->toThrow(InvalidArgumentException::class);
+
+    // The same run again, which the unique index also refuses.
+    expect(fn () => $lifecycle->start($first, ['policy' => 'stamina']))
+        ->toThrow(InvalidArgumentException::class);
+
+    expect(IndependentTrainingRun::query()->count())->toBe(1);
+});
+
+it('allows a new session once the previous window is closed', function (): void {
+    $lifecycle = new Lifecycle;
+
+    $first = $lifecycle->start(itrRun(), ['policy' => 'stamina']);
+    $lifecycle->abandon($first);
+
+    $second = $lifecycle->start(itrRun(), ['policy' => 'stamina']);
+
+    expect($second->abandoned_at)->toBeNull()
+        ->and(IndependentTrainingRun::query()->count())->toBe(2);
+});
+
+it('does not re-stamp a session another caller already closed', function (): void {
+    $lifecycle = new Lifecycle;
+    $itr = $lifecycle->start(itrRun(), ['policy' => 'stamina']);
+
+    // Two ticks racing the same row: the first claims it, the second must be a no-op rather than a
+    // second stamp that would overwrite the recorded finish.
+    $first = $lifecycle->complete($itr);
+    $stampedAt = $itr->fresh()->completed_at;
+
+    $second = $lifecycle->complete($itr->fresh());
+
+    expect($itr->fresh()->completed_at->equalTo($stampedAt))->toBeTrue()
+        ->and($first->id)->toBe($second->id)
+        ->and($first->status)->toBe(RunStatus::Completed);
+});
+
+/*
+ * S1.6's client half, pinned where it can be checked without a browser.
+ *
+ * "Give up" posted straight to `abandon_url`: no question, and on success the only visible change was
+ * the card losing its in-progress block. A misclick ended a session, and a Trainer who meant it could
+ * not tell an ended session from a re-render. The page now routes the click through a function that
+ * asks first, and the server's flash names the outcome.
+ */
+it('asks before giving up, and says so when it did', function (): void {
+    $source = (string) file_get_contents(base_path('resources/js/pages/Dashboard.vue'));
+
+    // The click is wired to the guard, not straight to the post.
+    expect($source)->toContain('@click="giveUpIndependentTraining"')
+        ->and($source)->not->toContain('@click="router.post(props.activeCareer.indep.abandon_url)"')
+        // And the guard asks. A function that posts without a question is the defect.
+        ->and($source)->toContain('confirm(');
+
+    // The server's answer names what happened rather than re-rendering silently.
+    $run = itrRun();
+    app(Lifecycle::class)->start($run, ['policy' => 'stamina']);
+
+    $this->post(route('runs.indep.abandon', $run))
+        ->assertRedirect(route('home'))
+        ->assertSessionHas('status', 'Independent Training session abandoned.');
+
+    // The run is retired, which is the consequence the question promised.
+    expect($run->fresh()->status)->toBe(RunStatus::Retired);
+});

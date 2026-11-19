@@ -221,6 +221,35 @@ const indepRemaining = computed<string | null>(() => {
 });
 
 /*
+ * S1.6: giving up is an ending, so it asks before it writes.
+ *
+ * The button posted straight to `abandon_url` with no question and no acknowledgement, and the only
+ * thing that happened on success was this card losing its `in_progress` block: the session was retired,
+ * the recorded state stayed, and nothing said so. Two harms on one control. A misclick ended a session;
+ * and a Trainer who did mean it could not tell whether the session had ended or the page had simply
+ * re-rendered, because retiring a run and losing the overlay look the same from here.
+ *
+ * `confirm()` is the tree's existing vocabulary for an ending with no undo (Veterans, TransferRequests,
+ * TrainingDetail). The question names both consequences the code actually produces: the run is retired,
+ * and the one-at-a-time rule is released.
+ */
+function giveUpIndependentTraining(): void {
+    const url = props.activeCareer?.indep?.abandon_url;
+
+    if (url === null || url === undefined) {
+        return;
+    }
+
+    if (!confirm('Give up this Independent Training session? The run is retired and its recorded state stays. You can start a new session afterwards.')) {
+        return;
+    }
+
+    // `preserveScroll` because the card sits below the fold on a long board: without it the answer to
+    // "did that work" is arriving halfway up the page.
+    router.post(url, {}, { preserveScroll: true });
+}
+
+/*
  * The lede is the wireframe's own sentence with its three figures bound to live props
  * (index.html:59). The verification line that used to trail it now lives where the wireframe puts
  * it -- inside the "Needs you" column's data-status tile (index.html:116) -- because a fact printed
@@ -375,10 +404,16 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                                 <p class="mt-0.5 text-xs text-ink-muted">
                                     You cannot start another training until this one completes.
                                 </p>
+                                <!-- An ending with no undo asks first. The label is the short one the
+                                     card has room for, so the question is where the consequence is
+                                     stated: the session is retired, the recorded state stays, and no
+                                     second training can start until it is closed. `confirm()` is the
+                                     vocabulary the rest of the tree already uses for this (Veterans,
+                                     TransferRequests, TrainingDetail). -->
                                 <button
                                     type="button"
                                     class="mt-1.5 inline-flex min-h-9 items-center rounded-md border border-rule bg-raised px-3 text-xs font-medium text-ink hover:bg-sunken transition-colors duration-150 ease-out"
-                                    @click="router.post(props.activeCareer.indep.abandon_url)"
+                                    @click="giveUpIndependentTraining"
                                 >
                                     Give up
                                 </button>

@@ -870,3 +870,40 @@ it('refuses an unknown policy and an eleventh priority skill at the request, not
         'priority_skills' => range(1, 11),
     ])->assertSessionHasErrors('priority_skills');
 });
+
+/*
+ * The flag without its policy, which used to be a 500 plus an orphan career.
+ *
+ * `policy` was nullable while the request's own docblock said it "is the one that must be present when
+ * the flag is on". A PUT carrying `independent=1` and nothing else passed validation,
+ * `independentConfig()` cast the absent value to the empty string, and `Lifecycle::start()`'s
+ * `tryFrom('')` threw — but only AFTER `store()`'s transaction had committed the run, its seeded skills
+ * and its deck slots. So the Trainer saw a 500 and the database kept a career the page never finished
+ * creating.
+ *
+ * Both halves are asserted: the field error, and the absence of the row. A test that only checked the
+ * error would pass on a request rule that refuses after the write.
+ */
+it('refuses the flag with no policy and leaves no career behind', function (): void {
+    $fixture = preflightFixture();
+    session([SetupDraft::SESSION_KEY => preflightDraft($fixture['trainee'], $fixture['cards'], $fixture['parents'])]);
+
+    // Counted as a delta: the fixture builds careers of its own, so an absolute count would be
+    // measuring the fixture rather than this write.
+    $runsBefore = TrainingRun::query()->count();
+    $overlaysBefore = IndependentTrainingRun::query()->count();
+
+    test()->put(route('career.preflight.store'), ['independent' => true])
+        ->assertSessionHasErrors('policy');
+
+    expect(TrainingRun::query()->count())->toBe($runsBefore)
+        ->and(IndependentTrainingRun::query()->count())->toBe($overlaysBefore);
+
+    // The same submission with the policy present still creates one, so the case above is about the
+    // missing value and not about the fixture.
+    test()->put(route('career.preflight.store'), ['independent' => true, 'policy' => 'balanced'])
+        ->assertRedirect();
+
+    expect(TrainingRun::query()->count())->toBe($runsBefore + 1)
+        ->and(IndependentTrainingRun::query()->count())->toBe($overlaysBefore + 1);
+});

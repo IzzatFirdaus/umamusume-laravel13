@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Enums\EnergyState;
 use App\Enums\RunStatus;
+use App\Enums\TurnEventType;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use Inertia\Testing\AssertableInertia as Assert;
@@ -159,4 +160,58 @@ it('clears the previous band when the state becomes not recorded', function (): 
 
     expect($fresh->energy_state)->toBe(EnergyState::Unknown)
         ->and($fresh->energy_band)->toBeNull();
+});
+
+/*
+ * S1.14: the two keys a correction accepts but cannot store as columns.
+ *
+ * `turn` is the row's identity, not one of its attributes. `turn_events` and `race_entries` address a
+ * turn by NUMber with no `turn_entry_id`, so moving a row's number is a renumber, and a renumber that
+ * only rewrites `turn_entries` strands both event tables at the old number. The store door documented
+ * that rule; the correction door simply wrote `validated()` wholesale. `StoreTurnEntryRequest` now
+ * refuses a changed number and prohibits the three keys the correction path has no column and no event
+ * for, so the value is refused rather than dropped in silence. Both halves are pinned here because a
+ * refusal that is not asserted is a refusal the next edit can delete freely.
+ */
+it('refuses a correction that moves a turn to another number', function (): void {
+    $run = energyCorrectionRun();
+    $turn = $run->turnEntries()->firstOrFail();
+
+    // A failure event at the number the row currently holds: if the renumber were allowed, this event
+    // would be left behind addressing a turn that no longer exists.
+    $run->turnEvents()->create([
+        'turn' => 1,
+        'event_type' => TurnEventType::Failure,
+        'source_name' => 'Train Speed',
+        'choice_label' => 'Train Speed',
+        'deltas' => ['penalty_kind' => 'mood', 'recorded' => []],
+        'origin_note' => 'fixture',
+    ]);
+
+    $this->from(route('runs.cockpit', $run))
+        ->put(route('runs.turns.update', [$run, $turn]), correctionPayload(['turn' => 2]))
+        ->assertSessionHasErrors('turn');
+
+    // Nothing moved: the row is still turn 1 and so is its event.
+    expect($turn->fresh()->turn)->toBe(1)
+        ->and($run->turnEvents()->where('turn', 1)->count())->toBe(1)
+        ->and($run->turnEvents()->where('turn', 2)->count())->toBe(0);
+});
+
+it('refuses a correction that carries a key the correction path cannot store', function (): void {
+    $run = energyCorrectionRun();
+    $turn = $run->turnEntries()->firstOrFail();
+
+    // `performance` is a `Scenario` event written by `storeTurn`, not a column. Posting it to the
+    // correction door used to pass validation and vanish (preventSilentlyDiscardingAttributes is off),
+    // so the Trainer saw a success for a change nothing recorded.
+    foreach ([['performance' => ['type' => 'mood', 'delta' => 1]], ['stage' => 'review'], ['previewed' => '1']] as $payload) {
+        $this->from(route('runs.cockpit', $run))
+            ->put(route('runs.turns.update', [$run, $turn]), correctionPayload($payload))
+            ->assertSessionHasErrors(array_key_first($payload));
+    }
+
+    // No `Scenario` event was invented, and the row itself is untouched.
+    expect($run->turnEvents()->where('event_type', TurnEventType::Scenario)->count())->toBe(0)
+        ->and($turn->fresh()->speed)->toBe(600);
 });

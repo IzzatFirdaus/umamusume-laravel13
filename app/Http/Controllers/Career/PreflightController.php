@@ -217,16 +217,18 @@ class PreflightController extends Controller
                 ]);
             }
 
+            // Independent Training (§1.1.7): the idle-mode overlay opens INSIDE the same transaction
+            // that creates the run. It used to open after the transaction returned, so a config the
+            // lifecycle refused (an unknown policy) left a committed career with no overlay and a 500
+            // on screen. The 50-minute window starts now; the scheduler closes it later.
+            $config = $request->independentConfig();
+
+            if ($config !== null) {
+                (new Lifecycle)->start($run, $config);
+            }
+
             return $run;
         });
-
-        // Independent Training (§1.1.7): the run is created the same way, then the idle-mode overlay is
-        // opened on it. The 50-minute window starts now, and the scheduler closes it later.
-        $config = $request->independentConfig();
-
-        if ($config !== null) {
-            (new Lifecycle)->start($run, $config);
-        }
 
         SetupDraft::reset();
 

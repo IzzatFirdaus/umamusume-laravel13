@@ -156,7 +156,10 @@ it('refuses an over-budget plan with both numbers named and writes no row', func
 
     expect($errors)->not->toBeNull()
         ->and((string) $errors['default']['messages']['skills'][0])
-        ->toBe("The plan exceeds this run's Skill Points: 100 planned against 99 recorded.");
+        // The trailing clause is the S1.9 disclosure: the sum covers skills the run already holds, so
+        // the number the Trainer reads is not just this post's total. Without the words, "100 planned"
+        // beside an inventory they never mentioned reads as a figure the tool invented.
+        ->toBe("The plan exceeds this run's Skill Points: 100 planned against 99 recorded, counting skills already acquired.");
 
     // The refusal left the inventory untouched: the skill was never attached.
     expect($run->refresh()->skills()->count())->toBe(0);

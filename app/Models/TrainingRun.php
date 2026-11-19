@@ -914,15 +914,24 @@ class TrainingRun extends Model
      */
     public function hasClearedMaidenLock(): bool
     {
-        // A run imported mid-career holds no entry for the turns it never played, so the record check
-        // below can never fire and every standard race would stay locked for the life of the run. The
-        // gate is absolute in the client — a run cannot enter any other race before its Debut — and the
+        // The position fallback, and why it is not for every run. A run whose position was *named*
+        // rather than derived holds no entry for the turns it never played, so the record check below
+        // can never fire and every standard race would stay locked for the life of the run. The gate
+        // is absolute in the client — a run cannot enter any other race before its Debut — and the
         // Debut sits at Junior Late June (turn 12), so a position past turn 12 has cleared it by
         // construction. Boundary is `> 12`, not `>= 12`: at turn 12 the Debut may not have resolved.
         //
-        // `nextTurnNumber()` is the run's effective position plus one, for both doors: a wizard run
-        // reads its last logged turn, a snapshot reads its stored position.
-        if ($this->nextTurnNumber() - 1 > 12) {
+        // A native run is the opposite case: its unlogged turns are "not yet played", not "never
+        // played", because its position *is* its own turn log. Reading the fallback off that log
+        // cleared the lock for a run that had logged thirteen turns and won nothing, which removed
+        // the gate line from every graded row — the symptom `ADR-0031` was written to end. So the
+        // fallback asks whether a position was named (`hasImportedPosition()`), not whether the run
+        // is a snapshot: the URA import writes `career_position` while `mode` stays the create form's
+        // `new_career` default, and gating on mode alone would re-lock every imported career.
+        //
+        // `nextTurnNumber()` is the run's effective position plus one: a snapshot reads its stored
+        // position until it logs a turn, a native run always reads its last logged turn.
+        if ($this->hasImportedPosition() && $this->nextTurnNumber() - 1 > 12) {
             return true;
         }
 

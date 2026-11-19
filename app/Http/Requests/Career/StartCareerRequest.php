@@ -115,7 +115,19 @@ class StartCareerRequest extends FormRequest
             // must be present when the flag is on; the other two default to the client's own defaults
             // (goal races only; no priority skills) when absent.
             'independent' => ['nullable', 'boolean'],
-            'policy' => ['nullable', 'string', Rule::enum(IndependentTrainingPolicy::class)],
+            // `required_unless` the flag is off, because the docblock two lines above says policy "is the
+            // one that must be present when the flag is on" and the rule did not say so. The refusal
+            // has to happen HERE: `independentConfig()` casts an absent policy to the empty string, the
+            // lifecycle's `tryFrom('')` then throws `InvalidArgumentException`, and by that point
+            // `PreflightController::store()` has already committed the run, its skills and its deck
+            // slots. The Trainer got a 500 and an orphan Active career. A field error at the boundary is
+            // the only shape that leaves no row behind.
+            'policy' => [
+                'nullable',
+                Rule::requiredIf(fn (): bool => $this->boolean('independent')),
+                'string',
+                Rule::enum(IndependentTrainingPolicy::class),
+            ],
             'rotation' => ['nullable', 'array'],
             'priority_skills' => ['nullable', 'array', 'max:10'],
             'priority_skills.*' => ['integer', Rule::exists('skills', 'id')],

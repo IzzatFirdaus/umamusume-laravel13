@@ -8,6 +8,7 @@ use App\Enums\IndependentTrainingPolicy;
 use App\Enums\RunStatus;
 use App\Models\IndependentTrainingRun;
 use App\Models\TrainingRun;
+use Illuminate\Support\Facades\DB;
 use InvalidArgumentException;
 
 /**
@@ -40,6 +41,15 @@ final class Lifecycle
 
         if (count($priority) > IndependentTrainingRun::MAX_PRIORITY_SKILLS) {
             throw new InvalidArgumentException('At most 10 priority skills may be fixed.');
+        }
+
+        // The one-at-a-time rule is enforced HERE as well as by the unique index, because the index
+        // says only 'one overlay per run' while this says 'nobody else's window may be open either'.
+        // `canStart()` had no production caller: it was covered by a passing feature test and reached
+        // by nothing, so the rule lived in a docblock. A caller that skips the request-level check
+        // (a seeder, a test helper, a future console command) now gets a refusal, not a second session.
+        if (! $this->canStart($run)) {
+            throw new InvalidArgumentException('Another Independent Training session is already open, or this run already carries one.');
         }
 
         return IndependentTrainingRun::create([
@@ -76,17 +86,36 @@ final class Lifecycle
      */
     public function complete(IndependentTrainingRun $itr): TrainingRun
     {
-        if ($itr->completed_at !== null || $itr->abandoned_at !== null) {
-            return $itr->trainingRun;
-        }
+        // One transaction and one conditional stamp. The pair of writes is the defect: the overlay and
+        // the parent run are two rows, and a failure between them left the overlay stamped complete
+        // while the career stayed Active — a state nothing ever re-scans, because `completeExpired()`
+        // only looks at rows still holding both nulls. The guard reads the in-memory model, which is
+        // not a lock: two overlapping scheduler ticks could both pass it. So the stamp is the guard,
+        // and it is taken with a conditional UPDATE whose affected-row count says whether this caller
+        // is the one that ended the session.
+        return DB::transaction(function () use ($itr): TrainingRun {
+            $claimed = IndependentTrainingRun::query()
+                ->whereKey($itr->getKey())
+                ->whereNull('completed_at')
+                ->whereNull('abandoned_at')
+                ->update([
+                    'completed_at' => now(),
+                    'result' => (new Simulator)->run($itr),
+                    'updated_at' => now(),
+                ]);
 
-        $itr->update([
-            'completed_at' => now(),
-            'result' => (new Simulator)->run($itr),
-        ]);
-        $itr->trainingRun()->update(['status' => RunStatus::Completed]);
+            if ($claimed === 0) {
+                // Somebody else already ended it. Answer with the run as it stands rather than
+                // re-stamping, which is what the idempotency rule promises the caller.
+                return $itr->trainingRun()->firstOrFail();
+            }
 
-        return $itr->trainingRun()->firstOrFail();
+            $itr->refresh();
+
+            $itr->trainingRun()->update(['status' => RunStatus::Completed]);
+
+            return $itr->trainingRun()->firstOrFail();
+        });
     }
 
     /**
@@ -94,12 +123,23 @@ final class Lifecycle
      */
     public function abandon(IndependentTrainingRun $itr): void
     {
-        if ($itr->completed_at !== null || $itr->abandoned_at !== null) {
-            return;
-        }
+        // Same shape as `complete()` and for the same reason: two rows, one transaction, and a
+        // conditional stamp so the racing tick cannot retire a session this caller already ended.
+        DB::transaction(function () use ($itr): void {
+            $claimed = IndependentTrainingRun::query()
+                ->whereKey($itr->getKey())
+                ->whereNull('completed_at')
+                ->whereNull('abandoned_at')
+                ->update(['abandoned_at' => now(), 'updated_at' => now()]);
 
-        $itr->update(['abandoned_at' => now()]);
-        $itr->trainingRun()->update(['status' => RunStatus::Retired]);
+            if ($claimed === 0) {
+                return;
+            }
+
+            $itr->refresh();
+
+            $itr->trainingRun()->update(['status' => RunStatus::Retired]);
+        });
     }
 
     /**
