@@ -85,6 +85,7 @@ return [
         'gametora-characters' => [
             'url' => 'https://gametora.com/data/umamusume/character-cards.897e63ea.json',
             'parser' => GametoraCharacterParser::class,
+            'entity' => 'umamusume',
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
@@ -121,6 +122,7 @@ return [
         'gametora-character-cards' => [
             'url' => 'https://gametora.com/data/umamusume/character-cards.897e63ea.json',
             'parser' => GametoraCharacterCardParser::class,
+            'entity' => 'umamusume',
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
@@ -173,6 +175,7 @@ return [
                 'key' => 'race_instances',
             ],
             'parser' => GametoraRaceCatalogParser::class,
+            'entity' => 'umamusume',
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
@@ -209,6 +212,7 @@ return [
                 'key' => 'skills',
             ],
             'parser' => GametoraSkillsParser::class,
+            'entity' => 'umamusume',
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
@@ -265,6 +269,7 @@ return [
                 'key' => 'characters',
             ],
             'parser' => GametoraCharacterProfileParser::class,
+            'entity' => 'umamusume',
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
@@ -318,6 +323,7 @@ return [
                 'key' => 'support-cards',
             ],
             'parser' => GametoraSupportCardParser::class,
+            'entity' => 'umamusume',
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
@@ -341,6 +347,7 @@ return [
                 'key' => 'support_effects',
             ],
             'parser' => GametoraSupportEffectParser::class,
+            'entity' => 'umamusume',
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
@@ -425,6 +432,9 @@ return [
                 'key' => 'racetracks_extended',
             ],
             'parser' => GametoraRacetrackParser::class,
+            // Read by `uma:enrich-races`, not `uma:fetch` (S1.5), and a race is not a trainee:
+            // the review queue must never offer to promote one through the trainee path (S1.1).
+            'entity' => 'race',
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
@@ -439,6 +449,9 @@ return [
                 'key' => 'race-fans',
             ],
             'parser' => GametoraRaceFansParser::class,
+            // Read by `uma:enrich-races`, not `uma:fetch` (S1.5), and a race is not a trainee:
+            // the review queue must never offer to promote one through the trainee path (S1.1).
+            'entity' => 'race',
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
@@ -453,6 +466,9 @@ return [
                 'key' => 'races',
             ],
             'parser' => GametoraRaceParser::class,
+            // Read by `uma:enrich-races`, not `uma:fetch` (S1.5), and a race is not a trainee:
+            // the review queue must never offer to promote one through the trainee path (S1.1).
+            'entity' => 'race',
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
@@ -467,6 +483,9 @@ return [
                 'key' => 'race-rewards',
             ],
             'parser' => GametoraRaceRewardParser::class,
+            // Read by `uma:enrich-races`, not `uma:fetch` (S1.5), and a race is not a trainee:
+            // the review queue must never offer to promote one through the trainee path (S1.1).
+            'entity' => 'race',
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',
@@ -481,6 +500,7 @@ return [
                 'key' => 'ura-objectives',
             ],
             'parser' => GametoraUraObjectivesParser::class,
+            'entity' => 'umamusume',
             'delay_ms' => 1000,
             'timeout_s' => 15,
             'timezone' => 'Asia/Tokyo',

@@ -13,7 +13,9 @@ use App\Models\CharacterCard;
 use App\Models\MatchCandidate;
 use App\Models\Umamusume;
 use App\Models\UmamusumeAlias;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -25,34 +27,53 @@ use Inertia\Response;
  */
 class ReviewController extends Controller
 {
+    private const PAGE_SIZE = 25;
+
     /**
      * Lists Pending candidates only; resolved rows leave this view.
      */
-    public function index(): Response
+    public function index(Request $request): Response|RedirectResponse
     {
-        $candidates = MatchCandidate::with('suggestedUmamusume')
-            ->where('status', CandidateStatus::Pending->value)
-            // Rows the engine could suggest a match for come first: a suggestion is the queue's
-            // cheapest decision, so the ones a Trainer can act on in one click are not buried
-            // behind the ones that need research. Newest-fetch order still breaks the ties inside
-            // each half, so this narrows the queue without reordering either part of it.
-            ->orderByRaw('suggested_umamusume_id IS NULL')
-            ->latest('created_by_fetch_at')
-            ->paginate(25)
+        $candidates = self::pendingCandidates()
+            ->with('suggestedUmamusume')
+            ->paginate(self::PAGE_SIZE);
+
+        $page = $candidates->currentPage();
+        if ($page > $candidates->lastPage()) {
+            return redirect()->route('review.index', self::pageParameters($candidates->lastPage()));
+        }
+
+        $continuation = $request->session()->get('reviewContinuation');
+        $next = is_array($continuation)
+            ? ($candidates->getCollection()->firstWhere('id', $continuation['candidate_id']) ?? $candidates->getCollection()->first())
+            : null;
+
+        $candidates
             ->through(fn (MatchCandidate $candidate): array => [
                 'id' => $candidate->id,
                 'proposed_name' => $candidate->proposed_name,
                 'proposed_name_ja' => $candidate->proposed_name_ja,
+                // The entity this row belongs to, from the payload the runner wrote (S1.1). A race
+                // candidate can only be rejected: the trainee promotion path would write a race into
+                // the trainee table. The page uses this to withhold the verdict rather than offer a
+                // button that refuses.
+                'entity' => (string) ($candidate->payload['entity'] ?? 'umamusume'),
                 'match_tier' => $candidate->match_tier->value,
                 'match_tier_label' => $candidate->match_tier->label(),
                 'source_key' => $candidate->source_key,
                 'created_at' => $candidate->created_by_fetch_at->toDateString(),
                 'suggestion' => $candidate->suggestedUmamusume?->name,
                 'suggested_umamusume_id' => $candidate->suggested_umamusume_id,
+                'review_url' => route('review.detail', ['candidate' => $candidate->id, ...self::pageParameters($page)], absolute: false),
             ]);
 
         return Inertia::render('Review/Index', [
             'candidates' => $candidates,
+            'queueUrl' => route('review.index', absolute: false),
+            'databaseUrl' => route('database.index', absolute: false),
+            'nextReviewUrl' => $next === null
+                ? null
+                : route('review.detail', ['candidate' => $next->id, ...self::pageParameters($page)], absolute: false),
             // The queue being empty means two different things, and only the table knows which: no row
             // at all is a database nobody has fetched, while rows with a verdict on them is a queue
             // someone has worked through.
@@ -84,7 +105,7 @@ class ReviewController extends Controller
      * list a Trainer scans and this is the screen they decide on. The props are the row's own shape plus
      * the alias languages `CandidateForm` offers, so the form receives exactly what the inline form did.
      */
-    public function show(MatchCandidate $candidate): Response
+    public function show(Request $request, MatchCandidate $candidate): Response
     {
         // `cards` rides the same eager load as the trainee itself: the Best match card prints the
         // rarity mark the HFW draws (`review-detail.html:90`, `pill pill-neutral "★★★ SSR"`), and the
@@ -92,22 +113,32 @@ class ReviewController extends Controller
         // on one already-read row rather than a lazy query per render, and the derivation below is
         // `CatalogController`'s own expression (`:135-137`, `:159`) so the two screens cannot disagree
         // about what a trainee's rarity is.
-        $candidate->loadMissing('suggestedUmamusume.cards');
+        $candidate->loadMissing(['suggestedUmamusume.cards', 'suggestedUmamusume.aliases']);
 
         $suggested = $candidate->suggestedUmamusume;
+        $pageParameters = self::pageParameters(max(1, min($request->integer('page', 1), 2147483647)));
 
         $maxRarity = $suggested === null || $suggested->cards->isEmpty()
             ? null
             : CardRarity::from((int) $suggested->cards->max(static fn (CharacterCard $card): int => $card->rarity->value));
 
         return Inertia::render('Review/Detail', [
+            'queueUrl' => route('review.index', $pageParameters, absolute: false),
+            'resolveUrl' => route('review.resolve', ['candidate' => $candidate->id, ...$pageParameters], absolute: false),
+            'reopenUrl' => route('review.reopen', $candidate, absolute: false),
             'candidate' => [
                 'id' => $candidate->id,
                 'proposed_name' => $candidate->proposed_name,
                 'proposed_name_ja' => $candidate->proposed_name_ja,
+                // The entity this row belongs to, from the payload the runner wrote (S1.1). A race
+                // candidate can only be rejected: the trainee promotion path would write a race into
+                // the trainee table. The page uses this to withhold the verdict rather than offer a
+                // button that refuses.
+                'entity' => (string) ($candidate->payload['entity'] ?? 'umamusume'),
                 'match_tier' => $candidate->match_tier->value,
                 'match_tier_label' => $candidate->match_tier->label(),
                 'source_key' => $candidate->source_key,
+                'external_ref' => $candidate->external_ref,
                 'created_at' => $candidate->created_by_fetch_at->toDateString(),
                 'suggestion' => $suggested?->name,
                 'suggested_umamusume_id' => $candidate->suggested_umamusume_id,
@@ -124,6 +155,16 @@ class ReviewController extends Controller
                 'slug' => $suggested->slug,
                 'name' => $suggested->name,
                 'name_ja' => $suggested->name_ja,
+                'catalog_url' => route('catalog.show', ['slug' => $suggested->slug], absolute: false),
+                'aliases' => $suggested->aliases
+                    ->sortBy('alias', SORT_NATURAL | SORT_FLAG_CASE)
+                    ->map(fn (UmamusumeAlias $alias): array => [
+                        'id' => $alias->id,
+                        'name' => $alias->alias,
+                        'language' => $alias->language->value,
+                    ])
+                    ->values()
+                    ->all(),
                 'costume' => self::costumeOf($suggested->name),
                 'aptitudes' => $suggested->aptitudeAxes(),
                 // Null when no card row exists: the card prints the absence in words rather than a
@@ -200,8 +241,45 @@ class ReviewController extends Controller
 
     public function resolve(ResolveMatchCandidateRequest $request, MatchCandidate $candidate, ResolveMatchCandidate $action): RedirectResponse
     {
+        $page = $request->integer('page', 1);
+        $pageIds = self::pendingCandidates()
+            ->offset(($page - 1) * self::PAGE_SIZE)
+            ->limit(self::PAGE_SIZE + 1)
+            ->pluck('id');
+        $position = $pageIds->search($candidate->id, strict: true);
+        $nextId = $position === false ? null : $pageIds->get($position + 1);
+
         $action->handle($candidate, $request->verdict());
 
-        return redirect()->route('review.index')->with('status', 'Candidate resolved.');
+        if ($page > 1) {
+            $lastPage = max(1, (int) ceil(self::pendingCandidates()->count() / self::PAGE_SIZE));
+            $page = min($page, $lastPage);
+        }
+
+        return redirect()->route('review.index', self::pageParameters($page))
+            ->with('status', 'Candidate resolved.')
+            ->with('reviewContinuation', ['candidate_id' => $nextId]);
+    }
+
+    /**
+     * Suggested cases first, then newest fetch first, with a stable tie-break for one fetch batch.
+     *
+     * @return Builder<MatchCandidate>
+     */
+    private static function pendingCandidates(): Builder
+    {
+        return MatchCandidate::query()
+            ->where('status', CandidateStatus::Pending->value)
+            ->orderByRaw('suggested_umamusume_id IS NULL')
+            ->latest('created_by_fetch_at')
+            ->orderByDesc('id');
+    }
+
+    /**
+     * @return array{page?: int}
+     */
+    private static function pageParameters(int $page): array
+    {
+        return $page === 1 ? [] : ['page' => $page];
     }
 }

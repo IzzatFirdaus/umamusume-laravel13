@@ -10,6 +10,7 @@ use App\Models\MatchCandidate;
 use App\Models\Umamusume;
 use App\Models\UmamusumeAlias;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 /**
  * Trainer verdict on a review-queue candidate (PRD US-5). Confirmed promotes the
@@ -32,6 +33,36 @@ final class ResolveMatchCandidate
             $target = isset($input['umamusume_id'])
                 ? Umamusume::findOrFail((int) $input['umamusume_id'])
                 : $candidate->suggestedUmamusume;
+
+            // A race is not a trainee. `confirm()` promotes through `PromoteMatchedRecord`, whose shape
+            // constructs an `App\Models\Umamusume`, so confirming a race-sourced candidate would either
+            // throw (the payload has `name_en`, not `name`) or - if a payload ever carried both - write a
+            // race into the trainee table. That is a data-integrity write, not a crash, which is why the
+            // refusal belongs here rather than in a docblock.
+            //
+            // ponytail: race candidates can only be Rejected today. Whether a race should ever be
+            // promotable BY HAND is an owner ruling, and the resolver path that would do it
+            // (`StoreRaceCatalogSlots` joining by id, as `uma:enrich-races` does) is a schema decision
+            // (an `entity` column) this slice does not take. Upgrade path: add the column + ADR, then
+            // dispatch on it here.
+            if (($candidate->payload['entity'] ?? 'umamusume') !== 'umamusume'
+                && $status !== CandidateStatus::Rejected) {
+                throw ValidationException::withMessages([
+                    'status' => 'This candidate is a race, and the review queue can only reject one. Races reach the catalog through uma:enrich-races.',
+                ]);
+            }
+
+            // A verdict that promises a write needs something to write on. `alias()` used to return
+            // early when the target was null while this method stamped the row `Aliased` anyway, so a
+            // suggestion-less candidate left the queue marked as aliased with no alias recorded: the
+            // queue's only non-Reject door for those rows was a no-op reported as success. Refused
+            // here rather than in the request because only the model knows whether a suggestion
+            // exists, and a 500 or a silent success are both worse than a named refusal.
+            if ($status === CandidateStatus::Aliased && $target === null) {
+                throw ValidationException::withMessages([
+                    'umamusume_id' => 'This candidate has no suggested trainee and none was named, so there is nothing to record an alias on. Name the trainee, or reject the candidate.',
+                ]);
+            }
 
             match ($status) {
                 CandidateStatus::Confirmed => $this->confirm($candidate, $target),

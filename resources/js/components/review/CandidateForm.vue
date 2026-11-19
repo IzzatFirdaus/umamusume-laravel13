@@ -18,9 +18,22 @@ const props = defineProps<{
         id: number;
         proposed_name: string;
         suggested_umamusume_id: number | null;
+        /**
+         * What this candidate is, written by the pipeline from its source's config (S1.1).
+         *
+         * A race-sourced row can only be rejected: `PromoteMatchedRecord` builds an `Umamusume`, so
+         * confirming one would write a race into the trainee table. The verdict is withheld rather
+         * than offered and refused, because a button that always errors teaches the Trainer nothing
+         * except to stop reading the screen.
+         */
+        entity: string;
     };
     aliasLanguages: { value: string; label: string }[];
+    resolveUrl: string;
 }>();
+
+/** A candidate the trainee promotion path can actually resolve. */
+const promotable = computed<boolean>(() => props.candidate.entity === 'umamusume');
 
 const form = useForm({
     // No preselected verdict. Confirm was the default and it is the one option that writes a catalog
@@ -49,8 +62,21 @@ function onIdInput(value: string | number | File | null): void {
     form.umamusume_id = typeof value === 'string' || typeof value === 'number' ? value : '';
 }
 
+const confirmLabel = computed(() =>
+    props.candidate.suggested_umamusume_id === null && form.umamusume_id === ''
+        ? 'Create catalog record'
+        : 'Confirm this match',
+);
+
+const canSubmit = computed(() =>
+    form.status !== '' && !form.processing
+    && (form.status !== 'Aliased' || (form.alias_language !== '' && form.umamusume_id !== '')),
+);
+
 function submit(): void {
-    form.post(`/review/${props.candidate.id}`);
+    if (canSubmit.value) {
+        form.post(props.resolveUrl);
+    }
 }
 
 /*
@@ -150,7 +176,7 @@ defineExpose({ chooseRecord });
             />
         </div>
 
-        <div>
+        <div v-if="form.status === 'Aliased'">
             <BaseSelect
                 :id="aliasId"
                 name="alias_language"
@@ -165,7 +191,11 @@ defineExpose({ chooseRecord });
             />
         </div>
 
-        <div class="savebar">
+        <p v-if="form.status === 'Aliased' && form.umamusume_id === ''" class="text-sm text-ink-muted">
+            Enter the catalog ID to attach the imported name to that entry.
+        </p>
+
+        <div class="savebar flex-wrap">
             <span class="dirty" role="status" data-region="review-verdict-status">
                 {{ statusWord }}
             </span>
@@ -178,14 +208,34 @@ defineExpose({ chooseRecord });
             >
                 Reject this match
             </button>
+            <!-- A race candidate has no verdict here. It can only be rejected: promoting one would
+                 build an `Umamusume` from a race record. The row still shows its name and its source,
+                 so the queue can be emptied; it just does not offer a door that refuses. -->
             <button
+                v-if="!promotable && form.status !== 'Rejected'"
                 type="button"
-                :aria-label="`Confirm this match for ${candidate.proposed_name}`"
+                class="inline-flex min-h-11 items-center justify-center rounded-full bg-primary-action px-4 font-semibold text-on-primary-action transition-colors duration-150 ease-out hover:bg-primary-action/90"
+                @click="decide('Rejected')"
+            >
+                Reject
+            </button>
+            <button
+                v-else-if="form.status === 'Aliased'"
+                type="submit"
+                :disabled="!canSubmit"
+                class="inline-flex min-h-11 items-center justify-center rounded-full bg-primary-action px-4 font-semibold text-on-primary-action transition-colors duration-150 ease-out hover:bg-primary-action/90 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+                Record alias
+            </button>
+            <button
+                v-else
+                type="button"
+                :aria-label="`${confirmLabel} for ${candidate.proposed_name}`"
                 :disabled="form.processing"
                 class="inline-flex min-h-11 items-center justify-center rounded-full bg-primary-action px-4 font-semibold text-on-primary-action transition-colors duration-150 ease-out hover:bg-primary-action/90 disabled:opacity-50 disabled:cursor-not-allowed"
                 @click="decide('Confirmed')"
             >
-                Confirm this match
+                {{ confirmLabel }}
             </button>
         </div>
     </form>

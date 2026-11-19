@@ -50,7 +50,7 @@ final class PipelineRunner
     ) {}
 
     /**
-     * @param  array{url: string, parser: class-string, timezone?: string|null}  $sourceConfig
+     * @param  array{url: string, parser: class-string, timezone?: string|null, entity?: string}  $sourceConfig
      * @return array{updated: int, created: int, skipped: int, review: int}
      */
     public function run(string $sourceKey, array $sourceConfig, string $body, ?string $snapshotPath): array
@@ -319,7 +319,19 @@ final class PipelineRunner
                     'suggested_umamusume_id' => $match['umamusume']?->id,
                     'match_tier' => $match['tier']->value,
                     'status' => CandidateStatus::Pending->value,
-                    'payload' => [...$record, 'url' => $sourceConfig['url']],
+                    'payload' => [
+                        ...$record,
+                        'url' => $sourceConfig['url'],
+                        // The entity the record belongs to, and the name to print, resolved ONCE at
+                        // write time. The review screen used to read `payload['name']` directly, which
+                        // is absent on every race record (they carry `name_en`), so the queue could
+                        // neither label a row nor resolve it: `PromoteMatchedRecord` normalized
+                        // `$record['name']` and threw a TypeError on Confirm. A payload fact rather than
+                        // a column, because the queue's own schema is not this slice's to change
+                        // (an `entity` column needs an ADR and a digest update, `AGENTS.md` §11).
+                        'entity' => (string) ($sourceConfig['entity'] ?? 'umamusume'),
+                        'display_name' => $this->recordName($record, $sourceKey),
+                    ],
                     'created_by_fetch_at' => now(),
                 ]
             );

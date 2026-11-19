@@ -15,6 +15,8 @@ use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
 use App\Enums\TurnChoice;
 use App\Enums\TurnEventType;
+use App\Http\Requests\AbandonIndependentTrainingRequest;
+use App\Http\Requests\ConfirmRunDeletionRequest;
 use App\Http\Requests\DeckPickerSearchRequest;
 use App\Http\Requests\ImportHistoricalRunRequest;
 use App\Http\Requests\RunSearchRequest;
@@ -876,15 +878,13 @@ class TrainingRunController extends Controller
      * `ConfirmDelete` page sets it once the Trainer ticks the checkbox; the test teardown sends it
      * too. A caller that omits it is refused rather than silently deleting a career, which is the
      * whole point of a confirmation door.
+     *
+     * The refusal moved to `ConfirmRunDeletionRequest` in S1.16 so this write is a Form Request like
+     * every other one on the controller; the redirect-back and the `confirmed` error key are the
+     * same as the hand-rolled branch they replace.
      */
-    public function destroy(Request $request, TrainingRun $run): RedirectResponse
+    public function destroy(ConfirmRunDeletionRequest $request, TrainingRun $run): RedirectResponse
     {
-        if (! $request->boolean('confirmed')) {
-            return redirect()
-                ->back(fallback: route('runs.confirm-delete', $run))
-                ->withErrors(['confirmed' => 'Confirm that this career should be deleted.']);
-        }
-
         $run->delete();
 
         return redirect()->route('runs.index')->with('status', 'Run deleted.');
@@ -969,46 +969,9 @@ class TrainingRunController extends Controller
             // number a deleted turn used inherits that turn's event, and the page's Failed chip is
             // built from exactly that key. Cleared before any new event is written, and cleared
             // whether or not this turn failed: a success at a reused number has to shed the orphan
-            // just as a failure has to replace it.
-            $run->turnEvents()
-                ->where('turn', $entry->turn)
-                ->where('event_type', TurnEventType::Failure)
-                ->delete();
-
-            // Which words are a failure is `TurnChoice::outcomes()`'s to say, so the branch that writes the
-            // event and the boundary that accepts the word read one list (D-200, D-201, D-205). A turn with
-            // no choice still fails the way it always did: this path is reached by the record form, which
-            // demands a choice, so the fallback is a refusal to invent one, not a second vocabulary.
-            $turnChoice = TurnChoice::tryFrom((string) ($validated['choice'] ?? ''));
-            $outcomes = $turnChoice === null ? ['Failure' => true] : $turnChoice->outcomes();
-
-            if (($outcomes[(string) ($validated['outcome'] ?? '')] ?? false) === true) {
-                $label = $this->choiceLabel((string) ($validated['choice'] ?? ''));
-                $kind = (string) $validated['penalty_kind'];
-                $previous = $this->previousTurn($run, (int) $entry->turn);
-
-                $penalties = [];
-
-                foreach ($this->previewDeltas($validated, $previous) as $delta) {
-                    if ($delta['direction'] === 'down') {
-                        $penalties[$delta['text']] = true;
-                    }
-                }
-
-                $run->turnEvents()->create([
-                    'turn' => $entry->turn,
-                    'event_type' => TurnEventType::Failure,
-                    'source_name' => $label,
-                    'choice_label' => $label,
-                    'deltas' => [
-                        'penalty_kind' => $kind,
-                        'recorded' => array_keys($penalties),
-                    ],
-                    'origin_note' => 'The Trainer recorded this turn as a failure of '.$label.', '
-                        .'with a '.$kind.' penalty. Logged from the client, not modelled: '
-                        .'no source in this repository publishes a failure chance.',
-                ]);
-            }
+            // just as a failure has to replace it. One method owns that rule for all three doors
+            // (create, correct, delete): `syncFailureEvent()`.
+            $this->syncFailureEvent($run, (int) $entry->turn, $validated);
 
             // A Performance observation is the Trainer's own reading of the turn (Our Grand
             // Concert, `docs/scenarios/07-grand-concert.md`). Nothing here derives what the turn
@@ -1055,6 +1018,70 @@ class TrainingRunController extends Controller
         }
 
         return $key === '' ? 'unrecorded choice' : $key;
+    }
+
+    /**
+     * The Failure event a turn at this number owns: cleared, then written when the entry says the turn
+     * failed.
+     *
+     * `turn_events` is keyed on `(training_run_id, turn)` and carries no `turn_entry_id`, so the row and
+     * its event are only ever in step by convention. Three doors now write a turn (create, correct,
+     * delete) and each of them has to leave the same state behind: no Failure row at a number whose
+     * turn succeeded or no longer exists, exactly one at a number whose turn failed. That rule lives
+     * here rather than three times so the doors cannot drift back to two behaviours (`TimelineController:191`
+     * reads events by number, so a stale row prints a red Failure chip beside a corrected Success row).
+     *
+     * Always called inside the caller's transaction, so the clear and the write commit together.
+     *
+     * @param  array<string, mixed>|null  $validated  the turn's submitted values, or null to clear only
+     */
+    private function syncFailureEvent(TrainingRun $run, int $turn, ?array $validated): void
+    {
+        $run->turnEvents()
+            ->where('turn', $turn)
+            ->where('event_type', TurnEventType::Failure)
+            ->delete();
+
+        if ($validated === null) {
+            return;
+        }
+
+        // Which words are a failure is `TurnChoice::outcomes()`'s to say, so the branch that writes the
+        // event and the boundary that accepts the word read one list (D-200, D-201, D-205). A turn with
+        // no choice still fails the way it always did: this path is reached by the record form, which
+        // demands a choice, so the fallback is a refusal to invent one, not a second vocabulary.
+        $turnChoice = TurnChoice::tryFrom((string) ($validated['choice'] ?? ''));
+        $outcomes = $turnChoice === null ? ['Failure' => true] : $turnChoice->outcomes();
+
+        if (($outcomes[(string) ($validated['outcome'] ?? '')] ?? false) !== true) {
+            return;
+        }
+
+        $label = $this->choiceLabel((string) ($validated['choice'] ?? ''));
+        $kind = (string) $validated['penalty_kind'];
+        $previous = $this->previousTurn($run, $turn);
+
+        $penalties = [];
+
+        foreach ($this->previewDeltas($validated, $previous) as $delta) {
+            if ($delta['direction'] === 'down') {
+                $penalties[$delta['text']] = true;
+            }
+        }
+
+        $run->turnEvents()->create([
+            'turn' => $turn,
+            'event_type' => TurnEventType::Failure,
+            'source_name' => $label,
+            'choice_label' => $label,
+            'deltas' => [
+                'penalty_kind' => $kind,
+                'recorded' => array_keys($penalties),
+            ],
+            'origin_note' => 'The Trainer recorded this turn as a failure of '.$label.', '
+                .'with a '.$kind.' penalty. Logged from the client, not modelled: '
+                .'no source in this repository publishes a failure chance.',
+        ]);
     }
 
     /**
@@ -1132,7 +1159,30 @@ class TrainingRunController extends Controller
     {
         abort_unless($turn->training_run_id === $run->id, 404);
 
-        $turn->update($request->validated());
+        $validated = $request->validated();
+
+        DB::transaction(function () use ($run, $turn, $validated): void {
+            // `turn` is the row's identity, not one of its attributes: `turn_events` and `race_entries`
+            // address a turn by number, so writing a new one here would strand both at the old number
+            // with nothing to re-key them. `StoreTurnEntryRequest` refuses a changed number on this
+            // path, so dropping the key is dropping a value that can only equal the stored one.
+            $attributes = $this->turnAttributes($validated);
+            unset($attributes['turn']);
+
+            // The row and its Failure event are one write (NFR-4): a correction that turns a failure
+            // into a success has to shed the event at that number, and a half-applied pair is the state
+            // `TimelineController` prints as a red chip beside a corrected row.
+            $turn->update($attributes);
+
+            // A correction that says nothing about the outcome rules on nothing. The Cockpit's
+            // correction form and the turn-edit door post neither `choice` nor `outcome`, and clearing
+            // on their behalf would delete the only record of a failure (`turn_entries` has no column
+            // for one). `TurnChoiceTest` pins the same rule for the stored `choice`; this is its
+            // event-shaped half.
+            if (array_key_exists('outcome', $validated)) {
+                $this->syncFailureEvent($run, (int) $turn->turn, $validated);
+            }
+        });
 
         return redirect()->back(fallback: route('runs.cockpit', $run))->with('status', 'Turn '.$turn->turn.' updated.');
     }
@@ -1143,14 +1193,12 @@ class TrainingRunController extends Controller
 
         // The row and its failure event go together. The event is keyed on `(training_run_id, turn)`
         // rather than on the row, so leaving it behind hands its Failed chip to whichever turn later
-        // takes the number (SCREEN_SPEC.md §7-2). Scoped to the failure type because a shop purchase
-        // is stored on this same key by `storePurchase` as a `Scenario` event, and deleting a turn
-        // is not a ruling on that record. One transaction, so a half delete cannot strand either row.
+        // takes the number (SCREEN_SPEC.md §7-2). The clear is the same one the create and correct
+        // doors use, scoped to the failure type because a shop purchase is stored on this same key by
+        // `storePurchase` as a `Scenario` event, and deleting a turn is not a ruling on that record.
+        // One transaction, so a half delete cannot strand either row.
         DB::transaction(function () use ($run, $turn): void {
-            $run->turnEvents()
-                ->where('turn', $turn->turn)
-                ->where('event_type', TurnEventType::Failure)
-                ->delete();
+            $this->syncFailureEvent($run, (int) $turn->turn, null);
 
             $turn->delete();
         });
@@ -1184,13 +1232,22 @@ class TrainingRunController extends Controller
                 ->withErrors(['skills' => $refusal]);
         }
 
-        foreach ($request->validated()['skills'] as $entry) {
-            // The same scope the request rule applies, so the two cannot disagree about which rows
-            // are writable. The request is what refuses an ineligible skill; this is the second
-            // gate behind it, and the null check stays because `find()` is nullable.
-            $skill = Skill::availableOnGlobal()->find((int) $entry['skill_id']);
+        // A batch of skill rows plus their levels is two tables' worth of writes that have to land
+        // together (PRD NFR-4): a run left holding a pivot row whose level row never arrived reads as
+        // an acquired skill at a level nobody recorded. The refusal above stays outside the
+        // transaction on purpose -- it is a read-and-compare gate, and a refusal must write nothing at
+        // all, not open and roll back a transaction to prove it.
+        DB::transaction(function () use ($request, $run): void {
+            foreach ($request->validated()['skills'] as $entry) {
+                // The same scope the request rule applies, so the two cannot disagree about which rows
+                // are writable. The request is what refuses an ineligible skill; this is the second
+                // gate behind it, and the null check stays because `find()` is nullable.
+                $skill = Skill::availableOnGlobal()->find((int) $entry['skill_id']);
 
-            if ($skill !== null) {
+                if ($skill === null) {
+                    continue;
+                }
+
                 // Form data arrives as strings, and the model's `?int` parameter is strict: the
                 // validated `integer` rule checks but does not cast, so the cast happens here at
                 // the boundary the write crosses.
@@ -1212,7 +1269,7 @@ class TrainingRunController extends Controller
                     $run->skillLevels()->where('skill_id', $skill->id)->delete();
                 }
             }
-        }
+        });
 
         return redirect()->route('runs.skills.planner', $run)->with('status', 'Skill status saved.');
     }
@@ -1220,11 +1277,30 @@ class TrainingRunController extends Controller
     /**
      * The over-budget refusal for a skills sync, or null when the plan fits.
      *
-     * Priced exactly as the planner's bar prices: each skill the post marks `Acquired` at its
-     * hint-adjusted cost (`HintDiscount::price`, floor, as `getHintAdjustedCost` in the page), so
-     * the bar and the refusal quote one number. A run with no recorded Skill Points has never met a
-     * budget, and the page already prints its absence rather than a zero; the write refuses nothing
-     * there rather than inventing a zero-budget reading (`ADR-0003`).
+     * **The budget is spent once, not once per post.** The first cut of this gate summed only the
+     * skills the incoming post marked `Acquired`, which reproduced one layer down the very shape the
+     * gate exists to prevent: hold 200 SP, post a 150 SP skill (fits), post another (fits again), and
+     * the run has spent 300 against 200 recorded. A write that trusts the client's arithmetic is a
+     * gate the client can simply omit, and so is one that forgets what the client already wrote. So
+     * `run_skills` is read back first: every row already `Acquired`, priced at its own recorded hint
+     * level, plus this post's `Acquired` delta.
+     *
+     * A skill that is already `Acquired` and posted again is counted once, at the post's price, not
+     * twice: the post rewrites that pivot row (`setSkillStatus` is `syncWithoutDetaching`), so the
+     * recorded figure it replaces is not also on the bill.
+     *
+     * Priced exactly as the planner's bar prices: each skill at its hint-adjusted cost
+     * (`HintDiscount::price`, floor, as `getHintAdjustedCost` in the page), so the bar and the refusal
+     * quote one number. `HintDiscount::price` normalises an integer 5 and the string `'max'` to the
+     * same top tier, which is why both sides call it rather than re-deriving the discount.
+     *
+     * A run with no recorded Skill Points has never met a budget, and the page already prints its
+     * absence rather than a zero; the write refuses nothing there rather than inventing a zero-budget
+     * reading (`ADR-0003`).
+     *
+     * The total is a read-and-compare figure. Nothing here persists or caches it: SP is a reading off
+     * the latest turn entry, and an already-learned skill's cost is a catalogue fact, so a stored
+     * total would be a third copy of two things that already have an owner.
      *
      * @param  StoreRunSkillRequest  $request  the validated sync payload
      * @param  TrainingRun  $run  the run whose recorded SP is the budget
@@ -1240,28 +1316,63 @@ class TrainingRunController extends Controller
             return null;
         }
 
+        /** @var list<array<string, mixed>> $entries */
+        $entries = $request->validated()['skills'];
+        /** @var list<int> $posted */
+        $posted = array_map(static fn (array $entry): int => (int) $entry['skill_id'], $entries);
+
         $spend = 0;
 
-        foreach ($request->validated()['skills'] as $entry) {
+        // What the run has already bought. `skills()` carries `hint_level` on the pivot (TrainingRun
+        // :346), and a hint never lives orphaned (:416), so a recorded Acquired row always prices at
+        // the level the run holds for it.
+        foreach ($run->skills()->wherePivot('status', SkillAcquisition::Acquired->value)->get() as $skill) {
+            if (in_array($skill->id, $posted, true)) {
+                continue;
+            }
+
+            $spend += $this->skillPrice($skill->sp_cost, $skill->pivot->hint_level);
+        }
+
+        foreach ($entries as $entry) {
             if ($request->acquisitionFor($entry) !== SkillAcquisition::Acquired) {
                 continue;
             }
 
             $skill = Skill::availableOnGlobal()->find((int) $entry['skill_id']);
-            $hintLevel = $entry['hint_level'] ?? null;
 
-            $spend += $skill === null || $skill->sp_cost === null
-                ? 0
-                : ($hintLevel === null
-                    ? (int) $skill->sp_cost
-                    : HintDiscount::price((int) $skill->sp_cost, (int) $hintLevel));
+            $spend += $this->skillPrice($skill?->sp_cost, $entry['hint_level'] ?? null);
         }
 
         if ($spend <= $sp) {
             return null;
         }
 
-        return "The plan exceeds this run's Skill Points: {$spend} planned against {$sp} recorded.";
+        return "The plan exceeds this run's Skill Points: {$spend} planned against {$sp} recorded, "
+            .'counting skills already acquired.';
+    }
+
+    /**
+     * One skill's cost to the plan: its hint-adjusted price, or nothing when the catalogue states none.
+     *
+     * A null base and a null hint are different absences and both mean "charge nothing here": a skill
+     * with no published cost cannot be priced (`ADR-0015`), and one with no recorded hint level is
+     * priced at base. `mixed` in, because the two callers hand over a cast model attribute and a raw
+     * validated array value respectively.
+     */
+    private function skillPrice(mixed $spCost, mixed $hintLevel): int
+    {
+        if (! is_int($spCost) && ! (is_string($spCost) && ctype_digit($spCost))) {
+            return 0;
+        }
+
+        $base = (int) $spCost;
+
+        if ($hintLevel === null || $hintLevel === '') {
+            return $base;
+        }
+
+        return HintDiscount::price($base, is_int($hintLevel) ? $hintLevel : (string) $hintLevel);
     }
 
     /**
@@ -1269,7 +1380,7 @@ class TrainingRunController extends Controller
      * window so another session can start. Idempotent — the `Lifecycle::abandon()` stamp ignores a run
      * that already ended, and a normal career (no overlay) is a no-op rather than an error.
      */
-    public function abandonIndependent(TrainingRun $run): RedirectResponse
+    public function abandonIndependent(AbandonIndependentTrainingRequest $request, TrainingRun $run): RedirectResponse
     {
         $itr = $run->independentTrainingRun;
 

@@ -9,6 +9,7 @@ use App\Enums\CareerPhase;
 use App\Enums\CareerYear;
 use App\Enums\SnapshotFieldState;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\SnapshotReviewRequest;
 use App\Http\Requests\StoreSnapshotRequest;
 use App\Models\Umamusume;
 use App\Services\Career\CareerPositionLabel;
@@ -98,9 +99,16 @@ class SnapshotController extends Controller
      * to the page so the confirm button re-posts exactly what was read back rather than re-collecting
      * it.
      */
-    public function review(Request $request): Response
+    public function review(SnapshotReviewRequest $request): Response
     {
-        $data = $this->reviewData($request);
+        // The validated body where the setup screen posted one, the parked draft otherwise. The
+        // boundary is a Form Request now (S1.16): `reviewData()` used to call
+        // `Validator::make($submitted, StoreSnapshotRequest::fieldRules())->validate()` inline, so the
+        // rules were shared but the BOUNDARY was a controller method, which is the Floor's no-inline-
+        // validation rule one layer down.
+        $data = $request->hasSnapshotPayload()
+            ? $request->validated()
+            : $this->reviewData($request);
 
         if ($data !== []) {
             // Parked for `setup()`: the review screen's Back returns to the form, and the Trainer
@@ -138,14 +146,8 @@ class SnapshotController extends Controller
      *
      * @return array<string, mixed>
      */
-    private function reviewData(Request $request): array
+    private function reviewData(SnapshotReviewRequest $request): array
     {
-        $submitted = $request->request->all();
-
-        if (array_key_exists('career_year', $submitted) || array_key_exists('umamusume_id', $submitted)) {
-            return Validator::make($submitted, StoreSnapshotRequest::fieldRules())->validate();
-        }
-
         $draft = $request->session()->get('career.snapshot.draft');
 
         return is_array($draft) ? $draft : [];

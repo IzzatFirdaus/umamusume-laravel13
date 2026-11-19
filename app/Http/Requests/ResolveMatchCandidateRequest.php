@@ -26,8 +26,22 @@ class ResolveMatchCandidateRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', Rule::enum(CandidateStatus::class)],
+            'page' => ['sometimes', 'integer', 'min:1', 'max:2147483647'],
+            // `Pending` is not a verdict. It used to be accepted: `ResolveMatchCandidate::handle()`
+            // mapped it to `null` work and then stamped the row `Pending` and saved, so the endpoint
+            // answered success and flashed "Candidate resolved." while changing nothing. Reopen is the
+            // door back to Pending, and the queue exposes it as its own action, so accepting the word
+            // here was an offer the queue never needed and could not honour.
+            'status' => [
+                'required',
+                Rule::enum(CandidateStatus::class)->except([CandidateStatus::Pending]),
+            ],
             'umamusume_id' => ['nullable', 'integer', Rule::exists('umamusume', 'id')],
+            // Aliased needs a target to hang the alias on. `alias()` returned early when the target was
+            // null while `handle()` stamped the row regardless, so a suggestion-less candidate could
+            // leave the queue marked Aliased with no alias recorded anywhere: the one non-Reject door
+            // available to those rows did nothing at all, silently. The target is either named in the
+            // post or the row already carries a suggestion, which is what `withValidator` checks.
             'alias_language' => ['nullable', Rule::enum(AliasLanguage::class), 'required_if:status,Aliased'],
         ];
     }
