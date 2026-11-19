@@ -19,7 +19,7 @@
  * indistinguishable from its sibling.
  */
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { computed, ref } from 'vue';
 import AbsenceValue from '../../components/AbsenceValue.vue';
 import BaseButton from '../../components/Form/BaseButton.vue';
 import BaseInput from '../../components/Form/BaseInput.vue';
@@ -29,6 +29,8 @@ import SourceNote from '../../components/database/SourceNote.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
 import Pagination from '../../components/ui/Pagination.vue';
 import AppLayout from '../../layouts/AppLayout.vue';
+
+type RaceSort = 'name' | 'grade' | 'distance' | 'fans';
 
 interface Slot {
     id: number;
@@ -65,6 +67,9 @@ const props = defineProps<{
         grade: string | null;
         surface: string | null;
         distance: string | null;
+        /** The ordering token, or `null` for the calendar's own order. */
+        sort: RaceSort | 'calendar' | null;
+        direction: 'asc' | 'desc' | null;
     };
 }>();
 
@@ -78,6 +83,29 @@ const grade = ref(props.filters.grade ?? '');
 const surface = ref(props.filters.surface ?? '');
 const distance = ref(props.filters.distance ?? '');
 const loading = ref(false);
+const raceReference = ref<HTMLDetailsElement | null>(null);
+
+const columns: { label: string; sort?: RaceSort; numeric?: boolean }[] = [
+    { label: 'Race', sort: 'name' },
+    { label: 'Grade', sort: 'grade' },
+    { label: 'Surface' },
+    { label: 'Distance', sort: 'distance', numeric: true },
+    { label: 'Band' },
+    { label: 'Fans', sort: 'fans', numeric: true },
+];
+
+const ariaSort = (key?: RaceSort): 'ascending' | 'descending' | undefined => {
+    if (!key || props.filters.sort !== key) {
+        return undefined;
+    }
+
+    return props.filters.direction === 'desc' ? 'descending' : 'ascending';
+};
+
+const orderLabel = computed(() => {
+    const column = columns.find(column => column.sort === props.filters.sort);
+    return column === undefined ? 'Calendar order' : `${column.label} ${ariaSort(column.sort)}`;
+});
 
 /** Every stored tier is selectable: the database holds seven, the drawing lists four. */
 const gradeOptions = ['G1', 'G2', 'G3', 'OP', 'Pre-OP', 'Maiden', 'Debut'];
@@ -91,26 +119,52 @@ const distanceOptions = ['Sprint', 'Mile', 'Medium', 'Long'];
  */
 const facet = (value: string | number | null): string => (value === null ? '' : String(value));
 
+function visit(query: Record<string, string | number | undefined>): void {
+    router.get('/database/races', query, {
+        preserveState: true,
+        preserveScroll: true,
+        onStart: () => { loading.value = true; },
+        onFinish: () => { loading.value = false; },
+    });
+}
+
+function appliedQuery(): URLSearchParams {
+    return new URLSearchParams(window.location.search);
+}
+
 function apply(): void {
-    router.get(
-        window.location.pathname,
-        {
-            q: q.value || undefined,
-            grade: grade.value || undefined,
-            surface: surface.value || undefined,
-            distance: distance.value || undefined,
-        },
-        {
-            preserveState: true,
-            preserveScroll: true,
-            onStart: () => {
-                loading.value = true;
-            },
-            onFinish: () => {
-                loading.value = false;
-            },
-        },
-    );
+    visit({
+        q: q.value || undefined,
+        grade: grade.value || undefined,
+        surface: surface.value || undefined,
+        distance: distance.value || undefined,
+        sort: props.filters.sort ?? undefined,
+        direction: props.filters.direction ?? undefined,
+        pageSize: appliedQuery().get('pageSize') ?? undefined,
+    });
+}
+
+function sortBy(key?: RaceSort): void {
+    const query = appliedQuery();
+    query.delete('page');
+    query.delete('sort');
+    query.delete('direction');
+
+    if (key !== undefined) {
+        query.set('sort', key);
+        const descending = props.filters.sort === key
+            ? props.filters.direction === 'asc'
+            : key === 'distance' || key === 'fans';
+        query.set('direction', descending ? 'desc' : 'asc');
+    }
+
+    visit(Object.fromEntries(query));
+}
+
+function openReference(): void {
+    if (raceReference.value !== null) {
+        raceReference.value.open = true;
+    }
 }
 
 const gates = (slot: Slot): string[] =>
@@ -131,19 +185,10 @@ const slotLine = (slot: Slot): string =>
 /** The wireframe prints its mono figures grouped ("2,000 m"), not as raw digits. */
 const group = (value: number): string => value.toLocaleString('en-US');
 
-/**
- * The canonical pager owns the range, so the page owns the request. The pager it replaces was a set
- * of Inertia links built from the server's own paginator, and those links carried the query string
- * with them, so this rebuilds the same query with the new page number rather than replacing it.
- */
 function goToPage(page: number): void {
-    const query = new URLSearchParams(window.location.search);
+    const query = appliedQuery();
     query.set('page', String(page));
-
-    router.get(`${window.location.pathname}?${query.toString()}`, {}, {
-        preserveState: true,
-        preserveScroll: true,
-    });
+    visit(Object.fromEntries(query));
 }
 </script>
 
@@ -154,7 +199,7 @@ function goToPage(page: number): void {
             <PageHeader
                 eyebrow="Races"
                 title="Race catalog"
-                description="Grade, surface, distance band and the fan threshold an obligation reads. Filter to the races a trainee's aptitude actually permits."
+                description="Search by race name and filter by grade, surface or distance band."
             />
         </template>
 
@@ -168,7 +213,7 @@ function goToPage(page: number): void {
         -->
         <form
             v-if="props.totalCount > 0"
-            class="mt-4 flex flex-wrap items-end gap-3"
+            class="mt-4 flex flex-wrap items-end gap-3 rounded-md border border-rule-soft bg-panel p-3"
             :aria-busy="loading"
             @submit.prevent="apply"
         >
@@ -228,16 +273,24 @@ function goToPage(page: number): void {
             </span>
         </form>
 
-        <p v-if="loading" role="status" class="mt-3 text-sm text-ink-muted">Loading results…</p>
+        <div v-if="props.totalCount > 0" class="mt-3 flex flex-wrap items-center gap-x-3 gap-y-1">
+            <p role="status" aria-atomic="true" class="text-sm text-ink-muted">
+                <template v-if="loading">Loading results…</template>
+                <template v-else>{{ props.slots.total }} matching slots · {{ orderLabel }}</template>
+            </p>
+            <BaseButton v-if="props.filters.direction !== null" variant="ghost" :disabled="loading" @click="sortBy()">
+                Restore calendar order
+            </BaseButton>
+        </div>
 
         <section
             v-if="props.totalCount === 0"
             aria-labelledby="races-offline"
             class="mt-8 rounded-md border border-dashed border-rule bg-panel p-6"
         >
-            <h3 id="races-offline" class="text-lg font-semibold text-ink-strong">
+            <h2 id="races-offline" class="text-lg font-semibold text-ink-strong">
                 The race database is offline
-            </h3>
+            </h2>
 
             <p class="mt-2 text-sm text-ink-muted">
                 No rows have been fetched from the race calendar source, and the calendar is what the
@@ -255,29 +308,48 @@ function goToPage(page: number): void {
         <template v-else>
             <div class="card mt-4">
                 <div
-                    class="relative overflow-x-auto"
+                    class="relative overflow-x-auto scroll-p-2"
                     role="region"
                     tabindex="0"
                     aria-label="Race slots, scrollable"
                 >
                     <table class="t min-w-[40rem]">
                         <caption class="sr-only">
-                            Career race slots: race, grade, surface, distance, distance band and fan threshold
+                            Career race slots. Activate a sortable column header to change the order.
                         </caption>
                         <thead>
                             <tr>
-                                <th scope="col">Race</th>
-                                <th scope="col">Grade</th>
-                                <th scope="col">Surface</th>
-                                <th scope="col" class="n">Distance</th>
-                                <th scope="col">Band</th>
-                                <th scope="col" class="n">Fans</th>
+                                <th
+                                    v-for="column in columns"
+                                    :key="column.label"
+                                    scope="col"
+                                    :class="{ n: column.numeric }"
+                                    :aria-sort="ariaSort(column.sort)"
+                                >
+                                    <!-- No glyph in the header cell. Direction is stated twice without
+                                         it: `aria-sort` for a screen reader, and the `orderLabel` line
+                                         above the table ("Distance descending") for everyone. A glyph
+                                         here would break `database.spec.ts:402`, which pins every
+                                         columnheader's text to the six column labels exactly. -->
+                                    <button
+                                        v-if="column.sort"
+                                        type="button"
+                                        class="inline-flex min-h-11 min-w-11 items-center gap-1 rounded-sm px-1 hover:bg-sunken hover:text-ink-strong"
+                                        :aria-disabled="loading ? 'true' : undefined"
+                                        @click="!loading && sortBy(column.sort)"
+                                    >
+                                        {{ column.label }}
+                                    </button>
+                                    <template v-else>{{ column.label }}</template>
+                                </th>
                             </tr>
                         </thead>
                         <tbody>
                             <tr v-for="slot in props.slots.data" :key="slot.id">
                                 <th scope="row" class="font-semibold text-ink-strong">
-                                    <Link :href="`/database/races/${slot.id}`" class="text-ink-strong underline">{{ slot.title }}</Link>
+                                    <Link :href="`/database/races/${slot.id}`" class="inline-flex min-h-11 items-center text-ink-strong underline">
+                                        {{ slot.title }}
+                                    </Link>
                                     <span
                                         v-if="slotLine(slot) !== ''"
                                         class="block text-xs font-normal text-ink-muted"
@@ -295,18 +367,15 @@ function goToPage(page: number): void {
                                     <AbsenceValue v-if="slot.distance === null" compact reason="Not recorded" />
                                     <span v-else class="font-mono tabular-nums">{{ group(slot.distance) }} m</span>
                                 </td>
-                                <!-- Keybox 1: the asterisk marks the derived edge the sources dispute; the
-                                     cell's aria-label carries the reason for a screen reader, because an
-                                     absolutely positioned `sr-only` span inside the scroll region escapes its
-                                     clip and widened the document at 320px (measured 88px). The `relative` on
-                                     the scroll region now contains it, so AbsenceValue's sr-only twin is safe. -->
-                                <td
-                                    :aria-label="slot.distance === 1400
-                                        ? `${slot.distance_band}, on the disputed 1400 m boundary; this catalogue's cut-off reads it as ${slot.distance_band} and the export reads it as Mile`
-                                        : undefined"
-                                >
+                                <td>
                                     <AbsenceValue v-if="slot.distance_band === null" compact reason="Not recorded" />
                                     <span v-else>{{ slot.distance_band }}<template v-if="slot.distance === 1400">*</template></span>
+                                    <a
+                                        v-if="slot.distance === 1400"
+                                        href="#race-reference"
+                                        class="flex min-h-11 items-center text-xs text-ink underline"
+                                        @click="openReference"
+                                    >Source conflict</a>
                                 </td>
                                 <td class="n">
                                     <AbsenceValue v-if="slot.fans_needed === null" compact reason="Not recorded" />
@@ -316,18 +385,6 @@ function goToPage(page: number): void {
                         </tbody>
                     </table>
                 </div>
-                <p class="note mt-3">
-                    <span class="g" aria-hidden="true">○</span>
-                    <span class="flex-1">
-                        <b>*1400 m is an open conflict.</b> This catalogue's cut-off puts it in Sprint, while
-                        the data export codes those courses as <span class="font-mono">distance_type==2</span>,
-                        which reads as Mile, and the client's "(Mile)"-tagged skills gate on that type; the row
-                        is marked and no winner is encoded. Band is derived from this row's Distance through
-                        the catalogue's cut-offs below, so it is shown as derived, not as a stored measurement.
-                        N/A marks a field the source records nothing for. It is not a zero, and no column here
-                        fills a gap with a guess.
-                    </span>
-                </p>
                 <Pagination
                     :page="props.slots.current_page"
                     :pages="props.slots.last_page"
@@ -340,89 +397,96 @@ function goToPage(page: number): void {
             </div>
         </template>
 
-        <!-- The wireframe's two reference cards (`database-races.html:102-132`). The bands are the
-             cut-offs the parser and the Distance facet use; the payout is the per-grade first-place
-             figure the reference guide carries for both career families. -->
-        <div class="mt-4 grid gap-4 g-2">
-            <section class="card" aria-labelledby="race-bands">
-                <h2 id="race-bands">Distance bands</h2>
-                <table class="t">
-                    <thead>
-                        <tr>
-                            <th scope="col">Band</th>
-                            <th scope="col" class="n">Metres</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <th scope="row" class="font-medium">Sprint</th>
-                            <td class="n font-mono tabular-nums">≤ 1400</td>
-                        </tr>
-                        <tr>
-                            <th scope="row" class="font-medium">Mile</th>
-                            <td class="n font-mono tabular-nums">1401-1800</td>
-                        </tr>
-                        <tr>
-                            <th scope="row" class="font-medium">Medium</th>
-                            <td class="n font-mono tabular-nums">1801-2400</td>
-                        </tr>
-                        <tr>
-                            <th scope="row" class="font-medium">Long</th>
-                            <td class="n font-mono tabular-nums">≥ 2401</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <p class="note mt-3">
-                    <span class="g" aria-hidden="true">○</span>
-                    <span class="flex-1">The 1400 m boundary is the source of the conflict noted above.</span>
-                </p>
-            </section>
+        <details ref="raceReference" class="mt-4 rounded-md border border-rule-soft bg-panel p-3">
+            <summary id="race-reference" class="min-h-11 cursor-pointer py-2 text-lg font-semibold text-ink-strong">
+                Race reference
+            </summary>
+            <p class="mt-2 text-sm text-ink-muted">
+                <strong class="text-ink-strong">*1,400 m source conflict.</strong>
+                The catalog cutoff places it in Sprint. The source export codes it as Mile
+                (<code class="font-mono">distance_type==2</code>). N/A marks a field the source records nothing for.
+            </p>
+            <div class="mt-4 grid gap-4 g-2">
+                <section class="card" aria-labelledby="race-bands">
+                    <h2 id="race-bands">Distance bands</h2>
+                    <table class="t">
+                        <thead>
+                            <tr>
+                                <th scope="col">Band</th>
+                                <th scope="col" class="n">Metres</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row" class="font-medium">Sprint</th>
+                                <td class="n font-mono tabular-nums">≤ 1400</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="font-medium">Mile</th>
+                                <td class="n font-mono tabular-nums">1401-1800</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="font-medium">Medium</th>
+                                <td class="n font-mono tabular-nums">1801-2400</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="font-medium">Long</th>
+                                <td class="n font-mono tabular-nums">≥ 2401</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="note mt-3">
+                        <span class="g" aria-hidden="true">○</span>
+                        <span class="flex-1">The 1,400 m boundary is disputed.</span>
+                    </p>
+                </section>
 
-            <section class="card" aria-labelledby="race-payout">
-                <h2 id="race-payout">What a race pays</h2>
-                <table class="t">
-                    <thead>
-                        <tr>
-                            <th scope="col">Grade</th>
-                            <th scope="col" class="n">Stat</th>
-                            <th scope="col" class="n">Skill Pt</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <th scope="row" class="font-medium">G1</th>
-                            <td class="n font-mono tabular-nums">+10</td>
-                            <td class="n font-mono tabular-nums">+45</td>
-                        </tr>
-                        <tr>
-                            <th scope="row" class="font-medium">G2 · G3</th>
-                            <td class="n font-mono tabular-nums">+8</td>
-                            <td class="n font-mono tabular-nums">+35</td>
-                        </tr>
-                        <tr>
-                            <th scope="row" class="font-medium">OP · Pre-OP</th>
-                            <td class="n font-mono tabular-nums">+5</td>
-                            <td class="n font-mono tabular-nums">+30</td>
-                        </tr>
-                    </tbody>
-                </table>
-                <p class="note mt-3">
-                    <span class="g" aria-hidden="true">○</span>
-                    <span class="flex-1">
-                        First place at 0 Race Bonus in the standard career families. <b>Trackblazer pays the
-                        same stat gain at a lower SP figure</b> (G1 +35, G2-G3 +25, OP-Pre-OP +20). Second
-                        and third are not published.
-                    </span>
-                </p>
-                <!-- The figures above are not read from a table: they are transcribed, so the card says
-                     which dataset they came from and when the guide was read, the same row every other
-                     transcribed reference view carries. -->
-                <SourceNote
-                    :section="props.source.section"
-                    :anchor="props.source.anchor"
-                    :recheck="props.recheck"
-                />
-            </section>
-        </div>
+                <section class="card" aria-labelledby="race-payout">
+                    <h2 id="race-payout">What a race pays</h2>
+                    <table class="t">
+                        <thead>
+                            <tr>
+                                <th scope="col">Grade</th>
+                                <th scope="col" class="n">Stat</th>
+                                <th scope="col" class="n">SP</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <th scope="row" class="font-medium">G1</th>
+                                <td class="n font-mono tabular-nums">+10</td>
+                                <td class="n font-mono tabular-nums">+45</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="font-medium">G2 · G3</th>
+                                <td class="n font-mono tabular-nums">+8</td>
+                                <td class="n font-mono tabular-nums">+35</td>
+                            </tr>
+                            <tr>
+                                <th scope="row" class="font-medium">OP · Pre-OP</th>
+                                <td class="n font-mono tabular-nums">+5</td>
+                                <td class="n font-mono tabular-nums">+30</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <p class="note mt-3">
+                        <span class="g" aria-hidden="true">○</span>
+                        <span class="flex-1">
+                            First place at 0 Race Bonus in the standard career families. <b>Trackblazer pays the
+                            same stat gain at a lower SP figure</b> (G1 +35, G2-G3 +25, OP-Pre-OP +20). Second
+                            and third are not published.
+                        </span>
+                    </p>
+                    <!-- The figures above are not read from a table: they are transcribed, so the card says
+                         which dataset they came from and when the guide was read, the same row every other
+                         transcribed reference view carries. -->
+                    <SourceNote
+                        :section="props.source.section"
+                        :anchor="props.source.anchor"
+                        :recheck="props.recheck"
+                    />
+                </section>
+            </div>
+        </details>
     </AppLayout>
 </template>

@@ -27,6 +27,14 @@ use Inertia\Response;
  */
 class DatabaseController extends Controller
 {
+    private const RACE_SORT_COLUMNS = [
+        'calendar' => null,
+        'name' => 'title',
+        'grade' => 'grade_code',
+        'distance' => 'distance',
+        'fans' => 'fans_needed',
+    ];
+
     /**
      * The hub: the eight areas the Database screen lists, all read-only.
      *
@@ -117,6 +125,15 @@ class DatabaseController extends Controller
      */
     public function races(Request $request): Response
     {
+        $sort = $request->query('sort');
+        $sort = is_string($sort) && array_key_exists($sort, self::RACE_SORT_COLUMNS) ? $sort : null;
+        $column = $sort === null ? null : self::RACE_SORT_COLUMNS[$sort];
+        $direction = match ($request->query('direction')) {
+            'asc' => 'asc',
+            'desc' => 'desc',
+            default => in_array($sort, ['distance', 'fans'], true) ? 'desc' : 'asc',
+        };
+
         $q = $request->query('q');
         $q = is_string($q) ? trim($q) : null;
         $grade = $request->query('grade');
@@ -126,7 +143,7 @@ class DatabaseController extends Controller
         $distance = $request->query('distance');
         $distance = is_string($distance) ? trim($distance) : null;
 
-        $slots = RaceCatalogSlot::query()
+        $query = RaceCatalogSlot::query()
             // SQLite has no default LIKE escape character, so the clause names one and the pattern
             // escapes `%`/`_` first: unescaped, a `%` would return the whole calendar (KI-26's trap).
             ->when($q !== null && $q !== '', static fn ($query) => $query->whereRaw(
@@ -135,10 +152,19 @@ class DatabaseController extends Controller
             ))
             ->when($grade !== null && $grade !== '', static fn ($query) => $query->where('tier', $grade))
             ->when($surface !== null && $surface !== '', static fn ($query) => $query->where('surface', $surface))
-            ->when($distance !== null && $distance !== '', static fn ($query) => $query->where('distance_band', $distance))
+            ->when($distance !== null && $distance !== '', static fn ($query) => $query->where('distance_band', $distance));
+
+        if ($column === 'title') {
+            $query->orderByRaw('title COLLATE NOCASE '.$direction);
+        } elseif ($column !== null) {
+            $query->orderByRaw($column.' IS NULL')->orderBy($column, $direction);
+        }
+
+        $slots = $query
             ->orderBy('year')
             ->orderBy('turn')
             ->orderBy('sort_order')
+            ->orderBy('id')
             ->paginate(PageSize::clamp($request->query('pageSize')))
             ->withQueryString()
             ->through(static fn (RaceCatalogSlot $slot): array => [
@@ -170,6 +196,11 @@ class DatabaseController extends Controller
                 'grade' => $grade,
                 'surface' => $surface,
                 'distance' => $distance,
+                // Echoed on the same contract as the other facets: a restored URL that reordered the
+                // calendar has to paint the ordering it applied, or the Trainer reads the rows as
+                // arbitrary. `null` is the calendar order, which is also what an unknown token clamps to.
+                'sort' => $sort,
+                'direction' => $column === null ? null : $direction,
             ],
         ]);
     }
