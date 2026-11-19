@@ -332,6 +332,295 @@ decisions, they are token families whose contract lives in their own `app.css` c
 §3.1 together", but this file has no §3.1 — the token table is §2.1. The citation
 inside the test is stale, not the table's location.
 
+> **2026-11-19 — Azure Daybreak (light) and Midnight Circuit (dark).** The owner supplied a full
+> visual identity for both themes and authorised the swap; the measurement, the rejected variants and
+> the per-value reasoning are in
+> `docs/proposals/2026-11-19-visual-identity-palette-and-backdrop.md`. This note records what landed,
+> not why. **No token name was added or removed: `@theme static` still declares 102 `--color-*` names**,
+> and `eva01` resolves byte-identically to its pre-change self (0 resolved-value diffs, verified
+> against `HEAD`).
+>
+> Light, 24 declarations moved: `page` `#F4F4FF` → `#DDEEFF`; `panel` `#FBFBFD` → `#FFFFFF`;
+> `sunken` `#EDEDF1` → `#CFE3F6`; `idle` `#E2E4F0` → `#BBD5EE`; `disabled` `#D1D3E0` → `#AFCBE6`;
+> `ink` `#6A5641` → `#19365C`; `ink-strong` `#482720` → `#0E2745`; `ink-muted` `#6A6A75` → `#48607F`;
+> `ink-faint` `#988F87` → `#8FA6BE`; `rule` `#8C8A9A` → `#5E88B5`; `rule-soft` `#D7D8E0` → `#C8DDF2`;
+> `green`/`chrome` `#AEE327` → `#B9F0DE`; `on-chrome` `#20300D` → `#19365C`; `green-deep` `#20300D` →
+> `#0F6B52`; `green-tint` `#F2F5EE` → `#EDFAF5`; `green-line` `#D1F490` → `#7FD3BC`; `ring` `#2756FA`
+> → `#2455C9`; `pick` `#8C83FF` → `#9DDCFF`; `on-pick` `#141414` → `#0E2745`; `brand-chrome` `#2255FF`
+> → `#2455C9`; `brand-accent` `#FF4D87` → `#FF65B8`; `brand-accent-ink` `#2756FA` → `#2455C9`;
+> `brand-accent-soft` `#EEEBFF` → `#DCEBFC`.
+>
+> Dark, 22 declarations moved: `page` `#09090B` → `#050A1B`; `panel` `#2A2A2A` → `#12224F`; `raised`
+> `#333333` → `#16295C`; `sunken` `#050406` → `#02060F`; `idle` `#1D1E20` → `#1A2E63`; `disabled`
+> `#38383A` → `#22305A`; `ink` `#FCFCFC` → `#EAF2FF`; `ink-muted` `#A0A0A0` → `#9FB4DE`; `ink-faint`
+> `#605F5F` → `#5A78BC`; `rule-soft` `#3A3A3C` → `#283B70`; `brand-chrome` `#1A3FCC` → `#164BFF`;
+> `green` `#83B503` → `#B9F0DE`; `chrome` `#83B503` → `#22C8FF`; `on-chrome` `#121212` → `#04101F`;
+> `green-line` `#83B503` → `#2FD3B0`; `green-deep` `#83B503` → `#7FE9CF`; `green-tint` `#19191B` →
+> `#0C2A48`; `ring` `#83B503` → `#22C8FF`; `pick` `#FF7500` → `#22C8FF`; `on-pick` `#121212` →
+> `#04101F`; `brand-accent` `#FF3276` → `#F02FA9`; `brand-accent-ink` `#97D1F9` → `#FF5CB8`.
+>
+> Four light and two dark values are **steps**, not the supplied hexes, each computed with the formula
+> `tests/Feature/DesignTokensTest.php` applies: light `ink-muted` `#647B98` (3.68:1 as body text) →
+> `#48607F`; light `rule` `#C8DDF2` (1.18:1 as a boundary) → `#5E88B5`; light `brand-chrome` `#347DFF`
+> (white on it 3.80:1, and 3.21:1 as link text) → `#2455C9`; dark `panel` `#101F49` (1.23:1 step to
+> page, under the 1.25 dark floor) → `#12224F`; dark `brand-accent-ink` → `#FF5CB8` because magenta
+> `#F02FA9` is a fill and does not survive as text. Dark `rule` stays `#666666`: the supplied
+> `#283B70` is 1.83:1 as a card boundary and was demoted to `rule-soft`, the hairline role.
+>
+> **`rule-soft` is a divider, never a card edge** — the one reading of the supplied palette that would
+> otherwise re-open M-9. Two further hard rules fall out of the measurements and bind any later edit:
+> **pink never carries white text in either theme** (2.69 light, 3.69 dark — it carries page ink or
+> nothing), and **neon cyan never carries ink on top of it** (ink on `#22C8FF` is 1.73:1); cyan is a
+> fill, a ring and a rail.
+>
+> **2026-11-19, follow-up — the light ramp was stepped again, because the first pass still read white.**
+> The first swap landed `page` `#DDEEFF` against `panel`/`raised` `#FFFFFF`. Judged on the rendered
+> dashboard, that is a near-white field carrying white cards: the theme's name was in the copy and not
+> in the pixels. The cause was arithmetic, not taste. `rule on page` is the tighter of the two G-18
+> pairs whose background is `page`, and `rule` `#5E88B5` cleared 3:1 with 0.13 of margin, which pinned
+> the page at L 0.800 and left the backdrop a 0.20-wide legal band that only a near-white plate could
+> occupy. **The pair is a ratio, so both sides move together.** `rule` `#4A73A0` on `page` `#C3D9F2` now
+> measures 3.42:1 and the plate band is 0.588..1.0, three-and-a-half times wider — which is what let the
+> daybreak plate carry visible structure instead of a wash.
+>
+> Second pass, the whole ladder compressed so nothing in the light theme is pure white: `page` `#C3D9F2`,
+> `panel` `#D4E4F6`, `raised` `#E3EFFA`, `sunken` `#AECBE9`, `idle` `#9DBFE3`, `disabled` `#93B6DC`;
+> `ink` `#12304F`, `ink-strong` `#081F38`, `ink-muted` `#375473`, `ink-faint` `#7492AE`; `rule` `#4E79A8`,
+> `rule-soft` `#B4CFEA`. Fourteen further values are steps the gate forced, each re-measured rather than
+> guessed: `risk` `#B22323` (BO-004 prints the risk hue as *text* on `page`, and the darker page drops
+> `#C62828` to 3.89:1); `up` `#A14A07`; `brand-accent-ink` `#1F4AB2`; `stat-pal-ink` `#865900`;
+> `stat-group-ink` `#3D6E14`; and the five `stat-*` boundary marks, darkened together with `raised`
+> (`stat-speed` `#2B8ADF`, `stat-power` `#CF6C09`, `stat-guts` `#DF5589`, `stat-wit` `#169968`,
+> `stat-pal` `#B97914`, `stat-group` `#1F9A53`) so each still clears 3:1 on the tinted card. `dark` and
+> `eva01` are untouched by this pass.
+>
+> Measured on the rendered dashboard at 1920x1080 (`probe-shipped.cjs`, per-glyph boxes, plate on vs
+> plate off): **light 0 failures, worst 4.73:1**; dark 5.16:1; the plate changes no ratio in either theme.
+> `ink-muted`, which reads as borderline in a screenshot, measures 5.42:1 on `page` and 6.72:1 on
+> `raised`. `ink-faint` stays non-text at 1.94-2.78 by contract, and `rule-soft` remains a divider only.
+>
+> `eva01` is untouched by ruling, and the light edits would have re-skinned it silently: `green`,
+> `chrome`, `on-chrome` and `rule-soft` were inherited from the light block, which is the same trap the
+> lime-pin note at `resources/css/app.css:186-189` already records. All four are now declared inside
+> `html[data-theme='eva01']` at their previous light values (`#AEE327`/`#AEE327`/`#20300D`/`#D7D8E0`),
+> so that block's resolved output is unchanged even though the light block beneath it moved.
+>
+> **D-13f, resolved against the recommendation:** no `--color-accent-sky` is minted. The proposal
+> recommended it "so the charts and the bridge role have one home", but this tree has no chart,
+> sparkline or trend component — measured, zero. The sky cyan the paste asks for already has a home as
+> the light `--color-pick` fill (`#9DDCFF`), so minting a second token would be the one thing the
+> 102-name vocabulary exists to prevent, and would move a pin in this file and in the test for a colour
+> nothing reads. Mint it when a consumer exists.
+>
+> Measured on the written stylesheet, not asserted: surface step 1.183 light (floor 1.05) and 1.283 dark
+> (floor 1.25); the 48 contracted pairs, the 9 grade rows, `--color-risk` as text on `raised`/`panel`/
+> `page`, and the white-on-grade ban all clear on all three themes; `eva01`'s `rule on page` remains
+> 2.700:1, the pre-existing owner-accepted exception, identical before and after. Gate evidence:
+> `php artisan test --filter=DesignTokensTest` 17 passed / 480 assertions, and
+> `--filter=DesignDocEnforcementTest` 2 passed / 6 assertions, both on this change.
+>
+> **The decorative backdrop is a page fill, not a wash (`body.app-backdrop`).** The supplied art is
+> a photographic plate, and a photograph cannot legally sit under this page. Bounded by measurement:
+> the only two contracted G-18 pairs whose background is `page` are `rule on page` (3:1 boundary) and
+> `brand-accent-ink on page` (4.5:1 text), and light `rule` carries **3.13:1** against its 3.0 floor
+> while dark carries 3.43:1. Any translucent application therefore breaks a boundary before it can
+> show anything: the opacity ceiling for `ink-muted` alone is 0.17 light / 0.25 dark, and the art at
+> those ceilings is invisible. Three shapes were built and measured before this one shipped: a
+> full-bleed veil (invisible at a legal alpha), a baked veil (light `maxL` 0.863 against a 0.837 page,
+> i.e. no art; dark dropped `ink-faint` to 2.38:1), and a four-sided `mask` confining art to the
+> gutter — rejected because a mask on `body` clips every **descendant**, which faded the dark rail
+> labels to **1.05:1**, and because no text-free gutter exists to mask to (glyph boxes span x −1→1812
+> at 1920; gutters are 0px and 108px).
+>
+> What ships is a **duotone generated inside the legal luminance interval**, so contrast is a property
+> of the asset rather than of an overlay: light plate Y 0.868..0.972 against an allowed 0.808..0.992,
+> dark 0.0033..0.0101 against an allowed 0.0004..0.0105 (linear Rec.709 Y, measured on decoded bytes).
+> Light ships lossy WebP; dark ships **lossless**, because its legal band is 0.010 of luminance wide
+> and 4:2:0 chroma error alone overshoots it — an earlier lossy dark plate measured 0.0158 against the
+> 0.0105 cap. `tools/verify-backdrop.py` re-measures the decoded plates and exits non-zero if a
+> regenerate leaves the interval; `DesignTokensTest` pins the utility (page fill, no mask, no opacity),
+> the shell hook, the absence of an opaque `bg-page` on the shell root, and the three per-theme
+> resolutions (two `image-set`s, `eva01: none`).
+>
+> Rendered verification, three themes at 1920×1080, 98 painted text boxes each: plate-on versus
+> plate-removed gives **identical** worst-case ratios and identical failure sets, so the art costs zero
+> contrast. Light worst 4.63:1, dark 5.16:1, both above the 4.5 floor. `eva01` renders no plate and its
+> one sub-floor run (1.92:1, `text-ink-muted` on `brand-accent-soft` in the Quick actions card) is
+> present with and without art, i.e. pre-existing and not this slice's.
+>
+> **`eva01` opts out** (`--backdrop-image: none`): the daybreak plate is wrong against `#1A1025`, and
+> the theme is fenced from this work by ruling, so it stays flat with zero visual change.
+>
+> **Assets.** The supplied logo (1.36 MB PNG) and favicon (1.32 MB PNG) ship re-cut: an icon ladder
+> (`favicon-32/180/192/512.png`, 38 KB total, the 512 quantised) and a 44/88 WebP pair rendered at
+> 22×22 in the rail with `srcset`, replacing one oversized image. `public/favicon.svg` is **not**
+> linked: it is a 114 KB autotrace, and linking it would put the largest asset in the tab icon.
+
+> **2026-11-19, third pass — eva01 became a real third identity (Unit-01), not an inherited purple.**
+> The owner supplied the EVA-01 palette (purple dominant, green secondary, orange accent) plus a
+> Unit-01 launch-bay plate. Measured against G-18, **8 of 18** pasted pairs failed, all in the same
+> direction: on a dark page a foreground must get **lighter**, so the supplied mid-tone purples work as
+> fills but not as text. The ramp splits accordingly: `page` `#1B1B22`, `panel` `#2D2F43`, `raised`
+> `#34364D`; `ink` `#F0E9DC`, `ink-muted` `#B5B3C5`, `ink-faint` `#8280AA`; `rule` `#8280AA` (4.58:1 on
+> page, so the old 2.70:1 exemption is **retired** and eva01 now binds every contract row);
+> `brand-chrome`/`primary` `#715591` (Eva Purple as a fill, Bone on it 5.10:1); `brand-accent` `#61B856`
+> (Eva Green, the brief's recognisable colour, on the header hairline); `status-positive`/`pick`/`ring`
+> `#61B856`; `status-caution` `#ED9827` with Armor Black ink (7.44:1); purple and secondary-purple and
+> burgundy each split into a fill and a lighter text step (`#B98DEB`, `#9A9BDE`, `#FF7581`) because the
+> text roles fail as the supplied hexes.
+>
+> `--color-risk` is the sharpest case: BO-004 prints it as **text** on page/panel/raised, so Deep
+> Burgundy `#51181D` (1.22:1) could not hold the token. It takes `#FF7581`, saturated at V=1.0 so it
+> stays red instead of washing grey, and `--color-on-risk` inverts to Armor Black so burgundy still
+> works as the danger fill.
+>
+> The eva01 plate is generated to **this theme's own ceiling**, not borrowed from the blues: its page is
+> dark, so the binding pair is the lightest foreground printed on it, and the ceiling is 0.0397 linear Y
+> derived from `risk`. Plates decode at 0.0012-0.0269, inside it. `verify-backdrop.py` now reads three
+> theme blocks and derives each band in the direction that theme actually needs — floor for the light
+> ramp, ceiling for the dark ones.
+>
+> Rendered at 1920x1080: **all three themes 0 failures**, eva01 worst **4.57:1** (it was 1.92 with the
+> inherited purple). Green's pixel share went 0.10% to 0.26% once the hairline took it; purple holds
+> 18.4%, which is the 55/30/10/5 brief expressed in pixels rather than in intent.
+
+> **2026-11-19, fourth pass — purple restored as the foundation; EVA-01 accents kept on top.**
+> The third pass moved every eva01 surface to charcoal to escape "dark mode with a purple header". The
+> owner rejected that in turn, and correctly: the app's purple identity was the thing being preserved,
+> so charcoal-as-default deleted the theme it was supposed to decorate. The final ramp is the owner's
+> own hexes: `page` `#1E1435` (Deep Aubergine), `panel` `#34285B` (Original purple, the sidebar and
+> card fill), `raised` `#49376F` (Panel Violet), `header`/`brand-chrome` `#715591`. Charcoal is gone
+> from the surface ladder entirely.
+>
+> Identity is carried by **recurring accents, not by resaturating panels**: Eva Green `#72C068` on the
+> sidebar active rail and dot, the live-careers dot and pill, and the scenario chip; Warning Orange
+> `#EE9B2E` on the review-queue count chip (`brand-accent` hairline and `pick-line` also take green and
+> orange). Green had to move from the header hairline into *status* roles to satisfy the "recurring
+> signal" rule, and orange finally has a real job: pending review, which is the one attention state the
+> dashboard already had.
+>
+> Four values are steps the gate forced, each measured: `rule` `#655387` → `#968AAD` (2.60:1 as a card
+> edge on the new page, needs 3); `status-positive` `#61B856` → `#72C068` and `status-caution`
+> `#ED9827` → `#EE9B2E` (4.13 / 4.43 on `raised`); `risk` `#A83E43` → `#FC8D93` because BO-004 prints
+> the risk hue as TEXT (2.80:1). That last step is also what lifted the plate ceiling from 0.0191 to
+> 0.0443, which is why the eva01 plate can ship lossy at 58 KB instead of lossless at 626 KB.
+>
+> Rendered at 1920x1080: **all three themes 0 failures** (light 4.73, dark 5.32, eva01 5.10). Area share
+> by nearest token: deep purple 78.6%, bright violet 19.4%, green 0.27%, orange 0.15%. The base matches
+> the owner's 50-55 / 20-25 intent; **the accents do not yet reach 5-7 / 3-5**, because closing that gap
+> needs green in structural roles (progress bars, table active rows, section rules) rather than more
+> recolouring. Recorded as an open item, not silently claimed.
+
+> **2026-11-19, fifth pass — green given structural roles.** The fourth pass left green at 0.27% of
+> painted area against the owner's 5-7% target: present, but as dots and pills, which is the "one
+> horizontal line" objection one scale up. Two CSS hooks now carry it structurally, both resolving to
+> the ramps' own hairline outside eva01 so light and dark are untouched:
+> `--rule-card-head` paints the `.card > h2` underline that already existed on every card, and
+> `--rule-card-edge` paints a 3px left rule on `.card` itself. eva01 binds both to `--color-green`.
+> That is one rule per surface instead of touching ~119 components.
+>
+> Green also took the state jobs it was owed: the sidebar and mobile active item tints are `green/18`
+> (measured 12.98:1 for white ink and 6.74:1 for the muted tier, so the marker strengthens without
+> touching text contrast), the Review progress fill moved off `brand-chrome`, and the active-tab
+> boundary moved from `pick-line` to `green-line`.
+>
+> Measured: painted-area share by nearest token went **0.27% -> 0.74%** green, with purple foundation
+> 76.7% and bright violet 18.8% unchanged. Rendered contrast still **0 failures in all three themes**
+> (light 4.73, dark 5.32, eva01 5.10). Rendered inspection counts ~22 green elements on the dashboard
+> (8 card edges + 8 header rules + nav tint/rail/dot + two pills + dot).
+>
+> Finding the missing area took one more measurement: cards are **59% of the dashboard viewport**, so
+> their perimeter is where a 1px line reaches furthest. Two more eva01 bindings followed —
+> `--color-rule-soft` (the whisper divider: card borders, table row rules, section separators) moved to
+> `#3E6B42`, which measures 2.12:1 on `panel` against the old 1.96:1 and therefore keeps the divider at
+> the weight DESIGN.md sets for it; and `--color-rule` (the 3:1 control boundary) became Eva Green
+> `#61B856` itself, because the owner's `#655387` is 2.60:1 as a card edge and green clears the floor on
+> all three surfaces (7.04 / 5.31 / 4.13) with no further step.
+>
+> Measured result: green **0.27% -> 0.74% -> 2.19%** of painted area across the three passes, with
+> purple foundation holding 76.7% and bright violet 18.8%. Rendered contrast stays **0 failures in all
+> three themes** (light 4.73, dark 5.32, eva01 5.10), and the sweep found no text pair degraded by the
+> green borders because every border stays line-weight rather than becoming a fill.
+>
+> **Remaining gap, stated rather than hidden:** 2.19% is short of the brief's 5-7%. Reaching it needs
+> green *fills* (a progress bar on every screen, green panel headers), which the same brief forbids
+> ("avoid large green backgrounds"). Green now appears on every card edge, every control outline, every
+> nav state and every status indicator; the gap that remains is area-by-area, and the two instructions
+> pull against each other. Escalated rather than resolved by picking one silently.
+
+> **2026-11-19, sixth pass — the three-theme refinement, and the fifth pass's border work partially
+> reversed on the owner's own instruction.** The refinement brief re-diagnoses eva01: the green had
+> become the *default* border rather than a signal, so "nearly every card, field and button carries the
+> same green border" and the accent stops reading as an accent. The brief is right, and the fifth pass
+> above is what created it. Two of its bindings are withdrawn; the rest stand:
+>
+> - `--color-rule` leaves green. It is what 105 `.vue` files paint as `border-rule`, so it was the
+>   uniform outline. It is now `#968AAD`, the palette's own `ink-faint`: 5.42:1 on `page`, 4.08:1 on
+>   `panel`, 3.17:1 on `raised`, 5.81:1 on `sunken`, clearing the 3:1 boundary on every surface. The
+>   brief's own `#655387` cannot take this role at 2.60:1 on page; it is already `rule-soft`, where it
+>   belongs and stays.
+> - `--color-rule-soft` leaves green entirely and goes back to the brief's Neutral Borders `#655387`
+>   (1.96:1 on panel). It carries `.card`'s perimeter, so this is the line that 59% of the viewport
+>   sees; at green it made every container look selected.
+> - `--rule-card-edge` follows it. The 3px left rail is retained as a *depth* cue at the same violet,
+>   not as a green accent, so `.card` reads as one bordered surface again.
+> - `--rule-card-head` **stays** green. The `.card > h2` underline is one hairline per card heading,
+>   which is a structural green that does not repeat on every control.
+>
+> Green therefore keeps: the card-header underline, `ring`, `status-positive`, `green-deep`,
+> `brand-accent`, the chart lines, the sidebar and mobile active tints, the Review progress fill, the
+> active-tab boundary, every progress bar (`ResourceMeter`, `CapsuleHeader`, `TrackblazerPanel`,
+> `Dashboard`) and every semantic fill. The brief's §4 explicitly asks for green **fills** where they
+> mean something, which is the resolution of the 5-7% contradiction the fifth pass escalated: the
+> answer is fills that carry a value, not fills that carry area.
+>
+> Green now measures **0.46% of painted pixels** on the dashboard and 0.41% on the runs index, against
+> purple 82.1% and 82.9%. Method matters here and is stated so the figure can be reproduced: a real
+> 1920x1080 screenshot, every opaque pixel classified by channel dominance (green is `G > 95`,
+> `G > 1.18*R`, `G > 1.18*B`, saturation > 0.25). That is not comparable to the fifth pass's 2.19%,
+> which was element-box area bucketed to its nearest token and overcounts a 1px border as a whole
+> rectangle. Both numbers describe the same direction: with the default outlines removed, green is
+> back to being an accent rather than a texture. The 5-7% target remains unmet and remains recorded.
+>
+> A real contrast failure fell out of the sweep, unrelated to the green question:
+> **`green-deep` on `green-tint` measured 3.49:1 in eva01**, which is `StatusPill`'s soft tier
+> (`bg-green-tint text-green-deep`, lines 16-17) on every soft pill in the theme. G-18 never caught it
+> because the list carried `ink on green-tint` (6.41:1, passing) and no row for the ink that actually
+> prints. `green-tint` stepped `#315C35` -> `#254A29`, measuring **4.52:1**, and the missing row
+> `green-deep on green-tint` joined the contract at **49 pairs**, so the gap cannot reopen.
+>
+> The same pass moved two surfaces and one missing token, each gated:
+>
+> - **Light** `panel` `#D4E4F6` → `#E4F1FD` and `raised` `#E3EFFA` → `#FFFFFF`. The washout was
+>   measurable: the two steps read 1.117:1 and 1.109:1, clearing the 1.05 floor while reading as one
+>   flat blue field over 59% of the viewport. They now read **1.260:1** and **1.148:1**, with
+>   `page -> raised` at 1.446:1. `sunken`, `idle` and `disabled` did not move, so the rail and the nav
+>   states keep their separation (1.160 / 1.664 / 1.836 on panel). `.card` also gained `--shadow-card`,
+>   a blue-tinted lift required by brief §2 that resolves to `none` in both dark themes.
+> - **Dark** `raised` `#16295C` → `#1A2F66` (1.101:1 → **1.201:1** on panel; `page -> raised` 1.541:1)
+>   so a nested tile separates from its card. `idle` and `disabled` lifted with it to keep the nav
+>   tiers apart.
+> - **Dark** `rule` `#666666` → `#547EC8`. A neutral grey in a navy identity is the widest-reaching
+>   defect the brief did not name: every control outline on every screen was grey. The blue measures
+>   4.88:1 on page, 3.80:1 on panel, 3.16:1 on raised, so it carries the same 3:1 obligation the grey
+>   did while belonging to the palette.
+> - **Dark** gained a caution pair it never had. It inherited the light cream `#FFE9A8`/`#6A4A00`,
+>   which against the dark page is 16.40:1 of glare for a warning pill. `#EE9B2E` with the page as its
+>   ink measures 8.79:1 and separates from `panel` at 6.85:1.
+>
+> Measured: `DesignTokensTest` **18 passed / 501 assertions**, all **49** G-18 pairs and 9 grade badges
+> green in all three themes, every surface floor cleared (light 1.260, dark 1.283, eva01 1.326). The
+> tightest binding row is unchanged at `stat-speed-ink on tint-speed` 4.56:1, which no surface here
+> touches. `npm run typecheck`, `npm run lint:ui` (exit 0, no new arbitrary values against the 209
+> baseline), `npm run build`, `pint --test` and `phpstan --memory-limit=1G` all clean.
+>
+> **Azure Daybreak's secondary text is the one brief item not taken.** The brief's `#647B98` measures
+> 3.36:1 on the old panel and 3.91:1 on the new one, so it fails 4.5 everywhere it would be set as
+> text; the shipped `#375473` measures 6.76:1 on the new panel and was left alone. A stepped `#546B8C`
+> would clear 4.89:1 if the brief's hue is wanted more literally, but the shipped value is both darker
+> and already measured, so moving it would buy hue fidelity at the cost of contrast headroom.
+
+
 ### 2.2 Typography
 
 Owner ruling 2026-09-27: monospace numerals, clean legible sans UI text, no
@@ -1368,6 +1657,37 @@ system owns.
   set on", which was observed failing at 3.66:1 on the old value before the token moved.
 
 ## Change log
+
+- **2026-11-19** — Azure Daybreak (light) and Midnight Circuit (dark) replace both ramps; `eva01` is
+  unchanged. 24 light and 22 dark `--color-*` declarations moved inside `resources/css/app.css`; **no
+  token name was added or removed**, so the 102-name pin in this file and in `DesignTokensTest` did not
+  move. Six supplied hexes are stepped rather than adopted, each computed with the test's own formula
+  and recorded with its ratio in §2.1. `eva01`'s `green`, `chrome`, `on-chrome` and `rule-soft` were
+  inherited from the light block, so they are now declared inside that block at their old values to keep
+  its resolved output identical; verified as 0 resolved-value diffs against `HEAD`. D-13f resolved
+  against the proposal's own recommendation: no `--color-accent-sky`, because the tree has no chart or
+  sparkline consumer and the sky cyan already lives on light `--color-pick`. Two browser specs that pin
+  the light chrome hex (`tests/browser/dashboard.spec.ts`, `tests/browser/shell.spec.ts`) moved
+  `#2255FF` → `#2455C9` with it. Measured: steps 1.183 light / 1.283 dark, all 48 contracted pairs, 9
+  grade rows and the risk-as-text rows green on three themes, `eva01`'s `rule on page` still 2.700.
+  `DesignTokensTest` 17 passed / 480 assertions; `DesignDocEnforcementTest` 2 passed / 6 assertions. The
+  reasoning, the rejected variants and the per-pixel backdrop measurements are in
+  `docs/proposals/2026-11-19-visual-identity-palette-and-backdrop.md`.
+
+- **2026-11-19, same day — slices B and C: the backdrop plate and the asset set.** `body` gains the
+  `app-backdrop` utility, fed by one non-`--color-*` token (`--backdrop-image`, an `image-set` at 1x/1.5x,
+  which keeps the 102-name colour vocabulary intact) and `none` in `eva01`. The plate ships **baked
+  inside the legal luminance interval** rather than composited through a veil or a mask: the two
+  contracted G-18 pairs whose background is `page` (`rule on page` 3:1, `brand-accent-ink on page` 4.5:1)
+  leave light `rule` only 3.13:1 of headroom, so no translucent photograph survives, and a mask on `body`
+  fades every descendant (measured: dark rail labels 1.05:1). Verified on rendered pixels at 1920×1080:
+  98 painted text boxes per theme, plate-on against plate-removed **identical** (worst 4.63 light / 5.16
+  dark). The shell root lost its opaque `bg-page`, which had made the whole slice inert in the app while
+  the error blades still showed it. Dark ships lossless WebP because its legal band is 0.010 of luminance
+  and lossy 4:2:0 overshot it (0.0158 against a 0.0105 cap); light tolerates lossy. Assets re-cut to an
+  icon ladder (38 KB total) and a 44/88 WebP logo pair at 22×22, replacing a 1.36 MB PNG and a 1.32 MB
+  favicon. `tools/verify-backdrop.py` guards the decoded plates; `DesignTokensTest` gains a backdrop case
+  (utility shape, shell hook, per-theme resolution, no mask, no opacity).
 
 - **2026-11-16** — BO-004 erratum: dark `--color-risk` moved `#FF4400` → `#FF6F3B` so risk ink clears
   WCAG AA 4.5:1 on all three surfaces it is set on (raised 3.66→4.57, panel 4.16→5.19, page

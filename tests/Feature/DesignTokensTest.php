@@ -338,6 +338,52 @@ it('declares the ratified radius scale and the overlay shadow in the static them
 });
 
 /**
+ * The decorative identity backdrop (2026-11-19, DESIGN.md §2.1).
+ *
+ * Three things can silently break it, and each has already broken it once:
+ *
+ * 1. The utility must paint the page fill, because the Inertia shell's root element used to
+ *    re-paint `--color-page` opaquely above `body`, which made the whole slice inert in the app
+ *    while the error blades (no such wrapper) still showed it.
+ * 2. Light and dark must each resolve an `image-set`, and eva01 must resolve `none`: the light
+ *    plate is wrong against the eva01 purple, so that theme is deliberately flat.
+ * 3. No `mask` may return. A mask on `body` clips every descendant, so text inside the shell is
+ *    faded with the art: measured, the dark rail labels fell to 1.05:1. The plate carries its own
+ *    contrast instead (see tools/verify-backdrop.py), which is why there is nothing to mask.
+ */
+it('paints the identity backdrop from one body utility and keeps it unmasked', function (): void {
+    $css = (string) file_get_contents(base_path('resources/css/app.css'));
+    $shell = (string) file_get_contents(base_path('resources/views/app.blade.php'));
+    $layout = (string) file_get_contents(base_path('resources/js/layouts/AppLayout.vue'));
+
+    // One hook: the Blade body, which every entry document shares.
+    expect($shell)->toContain('app-backdrop');
+
+    // The plate is the page fill, and the shell wrapper must not re-paint over it.
+    $utility = substr($css, (int) strpos($css, '@utility app-backdrop'));
+    $utility = substr($utility, 0, (int) strpos($utility, '}'));
+    expect($utility)
+        ->toContain('background-color: var(--color-page)')
+        ->toContain('background-image: var(--backdrop-image)')
+        ->not->toContain('mask-image')
+        ->not->toContain('opacity:');
+
+    // The shell root: `text-ink` stays, an opaque `bg-page` would hide the art again.
+    expect($layout)->toContain('flex min-h-screen text-ink');
+
+    // Per-theme resolution: three plates, one per theme. eva01 used to opt out (`none`); the
+    // 2026-11-19 Unit-01 commission gave it its own plate, so the opt-out is gone.
+    preg_match_all('/--backdrop-image:\s*([^;]+);/', $css, $matches);
+    $resolved = array_map(static fn (string $value): string => trim($value), $matches[1]);
+
+    expect($resolved)->toHaveCount(3);
+    expect(implode(' ', $resolved))->toContain('backdrop-daybreak-1920.webp');
+    expect(implode(' ', $resolved))->toContain('backdrop-midnight-1920.webp');
+    expect(implode(' ', $resolved))->toContain('backdrop-eva01-1920.webp');
+    expect($resolved)->not->toContain('none');
+});
+
+/**
  * Every `--color-*` token the static theme block declares, read from the stylesheet
  * rather than remembered by hand.
  *
@@ -439,6 +485,11 @@ function g18ContractPairs(): array
 
         // Fills with their own ink, the pair each one exists for.
         'ink on green-tint' => ['foreground' => 'ink', 'background' => 'green-tint', 'type' => 'text'],
+        // 2026-11-19: StatusPill's soft tier is `bg-green-tint text-green-deep`, so the pair that
+        // actually prints on that fill is green-deep, not ink. eva01 measured 3.49:1 here while the
+        // list carried only the `ink` row (6.41:1) and reported a pass on a pill nobody can read.
+        // The token was stepped to #254A29 and this row is what keeps it honest.
+        'green-deep on green-tint' => ['foreground' => 'green-deep', 'background' => 'green-tint', 'type' => 'text'],
         'ink-strong on raised' => ['foreground' => 'ink-strong', 'background' => 'raised', 'type' => 'text'],
         'on-chrome on chrome' => ['foreground' => 'on-chrome', 'background' => 'chrome', 'type' => 'text'],
         'on-pick on pick' => ['foreground' => 'on-pick', 'background' => 'pick', 'type' => 'text'],
@@ -715,12 +766,12 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
         $pairs = g18ContractPairs();
         $badges = g18GradeBadgeTokens();
 
-        expect($pairs)->toHaveCount(48)
+        expect($pairs)->toHaveCount(49)
             ->and($badges)->toHaveCount(9)
             ->and(array_keys($pairs))->toBe([
                 'ink on panel', 'ink on raised', 'ink-muted on sunken', 'ink-muted on raised', 'ink-muted on panel',
                 'ink on tint-speed', 'ink on tint-stamina', 'ink on tint-power', 'ink on tint-guts', 'ink on tint-wit',
-                'ink on tint-sp', 'ink on green-tint', 'ink-strong on raised', 'on-chrome on chrome',
+                'ink on tint-sp', 'ink on green-tint', 'green-deep on green-tint', 'ink-strong on raised', 'on-chrome on chrome',
                 'on-pick on pick', 'on-pick on green', 'on-risk on risk', 'up on panel', 'down on raised',
                 'goal on raised', 'goal-line on raised', 'green-deep on sunken', 'rule on page',
                 'pick-line on raised',
@@ -767,12 +818,9 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
             ));
 
             foreach ($pairs as $label => $pair) {
-                // Owner-accepted exception: eva01's given rule #65508E measures 2.70:1 on the
-                // given page #1A1025. The value is shipped exactly as requested, so this single
-                // boundary row is not asserted for that theme; the other 40 pairs still bind.
-                if ($theme === 'eva01' && $label === 'rule on page') {
-                    continue;
-                }
+                // 2026-11-19: the eva01 exemption that stood here (given `rule` #65508E at
+                // 2.70:1 on the given page #1A1025) is retired with the purple-dominant ramp.
+                // `rule` #8280AA on page #1B1B22 measures 4.63:1, so the row binds like any other.
 
                 $ratio = contrastRatio($colors[$pair['foreground']], $colors[$pair['background']]);
 
@@ -971,17 +1019,14 @@ describe('browser contrast and token resolution (D-288, G-18)', function (): voi
             $surfaceStep = contrastRatio($panel, $pageColor);
             $boundaryStep = contrastRatio($rule, $pageColor);
 
-            // The boundary, which is the part WCAG 1.4.11 asks about. eva01 is exempt by the
-            // owner's acceptance of the given rule (see `contrastThemes()`); its surface step
-            // still binds below.
-            if ($theme !== 'eva01') {
-                expect($boundaryStep)->toBeGreaterThanOrEqual(3.0, sprintf(
-                    '%s theme: the card boundary (--color-rule on --color-page) measures %.2f:1, under the 3:1'
-                    .' WCAG 1.4.11 needs for the visual information identifying the component.',
-                    $theme,
-                    $boundaryStep,
-                ));
-            }
+            // The boundary, which is the part WCAG 1.4.11 asks about. Every theme binds since
+            // 2026-11-19: eva01's old exemption (given `rule` at 2.70:1) died with the ramp change.
+            expect($boundaryStep)->toBeGreaterThanOrEqual(3.0, sprintf(
+                '%s theme: the card boundary (--color-rule on --color-page) measures %.2f:1, under the 3:1'
+                .' WCAG 1.4.11 needs for the visual information identifying the component.',
+                $theme,
+                $boundaryStep,
+            ));
 
             // The surface step, floored per theme at what each ramp was widened to.
             $floor = $theme === 'dark' ? 1.25 : 1.05;

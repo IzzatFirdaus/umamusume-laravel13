@@ -7,7 +7,7 @@ import { test, expect } from '@playwright/test';
  * The wireframe is the visual authority for this rewrite (owner ruling 2026-10-26), so what this
  * case pins is the wireframe's own shell rather than the earlier 2.1.0 bar:
  *
- *   1. The bar is the wireframe's blue chrome (#2255FF in light), closed by its 2px pink hairline.
+ *   1. The bar is the wireframe's blue chrome (#2455C9 in light), closed by its 2px pink hairline.
  *   2. It carries the section crumb on the left and the two utilities on the right: the live-career
  *      pill (`1 active career` / `N active careers`) and the `? Help` link.
  *   3. The wireframe's `+ Static wireframe` chip is a document artifact and does not ship.
@@ -17,7 +17,7 @@ import { test, expect } from '@playwright/test';
  */
 
 const BAR = '[data-shell-topbar]';
-const BLUE = 'rgb(34, 85, 255)'; // --color-brand-chrome, light theme
+const BLUE = 'rgb(36, 85, 201)'; // --color-brand-chrome, light theme (Azure Daybreak 2026-11-19)
 
 async function ready(page: import('@playwright/test').Page): Promise<void> {
     await page.goto('/', { waitUntil: 'domcontentloaded' });

@@ -133,7 +133,7 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                         :aria-valuemax="totalCount"
                     >
                         <div
-                            class="h-full rounded-full bg-brand-chrome transition-[width] duration-150 ease-out motion-reduce:transition-none"
+                            class="h-full rounded-full bg-green transition-[width] duration-150 ease-out motion-reduce:transition-none"
                             :style="{ width: `${progressPercent}%` }"
                         />
                     </div>

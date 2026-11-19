@@ -5,6 +5,8 @@ import Flash from '../components/ui/Flash.vue';
 import NavGlyph from '../components/NavGlyph.vue';
 import VisitProgressBar from '../components/VisitProgressBar.vue';
 import { useLayout } from '../composables/useLayout';
+import appLogo from '../../img/app-logo-44.webp';
+import appLogo2x from '../../img/app-logo-88.webp';
 
 const page = usePage();
 
@@ -291,7 +293,8 @@ function toggleRail(): void {
 // One brand accent on the surface: the header blue carries the active nav item, so the rail reads
 // as the same family as the chrome above it instead of adding a second hue beside it. The mobile
 // bar keeps this fill; the rail's current row uses the HFW's chrome tint plus an inset rule.
-const activeClass = 'bg-brand-chrome/10 font-semibold text-brand-chrome';
+// Same split as the rail: green marks the selected destination, so the mobile bar matches.
+const activeClass = 'bg-green/18 font-semibold text-ink-strong';
 
 /*
  * The rail's geometry copies the HFW's rail block (docs/design-research/frontend-v2-wireframes/
@@ -307,8 +310,6 @@ const railHeadClass = 'flex items-center gap-2 px-2.5 pb-2 pt-3';
 const railHeadCollapsedClass = 'flex flex-col items-center gap-0.5 px-0 pb-1.5 pt-2.5';
 const railBrandClass = 'flex min-w-0 flex-1 items-center gap-[9px]';
 const railBrandCollapsedClass = 'flex flex-none items-center justify-center';
-const railMarkClass =
-    'grid size-5.5 shrink-0 place-items-center rounded-sm bg-brand-chrome text-[11px] font-black text-on-brand-chrome';
 const railWordClass = 'overflow-hidden whitespace-nowrap text-xs font-black leading-normal tracking-widest text-ink-strong';
 const railGroupClass =
     'px-[31px] pb-[5px] pt-3 text-[10px] font-extrabold uppercase tracking-[0.13em] text-ink-muted';
@@ -317,10 +318,13 @@ const railItemClass =
 const railItemCollapsedClass =
     'relative mx-1 my-px flex min-h-11 items-center justify-center gap-2.5 rounded-sm px-0 text-[13.5px]';
 const railItemIdleClass = 'font-medium text-ink hover:bg-sunken';
-const railItemCurrentClass = 'bg-brand-chrome/10 font-extrabold text-ink-strong';
+// The current item's tint is green, not brand-chrome: the owner's EVA-01 rule is that green marks
+// selection while purple carries identity, and a green/18 tint over the sidebar measures 12.98:1
+// for white ink and 6.74:1 for muted, so the marker strengthens without touching text contrast.
+const railItemCurrentClass = 'bg-green/18 font-extrabold text-ink-strong';
 const railItemDisabledClass = 'cursor-not-allowed font-medium text-ink-muted';
 const railDotClass = 'size-1.5 flex-none rounded-full';
-const railCurrentRuleClass = 'absolute -left-1 inset-y-2 w-[3px] rounded-r-[3px] bg-brand-chrome';
+const railCurrentRuleClass = 'absolute -left-1 inset-y-2 w-[3px] rounded-r-[3px] bg-status-positive';
 const railGlyphClass = 'size-4.5';
 const railFootClass =
     'mt-auto flex min-h-11 items-center border-t border-rule-soft text-xs leading-normal text-ink-muted underline';
@@ -351,7 +355,13 @@ const moreIsCurrent = computed(() =>
 </script>
 
 <template>
-    <div class="flex min-h-screen bg-page text-ink" :data-layout="mode">
+    <!--
+        No `bg-page` here: `body` already carries `app-backdrop`, which paints `--color-page` and the
+        decorative plate. A second opaque page fill on this wrapper would hide the plate entirely in
+        the app shell (the error blades never had one, so they showed it), which is how the first cut
+        of the backdrop shipped inert. One surface, one fill.
+    -->
+    <div class="flex min-h-screen text-ink" :data-layout="mode">
         <!-- The visit progress indicator (KI-63's replacement) teleports its element to <body>, so
              every shell that renders through this layout carries it and no page imports it. -->
         <VisitProgressBar />
@@ -375,7 +385,16 @@ const moreIsCurrent = computed(() =>
                  the word moves to `sr-only` (WCAG 2.5.3 and 1.3.1). -->
             <div :class="railCollapsed ? railHeadCollapsedClass : railHeadClass">
                 <span :class="railCollapsed ? railBrandCollapsedClass : railBrandClass">
-                    <span aria-hidden="true" :class="railMarkClass" data-rail-mark>TD</span>
+                    <img
+                        :src="appLogo"
+                        :srcset="`${appLogo} 1x, ${appLogo2x} 2x`"
+                        alt=""
+                        class="size-5.5 shrink-0 object-contain"
+                        data-rail-mark
+                        aria-hidden="true"
+                        width="22"
+                        height="22"
+                    />
                     <span :class="[railWordClass, railCollapsed ? 'sr-only' : '']">TRAINER DESK</span>
                 </span>
                 <button
@@ -420,7 +439,7 @@ const moreIsCurrent = computed(() =>
                                     v-if="!railCollapsed"
                                     aria-hidden="true"
                                     data-rail-dot
-                                    :class="[railDotClass, isCurrent(item.to as string) ? 'bg-brand-chrome' : 'bg-ink-faint']"
+                                    :class="[railDotClass, isCurrent(item.to as string) ? 'bg-status-positive' : 'bg-ink-faint']"
                                 />
                                 <NavGlyph v-if="railCollapsed" :name="item.icon" class="size-4.5" />
                                 <span :class="railCollapsed ? 'sr-only' : ''">{{ item.label }}</span>
@@ -444,7 +463,7 @@ const moreIsCurrent = computed(() =>
                                     v-if="!railCollapsed"
                                     aria-hidden="true"
                                     data-rail-dot
-                                    :class="[railDotClass, isCurrent(item.to) ? 'bg-brand-chrome' : 'bg-ink-faint']"
+                                    :class="[railDotClass, isCurrent(item.to) ? 'bg-status-positive' : 'bg-ink-faint']"
                                 />
                                 <NavGlyph v-if="railCollapsed" :name="item.icon" class="size-4.5" />
                                 <span :class="railCollapsed ? 'sr-only' : ''">{{ item.label }}</span>

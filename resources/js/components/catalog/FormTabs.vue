@@ -39,7 +39,7 @@ function href(id: number): string {
                 class="inline-flex min-h-11 items-center rounded-full border px-3 text-sm"
                 :class="
                     card.id === activeCardId
-                        ? 'border-pick-line bg-sunken font-semibold text-ink-strong'
+                        ? 'border-green-line bg-sunken font-semibold text-ink-strong'
                         : 'border-rule bg-panel font-normal text-ink hover:border-green-line'
                 "
             >

@@ -531,8 +531,16 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                             <div class="min-w-0">
                                 <div class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Review queue</div>
                                 <div class="text-sm font-extrabold leading-[1.3] text-ink-strong">
+                                    <!-- 2026-11-19 (Unit-01 identity): pending review is the exact job the
+                                         owner's spec gives Warning Orange ("review queue counts, pending
+                                         review indicators"). `--color-status-caution` is a FILL token
+                                         paired with `--color-status-caution-ink`, so the count rides a
+                                         chip rather than being coloured as text; that keeps the pair
+                                         the G-18 contract already measures in every theme. -->
                                     <template v-if="props.needsYou.reviewPending > 0">
-                                        {{ group(props.needsYou.reviewPending) }} pending {{ props.needsYou.reviewPending === 1 ? 'match' : 'matches' }}
+                                        <span class="inline-flex items-center gap-1.5">
+                                            <span class="rounded-sm bg-status-caution px-1.5 py-0.5 leading-none text-status-caution-ink" data-review-count>{{ group(props.needsYou.reviewPending) }}</span> pending {{ props.needsYou.reviewPending === 1 ? 'match' : 'matches' }}
+                                        </span>
                                     </template>
                                     <!-- index.html:126 prints the bare instruction. With nothing waiting the
                                          instruction is still the door's own words, and the count beside it
@@ -565,7 +573,17 @@ const veteransShown = computed<number>(() => props.recentVeterans.rows.length);
                 <section class="card" aria-labelledby="kpi-careers-heading" data-card="kpi_careers">
                     <h2 id="kpi-careers-heading" class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Careers running</h2>
                     <p class="text-kpi font-extrabold leading-[1.2] text-ink-strong">{{ group(props.counts.careersRunning) }}</p>
-                    <p class="text-xs text-ink-muted">
+                    <!-- 2026-11-19 (Unit-01 identity): the live-status line is a status, so it takes
+                         the green role rather than the muted tier. The owner's spec names "active
+                         counters and live-status indicators" for green, and this is the dashboard's
+                         one live counter; the dot makes it read as a signal at a glance. -->
+                    <p class="flex items-center gap-1.5 text-xs text-ink-muted">
+                        <span
+                            v-if="props.counts.careersRunning > 0"
+                            aria-hidden="true"
+                            class="size-1.5 flex-none rounded-full bg-status-positive"
+                            data-live-dot
+                        />
                         <span v-if="props.activeCareerCount > 1">{{ props.activeCareerCount }} live careers</span>
                         <span v-else-if="props.activeCareer">{{ props.activeCareer.trainee }} &middot; {{ props.activeCareer.scenario_label }}</span>
                         <span v-else>No career is running.</span>

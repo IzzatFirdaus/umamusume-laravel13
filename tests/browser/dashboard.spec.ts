@@ -22,7 +22,7 @@ import { recordTurns } from '../utils/record-turns';
  *     key are document artifacts, not screens.
  */
 
-const BLUE = 'rgb(34, 85, 255)'; // --color-brand-chrome #2255FF (light)
+const BLUE = 'rgb(36, 85, 201)'; // --color-brand-chrome #2455C9 (light, Azure Daybreak 2026-11-19)
 
 async function ready(page: import('@playwright/test').Page): Promise<void> {
     await page.goto('/', { waitUntil: 'domcontentloaded' });

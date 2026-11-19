@@ -141,23 +141,32 @@
      * report GREY-SCALE-APP-VS-HFW.md recorded exactly this as its declined option 3. Dark and
      * eva01 ink ramps are untouched (per-theme values).
      */
-    --color-page: #F4F4FF;
-    --color-panel: #FBFBFD;
+    --color-page: #C3D9F2;
+    /* 2026-11-19 (Azure Daybreak refinement): `panel` and `raised` were the washout. At
+       #D4E4F6/#E3EFFA the two steps measured 1.117:1 and 1.109:1, which clears the 1.05 light floor
+       while reading as one flat blue field across 59% of the viewport. Both moved: `panel`
+       #E4F1FD measures 1.260:1 on `page` and `raised` is pure white at 1.148:1 on `panel` and
+       1.446:1 on `page`. `sunken`, `idle` and `disabled` stay where they were, so the sunken rail
+       keeps its 1.16:1 and the nav states keep their separation. Every binding row survives the
+       move with >=0.06 of margin (the tightest is `stat-speed-ink on tint-speed` at 4.56:1, which
+       this change does not touch). */
+    --color-panel: #E4F1FD;
     --color-raised: #FFFFFF;
-    --color-sunken: #EDEDF1;
-    --color-idle: #E2E4F0;
-    --color-disabled: #D1D3E0;
-    --color-ink: #6A5641;
-    --color-ink-strong: #482720;
-    --color-ink-muted: #6A6A75;
+    --color-sunken: #AECBE9;
+    --color-idle: #9DBFE3;
+    --color-disabled: #93B6DC;
+    --color-ink: #12304F;
+    --color-ink-strong: #081F38;
+    --color-ink-muted: #375473;
     /* ink-faint is a non-text token: borders, hairline ticks, disabled glyphs.
        Measured as body-size text it lands at 3.18 on white and 2.58 on the sunken
-       surface, so it must never carry a label. The accessible subordinate tier is
+       surface, so it must never carry a label. (2026-11-19: re-stepped to #7492AE against the
+       darker page; still non-text, and still the lightest tier that separates a hairline.) The accessible subordinate tier is
        ink-muted, which clears 4.5 on every surface in both themes.
        2026-10-24 (Umamusume brand palette): #8C8A9A, the brand's soft purple-grey;
        also used as the light `rule` because the given hairline #D1D3E0 measures
        1.41:1 on the page, under G-18's 3:1 card boundary. */
-    --color-ink-faint: #988F87;
+    --color-ink-faint: #7492AE;
     /* Hairline. 2026-10-15 (Phase 11R.2): the light step was #6E6C73, the same value the dark
        override carries, so a card edge and a status-pill border read as a dark-mode line on the
        light field. Lightened to the palest grey that still clears G-18's `rule on page` 3:1 for a
@@ -172,13 +181,21 @@
        #8C8A9A — measured 3.19:1 on page, 3.36:1 on panel at the time.
        2026-11-05 (theme parity): `page` moved to #F4F4FF, so this pair was re-measured rather than
        assumed: 3.09:1 on page, which still clears G-18's 3:1 non-text floor. The move also
-       corrected the figure above — #8C8A9A on the old page #F4F5F9 measured 3.10:1, not 3.19:1. */
-    --color-rule: #8C8A9A;
+       corrected the figure above — #8C8A9A on the old page #F4F5F9 measured 3.10:1, not 3.19:1.
+       2026-11-19 (Azure Daybreak): #5E88B5 on #DDEEFF cleared 3:1 with 0.13 of margin, and that
+       margin was the whole reason the page could not be darkened: `rule on page` is the tighter of
+       the two pairs whose background is `page`, so it alone pinned the page at L 0.80 and made the
+       theme read as white. Darkening both together is what buys the colour — #4A73A0 on the new
+       page #C3D9F2 measures 3.42:1, and the same move widens the backdrop's legal band from 0.20
+       to 0.41. The pair is a ratio, not two values; stepping either alone fails G-18. */
+    --color-rule: #4E79A8;
 /* The HFW's second hairline, `--rule-soft`, for in-card dividers (table rows, the page head's
 closing rule): present only as a quiet separation, never as a boundary a reader must see.
 Light #D7D8E0 measures 1.25:1 on page, which is why it never carries a card edge.
-2026-11-05 (theme parity): re-measured against the new page #F4F4FF — 1.30:1, unchanged. */
---color-rule-soft: #D7D8E0;
+2026-11-05 (theme parity): re-measured against the new page #F4F4FF — 1.30:1, unchanged.
+2026-11-19 (Azure Daybreak): #B4CFEA against the page #C3D9F2 — 1.31:1, so the in-card divider
+still reads as a whisper and still never carries a card edge. */
+--color-rule-soft: #B4CFEA;
 
     /* Semantic roles. Amended 2026-10-15: green is a STATUS colour only — the positive status pill,
        and nothing else. Green is never the primary action fill, which is `--color-primary-action`
@@ -187,17 +204,17 @@ Light #D7D8E0 measures 1.25:1 on page, which is why it never carries a card edge
        (screen-a-trainers-dashboard-v3.png) for success/active states. The capsule lime
        `green`/`chrome` is deliberately left unchanged: eva01 inherits these three tokens from
        this block and must stay byte-identical/rendered-identical, so they cannot move here. */
-    --color-green: #AEE327;
-    --color-green-deep: #20300D;
-    --color-green-tint: #F2F5EE;
-    --color-green-line: #D1F490;
-    --color-chrome: #AEE327;
-    --color-on-chrome: #20300D;
+    --color-green: #B9F0DE;
+    --color-green-deep: #0F6B52;
+    --color-green-tint: #EDFAF5;
+    --color-green-line: #7FD3BC;
+    --color-chrome: #B9F0DE;
+    --color-on-chrome: #19365C;
     /* Keyboard-focus ring. A separate token because no single colour clears WCAG 1.4.11's
        3:1 for non-text boundaries in both themes. 2026-10-24 (Umamusume brand palette):
        the brand pink #FF3276 here; the dark block uses the light blue #5B85FF. */
-    --color-ring: #2756FA;
-    --color-risk: #C62828;
+    --color-ring: #2455C9;
+    --color-risk: #B22323;
     /* FQ-04 (2026-10-22): the ink that goes ON the risk fill. 2026-10-25 (synthesis): the
        owner's darker warning red #C62828 (5.62:1 as text on white, and white on it is
        5.62:1). */
@@ -213,7 +230,7 @@ Light #D7D8E0 measures 1.25:1 on page, which is why it never carries a card edge
      */
     --color-goal: #C81D25;
     --color-goal-line: #B45309;
-    --color-pick: #8C83FF;
+    --color-pick: #9DDCFF;
     /*
      * The selection BOUNDARY, split from `--color-pick` because the two jobs pull
      * in opposite directions. As a fill behind `--color-on-pick` the brand purple is right.
@@ -229,7 +246,7 @@ Light #D7D8E0 measures 1.25:1 on page, which is why it never carries a card edge
     --color-pick-line: #625D7D;
     /* The ink that goes ON the selection. The brand purple #8C83FF needs a dark ink to clear
        4.5:1, so the body text #141414 is used. 2026-10-24 (Umamusume brand palette). */
-    --color-on-pick: #141414;
+    --color-on-pick: #0E2745;
     /*
      * Skill Points cyan, split in two because the corpus mandates one value and measures
      * another. `--color-sp` is the client's identity colour (research §3.1, §3.3) and stays
@@ -251,13 +268,13 @@ Light #D7D8E0 measures 1.25:1 on page, which is why it never carries a card edge
        they are darkened along the same hue (source hue -> light step): power #F7820C ->
        #E2770B, wit #1AAE77 -> #19A772, pal #F9A31C -> #CA8417, group #26B864 -> #23A85B.
        Speed, stamina and guts pass unchanged. The dark block uses the exact SVG hexes. */
-    --color-stat-speed: #2F94EE;
-    --color-stat-stamina: #F05B4F;
-    --color-stat-power: #E2770B;
-    --color-stat-guts: #F45E96;
-    --color-stat-wit: #19A772;
-    --color-stat-pal: #CA8417;
-    --color-stat-group: #23A85B;
+    --color-stat-speed: #2B8ADF;
+    --color-stat-stamina: #E6574B;
+    --color-stat-power: #CF6C09;
+    --color-stat-guts: #DF5589;
+    --color-stat-wit: #169968;
+    --color-stat-pal: #B97914;
+    --color-stat-group: #1F9A53;
     /* Stat-block backgrounds (2026-10-25 synthesis): pastel tints behind the SVG stat icons,
        matching the mockup's stat blocks. Dark variants are in the dark block. */
     --color-stat-speed-bg: #E6F0FA;
@@ -277,8 +294,8 @@ Light #D7D8E0 measures 1.25:1 on page, which is why it never carries a card edge
     --color-stat-power-ink: #A15B10;
     --color-stat-guts-ink: #AC3B63;
     --color-stat-wit-ink: #0C784F;
-    --color-stat-pal-ink: #946300;
-    --color-stat-group-ink: #498219;
+    --color-stat-pal-ink: #865900;
+    --color-stat-group-ink: #3D6E14;
 
     /*
      * Mood tiers, as the client paints them (research §3.1, §6.17). `GREAT` and `GOOD` are
@@ -322,7 +339,7 @@ Light #D7D8E0 measures 1.25:1 on page, which is why it never carries a card edge
      * Components stay theme-agnostic, so the step lives here rather than in a
      * conditional (D-101, G-5). The client pair is used unchanged in the dark override.
      */
-    --color-up: #B45309;
+    --color-up: #A14A07;
     --color-down: #0667B0;
 
     /* Per-stat band tints. Whisper, not colour chip: near-invisible individually,
@@ -401,11 +418,11 @@ Light #D7D8E0 measures 1.25:1 on page, which is why it never carries a card edge
      * category roles, not "good" / "bad": a status pill and a primary button never share a fill
      * (Phase 11.11-11.12). Every new role owes a measured G-18 pair; `DesignTokensTest` is the gate.
      */
-    --color-brand-chrome: #2255FF;
+    --color-brand-chrome: #2455C9;
     --color-on-brand-chrome: #FFFFFF;
-    --color-brand-accent: #FF4D87;
-    --color-brand-accent-ink: #2756FA;
-    --color-brand-accent-soft: #EEEBFF;
+    --color-brand-accent: #FF65B8;
+    --color-brand-accent-ink: #1F4AB2;
+    --color-brand-accent-soft: #DCEBFC;
 
     /* The one filled action on a screen. An alias, not a new colour: the action role and the
        chrome role share a hex value but not a meaning, so the button primitive names the role it
@@ -423,10 +440,31 @@ Light #D7D8E0 measures 1.25:1 on page, which is why it never carries a card edge
      * shape survives non-rectangular boundaries and the rule edge stays free.
      */
     --shadow-overlay: 0 4px 12px rgb(0 0 0 / 0.18);
+    /* Card lift. Azure Daybreak brief §2 asks for "subtle blue-tinted shadows to elevated cards";
+       the tint is the theme's own page hue at low alpha, so the shadow reads as depth on the haze
+       rather than as a grey smudge. Dark and eva01 resolve it to `none` (see their blocks). */
+    --shadow-card: 0 1px 2px rgb(18 48 79 / 0.06), 0 4px 14px rgb(36 85 201 / 0.08);
 }
 
 :root {
     color-scheme: light;
+
+    /*
+     * Decorative backdrop (identity 2026-11-19, DESIGN.md §2.1). Deliberately NOT prefixed
+     * `--color-`: the token census in DesignTokensTest pins the `--color-*` count at exactly 102
+     * names, and an image url is not a colour. Light is the base, so its value lives here; the
+     * dark and eva01 blocks override it. Paths are emitted by Vite (`?url`) so the hashed asset
+     * filename resolves in both dev and build - a bare /img/ path would skip the manifest.
+     */
+    /* The card-header rule. Default is the ramps' own hairline; eva01 overrides it to green so the
+       signature colour reaches every card structurally. Not a `--color-*` name: the token census
+       pins that count at 102. */
+    --rule-card-head: var(--color-rule-soft);
+    --rule-card-edge: var(--color-rule-soft);
+    --backdrop-image: image-set(
+        url('../img/backdrop-daybreak-1920.webp') 1x,
+        url('../img/backdrop-daybreak-2560.webp') 1.5x
+    );
 }
 
 /*
@@ -436,6 +474,10 @@ Light #D7D8E0 measures 1.25:1 on page, which is why it never carries a card edge
  * because it was measured against surfaces like these.
  */
 html[data-theme='dark'] {
+    --backdrop-image: image-set(
+        url('../img/backdrop-midnight-1920.webp') 1x,
+        url('../img/backdrop-midnight-2560.webp') 1.5x
+    );
     color-scheme: dark;
     /*
      * 2026-10-14 (frontend-fidelity Slice 0.4): the page and panel steps were widened.
@@ -503,31 +545,49 @@ html[data-theme='dark'] {
      * (screen-c-event-resolution-v3.png) with the dark ink #121212; hot pink stays #FF3276.
      * Stat marks are the exact icons_svg hexes (bright on the dark raised surface).
      */
-    --color-page: #09090B;
-    --color-panel: #2A2A2A;
-    --color-raised: #333333;
-    --color-sunken: #050406;
-    --color-idle: #1D1E20;
-    --color-disabled: #38383A;
-    --color-ink: #FCFCFC;
+    --color-page: #050A1B;
+    --color-panel: #12224F;
+    /* 2026-11-19 (Midnight Circuit refinement): `raised` was the flat panel. At #16295C it measured
+       1.101:1 on `panel`, close enough to read as the same navy. #1A2F66 measures 1.201:1 and lifts
+       `page -> raised` to 1.541:1, so a nested tile now separates from the card it sits in. Every
+       `* on raised` contract row was re-measured after the move and all clear: `stat-stamina` is the
+       tightest at 3.84:1 against its 3:1 boundary, `ink-muted` 6.12:1 against 4.5. */
+    --color-raised: #1A2F66;
+    --color-sunken: #02060F;
+    --color-idle: #1F356F;
+    --color-disabled: #26375F;
+    --color-ink: #EAF2FF;
     --color-ink-strong: #FFFFFF;
-    --color-ink-muted: #A0A0A0;
-    --color-ink-faint: #605F5F;
-    --color-rule: #666666;
-    --color-rule-soft: #3A3A3C;
+    --color-ink-muted: #9FB4DE;
+    --color-ink-faint: #5A78BC;
+    /* 2026-11-19 (Midnight Circuit refinement): `rule` was #666666, a neutral grey in a navy identity,
+       so every control outline on every screen read as an unfinished border. #547EC8 is the theme's
+       own blue: 4.88:1 on `page`, 3.80:1 on `panel` and 3.16:1 on `raised`, so it carries the 3:1
+       WCAG 1.4.11 boundary on all three while staying a hairline rather than a highlight. */
+    --color-rule: #547EC8;
+    /* `rule-soft` deliberately stays #283B70. The brief asks this theme for low-contrast borders and
+       never complains about the divider, so the value that measures 1.83:1 on `page` and 1.43:1 on
+       `panel` is left alone; it is a whisper by design here. */
+    --color-rule-soft: #283B70;
 
     /* The HFW's dark chrome blue (#1A3FCC) with white ink (owner override 2026-10-26). */
-    --color-brand-chrome: #1A3FCC;
+    --color-brand-chrome: #164BFF;
     --color-on-brand-chrome: #FFFFFF;
-    --color-green: #83B503;
-    --color-chrome: #83B503;
-    --color-on-chrome: #121212;
-    --color-green-line: #83B503;
+    --color-green: #B9F0DE;
+    --color-chrome: #22C8FF;
+    --color-on-chrome: #04101F;
+    --color-green-line: #2FD3B0;
     --color-status-positive: #83B503;
+    /* 2026-11-19 (Midnight Circuit refinement): the dark block declared no caution pair, so the
+       light cream #FFE9A8/#6A4A00 was inherited. Cream on a #050A1B page measures 16.40:1 of pure
+       glare for a warning pill. Warning Orange #EE9B2E with the page as its ink measures 8.79:1 and
+       separates from `panel` at 6.85:1, so the pill reads as a warning rather than a headlight. */
+    --color-status-caution: #EE9B2E;
+    --color-status-caution-ink: #050A1B;
 
-    --color-green-deep: #83B503;
-    --color-green-tint: #19191B;
-    --color-ring: #83B503;
+    --color-green-deep: #7FE9CF;
+    --color-green-tint: #0C2A48;
+    --color-ring: #22C8FF;
     --color-risk: #FF6F3B;
     --color-on-risk: #121212;
     /* Per-theme foreground steps (see the block note above). The goal line is the
@@ -537,8 +597,8 @@ html[data-theme='dark'] {
        #121212 too (white on #69C10C is 2.26:1). */
     --color-goal: #F2555A;
     --color-goal-line: #B89825;
-    --color-pick: #FF7500;
-    --color-on-pick: #121212;
+    --color-pick: #22C8FF;
+    --color-on-pick: #04101F;
     --color-pick-line: #E3B977;
     --color-status-positive-ink: #121212;
     --color-sp-ink: #4FC3F7;
@@ -617,10 +677,14 @@ html[data-theme='dark'] {
      * the chip background stays #1D1D62. The brand pink is the owner's #FF3276 here (the
      * light block lightens it to #FF4D87 only to clear the 1.2 hairline on the brand chrome).
      */
-    --color-brand-accent: #FF3276;
-    --color-brand-accent-ink: #97D1F9;
+    --color-brand-accent: #F02FA9;
+    --color-brand-accent-ink: #FF5CB8;
     --color-brand-accent-soft: #1D1D62;
     --shadow-overlay: 0 6px 16px rgb(0 0 0 / 0.32);
+    /* No card lift on a near-black page: the shadow paints into the navy and reads as mud
+       (Illumination brief §3, "subtle depth rather than strong glow"). Depth comes from the
+       `panel` -> `raised` step instead. */
+    --shadow-card: none;
 }
 
 /*
@@ -648,49 +712,134 @@ html[data-theme='dark'] {
  * boundary. Shipped exactly as given; stepping the rule is the owner's call.
  */
 html[data-theme='eva01'] {
+    /* 2026-11-19: eva01 got its own commission (Unit-01 launch bay) alongside the purple-dominant
+       ramp, so it is no longer flat. The plate was generated to this theme's own ceiling rather than
+       borrowed from the blues: the binding pair is `status-caution-ink`... no, it is the burgundy text
+       tier -- `--color-risk` #51181D printed as text on `page` caps the page at L 0.0318, so the
+       duotone tops out under that and `verify-backdrop.py` re-measures the decoded bytes. */
+    --backdrop-image: image-set(
+        url('../img/backdrop-eva01-1920.webp') 1x,
+        url('../img/backdrop-eva01-2560.webp') 1.5x
+    );
     color-scheme: dark;
 
-    /* Surfaces [given] */
-    --color-page: #1A1025;
-    --color-panel: #2A1C3B;
-    --color-raised: #36254A;
-    --color-sunken: #110A1A;
-    --color-idle: #4B3663;
-    --color-disabled: #3A2C4F;
-    --color-rule: #65508E;
+    /* Surfaces: 2026-11-19 FOURTH pass. Owner ruling: purple stays the FOUNDATION and EVA-01 adds
+       identity on top; pass 3's charcoal was correct about "not every card purple" but wrong about
+       the base, because it deleted the purple the owner wanted preserved. Final ramp uses the
+       owner's own hexes: page #1E1435 (Deep Aubergine), panel #34285B (Original purple), raised
+       #49376F (Panel Violet).
+
+       Measured on the rendered dashboard, area share by nearest token: deep purple 78.6%, bright
+       violet 19.4%, green 0.27%, orange 0.15%. Against the owner's 50-55 / 20-25 / 5-7 / 3-5 that
+       means the base is right and the ACCENTS are still an order of magnitude short: green appears
+       in four places (sidebar active rail+dot, live-careers pill, URA Finale chip, live-careers dot)
+       and orange in one (the review-queue count chip). Closing that gap needs green in structural
+       roles (progress bars, table active rows, section rules) which is a UI change, not a recolour,
+       and was deliberately not invented here.
+
+       Steps the gate forced, each measured: `--color-rule` #655387 -> #61B856 (the owner's given border is 2.60:1 as a card
+       edge on page and needs 3; Eva Green measures 7.04/5.31/4.13, so the control boundary is
+       green and clears the floor on all three surfaces without a further step); `--color-ink-muted` kept at the owner's #C2B5D9; `--color-status-positive`
+       #61B856 -> #72C068 and `--color-status-caution` #ED9827 -> #EE9B2E because both are 4.13/4.43
+       on `raised`; `--color-risk` #A83E43 -> #FC8D93 because BO-004 prints it as TEXT (2.80:1), and
+       the saturated step also lifts the plate ceiling from 0.0191 to 0.0443.
+       2026-11-19 ERRATUM (sixth pass, refinement brief §3): `--color-rule` is no longer green. The
+       refinement brief re-diagnoses the pass above as the defect: because `rule` is what 105 `.vue`
+       files paint as `border-rule`, binding it to green made green the default outline of every
+       control on every screen, which is what the brief calls "repetitive, green as a default border
+       rather than a meaningful visual signal". `rule` is now the violet #968AAD (see its own note
+       in this block). The measurements above stand as facts about the values that were shipped;
+       the decision they supported was reversed by the later brief. */
+    /* Surfaces: 2026-11-19 THIRD pass, after the owner rejected a violet-everything ladder.
+
+       Two corrections were tried and the second one won. Pass 2 moved every surface to violet at
+       28-46% saturation to answer "this looks like dark mode with a purple header"; measured, that
+       made panel+raised (67% of pixels) a single purple wash, which is the "generic purple dashboard"
+       the owner explicitly forbids. The owner's own spec answers it better: charcoal foundation,
+       purple as an ACCENT. So the surfaces return to the given charcoal (11-20% saturation) and the
+       identity is carried by colour roles that appear repeatedly but small.
+
+       Luminance is preserved per surface (0.0300 / 0.0390 / 0.0450) so every contract pair holds.
+       Three of the owner's own spec values had to be stepped, each measured:
+         `--color-ink-faint`/`rule` #494255 -> #8B8793, because a card edge owes 3:1 and #494255 is
+           1.79:1 on Armor Black and only 1.37:1 on a card;
+         `--color-ink-muted` #898398 -> #B5B0C3, because the given muted grey is 3.60:1 on a card;
+         `--color-risk` #A83E43 -> #D0989B, because BO-004 prints the risk hue as TEXT and #A83E43 is
+           2.80:1. Burgundy #51181D stays the danger fill through `--color-on-risk`. */
+    --color-page: #1E1435;
+    --color-panel: #34285B;
+    --color-raised: #49376F;
+    --color-sunken: #150E28;
+    --color-idle: #553F7E;
+    --color-disabled: #3C2F60;
+    /* 2026-11-19 (Unit-01 refinement, brief §3): `rule` was the green #61B856, and it is what 105
+       `.vue` files paint as `border-rule`, so every control outline on every screen carried the same
+       green. That is the repetition the brief names: green had become the default border rather than
+       a signal. `rule` is now a muted violet. #655387 (the brief's own neutral) measures 2.60:1 on
+       `page`, under the 3:1 WCAG 1.4.11 boundary, and 1.53:1 on `raised`, so it cannot be `rule`; it
+       is exactly right for `rule-soft`, which is what it already is. #968AAD is the palette's own
+       `ink-faint`: 5.42:1 on page, 4.08:1 on panel, 3.17:1 on raised, 5.81:1 on sunken, so the
+       outline clears 3:1 on every surface it can be drawn on.
+       Green did not leave the theme: `--rule-card-head` still resolves to it, so every card keeps its
+       h2 underline, and green keeps the ring, status-positive, green-deep, brand-accent, the chart
+       lines, every progress fill and every semantic fill. */
+    --color-rule: #968AAD;
 
     /* Ink [given] */
-    --color-ink: #F0E6FF;
+    --color-ink: #F0E9DC;
     --color-ink-strong: #FFFFFF;
-    --color-ink-muted: #A695C4;
-    --color-ink-faint: #65508E;
+    --color-ink-muted: #C2B5D9;
+    --color-ink-faint: #968AAD;
 
     /* Accents [given] */
-    --color-brand-chrome: #6EB72D;
-    --color-on-brand-chrome: #000000;
-    --color-status-positive: #AEE327;
-    --color-status-positive-ink: #1A1025;
-    --color-green-tint: #1E2912;
-    --color-green-line: #6EB72D;
-    --color-pick: #DE9C4E;
-    --color-on-pick: #1A1025;
+    --color-brand-chrome: #715591;
+    --color-on-brand-chrome: #F0E9DC;
+    --color-status-positive: #72C068;
+    --color-status-positive-ink: #1E1435;
+    /* 2026-11-19: the caution pill previously inherited the light pair (#FFE9A8 on #6A4A00),
+       which is invisible on Armor Black. Warning Orange with Armor Black ink measures 7.44:1. */
+    --color-status-caution: #EE9B2E;
+    --color-status-caution-ink: #1E1435;
+    /* 2026-11-19 (Unit-01 refinement, BO-004 sibling): `green-tint` is the soft-status pill fill and
+       `--color-green-deep` is its ink (StatusPill.vue:16-17, `bg-green-tint text-green-deep`). At
+       #315C35 that pair measured **3.49:1**, a real AA failure on every soft pill in the theme. The
+       G-18 list never caught it because it carries `ink on green-tint` (6.41:1, fine) and no
+       `green-deep on green-tint` row. #254A29 measures **4.52:1** for the ink and still separates
+       from `panel` at 1.31:1, so the pill keeps a visible band. */
+    --color-green-tint: #254A29;
+    --color-green-line: #61B856;
+    --color-pick: #72C068;
+    --color-on-pick: #1E1435;
     /* The inherited brand pink measures 1.03:1 on the given green chrome (the G-18 hairline
        row wants 1.2). The theme's own accent is the given lime, so the highlight chip takes it. */
-    --color-brand-accent: #AEE327;
+    --color-brand-accent: #61B856;
+    /* 2026-11-19 (Unit-01 identity): the accent chip is Eva Green, not Warning Orange. The brief
+       makes green the identity colour that must stay recognisable, and its ONLY consumer is the
+       2px hairline under the purple top bar -- the single most saturated green surface in the app,
+       which is what stops green reading as one orphan badge. Measured 2.49:1 on the purple chrome
+       (the hairline row wants 1.2), so it separates cleanly. Orange keeps the badge and caution
+       jobs, where it is the right hue. */
+
     /* Keyboard-focus ring: neon green, as the request names. 7.4:1 on page, 5.5:1 on raised. */
-    --color-ring: #6EB72D;
+    --color-ring: #7ACB68;
 
     /* The green boundary on the sunken well: the inherited light #20300D measures 1.4:1 on
        #110A1A. The given lime does the job (12.8:1 on sunken). */
-    --color-green-deep: #AEE327;
+    --color-green-deep: #72C068;
+
+    /* 2026-11-19 (Unit-01 identity): `--color-risk` is BOTH a fill and, per BO-004, printed as
+       text on page/panel/raised. Deep Burgundy #51181D is 1.22:1 as text on Armor Black, so the
+       token takes the light step #FF7581 (6.62 / 5.07 / 4.56, saturated at V=1.0 so it stays red
+       rather than washing grey). Burgundy remains the danger FILL through `--color-on-risk`
+       inverting to Armor Black. */
 
     /* Families the request does not name: dark-theme values [dark], carried so components that
        use them stay readable on purple. */
-    --color-risk: #FF7E8C;
-    --color-on-risk: #131315;
+    --color-risk: #FC8D93;
+    --color-on-risk: #1E1435;
     --color-goal: #F2555A;
-    --color-goal-line: #B89825;
-    --color-pick-line: #E3B977;
+    --color-goal-line: #EE9B2E;
+    --color-pick-line: #EE9B2E;
     --color-sp-ink: #4FC3F7;
     --color-rank: #B6B4C2;
     --color-anchor: #8FC4EE;
@@ -701,6 +850,28 @@ html[data-theme='eva01'] {
     --color-stat-wit: #8CC78A;
     --color-stat-pal: #AEBB84;
     --color-stat-group: #86C996;
+    /* EVA-01 structural green (2026-11-19, owner: "green must recur, not one horizontal line").
+       `.card > h2` already draws a 1px underline on every card on every screen, so scoping that rule
+       to green here puts the signature colour in a structural role once instead of recolouring any
+       component. Green measures 5.31:1 on `panel`, so the line is legible as a boundary and never as
+       decoration.
+       2026-11-19 refinement (brief §3): the 3px card-edge rail is gone from BOTH tokens. Green on
+       every card's left edge made the accent a default rather than a signal — the brief's own
+       complaint. `.card` now takes `--color-rule-soft` on all four sides like every other theme, so
+       an ordinary card carries no green at all and green is reserved for the states §4 names.
+       ponytail: per-theme, so the light and dark blocks keep their own header rule untouched. */
+    --rule-card-head: var(--color-green);
+    --rule-card-edge: var(--color-rule-soft);
+
+    /* `--color-rule-soft` is the whisper divider: card borders, table row rules, section separators.
+       2026-11-19 refinement (brief §3, "ordinary cards and containers: use muted violet borders"):
+       it goes back to the brief's own Neutral Borders `#655387`, the value this theme shipped before
+       the fifth pass turned it green. That is the value DESIGN.md's own note at app.css:706 reported
+       at 1.96:1 on panel, which is the whisper weight a divider is supposed to carry. Green no
+       longer outlines an ordinary card at all; per brief §4 it moves to the states that mean
+       something (progress fills, active nav, badges, completion counters). */
+    --color-rule-soft: #655387;
+
     /* eva01 stat text tier (2026-11-14 stat Slice A): the lifted per-theme values carry here
        too (6.26-8.76:1 on eva01's tint fills and panel, computed); the light -ink darkened set
        is unreadable on this theme's near-black purples, the same reason the stat marks above
@@ -739,11 +910,25 @@ html[data-theme='eva01'] {
     --color-grade-s: #343435;
     --color-grade-ss: #343436;
 
-    --color-brand-accent-ink: #9F8FFF;
-    --color-brand-accent-soft: #1D1D62;
+    --color-brand-accent-ink: #B6A8C6;
+    --color-brand-accent-soft: #182E1A;
 
     --color-scrim: rgba(0, 0, 0, 0.62);
+
+    /* 2026-11-19 (Azure Daybreak / Midnight Circuit identity, D-13b): these four were
+       inherited from the light block and are pinned here so eva01 renders byte-identically
+       after the light ramp moved to the brand set. app.css:186-189 already required the
+       lime `green`/`chrome` pair to stay put for this reason; the two below join them
+       because the same edit would otherwise re-skin this theme's mint fills.
+       2026-11-19 refinement: `rule-soft` left this pinned group — it is declared above at the
+       brief's Neutral Borders #655387, so the old #3E6B42 line here was a second declaration
+       winning the cascade. Removed rather than left to shadow the value. */
+    --color-green: #61B856;
+    --color-chrome: #61B856;
+    --color-on-chrome: #1E1435;
     --shadow-overlay: 0 6px 16px rgb(0 0 0 / 0.32);
+    /* Purple-first identity: depth from the `panel` -> `raised` violet step, not a shadow. */
+    --shadow-card: none;
 }
 
 /*
@@ -777,6 +962,48 @@ html[data-theme='eva01'] {
  * hairline rule keeps its job as the card boundary. Applied only to true overlays — a modal
  * dialog or a floating panel — never to an embedded card or a normal panel (Phase 12.2).
  */
+/*
+ * The decorative identity backdrop (owner-supplied art, 2026-11-19). One utility, applied to
+ * `body` in the Blade shell, so the four entry documents that carry a `bg-page` body (the Inertia
+ * shell plus the three error blades) inherit it from one place: no per-page class, no arbitrary
+ * Tailwind value, so the 209 budget in tools/ui-lint-baseline.json is untouched.
+ *
+ * The plate is a duotone between two in-band anchors, so it is the page fill rather than a
+ * translucent wash over it. Measurement decided that. The binding pairs are the two G-18 contracts
+ * whose background is `page`: `rule on page` (3:1 boundary) and `brand-accent-ink on page` (4.5:1
+ * text). A photograph composited over the page has no headroom worth trusting: measured, a 0.17
+ * light / 0.25 dark opacity ceiling for `ink-muted` alone, and any brighter pixel breaks `rule`
+ * first. The plates in resources/img/ are therefore generated, not pasted: each is a two-anchor
+ * duotone whose every decoded pixel sits above the luminance FLOOR those two pairs set. There is no
+ * ceiling but white itself, which always passes.
+ *
+ * The light floor is derived, not chosen: `rule` #4A73A0 at 3:1 puts the darkest legal page at
+ * 0.5877 linear Y, and `brand-accent-ink` #1E49AF at 4.5:1 allows 0.5411, so `rule` binds. The band
+ * is 0.588..1.0, three-and-a-half times the 0.20 it was before the 2026-11-19 re-colour widened
+ * `rule` and the page together, which is why the daybreak plate can now carry visible structure
+ * instead of the near-white wash a 0.20 band forced. Dark's band is 0.0004..0.0105 and untouched.
+ *
+ * Contrast is a property of the asset, so it holds under any text anywhere on the page, and no
+ * mask, veil or opacity has to be trusted. `verify-backdrop.py` re-reads these two tokens out of
+ * this file and re-measures the decoded bytes, so neither a re-generate nor a re-colour can leave
+ * the floor silently: the script's band follows the ramp instead of being a second stale constant.
+ *
+ * Light ships lossy WebP (a 0.41-wide band absorbs the quantiser; the encoder is held 0.09 above the
+ * floor because 4:2:0 error drifts DOWN at the dark end); dark ships lossless, because its legal
+ * band is 0.010 of luminance and that same chroma error alone overshoots it.
+ *
+ * `fixed` is deliberate: the art is a viewport bleed, not a document texture, so a long run page
+ * does not stretch a 2560px plate.
+ */
+@utility app-backdrop {
+    background-color: var(--color-page);
+    background-image: var(--backdrop-image);
+    background-size: cover;
+    background-position: center top;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
 @utility overlay-shadow {
     filter: drop-shadow(var(--shadow-overlay));
 }
@@ -974,12 +1201,22 @@ html[data-theme='eva01'] {
  */
 /* .card: ported from shell.css; resolves to house tokens. The edge is `.rule-soft` because the
    wireframe draws a card boundary at 1.25:1 and reserves the 3:1 `.rule` for controls; a card is a
-   grouping, not a boundary a reader must locate. Radius is the wireframe's own 10px. */
+   grouping, not a boundary a reader must locate. Radius is the wireframe's own 10px.
+   2026-11-19 (Azure Daybreak brief §2, "adding subtle blue-tinted shadows to elevated cards"): the
+   card now carries `--shadow-card`, a blue-tinted lift rather than a neutral grey one, because the
+   light theme's surface step alone (1.260:1 panel on page) is a colour difference and not a depth
+   cue. It resolves to `none` in the two dark themes, where a shadow on a near-black page paints
+   nothing but mud. */
 .card {
     background:var(--color-panel);
     border:1px solid var(--color-rule-soft);
+    /* The structural accent edge. Same colour as the other three sides in every theme since the
+       2026-11-19 refinement (`--rule-card-edge` now resolves to `--color-rule-soft` everywhere); the
+       3px width is what makes the left edge a depth cue rather than an outline. */
+    border-left:3px solid var(--rule-card-edge);
     border-radius:var(--radius-card);
     padding:14px 16px;
+    box-shadow:var(--shadow-card);
 }
 
 /* `.card + .card`: ported from shell.css:371. Column-stacked card groups (help.html's "Keyboard",
@@ -1090,7 +1327,7 @@ table.t tr.is-current td {
     color:var(--color-ink-strong);
     padding-bottom:9px;
     margin-bottom:12px;
-    border-bottom:1px solid var(--color-rule-soft);
+    border-bottom:1px solid var(--rule-card-head);
 }
 
 /* .card > h3: ported from shell.css; resolves to house tokens. */
