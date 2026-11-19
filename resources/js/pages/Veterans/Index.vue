@@ -522,7 +522,13 @@ const factorGrades: { family: string; note: string }[] = [
             <!-- HFW-OVERRIDE (copy: pager noun) - the mock prints "7 veterans - page 1 of 2"; the
                  app prints the paginator's own noun, singular "veteran" for a library of one, because the
                  count is a live figure rather than the mock's fixed seven. -->
+            <!-- The plan asks for the pager to disappear when a single page holds everything, and
+                 `veterans-transfer-requests.spec.ts:56` states the same rule for the lifecycle tabs.
+                 It is `v-show`, not `v-if`: `veterans-parity.spec.ts:67` compares the app's `pager`
+                 marker against the wireframe's and the capture walks DOM children, so removing the
+                 node would report the marker missing. Hidden-but-present satisfies both. -->
             <Pagination
+                v-show="veterans.last_page > 1"
                 variant="compact"
                 noun="veteran"
                 :page="veterans.current_page"
@@ -537,26 +543,36 @@ const factorGrades: { family: string; note: string }[] = [
         <div class="mt-3.5 grid grid-cols-1 gap-3.5 min-[821px]:grid-cols-2">
             <Card as="section" aria-labelledby="veteran-spark-grades" class="min-w-0">
                 <h2 id="veteran-spark-grades">Spark grades</h2>
-                <div class="min-w-0 overflow-x-auto" role="region" tabindex="0" aria-label="Spark grades, scrollable">
-                <table class="t">
-                    <thead>
-                        <tr><th scope="col">Family</th><th scope="col">Carries</th></tr>
-                    </thead>
-                    <tbody>
-                        <tr v-for="grade in factorGrades" :key="grade.family">
-                            <th scope="row" class="font-medium text-ink">{{ grade.family }}</th>
-                            <td>{{ grade.note }}</td>
-                        </tr>
-                    </tbody>
-                </table>
-                </div>
-                <p class="note mt-2.5">
-                    <span class="g" aria-hidden="true">○</span>
-                    <span>
-                        Three stars is the ceiling on Global. The ★4 cap is the JP-only spark-research item,
-                        which cannot push past ★4 and does not exist here.
-                    </span>
-                </p>
+                <!-- The plan folds the grade ladder behind a named disclosure: it is reference the
+                     Trainer consults occasionally, and it was spending the same vertical band as the
+                     team-eligibility arithmetic beside it. The `h2` stays outside the `details` so the
+                     card keeps the heading the parity capture looks for (`.grid` filtered by the
+                     "Spark grades" heading at 390px), and the summary carries the plan's own words. -->
+                <details class="mt-2">
+                    <summary class="min-h-11 cursor-pointer py-3 text-sm font-medium text-ink hover:text-ink-strong">
+                        How Sparks work
+                    </summary>
+                    <div class="min-w-0 overflow-x-auto" role="region" tabindex="0" aria-label="Spark grades, scrollable">
+                        <table class="t">
+                            <thead>
+                                <tr><th scope="col">Family</th><th scope="col">Carries</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="grade in factorGrades" :key="grade.family">
+                                    <th scope="row" class="font-medium text-ink">{{ grade.family }}</th>
+                                    <td>{{ grade.note }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="note mt-2.5">
+                        <span class="g" aria-hidden="true">○</span>
+                        <span>
+                            Three stars is the ceiling on Global. The ★4 cap is the JP-only spark-research item,
+                            which cannot push past ★4 and does not exist here.
+                        </span>
+                    </p>
+                </details>
             </Card>
 
             <!-- Team eligibility is arithmetic this page does rather than a figure a Trainer keeps by hand:

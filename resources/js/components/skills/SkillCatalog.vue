@@ -270,6 +270,23 @@ const secondaryName = (skill: Skill): string | null =>
 
         <p v-if="loading" role="status" class="mt-3 text-sm text-ink-muted">Loading results…</p>
 
+        <!-- Matching results against the scope's own total, which is the pair the plan asks to see
+             apart. `skills.total` is how many rows the facets answered; `totalCount` is every skill
+             the scope holds. The paginator below states which slice of the matching set is on screen,
+             so the three figures a Trainer needs are: this scope, this answer, this page. Gated on a
+             search so the line does not restate the whole catalogue when nobody has asked anything. -->
+        <p
+            v-if="props.skills.data.length > 0 && props.search !== null"
+            class="mt-3 text-sm text-ink-muted"
+            role="status"
+            data-testid="result-summary"
+        >
+            <span class="font-mono tabular-nums text-ink-strong">{{ props.skills.total }}</span>
+            matching of
+            <span class="font-mono tabular-nums text-ink-strong">{{ props.totalCount }}</span>
+            in {{ props.scopes[props.scope] ?? props.scope }}
+        </p>
+
         <!-- Two absences, named apart: an empty catalogue is a fetch nobody has run, and an empty result
              is a question the data cannot answer. The no-match headline is the live region, because it is
              the result of an action; the empty catalogue is a static state and must not announce on load. -->

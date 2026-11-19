@@ -138,8 +138,15 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                         />
                     </div>
                     <p class="shrink-0 text-xs text-ink-muted">
-                        {{ resolvedCount }} of {{ totalCount }} resolved
-                        <span v-if="props.resolvedToday > 0"> · {{ props.resolvedToday }} today</span>
+                        {{ resolvedCount }} of {{ totalCount }} resolved, all time
+                        <span v-if="props.resolvedToday > 0"> · {{ props.resolvedToday }} resolved today</span>
+                        <!-- The three scopes the plan asks to see apart: the queue still waiting, and
+                             the slice of it this page prints. "N of M resolved" alone mixed the
+                             all-time total with today's work and said nothing about how many rows were
+                             on screen, so a Trainer reading "0 of 304" beside "8 today" could not tell
+                             which scope either number belonged to. Each is now named. -->
+                        · {{ props.candidates.total }} pending
+                        · {{ props.candidates.data.length }} shown
                     </p>
                 </div>
                 <!-- One Pending table, in the wireframe's columns (`review.html:69-101`). Both
