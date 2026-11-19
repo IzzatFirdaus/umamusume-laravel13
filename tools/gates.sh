@@ -80,6 +80,10 @@ step "markdown fences" python tools/md_fence_check.py
 # `adr set` step below, which a peer added with its own G-61 note.
 step "citation census" python tools/doc_census.py
 step "untracked files" python tools/check_untracked.py
+# Gate G-62 (GOVERNANCE.md §GATE-REGISTRY). Registered as automated on 2026-11-19 when the backdrop
+# plates landed and absent from this script, so nobody could tell a passing plate from an unmeasured
+# one. Deterministic, offline, and it reads the committed assets only, so it costs nothing here.
+step "backdrop plates" python tools/verify-backdrop.py
 # Gate G-61. `adr-check.py` was absent from this script while being a documented gate,
 # so an ADR could land with no index row (or a one-sided authority relation) and every
 # gate still reported green. It is deterministic and offline, so it belongs here.
@@ -106,17 +110,26 @@ const {execSync}=require("child_process");
 let out="{}";
 try { out=execSync("npm audit --omit=dev --json",{encoding:"utf8",stdio:["ignore","pipe","ignore"]}); }
 catch(e){ out=e.stdout||"{}"; }
+// Three states, not two. A scan that never ran must not report as clean: offline, proxy-blocked and
+// registry-down runs are the normal case on this host, and JSON.parse("{}") has no metadata, so the
+// !v.total branch used to print clean with no data behind it. AGENTS.md section 5 forbids exactly
+// that claim, and C-8 makes the audit a pre-tag obligation, so an unmeasured run is named as such.
 const d=JSON.parse(out||"{}");
 const v=(d.metadata||{}).vulnerabilities||{};
 const highs=Object.entries(d.vulnerabilities||{}).filter(([,a])=>a.severity==="high"||a.severity==="critical");
+// A completed audit always carries metadata. The failure payload npm returns when the request
+// itself dies is {message, error} and carries none, so the presence of metadata is what separates
+// a measured zero from a scan that did not measure.
+if(!d.metadata){ console.log("npm audit: UNAVAILABLE (scan failed, no data; not a clean result)"); console.log("  " + (d.message || "no diagnostic returned")); process.exit(0); }
 if(!v.total){ console.log("npm audit: clean"); process.exit(0); }
-console.log(`npm audit: ${v.critical||0} critical, ${v.high||0} high, ${v.moderate||0} moderate`);
-for(const [name,a] of highs) console.log(`  ${name}: ${a.severity}, direct=${a.isDirect}`);
+console.log("npm audit: " + (v.critical||0) + " critical, " + (v.high||0) + " high, " + (v.moderate||0) + " moderate");
+for(const [name,a] of highs) console.log("  " + name + ": " + a.severity + ", direct=" + a.isDirect);
 const pkg=require("./package.json");
 const prodVite=Object.keys(pkg.dependencies||{}).filter(k=>k.includes("vite"));
-console.log(`  production deps pulling vite: ${prodVite.join(", ")||"none"}`);
-console.log("  advisory until tag time (AGENTS.md §5).");
+console.log("  production deps pulling vite: " + (prodVite.join(", ")||"none"));
+console.log("  advisory until tag time (AGENTS.md section 5).");
 '
+
 
 [ "$fast" -eq 0 ] && step "php suite" php artisan test --compact
 

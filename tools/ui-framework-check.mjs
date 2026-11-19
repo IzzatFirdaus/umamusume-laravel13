@@ -222,7 +222,13 @@ if (findings.length === 0) {
 console.error(`ui-framework-check: ${findings.length} finding(s)`);
 for (const f of findings) console.error(`  ${f.file}:${f.line}  [${f.rule}] ${f.detail}`);
 
-// A debt increase is a gate failure on its own: --strict widens the gate to every finding, it does not
-// create the only path to a non-zero exit.
-const debtIncrease = findings.some((f) => f.rule === 'debt-increase');
-process.exit(process.argv.includes('--strict') || debtIncrease ? 1 : 0);
+// Two rules are gate failures on their own, and `--strict` is what widens the gate to every finding
+// rather than the only path to a non-zero exit.
+//
+// `card-in-card` belongs here because AGENTS.md §13 and DESIGN.md both state that a Card inside a Card
+// is refused, and it was reported as a finding while never being fatal: the one structural rule the
+// documentation names was the one the check could not fail on. It is 0 today, so adding it to the fatal
+// set changes no current verdict.
+const FATAL_RULES = ['debt-increase', 'card-in-card'];
+const fatal = findings.some((f) => FATAL_RULES.includes(f.rule));
+process.exit(process.argv.includes('--strict') || fatal ? 1 : 0);

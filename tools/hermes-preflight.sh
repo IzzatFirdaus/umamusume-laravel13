@@ -38,7 +38,12 @@ echo "=== 5. Node/TypeScript check ==="
 npm run typecheck || { echo "❌ TypeScript check failed"; exit 1; }
 
 echo "=== 6. PHP lint ==="
-vendor/bin/pint --test || { echo "❌ Pint lint failed"; exit 1; }
+# Never a bare `pint --test` here. With no path list it collects every file that differs from HEAD,
+# which on a shared worktree is every peer's in-flight edit as well as the caller's, and it reports
+# their style errors as this checkout's (KI-75, AGENTS.md §9). `tools/gates.sh` already owns the
+# correct semantics — it collects the changed set explicitly and keeps phpstan whole-project — so
+# delegate rather than reimplementing a third opinion.
+bash tools/gates.sh --fast || { echo "❌ Gate failed"; exit 1; }
 
 echo "=== 7. npm ci dry-run ==="
 npm ci --dry-run || { echo "❌ npm ci dry-run failed"; exit 1; }

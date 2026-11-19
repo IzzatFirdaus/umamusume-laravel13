@@ -20,7 +20,10 @@ from collections import Counter
 HEADING = re.compile(r'^(#{2,4})\s*([A-Z][A-Z0-9]*-\d+)\b')
 H_SPLIT = re.compile(r'^\*\*(State|Status)[^*]*:\*\*\s*(.*)$')
 H_INNER = re.compile(r'^\*\*(State|Status):\s*(.+?)\*\*\s*(.*)$')
-INDEX_ROW = re.compile(r'^([A-Z][A-Z0-9]*-\d+)\s+([A-Za-z][A-Za-z0-9\-]*)')
+# An optional list marker: the index's rows are Markdown bullets in some sections and bare lines
+# in others. Without the `[-*]?` allowance two closed rows (KI-104, KI-106) were dropped by the
+# parser and reported as 'NO INDEX ROW' although both were present in the file all along.
+INDEX_ROW = re.compile(r'^[-*]?\s*([A-Z][A-Z0-9]*-\d+)\s+([A-Za-z][A-Za-z0-9\-]*)')
 
 # A family is matched by PREFIX. Exact-string sets report every variant as a contradiction.
 CLOSED_FAMILY = ('CLOSED', 'RESOLVED', 'SUPERSEDED', 'FIXED', 'TERMINAL', 'ACKNOWLEDGED', 'ACCEPTED')

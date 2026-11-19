@@ -24,6 +24,11 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MASTERS_DIR = "docs/research-scratch"
 EXEMPT_PREFIXES = (".ai/", "docs/adr/")
 
+# The ratchet. `tests/Feature/DocCitationParityTest.php` pins the same number and is the authority
+# when the two disagree; this copy exists so the census can be a gate on its own instead of a report
+# that always exits 0. Measured 528 at fec658f8 on 2026-11-19, well under the bar.
+DOC_CITATION_BASELINE = 708
+
 # A file whose header carries this marker is a catalogue: its backticked paths are the subject
 # it enumerates, not citations a reader follows. `DOCUMENTATION-INVENTORY-2026-09-30.md` lists every
 # markdown file in the tree, and 142 of those names point at files that no longer exist, which is
@@ -358,6 +363,19 @@ def main(argv=None):
         print(f"  {c:4}  {ref_}")
 
     print(fence_report(files))
+
+    # A gate that cannot fail is not a gate. Before this, `main()` returned 0 unconditionally, so
+    # `bash tools/gates.sh --fast` reported the citation step green at any count and the ratchet was
+    # enforced only by `DocCitationParityTest` inside the PHP suite, which `--fast` skips. The exit
+    # code now carries the verdict; the report above is unchanged so a human reads the same output.
+    if len(dead) > DOC_CITATION_BASELINE:
+        print(f"\nRATCHET FAILED: {len(dead)} dead citations against a {DOC_CITATION_BASELINE} baseline "
+              f"(+{len(dead) - DOC_CITATION_BASELINE}). Repoint the lines a reader would follow, or "
+              f"raise the baseline in this file and tests/Feature/DocCitationParityTest.php together "
+              f"with a written reason.")
+        return 1
+
+    print(f"\nratchet: {len(dead)} <= {DOC_CITATION_BASELINE}")
     return 0
 
 
