@@ -13,7 +13,9 @@ use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvent;
 use App\Models\Umamusume;
+use App\Services\Career\TeamPanelBuilder;
 use App\Services\CareerCalendar;
+use App\Services\ScenarioCaps;
 use Illuminate\Support\Collection;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -1056,4 +1058,110 @@ it('carries no starting stats for a run that names no costume form', function ()
     $this->get(route('runs.cockpit', $run))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page->where('state.starting_stats', null));
+});
+
+/*
+ * The scenario's "illustrative support data" note is config, not a name test in the page.
+ *
+ * It used to be two template paragraphs behind `props.run.scenario === 'trackblazer'` and
+ * `=== 'grand_concert'`. The second was dead code: `config/scenarios.php` keys the scenario
+ * `our_grand_concert`, so the concert cockpit never printed its caveat and nothing failed, because
+ * no test asserted the note on any surface. These three cases are that assertion, and the third is
+ * the one that would have caught the typo.
+ */
+it('prints the scenario support-data note from config for a scenario that declares one', function (): void {
+    $run = cockpitRun(['scenario' => 'trackblazer', 'status' => RunStatus::Active], turns: 1, energy: 70);
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('run.support_data_note.lead', 'Illustrative support data.')
+            ->where('run.support_data_note.body', fn (string $body): bool => str_contains($body, 'Trackblazer')));
+});
+
+it('prints the concert note, whose page branch compared against a key that does not exist', function (): void {
+    $run = cockpitRun(['scenario' => 'our_grand_concert', 'status' => RunStatus::Active], turns: 1, energy: 70);
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('run.support_data_note.lead', 'Illustrative support data.')
+            // The word the dead paragraph carried. `grand_concert` alone would never reach this.
+            ->where('run.support_data_note.body', fn (string $body): bool => str_contains($body, 'concert loop')));
+});
+
+it('carries no support-data note for a scenario that declares none', function (): void {
+    $run = cockpitRun(['scenario' => 'ura_finale', 'status' => RunStatus::Active], turns: 1, energy: 70);
+
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page->where('run.support_data_note', null));
+});
+
+it('branches on no scenario name to decide whether to print the note', function (): void {
+    $source = (string) file_get_contents(base_path('resources/js/pages/Career/Cockpit.vue'));
+
+    // The rendering condition is the prop, not a scenario literal. A page that knows a scenario name
+    // is the defect AGENTS.md §7 names, and it is how the concert note went missing.
+    expect($source)->toContain('v-if="props.run.support_data_note !== null"')
+        ->and($source)->not->toContain("scenario === 'grand_concert'")
+        ->and($source)->not->toContain("scenario === 'trackblazer'");
+});
+
+/*
+ * Two readers on one run must answer the same question the same way.
+ *
+ * `careerGoalSections()` reads `decisionTurn()` and refuses a run with no scenario, matching what
+ * `RaceStripBuilder`, `RacePlannerController::calendarSlots()` and `ScenarioCaps::scenarioCaps()`
+ * already do. It used to read `nextTurnToPlay()` — one turn behind for a snapshot — and to lend the
+ * config baseline's mandatory calendar to a run the Trainer never gave a scenario.
+ */
+it('reads the decision turn, not the next logged turn, so a snapshot agrees with its own race strip', function (): void {
+    $position = CareerPosition::fromArray([
+        'year' => 3, 'month' => 10, 'phase' => 'Early', 'turn_index' => 67,
+        'field_states' => [], 'field_values' => null,
+    ]);
+
+    // A snapshot imported at Senior Early October with only 12 logged turns: `nextTurnToPlay()`
+    // answers 13, `decisionTurn()` answers the stored position. The two disagree, which is the case
+    // the goal panel used to get wrong.
+    $run = cockpitRun([
+        'scenario' => 'unity_cup',
+        'status' => RunStatus::Active,
+        'mode' => RunMode::Snapshot,
+        'career_position' => $position,
+        'career_position_source' => 'imported',
+    ], turns: 12, energy: 70);
+
+    $source = (string) file_get_contents(base_path('app/Services/Career/TeamPanelBuilder.php'));
+
+    expect($source)->toContain('$run->decisionTurn()')
+        ->and($source)->not->toContain('$run->nextTurnToPlay()');
+
+    // And the panel still composes rows for this run, so the assertion above is not passing on an
+    // empty panel.
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/Cockpit')
+            ->where('scenario.objectives', fn (Collection $rows): bool => $rows->isNotEmpty()));
+});
+
+it('owes no mandatory calendar to a run that names no scenario', function (): void {
+    $run = cockpitRun(['scenario' => null, 'status' => RunStatus::Active], turns: 1, energy: 70);
+
+    // Called on the service directly, not through the cockpit: the controller happens to skips this
+    // reader when the scenario's `career_goals` panel is off, which is true for the baseline, so a
+    // page-level assertion would pass with or without the guard inside the reader. The guard is what
+    // protects any future caller, and this is the only shape that tests it.
+    $sections = app(TeamPanelBuilder::class)->careerGoalSections($run);
+
+    // The baseline scenario DOES declare the career_goals panel, so without the guard this reader
+    // returns its seven mandatory races as this run's obligations.
+    expect(ScenarioCaps::caps((string) config('scenarios.baseline')))->not->toBeEmpty()
+        ->and($sections['objectives'])->toBe([])
+        ->and($sections['alerts'])->toBe([]);
+
+    // And the cockpit itself still renders, so the guard did not break the page.
+    $this->get(route('runs.cockpit', $run))->assertOk();
 });

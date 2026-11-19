@@ -288,7 +288,15 @@ class RaceDecisionController extends Controller
             return null;
         }
 
-        $family = $run->scenarioKey() === 'trackblazer' ? 'trackblazer' : 'standard';
+        // The family is a config fact about the scenario, not a comparison against its name. This line
+        // used to read `$run->scenarioKey() === 'trackblazer' ? 'trackblazer' : 'standard'`, which is the
+        // hardcoded scenario name `AGENTS.md` §7 bans: a fifth scenario would silently get the standard
+        // table, and nothing would fail. `payout_family` is declared per scenario in
+        // `config/scenarios.php`, so the answer travels with the scenario it describes.
+        $family = (string) config(
+            'scenarios.scenarios.'.$run->scenarioKey().'.payout_family',
+            'standard',
+        );
         /** @var array{stat: int, sp: int}|null $row */
         $row = config('uma.race_payouts.families.'.$family.'.'.$tier);
 

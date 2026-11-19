@@ -88,13 +88,36 @@ final class HintDiscount
 
     /**
      * The discount percentage a hint level earns, or null when the level is outside the ladder.
+     *
+     * The top tier has two spellings and only one of them is a ladder key.
+     * `config('uma.skills.hint_discount')` is keyed `1,2,3,4,max`, because `max` is what the client
+     * prints, but `StoreRunSkillRequest` validates the persisted tier as an integer `between:1,5` and
+     * the Learn control posts `5` for the top one. Read raw, an integer `5` found no ladder key,
+     * `price()` returned the undiscounted base, and the planner quoted 78 SP on screen while the
+     * server refused the same plan quoting 130. Normalising here rather than at each call site means
+     * the write path, the planner payload and the budget refusal cannot drift apart again.
      */
     public static function discountPct(int|string $hintLevel): ?int
     {
         /** @var array<int|string, int> $discounts */
         $discounts = config('uma.skills.hint_discount');
 
-        return $discounts[$hintLevel] ?? null;
+        return $discounts[self::ladderKey($hintLevel)] ?? null;
+    }
+
+    /**
+     * One ladder key for the two spellings of the top tier: `5` and `'max'` are the same tier.
+     *
+     * Every other value passes through untouched, so an out-of-ladder level still resolves to null
+     * rather than silently becoming a discount.
+     */
+    private static function ladderKey(int|string $hintLevel): int|string
+    {
+        if ($hintLevel === 5 || $hintLevel === '5') {
+            return 'max';
+        }
+
+        return $hintLevel;
     }
 
     /**

@@ -146,7 +146,9 @@ interface Performance {
 }
 
 const props = defineProps<{
-    run: { id: number; trainee: string; trainee_ja: string | null; notes: string | null; umamusume_id: number; scenario: string | null; status: string; status_label: string; scenario_label: string; run_url: string; skills_url: string; index_url: string; timeline_url: string; result_url: string; training_url: string; deck_url: string; status_labels: Record<string, string>; scenarios: Record<string, string>; update_url: string; destroy_url: string; export_csv_url: string; export_json_url: string; current_objective_index: number | null;
+    run: { id: number; trainee: string; trainee_ja: string | null; notes: string | null; umamusume_id: number; scenario: string | null; status: string; status_label: string; scenario_label: string;
+        /** The scenario's own caveat about where its figures come from, or null when it declares none. */
+        support_data_note: { lead: string; body: string } | null; run_url: string; skills_url: string; index_url: string; timeline_url: string; result_url: string; training_url: string; deck_url: string; status_labels: Record<string, string>; scenarios: Record<string, string>; update_url: string; destroy_url: string; export_csv_url: string; export_json_url: string; current_objective_index: number | null;
         /**
          * KI-95: the import provenance line, `Imported {date} from {source}`, derived by the
          * controller only for runs an import wrote; a career someone started here carries null and
@@ -1095,33 +1097,24 @@ const jumpToShop = (): void => {
                          this screen stays the wireframe's density. The shell switches on the matrix's
                          own flags and widget keys and knows no scenario name (G-33). -->
 
-                    <!-- HFW OVERRIDE (copy, not visual) — `cockpit-trackblazer.html` prints a `.mockbar`
-                         stating that its support data is illustrative. A wireframe artifact is not
-                         shippable, so the same warning ships as a `.note` instead of the bar. The date is
-                         the one the scenario matrix carries as its own verification stamp, never a date
-                         this page chose; the wording avoids long unbreakable tokens because a note that
-                         forces a 320px scroll would be a defect of its own. -->
-                    <p
-                        v-if="props.run.scenario === 'trackblazer'"
-                        class="note mt-3 text-xs text-ink-muted"
-                        data-field="support-data-note"
-                    >
-                        <b>Illustrative support data.</b> The Trackblazer figures on this screen are what
-                        the scenario matrix records, and that matrix was verified on 2026-09-27. Anything
-                        the matrix does not carry prints as an absence rather than an estimate.
-                    </p>
+                    <!-- HFW OVERRIDE (copy, not visual). Both `cockpit-trackblazer.html` and
+                         `cockpit-grand-concert.html` print a `.mockbar` stating that their support data is
+                         illustrative. A wireframe artifact is not shippable, so the warning ships as a
+                         `.note` instead of the bar.
 
-                    <!-- The same override for Our Grand Concert (`cockpit-grand-concert.html` draws its
-                         own `.mockbar`), with the same rule: the warning ships as words, the bar does not
-                         ship at all. -->
+                         The note itself comes from the scenario's own config entry. It used to be two
+                         paragraphs behind `props.run.scenario === '...'` tests, and the concert one
+                         compared against `grand_concert` while the config key is `our_grand_concert`, so
+                         that caveat was dead code: the concert cockpit printed nothing. Reading the entry
+                         fixes the typo and removes the last scenario name from this page (G-33), so a
+                         fifth scenario declares its own note without a template change. -->
                     <p
-                        v-if="props.run.scenario === 'grand_concert'"
+                        v-if="props.run.support_data_note !== null"
                         class="note mt-3 text-xs text-ink-muted"
                         data-field="support-data-note"
                     >
-                        <b>Illustrative support data.</b> The concert loop and its payouts are what the
-                        scenario matrix records, and that matrix was verified on 2026-09-27. A performance
-                        type the run has not recorded prints <b>Not recorded</b> rather than a zero.
+                        <b>{{ props.run.support_data_note.lead }}</b>
+                        {{ props.run.support_data_note.body }}
                     </p>
                 </Section>
 

@@ -10,6 +10,7 @@ use App\Models\CharacterCard;
 use App\Models\Skill;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use App\Services\HintDiscount;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -267,5 +268,45 @@ final class SkillHintLevelTest extends TestCase
         $this->assertNull($row['recorded']['hint_level']);
         // Should price at base cost (160) when no hint recorded
         $this->assertEquals(160, $row['sp_cost']);
+    }
+
+    /**
+     * The top tier has two spellings and only one is a ladder key. An integer `5` used to find no
+     * key, so `price()` returned the undiscounted base: the planner printed 78 SP for a Lv Max skill
+     * and the server refused the same plan quoting 130. Both spellings must price identically.
+     */
+    public function test_top_tier_prices_the_same_as_integer_five_and_string_max(): void
+    {
+        $this->assertSame(78, HintDiscount::price(130, 5));
+        $this->assertSame(HintDiscount::price(130, 5), HintDiscount::price(130, 'max'));
+        $this->assertSame(HintDiscount::price(130, 5), HintDiscount::price(130, '5'));
+    }
+
+    /**
+     * The discount ladder is non-linear past Lv3, so each tier is pinned against the client's own
+     * percentages (UMAMUSUME_REFERENCE.md §1.1.4) rather than against a formula.
+     */
+    public function test_every_ladder_tier_prices_its_configured_percentage(): void
+    {
+        $expected = [1 => 117, 2 => 104, 3 => 91, 4 => 84, 5 => 78];
+
+        foreach ($expected as $level => $price) {
+            $this->assertSame($price, HintDiscount::price(130, $level), "hint level {$level}");
+        }
+
+        $this->assertSame(40, HintDiscount::discountPct(5));
+        $this->assertSame(40, HintDiscount::discountPct('max'));
+    }
+
+    /**
+     * Normalising the top tier must not turn an unknown level into a discount: a level outside the
+     * ladder still prices at base, which is what keeps a corrupt or future value from inventing one.
+     */
+    public function test_out_of_ladder_levels_price_at_base(): void
+    {
+        foreach ([0, 6, 99, 'nonsense', ''] as $level) {
+            $this->assertNull(HintDiscount::discountPct($level));
+            $this->assertSame(130, HintDiscount::price(130, $level));
+        }
     }
 }

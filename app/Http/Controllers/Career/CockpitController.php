@@ -378,6 +378,14 @@ class CockpitController extends Controller
             'scenario_label' => $run->hasScenario()
                 ? (string) config('scenarios.scenarios.'.$run->scenarioKey().'.label', $run->scenarioKey())
                 : 'No scenario set',
+            // The scenario's own caveat about where its figures come from, or null when it declares
+            // none. Config rather than a branch on the scenario's name: the page used to test
+            // `=== 'grand_concert'` against a key that is actually `our_grand_concert`, so the concert
+            // cockpit silently printed no caveat at all. Reading the entry means a fifth scenario
+            // declares its own note and this file learns no new scenario name.
+            'support_data_note' => $run->hasScenario()
+                ? config('scenarios.scenarios.'.$run->scenarioKey().'.support_data_note')
+                : null,
             // The cockpit owns the run-identity writes (F2, plan §9.6 ruling 1): status, scenario
             // and grade-point period all POST through `runs.update`, the same route and validator the
             // 2.0.0 record screen used. The cockpit is the door, so the 2.0 edit URLs ride here.
@@ -494,6 +502,12 @@ class CockpitController extends Controller
                 ? (string) config('scenarios.scenarios.'.$run->scenarioKey().'.label', $run->scenarioKey())
                 : 'No scenario set',
             'scenario_declared' => $run->hasScenario(),
+            // Screens that render this identity block draw the scenario's own caveat beside the
+            // figures it qualifies. Null when the scenario declares none, which the page renders as
+            // nothing rather than an empty note.
+            'support_data_note' => $run->hasScenario()
+                ? config('scenarios.scenarios.'.$run->scenarioKey().'.support_data_note')
+                : null,
             'year_label' => $yearLabel,
             'month_label' => $monthLabel,
             'turn' => $turn,

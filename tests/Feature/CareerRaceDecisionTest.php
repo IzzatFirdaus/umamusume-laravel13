@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\RaceEntryStatus;
+use App\Enums\RunMode;
 use App\Enums\RunStatus;
 use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
@@ -225,6 +226,84 @@ it('clears the maiden lock from the run position when the run carries no Debut r
     ]);
 
     expect($early->hasClearedMaidenLock())->toBeFalse();
+});
+
+it('keeps the maiden lock on a native run past turn 12 that has won nothing', function (): void {
+    // The position fallback is for a run _imported_ mid-career, whose unlogged turns were never
+    // played; a native run's unlogged turns are simply not played yet, and its position is its own
+    // turn log. Reading the fallback off that log cleared the lock for a run with thirteen turns
+    // logged and nothing won, which dropped `blocked_reason` from every graded row — the exact
+    // symptom `ADR-0031` was written to end.
+    $run = raceRun(turns: 13);
+    raceSlot(['title' => 'Chukyo Junior Stakes', 'turn' => 14, 'half' => 'Late', 'grade_code' => 100, 'sort_order' => 1]);
+
+    // The premise: thirteen turns logged, position past the Debut's slot, and no race entered at all.
+    expect($run->turnEntries()->count())->toBe(13)
+        ->and($run->raceEntries()->count())->toBe(0)
+        ->and($run->hasClearedMaidenLock())->toBeFalse();
+
+    $this->get(route('runs.races.decision', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('races.0.maiden_gated', true)
+            ->where('races.0.blocked_reason', fn (mixed $reason): bool => is_string($reason) && $reason !== ''));
+});
+
+it('clears the maiden lock on a native run past turn 12 that won its Maiden', function (): void {
+    // The other half of the same branch: past turn 12 the record check must still be consulted, so a
+    // completed first place at grade 800 or 900 clears the lock however many turns are logged. This
+    // is the case the fallback used to answer without reading a single entry.
+    $run = raceRun(turns: 13);
+    raceSlot(['title' => 'Chukyo Junior Stakes', 'turn' => 14, 'half' => 'Late', 'grade_code' => 100, 'sort_order' => 1]);
+
+    $maiden = RaceCatalogSlot::factory()->create([
+        'scenario_key' => null,
+        'year' => RaceCatalogSlot::YEAR_JUNIOR,
+        'month' => 7,
+        'half' => 'Early',
+        'turn' => 13,
+        'title' => 'Junior Maiden Race',
+        'tier' => 'Maiden',
+        'grade_code' => 800,
+        'is_mandatory' => false,
+        'sort_order' => 2,
+    ]);
+
+    RaceEntry::factory()->create([
+        'training_run_id' => $run->id,
+        'race_catalog_slot_id' => $maiden->id,
+        'status' => RaceEntryStatus::Completed,
+        'placement' => 1,
+    ]);
+
+    expect($run->fresh()->hasClearedMaidenLock())->toBeTrue();
+
+    $this->get(route('runs.races.decision', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('races.0.maiden_gated', false)
+            ->where('races.0.blocked_reason', null));
+});
+
+it('still clears the maiden lock from position on a snapshot run that holds no entries', function (): void {
+    // The imported case, unchanged: a run entered mid-career carries no entry for any turn it never
+    // played, so a record-only check would lock every standard race for the life of the run. The
+    // fallback is keyed on a _named_ position rather than on `mode`, because the URA import writes
+    // `career_position` while the run's mode stays the create form's `new_career` default.
+    $run = TrainingRun::factory()->create([
+        'scenario' => 'ura_finale',
+        'status' => RunStatus::Active,
+        'mode' => RunMode::Snapshot,
+        'umamusume_id' => Umamusume::factory()->state(['name' => 'Rice Shower', 'name_ja' => 'ライスシャワー']),
+        'career_position' => ['year' => 2, 'month' => 7, 'phase' => 'Early', 'turn_index' => 37],
+        'career_position_source' => 'imported',
+    ]);
+
+    // A Junior turn-13 row, which this run has long passed, so the gate is asserted on the model.
+    raceSlot(['title' => 'Kyoto Daishoten', 'sort_order' => 1]);
+
+    expect($run->raceEntries()->count())->toBe(0)
+        ->and($run->hasClearedMaidenLock())->toBeTrue();
 });
 
 it('refuses to state a readiness or a win figure, and names the ADR-0016 blocker', function (): void {

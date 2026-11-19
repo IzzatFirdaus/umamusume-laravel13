@@ -83,7 +83,23 @@ final class TeamPanelBuilder
      */
     public function careerGoalSections(TrainingRun $run): array
     {
-        $next = $run->hasScenario() ? $run->nextTurnToPlay() : null;
+        // `decisionTurn()`, not `nextTurnToPlay()`. The two agree for a new-career run and differ for
+        // a snapshot: `nextTurnToPlay()` derives from the last logged turn, so an imported run whose
+        // position is ahead of its rows lands one turn behind. `RaceStripBuilder` and the Race
+        // Planner already read `decisionTurn()` for that reason, and this panel prints the same
+        // obligation rows beside the strip: reading the other method marked a race `not_reached` here
+        // while the strip beside it marked the same race as the turn being decided.
+        $next = $run->hasScenario() ? $run->decisionTurn() : null;
+
+        // A run that names no scenario has no calendar to owe. `scenarioKey()` resolves null to the
+        // config's baseline so the rest of the app keeps a coherent layout key, but lending that
+        // baseline's seven mandatory races to a run the Trainer never gave a scenario is a fact about
+        // a scenario they did not choose. `RacePlannerController::calendarSlots()` and
+        // `ScenarioCaps::scenarioCaps()` both refuse the loan; this reader now refuses it too, so the
+        // cockpit and the Race Planner answer one question one way.
+        if (! $run->hasScenario()) {
+            return ['objectives' => [], 'alerts' => []];
+        }
 
         /** @var Collection<int, RaceCatalogSlot> $slots */
         $slots = RaceCatalogSlot::query()
@@ -177,7 +193,11 @@ final class TeamPanelBuilder
         // whose rows are all named absences of a mechanic their scenario does not have. Same guard
         // shape the `trackblazer` composers use, and the panel reads the group list as data, so no
         // scenario name reaches a component (gate G-33).
-        if ($run->scenarioKey() === 'ura_finale') {
+        //
+        // The question asked is "does this scenario declare the mechanic", not "is this run URA". The
+        // literal comparison that used to sit here would have kept composing Happy Meek for the wrong
+        // scenario the day a second one gained it, and would have needed an edit to stop.
+        if ((bool) config('scenarios.scenarios.'.$run->scenarioKey().'.happy_meek', false)) {
             $objectives[] = [
                 'group' => 'Happy Meek',
                 'rows' => $this->happyMeekRows(),
