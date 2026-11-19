@@ -6,9 +6,7 @@
 stay on disk as the historical record of how each slice was derived; none of them is edited here, and none of the
 peer-owned working-tree files is touched by this document.
 
-**Measurement basis.** Every figure below was produced by a command run on 2026-11-18 between 13:30 and 14:10
-+08:00, at `HEAD 816e923e`, on branch `master`. The tree is shared and moves while it is read: a count in this
-document is a timestamp with its command beside it, not a constant.
+**Measurement basis.** Figures carry the HEAD they were measured at: `816e923e` (2026-11-18, 13:30-14:10 +08:00) unless stamped `fec658f8` (re-measured in this session). The tree is shared and moves while it is read: a count is a timestamp with its command beside it, not a constant.
 
 **Provenance labels used below.**
 
@@ -34,9 +32,9 @@ non-goals stay cut. It does **not** mean auth, hosting, a second database, a wal
 
 | Fact | Measured value | Command |
 |---|---|---|
-| HEAD | `816e923e` (`fix(uiux): close KI-160/KI-166 reflow ...`) | `git rev-parse --short HEAD` |
-| Divergence | **8 behind / 38 ahead** of `origin/master` | `git rev-list --left-right --count origin/master...HEAD` -> `8  38` |
-| Working tree | **61 rows** - 33 ` M`, 1 ` D`, 27 `??`, nothing staged | `git status --porcelain -uall` |
+| HEAD | `fec658f8` (merge reconciling the 8-behind with the local series) | `git rev-parse --short HEAD` |
+| Divergence | `0  0` — `master` == `origin/master` | `git rev-list --left-right --count origin/master...HEAD` -> `0  0` |
+| Working tree | **32 rows** - 9 ` M`, 0 ` D`, 23 `??`, nothing staged | `git status --porcelain -uall` |
 | Stashes | 6, all peer/foreign work | `git stash list` |
 | Tags | `0.1.0 2.0.1 2.0.2 2.1.0 2.1.1`; no `3.0.*` | `git tag -l` |
 | Gate script | `tools/gates.sh` exists, **untracked**; `composer.json` has `gates` | `git ls-files tools/gates.sh`, `git status --porcelain -- tools/gates.sh` |
@@ -61,7 +59,7 @@ non-goals stay cut. It does **not** mean auth, hosting, a second database, a wal
 
 | Surface | Count | Command |
 |---|---|---|
-| Routes | **108** | `php artisan tinker --execute="echo count(app('router')->getRoutes()->getRoutes());"` |
+| Routes | **110** | `php artisan tinker --execute="echo count(app('router')->getRoutes()->getRoutes());"` |
 | Vue pages | **62** | glob `resources/js/pages/**/*.vue` |
 | Vue components | **119** | glob `resources/js/components/**/*.vue` |
 | PHP test files | **275** (262 Feature, 13 Unit) | glob `tests/Feature/**/*.php`, `tests/Unit/**/*.php` |
@@ -138,6 +136,8 @@ non-goals stay cut. It does **not** mean auth, hosting, a second database, a wal
 | ADR-0029 per-level effects | `SupportCardEffects::forLevel()/atLevel()/valueAt()` at HEAD (`550fd542`); `DeckAnalysisReachedEffectsTest` exists |
 | CHANGELOG single heading | `grep -c '^## [Unreleased]' CHANGELOG.md` -> 1 |
 | Team Rank storage | column, model guard, `latestTeamRank()`, turn-event payload writer, seeder - see §4 |
+| Logo and favicon wiring | `public/favicon.png`, `resources/img/app-logo.png`, `resources/views/app.blade.php` (`<link rel="icon" type="image/png" href="/favicon.png">`), `resources/js/layouts/AppLayout.vue` (rail `<img :src="appLogo" ... data-rail-mark aria-hidden="true">`); `npm run build` emits `public/build/assets/app-logo-*.png`; `curl http://127.0.0.1:8000/favicon.png` -> `200 image/png`. **Left uncommitted** — no commit instruction received; commit as its own pathspec, never folded into S0.1's accessibility batch (different concern). |
+| Backgrounds | Not added and not referenced anywhere in code. `bg-light.png`, `bg-dark.png`, `bg-eva01.png` and renderer variants sit untracked at repo root per the standing instruction "revert back backgrounds ... stay previous state". |
 | Register contradictions | `audit_status_register.py` -> `CONTRADICTIONS: none` |
 
 ---
@@ -276,6 +276,32 @@ git rev-list --left-right --count origin/master...HEAD
 npm ci --dry-run
 git log --oneline --graph -12
 ```
+
+### S0.6 - Re-tune light/dark to Azure Daybreak / Midnight Circuit (owner-gated)
+
+**Objective.** Replace the current light page #F4F4FF / dark page #09090B with the Azure Daybreak (light) / Midnight Circuit (dark) palettes so neither theme sits at a contrast extreme, per the owner's 2026-11-18 paste. Theme wiring is already complete and green: server-side compose in `AppServiceProvider`, `useTheme()` hydration (`data-theme` on `<html>`, null = follow system), `Preference` keys `light`/`dark`/`eva01`, radio tiles on `Preferences/Edit` (SCREEN-024), and `data-rail-mark` untouched on the rail logo. `DesignTokensTest` is 17/17 and G-18/G-19 pass at the current palettes.
+
+**Why an owner ruling first.** The current palettes carry signed decisions: light-first default reversed 2026-09-27, HLF exact pixels and the Umamusume brand palette signed 2026-10-24, C1a warm-brown ink #6A5641 raised 2026-11-14, G-18 pairs measured 4.57/5.19/7.19. Swapping to Azure Daybreak / Midnight Circuit reverses those rulings and can break G-18: Azure Daybreak page #DDEEFF with ink #6A5641 measures about 3.7:1 (inferred), under 4.5:1. No token changes until D-13.
+
+**Deliverable (shovel-ready once D-13 lands).** CSS only, in `resources/css/app.css`:
+
+- `@theme static` light: `--color-page: #DDEEFF`, `--color-panel`/`--color-raised: #FFFFFF`, `--color-primary: #347DFF`, `--color-accent: #9DDCFF`, `--color-secondary: #B9F0DE`, `--color-highlight: #FF65B8`; ink tokens keep their C1a values pending G-18 re-measurement.
+- `html[data-theme='dark']`: `--color-page: #050A1B`, `--color-panel: #101F49`, `--color-raised: #101F49`, `--color-primary: #164BFF`, `--color-accent: #22C8FF`, `--color-secondary: #283B70`, `--color-highlight: #F02FA9`; ink #FCFCFC unchanged.
+- No `dark:` utilities, no skeleton palette classes (G-19), no new tokens beyond the palette set, `data-rail-mark` untouched, eva01 block not touched.
+
+**Dependencies.** D-13 owner ruling (apply Azure Daybreak / Midnight Circuit, keep signed palettes, or third measured option). S0.1-S0.4 landed so the diff is one concern only.
+
+**Acceptance.** D-13 recorded; if approved, the CSS diff above applied with no other file touched; `pint --test --format agent resources/css/app.css` passes; `DesignTokensTest` 17/17; G-18 pairs re-measured at least 4.5:1 in both themes (any failure goes to an ink ruling, never a silent default); `npm run typecheck` and `npm run build` green.
+
+**Verify.**
+```bash
+php artisan test --compact --filter=DesignTokensTest < /dev/null
+php vendor/bin/pint --test --format agent resources/css/app.css
+npm run typecheck
+npm run build
+```
+Plus a browser G-18 spot check on a shell page against resolved custom properties (DESIGN.md §2.1).
+
 
 ---
 
@@ -689,7 +715,7 @@ bash tools/gates.sh
 ## 11. Execution order and dependency graph
 
 ```
-Phase 0  S0.4 (noise) -> S0.1 (UI batch) -> S0.2 (gate) -> S0.3 (docs/ADRs) -> S0.5 (merge+push, owner)
+Phase 0  S0.4 (noise) -> S0.1 (UI batch) -> S0.2 (gate) -> S0.3 (docs/ADRs) -> S0.6 (light/dark, owner D-13) -> S0.5 (merge+push, owner)
 Phase 1  S1.1 (PHP baseline) --+-> S1.2 (browser sweep)
                                 +-> S1.3 (citations, independent)
 Phase 2  S2.1 (page-header) -> S2.3 (KI-114) -> S2.2 (KI-167) -> S2.4 (KI-127) -> S2.6 (register) -> S2.5 (KI-104, owner)
@@ -811,6 +837,7 @@ failures all die with the tier assertions is **inferred** from the sweep's class
 | D-10 | FQ-01..FQ-09 rulings for the primitive layer | S5.4 |
 | D-11 | OQ-2 / OQ-3 / OQ-6 rulings | S5.3, S5.6 |
 | D-12 | Cut `v3.0.0` after gates | S4.4 |
+| D-13 | Palette ruling: apply Azure Daybreak / Midnight Circuit, keep signed palettes, or third measured option | S0.6 |
 
 ---
 
@@ -856,6 +883,7 @@ The roadmap is complete when all of the following are true at one commit that is
 6. No `OPEN` KI names a shipped screen, `/api/v1`, or a schema surface.
 7. `VERSION.md` and `CHANGELOG.md` describe that commit, and `v3.0.0` tags it.
 8. An Independent Training run can be created, advanced and read back through the UI.
+9. The light/dark decision (D-13) is either applied and green (S0.6) or formally parked with a dated note - never silently reversed.
 
 Anything less is a stated partial, with the unrun gate named - never a document claiming progress in place of code.
 

@@ -170,6 +170,7 @@ None for Phases 0–2. Phase 3 changes audit/framework documents only; Phase 4 c
 |---|---|---|
 | 2026-11-18 | Created; re-baselined at `2546689e`; three audit findings excluded as already fixed; KI-166 made the primary execution target | AUD-20261118-001 needs implementation, but its findings predate current source |
 | 2026-11-18 | Execution re-baselined at `cfd8bd78`; §10 records measured verdicts for every slice | Peer commit landed one commit after the pair was written; all execution evidence needed a current HEAD |
+| 2026-11-19 | §12 Phase 5 added: five slices derived from a cited external-practice review (WCAG 2.2, GOV.UK validation, Inertia v3 deferred props, Baseline 2024), each measured at `fec658f8` | Research task: adopt published UI/UX practice; the internal audit only tested screen correctness |
 
 ---
 
@@ -222,4 +223,175 @@ reserves 96 px, content ends above it), the empty cockpit being a dead end (it c
 first turn through Training" link), a "future" verification date (2026-11-02 is 16 days past), and the
 Dashboard's repeated absence wording (required by `Tile.vue` and `DESIGN.md` §5). Vision-model verdicts
 in this pass were wrong four times and are treated as leads only.
+
+---
+
+## 12. Phase 5 — External practice adopted (2026-11-19)
+
+Phases 0–4 are closed; this phase exists because a cited review of external UI/UX practice found four
+gaps the internal audit never looked for. The audit asked "is this screen correct?"; this phase asks
+"is this screen built the way the published standards now say to build it?".
+
+**Sources.** WCAG 2.2 (W3C Recommendation, 5 October 2023) · web.dev Web Vitals (last revised
+2024-10-31) · GOV.UK Design System validation and error-summary patterns · NN/g 10 Usability
+Heuristics (reviewed 2024-01-30) · Tailwind CSS v4 theme-variable docs · Inertia.js v3 deferred-props
+and prefetching docs · MDN Popover API · web.dev Baseline correction of 2025-02-07 · Chrome Modern Web
+Guidance, IME-safe enter-to-submit (revised 2026-11-01).
+
+**Measured at `fec658f8` (this session).** Every figure below came from a command run against the
+working tree; none is inherited from the audit.
+
+| Fact | Measured value | Command |
+|---|---|---|
+| Error-summary component or usage | **0 files** | `rg -in 'error-summary\|errorsummary\|error summary' resources/js app resources/views` |
+| Pages building forms with `useForm` | **24** | `rg -l 'useForm' resources/js/pages \| wc -l` |
+| Server-side Form Requests | **33** | `rg --files app/Http/Requests \| wc -l` |
+| Enter handlers with no `isComposing` guard | **4 components** (`SparkTargetPicker.vue:222`, `SearchableSkillPicker.vue:131`, `TraineeCombobox.vue:426`, `ui/Combobox.vue:150`) | `rg -n "'Enter'"`, then per-file `rg -c 'isComposing'` |
+| Enter handlers with the guard | **1** (`Career/TrainingDetail.vue:475-479`, includes the `keyCode === 229` fallback) | same |
+| `Inertia::defer` usages | **0** | `rg -n 'Inertia::defer' app \| wc -l` |
+| Pages setting `<Head title>` | **58 of 62** | `rg -ln '<Head' resources/js/pages \| wc -l` |
+| `aria-describedby` / `aria-invalid` / `role="alert"` / `role="status"` | 32 / 11 / 43 / 44 files | per-pattern `rg -c` |
+| Arbitrary Tailwind values | **209** (baseline; new one fails at 210) | `tools/ui-lint-baseline.json` `count` |
+| Focus-visible usage | 21 files; global reduced-motion override at `app.css:943` | `rg -c 'focus-visible'` |
+
+### 5.1 Error summary — the only gap with zero partial coverage
+
+**Objective.** Give every failed form write the GOV.UK "Recover from validation errors" shape: summary
+at the top of the form, keyboard focus moved to it, each item an anchor to its field, wording identical
+to the field message. The field-level half already exists (`aria-describedby` 32 files, `aria-invalid`
+11); the summary half does not exist at all.
+
+**Deliverable.** One `resources/js/components/ui/ErrorSummary.vue`: renders nothing with no errors, a
+`role="alert"` block with a linked list when errors exist, focuses itself on appear, anchors to the
+`aria-describedby` id convention already in use. Wired into the forms whose failure is most costly
+first (career preflight, deck select, turn entry, preferences), not all 24 at once. Page `<title>`
+prefixed `Error: ` on failure, built from the same `hasErrors` state that renders the summary.
+
+**Acceptance.** A browser case asserts that after a failed submit focus lands on the summary, the
+summary lists one entry per invalid field, and each entry's anchor resolves to that field's id. No
+component duplicates the existing per-field message text; `npm run lint:ui` takes no new arbitrary
+value.
+
+**Verify.**
+```bash
+npm run typecheck
+npm run lint:ui
+PLAYWRIGHT_PORT=8420 PLAYWRIGHT_SCRATCH_DB=$PWD/.scratch-uma/phase5/browser-8420.sqlite \
+  npx playwright test error-summary.spec.ts --workers=1
+```
+
+### 5.2 IME-safe Enter in the four unguarded components
+
+**Objective.** Stop premature submission while a Japanese/Chinese/Korean input method is composing.
+Enter confirms the conversion candidate; a handler that submits on `keydown` without checking
+`isComposing` sends a half-composed string. Trainer Desk stores and searches Japanese names, so this
+is a live defect class rather than a hypothetical.
+
+**Deliverable.** In `SparkTargetPicker.vue`, `SearchableSkillPicker.vue`, `TraineeCombobox.vue` and
+`ui/Combobox.vue`: call `event.preventDefault()` first, `return` on `event.isComposing`, and add the
+50 ms `compositionend` guard that Chrome's guidance prescribes for Safari's WebKit 165004 event-order
+bug. `TrainingDetail.vue` stays as it is - it already implements the pattern and is the reference.
+
+**Acceptance.** One spec case per component dispatches a composing `Enter` and asserts the form/selection
+did not commit, then a non-composing `Enter` and asserts it did. Guarding is additive: the four refusal
+cases must go red against the current tree.
+
+**Verify.**
+```bash
+npm run typecheck
+PLAYWRIGHT_PORT=8421 PLAYWRIGHT_SCRATCH_DB=$PWD/.scratch-uma/phase5/browser-8421.sqlite \
+  npx playwright test ime-enter.spec.ts --workers=1
+```
+
+### 5.3 Deferred props for the data-heavy reads
+
+**Objective.** Attack INP (≤ 200 ms at p75, the Core Web Vital that a dense cockpit fails) by not
+blocking first paint on secondary data. Inertia v3 ships `Inertia::defer()` with a `<Deferred>`
+fallback, a `rescue` slot and a `reloading` boolean; the repository uses none of it.
+
+**Deliverable.** `Inertia::defer()` on the cockpit and result panels' secondary props, grouped so the
+independent sets load in parallel; `<Deferred>` with a named fallback and a `rescue` retry on the
+client. Never defer a prop the page's primary decision needs - the deferral must be invisible to the
+first interaction.
+
+**Acceptance.** A feature test asserts the deferred key is absent from the first response payload and
+present in the partial reload; the page renders its fallback then the data with no layout shift
+(the G-18/CLS rule); a deferred failure renders the rescue path rather than a blank panel.
+
+**Verify.**
+```bash
+php artisan test --compact --filter=DeferredProps
+npx playwright test career-cockpit.spec.ts --workers=1
+```
+
+### 5.4 WCAG 2.2 AA assertions the current suite does not make
+
+**Objective.** Close the 2.2 delta. Conformance to 2.2 implies 2.0 and 2.1, and the existing gates
+cover 2.1 well; the additions below have partial practice but no assertion, so a regression is
+invisible today.
+
+**Deliverable.** Three cases in `tests/browser/accessibility.spec.ts` (or a sibling spec, since that
+file is already large):
+
+- **2.4.11 Focus Not Obscured (AA)** - focus the last control in a long form and assert its bounding
+  box is not fully covered by the sticky footer or the mobile bottom bar.
+- **2.5.8 Target Size (AA)** - assert every interactive element in a sample of screens is at least
+  24x24 CSS px, honoring the spacing exception. `min-h-9/10/11` appears 304 times already, so this is
+  guarding an existing convention, not demanding new styling.
+- **2.5.7 Dragging Movements (AA)** - assert each reorderable or drag-capable surface has a
+  single-pointer path. Currently satisfied by construction (click/radio grids); the case exists to
+  keep it that way.
+
+**Acceptance.** All three cases green; each one fails when its rule is violated, proven by a temporary
+revert recorded in the slice note. `npm run test:a11y` stays the entry point.
+
+**Verify.**
+```bash
+npm run test:a11y
+```
+
+### 5.5 Record the Baseline decisions instead of re-litigating them
+
+**Objective.** Stop the tree from adopting a platform feature on a blog post's word. `AGENTS.md` §13
+binds the project to **Baseline 2024**, so each candidate gets one recorded verdict with its date.
+
+**Deliverable.** A row per candidate in `DESIGN.md` or the slice note:
+
+| Candidate | Recorded status | Verdict |
+|---|---|---|
+| Popover API | Baseline as of **2025-01-27**; the April 2024 announcement was retracted over an iOS light-dismiss bug | Usable. `ProvenanceMark.vue` already uses `popover="hint"`. |
+| `<dialog>` + `showModal()` | Long-standing Baseline; native focus trap and Esc | Usable. Four files already use it. |
+| Container queries | Baseline; Tailwind v4 `--container-*` namespace | In use and load-bearing (`AppLayout`, `SetupLayout`, `DataTable`). |
+| `KeyboardEvent.isComposing` | Chrome 56 / Edge 79 / Firefox 31; Safari affected by WebKit 165004 | Usable **with** the 50 ms guard (slice 5.2). |
+| View Transitions | Same-document newly available; not Baseline-2024 across core browsers | **Defer past 3.0.0.** Revisit only with a measured motion budget. |
+
+**Acceptance.** Each row states its status and the date it was checked; no feature outside the table is
+introduced by a later slice without a row.
+
+**Verify.**
+```bash
+python tools/md_fence_check.py DESIGN.md docs/roadmap/UI-UX-IMPLEMENTATION-ROADMAP-2026-11-18.md
+```
+
+### 5.6 Not a slice - cross-references
+
+- **Arbitrary-value debt (209)** is owned by ADR-0028 FQ-01..FQ-09 and blocked on owner rulings; the
+  master roadmap carries it as S5.4. Do not start it here.
+- **`page-header.spec.ts` tier drift** is `S2.1` in the master roadmap (component correct, spec stale).
+- **Palette work** is `S0.6` there, gated on D-13.
+- **NN/g heuristics** need no slice: they are the review lens for 4.2's interaction table, not a
+  build target. The one heuristic with a live gap is #1 (visibility of system status) on the failure
+  path, which slice 5.1 closes.
+
+### Execution order and dependency
+
+```
+5.1 (error summary)  ── independent, highest value
+5.2 (IME Enter)      ── independent, smallest diff
+5.3 (deferred props) ── after 5.1 if the same controllers are touched
+5.4 (WCAG 2.2 cases) ── after 5.1/5.2 so the cases assert fixed behaviour
+5.5 (Baseline rows)  ── anytime; must land before 5.3's feature choice is cited
+```
+
+Nothing in Phase 5 is owner-gated. No new dependency, no schema change, no design-token change.
 
