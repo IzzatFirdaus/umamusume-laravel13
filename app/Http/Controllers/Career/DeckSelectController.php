@@ -11,6 +11,7 @@ use App\Models\DeckSlot;
 use App\Models\SupportCard;
 use App\Services\Career\SetupDraft;
 use App\Services\DataPipeline\ArtworkMirror;
+use App\Services\ScenarioCaps;
 use App\Services\SupportCardEffects;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -126,13 +127,27 @@ class DeckSelectController extends Controller
             return [];
         }
 
+        $caps = ScenarioCaps::caps($scenarioKey);
+        $label = (string) config("scenarios.scenarios.{$scenarioKey}.label", $scenarioKey);
+
         return match ($scenarioKey) {
             // A stated fact, not counsel: the cap figures are the scenario's own published ceilings
             // (`UMAMUSUME_REFERENCE.md` §2.1), and "Consider a Wit-heavy deck" was the tool advising a
-            // build — exactly the recommendation FR-F-3 bars the advisor from making (UX-20).
-            'unity_cup' => ["Unity Cup's Wit cap is 1800; the other four stats cap at 1300."],
+            // build, which is exactly the recommendation FR-F-3 bars the advisor from making (UX-20).
+            //
+            // The figures are READ from `ScenarioCaps`, never retyped. They used to be prose literals
+            // ("Wit cap is 1800", "Speed cap is 1600") sitting in a controller, which is the second
+            // home ADR-0015 exists to prevent: editing one `cap_bonus` in `config/scenarios.php` left
+            // this screen printing the old number with nothing failing. Only the sentences live here;
+            // every number in them comes from the single owner.
+            'unity_cup' => [
+                $label."'s Wit cap is ".$caps['Wit'].'; the other four stats cap at '
+                .$caps['Speed'].'.',
+            ],
             'trackblazer' => ['No Race Goals. Focus on Result Point objectives.'],
-            'our_grand_concert' => ['Speed cap is 1600. Lessons/Songs mechanic active.'],
+            'our_grand_concert' => [
+                'Speed cap is '.$caps['Speed'].'. Lessons/Songs mechanic active.',
+            ],
             'ura_finale' => ['Standard scenario. No extra systems beyond training, racing, and objectives.'],
             default => [],
         };

@@ -2,9 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Career\DeckSelectController;
 use App\Models\Scenario;
 use App\Services\DataPipeline\Parsers\GametoraScenarioParser;
 use App\Services\ScenarioCaps;
+use Inertia\Testing\AssertableInertia as Assert;
 
 /*
  * ADR-0015's open finding, closed.
@@ -129,4 +131,68 @@ it('agrees with the table when a row is stored from an absolute figure the parse
             expect($row->getAttribute('cap_'.strtolower($stat)))->toBe($value);
         }
     }
+});
+
+/*
+ * The two screens that PRINT a cap figure had their own copies of it, in prose, in a controller.
+ *
+ * `DeckSelectController::scenarioHints()` stated "Wit cap is 1800" and "Speed cap is 1600" as string
+ * literals, and `DatabaseController::scenarios()` computed `base + bonus` itself with no clamp. Both
+ * agreed with `ScenarioCaps` on the day they were written, which is exactly why nothing failed when a
+ * `cap_bonus` edit could have left them quoting a stale ceiling. These cases read the figure back out
+ * of the rendered surfaces and compare it to the single owner, so the next edit to `cap_bonus` fails
+ * here instead of shipping a second answer.
+ */
+it('states the deck-builder cap hints from ScenarioCaps, not from a literal', function (): void {
+    $controller = new ReflectionClass(DeckSelectController::class);
+    $method = $controller->getMethod('scenarioHints');
+    $instance = $controller->newInstanceWithoutConstructor();
+
+    foreach (['unity_cup', 'our_grand_concert'] as $key) {
+        /** @var list<string> $hints */
+        $hints = $method->invoke($instance, $key);
+        $joined = implode(' ', $hints);
+        $caps = ScenarioCaps::caps($key);
+
+        // Every figure the sentence prints must be one of this scenario's own published ceilings.
+        preg_match_all('/\b(\d{3,4})\b/', $joined, $matches);
+
+        expect($matches[1])->not->toBeEmpty("{$key}'s hint states no figure at all.");
+
+        foreach ($matches[1] as $printed) {
+            expect(array_map('strval', array_values($caps)))->toContain($printed);
+        }
+    }
+
+    // And the specific numbers the old literals carried are still what the owner computes, so this
+    // case fails if a `cap_bonus` edit moves a ceiling and the sentence is not re-derived.
+    expect(ScenarioCaps::caps('unity_cup')['Wit'])->toBe(1800)
+        ->and(ScenarioCaps::caps('our_grand_concert')['Speed'])->toBe(1600);
+});
+
+it('prints the Database matrix cap from ScenarioCaps, clamped the same way', function (): void {
+    $this->get(route('database.scenarios'))
+        ->assertOk()
+        ->assertInertia(function (Assert $page): void {
+            /** @var array<int, array<string, mixed>> $rows */
+            $rows = $page->toArray()['props']['scenarios'] ?? [];
+
+            expect($rows)->not->toBeEmpty();
+
+            // The payload is keyed by scenario key, not a list of rows carrying one.
+            foreach ($rows as $key => $row) {
+                $key = (string) $key;
+
+                /** @var array<int, array{stat: string, cap: int}> $caps */
+                $caps = $row['caps'];
+                $published = ScenarioCaps::caps($key);
+
+                foreach ($caps as $entry) {
+                    expect($entry['cap'])->toBe(
+                        $published[$entry['stat']],
+                        "{$key} {$entry['stat']} printed {$entry['cap']} but ScenarioCaps says {$published[$entry['stat']]}"
+                    );
+                }
+            }
+        });
 });

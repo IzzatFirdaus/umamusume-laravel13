@@ -8,6 +8,7 @@ use App\Models\RaceCatalogSlot;
 use App\Models\Umamusume;
 use App\Services\PageSize;
 use App\Services\RaceFacts;
+use App\Services\ScenarioCaps;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
@@ -229,6 +230,13 @@ class DatabaseController extends Controller
         foreach (config('scenarios.scenarios') as $key => $definition) {
             $caps = [];
 
+            // `ScenarioCaps` is the single owner of per-stat ceiling arithmetic (ADR-0015,
+            // `AGENTS.md` §8). This loop used to compute `base + bonus` itself, with no clamp against
+            // `config('scenarios.hard_cap')`, so a bonus large enough to pass the engine ceiling would
+            // have printed here as a legal cap the validator would then refuse: the matrix and the
+            // form quoting two different numbers for one stat.
+            $published = ScenarioCaps::caps((string) $key);
+
             foreach ($definition['cap_bonus'] as $stat => $bonus) {
                 $bonus = (int) $bonus;
 
@@ -236,7 +244,8 @@ class DatabaseController extends Controller
                     'stat' => (string) $stat,
                     'bonus' => $bonus,
                     // The published cap, base plus bonus as separate labelled terms (DESIGN.md §6.22).
-                    'cap' => $baseCap + $bonus,
+                    // `published` is the same figure the validators clamp against.
+                    'cap' => $published[(string) $stat] ?? $baseCap + $bonus,
                 ];
             }
 

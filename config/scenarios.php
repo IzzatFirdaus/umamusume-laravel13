@@ -161,6 +161,14 @@ return [
 
         'ura_finale' => [
             'label' => 'URA Finale',
+            // Which `uma.race_payouts.families` row prices a 1st place here. A fact about the
+            // scenario, so a controller never compares a scenario key to a literal to pick it
+            // (S1.15; `AGENTS.md` §7 bans scenario names outside this config).
+            'payout_family' => 'standard',
+            // Happy Meek is `ura_finale`'s own mechanic. A capability flag rather than a name
+            // comparison in the panel builder, so the copilot reads what the scenario
+            // declares instead of knowing which one it is (S1.15, `AGENTS.md` §7).
+            'happy_meek' => true,
             /* The client's own full scenario label, where a source states one (walk-8 U-01 /
                R7-63). The short `label` above stays what every surface prints; this is the fuller
                client name the walk found had no home. Sources, verbatim, `UMAMUSUME_REFERENCE.md`
@@ -415,6 +423,14 @@ return [
 
         'unity_cup' => [
             'label' => 'Unity Cup',
+            // Which `uma.race_payouts.families` row prices a 1st place here. A fact about the
+            // scenario, so a controller never compares a scenario key to a literal to pick it
+            // (S1.15; `AGENTS.md` §7 bans scenario names outside this config).
+            'payout_family' => 'standard',
+            // Happy Meek is `ura_finale`'s own mechanic. A capability flag rather than a name
+            // comparison in the panel builder, so the copilot reads what the scenario
+            // declares instead of knowing which one it is (S1.15, `AGENTS.md` §7).
+            'happy_meek' => false,
             /* The client's own full scenario label, where a source states one (walk-8 U-01 /
                R7-63). The short `label` above stays what every surface prints; this is the fuller
                client name the walk found had no home. Sources, verbatim, `UMAMUSUME_REFERENCE.md`
@@ -672,6 +688,14 @@ return [
 
         'trackblazer' => [
             'label' => 'Trackblazer',
+            // Which `uma.race_payouts.families` row prices a 1st place here. A fact about the
+            // scenario, so a controller never compares a scenario key to a literal to pick it
+            // (S1.15; `AGENTS.md` §7 bans scenario names outside this config).
+            'payout_family' => 'trackblazer',
+            // Happy Meek is `ura_finale`'s own mechanic. A capability flag rather than a name
+            // comparison in the panel builder, so the copilot reads what the scenario
+            // declares instead of knowing which one it is (S1.15, `AGENTS.md` §7).
+            'happy_meek' => false,
             /* The client's own full scenario label, where a source states one (walk-8 U-01 /
                R7-63). The short `label` above stays what every surface prints; this is the fuller
                client name the walk found had no home. Sources, verbatim, `UMAMUSUME_REFERENCE.md`
@@ -716,6 +740,15 @@ return [
                 'shop' => true,
                 'epithet_routes' => true,
                 'team_rank_ladder' => false,
+            ],
+            /* The screen's own caveat about where its numbers come from. A page that branched on the
+               scenario's NAME to print this was both a literal-name switch (AGENTS.md §7) and, for Our
+               Grand Concert, dead code: the condition tested 'grand_concert' while the config key is
+               'our_grand_concert', so the concert cockpit never printed its caveat at all. It lives
+               here so a fifth scenario declares its own note and no page knows a scenario name. */
+            'support_data_note' => [
+                'lead' => 'Illustrative support data.',
+                'body' => 'The Trackblazer figures on this screen are what the scenario matrix records, and that matrix was verified on 2026-09-27. Anything the matrix does not carry prints as an absence rather than an estimate.',
             ],
             'scenario_links' => [],
             'facility_level_source' => 'repetition_plus_purchases',
@@ -1114,6 +1147,14 @@ return [
 
         'our_grand_concert' => [
             'label' => 'Our Grand Concert',
+            // Which `uma.race_payouts.families` row prices a 1st place here. A fact about the
+            // scenario, so a controller never compares a scenario key to a literal to pick it
+            // (S1.15; `AGENTS.md` §7 bans scenario names outside this config).
+            'payout_family' => 'standard',
+            // Happy Meek is `ura_finale`'s own mechanic. A capability flag rather than a name
+            // comparison in the panel builder, so the copilot reads what the scenario
+            // declares instead of knowing which one it is (S1.15, `AGENTS.md` §7).
+            'happy_meek' => false,
             /* The client's own full scenario label, where a source states one (walk-8 U-01 /
                R7-63). The short `label` above stays what every surface prints; this is the fuller
                client name the walk found had no home. Sources, verbatim, `UMAMUSUME_REFERENCE.md`
@@ -1213,6 +1254,11 @@ return [
             | primary read that sentence was false, so it moved. D-241 and gate G-41 are unaffected by the
             | value itself: what they govern is the panels and widgets below, which stay off.
             */
+            // Same contract as Trackblazer's above: the caveat is config, not a name test in a page.
+            'support_data_note' => [
+                'lead' => 'Illustrative support data.',
+                'body' => 'The concert loop and its payouts are what the scenario matrix records, and that matrix was verified on 2026-09-27. A performance type the run has not recorded prints Not recorded rather than a zero.',
+            ],
             'documented' => true,
             /*
             | The rendering switch the two screens above read, and the only one. documented above is a
