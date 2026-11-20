@@ -56,7 +56,7 @@ it('recommends Rest below the advisory line and names the line and the recovery'
     // Rule 2. 50 is the only sourced threshold (ADR-0001 §3).
     //
     // Dated correction 2026-11-06 (§13.3): this case used to assert the reason carries `30` and its
-    // comment called +30 "the sourced recovery". It is not: `UMAMUSUME_REFERENCE.md:190` gives +50 as
+    // comment called +30 "the sourced recovery". It is not: `UMAMUSUME_REFERENCE.md:284` gives +50 as
     // the modal recovery, +70 on a big success, and +30 as the FAILURE tier. The old assertion pinned
     // the defect rather than the mechanic. The reason now names the modal figure, so the assertion
     // moved to 50, and 30 is still asserted because the failure tier is named in the same sentence.

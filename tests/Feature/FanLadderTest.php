@@ -6,7 +6,7 @@ use App\Services\FanLadder;
 
 /**
  * The fan class ladder, filled from the client's nine-step pyramid
- * (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:474`, SR §1.15 frame-verified): each tier's
+ * (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:531`, SR §1.15 frame-verified): each tier's
  * published threshold is the count that REACHES it, so a band spans from its own threshold to the
  * next tier's. The audited reading (209,245 fans -> `Star`, 30,755 to `Top Star`) is unchanged by
  * the fill - that is the regression case below.
@@ -48,7 +48,7 @@ it('places a count at each documented threshold in that threshold\'s class', fun
 
 it('answers nothing below the first fan-counted tier rather than inventing a class', function (): void {
     // `Beginner` and `Debut / Maiden` are keyed on "1st place" and an entry class, not a fan count
-    // (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:474`). A count under Bronze has no class this
+    // (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:531`). A count under Bronze has no class this
     // tool can claim, so it answers null instead of borrowing Bronze's name.
     expect(FanLadder::classFor(0))->toBeNull()
         ->and(FanLadder::classFor(4_999))->toBeNull()

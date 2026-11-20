@@ -745,3 +745,28 @@ it('does not leak a Japan-only skill into the default Global scope', function ()
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page->where('skills.data', []));
 });
+
+it('distinguishes intentionally untyped skills from skills with unknown effect classification', function (): void {
+    Skill::factory()->create([
+        'release_status' => 'GlobalReleased',
+        'name_is_client' => true,
+        'name' => 'Deliberately untyped',
+        'type' => null,
+        'condition_groups' => [['effects' => [['type' => 1, 'value' => -400000]]]],
+    ]);
+    Skill::factory()->create([
+        'release_status' => 'GlobalReleased',
+        'name_is_client' => true,
+        'name' => 'Unknown classification',
+        'type' => null,
+        'condition_groups' => [['effects' => [['type' => 999, 'value' => 10]]]],
+    ]);
+
+    test()->get(route('skills.index', ['type' => 'Unspecified']))
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('skills.data.0.name', 'Deliberately untyped')
+            ->where('skills.data.0.type', null)
+            ->where('skills.data.0.type_withheld', true)
+            ->where('skills.data.1.name', 'Unknown classification')
+            ->where('skills.data.1.type_withheld', false));
+});

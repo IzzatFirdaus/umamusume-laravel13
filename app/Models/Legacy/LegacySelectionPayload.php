@@ -55,7 +55,7 @@ final readonly class LegacySelectionPayload
      * The letter ranks the client shows for a Legacy's own standing, as read off the screen. Small on
      * purpose: this is the vocabulary the client prints, not a computed grade. `UG` is the letter the
      * canonical Rice Shower ancestry prints for Legacy 2 and both of her grandparents
-     * (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:153-155`); it was missing until the Phase 1 walk of
+     * (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:203-205`); it was missing until the Phase 1 walk of
      * 2026-10-11, and its absence discarded the whole Legacy save rather than the one field.
      */
     public const RANK_LETTERS = ['G', 'F', 'E', 'D', 'C', 'B', 'A', 'S', 'B+', 'A+', 'S+', 'UG'];
@@ -65,13 +65,15 @@ final readonly class LegacySelectionPayload
     public const SPARK_KINDS = ['blue', 'pink', 'green', 'white', 'scenario'];
 
     /**
-     * The three things a Spark's target can be, and the ten aptitude dimensions. The category is a
+     * The four things a Spark's target can be, and the ten aptitude dimensions. The category is a
      * transient form field, not a stored one: the payload keeps the target string verbatim (`ADR-0010`),
-     * and the category exists so a write can refuse `Stat -> Late Surger` at the boundary.
+     * and the category exists so a write can refuse `Stat -> Late Surger` at the boundary. `Race` is the
+     * competition family of a White Spark (`UMAMUSUME_REFERENCE.md:1097`): it shares the `white` display
+     * kind but its target is a race name the client printed, never a stat, aptitude or skill.
      *
      * @var list<string>
      */
-    public const SPARK_CATEGORIES = ['Stat', 'Aptitude', 'Skill'];
+    public const SPARK_CATEGORIES = ['Stat', 'Aptitude', 'Skill', 'Race'];
 
     /**
      * The ten aptitude dimensions a Spark can name, as the client's own words.
@@ -260,7 +262,7 @@ final readonly class LegacySelectionPayload
 
         // The parent's headline Spark (`ADR-0010` Amendment 2026-10-31). An index into `sparks`, not a
         // claim about which Spark fires: career start fires the recorded stat and aptitude factors
-        // regardless (`UMAMUSUME_REFERENCE.md:645`, `:692`). Stored only when present, so a payload
+        // regardless (`UMAMUSUME_REFERENCE.md:1062`, `:1142`). Stored only when present, so a payload
         // that never had one keeps its shape.
         $pick = self::nullableInt($legacy['pick'] ?? null, "Legacy #{$index} pick");
 

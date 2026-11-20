@@ -163,6 +163,8 @@ class SkillController extends Controller
                     'release_status' => $skill->release_status?->value,
                     'is_unique' => $skill->is_unique,
                     'type' => $skill->type,
+                    'type_withheld' => $skill->type === null
+                        && GametoraSkillsParser::classifyEffects($skill->condition_groups)['withheld'],
                     'sp_cost' => $skill->sp_cost,
                     // The activation predicate the source states, one entry per condition group, printed
                     // verbatim in monospace beside the readable name (`skills.html` annotation 1). Null is

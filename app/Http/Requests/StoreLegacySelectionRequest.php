@@ -199,9 +199,12 @@ class StoreLegacySelectionRequest extends FormRequest
      *
      * The category is the form's own control and is not stored; a hand-made POST with no category keeps
      * the free-text target the rules already allow. When a category is posted, `Stat` is checked against
-     * the stat matrix and `Aptitude` against the ten client dimensions. `Skill` is left as the verbatim
-     * name the resolver reads from the skills catalogue (`ADR-0011`); the UI offers only catalogue rows,
-     * and the stored target is the string the Trainer read, not an id.
+     * the stat matrix and `Aptitude` against the ten client dimensions. `Skill` and `Race` are left as
+     * the verbatim name the resolver reads from the skills catalogue (`ADR-0011`) or the client-spelled
+     * race list (`config('uma.legacy_spark_targets.race')`); the UI offers only those rows, and the
+     * stored target is the string the Trainer read, not an id. Race names such as `Japan C.` are
+     * abbreviated on the client, so normalising them against the race catalogue would store a spelling
+     * the Trainer did not read; both families stay free text at this boundary.
      *
      * @param  array<string, mixed>  $spark
      */

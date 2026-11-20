@@ -15,7 +15,7 @@ use App\Services\ScenarioCaps;
  * amendment, and `ADR-0020` §3's record-only stance by the amendment of the same date. It is a
  * separate object so `AncestryGraph` keeps its "computes nothing" charter literally.
  *
- * **It computes one figure and no more.** Per `UMAMUSUME_REFERENCE.md:645`, career start is
+ * **It computes one figure and no more.** Per `UMAMUSUME_REFERENCE.md:1062`, career start is
  * deterministic for stat and aptitude factors, so the sum is arithmetic on a stated table rather than
  * a forecast: `:420` prices the raise at +16 per ★3 basic-ability factor, and `ScenarioCaps::capRaise()`
  * is the only place that number appears. No score, no affinity payout, no Spark roll, no ranking.

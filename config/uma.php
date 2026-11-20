@@ -39,6 +39,41 @@ return [
     ],
 
     /*
+     * Spark targets the Trainer reads off the Legacy screen but that are not rows in the skill
+     * catalogue. Both doors build their target pickers from these lists; a target is stored verbatim
+     * (`ADR-0010`), so the spelling here is the client's own and is never normalised.
+     *
+     * The race strings are the fifteen distinct competition-spark names in the canonical Rice Shower
+     * tree (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:246-252`): eighteen entries, of which Osaka Hai,
+     * Japan C. and NHK Mile C. each appear twice. The catalogue's longer names (NHK Mile Cup,
+     * Asahi Hai Futurity Stakes) are deliberately NOT substituted, because storing a different
+     * spelling from the one read breaks the record-only contract. One guide's vocabulary is a known
+     * ceiling: another sourced run's names are added here, never invented at runtime.
+     */
+    'legacy_spark_targets' => [
+        'race' => [
+            'Oka Sho',
+            'Victoria Mile',
+            'Shuka Sho',
+            'Japan C.',
+            'Osaka Hai',
+            'Tenno Sho (Autumn)',
+            'Kikuka Sho',
+            'URA Finale',
+            'Takarazuka Kinen',
+            'Asahi Hai F.S.',
+            'Tenno Sho (Spring)',
+            'NHK Mile C.',
+            'Sprinters S.',
+            'JBC L. Classic',
+            'Tokyo Daishoten',
+        ],
+        'skill' => [
+            'Ignited Spirit: Guts +',
+        ],
+    ],
+
+    /*
      * Adding a source requires a robots.txt/rate-limit review and one parser class
      * per source (PRD OQ-2, AGENTS.md Data Engineer rules).
      *
@@ -591,7 +626,7 @@ return [
 
     /*
      * The fan class ladder, from the client's own nine-step pyramid
-     * (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:474`; restated in
+     * (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:531`; restated in
      * `docs/audits/ux-walkthroughs/rice-shower-unity-cup-ux-walk-9.md:194`, SR §1.15 frame-verified;
      * `docs/research-scratch/DESIGN-CORPUS.md:1388-1400`, rule D-272 — one scale, never merged with
      * race-entry gates). Half-open `[from, to)`, matching `FanLadder::bandFor()`.

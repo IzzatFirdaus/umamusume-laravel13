@@ -198,7 +198,7 @@ final class GametoraSkillsParser implements SkillSourceParser
             'rarity' => $rarity,
             'is_unique' => $rarity !== null && in_array($rarity, self::UNIQUE_CLASS_CODES, true),
             'sp_cost' => isset($skill['cost']) && is_int($skill['cost']) ? $skill['cost'] : null,
-            'type' => $this->category($skill['condition_groups'] ?? null),
+            'type' => self::classifyEffects($skill['condition_groups'] ?? null)['type'],
             'condition_groups' => $this->conditionGroups($skill['condition_groups'] ?? null),
             // P3: description and distance parsing
             'description' => $description,
@@ -218,23 +218,19 @@ final class GametoraSkillsParser implements SkillSourceParser
     }
 
     /**
-     * Speed, Recovery, Passive — or null.
+     * Single positive type when supported by the recorded effects. Mixed known types or
+     * non-positive effects establish that the classifier deliberately leaves the skill untyped.
      *
-     * Null on three conditions, each of them a refusal to guess: any effect code outside the table above,
-     * more than one category in one skill (a recovery *and* velocity effect is not one type), and no
-     * effect at all.
-     *
-     * @param  mixed  $groups  mixed: the caller is reading a document, not a schema
+     * @return array{type: string|null, withheld: bool}
      */
-    private function category(mixed $groups): ?string
+    public static function classifyEffects(mixed $groups): array
     {
-        if (! is_array($groups)) {
-            return null;
-        }
-
+        /** @var array<string, true> $categories */
         $categories = [];
+        $unmapped = false;
+        $nonPositive = false;
 
-        foreach ($groups as $group) {
+        foreach (is_array($groups) ? $groups : [] as $group) {
             if (! is_array($group) || ! is_array($group['effects'] ?? null)) {
                 continue;
             }
@@ -242,20 +238,24 @@ final class GametoraSkillsParser implements SkillSourceParser
             foreach ($group['effects'] as $effect) {
                 $code = is_array($effect) ? ($effect['type'] ?? null) : null;
                 $value = is_array($effect) ? ($effect['value'] ?? null) : null;
+                $nonPositive = $nonPositive || (is_int($value) && $value <= 0);
 
-                // The code names an axis and the sign names the direction, and only the pair is a
-                // category: `G1 Averseness` carries the same code 1 as `Right-Handed ◎` while meaning
-                // the opposite of it. A non-positive value is therefore not evidence of `Passive`.
-                if (! is_int($code) || ! is_int($value) || $value <= 0
-                    || ! isset(self::CATEGORY_BY_EFFECT_CODE[$code])) {
-                    return null;
+                if (! is_int($code) || ! is_int($value) || ! isset(self::CATEGORY_BY_EFFECT_CODE[$code])) {
+                    $unmapped = true;
+
+                    continue;
                 }
 
-                $categories[(string) self::CATEGORY_BY_EFFECT_CODE[$code]] = true;
+                $categories[self::CATEGORY_BY_EFFECT_CODE[$code]] = true;
             }
         }
 
-        return count($categories) === 1 ? (string) array_key_first($categories) : null;
+        $withheld = $nonPositive || count($categories) > 1;
+
+        return [
+            'type' => $unmapped || $withheld ? null : array_key_first($categories),
+            'withheld' => $withheld,
+        ];
     }
 
     /**

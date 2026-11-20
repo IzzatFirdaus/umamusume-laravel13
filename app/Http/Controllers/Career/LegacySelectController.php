@@ -194,20 +194,32 @@ class LegacySelectController extends Controller
             'sparkTargets' => [
                 'Stat' => array_values((array) config('scenarios.stat_order')),
                 'Aptitude' => LegacySelectionPayload::SPARK_APTITUDES,
+                // The competition family of a White Spark: race names the client printed, keyed to
+                // config so both doors offer the same exact spellings (`config/uma.php` carries the
+                // source anchor and the reason no catalogue title is substituted).
+                'Race' => array_values((array) config('uma.legacy_spark_targets.race')),
                 // S-A-P02.5: the Japanese name rides beside the English one. `SkillController.php:515`
                 // states the rule this answers — *"The rule is search matches what the user can see"* —
                 // and 605 of the 623 Global-client skills carry a `name_ja` that differs from `name`.
                 // The option stays the English `name`, because that is the string the payload stores
-                // (`ADR-0010`); the Japanese name is the second way a Trainer finds it.
-                'Skill' => Skill::query()
-                    ->availableOnGlobal()
-                    ->orderBy('name')
-                    ->get(['name', 'name_ja'])
-                    ->map(static fn (Skill $skill): array => [
-                        'name' => $skill->name,
-                        'name_ja' => $skill->name_ja,
-                    ])
-                    ->all(),
+                // (`ADR-0010`); the Japanese name is the second way a Trainer finds it. The configured
+                // spark-only names sit beside them with no Japanese reading, because the client prints
+                // none for those strings.
+                'Skill' => array_merge(
+                    Skill::query()
+                        ->availableOnGlobal()
+                        ->orderBy('name')
+                        ->get(['name', 'name_ja'])
+                        ->map(static fn (Skill $skill): array => [
+                            'name' => $skill->name,
+                            'name_ja' => $skill->name_ja,
+                        ])
+                        ->all(),
+                    array_map(
+                        static fn (string $name): array => ['name' => $name, 'name_ja' => null],
+                        (array) config('uma.legacy_spark_targets.skill'),
+                    ),
+                ),
             ],
             'notice' => LegacyController::RECORD_ONLY_NOTICE,
             // The step's write URL, supplied server-side the way CareerLayout.vue:11 and

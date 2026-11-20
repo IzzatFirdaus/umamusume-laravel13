@@ -284,19 +284,28 @@ class LegacyController extends Controller
             'sparkTargets' => [
                 'Stat' => array_values((array) config('scenarios.stat_order')),
                 'Aptitude' => LegacySelectionPayload::SPARK_APTITUDES,
+                // The competition family of a White Spark, from the same config the wizard's step
+                // reads: both doors post against one request, so they cannot offer different spellings.
+                'Race' => array_values((array) config('uma.legacy_spark_targets.race')),
                 // S-A-P02.5: the same Global-client read the wizard's step sends, the same reason, and the
                 // same Japanese name beside the English one — both doors post against one request
                 // (`StoreLegacySelectionRequest`), so a list that differed between them would offer one
-                // field two different vocabularies.
-                'Skill' => Skill::query()
-                    ->availableOnGlobal()
-                    ->orderBy('name')
-                    ->get(['name', 'name_ja'])
-                    ->map(static fn (Skill $skill): array => [
-                        'name' => $skill->name,
-                        'name_ja' => $skill->name_ja,
-                    ])
-                    ->all(),
+                // field two different vocabularies. Configured spark-only names carry no Japanese reading.
+                'Skill' => array_merge(
+                    Skill::query()
+                        ->availableOnGlobal()
+                        ->orderBy('name')
+                        ->get(['name', 'name_ja'])
+                        ->map(static fn (Skill $skill): array => [
+                            'name' => $skill->name,
+                            'name_ja' => $skill->name_ja,
+                        ])
+                        ->all(),
+                    array_map(
+                        static fn (string $name): array => ['name' => $name, 'name_ja' => null],
+                        (array) config('uma.legacy_spark_targets.skill'),
+                    ),
+                ),
             ],
             'notice' => self::RECORD_ONLY_NOTICE,
         ]);

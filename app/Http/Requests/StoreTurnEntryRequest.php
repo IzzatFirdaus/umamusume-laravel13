@@ -9,6 +9,7 @@ use App\Enums\MoodTier;
 use App\Enums\PerformanceType;
 use App\Enums\TurnChoice;
 use App\Models\TrainingRun;
+use App\Models\TurnEntry;
 use App\Services\ScenarioCaps;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
@@ -67,6 +68,7 @@ class StoreTurnEntryRequest extends FormRequest
         $run = $this->route('run');
         $runModel = $run instanceof TrainingRun ? $run : null;
         $turn = $this->route('turn');
+        $turnModel = $turn instanceof TurnEntry ? $turn : null;
         $staged = $this->input('stage') !== null;
         $caps = ScenarioCaps::forRun($runModel);
 
@@ -94,7 +96,24 @@ class StoreTurnEntryRequest extends FormRequest
             : [];
         $allowedChoices = array_merge($sharedChoices, $declaredExtras);
 
-        return [
+        /*
+         * S1.18: three of the rail's keys have no column and no event on the correction path.
+         * `performance` is persisted by `storeTurn` through `PerformancePayload` as a `Scenario`
+         * event, and `stage`/`previewed` are the store door's own control flow; `updateTurn`
+         * consumed none of them, so `validated()` carried them and `turnAttributes()` dropped them
+         * without a word (`preventSilentlyDiscardingAttributes` is off). The rules stay, because
+         * deleting them would break the store path that does persist them; on the correction door
+         * they are refused instead, so a value is either written or answered with an error.
+         *
+         * @var array<string, mixed> $updateOnly
+         */
+        $updateOnly = $turnModel === null ? [] : [
+            'stage' => ['prohibited'],
+            'previewed' => ['prohibited'],
+            'performance' => ['prohibited'],
+        ];
+
+        return $updateOnly + [
             'turn' => [
                 'required',
                 'integer',
@@ -102,6 +121,12 @@ class StoreTurnEntryRequest extends FormRequest
                 Rule::unique('turn_entries', 'turn')
                     ->where(fn ($q) => $q->where('training_run_id', $runModel?->id))
                     ->ignore($turn),
+                // A correction cannot renumber its row. `turn` is the number `turn_events` and
+                // `race_entries` address a turn by, and neither carries a `turn_entry_id` for the
+                // event side, so a renumber would have to re-key both tables in the same write. The
+                // write path drops the key; this rule is what stops that drop being silent, which is
+                // the difference between a refused request and a value nobody told the Trainer about.
+                ...($turnModel === null ? [] : [Rule::in([$turnModel->turn])]),
             ],
             'speed' => ['required', 'integer', 'between:0,'.$caps['Speed']],
             'stamina' => ['required', 'integer', 'between:0,'.$caps['Stamina']],

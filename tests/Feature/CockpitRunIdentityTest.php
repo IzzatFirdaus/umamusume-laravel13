@@ -91,7 +91,7 @@ final class CockpitRunIdentityTest extends TestCase
     public function test_reads_a_fan_count_below_the_first_fan_counted_band_as_a_bare_number(): void
     {
         // `Beginner` and `Debut / Maiden` are keyed on "1st place" and an entry class, not a fan
-        // count (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:474`), so the filled ladder's first
+        // count (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:531`), so the filled ladder's first
         // band starts at Bronze 5,000. Under it the ladder names no class, so the class and the
         // gap are null while the count itself still crosses the wire: the row prints the number
         // alone rather than a class nobody sourced (`FanLadder`'s own contract).

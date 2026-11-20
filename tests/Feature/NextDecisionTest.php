@@ -193,7 +193,7 @@ it('prints the constant a figure rests on with its source, its read date and its
 it('presents the rest modal figure rather than the failure tier (§13.3)', function (): void {
     // §13.3: `config/advisor.php:32` declared `rest_recovery => 30` with `confidence => 'current'`, and
     // `NextDecision.php:485` printed it as "Rest recovers +30 Energy". The reference is explicit
-    // (`UMAMUSUME_REFERENCE.md:190`): +50 is the modal recovery, +70 the big success, and +30 is the
+    // (`UMAMUSUME_REFERENCE.md:284`): +50 is the modal recovery, +70 the big success, and +30 is the
     // FAILURE tier, sometimes with a stayed-up-late penalty. The same file's own `recorded_forecast`
     // branches (:238-243) already print all three. So the surface quoted the worst case as the figure.
     //

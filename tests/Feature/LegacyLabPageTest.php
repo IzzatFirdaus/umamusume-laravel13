@@ -301,7 +301,7 @@ it('projects 1432 for a pair of ★3 Blue Speed parents against a 1400 cap', fun
 });
 
 it('projects 1416 for a ★3 plus ★2 Blue pair and states the ★3-only basis', function (): void {
-    // Ver 2 gap closure: the reference (§1.3.4, UMAMUSUME_REFERENCE.md:420) states +16 per ★3 Blue
+    // Ver 2 gap closure: the reference (§1.3.4, UMAMUSUME_REFERENCE.md:663) states +16 per ★3 Blue
     // factor and no ★1/★2 figure, so capRaise returns 16 only for stars === 3. A ★3/★2 pair projects
     // raise 16 (not 24, not the wireframe's +8 filler at legacy-builder.html:78), and projectionNote
     // states the conservative reading of silence so a Trainer is not shown an undercounted ceiling

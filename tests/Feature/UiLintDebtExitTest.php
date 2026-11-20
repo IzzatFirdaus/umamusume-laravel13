@@ -41,6 +41,32 @@ VUE);
     File::deleteDirectory($root);
 });
 
+it('exits non-zero when a Card is nested inside another Card', function (): void {
+    $root = sys_get_temp_dir().DIRECTORY_SEPARATOR.'uma-lint-fixture-'.uniqid();
+
+    File::ensureDirectoryExists($root.'/resources/css');
+    File::ensureDirectoryExists($root.'/resources/js/pages');
+    File::ensureDirectoryExists($root.'/tools');
+
+    File::put($root.'/resources/css/app.css', ':root {
+    color: #000;
+}
+');
+    File::put(
+        $root.'/resources/js/pages/Fixture.vue',
+        File::get(base_path('tests/Fixtures/nested-card.vue')),
+    );
+    File::put($root.'/tools/ui-lint-baseline.json', json_encode(['count' => 0, 'allowlist' => []], JSON_PRETTY_PRINT));
+
+    $result = Process::path($root)->run(['node', base_path('tools/ui-framework-check.mjs')]);
+
+    // Structural rules are fatal on their own, independent of the arbitrary-value baseline.
+    expect($result->exitCode())->toBe(1)
+        ->and($result->errorOutput())->toContain('[card-in-card]');
+
+    File::deleteDirectory($root);
+});
+
 it('keeps reporting debt at zero exit while the count holds', function (): void {
     $root = sys_get_temp_dir().DIRECTORY_SEPARATOR.'uma-lint-fixture-'.uniqid();
 

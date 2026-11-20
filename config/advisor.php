@@ -31,7 +31,7 @@ return [
     'constants' => [
         'rest_recovery' => [
             // §13.3: this constant used to hold `30` with `confidence => 'current'`, so the advisor
-            // printed the FAILURE tier as the recovery figure. `UMAMUSUME_REFERENCE.md:190` states the
+            // printed the FAILURE tier as the recovery figure. `UMAMUSUME_REFERENCE.md:284` states the
             // three tiers: +50 modal, +70 big success, +30 failure (sometimes carrying a stayed-up-late
             // penalty). The modal figure is the one a forecast uses; the other two are named beside it
             // so the copy can say which is which instead of quoting the worst case as the norm.
