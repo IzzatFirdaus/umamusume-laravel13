@@ -166,6 +166,7 @@ Tests use Pest 4, feature-first, with a global `TestCase` + `RefreshDatabase` bi
 | Accessibility tests               | `npm run test:a11y`                                                                                 |
 | Fresh DB + offline catalog data   | `php artisan migrate:fresh --seed`                                                                  |
 | Fetch / replay / backup           | `php artisan uma:fetch`, `uma:reparse <source>`, `uma:backup`                                       |
+| Enrich race reference rows        | `php artisan uma:enrich-races` (offline from committed seed bodies; stamps provenance)              |
 | Mirror catalog artwork            | `php artisan uma:fetch-art` (options `--kind`, `--dry-run`, `--refetch`); manual only, `ADR-0021`   |
 | Route list                        | `php artisan route:list`                                                                            |
 
@@ -176,6 +177,7 @@ Tests use Pest 4, feature-first, with a global `TestCase` + `RefreshDatabase` bi
 - Storage is SQLite only, WAL + `busy_timeout`, so the web request and queue worker coexist (NFR-4).
 - Seeders: `UmamusumeSeeder` (two illustrative trainees), `UmamusumeRosterSeeder` (committed roster), `SkillSeeder` (nine names the skills import later adopts), `SourceDocumentSeeder` (every committed body through `PipelineRunner`), `ScenarioSlotSeeder` (URA finale goal races). Order in `DatabaseSeeder` is load-bearing.
 - Snapshots land in `storage/app/private/snapshots` (gitignored, hashed). Trainer data (runs, turns, manual edits) is never deleted or overwritten by the engine.
+- `uma:enrich-races` reads the committed track/fan/reward bodies and stamps the contributing source URLs on every row it changes. Rows a Trainer edited (`is_manual`) are skipped and counted, never overwritten; the inline provenance is the record of that fetch because `data_sources` cannot hold a non-trainee foreign key (`ADR-0008`).
 
 ## Main Workflows
 

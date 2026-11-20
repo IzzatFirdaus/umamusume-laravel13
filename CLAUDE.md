@@ -273,7 +273,8 @@ this paragraph is the only repo-wide mechanism for the memory layer it describes
 - `git status` before you start and `git diff` before you report. This tree frequently holds
   uncommitted work from other sessions: do not revert it, do not reformat it, do not commit
   it. Scope your edits and your tools to your own files.
-- There is no CI, so the diff is the review. `CHANGELOG.md` and `VERSION.md` are tracked
+- CI is build-only here (three GitHub workflows, none running a §9 gate), so the diff is the review.
+  `CHANGELOG.md` and `VERSION.md` are tracked
   files: `CHANGELOG.md` is updated by the Docs Writer on significant landings
   (`AGENTS.md` §3 "Documentation map", §14 "Git and change management").
 

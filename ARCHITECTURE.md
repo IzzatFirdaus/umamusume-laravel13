@@ -314,6 +314,8 @@ GET /api/v1/umamusume?status=&search=&page=&pageSize=   -> { data: [Umamusume], 
 GET /api/v1/umamusume/{slug}                            -> { data: Umamusume } (includes aliases, sources)
 GET /api/v1/training-runs?page=                         -> { data: [TrainingRunSummary], pagination }
 GET /api/v1/training-runs/{id}                          -> { data: TrainingRun } (includes turns, skills)
+GET /api/v1/support-cards?page=&search=&type=&rarity=   -> { data: [SupportCard], pagination }
+GET /api/v1/support-cards/{supportCard}                 -> { data: SupportCard }
 ```
 
 Error shape (every non-2xx):
@@ -326,10 +328,12 @@ Status mapping: 400 bad input, 404 missing, 422 validation, 500 internal (generi
 
 Deliberately absent: auth endpoints, write endpoints, idempotency keys (single local consumer, read-only surface), cursor pagination.
 
-Six endpoints is terminal (`PRD.md` FR-E E-1 names "catalog and runs", not skills; owner ruling
-2026-11-16, ruling 9B). `skills`, `support-cards`, and every other catalog table stay browser-only:
-adding a read-only index/show for them would be surface the PRD does not ask for. A request for one is
-a PRD amendment first, not a controller.
+Six endpoints is terminal (owner ruling 2026-11-16, ruling 9B): the three catalog/resource pairs
+above (umamusume, training-runs, support-cards). The support-card pair is one of the six, not an
+addition to them — `routes/api.php` has shipped both routes since before that ruling; this section
+listed four and named the pair "deliberately absent", which contradicted both the route list and the
+six-endpoint count (N4.3, re-measured 2026-11-20). `skills` and every other catalog table stay
+browser-only. A new API resource is a PRD amendment first, not a controller.
 
 ## 5. Data-Fetching Engine (JP ↔ Global cross-reference)
 

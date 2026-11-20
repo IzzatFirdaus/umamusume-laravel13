@@ -16,7 +16,8 @@ of *Umamusume Pretty Derby*. Consolidates four legacy apps (three trackers + the
 - Web surface: Inertia + Vue 3 + TS, Tailwind v4, Vite. Blade only as `app.blade.php` shell + errors.
   JSON is read-only `/api/v1` (3 controllers). ~119 components / ~62 pages under `resources/js/`.
 - Data via stage-isolated fetch engine (JP↔Global cross-ref, snapshots, provenance on promote).
-- No CI; every gate in §9 runs locally and its output is the only evidence.
+- No CI; every gate in §9 runs locally and its output is the only evidence. Three build-only GitHub
+  workflows exist (`.github/workflows/`); none runs a §9 gate.
 
 ## 2. Instruction scope and precedence
 
@@ -462,7 +463,7 @@ forbidden/permitted locations as a persistent reminder.
 
 - Conventional commits: `type(scope): summary`, lowercase, imperative.
 - One slice per commit series; report + verification output in hand-off. Branch of record `master`;
-  no CI.
+  CI is build-only (three workflows, no gate job), so the diff is still the review.
 - `git commit <path>` guards index, not working tree: commits that path's working-tree content, so
   another session's uncommitted lines in same file land too. Name every path; stage only your hunk
   when working tree carries another session's work.

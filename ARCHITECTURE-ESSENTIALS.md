@@ -148,7 +148,8 @@ is about the game rather than about this application.
 
 ## API contract (/api/v1, P2)
 
-- GET umamusume?status=&search=&page=&pageSize= ; GET umamusume/{slug} ; GET training-runs ; GET training-runs/{id}
+- GET umamusume?status=&search=&page=&pageSize= ; GET umamusume/{slug} ; GET training-runs ; GET training-runs/{id} ; GET support-cards?page=&search=&type=&rarity= ; GET support-cards/{supportCard}
+- Six endpoints is terminal (owner ruling 2026-11-16, ruling 9B); the support-card pair is one of them, verified against `php artisan route:list --path=api` (N4.3, 2026-11-20)
 - Shape: { data: ..., pagination: { page, pageSize, totalItems, totalPages } } on lists
 - Error (all non-2xx): { error: { code, message } }; 400/404/422/500; 500 generic, details to log
 - camelCase params+fields, plural nouns, no verbs, offset pagination, additive changes only, API Resources + PHPDoc array-shapes
