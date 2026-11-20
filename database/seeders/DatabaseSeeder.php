@@ -17,6 +17,8 @@ use Illuminate\Database\Seeder;
  *                          SourceDocumentSeeder can adopt them by name
  *   SourceDocumentSeeder   every committed body through PipelineRunner; must follow
  *                          the roster, and must follow SkillSeeder for that adoption
+ *   RaceEnrichmentSeeder   joins the four committed race bodies into the slots the
+ *                          source document created; must follow SourceDocumentSeeder
  *   ScenarioSlotSeeder     URA finale goal races joined from three committed exports
  */
 class DatabaseSeeder extends Seeder
@@ -28,6 +30,7 @@ class DatabaseSeeder extends Seeder
             UmamusumeRosterSeeder::class,
             SkillSeeder::class,
             SourceDocumentSeeder::class,
+            RaceEnrichmentSeeder::class,
             ScenarioSlotSeeder::class,
         ]);
     }

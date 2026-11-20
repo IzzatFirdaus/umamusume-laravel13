@@ -10,6 +10,7 @@ use App\Services\DataPipeline\Parsers\GametoraRaceParser;
 use App\Services\DataPipeline\Parsers\GametoraRaceRewardParser;
 use App\Services\DataPipeline\Parsers\GametoraRacetrackParser;
 use App\Services\DataPipeline\SourceFetcher;
+use Database\Seeders\ReadsCommittedSource;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
@@ -17,7 +18,9 @@ use Illuminate\Support\Facades\Storage;
 
 class EnrichRaces extends Command
 {
-    protected $signature = 'uma:enrich-races';
+    use ReadsCommittedSource;
+
+    protected $signature = 'uma:enrich-races {--from-seed : Read committed seed bodies instead of snapshots or the network}';
 
     protected $description = 'Enrich race_catalog_slots from gametora race snapshots';
 
@@ -25,10 +28,13 @@ class EnrichRaces extends Command
     {
         // 1 & 2: read/fetch snapshots and parse. Each body is kept beside the path it came from,
         // because that path is the provenance stamped on every row the body enriches.
-        $tracks = $this->snapshot('gametora-racetracks', $fetcher);
-        $fans = $this->snapshot('gametora-race-fans', $fetcher);
-        $races = $this->snapshot('gametora-races', $fetcher);
-        $rewards = $this->snapshot('gametora-race-rewards', $fetcher);
+        // `--from-seed` is the offline path: the committed bodies are the same source documents a
+        // fresh clone ships, so a machine with no snapshot history and no network still enriches.
+        $fromSeed = (bool) $this->option('from-seed');
+        $tracks = $fromSeed ? $this->committedBody('gametora-racetracks') : $this->snapshot('gametora-racetracks', $fetcher);
+        $fans = $fromSeed ? $this->committedBody('gametora-race-fans') : $this->snapshot('gametora-race-fans', $fetcher);
+        $races = $fromSeed ? $this->committedBody('gametora-races') : $this->snapshot('gametora-races', $fetcher);
+        $rewards = $fromSeed ? $this->committedBody('gametora-race-rewards') : $this->snapshot('gametora-race-rewards', $fetcher);
 
         /** @var array<string, array{url: string}> $provenance */
         $provenance = [
@@ -262,6 +268,28 @@ class EnrichRaces extends Command
         $source = config("uma.sources.{$sourceKey}");
 
         return is_array($source) && isset($source['timezone']) ? (string) $source['timezone'] : null;
+    }
+
+    /**
+     * The committed body for `--from-seed`, with the declared URL as provenance.
+     *
+     * @return array{body: string|null, url: string}
+     */
+    private function committedBody(string $sourceKey): array
+    {
+        /** @var array<string, mixed>|null $source */
+        $source = config("uma.sources.{$sourceKey}");
+        $declared = is_array($source) && isset($source['url']) ? (string) $source['url'] : '';
+
+        if (! is_array($source)) {
+            return ['body' => null, 'url' => $declared];
+        }
+
+        $committed = $this->readCommittedSource($sourceKey, $source);
+
+        return $committed === null
+            ? ['body' => null, 'url' => $declared]
+            : ['body' => $committed['body'], 'url' => $declared];
     }
 
     /**
