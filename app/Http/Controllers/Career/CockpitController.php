@@ -1071,6 +1071,15 @@ class CockpitController extends Controller
      */
     private function obligationSlots(TrainingRun $run): Collection
     {
+        // A run that names no scenario has no calendar to owe. `scenarioKey()` resolves null to the
+        // baseline, and `forScenario()` would lend that baseline's mandatory rows to a run whose
+        // Trainer never chose it. TeamPanelBuilder and ScenarioCaps already refuse the loan; this is
+        // the one reader that feeds `advisor.decision.objectives` and the run race strip, so it
+        // refuses too (functional item 12).
+        if (! $run->hasScenario()) {
+            return collect();
+        }
+
         return RaceCatalogSlot::query()
             ->forScenario($run->scenarioKey())
             ->where('is_mandatory', true)

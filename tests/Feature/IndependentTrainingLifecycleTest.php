@@ -117,6 +117,17 @@ it('registers the scheduler to complete sessions every minute', function (): voi
         ->and($out)->toContain('* * * * *');
 });
 
+it('does not let the completion scheduler overlap itself', function (): void {
+    // `schedule:list` proves the cadence but not the overlap policy: its row carries only the cron
+    // expression, command and next due. Pin the registration itself in bootstrap/app.php so a future
+    // edit that drops the guard fails a test rather than only a review.
+    $source = file_get_contents(base_path('bootstrap/app.php'));
+
+    expect($source)->toMatch(
+        "/independent-training:complete'\)->everyMinute\(\)->withoutOverlapping\(\)/"
+    );
+});
+
 /*
  * Two invariants the class declared and did not enforce.
  *

@@ -693,6 +693,28 @@ final class CareerSkillsPlannerTest extends TestCase
                 ->where('purchasable.shortfall', 10));
     }
 
+    public function test_purchasable_cost_quotes_the_recorded_hint_price(): void
+    {
+        // A recorded hint is not a priority-only fact. The fill panel already prices a Suggested
+        // row through HintDiscount::price(); the purchasable panel quoted the base on the same row,
+        // so the Cost column and the recommendation disagreed about what the run would pay.
+        $run = $this->plannerRun();
+        $hinted = $this->skill('Hinted Buy', 130);
+        $hinted->update(['export_id' => 9101]);
+
+        $card = CharacterCard::factory()->create(['skills_innate' => [9101]]);
+        $run->update(['character_card_id' => $card->id]);
+        $run->refresh();
+        $run->setSkillHintLevel($hinted, 5);
+
+        $this->get(route('runs.skills.planner', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('purchasable.rows.0.name', 'Hinted Buy')
+                ->where('purchasable.rows.0.sp_cost', 130)
+                ->where('purchasable.rows.0.hint_adjusted_cost', 78));
+    }
+
     public function test_records_the_level_an_acquired_skill_reached(): void
     {
         $run = $this->plannerRun();

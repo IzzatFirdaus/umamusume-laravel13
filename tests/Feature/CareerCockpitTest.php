@@ -9,6 +9,7 @@ use App\Enums\RunStatus;
 use App\Enums\TurnChoice;
 use App\Models\Advisor\BuildTargetPayload;
 use App\Models\CharacterCard;
+use App\Models\RaceCatalogSlot;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvent;
@@ -1150,6 +1151,23 @@ it('reads the decision turn, not the next logged turn, so a snapshot agrees with
 it('owes no mandatory calendar to a run that names no scenario', function (): void {
     $run = cockpitRun(['scenario' => null, 'status' => RunStatus::Active], turns: 1, energy: 70);
 
+    // A real baseline mandatory row: scenarioKey() resolves a null scenario to the baseline, so an
+    // unguarded obligationSlots() would lend this run a race its Trainer never chose.
+    RaceCatalogSlot::factory()->create([
+        'scenario_key' => 'ura_finale',
+        'year' => 1,
+        'month' => 3,
+        'half' => 'Early',
+        'turn' => 1,
+        'title' => 'Baseline Mandatory',
+        'tier' => 'G1',
+        'distance' => 2000,
+        'distance_band' => 'Middle',
+        'surface' => 'Turf',
+        'is_mandatory' => true,
+        'sort_order' => 1,
+    ]);
+
     // Called on the service directly, not through the cockpit: the controller happens to skips this
     // reader when the scenario's `career_goals` panel is off, which is true for the baseline, so a
     // page-level assertion would pass with or without the guard inside the reader. The guard is what
@@ -1162,6 +1180,10 @@ it('owes no mandatory calendar to a run that names no scenario', function (): vo
         ->and($sections['objectives'])->toBe([])
         ->and($sections['alerts'])->toBe([]);
 
-    // And the cockpit itself still renders, so the guard did not break the page.
-    $this->get(route('runs.cockpit', $run))->assertOk();
+    // And the cockpit itself still renders, with no borrowed row in the objectives rail.
+    $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('advisor.decision.objectives', 0)
+            ->has('scenario.objectives', 0));
 });

@@ -124,19 +124,31 @@ final class SkillsPlannerController extends Controller
 
         $count = (clone $base)->count();
 
+        // The same recorded hint levels the fill panel reads. A Suggested row carries its level,
+        // so a purchasable skill can be discounted too; quoting the base here made the Cost column
+        // disagree with the recommendation and with the server's budget refusal.
+        $recordedHints = $run->skills->mapWithKeys(
+            static fn (Skill $skill): array => [(int) $skill->id => $skill->pivot->hint_level]
+        );
+
         $rows = $base
             ->orderBy('sp_cost')
             ->orderBy('name')
             ->limit(100)
             ->get(['id', 'name', 'sp_cost', 'rarity'])
-            ->map(static fn (Skill $skill): array => [
-                'id' => (int) $skill->id,
-                'name' => (string) $skill->name,
-                'sp_cost' => (int) $skill->sp_cost,
-                'hint_adjusted_cost' => (int) $skill->sp_cost, // no hint recorded on unacquired skills yet
-                'rarity' => $skill->rarity,
-                'is_gold' => $skill->rarity !== null && in_array($skill->rarity, [3, 4, 5, 6], true),
-            ])
+            ->map(static function (Skill $skill) use ($recordedHints): array {
+                $baseCost = (int) $skill->sp_cost;
+                $hintLevel = $recordedHints[(int) $skill->id] ?? null;
+
+                return [
+                    'id' => (int) $skill->id,
+                    'name' => (string) $skill->name,
+                    'sp_cost' => $baseCost,
+                    'hint_adjusted_cost' => $hintLevel === null ? $baseCost : HintDiscount::price($baseCost, (int) $hintLevel),
+                    'rarity' => $skill->rarity,
+                    'is_gold' => $skill->rarity !== null && in_array($skill->rarity, [3, 4, 5, 6], true),
+                ];
+            })
             ->values()
             ->all();
 

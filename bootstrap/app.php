@@ -49,8 +49,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withSchedule(function (Schedule $schedule): void {
         // Independent Training plays out with the app closed (§1.1.7), so the scheduler is the only
-        // actor that closes a session whose 50-minute window has passed.
-        $schedule->command('independent-training:complete')->everyMinute();
+        // actor that closes a session whose 50-minute window has passed. The unique index stops two
+        // overlay rows; the overlap guard stops two command invocations fighting over the same one.
+        $schedule->command('independent-training:complete')->everyMinute()->withoutOverlapping();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Unified API error shape (ARCHITECTURE §4): { "error": { "code", "message" } }
