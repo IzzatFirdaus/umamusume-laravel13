@@ -88,6 +88,12 @@ step "backdrop plates" python tools/verify-backdrop.py
 # so an ADR could land with no index row (or a one-sided authority relation) and every
 # gate still reported green. It is deterministic and offline, so it belongs here.
 step "adr set"         python tools/adr-check.py docs/adr
+# N0.5. The register has three status surfaces (index, body headings, historical snapshots); the
+# index at --index-lines 140 is the declared authority. Adding the auditor to gates.sh is what makes
+# the parser fix in audit_status_register.py enforceable rather than merely available. The window is
+# pinned because a note inserted above line 140 shifts a later `KI-57 CLOSED` row out of scope and
+# lets a prose `KI-57 onward.` line masquerade as the status (measured 2026-11-20).
+step "status register" python tools/audit_status_register.py KNOWN-ISSUES.md --index-lines 140
 
 # Dependency audits. AGENTS.md §5 makes these a PRE-TAG obligation ("clean of reachable
 # critical/high before tagging"), not a per-change one, so they report and name their finding
