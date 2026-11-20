@@ -171,3 +171,14 @@ its tests; the date in `decision` is the ruling's date where one exists, and `pr
 | A Japan-only skill is searched by a folded twin of `name_ja` | `skills.match_key_ja`, nullable, no default | 0036 | migration `2026_11_05_084524_add_match_key_ja_to_skills_table`; `App\Services\DataPipeline\JapaneseNameNormalizer` | 0036 §Decision |
 | Each search scope reads only the keys whose text it prints | `japan_only` reads `match_key_ja`; `all` reads all three | 0036 | `SkillController` scope search; `SkillSearchScreenTest` | 0036 §Decision |
 | **Do not** back-fill `match_key_ja` in SQL | a second fold implementation would drift from the normalizer | 0036 | migration leaves the column to the parser | 0036 §Decision |
+
+## Dated erratum 2026-11-20 (N4.4) — Independent Training entry control
+
+The row above reading "**The mode has no Trainer-facing entry control**" was true at `ae16ec88` and
+is stale at HEAD `478e947b`. The Preflight screen now ships the `independent` switch, `policy` radios
+and priority-skill picker (`resources/js/pages/Career/Preflight.vue:217,:247,:491-535`), and
+`StartCareerRequest::independentConfig()` is reached from that form (`S1.7`, accepted `ADR-0032`).
+`tests/Feature/IndependentTrainingStoreTest.php` and `tests/browser/career-preflight-indep.spec.ts`
+pin the door. The row is preserved verbatim as history; this erratum is the current reading. The
+remaining open item is the PRD requirement line (D-2), owner territory — `ADR-0032` is accepted and
+its authorisation stands regardless of that line.
