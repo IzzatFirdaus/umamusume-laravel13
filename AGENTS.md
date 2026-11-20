@@ -178,7 +178,7 @@ config/uma.php            fetch allowlist, politeness, thresholds, cache TTL, di
 config/scenarios.php      ONLY place scenario names enter layout path
 database/                 migrations, factory per model, seeders, seeders/data (committed bodies)
 resources/views/          4 Blade files only: app.blade.php + errors/
-resources/js/             TS+Vue3: spa.ts, bootstrap.ts, types.ts, pages/ (66), components/ (119), layouts/ (2)
+resources/js/             TS+Vue3: spa.ts, bootstrap.ts, types.ts, pages/ (62), components/ (119), layouts/ (3) — `find <dir> -name '*.vue' | wc -l`, measured 2026-11-20
 lang/en/uma.php           displayed vocabulary + Global terms map
 routes/                   web.php (browser), api.php (JSON)
 tests/                    Feature/ (bulk), Unit/ (no DB), Fixtures/ (stored bodies)
@@ -533,12 +533,12 @@ and says so.
   §4.7). Check disk state first (`uma:fetch-art --dry-run`) before reading missing images as frontend
   defect.
 - PHPStan needs `--memory-limit=1G`; `composer analyse` omits it.
-- Hot Vite dev server + default SSR settings → every full page load 500 after 30s (KI-76).
-  `INERTIA_SSR_ENABLED` defaults true, `config/inertia.php` unpublished so `ssr.timeout` unset; while
-  `public/hot` exists Inertia skips "no bundle" guard and POSTs to dev server's `/__inertia_ssr`,
-  which nothing answers, blocks until `max_execution_time` fatals. `.env.example` sets
-  `INERTIA_SSR_ENABLED=false`; keep it set, or publish `config/inertia.php` with short
-  `INERTIA_SSR_TIMEOUT`.
+- Hot Vite dev server + SSR pointed at a dead endpoint can still block a full page load (KI-76,
+  mitigated at HEAD). `config/inertia.php` is published, `ssr.enabled` defaults false
+  (`INERTIA_SSR_ENABLED`, both `.env` and `.env.example` set `false`), and `ssr.timeout` is wired
+  through `INERTIA_SSR_TIMEOUT`. Keep SSR off for the dev server, or point `ssr.url`/`hot_url` at a
+  live renderer; the old "unpublished config, no timeout" premise no longer holds (measured
+  2026-11-20).
 - Lore gate advisory; banned word families not written out here on purpose. Read pattern list in
   `tools/lore.php` when ruling needed.
 
