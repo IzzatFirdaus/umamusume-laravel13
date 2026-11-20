@@ -3609,6 +3609,13 @@ Shop panel → purchase form (turn, item from the scenario catalogue, cost as re
 
 ## 7. Screen-System Gaps & Inconsistencies
 
+**Dated reconciliation 2026-11-20 (plan slice N4.6).** Four database-area claims in the rows below are stale against the measured tree; each keeps its historic wording, and this note is the current reading:
+
+- `SCR-SYS-007` state table prints `verified_at` 2026-09-27; `config/scenarios.php:41` now reads **2026-11-02**. The page renders the config value, so the state-table literal is documentation drift, not a behaviour change.
+- `SCR-SYS-011` row prose says "the tile reads three"; the shipped page carries four conflict tiles (the same row records the mood-race row leaving the open list). The current count is four.
+- The §4.26 paragraph says `tests/Feature/DatabaseTest.php` has 7 cases and `tests/browser/database.spec.ts` 7; measured at HEAD `478e947b` they are **16** and **29** cases. Counts are re-derived, not written into historical prose.
+- SCR-SYS-008's "no filter" state and the §4.26 version sentence travel with the Phase 6 slices that own those pages (N6.12 and N6.1); no state-table row is rewritten here. §7-18 trust labels stay OPEN pending the owner definition, and the §8 numbering drift (`AGENTS.md` cites §8 while state tables live in §4) is recorded as this erratum rather than a silent renumber.
+
 1. **Documentation conflict (README vs routes).** `README.md` "Web surface" still listed `/design-preview`; the route is gone from `routes/web.php`, and `GuidedTurnOnRunViewTest` header states the surface "has since been deleted." README was stale. *Documentation Gap.*
    **Resolved 2026-10-04.** The row is gone and the deletion is recorded in prose instead. `EmptyStateCommandNamesTest` now checks every path in the Web surface table against the registered route list, so a deleted route cannot survive in that table again by the same accident. (A sibling session's README restructure also removed the row while this was in flight; the guard is the durable part.)
 2. **Routes without UI entry.** `runs.turns.update` (PUT) and `runs.turns.destroy` (DELETE) are implemented, owned-checked, and covered by `TrainingRunTest` edits/removals — but **no form on any screen posts to them**; the turn table has no row Edit/Delete action. Behavior exists in the backend and is unreachable in the product. *Navigation/Implementation Gap; Unresolved Requirement.*
