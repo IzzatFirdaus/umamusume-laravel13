@@ -102,7 +102,7 @@ final class TrackblazerVariant
      */
     public static function forRun(TrainingRun $run): ?array
     {
-        if ($run->scenarioKey() !== 'trackblazer') {
+        if (! (bool) config('scenarios.scenarios.'.$run->scenarioKey().'.trackblazer_panels', false)) {
             return null;
         }
 

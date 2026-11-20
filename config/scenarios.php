@@ -696,6 +696,10 @@ return [
             // comparison in the panel builder, so the copilot reads what the scenario
             // declares instead of knowing which one it is (S1.15, `AGENTS.md` §7).
             'happy_meek' => false,
+            // The Trackblazer-only grade/shop/epithet/rival panels and variant. A capability flag
+            // so readers ask what the scenario composes rather than comparing its key to a name
+            // (G-33); absent on the other scenarios, which is false.
+            'trackblazer_panels' => true,
             /* The client's own full scenario label, where a source states one (walk-8 U-01 /
                R7-63). The short `label` above stays what every surface prints; this is the fuller
                client name the walk found had no home. Sources, verbatim, `UMAMUSUME_REFERENCE.md`

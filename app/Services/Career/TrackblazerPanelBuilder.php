@@ -58,7 +58,7 @@ final class TrackblazerPanelBuilder
      */
     public function gradeSection(TrainingRun $run, ?TurnEntry $latest): ?array
     {
-        if ($run->scenarioKey() !== 'trackblazer') {
+        if (! (bool) config('scenarios.scenarios.'.$run->scenarioKey().'.trackblazer_panels', false)) {
             return null;
         }
 
@@ -574,7 +574,7 @@ final class TrackblazerPanelBuilder
      */
     public function shopSection(TrainingRun $run): ?array
     {
-        if ($run->scenarioKey() !== 'trackblazer') {
+        if (! (bool) config('scenarios.scenarios.'.$run->scenarioKey().'.trackblazer_panels', false)) {
             return null;
         }
 
@@ -736,7 +736,7 @@ final class TrackblazerPanelBuilder
      */
     public function epithetSection(TrainingRun $run): ?array
     {
-        if ($run->scenarioKey() !== 'trackblazer') {
+        if (! (bool) config('scenarios.scenarios.'.$run->scenarioKey().'.trackblazer_panels', false)) {
             return null;
         }
 
@@ -755,7 +755,7 @@ final class TrackblazerPanelBuilder
      */
     public function rivalSection(TrainingRun $run): ?array
     {
-        if ($run->scenarioKey() !== 'trackblazer') {
+        if (! (bool) config('scenarios.scenarios.'.$run->scenarioKey().'.trackblazer_panels', false)) {
             return null;
         }
 
