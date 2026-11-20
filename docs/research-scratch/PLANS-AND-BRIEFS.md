@@ -478,7 +478,7 @@ the path on disk but not in `git ls-files`, so the citation works on this machin
 | research-scratch/DOCUMENTATION-INVENTORY-2026-09-30.md   | 5       | `.gitignore:87`              | **Owner decision (O-3).** The governing inventory. Either promote it into `docs/research-scratch/` as a registered master, or declare every citation into the root scratch folder scratch-only. Leaving it ignored while five citations point at it is the state that produced A-10.                                 |
 | .agents/README.md                                        | 4       | `.gitignore:49`              | **Withdraw the pointer or commit the file.** `.agents/` is a tooling layer the repo map already describes; the citations are from `README.md:122` and the doc-sync plan.                                                                                                                                             |
 | .copilot/instructions.md                                 | 4       | `.gitignore:60`              | **Withdraw.** Machine-local by design; `docs/SKILL_AUTOMATION.md:29` should not cite it.                                                                                                                                                                                                                             |
-| research-scratch/scrape-game8-scenarios.md               | 1       | `.gitignore:87`              | **Owner decision (O-3).** Cited from `docs/UMAMUSUME_REFERENCE.md:1007` (fenced).                                                                                                                                                                                                                                    |
+| research-scratch/scrape-game8-scenarios.md               | 1       | `.gitignore:87`              | **Owner decision (O-3).** Cited from `docs/UMAMUSUME_REFERENCE.md:1627` (fenced).                                                                                                                                                                                                                                    |
 | research-scratch/scrape-training-heuristics.md           | 1       | `.gitignore:87`              | Same, from `:1055`.                                                                                                                                                                                                                                                                                                  |
 | research-scratch/global-race-sources.md                  | 1       | `.gitignore:87`              | Same, from `docs/scenarios/09-global-race-calendar.md:727`.                                                                                                                                                                                                                                                          |
 | research-scratch/calendar-tables.md                      | 1       | `.gitignore:87`              | Same, from `:729`.                                                                                                                                                                                                                                                                                                   |
@@ -815,7 +815,7 @@ weak-turf trainee 60/200/300. Either a dated capture names the condition, or the
 Trainer-entered track selector, which is a third column on `training_runs` and follows the `D-270` pattern.
 
 Read against the corpus rather than the entry alone, the gap is narrower than "no source":
-`docs/UMAMUSUME_REFERENCE.md:883-888` states the three threshold sets, says the choice is **by aptitude**
+`docs/UMAMUSUME_REFERENCE.md:1477-1482` states the three threshold sets, says the choice is **by aptitude**
 ("a high-dirt or low-turf character takes 30 / 200 / 300, and a turf character whose range is narrow takes
 60 / 200 / 300"), names Haru Urara and Curren Chan as the two cases, and records two independent
 extractions agreeing. What it does not give is the *letter threshold*: `aptitude_dirt` at what grade,
@@ -7883,7 +7883,7 @@ roadmap §3.3.
 
 | Site | Current text | Evidence |
 |---|---|---|
-| `config/scenarios.php:266` `duel.win.gains` | `stat gains, and one tier on the cap of the stat dueled` | `UMAMUSUME_REFERENCE.md:977` (2026-11-12): "**The cap raise is +4 points, not "a tier"** — the wiki states it directly … and `config/scenarios.php` `duel.win.gains` saying "one tier on the cap of the stat dueled" is the stale half of that pair." |
+| `config/scenarios.php:266` `duel.win.gains` | `stat gains, and one tier on the cap of the stat dueled` | `UMAMUSUME_REFERENCE.md:1597` (2026-11-12): "**The cap raise is +4 points, not "a tier"** — the wiki states it directly … and `config/scenarios.php` `duel.win.gains` saying "one tier on the cap of the stat dueled" is the stale half of that pair." |
 | `resources/js/pages/Career/Preflight.vue:812` | `Can appear on any stat-training turn. Win pays 30 SP and +1 cap tier; lose pays 15 SP.` | Same. The 30/15 SP figures are correct and both sources agree. |
 
 `Preflight.vue` is faithful to the config, so the config is the stale layer and the page is a consequence.
@@ -7982,8 +7982,8 @@ of these as official wording."*
 **The inconsistency, measured.** The reference guide cites **one page, twice**, for the `Result Points`
 vocabulary it adopted on 2026-11-12:
 
-- `UMAMUSUME_REFERENCE.md:1186` — "DotGG's reproduction of Cygames' Trackblazer launch announcement"
-- `UMAMUSUME_REFERENCE.md:1207` — same URL, "third-party host, publisher text"
+- `UMAMUSUME_REFERENCE.md:1830` — "DotGG's reproduction of Cygames' Trackblazer launch announcement"
+- `UMAMUSUME_REFERENCE.md:1851` — same URL, "third-party host, publisher text"
 - Row 60 — `Result Points` **adopted** on the strength of "the term in the launch announcement's own text …
   reproduced by DotGG from Cygames' announcement"
 

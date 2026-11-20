@@ -238,7 +238,7 @@ This phase is the one that moves the product from "works if you know the incanta
 
 - **Objective:** the artwork referenced by 3.2 is populated automatically for trainees and support cards during install.
 - **Read first:** the existing `uma:fetch-art` command (its signature, source, failure modes), the install path (`composer.json` post-install, or the artisan installer, or both), and gametora's rate-limit behaviour if documented.
-- **Planning output first (no code):** a short `docs/plans/artwork-auto-mirror.md` deciding: (a) where the hook lives — composer post-install vs artisan installer vs first-boot; (b) failure handling — abort install, warn-and-continue, or queue for retry; (c) rate limiting and caching; (d) whether partial mirrors are acceptable.
+- **Planning output first (no code):** a short `docs/plan/artwork-auto-mirror.md` deciding: (a) where the hook lives — composer post-install vs artisan installer vs first-boot; (b) failure handling — abort install, warn-and-continue, or queue for retry; (c) rate limiting and caching; (d) whether partial mirrors are acceptable.
 - **Action:** implement the chosen hook. It must **not** fail the install when the network is down — artwork is non-essential to a working app; a failed fetch must fall through to 3.2's placeholder.
 - **Deliverable:** the install hook + a feature/unit test asserting the hook is idempotent (running twice does not re-download) and network-failure-tolerant.
 - **Verification:** `vendor/bin/pest --filter ArtworkMirror` green; then a manual run with the network stubbed to fail and the app still boots.
@@ -255,7 +255,7 @@ This phase is the one that moves the product from "works if you know the incanta
 
 ### Slice 4.1 — Threat model and scope doc (no code)
 
-- **Deliverable:** `docs/plans/image-uploads.md` covering: accepted MIME types and magic-byte validation; max dimensions and byte size; storage location (`storage/app/private` vs public) and symlink policy; filename sanitisation and path-traversal defence; cleanup on run deletion; whether uploads are per-run or global; EXIF stripping; and the interaction with the existing artwork pipeline (does a user upload override the mirrored artwork?).
+- **Deliverable:** `docs/plan/image-uploads.md` covering: accepted MIME types and magic-byte validation; max dimensions and byte size; storage location (`storage/app/private` vs public) and symlink policy; filename sanitisation and path-traversal defence; cleanup on run deletion; whether uploads are per-run or global; EXIF stripping; and the interaction with the existing artwork pipeline (does a user upload override the mirrored artwork?).
 - **Read first:** `PRD §6.13` (currently says "cut"), any existing file-handling code, and the Laravel filesystem config.
 - **Dependency:** owner sign-off on the scope doc before Slice 4.2.
 - **Done when:** the doc is ratified and `PRD §6.13` is rephrased `cut` → `planned, not in this build` (the UX-19 `9c50f139` pattern).

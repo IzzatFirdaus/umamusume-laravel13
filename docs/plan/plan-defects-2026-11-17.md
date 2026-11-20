@@ -170,7 +170,7 @@ assertable. The two non-numeric tiers stay absent, on purpose, with a comment na
 
 Sources, each with its line:
 
-- `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:474` - the client's nine-step pyramid, all nine named.
+- `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:531` - the client's nine-step pyramid, all nine named.
 - `docs/research-scratch/DESIGN-CORPUS.md:1388-1400` - the same nine as a table with thresholds, and `:2578`
   (rule **D-272**) states they are one scale that must not be merged with race gates.
 - `docs/audits/ux-walkthroughs/rice-shower-unity-cup-ux-walk-9.md:194` - the readings restated with the gap
@@ -203,7 +203,7 @@ class) have no fan count and stay unrepresentable.
 ```php
 /*
  * The fan class ladder, from the client's own nine-step pyramid
- * (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:474`; `docs/research-scratch/DESIGN-CORPUS.md:1388-1400`,
+ * (`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:531`; `docs/research-scratch/DESIGN-CORPUS.md:1388-1400`,
  * rule D-272 - one scale, never merged with race-entry gates). Half-open `[from, to)`, matching
  * `FanLadder::bandFor()`.
  *
@@ -232,7 +232,7 @@ class) have no fan count and stay unrepresentable.
 ],
 ```
 
-**Before writing the array, re-read `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:474` yourself.** It is the
+**Before writing the array, re-read `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:531` yourself.** It is the
 only document that states a *class for a known fan count*, and it is what decides whether `Star` starts at
 100,000 or 160,000. The table above is derived from it; if the sentence has changed, the table changes with it.
 
@@ -269,7 +269,7 @@ test table below both pin `Star` at `[100_000, 240_000)` and `Bronze` at `0`; th
 ```
 
 `FanLadderTest` runs **22 passed / 28 assertions** at this tree. **Do not rewrite it.** If a later slice needs the
-ladder changed, change it against `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:474` and re-pin the whole table in
+ladder changed, change it against `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:531` and re-pin the whole table in
 one edit, never one threshold at a time.
 
 **Everything below is kept as the record of what was planned, so the next reader can see why it lost.** It is not

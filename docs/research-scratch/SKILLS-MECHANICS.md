@@ -46,11 +46,11 @@ Field provenance. Every fact cites the export field it came from, and nothing is
 | What it costs                  | `cost`                                                                      | ADR-0011:34: SP cost, present on rarity 1 and 2 only, absent on 3 to 6                                                                                          |
 | Uniqueness                     | `char`, `rarity`                                                            | ADR-0011:36: the trainee cards whose unique skill this is                                                                                                       |
 | Availability                   | absence of `unreleased`                                                     | ADR-0011:34 as quoted. `release_status` is an application enum at `app/Enums/ReleaseStatus.php:16`, not an export field                                         |
-| Style eligibility              | `running_style==N` inside the DSL                                           | docs/UMAMUSUME_REFERENCE.md:231-234 maps 1 to Front Runner, 2 to Pace Chaser, 3 to Late Surger, 4 to End Closer                                                 |
+| Style eligibility              | `running_style==N` inside the DSL                                           | docs/UMAMUSUME_REFERENCE.md:372-375 maps 1 to Front Runner, 2 to Pace Chaser, 3 to Late Surger, 4 to End Closer                                                 |
 
 Decoding rules applied, and only these:
 
-1. A `running_style==N` atom is rendered as the client label for N from the reference table. The four labels are the shipped ones; the literal export renderings such as Runner, Leader, Betweener and Chaser are not used as labels, per UMAMUSUME_REFERENCE.md:229-234.
+1. A `running_style==N` atom is rendered as the client label for N from the reference table. The four labels are the shipped ones; the literal export renderings such as Runner, Leader, Betweener and Chaser are not used as labels, per UMAMUSUME_REFERENCE.md:370-375.
 2. Every other atom is emitted exactly as stored. No glossary exists for them, so a paraphrase would be an invented fact.
 3. A missing field prints as `absent` or `none`. It is never filled by inference, and the totals are published so a reader can see how much is missing.
 
@@ -70,7 +70,7 @@ Every count below came from the same script that wrote this file, and each is pa
 | `condition_groups` non-empty                  | 623 of 623           | The empty case is 0, and the non-empty case matched on every row, so the zero is meaningful                                                                                      |
 | Skills gated on exactly one style             | 121 of 623           | Per label: Front Runner 26, Pace Chaser 35, Late Surger 33, End Closer 27. Multi-style gating occurs on 2 skills, which is the case a single-label decode would otherwise hide   |
 
-One reconciliation to flag. UMAMUSUME_REFERENCE.md:231-234 publishes gated counts of 107, 220, 166 and 115. Measuring that same definition across all 1910 records gives 107, 220, 166, 115, which reproduces the reference exactly. Measuring it across the Global subset gives 26, 35, 33, 27. The reference table therefore counts the whole export and does not say so. Any UI that shows those counts next to a Global-only list is wrong.
+One reconciliation to flag. UMAMUSUME_REFERENCE.md:372-375 publishes gated counts of 107, 220, 166 and 115. Measuring that same definition across all 1910 records gives 107, 220, 166, 115, which reproduces the reference exactly. Measuring it across the Global subset gives 26, 35, 33, 27. The reference table therefore counts the whole export and does not say so. Any UI that shows those counts next to a Global-only list is wrong.
 
 ### Tokens and codes, without invented meanings
 
@@ -100,7 +100,7 @@ Read as advice this would say take it when you run a given style. It says nothin
 
 ### The table
 
-When it fires holds the activation DSL verbatim, one entry per condition group, groups separated by `++`. Atoms are unexplained because no glossary exists. Style eligibility is decoded from `running_style==N` against UMAMUSUME_REFERENCE.md:231-234. Pipe characters inside client text are replaced with a slash so the table stays parseable; no other character was altered.
+When it fires holds the activation DSL verbatim, one entry per condition group, groups separated by `++`. Atoms are unexplained because no glossary exists. Style eligibility is decoded from `running_style==N` against UMAMUSUME_REFERENCE.md:372-375. Pipe characters inside client text are replaced with a slash so the table stays parseable; no other character was altered.
 
 | id        | name_en (client)                      | type                           | cost SP   | rarity   | unique to (card ids)                                                                                                                                                             | style eligibility                  | when it fires, verbatim                                                                                                                                                                                                                                                                                                                                                   |
 | --------- | ------------------------------------- | ------------------------------ | --------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -1025,7 +1025,7 @@ The brief named inheritance, personal defaults and star-rank unlock. Confirmed G
 
 | #     | Path                                                 | Anchor                                                                                                                                                                                                                                                                                                                                                                                  | Status                                                                                                                                                                                                                                               |
 | ----- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1     | Innate / default skills, raised by Potential Level   | `UMAMUSUME_REFERENCE.md:386` names **Potential Levels** (`覚醒Lv`) as a real pre-run system, and `:395` records that which UI owns the export's `stat_bonus` row is `❌ UNVERIFIED`; `[S]` Umamusume Global news 1064 (2026-09-23) "Potential Levels and Books of Hints"; `:771` §1.6.10                                                                                                | Name and existence confirmed. The "starts with 3 hints, 7 after awakening" counts are `❌ UNVERIFIED` — no anchor in the corpus carries a number                                                                                                     |
+| 1     | Innate / default skills, raised by Potential Level   | `UMAMUSUME_REFERENCE.md:629` names **Potential Levels** (`覚醒Lv`) as a real pre-run system, and `:638` records that which UI owns the export's `stat_bonus` row is `❌ UNVERIFIED`; `[S]` Umamusume Global news 1064 (2026-09-23) "Potential Levels and Books of Hints"; `:1335` §1.6.10                                                                                                | Name and existence confirmed. The "starts with 3 hints, 7 after awakening" counts are `❌ UNVERIFIED` — no anchor in the corpus carries a number                                                                                                     |
 | 2     | Inspiration / Legacy Sparks                          | `REFERENCE` §1.5.1–1.5.4 (`:586`–`:641`); `docs/scenarios/01-ura-finale.md:38`                                                                                                                                                                                                                                                                                                          | Confirmed, multi-source. Three payout moments (career start, early April Classic, early April Senior); White Sparks pay a mid-run hint +1..+5 and never fire at career start; Green Sparks carry the trainee's own Unique Skill at 1–3 hint levels   |
 | 3     | Star-rank unlock                                     | `REFERENCE:588` (unique-skill Spark guaranteed once the trainee stands at ★3+); §1.3.5 `:385` (★4/★5 breakthrough rows, +50 stat budget per rank past native rarity); §1.6.9 `:750`, `:762` and the terminology row `:1957`                                                                                                                                                             | Confirmed for the ★3 consequence. The currency route is Trainee Star Pieces (Transfer Requests, duplicates) and the Statue Exchange at 650 pieces to max a trainee — see §5.1: the phrasing "Goddess Statues raise rank" is a retired reading        |
 | 4     | Support card events                                  | `REFERENCE` §1.4.4 `:465`–`:467`; §1.4.7/§1.4.8 `:550`–`:555`                                                                                                                                                                                                                                                                                                                           | Confirmed, export-backed. Per-card `hint_skills` / `hint_others`; Hint Levels (id 17) and Hint Frequency (id 18); one event pays `1 + card hint level`                                                                                               |
@@ -1704,7 +1704,7 @@ footnote: **`is_unique` 294** is the code rule (rarity 3/4/5) while the card joi
 
 ### 9. Cross-references
 
-- `docs/UMAMUSUME_REFERENCE.md` — the mechanics authority. Skill-adjacent: §1.1.4 `:142`, §1.2 gating
+- `docs/UMAMUSUME_REFERENCE.md` — the mechanics authority. Skill-adjacent: §1.1.4 `:236`, §1.2 gating
   `:208`–`:312`, §1.3.5 `:378`, §1.4.4 `:463`, §1.4.7 `:550`, §1.5.1–1.5.4 `:582`, §1.6.9–1.6.10 `:748`,
   §2.2 `:849`, §2.3 `:863`, Conflict Log rows 12, 16, 43, 44, 45, 46, §8.4 `:2083`.
 - `DESIGN-CORPUS.md` §MECHANICS-TRANSLATION-TRIAGE.md — rulings this file must not reopen: §1
@@ -2652,7 +2652,7 @@ That leaves two facts the export carries, the document publishes, and no ruling 
   paraphrase would be an invented fact. This is source data with a provenance chain, not a claim about
   meaning, so it clears D-20 where the description does not.
 - **Style eligibility.** Decoded from `running_style==N` against
-  `docs/UMAMUSUME_REFERENCE.md:229-234`, which publishes the four client labels. This is the one decode the
+  `docs/UMAMUSUME_REFERENCE.md:370-375`, which publishes the four client labels. This is the one decode the
   fact document performs, and it is the one the design may render as a word.
 
 `type` is a third, with a warning attached: the stored column is **this tool's derivation**, one of three
@@ -2728,7 +2728,7 @@ Sizing and role notes for the implementer, so nothing here needs re-deciding:
   a state never live in a glyph alone, and §6.11's sparkle is the client's own mark. It is not ornament and
   must not be copied to any other state.
 - Style label: plain `text-ink-muted` word, **no pill, no colour**. It is a qualification of the row, not a
-  state. The four permitted strings are exactly the client labels at `UMAMUSUME_REFERENCE.md:231-234`:
+  state. The four permitted strings are exactly the client labels at `UMAMUSUME_REFERENCE.md:372-375`:
   Front Runner, Pace Chaser, Late Surger, End Closer. The literal export renderings (Runner, Leader,
   Betweener, Chaser) are barred by the same citation and must not appear.
 - Derived type word: render the stored `type` column only, never the export's gate-key array, and only
@@ -3928,7 +3928,7 @@ it. This version describes the changes without reproducing any of the four terms
 - No character is framed as an animal anywhere in this proposal, and the running-style words are the
 
 ```text
-client's own four labels (`UMAMUSUME_REFERENCE.md:231-234`). §9.6 carries the same verdict for the
+client's own four labels (`UMAMUSUME_REFERENCE.md:372-375`). §9.6 carries the same verdict for the
 Trainer-facing copy §9 drafts, which is the part a second pass should re-check rather than trust.
 ```
 

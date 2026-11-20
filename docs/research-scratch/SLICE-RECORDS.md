@@ -261,8 +261,8 @@ the recipe bodies were executed directly with the same patterns and pathspecs.
 `lore` reports 128 hits across the repository â€” every one of them in prose that
 names the ban in order to enforce it (`AGENTS.md`, `CONSTRAINTS.md`, `DESIGN.md`,
 `PRD.md`), in a registered unit name whose spelling happens to contain a banned
-substring (see `docs/UMAMUSUME_REFERENCE.md:1394` and the substring ruling at
-`docs/UMAMUSUME_REFERENCE.md:46`), or in the Makefile's own pattern strings. No new hit
+substring (see `docs/UMAMUSUME_REFERENCE.md:2038` and the substring ruling at
+`docs/UMAMUSUME_REFERENCE.md:60`), or in the Makefile's own pattern strings. No new hit
 was introduced by this slice â€” including in this file, which is why that unit is cited by
 line number rather than named.
 
@@ -12188,7 +12188,7 @@ N of 9 entries complete: Cockpit, TrainingDetail, RaceDecision, SkillsPlanner, E
 
 **M1 / Index ten-item re-check.** §11 ten re-checks answered; item 8: no violation because no screen makes the Trainer carry something between two places. §1 six prime directives govern findings. Twelve-document table: no change recorded for this pass.
 
-**Reference figures.** +16 per ★3 Blue factor (§1.3.4, UMAMUSUME_REFERENCE.md:420) sanctioned; ★2/+8 refused as unsourced; wireframe "24-point cap gap" refused (ADR-0020 §3 / PRD G-4 at PRD.md:322). No star-roll odds rendered (§1.5.3 stale).
+**Reference figures.** +16 per ★3 Blue factor (§1.3.4, UMAMUSUME_REFERENCE.md:663) sanctioned; ★2/+8 refused as unsourced; wireframe "24-point cap gap" refused (ADR-0020 §3 / PRD G-4 at PRD.md:322). No star-roll odds rendered (§1.5.3 stale).
 
 ---
 
@@ -17298,7 +17298,7 @@ expression reads is unchanged, and the payload is byte-identical.
 ### 5. What stays open
 
 - **The goal-race calendar** remains off for this scenario, and that is a surface decision, not a
-  data one (`09-global-race-calendar.md:643` "not a fixture list"; `UMAMUSUME_REFERENCE.md:1673-1675`
+  data one (`09-global-race-calendar.md:643` "not a fixture list"; `UMAMUSUME_REFERENCE.md:2388-2390`
   "a design decision about surfaces, and it is the owner's"). This slice does not touch it.
 - **D-241 / gate G-41 wording** still names this scenario as the "undescribed scenario" acceptance
   case while the scenario is documented (`config/scenarios.php:1118-1128` records the same
@@ -17312,7 +17312,7 @@ expression reads is unchanged, and the payload is byte-identical.
 | Ladder grain is the trainee, not the scenario | `docs/adr/0026-…md:71` (Accepted) | ADR |
 | Same, publisher-side | Game8 `archives/607337` — "race goals and career events … for each Umamusume" | web, read 2026-11-10 |
 | Unique-skill thresholds "same as URA Finale" | uma.guide `guides/grand-concert` | web, read 2026-11-10 |
-| Calendar stays off | `docs/scenarios/09-global-race-calendar.md:643`; `UMAMUSUME_REFERENCE.md:1673-1675` | repo corpus |
+| Calendar stays off | `docs/scenarios/09-global-race-calendar.md:643`; `UMAMUSUME_REFERENCE.md:2388-2390` | repo corpus |
 | The key is already set | `config/scenarios.php:1090` | code |
 
 ## s-a-p01-og-1-report-2026-11-10.md
@@ -19291,7 +19291,7 @@ The owner's review asked for the reasoning to be stated against `docs/UMAMUSUME_
 
 **The claim, in one sentence.** `trainee_goals` holds **the character's own career goals**, so a run composes them because the run is *that character's*, not because the scenario happens to be URA.
 
-**The reference corpus says so, in the client's own words.** `docs/UMAMUSUME_REFERENCE.md` §1.2 (`:388`) records what a race goal is and who owns it: *"The Debut Race is mandatory for **every character**"*; *"Campaign objectives are 'getting a minimum placing in a specific race or acquiring a set amount of fans before a set date'"*. **Every character.** Not every URA run — every character. The reference document attributes it to the export and to the career-mode wiki, and the subject of the goals is the character.
+**The reference corpus says so, in the client's own words.** `docs/UMAMUSUME_REFERENCE.md` §1.2 (`:631`) records what a race goal is and who owns it: *"The Debut Race is mandatory for **every character**"*; *"Campaign objectives are 'getting a minimum placing in a specific race or acquiring a set amount of fans before a set date'"*. **Every character.** Not every URA run — every character. The reference document attributes it to the export and to the career-mode wiki, and the subject of the goals is the character.
 
 **What the reference says about the scenarios that re-shape the career.** §2.2 (`:1260`) records for Our Grand Concert: *"**The standard career is back.** Race goals, career events and per-character hidden events all return, including New Year events and the hot spring lottery, so a Runaway-style gate is reachable here in a way it is not in Trackblazer."* The sentence's shape is the answer: the scenarios are not competing vocabularies for the goal concept; each one **keeps or removes the standard career**, and where the standard career is present the character's race goals are present with it. §2.2 (`:1124`) records the opposite case for the scenario that drops it: *"Open career, no race goals, no scenario link … What replaces career goals is four shared …"* — Trackblazer, which is the one scenario whose `goal_source` is `null`.
 
@@ -19632,7 +19632,7 @@ Three separable pieces, in evidence strength order. They need not ship together.
 | 2026-11-08 | Decision 7 still open. `S-A-P01.OG` is held and named in `§s-a-p01-1`'s §9. Our Grand Concert's `goal_source` is deliberately **unset** rather than guessed, so the default keeps today's behaviour until the owner rules which ladder `config/scenarios.php:1118-1119` means. |
 | 2026-11-08 | **Decision 7 settled by the corpus; §4.3's premise corrected.** The owner review forced the read of the Unity Cup corpus file, and the read showed the ladder is **the character's own** goals (`ADR-0026`: "Trainee grain, no run scope"; `09-global-race-calendar.md:641`: "the goals are the character's own, per trainee rather than per scenario"; `02-unity-cup.md:169,289`: Unity Cup "adds Team Races on top; it does not remove the underlying career race-goal structure"). **Consequence: §4.3's Unity Cup gating was wrong and was corrected at `S-A-P01.4` (`f434b41a`)** — `unity_cup` restored to `'trainee_goals'`, `our_grand_concert` named `'trainee_goals'`, Trackblazer left `null`. The unified fix landed rather than the OGC half alone, which is what the review required. **A figure in the review is corrected in §0.3: it is 1,201 of 1,677 goal rows that carry a race slot, and all 1,201 point at shared slots — not "1,677 of 1,677".** The conclusion the review drew holds; the denominator did not. |
 | 2026-11-08 | **§0 added — implementation status.** §0.1 slices landed and their commits · §0.2 decision-by-decision disposition (decision 7 still open) · §0.3 the three divergences · §0.4 the held `S-A-P01.OG` slice and what the owner must decide · §0.5 measurement-vs-shipped · §0.6 gates at close-out · §0.7 still open. §9 and §10 carry dated notes marking them historical; their content is unchanged. |
-| 2026-11-10 | **`S-A-P01.OG` resolved and closed** (`S-A-P01-OG-1`). The held slice asked which ladder `config/scenarios.php:1118-1119` means for Our Grand Concert; the answer is **`'trainee_goals'`**, which the entry has carried since `S-A-P01.4` and which needs **no config change**. Resolution evidence, read fresh this pass rather than inherited: `docs/scenarios/07-grand-concert.md:92-95` ("returns the standard trainee career features of race goals and career events") and `:242` (the `S-A-P01.4` dated note); `ADR-0026:71` ("Trainee grain, no run scope", Accepted); `docs/scenarios/09-global-race-calendar.md:643` (goal races exist "in the URA sense", ladder is per trainee); plus two web sources — Game8 `archives/607337` ("race goals and career events … for each Umamusume") and uma.guide `guides/grand-concert` (silent on goals, and its unique-skill table is "the same as the URA Finale Scenario"). Full write-up: section `## s-a-p01-og-goal-source-2026-11-10.md` of `docs/research-scratch/SLICE-RECORDS.md`. What was actually stale was `TeamPanelBuilder.php:222-227`, whose comment still asserted the scenario "declares no `goal_source` while P-01 §7 decision 7 is open"; that comment is corrected in place with no behavior change. The goal-race **calendar** stays off and remains a surface decision (`09-global-race-calendar.md:643`; `UMAMUSUME_REFERENCE.md:1673-1675`), untouched here. |
+| 2026-11-10 | **`S-A-P01.OG` resolved and closed** (`S-A-P01-OG-1`). The held slice asked which ladder `config/scenarios.php:1118-1119` means for Our Grand Concert; the answer is **`'trainee_goals'`**, which the entry has carried since `S-A-P01.4` and which needs **no config change**. Resolution evidence, read fresh this pass rather than inherited: `docs/scenarios/07-grand-concert.md:92-95` ("returns the standard trainee career features of race goals and career events") and `:242` (the `S-A-P01.4` dated note); `ADR-0026:71` ("Trainee grain, no run scope", Accepted); `docs/scenarios/09-global-race-calendar.md:643` (goal races exist "in the URA sense", ladder is per trainee); plus two web sources — Game8 `archives/607337` ("race goals and career events … for each Umamusume") and uma.guide `guides/grand-concert` (silent on goals, and its unique-skill table is "the same as the URA Finale Scenario"). Full write-up: section `## s-a-p01-og-goal-source-2026-11-10.md` of `docs/research-scratch/SLICE-RECORDS.md`. What was actually stale was `TeamPanelBuilder.php:222-227`, whose comment still asserted the scenario "declares no `goal_source` while P-01 §7 decision 7 is open"; that comment is corrected in place with no behavior change. The goal-race **calendar** stays off and remains a surface decision (`09-global-race-calendar.md:643`; `UMAMUSUME_REFERENCE.md:2388-2390`), untouched here. |
 
 ## ki-101-harness-staleness-2026-11-10.md
 
@@ -21235,7 +21235,8 @@ was quiet at launch.
   Tests: 2415 passed (37175 assertions), Duration 1306.13s, run in the background from
   .scratch-uma/r1-c3-index/feature-suite.log against the tree containing R1. Zero failures; the
   prior baseline's two known reds (UiHygieneTest, ScenarioAdvisorFinaleTest) are confirmed fixed
-  (fixed by 080bb99 and 72160eca respectively).
+  (fixed by 
+080bb99 and 72160eca respectively).
 - **Browser suite: interrupted; recorded inconclusive, not classified as product failures.** The
   session-private run (PLAYWRIGHT_PORT=8171, scratch db under .scratch-uma/r1-c3-index/) was
   terminated by the host tool's own timeout at case 204/867, before any summary line. Up to that
@@ -21243,8 +21244,10 @@ was quiet at launch.
   concentrated in career-cockpit/preflight/training specs, with locator.click timing out - the
   KI-74 contention signature, recorded here as **infrastructure/inconclusive under load**, not as
   a defect list. No re-run was attempted (owner instruction: R2 is a measurement, not a fix).
-- **Targeted browser evidence stands from R1's gates:** eterans.spec.ts 16/16 passed and
-  eterans-parity.spec.ts 2/2 passed, both session-private (port 8161, scratch db under
+- **Targeted browser evidence stands from R1's gates:** 
+eterans.spec.ts 16/16 passed and
+  
+eterans-parity.spec.ts 2/2 passed, both session-private (port 8161, scratch db under
   .scratch-uma/r1-c3-index/). The first parity invocation timed out on webServer boot and passed
   on re-invocation - infrastructure, classified per the failure-attribution step.
 

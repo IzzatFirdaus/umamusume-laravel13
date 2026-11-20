@@ -114,7 +114,7 @@ is a normal state.
 
 **Semantics, and what it is not.** `pick` records which recorded Spark the Trainer marked as that
 parent's **headline** for display: the parent card's first row and the compare view's headline column.
-It is **not** "which Spark fires at inheritance." `UMAMUSUME_REFERENCE.md:645` states career start is
+It is **not** "which Spark fires at inheritance." `UMAMUSUME_REFERENCE.md:1062` states career start is
 deterministic for stat and aptitude factors, and `:692` bounds a run to exactly one Blue and one Pink,
 so there is no per-parent choice of what fires. Any projected figure sums every recorded Spark; `pick`
 never gates it. This is the `HFW-OVERRIDE` the builder page records.

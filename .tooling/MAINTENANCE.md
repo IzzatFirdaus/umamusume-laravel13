@@ -31,7 +31,7 @@ the gate should have blocked.
 | MiniMax | Agent shell-reads without a deny | `~/.minimax/permission.json` reset by an app update (v2 schema rewrite); deny rules dropped | Check `deny` array still has the 14 `command`-matcher rules (list in REVIEW-LOG Slice I) |
 | MiniMax (2) | Compound command (`&&`, `;`, pipe) executes instead of asking | **Not a regression** — the separator guard routes compound commands to ask, not deny; this is the documented residual gap | None (behavioral; see REVIEW-LOG Slice I) |
 | VS Code | Kilo panel auto-approves tool calls in this repo | `.vscode/settings.json` deleted or `kilo-code.new.autoApprove.enabled` re-enabled | File check; the key must be `false` |
-| MCP catalog | Agent reports missing/timeout MCP tools; tool count drifts | A runtime update re-added pruned servers, or a server cold-start regressed | `node .tooling/mcp-count.mjs` — must stay at 3 servers / 45 tools |
+| MCP catalog | Agent reports missing/timeout MCP tools; tool count drifts | A runtime update re-added pruned servers, or a server cold-start regressed | `hermes mcp list` + `node .tooling/mcp-count.mjs` — measured 2026-11-19: Hermes 8 registered / 4 enabled / 18 tools; repo `.mcp.json` declares 3 |
 
 Two universal rules:
 
@@ -95,7 +95,8 @@ node -e "const j=require(process.env.USERPROFILE+'/.minimax/permission.json'); c
 Get-Content .kilo/kilo.jsonc
 Get-Content .vscode/settings.json
 
-# MCP catalog (expect 3 servers / 45 tools; more means a runtime re-added pruned servers)
+# MCP catalog (measured 2026-11-19: Hermes 8 registered / 4 enabled / 18 tools;
+# repo .mcp.json declares 3 servers; drift means a runtime re-added pruned servers)
 node .tooling/mcp-count.mjs
 ```
 
@@ -169,4 +170,4 @@ Version-specific facts that WILL drift (re-derive, don't trust):
 - Codex CLI path: `%LOCALAPPDATA%\OpenAI\Codex\bin\<hash>\codex.exe`
 - Kilo CLI path: the Antigravity extensions dir `<hash>\bin\kilo.exe`
 - DSH profile path: `~/.dsh/profiles/desktop/`
-- Tool counts (45) and server list (laravel-boost, filesystem, playwright)
+- Hermes MCP counts (8 registered / 4 enabled / 18 tools as of 2026-11-19) and the server list in the active profile's config.yaml; repo `.mcp.json` declares `laravel-boost`, `filesystem`, `playwright`

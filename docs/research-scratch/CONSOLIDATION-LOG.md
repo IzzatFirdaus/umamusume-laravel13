@@ -94,7 +94,7 @@ the prior round deleted.
   `docs/Scenario-Specific User Flows & Frontend Specifications.md`) are already merged into the
   tracked-then-superseded archive `docs/_UMAMUSUME UX DELIVERABLES - MERGED.md` (Parts 1-3),
   not into the task-named `INCOMING-UX-TRIAGE.md`. Re-merging would duplicate them.
-- The task's explicit citation update **was** performed: `docs/UMAMUSUME_REFERENCE.md:386`
+- The task's explicit citation update **was** performed: `docs/UMAMUSUME_REFERENCE.md:629`
   and `:2029` now point at the live archive Part 1 instead of the deleted
   `COMPREHENSIVE UX DELIVERABLES.md`, and the D-285 cross-reference is repointed to the
   surviving master (`docs/research-scratch/DESIGN-CORPUS.md`).

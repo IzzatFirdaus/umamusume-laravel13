@@ -145,7 +145,7 @@ run's observed client ceilings from six blue sparks under any activation schedul
 forbidden. Projecting forward for an unstarted run is a different claim, and this amendment does not
 re-open what the Context measured.
 
-**Why this is arithmetic, not prediction.** `UMAMUSUME_REFERENCE.md:645` states career start is
+**Why this is arithmetic, not prediction.** `UMAMUSUME_REFERENCE.md:1062` states career start is
 deterministic for stat and aptitude factors (the two mid-run moments are the probabilistic ones), and
 `:420` prices the cap raise at **+16 per ★3 basic-ability factor**, applied at 育成開始時. Two ★3
 basic-ability factors, one from each parent, is +32 over the scenario cap: arithmetic on a stated

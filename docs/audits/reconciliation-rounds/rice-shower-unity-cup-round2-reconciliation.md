@@ -783,7 +783,7 @@ catalogue query returned), target step visited and deliberately left empty, ance
 captured the answer: `props.errors["legacies.1.rank_letter"] = "The selected legacies.1.rank_letter is
 invalid."` Two causes, at two layers. `LegacySelectionPayload::RANK_LETTERS` stopped at `S+` and does not
 include `UG`, the letter this career's own source prints for Legacy 2 and both of her grandparents
-(`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:153-155`); and `LegacySelect.vue` rendered errors for only
+(`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:203-205`); and `LegacySelect.vue` rendered errors for only
 three keys (the parent pick, the grandparent names, the affinity), so a refusal on any other field printed
 nothing and the *entire* Legacy write was discarded for one letter. Fixing the list is the root fix because
 that one constant is the single owner of the Form Request rule (`StoreLegacySelectionRequest.php:103`), the
@@ -1221,7 +1221,7 @@ Preflight -> `Start Career` created run 10 on the snapshot, and the run-scoped d
    right about the deck and wrong about there being a line that prints it.
 2. Slot 5 is the deck's only scenario-linked card — **verified two ways.** On the wizard step, 6 occurrences of
    `Scenario Link` of which 5 are `Not a Scenario Link`; on the run builder, exactly one row flagged `LINK`. This
-   matches `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:96` (`Haru Urara` as the only `yes`).
+   matches `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:132` (`Haru Urara` as the only `yes`).
 3. Ownership `Owned` x5 plus slot 6 `Rented` — **verified** via `aria-pressed` per slot.
 4. The run-scoped builder re-reads the six identities — **verified**.
 

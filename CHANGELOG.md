@@ -17,6 +17,12 @@ The game-mechanics sync. Four Round-5 defects corrected against `UMAMUSUME_REFER
 lock schema cleanup, and Independent Training (§1.1.7) built end to end. The reference is the ground
 truth for mechanics; the two ADRs that contradicted it were amended rather than obeyed.
 
+### Changed
+
+- **Docs folder map** - `docs/INDEX.md` added as the docs-tree placement router; `AGENTS.md` §3 map,
+  §6 tree and a default-placement rule now cover every `docs/` folder, so agents know where to place
+  or check a `.md` file without a specified path.
+
 ### Fixed
 
 - **Hint discount ladder** (§1.1.4) - `config/uma.php` `skills.hint_discount` carries Lv1 10% / Lv2 20%

@@ -18,16 +18,29 @@ A self-contained reference for Trainers of *Umamusume: Pretty Derby* by Cygames,
 
 **Structure, as of 2026-09-27 — eight sections, not four.** An incoming agent operating manual reproduced a four-section map of this file that has not been true since the scenario work landed; it was a mirror of this preamble's own stale line 9, which said "Four sections" (§ D-285 in `docs/research-scratch/DESIGN-CORPUS.md`: a write-up citing this repository is not a second source, and here it was not even that — it was a copy of an out-of-date sentence here). The real contents:
 
-| #     | Section                                            | What it holds                                                                                                                               |
-| ----- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1     | Core Game Mechanics                                | 1.1 Training, 1.2 Race, 1.3 Stats, 1.4 Support Cards, 1.5 Inheritance, 1.6 Additional Systems and Game Modes (through 1.6.11 Client UI-state grammars)   |
-| 2     | **Scenario Strategies and Mechanics `[Global]`**   | The four Global scenarios, per-scenario mechanics, the shared-heuristics ledger, and the numbered conflicts                                 |
-| 3     | Character Roster                                   | Debut forms, alternate costume cards, how the tables were built, cross-checks                                                               |
-| 4     | Live Operations & Events                           | Current and announced events, both servers                                                                                                  |
-| 5     | Gacha & Banner Schedule                            | Banners, rates, banner history                                                                                                              |
-| 6     | Server Terminology Map                             | One concept per row, `[JP]` against `[Global]` client wording                                                                               |
-| 7     | Source Attribution and Conflict Log                | **62 rows** as of 2026-11-12 (re-derive the count from the table before quoting it; rows 43-46 were added by the mechanics-brief pass, 48-52 by the 2026-10-05 Grand Concert read, 53-56 by the 2026-10-15 research-scratch integration, 57-59 by the 2026-11-06 career-flow reconciliation, and 60-62 by the 2026-11-12 scenario-knowledge pass)      |
-| 8     | Self-Audit Report                                  | Per-section confidence, weakest coverage, known gaps, blockers                                                                              |
+**1 — Core Game Mechanics**
+- What it holds: 1.1 Training, 1.2 Race, 1.3 Stats, 1.4 Support Cards, 1.5 Inheritance, 1.6 Additional Systems and Game Modes (through 1.6.11 Client UI-state grammars)
+
+**2 — Scenario Strategies and Mechanics `[Global]`**
+- What it holds: The four Global scenarios, per-scenario mechanics, the shared-heuristics ledger, and the numbered conflicts
+
+**3 — Character Roster**
+- What it holds: Debut forms, alternate costume cards, how the tables were built, cross-checks
+
+**4 — Live Operations & Events**
+- What it holds: Current and announced events, both servers
+
+**5 — Gacha & Banner Schedule**
+- What it holds: Banners, rates, banner history
+
+**6 — Server Terminology Map**
+- What it holds: One concept per row, `[JP]` against `[Global]` client wording
+
+**7 — Source Attribution and Conflict Log**
+- What it holds: **62 rows** as of 2026-11-12 (re-derive the count from the table before quoting it; rows 43-46 were added by the mechanics-brief pass, 48-52 by the 2026-10-05 Grand Concert read, 53-56 by the 2026-10-15 research-scratch integration, 57-59 by the 2026-11-06 career-flow reconciliation, and 60-62 by the 2026-11-12 scenario-knowledge pass)
+
+**8 — Self-Audit Report**
+- What it holds: Per-section confidence, weakest coverage, known gaps, blockers
 
 The scenario section is the one an ingestion pipeline is most likely to miss and least able to do without: it carries the Global-only rulings, the cap derivation, and the import filter that `docs/scenarios/07` and `08` depend on.
 
@@ -35,12 +48,13 @@ The scenario section is the one an ingestion pipeline is most likely to miss and
 
 Umamusume runs on separate servers with different content timelines. This document never merges them.
 
-| Tag           | Meaning                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `[JP]`        | Japan server, Japanese, the original release. Launched 2021-02-24. At its 5.5th anniversary as of this snapshot.                                                                                                                                                                                                                                                                                                                                                                   |
-| `[Global]`    | Worldwide English server, operated by Cygames. Official site `https://umamusume.com/`. First `[Global]` release dates in the roster data begin 2025-06-26, which matches the Cygames English-version availability notice indexed at [cygames.co.jp/en/news/id-24452](https://www.cygames.co.jp/en/news/id-24452), dated 2025-06-26 in the search index. That page returned 403 to this client, so its body was not read here: treat the date as corroborated rather than quoted.   |
-| `[Both]`      | The same content exists on both servers, with the same mechanics.                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `[JP-Only]`   | Live on the Japan server, not yet available on `[Global]`.                                                                                                                                                                                                                                                                                                                                                                                                                         |
+- **`[JP]`**: Japan server, Japanese, the original release. Launched 2021-02-24. At its 5.5th anniversary as of this snapshot.
+
+- **`[Global]`**: Worldwide English server, operated by Cygames. Official site `https://umamusume.com/`. First `[Global]` release dates in the roster data begin 2025-06-26, which matches the Cygames English-version availability notice indexed at [cygames.co.jp/en/news/id-24452](https://www.cygames.co.jp/en/news/id-24452), dated 2025-06-26 in the search index. That page returned 403 to this client, so its body was not read here: treat the date as corroborated rather than quoted.
+
+- **`[Both]`**: The same content exists on both servers, with the same mechanics.
+
+- **`[JP-Only]`**: Live on the Japan server, not yet available on `[Global]`.
 
 The `[JP]` server runs months ahead of `[Global]`. A `[JP]` banner date is not a `[Global]` banner date, and a `[JP]`-derived projection of future `[Global]` content is not a confirmation. Anything resting on a projection rather than an announcement sits in a labeled `[SPECULATION]` subsection.
 
@@ -60,12 +74,13 @@ The grep proposes; the Lore Guardian decides. Japanese katakana names and quoted
 
 ## How to read the flags
 
-| Flag                                                       | Meaning                                                                                      |
-| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `⚠️ STALE: [source] dated [date]`                          | The source is older than 90 days. The claim may still hold; check it before relying on it.   |
-| `❌ UNVERIFIED: No current source found. Last known: ...`  | Nothing citable supports this. It is not a gap to be filled in by guessing.                  |
-| `[SPECULATION]`                                            | A labeled prediction, from a derived schedule or community forecast. Not an announcement.    |
-| `[RUMOR]`, `[DATAMINE]`                                    | Unconfirmed or extracted-from-client content.                                                |
+- **`⚠️ STALE: [source] dated [date]`**: The source is older than 90 days. The claim may still hold; check it before relying on it.
+
+- **`❌ UNVERIFIED: No current source found. Last known: ...`**: Nothing citable supports this. It is not a gap to be filled in by guessing.
+
+- **`[SPECULATION]`**: A labeled prediction, from a derived schedule or community forecast. Not an announcement.
+
+- **`[RUMOR]`, `[DATAMINE]`**: Unconfirmed or extracted-from-client content.
 
 **Two rules for reading the flags, added 2026-10-02.** First, `⚠️ STALE` is about *the source's age*, not about the claim's volatility, and a mechanic can be perfectly stable while every guide that documents it is old. Friendship training (1.1.3) is the clearest case: eight `⚠️ STALE` markers sit on one subsection, because the only pages that print the bond threshold are from 2021 and 2022, and three of them agree. The mechanism has not changed; the sources have aged. Where a subsection accumulates several `⚠️ STALE` markers on claims that multiple sources agree on, the subsection carries a line saying so, and the markers are left in place rather than stripped, because deleting them would hide the fact that the number rests on an old page. Where a claim rests on a *single* stale source, the marker is the warning and must not be read past. Second, a bare `⚠️` with no `STALE` word is emphasis, not a status. It marks a trap, a spend-site error, or a rule a reader is likely to get wrong. It never means the source is old, and it should not be counted as a volatility flag.
 
@@ -75,19 +90,71 @@ Sections 4 and 5 are the fast-decaying parts of this document. Each of their sub
 
 Verified during compilation on 2026-09-27. Tiers: S official Cygames, A major community wiki with an editorial process, B database or tool site, C community post requiring corroboration, D rumor.
 
-| Source                                 | URL                                                                                                | Server       | Verified state on 2026-09-27                                                   | Tier   |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------ | ------------------------------------------------------------------------------ | ------ |
-| Umamusume JP official portal, news     | <https://umamusume.jp/news/?t=game>                                                                | `[JP]`       | Live, rendered in a browser. Newest item 2026.09.26 12:00                      | S      |
-| JP official news article pages         | <https://umamusume.jp/news/detail?id=3453>                                                         | `[JP]`       | Live per article id. JS-rendered, plain fetch returns an empty shell           | S      |
-| Umamusume Global official site, news   | <https://umamusume.com/news/>                                                                      | `[Global]`   | Live, rendered in a browser. Newest item 2026-09-24 22:00 UTC                  | S      |
-| Global official character index        | <https://umamusume.com/characters/>                                                                | `[Global]`   | Live                                                                           | S      |
-| GameTora data export                   | <https://gametora.com/data/manifests/umamusume.json>                                               | `[Both]`     | Live. Datasets fetched 2026-09-27, page text dated 2026-09-24                  | B      |
-| Kamigame JP wiki                       | <https://kamigame.jp/umamusume/>                                                                   | `[JP]`       | Live. Gacha page 最終更新日 2026-09-22 12:21                                   | A      |
-| GameWith JP wiki                       | <https://gamewith.jp/uma-musume/article/show/257332>                                               | `[JP]`       | Live. Article dates range 2021 to 2026-09-26, flagged individually             | A      |
-| Game8 EN                               | <https://game8.co/games/Umamusume-Pretty-Derby/archives/537125>                                    | `[Global]`   | Live, updated 2026-09-17. States its schedule is derived from JP and adapted   | A      |
-| Game8 JP                               | <https://game8.jp/umamusume/372572>                                                                | `[JP]`       | Live, pages dated 2025-11-21 to 2026-09-24                                     | A      |
-| Umamusume Wiki (MediaWiki)             | <https://umamusu.wiki/Game:Mechanics>                                                              | `[Both]`     | Live. Game:Mechanics last edited 2026-07-04, Game:Career_Mode 2026-09-08       | A      |
-| r/UmaMusume banner megathreads         | <https://www.reddit.com/r/UmaMusume/comments/1w44bo5/en_gacha_banner_megathread_september_2026/>   | `[Global]`   | Corroboration only, never a sole source                                        | C      |
+**Umamusume JP official portal, news**
+- URL: <https://umamusume.jp/news/?t=game>
+- Server: `[JP]`
+- Verified state on 2026-09-27: Live, rendered in a browser. Newest item 2026.09.26 12:00
+- Tier: S
+
+**JP official news article pages**
+- URL: <https://umamusume.jp/news/detail?id=3453>
+- Server: `[JP]`
+- Verified state on 2026-09-27: Live per article id. JS-rendered, plain fetch returns an empty shell
+- Tier: S
+
+**Umamusume Global official site, news**
+- URL: <https://umamusume.com/news/>
+- Server: `[Global]`
+- Verified state on 2026-09-27: Live, rendered in a browser. Newest item 2026-09-24 22:00 UTC
+- Tier: S
+
+**Global official character index**
+- URL: <https://umamusume.com/characters/>
+- Server: `[Global]`
+- Verified state on 2026-09-27: Live
+- Tier: S
+
+**GameTora data export**
+- URL: <https://gametora.com/data/manifests/umamusume.json>
+- Server: `[Both]`
+- Verified state on 2026-09-27: Live. Datasets fetched 2026-09-27, page text dated 2026-09-24
+- Tier: B
+
+**Kamigame JP wiki**
+- URL: <https://kamigame.jp/umamusume/>
+- Server: `[JP]`
+- Verified state on 2026-09-27: Live. Gacha page 最終更新日 2026-09-22 12:21
+- Tier: A
+
+**GameWith JP wiki**
+- URL: <https://gamewith.jp/uma-musume/article/show/257332>
+- Server: `[JP]`
+- Verified state on 2026-09-27: Live. Article dates range 2021 to 2026-09-26, flagged individually
+- Tier: A
+
+**Game8 EN**
+- URL: <https://game8.co/games/Umamusume-Pretty-Derby/archives/537125>
+- Server: `[Global]`
+- Verified state on 2026-09-27: Live, updated 2026-09-17. States its schedule is derived from JP and adapted
+- Tier: A
+
+**Game8 JP**
+- URL: <https://game8.jp/umamusume/372572>
+- Server: `[JP]`
+- Verified state on 2026-09-27: Live, pages dated 2025-11-21 to 2026-09-24
+- Tier: A
+
+**Umamusume Wiki (MediaWiki)**
+- URL: <https://umamusu.wiki/Game:Mechanics>
+- Server: `[Both]`
+- Verified state on 2026-09-27: Live. Game:Mechanics last edited 2026-07-04, Game:Career_Mode 2026-09-08
+- Tier: A
+
+**r/UmaMusume banner megathreads**
+- URL: <https://www.reddit.com/r/UmaMusume/comments/1w44bo5/en_gacha_banner_megathread_september_2026/>
+- Server: `[Global]`
+- Verified state on 2026-09-27: Corroboration only, never a sole source
+- Tier: C
 
 ### Corrections to the source list this document was commissioned against
 
@@ -113,13 +180,40 @@ Aptitude arrays in that export hold ten letters in this order: Turf, Dirt, Sprin
 
 A training turn picks one of five disciplines. Four of them spend Energy (体力) for a main stat, a smaller secondary stat, and Skill Points; the Wit discipline spends no Energy and pays out more Skill Points instead [Game8 (2026-09-10)](https://game8.jp/umamusume/372572). Verbatim from that guide: 「ウマ娘のトレーニングは5種類あります。基本は体力を消費して基礎能力やスキルPtが上昇しますが、「賢さ」のトレーニングは体力を消費せず、他のトレーニングよりもスキルPtが多く貰えます」 [Game8 (2026-09-10)](https://game8.jp/umamusume/372572).
 
-| Training (JP / [Global] label)   | Main gain           | Secondary gain(s)                | Skill Pt per session   | Energy                          | Source                                                                                                        |
-| -------------------------------- | ------------------- | -------------------------------- | ---------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| スピード / Speed                 | Speed +10 to +14    | Power +5 to +7                   | +2                     | spent                           | [GameWith base-value table, ⚠️ STALE: dated 2023-02-25](https://gamewith.jp/uma-musume/article/show/257432)   |
-| スタミナ / Stamina               | Stamina +9 to +13   | Guts +4 to +6                    | +2                     | spent                           | [GameWith, ⚠️ STALE: 2023-02-25](https://gamewith.jp/uma-musume/article/show/257432)                          |
-| パワー / Power                   | Power +8 to +12     | Stamina +5 to +7                 | +2                     | spent                           | [GameWith, ⚠️ STALE: 2023-02-25](https://gamewith.jp/uma-musume/article/show/257432)                          |
-| 根性 / Guts                      | Guts +8 to +12      | Speed +4 to +5, Power +4 to +5   | +2                     | spent                           | [GameWith, ⚠️ STALE: 2023-02-25](https://gamewith.jp/uma-musume/article/show/257432)                          |
-| 賢さ / Wit                       | Wit +9 to +13       | Speed +2 to +4                   | +4 to +5               | none, recovers a small amount   | [GameWith, ⚠️ STALE: 2023-02-25](https://gamewith.jp/uma-musume/article/show/257432)                          |
+**スピード / Speed**
+- Main gain: Speed +10 to +14
+- Secondary gain(s): Power +5 to +7
+- Skill Pt per session: +2
+- Energy: spent
+- Source: [GameWith base-value table, ⚠️ STALE: dated 2023-02-25](https://gamewith.jp/uma-musume/article/show/257432)
+
+**スタミナ / Stamina**
+- Main gain: Stamina +9 to +13
+- Secondary gain(s): Guts +4 to +6
+- Skill Pt per session: +2
+- Energy: spent
+- Source: [GameWith, ⚠️ STALE: 2023-02-25](https://gamewith.jp/uma-musume/article/show/257432)
+
+**パワー / Power**
+- Main gain: Power +8 to +12
+- Secondary gain(s): Stamina +5 to +7
+- Skill Pt per session: +2
+- Energy: spent
+- Source: [GameWith, ⚠️ STALE: 2023-02-25](https://gamewith.jp/uma-musume/article/show/257432)
+
+**根性 / Guts**
+- Main gain: Guts +8 to +12
+- Secondary gain(s): Speed +4 to +5, Power +4 to +5
+- Skill Pt per session: +2
+- Energy: spent
+- Source: [GameWith, ⚠️ STALE: 2023-02-25](https://gamewith.jp/uma-musume/article/show/257432)
+
+**賢さ / Wit**
+- Main gain: Wit +9 to +13
+- Secondary gain(s): Speed +2 to +4
+- Skill Pt per session: +4 to +5
+- Energy: none, recovers a small amount
+- Source: [GameWith, ⚠️ STALE: 2023-02-25](https://gamewith.jp/uma-musume/article/show/257432)
 
 The gain ranges above are the Level 1 to Level 5 spread for one discipline. Secondary-gain routing (Speed feeds Power, Stamina feeds Guts, Power feeds Stamina, Guts feeds Speed and Power, Wit feeds Speed) is confirmed independently by [Game8 (2026-09-10)](https://game8.jp/umamusume/372572) and by [Kamigame, ⚠️ STALE: 2021-10-15](https://kamigame.jp/umamusume/page/146276970408242410.html), so the mapping is `[Both]` in effect even though the numbers were measured on `[JP]`.
 
@@ -186,15 +280,40 @@ Failure probability scales inversely with Energy: 「体力が低いほどトレ
 
 Mitigations, from cheapest to most structural:
 
-| Mitigation                          | How it works                                                                  | Numbers on record                                                                                    | Source                                                                                                                                                    |
-| ----------------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Rest (お休み)                       | Free-turn action that refills Energy                                          | +50 Energy modal, +70 (big success), +30 (failure, sometimes with 夜ふかし気味 / Late-Night Feeling) | [GameWith 257617 (n=3833) and Kamigame 147307607101602682 (n=100, 2022-12-19), tables in `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` §2.1]   |
-| Hold an Energy floor                | Risk curve is not linear; it bends around the middle of the gauge             | success rate 「大きく変わってくる」 above vs below 50 Energy                                         | [GameWith (2026-09-25)](https://gamewith.jp/uma-musume/article/show/257614)                                                                               |
-| Pick Wit when low                   | Wit costs no Energy, so it is the low-risk filler turn                        | Energy cost 0                                                                                        | [Game8 (2026-09-10)](https://game8.jp/umamusume/372572)                                                                                                   |
-| Failure Protection (export id 27)   | Support-card effect that shrinks the roll on a shared tile                    | multiplicative reduction (calc: mult)                                                                | [GameTora data export, `support_effects.json` id 27](https://gametora.com/data/umamusume/support_effects.ca447e53.json)                                   |
-| Energy Cost Reduction effect        | Lowers the spend of each session, delaying the danger zone                    | multiplicative reduction                                                                             | [GameTora data export, `support_effects.json` id 28](https://gametora.com/data/umamusume/support_effects.ca447e53.json)                                   |
-| Mood management                     | Outings (お出かけ) lift mood, which is a gain multiplier, not a safety switch | see 1.1.6                                                                                            | [GameWith (2026-09-25)](https://gamewith.jp/uma-musume/article/show/257614)                                                                               |
-| Strategic skip                      | Decline the turn and rest instead of pushing a red-zone session               | no published threshold beyond the 50 Energy guide                                                    | [Game8 (2026-09-10)](https://game8.jp/umamusume/372572)                                                                                                   |
+**Rest (お休み)**
+- How it works: Free-turn action that refills Energy
+- Numbers on record: +50 Energy modal, +70 (big success), +30 (failure, sometimes with 夜ふかし気味 / Late-Night Feeling)
+- Source: [GameWith 257617 (n=3833) and Kamigame 147307607101602682 (n=100, 2022-12-19), tables in `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` §2.1]
+
+**Hold an Energy floor**
+- How it works: Risk curve is not linear; it bends around the middle of the gauge
+- Numbers on record: success rate 「大きく変わってくる」 above vs below 50 Energy
+- Source: [GameWith (2026-09-25)](https://gamewith.jp/uma-musume/article/show/257614)
+
+**Pick Wit when low**
+- How it works: Wit costs no Energy, so it is the low-risk filler turn
+- Numbers on record: Energy cost 0
+- Source: [Game8 (2026-09-10)](https://game8.jp/umamusume/372572)
+
+**Failure Protection (export id 27)**
+- How it works: Support-card effect that shrinks the roll on a shared tile
+- Numbers on record: multiplicative reduction (calc: mult)
+- Source: [GameTora data export, `support_effects.json` id 27](https://gametora.com/data/umamusume/support_effects.ca447e53.json)
+
+**Energy Cost Reduction effect**
+- How it works: Lowers the spend of each session, delaying the danger zone
+- Numbers on record: multiplicative reduction
+- Source: [GameTora data export, `support_effects.json` id 28](https://gametora.com/data/umamusume/support_effects.ca447e53.json)
+
+**Mood management**
+- How it works: Outings (お出かけ) lift mood, which is a gain multiplier, not a safety switch
+- Numbers on record: see 1.1.6
+- Source: [GameWith (2026-09-25)](https://gamewith.jp/uma-musume/article/show/257614)
+
+**Strategic skip**
+- How it works: Decline the turn and rest instead of pushing a red-zone session
+- Numbers on record: no published threshold beyond the 50 Energy guide
+- Source: [Game8 (2026-09-10)](https://game8.jp/umamusume/372572)
 
 Whether Wit training can fail at all is not settled across sources; see the Source Conflict Log (row 2).
 
@@ -204,13 +323,35 @@ Whether Wit training can fail at all is not settled across sources; see the Sour
 
 Mood (やる気, `[Global]`: Mood) has five states and modifies both training yield and the attributes the Umamusume carries into a race. The table below is the `[Global]` client's own Mood Effect panel, read from a client capture on 2026-09-27: the panel prints the tier strings, both effect columns, and marks the tier the unit is currently on. The panel is a first-party client string set with no web URL behind it, so it is cited as a capture with its date rather than as a link; where a claim here rests on the panel alone it is marked HIGH-not-corroborated, and the two repository files that point the same way are named below as third-hand corroboration rather than as sources.
 
-| `[Global]` client string   | State (JP)   | Wiki gloss       | Training effect   | Pre-race attributes   |
-| -------------------------- | ------------ | ---------------- | ----------------- | --------------------- |
-| `GREAT`                    | 絶好調       | peak condition   | +20%              | +4%                   |
-| `GOOD`                     | 好調         | good             | +10%              | +2%                   |
-| `NORMAL`                   | 普通         | normal           | 0%                | 0%                    |
-| `BAD`                      | 不調         | poor             | −10%              | −2%                   |
-| `AWFUL`                    | 絶不調       | worst            | −20%              | −4%                   |
+**`GREAT`**
+- State (JP): 絶好調
+- Wiki gloss: peak condition
+- Training effect: +20%
+- Pre-race attributes: +4%
+
+**`GOOD`**
+- State (JP): 好調
+- Wiki gloss: good
+- Training effect: +10%
+- Pre-race attributes: +2%
+
+**`NORMAL`**
+- State (JP): 普通
+- Wiki gloss: normal
+- Training effect: 0%
+- Pre-race attributes: 0%
+
+**`BAD`**
+- State (JP): 不調
+- Wiki gloss: poor
+- Training effect: −10%
+- Pre-race attributes: −2%
+
+**`AWFUL`**
+- State (JP): 絶不調
+- Wiki gloss: worst
+- Training effect: −20%
+- Pre-race attributes: −4%
 
 The training column agrees with the `[JP]` guides, which state the ±20% headline [GameWith (2026-09-25)](https://gamewith.jp/uma-musume/article/show/257614) (「やる気が高いとトレーニングで得られる効果が大きくなり、レース前のステータスも上昇する」, with a 20% peak bonus quoted) and [Game8 (2026-09-10)](https://game8.jp/umamusume/372572). The pre-race column does not: [Kamigame, ⚠️ STALE: 2021-10-15](https://kamigame.jp/umamusume/page/146276970408242410.html) and Game8 print ±10% with the second tier at ±5%, and the client panel prints ±4% and ±2%. That settles the conflict recorded under "New conflict worth logging: the mood race effect" in Section 2 in GameWith's favour and against the two glosses this table previously carried. The five tier strings and the ten percentages are the client's; the two column headers and the "Wiki gloss" column are this document's wording, because the panel's own header labels were not transcribed with the capture.
 
@@ -264,12 +405,37 @@ Two surfaces exist: `ground_type` / `terrain` 1 and 2. The client's own text pin
 
 Four distance bands, decoded from `distance_type==1..4` against the client skill names 短距離 / マイル / 中距離 / 長距離 and their [Global] description tags "(Sprint)", "(Mile)", "(Medium)", "(Long)" (e.g. `skills.json` ids 200961, 201031, 201101, 201171). Metre spans are the course lengths in the export, not a wiki's prose range.
 
-| Band     | `course.distance` (equivalent to the `distance_type` condition key in `skills.json`)   | Course metres in export   | Distances actually raced               | [JP] label   | [Global] label   | Race rows   |
-| -------- | -------------------------------------------------------------------------------------- | ------------------------- | -------------------------------------- | ------------ | ---------------- | ----------- |
-| Sprint   | 1                                                                                      | 1000, 1150, 1200 m        | 1000, 1200 m                           | 短距離       | Sprint           | 50          |
-| Mile     | 2                                                                                      | 1300 to 1800 m            | 1400, 1500, 1600, 1700, 1800 m         | マイル       | Mile             | 171         |
-| Medium   | 3                                                                                      | 1900 to 2400 m            | 1900, 2000, 2100, 2200, 2400 m         | 中距離       | Medium           | 84          |
-| Long     | 4                                                                                      | 2500 to 3600 m            | 2500, 2600, 3000, 3200, 3400, 3600 m   | 長距離       | Long             | 17          |
+**Sprint**
+- `course.distance` (equivalent to the `distance_type` condition key in `skills.json`): 1
+- Course metres in export: 1000, 1150, 1200 m
+- Distances actually raced: 1000, 1200 m
+- [JP] label: 短距離
+- [Global] label: Sprint
+- Race rows: 50
+
+**Mile**
+- `course.distance` (equivalent to the `distance_type` condition key in `skills.json`): 2
+- Course metres in export: 1300 to 1800 m
+- Distances actually raced: 1400, 1500, 1600, 1700, 1800 m
+- [JP] label: マイル
+- [Global] label: Mile
+- Race rows: 171
+
+**Medium**
+- `course.distance` (equivalent to the `distance_type` condition key in `skills.json`): 3
+- Course metres in export: 1900 to 2400 m
+- Distances actually raced: 1900, 2000, 2100, 2200, 2400 m
+- [JP] label: 中距離
+- [Global] label: Medium
+- Race rows: 84
+
+**Long**
+- `course.distance` (equivalent to the `distance_type` condition key in `skills.json`): 4
+- Course metres in export: 2500 to 3600 m
+- Distances actually raced: 2500, 2600, 3000, 3200, 3400, 3600 m
+- [JP] label: 長距離
+- [Global] label: Long
+- Race rows: 17
 
 Boundaries are confirmed by the [Global] official line "(Medium)" at 2,200 m and the `[JP]` line 「（マイル）」 at 1800 m. The 1400 m boundary is contested: see Conflict Log row 7.
 
@@ -281,12 +447,29 @@ Two facts the bands control. First, field size: 18 runners on 152 rows, 16 on 13
 
 The engine stores exactly four values, `running_style==1..4`. The `[Global]` labels are not literal translations of the `[JP]` terms, and the export carries both a client label (`name_en`) and a separate literal rendering (`enname`), which is why the two must never be quoted as one set.
 
-| `running_style`   | [JP] term   | [Global] client label   | Literal EN rendering in export                   | Skills gated to it   | Where the toolkit sits                                                          |
-| ----------------- | ----------- | ----------------------- | ------------------------------------------------ | -------------------- | ------------------------------------------------------------------------------- |
-| 1                 | 逃げ        | Front Runner            | Runner (逃げのコツ◎ = "Runner's Tricks ◎")       | 107                  | phase 0 and phase 1, lead-holding                                               |
-| 2                 | 先行        | Pace Chaser             | Leader (先行のコツ◎ = "Leader's Tricks ◎")       | 220                  | mid-race, largest pool                                                          |
-| 3                 | 差し        | Late Surger             | Betweener (差しのコツ◎ = "Betweener's Tricks ◎") | 166                  | late-race move, order_rate gated                                                |
-| 4                 | 追込        | End Closer              | Chaser (追込のコツ◎ = "Chaser's Tricks ◎")       | 115                  | last spurt, 18 of the 121 skills whose condition text pins `running_style==4`   |
+**1 — 逃げ**
+- [Global] client label: Front Runner
+- Literal EN rendering in export: Runner (逃げのコツ◎ = "Runner's Tricks ◎")
+- Skills gated to it: 107
+- Where the toolkit sits: phase 0 and phase 1, lead-holding
+
+**2 — 先行**
+- [Global] client label: Pace Chaser
+- Literal EN rendering in export: Leader (先行のコツ◎ = "Leader's Tricks ◎")
+- Skills gated to it: 220
+- Where the toolkit sits: mid-race, largest pool
+
+**3 — 差し**
+- [Global] client label: Late Surger
+- Literal EN rendering in export: Betweener (差しのコツ◎ = "Betweener's Tricks ◎")
+- Skills gated to it: 166
+- Where the toolkit sits: late-race move, order_rate gated
+
+**4 — 追込**
+- [Global] client label: End Closer
+- Literal EN rendering in export: Chaser (追込のコツ◎ = "Chaser's Tricks ◎")
+- Skills gated to it: 115
+- Where the toolkit sits: last spurt, 18 of the 121 skills whose condition text pins `running_style==4`
 
 Counts and label pairs are from the export, skills whose condition set pins exactly one `running_style` value [GameTora data export, `skills.json`](https://gametora.com/data/umamusume/skills.f4a1e02d.json). The [Global] label set is confirmed independently by the guide pages: Front Runner, Pace Chaser, Late Surger, End Closer [game8.co Running Style Differences, ⚠️ STALE: dated 2025-10-05](https://game8.co/games/Umamusume-Pretty-Derby/archives/543935), and by the per-style pages refreshed inside the recency window: [game8.co Front Runner Guide (2026.08.24)](https://game8.co/games/Umamusume-Pretty-Derby/archives/544485), [game8.co Pace Chaser Guide (2026.09.01)](https://game8.co/games/Umamusume-Pretty-Derby/archives/544592), [game8.co Late Surger Guide (2026.09.01)](https://game8.co/games/Umamusume-Pretty-Derby/archives/544747), [game8.co End Closer Guide (2026.08.24)](https://game8.co/games/Umamusume-Pretty-Derby/archives/544879).
 
@@ -310,12 +493,33 @@ What the label actually changes, mechanically:
 
 Every one of the 138 course definitions in the export carries exactly four phases, `phases[].id` 0 to 3, split at fixed fractions of the race: 16.67%, 66.67%, 83.33%, 100% (57 courses land on exactly those three fractions, and all 138 are within 0.1% of them). The same model is documented as 24 sections: "Opening Leg (0): Section 1 to 4. Middle Leg (1): Section 5 to 16. Final Leg (2): Section 17 to 20. Last Spurt (3): Section 21 to 24" [Umamusume Wiki Mechanics, last edited 4 July 2026](https://umamusu.wiki/Game:Mechanics), and 4/24, 16/24 and 20/24 are exactly the export's three boundaries.
 
-| Phase         | `phase` id   | Sections   | Share of race   | What is decided                                  | Export anchor                                                                                                                                   |
-| ------------- | ------------ | ---------- | --------------- | ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Opening Leg   | 0            | 1 to 4     | first 1/6       | break from the gate and the early lead contest   | 24 skill records gate on `phase==0`, incl. `blocked_front_continuetime`                                                                         |
-| Middle Leg    | 1            | 5 to 16    | 1/6 to 2/3      | position holding, then the position battle       | `positionKeepEnd` inside phase 1 in all 138 courses                                                                                             |
-| Final Leg     | 2            | 17 to 20   | 2/3 to 5/6      | the move (仕掛け) begins                         | `spurtStart` inside the course's own phase 2 window in all 138 courses; only 95 of 138 also sit at or above the mathematical two-thirds point   |
-| Last Spurt    | 3            | 21 to 24   | last 1/6        | who holds on                                     | `is_lastspurt==1` on 119 skill records                                                                                                          |
+**Opening Leg**
+- `phase` id: 0
+- Sections: 1 to 4
+- Share of race: first 1/6
+- What is decided: break from the gate and the early lead contest
+- Export anchor: 24 skill records gate on `phase==0`, incl. `blocked_front_continuetime`
+
+**Middle Leg**
+- `phase` id: 1
+- Sections: 5 to 16
+- Share of race: 1/6 to 2/3
+- What is decided: position holding, then the position battle
+- Export anchor: `positionKeepEnd` inside phase 1 in all 138 courses
+
+**Final Leg**
+- `phase` id: 2
+- Sections: 17 to 20
+- Share of race: 2/3 to 5/6
+- What is decided: the move (仕掛け) begins
+- Export anchor: `spurtStart` inside the course's own phase 2 window in all 138 courses; only 95 of 138 also sit at or above the mathematical two-thirds point
+
+**Last Spurt**
+- `phase` id: 3
+- Sections: 21 to 24
+- Share of race: last 1/6
+- What is decided: who holds on
+- Export anchor: `is_lastspurt==1` on 119 skill records
 
 Opening: the break is modeled as lost time, not as a stat. 「集中力」 (Focus) is "Slightly decrease time lost to slow starts" and 「ゲート難」 (Gatekept) is "Moderately increase time lost to slow starts", both `always==1`; a separate flag `is_badstart` gates skills such as 「抜かりなし」 (All Set), whose copy reads "If the skill user began the race without a late start, greatly recover endurance in the early part of mid-race".
 
@@ -345,12 +549,25 @@ Track condition as a course factor is covered in 1.2.5. Venue-gated skills exist
 
 Weather codes decode off the client's own skill names: `weather==1` 「晴れの日」 Sunny Days, 2 「曇りの日」 Cloudy Days, 3 「雨の日」 Rainy Days, 4 「雪の日」 Snowy Days [GameTora data export, `skills.json` ids 200211, 200221, 200231, 200241](https://gametora.com/data/umamusume/skills.f4a1e02d.json). Ground (footing) codes decode off the same source, and the client enumerates the whole set in one line: 「道悪◎」 (Wet Conditions ◎) covers `ground_condition` 2, 3 and 4 and its copy reads "Increase performance on good, soft, and heavy ground", while 「良バ場◎」 (Firm Conditions ◎) is `ground_condition==1` [GameTora data export, `skills.json` ids 200151 and 200161](https://gametora.com/data/umamusume/skills.f4a1e02d.json).
 
-| Code   | [JP] term   | [Global] label   | Speed modifier, Turf   | Speed modifier, Dirt   |
-| ------ | ----------- | ---------------- | ---------------------- | ---------------------- |
-| 1      | 良          | Firm             | 0                      | 0                      |
-| 2      | 稍重        | Good             | 0                      | 0                      |
-| 3      | 重          | Soft             | 0                      | 0                      |
-| 4      | 不良        | Heavy            | -50                    | -50                    |
+**1 — 良**
+- [Global] label: Firm
+- Speed modifier, Turf: 0
+- Speed modifier, Dirt: 0
+
+**2 — 稍重**
+- [Global] label: Good
+- Speed modifier, Turf: 0
+- Speed modifier, Dirt: 0
+
+**3 — 重**
+- [Global] label: Soft
+- Speed modifier, Turf: 0
+- Speed modifier, Dirt: 0
+
+**4 — 不良**
+- [Global] label: Heavy
+- Speed modifier, Turf: -50
+- Speed modifier, Dirt: -50
 
 Modifier row quoted as "Firm Good Soft Heavy / Turf 0 0 0 -50 / Dirt 0 0 0 -50" [Umamusume Wiki Mechanics, last edited 4 July 2026](https://umamusu.wiki/Game:Mechanics). Stamina side of footing: **sourced 2026-10-05, community grade.** A race-mechanics write-up gives the HP-consumption multipliers outright: Firm and Good are 1.0, Soft and Heavy are 1.02 on turf, and on dirt Soft is 1.01 against Heavy 1.02. Two further pages agree directionally that the Stamina requirement rises on Soft and Heavy, one of them a stats guide that also prints the −50 Speed figure quoted above, so the Speed and Stamina halves now come from the same class of source and they line up. Grade and limit: all three are community pages, one of them marked archived, and no official page states a multiplier, so these are published figures rather than decoded client values. Their size is its own check. A 1.01 to 1.02 band is exactly the magnitude a table could omit while still printing a Speed row. **Dissent recorded the same day, and it is not cosmetic.** A second audit of this file, reading the current wiki and Game8's stats guide, found no source establishing an exact Stamina modifier for condition and would leave the gap open. The multipliers above come from a community write-up marked archived, which that pass did not weigh as authoritative. Both readings are now on file. Treat the figures as the furthest the published record goes, at community grade with an archived flag rather than as decoded client values, and if the archived page has aged out this is a guess wearing a number: the export-derived readings elsewhere in this section are the safer basis for anything that computes.
 
@@ -358,13 +575,25 @@ Weather and footing are linked, one directionally. `[JP]` guidance states that o
 
 Skills gated to a specific combination, from the export's condition strings, all `[Both]`:
 
-| Skill ([JP] / [Global])                           | Trigger combination                                                       | Cost, SP                  |
-| ------------------------------------------------- | ------------------------------------------------------------------------- | ------------------------- |
-| 泥遊び◎ / Muddy ◎ (202342)                        | `ground_type==2` and `ground_condition` 3 or 4, dirt plus soft or heavy   | 110                       |
-| 泥んこマイスター / Maestro of the Mud (202341)    | same pair, plus a Speed and Power bonus                                   | 130                       |
-| ターフの主人公 (107701111)                        | `ground_condition==1` and `ground_type==1`, turf plus firm                | no cost field, rarity 6   |
-| ナイター◎ / Night Races ◎ (202231)                | `time==4`, night meeting                                                  | 90                        |
-| 交流重賞◎ / Collaborative Graded Races ◎ (202251) | `is_dirtgrade==1`                                                         | 90                        |
+**泥遊び◎ / Muddy ◎ (202342)**
+- Trigger combination: `ground_type==2` and `ground_condition` 3 or 4, dirt plus soft or heavy
+- Cost, SP: 110
+
+**泥んこマイスター / Maestro of the Mud (202341)**
+- Trigger combination: same pair, plus a Speed and Power bonus
+- Cost, SP: 130
+
+**ターフの主人公 (107701111)**
+- Trigger combination: `ground_condition==1` and `ground_type==1`, turf plus firm
+- Cost, SP: no cost field, rarity 6
+
+**ナイター◎ / Night Races ◎ (202231)**
+- Trigger combination: `time==4`, night meeting
+- Cost, SP: 90
+
+**交流重賞◎ / Collaborative Graded Races ◎ (202251)**
+- Trigger combination: `is_dirtgrade==1`
+- Cost, SP: 90
 
 The [Global] Champions Meeting edition announced 2026.09.19 disables exactly the three course-factor lines, "The following skills will not activate during this Scorpio Cup: Night Races ◎/○/×, Sharp Turns ◎/○/×, Collaborative Graded Races ◎/○/×" [Umamusume Global Official News, 2026.09.19](https://umamusume.com/news/1050), which confirms all three flags are live mechanics. Time of day: 13 of 322 race rows carry `time==4` (4 on grade 100, 5 on grade 200, 4 on grade 300). Values 2 (299 rows) and 3 (10 rows): ❌ UNVERIFIED: No current source found. Last known: the `[JP]` official condition line ends with 「昼」, which is the state the export's dominant value 2 would represent. **Re-checked 2026-10-05 and the vocabulary half closes while the numbers do not:** [GameTora's race list](https://gametora.com/umamusume/races) filters time of day as **Daytime / Evening / Night** with no integers printed beside them, so the state set is three and 「昼」 is Daytime, and [umamusu.wiki's Trackblazer page, rev. 2026-09-19](https://umamusu.wiki/Game:Trackblazer) prints the weather pair in client event copy as "Win 3 or more races in Sunny weather", "in Rainy weather" and "in Snowy weather". Which of 2 and 3 is Evening and which is Night remains ❌ UNVERIFIED: no public source publishes the enum, and a tracker must store the label the Trainer saw rather than guess the code. Skill effect magnitudes are stored as raw integers (600000 for a ◎ bonus, 400000 for ○, -400000 for ×): ❌ UNVERIFIED: No current source found. Last known: that triple in `skills.json` effect payloads.
 
@@ -376,13 +605,27 @@ The export stores five grade codes, 100 (55 rows), 200 (46), 300 (76), 400 (119)
 
 Entry is gated twice, by fan count and by race goals.
 
-| Grade code   | Race rows in the URA schedule   | `fans_needed` range   | `fans_gain` range   |
-| ------------ | ------------------------------- | --------------------- | ------------------- |
-| 100 (G1)     | 48                              | 1,000 to 25,000       | 20 to 54            |
-| 200          | 58                              | 375 to 2,000          | 13 to 56            |
-| 300          | 108                             | 350 to 1,500          | 9 to 53             |
-| 400 (OP)     | 164                             | 350                   | 5 to 50             |
-| 700          | 26                              | 350                   | 44                  |
+**100 (G1)**
+- Race rows in the URA schedule: 48
+- `fans_needed` range: 1,000 to 25,000
+- `fans_gain` range: 20 to 54
+
+**200 — 58**
+- `fans_needed` range: 375 to 2,000
+- `fans_gain` range: 13 to 56
+
+**300 — 108**
+- `fans_needed` range: 350 to 1,500
+- `fans_gain` range: 9 to 53
+
+**400 (OP)**
+- Race rows in the URA schedule: 164
+- `fans_needed` range: 350
+- `fans_gain` range: 5 to 50
+
+**700 — 26**
+- `fans_needed` range: 350
+- `fans_gain` range: 44
 
 Ranges are per-row values in the export's URA race schedule joined to the grade on each race [GameTora data export, `ura-races.json` `fans_needed` and `fans_gain`, joined to `races.json` by `instance` and `id`](https://gametora.com/data/umamusume/ura-races.c12e8867.json); the mechanism behind the column is documented: "To participate in a race, the trainee needs to have accumulated the required number of fans; races with higher ratings generally require a larger number of fans" [Umamusume Wiki Career Mode, last edited 8 September 2026](https://umamusu.wiki/Game:Career_Mode). The monotone drop from 1,000 to 350 across the codes is what the tier order predicts, which is the evidence for the 100 to 400 mapping. **Re-derived 2026-10-15 over the 404 URA schedule races (9 special-race rows excluded):** the grade counts and ranges above reproduce exactly, and the same sweep adds the **career-year distribution** the table does not carry — Year 1 56 races, Year 2 162, Year 3 186, so two thirds of the calendar's grade races fall in the last two years and a planner that front-loads a race schedule is working against the export's own shape. Source for the re-derivation: the committed export `ura-races.json` joined to `races.json` (tier B), recorded in `docs/research-scratch-source/race-field-data-report.md` (2026-10-15). The report also reads grade 700 as **Listed**, matching uma.guide's 「OP/L (Open/Listed)」 conflation noted above rather than resolving the 700 label, which stays `❌ UNVERIFIED`.
 
@@ -411,13 +654,25 @@ Server coverage, from the export: 13 of 322 race rows are flagged `unreleased_se
 
 All five statements below are quoted from [Game8 (2026-09-24)](https://game8.jp/umamusume/372949), which is the freshest mechanic-level source found `[JP]`.
 
-| Stat (JP / EN)     | Governs                                                                                                                                                           | Documented behaviour gate                                                                                |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| スピード / Speed   | Highest velocity reached in the closing stage of the race; the stat most directly tied to the result                                                              | Above 2000 the 「全開スパート」 (full spurt) behaviour can activate                                      |
-| スタミナ / Stamina | The endurance pool drained across the race; the longer the course, the more of the race it carries                                                                | Above 1200 the 「スタミナ勝負」 (endurance duel) behaviour becomes available                             |
-| パワー / Power     | Acceleration and course-taking, including how easily the Umamusume escapes a blocked lane; also speed during repositioning and acceleration out of a full spurt   | Above 1200 「脚をためる」 (saving her legs) becomes available                                            |
-| 根性 / Guts        | Tenacity once endurance is spent in the last spurt; stronger in late stretch duels, and for Front Runners also in the early battle for position                   | no published numeric gate                                                                                |
-| 賢さ / Wit         | Resistance to 掛かり (running hot and burning endurance), skill activation rate, and activation of 「位置取り調整」, 「リード確保」 and 「持久力温存」            | Above 1200, the speed-up and forward-push portions of unique, evolved and rare skills are strengthened   |
+**スピード / Speed**
+- Governs: Highest velocity reached in the closing stage of the race; the stat most directly tied to the result
+- Documented behaviour gate: Above 2000 the 「全開スパート」 (full spurt) behaviour can activate
+
+**スタミナ / Stamina**
+- Governs: The endurance pool drained across the race; the longer the course, the more of the race it carries
+- Documented behaviour gate: Above 1200 the 「スタミナ勝負」 (endurance duel) behaviour becomes available
+
+**パワー / Power**
+- Governs: Acceleration and course-taking, including how easily the Umamusume escapes a blocked lane; also speed during repositioning and acceleration out of a full spurt
+- Documented behaviour gate: Above 1200 「脚をためる」 (saving her legs) becomes available
+
+**根性 / Guts**
+- Governs: Tenacity once endurance is spent in the last spurt; stronger in late stretch duels, and for Front Runners also in the early battle for position
+- Documented behaviour gate: no published numeric gate
+
+**賢さ / Wit**
+- Governs: Resistance to 掛かり (running hot and burning endurance), skill activation rate, and activation of 「位置取り調整」, 「リード確保」 and 「持久力温存」
+- Documented behaviour gate: Above 1200, the speed-up and forward-push portions of unique, evolved and rare skills are strengthened
 
 #### 1.3.2 Speed and the race phases
 
@@ -431,14 +686,42 @@ No source publishes a metres-per-Stamina conversion. Neither of the two guides t
 
 #### 1.3.4 Caps and soft caps
 
-| Cap layer                                             | Value                                                                                                                                                                                                                  | Applies to                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Source                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Baseline per-stat cap                                 | 1200                                                                                                                                                                                                                   | every stat before breakthroughs. **Two different past-1200 effects are recorded here and they are not the same claim.** (a) *Training axis:* gains past 1200 are halved — `[Global]` Game8 EN pages, "always halved" (see 1.3.4 note below and `docs/adr/0002` amendment 1; the exact reduction is prose-only, no dataset field carries it). (b) *Race axis:* points earned past 1200 exist but have a reduced effect on the Umamusume during the race — the two JP guides cited here. A UI sentence must name which axis it is quoting.             | [Game8 (2025-11-21, ⚠️ STALE)](https://game8.jp/umamusume/475668), [Kamigame (2024-02-19, ⚠️ STALE)](https://kamigame.jp/umamusume/page/225422194069532204.html) — race axis; training axis from `[Global]` Game8 EN, dated 2026-07-07 / 2026-08-25 in the rework note                                                                                                                                                                                                                                                                                                                                                                                |
-| Scenario caps, Speed / Stamina / Power / Guts / Wit   | URA 1400 / 1400 / 1400 / 1400 / 1400; Unity Cup 1300 / 1300 / 1300 / 1300 / 1800; Climax (Global: Trackblazer) 1200 / 1900 / 1200 / 1200 / 1500; Our Grand Concert 1600 / 1300 / 1300 / 1500 / 1300                    | the training run you are in                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | [Game8 (2025-11-21, ⚠️ STALE)](https://game8.jp/umamusume/475668) for the first four scenarios; [Kamigame (2024-02-19, ⚠️ STALE)](https://kamigame.jp/umamusume/page/225422194069532204.html) for all five. **Climax row corrected 2026-09-27:** this cell previously read `1200 / 1900 / 1200 / 1500 / 1200`, with Guts and Wit transposed; `scenarios.json` and 1.6's Trackblazer row both give `… / 1200 / 1500`. The diagnosis is in `docs/research-scratch/DESIGN-CORPUS.md` ("The trap that produced the wrong Trackblazer row"). Any artifact that copied the pre-correction figure is reproducing this row, not an independent source   |
-| Extended scenario caps                                | Grand Masters 1500 / 1400 / 1500 / 1300 / 1300 (`[JP-Only]`, and it reproduces `1200 + scenarios.json.stats` = [300, 200, 300, 100, 100]); L'Arc 1600 / 1600 / 1500 / 1500 / 1300                                      | **Grand Masters now three-source corroborated** (GameWith 2023-07-17, Game8 2026-04-13, Kamigame 2024-04-08) — upgraded from this row's previous "single-source". ⚠️ **All three are `⚠️ STALE`**, by 1,168, 167 and 902 days against the anchor, so what agrees here is three old guides, not three current ones; the only fresh leg is the tier-B export, and the scenario has no `[Global]`-side source at all, so this stays a `[JP-Only]` value and is not promotable to Global-facing data. **L'Arc stays single-source**, on Kamigame alone   | [Kamigame (2024-02-19, ⚠️ STALE)](https://kamigame.jp/umamusume/page/225422194069532204.html); [GameWith (2023-07-17, ⚠️ STALE)](https://gamewith.jp/uma-musume/article/show/388788); [Game8 (2026-04-13, ⚠️ STALE)](https://game8.jp/umamusume/510269)                                                                                                                                                                                                                                                                                                                                                                                               |
-| Breakthrough (上限突破)                               | +16 to that stat's cap per ★3 basic-ability factor inherited; the cap applies at 育成開始時, Classic and Senior inheritance moments. A unique-skill factor also raises caps, in proportion to the donor's growth rates | inheritance tools, `[JP]`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | [Game8 (2025-11-21, ⚠️ STALE)](https://game8.jp/umamusume/475668)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| Support-card cap effects                              | Per-stat 「限界値アップ」 ([Global]: Max Speed, Max Stamina, and so on) raise the cap the run starts with                                                                                                              | deck building, `[Both]` wording                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | [GameTora data export, `support_effects.json` ids 20 to 24](https://gametora.com/data/umamusume/support_effects.ca447e53.json)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| Recorded hard ceiling                                 | 2000 per stat, with a sixth unlabeled column at 9999, identical for all five scenarios in the export                                                                                                                   | `[Both]`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | [GameTora data export, `scenarios.json`](https://gametora.com/data/umamusume/scenarios.61b7c51c.json)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+Baseline per-stat cap
+
+- Value: 1200
+- Applies to: every stat before breakthroughs. **Two different past-1200 effects are recorded here and they are not the same claim.** (a) *Training axis:* gains past 1200 are halved — `[Global]` Game8 EN pages, "always halved" (see 1.3.4 note below and `docs/adr/0002` amendment 1; the exact reduction is prose-only, no dataset field carries it). (b) *Race axis:* points earned past 1200 exist but have a reduced effect on the Umamusume during the race — the two JP guides cited here. A UI sentence must name which axis it is quoting.
+- Source: [Game8 (2025-11-21, ⚠️ STALE)](https://game8.jp/umamusume/475668), [Kamigame (2024-02-19, ⚠️ STALE)](https://kamigame.jp/umamusume/page/225422194069532204.html) — race axis; training axis from `[Global]` Game8 EN, dated 2026-07-07 / 2026-08-25 in the rework note
+
+Scenario caps, Speed / Stamina / Power / Guts / Wit
+
+- Value: URA 1400 / 1400 / 1400 / 1400 / 1400; Unity Cup 1300 / 1300 / 1300 / 1300 / 1800; Climax (Global: Trackblazer) 1200 / 1900 / 1200 / 1200 / 1500; Our Grand Concert 1600 / 1300 / 1300 / 1500 / 1300
+- Applies to: the training run you are in
+- Source: [Game8 (2025-11-21, ⚠️ STALE)](https://game8.jp/umamusume/475668) for the first four scenarios; [Kamigame (2024-02-19, ⚠️ STALE)](https://kamigame.jp/umamusume/page/225422194069532204.html) for all five. **Climax row corrected 2026-09-27:** this cell previously read `1200 / 1900 / 1200 / 1500 / 1200`, with Guts and Wit transposed; `scenarios.json` and 1.6's Trackblazer row both give `… / 1200 / 1500`. The diagnosis is in `docs/research-scratch/DESIGN-CORPUS.md` ("The trap that produced the wrong Trackblazer row"). Any artifact that copied the pre-correction figure is reproducing this row, not an independent source
+
+Extended scenario caps
+
+- Value: Grand Masters 1500 / 1400 / 1500 / 1300 / 1300 (`[JP-Only]`, and it reproduces `1200 + scenarios.json.stats` = [300, 200, 300, 100, 100]); L'Arc 1600 / 1600 / 1500 / 1500 / 1300
+- Applies to: **Grand Masters now three-source corroborated** (GameWith 2023-07-17, Game8 2026-04-13, Kamigame 2024-04-08) — upgraded from this row's previous "single-source". ⚠️ **All three are `⚠️ STALE`**, by 1,168, 167 and 902 days against the anchor, so what agrees here is three old guides, not three current ones; the only fresh leg is the tier-B export, and the scenario has no `[Global]`-side source at all, so this stays a `[JP-Only]` value and is not promotable to Global-facing data. **L'Arc stays single-source**, on Kamigame alone
+- Source: [Kamigame (2024-02-19, ⚠️ STALE)](https://kamigame.jp/umamusume/page/225422194069532204.html); [GameWith (2023-07-17, ⚠️ STALE)](https://gamewith.jp/uma-musume/article/show/388788); [Game8 (2026-04-13, ⚠️ STALE)](https://game8.jp/umamusume/510269)
+
+Breakthrough (上限突破)
+
+- Value: +16 to that stat's cap per ★3 basic-ability factor inherited; the cap applies at 育成開始時, Classic and Senior inheritance moments. A unique-skill factor also raises caps, in proportion to the donor's growth rates
+- Applies to: inheritance tools, `[JP]`
+- Source: [Game8 (2025-11-21, ⚠️ STALE)](https://game8.jp/umamusume/475668)
+
+Support-card cap effects
+
+- Value: Per-stat 「限界値アップ」 ([Global]: Max Speed, Max Stamina, and so on) raise the cap the run starts with
+- Applies to: deck building, `[Both]` wording
+- Source: [GameTora data export, `support_effects.json` ids 20 to 24](https://gametora.com/data/umamusume/support_effects.ca447e53.json)
+
+Recorded hard ceiling
+
+- Value: 2000 per stat, with a sixth unlabeled column at 9999, identical for all five scenarios in the export
+- Applies to: `[Both]`
+- Source: [GameTora data export, `scenarios.json`](https://gametora.com/data/umamusume/scenarios.61b7c51c.json)
+
 
 The 2000 ceiling is not just a display limit: it coincides with the Speed behaviour gate in 1.3.1, which is why current `[JP]` guides treat "cross 2000 in Speed" as a build objective rather than a rounding artifact [Game8 (2026-09-24)](https://game8.jp/umamusume/372949). A guide target above 2000 does appear in the wild; see Source Conflict Log row 3.
 
@@ -456,12 +739,21 @@ These are four different things and they do not stack the same way.
 
 **Erratum, 2026-10-12 (the cap-setting support effects carry no card).** The line above tells a planner to model **cap-setting effects** (`限界値アップ`, ids 20 to 24) among the five layers a run starts with, and the cap-layer table at 1.3.4 lists "Support-card cap effects" as a deck mechanic. Both are corrected by this document's own measurement: 1.4.8 records those five effects as carried by **zero of the 559 cards** (`inactive` in the export), and says a UI that offers a "cap raised by support cards" line would display a feature the catalogue does not contain. `docs/adr/0014` and `docs/research-scratch/SUPPORT-CARDS.md` ("Carried by zero") repeat the zero-coverage count. The effect class is real client vocabulary and the slots exist; no shipped card exercises them, so the layer is empty on `[Global]`. The sentences above and the 1.3.4 row are preserved as written per this file's dated-record rule. The cap layers a run actually has are the scenario base (1.3.4), breakthrough from inherited ★3 factors (1.3.4), and, on Our Grand Concert alone, the scenario's own inheritance uncaps (2.2.4).
 
-| Row in the export   | Total across the five stats                                  | Per-stat maximum observed     |
-| ------------------- | ------------------------------------------------------------ | ----------------------------- |
-| base_stats          | 450 (★3), 425 (★2), 400 (★1)                                 | 118 / 124 / 113 / 113 / 105   |
-| four_star_stats     | 500, every card                                              | 131 / 138 / 125 / 125 / 116   |
-| five_star_stats     | 550, every card                                              | 145 / 152 / 138 / 138 / 127   |
-| stat_bonus          | 30, every card, in 5-point steps across one to three stats   | 30 / 30 / 30 / 20 / 30        |
+**base_stats**
+- Total across the five stats: 450 (★3), 425 (★2), 400 (★1)
+- Per-stat maximum observed: 118 / 124 / 113 / 113 / 105
+
+**four_star_stats**
+- Total across the five stats: 500, every card
+- Per-stat maximum observed: 131 / 138 / 125 / 125 / 116
+
+**five_star_stats**
+- Total across the five stats: 550, every card
+- Per-stat maximum observed: 145 / 152 / 138 / 138 / 127
+
+**stat_bonus**
+- Total across the five stats: 30, every card, in 5-point steps across one to three stats
+- Per-stat maximum observed: 30 / 30 / 30 / 20 / 30
 
 Column order is GameTora's: Speed, Stamina, Power, Guts, Wit [GameTora data export, `character-cards.json`](https://gametora.com/data/umamusume/character-cards.679f7c2e.json). The export carries no in-game label for `stat_bonus`; its fixed 30-point size and 5-point granularity separate it from the +50-per-rank growth rows. **A client read on 2026-10-03 names the owner: the Growth Rate row.** The `[Rosy Dreams]` Rice Shower Umamusume Details screen carries Potential Level as a single number (her `Potential Lvl 2`) and, separately, a five-cell **Growth Rate** row reading Speed +0%, Stamina +10%, Power +0%, Guts +20%, Wit +0%, which is her export row `stat_bonus: [0, 10, 0, 20, 0]` in GameTora's column order, position for position. The same trainee's Growth Rate row was already on record from three July captures (`docs/research-scratch/screenshot-notes/Screenshot 2026-07-17 232345.md`, `Screenshot 2026-07-18 133731.md`, `Screenshot 2026-07-18 160438.md`), and Special Week agrees across two sources: the client example at 1.1.2, "STA: 20%" and "WIT: 10%", against her Section 3 roster row's `stat_bonus` Stamina+20, Wit+10. Scope: two trainees, one read in-client by this document and one quoted from a publisher's client screenshot. The earlier Potential Level guess is withdrawn, because the row varies by costume (`[0, 10, 0, 20, 0]`, `[0, 15, 15, 0, 0]` and `[0, 20, 0, 10, 0]` across Rice Shower's three) and a character-wide level cannot be a costume-varying five-stat row.
 
@@ -475,11 +767,32 @@ The totals that persist are the ones on the finished Umamusume. `[Global]` offic
 
 #### 1.3.7 Current competitive stat targets
 
-| Server       | Target set                                     | Speed   | Stamina                              | Power   | Guts   | Wit    | Source                                                                                   |
-| ------------ | ---------------------------------------------- | ------- | ------------------------------------ | ------- | ------ | ------ | ---------------------------------------------------------------------------------------- |
-| `[JP]`       | Champions Meeting guide, entry level           | 2000    | 1600, with one gold recovery skill   | 1300    | 1000   | 1400   | [GameWith (2026-09-26)](https://gamewith.jp/uma-musume/article/show/575798)              |
-| `[JP]`       | Champions Meeting guide, advanced              | 2100    | 1800, with one gold recovery skill   | 1600    | 1200   | 1750   | [GameWith (2026-09-26)](https://gamewith.jp/uma-musume/article/show/575798)              |
-| `[Global]`   | Published sample build target (Special Week)   | 1500+   | 800                                  | 1000    | 500    | 1000   | [Game8.co (2026-09-25)](https://game8.co/games/Umamusume-Pretty-Derby/archives/536322)   |
+**`[JP]`**
+- Target set: Champions Meeting guide, entry level
+- Speed: 2000
+- Stamina: 1600, with one gold recovery skill
+- Power: 1300
+- Guts: 1000
+- Wit: 1400
+- Source: [GameWith (2026-09-26)](https://gamewith.jp/uma-musume/article/show/575798)
+
+**`[JP]`**
+- Target set: Champions Meeting guide, advanced
+- Speed: 2100
+- Stamina: 1800, with one gold recovery skill
+- Power: 1600
+- Guts: 1200
+- Wit: 1750
+- Source: [GameWith (2026-09-26)](https://gamewith.jp/uma-musume/article/show/575798)
+
+**`[Global]`**
+- Target set: Published sample build target (Special Week)
+- Speed: 1500+
+- Stamina: 800
+- Power: 1000
+- Guts: 500
+- Wit: 1000
+- Source: [Game8.co (2026-09-25)](https://game8.co/games/Umamusume-Pretty-Derby/archives/536322)
 
 The `[JP]` guide states its reasoning as behaviour gates rather than preference: Speed must reach 2000 to switch on the full spurt, and 2400 m is a distance where 「スタミナ勝負が発動する」, with poor footing (不良) making instant recovery essential [GameWith (2026-09-26)](https://gamewith.jp/uma-musume/article/show/575798). The `[Global]` numbers are lower, and no source explains the gap; the roster and scenario lag visible in the export (1.1.8) is the context to read them in, not a stated cause.
 
@@ -495,15 +808,54 @@ Tier key: `[S]` = Cygames official site, `[A]` = maintained strategy wiki, `[B]`
 
 A support card is a training companion assigned before a career run. The client sorts cards into seven types, and Group is a type in its own right rather than a flag on another type: the export stores it in the same `type` field as the five stat types, the JP filter offers グループ beside the other six, and both English wikis list it as a seventh heading.
 
-| Type (export key)   | `[JP]`   | `[Global]`   | `[JP]` R / SR / SSR   | `[Global]` SSR   | Basis           |
-| ------------------- | -------- | ------------ | --------------------- | ---------------- | --------------- |
-| speed               | スピード | Speed        | 34 / 19 / 72          | 28               | `[B]` + `[A]`   |
-| stamina             | スタミナ | Stamina      | 25 / 17 / 55          | 22               | `[B]` + `[A]`   |
-| power               | パワー   | Power        | 21 / 21 / 57          | 21               | `[B]` + `[A]`   |
-| guts                | 根性     | Guts         | 30 / 22 / 59          | 20               | `[B]` + `[A]`   |
-| intelligence        | 賢さ     | Wit          | 25 / 21 / 53          | 18               | `[B]` + `[A]`   |
-| friend              | 友人     | Pal          | 11 / 1 / 11           | 4                | `[B]` + `[A]`   |
-| group               | グループ | Group        | 0 / 0 / 5             | 2                | `[B]` + `[A]`   |
+**speed**
+- `[JP]`: スピード
+- `[Global]`: Speed
+- `[JP]` R / SR / SSR: 34 / 19 / 72
+- `[Global]` SSR: 28
+- Basis: `[B]` + `[A]`
+
+**stamina**
+- `[JP]`: スタミナ
+- `[Global]`: Stamina
+- `[JP]` R / SR / SSR: 25 / 17 / 55
+- `[Global]` SSR: 22
+- Basis: `[B]` + `[A]`
+
+**power**
+- `[JP]`: パワー
+- `[Global]`: Power
+- `[JP]` R / SR / SSR: 21 / 21 / 57
+- `[Global]` SSR: 21
+- Basis: `[B]` + `[A]`
+
+**guts**
+- `[JP]`: 根性
+- `[Global]`: Guts
+- `[JP]` R / SR / SSR: 30 / 22 / 59
+- `[Global]` SSR: 20
+- Basis: `[B]` + `[A]`
+
+**intelligence**
+- `[JP]`: 賢さ
+- `[Global]`: Wit
+- `[JP]` R / SR / SSR: 25 / 21 / 53
+- `[Global]` SSR: 18
+- Basis: `[B]` + `[A]`
+
+**friend**
+- `[JP]`: 友人
+- `[Global]`: Pal
+- `[JP]` R / SR / SSR: 11 / 1 / 11
+- `[Global]` SSR: 4
+- Basis: `[B]` + `[A]`
+
+**group**
+- `[JP]`: グループ
+- `[Global]`: Group
+- `[JP]` R / SR / SSR: 0 / 0 / 5
+- `[Global]` SSR: 2
+- Basis: `[B]` + `[A]`
 
 Counts are records in the export: `[JP]` covers releases from 2021-02-24 on, `[Global]` counts cards carrying a `release_en` date. `[Global]` holds 115 SSR cards against `[JP]` 312, so the two catalogues are not interchangeable.
 
@@ -586,15 +938,47 @@ The export's `support-cards.json` stores each card's effects as `[[effect_id, v1
 
 The decode came from the GameTora support-card page (`https://gametora.com/umamusume/supports/<url_name>`; note the plural, the singular paths 404), which carries a level selector with −5 / −1 / +1 / +5 controls and prints "Unlocked at level N" against effects a card does not yet have. Reading Tokai Teio `[Dream Big!]` (`support_id` 30003) at three selector positions against its export row gives the rule:
 
-| Effect (id)                        | export anchors   | level 30 shown   | level 35 shown   | level 40 shown   |
-| ---------------------------------- | ---------------- | ---------------- | ---------------- | ---------------- |
-| Friendship Bonus (1)               | 30→15, 45→20     | 15%              | 16%              | 18%              |
-| Mood Effect (2)                    | 30→40, 50→60     | 40%              | 45%              | 50%              |
-| Initial Friendship Gauge (14)      | 30→20, 45→25     | 20               | 21               | 23               |
-| Hint Frequency (18)                | 30→30, 45→40     | 30%              | 33%              | 36%              |
-| Specialty Priority (19)            | 30→20, 45→35     | 20               | 25               | 30               |
-| Power Bonus (5)                    | 35→1             | not unlocked     | 1                | 1                |
-| Race Bonus (15) / Fan Bonus (16)   | 45→5 / 45→10     | not unlocked     | not unlocked     | not unlocked     |
+**Friendship Bonus (1)**
+- export anchors: 30→15, 45→20
+- level 30 shown: 15%
+- level 35 shown: 16%
+- level 40 shown: 18%
+
+**Mood Effect (2)**
+- export anchors: 30→40, 50→60
+- level 30 shown: 40%
+- level 35 shown: 45%
+- level 40 shown: 50%
+
+**Initial Friendship Gauge (14)**
+- export anchors: 30→20, 45→25
+- level 30 shown: 20
+- level 35 shown: 21
+- level 40 shown: 23
+
+**Hint Frequency (18)**
+- export anchors: 30→30, 45→40
+- level 30 shown: 30%
+- level 35 shown: 33%
+- level 40 shown: 36%
+
+**Specialty Priority (19)**
+- export anchors: 30→20, 45→35
+- level 30 shown: 20
+- level 35 shown: 25
+- level 40 shown: 30
+
+**Power Bonus (5)**
+- export anchors: 35→1
+- level 30 shown: not unlocked
+- level 35 shown: 1
+- level 40 shown: 1
+
+**Race Bonus (15) / Fan Bonus (16)**
+- export anchors: 45→5 / 45→10
+- level 30 shown: not unlocked
+- level 35 shown: not unlocked
+- level 40 shown: not unlocked
 
 Every intermediate figure is the **floor of a straight line drawn between the two bracketing anchors**: at level 35, Friendship Bonus is `15 + (20−15)·(35−30)/(45−30) = 16.67 → 16`, Mood Effect is `40 + 20·5/20 = 45`, Initial Friendship Gauge is `20 + 5·5/15 = 21.67 → 21`. All five changing effects land on the displayed integer at levels 35 and 40, and the two `Unlocked at level 45` effects are still absent at 40, so the rule is not a lucky fit on one row. `[Global]`
 
@@ -620,17 +1004,50 @@ The dictionary carries 35 effect records, and each one states in the export whet
 (`calc`) and what its unit is (`symbol`). That is the client's own metadata rather than this document's
 reading, so the grouping below is a re-shelving of published fields, not an interpretation. `[Global]` `[B]`
 
-| When it pays                                        | Effects (id)                                                                                                                                           | `calc`                              | Coverage on the 312 `[JP]` SSR records   |
-| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------- | ---------------------------------------- |
-| At career start                                     | Initial Speed (9), Initial Stamina (10), Initial Power (11), Initial Guts (12), Initial Wit (13), Initial Friendship Gauge (14)                        | flat                                | 65 / 40 / 62 / 49 / 18 / **305**         |
-| On every shared training session, as a multiplier   | Friendship Bonus (1), Mood Effect (2), Training Effectiveness (8)                                                                                      | 1 is `mult`; 2 and 8 flat percent   | 301 / 218 / 195                          |
-| On a specific discipline's gain, added              | Speed Bonus (3), Stamina Bonus (4), Power Bonus (5), Guts Bonus (6), Wit Bonus (7), Skill Point Bonus (30)                                             | flat                                | 78 / 48 / 69 / 56 / 35 / 126             |
-| On whether the card shows up on its own tile        | Specialty Priority (19)                                                                                                                                | `add`                               | 276                                      |
-| On race days                                        | Race Bonus (15), Fan Bonus (16)                                                                                                                        | flat percent                        | 250 / 250                                |
-| On this card's own events                           | Event Recovery (25), Event Effectiveness (26)                                                                                                          | flat percent                        | 15 / 16                                  |
-| On failure and Energy spend                         | Failure Protection (27) `mult`, Energy Cost Reduction (28) `mult`, Wit Friendship Recovery (31)                                                        | 27 and 28 multiply                  | 10 / 11 / 58                             |
-| On hint output                                      | Hint Levels (17) as a `level`, Hint Frequency (18) as percent                                                                                          | flat                                | 253 / 254                                |
-| Named, and carried by **no card at all**            | Max Speed (20), Max Stamina (21), Max Power (22), Max Guts (23), Max Wit (24), Minigame Effectiveness (29), Hint Quantity Bonus (33), id 41, id 9991   | —                                   | 0                                        |
+**At career start**
+- Effects (id): Initial Speed (9), Initial Stamina (10), Initial Power (11), Initial Guts (12), Initial Wit (13), Initial Friendship Gauge (14)
+- `calc`: flat
+- Coverage on the 312 `[JP]` SSR records: 65 / 40 / 62 / 49 / 18 / **305**
+
+**On every shared training session, as a multiplier**
+- Effects (id): Friendship Bonus (1), Mood Effect (2), Training Effectiveness (8)
+- `calc`: 1 is `mult`; 2 and 8 flat percent
+- Coverage on the 312 `[JP]` SSR records: 301 / 218 / 195
+
+**On a specific discipline's gain, added**
+- Effects (id): Speed Bonus (3), Stamina Bonus (4), Power Bonus (5), Guts Bonus (6), Wit Bonus (7), Skill Point Bonus (30)
+- `calc`: flat
+- Coverage on the 312 `[JP]` SSR records: 78 / 48 / 69 / 56 / 35 / 126
+
+**On whether the card shows up on its own tile**
+- Effects (id): Specialty Priority (19)
+- `calc`: `add`
+- Coverage on the 312 `[JP]` SSR records: 276
+
+**On race days**
+- Effects (id): Race Bonus (15), Fan Bonus (16)
+- `calc`: flat percent
+- Coverage on the 312 `[JP]` SSR records: 250 / 250
+
+**On this card's own events**
+- Effects (id): Event Recovery (25), Event Effectiveness (26)
+- `calc`: flat percent
+- Coverage on the 312 `[JP]` SSR records: 15 / 16
+
+**On failure and Energy spend**
+- Effects (id): Failure Protection (27) `mult`, Energy Cost Reduction (28) `mult`, Wit Friendship Recovery (31)
+- `calc`: 27 and 28 multiply
+- Coverage on the 312 `[JP]` SSR records: 10 / 11 / 58
+
+**On hint output**
+- Effects (id): Hint Levels (17) as a `level`, Hint Frequency (18) as percent
+- `calc`: flat
+- Coverage on the 312 `[JP]` SSR records: 253 / 254
+
+**Named, and carried by no card at all**
+- Effects (id): Max Speed (20), Max Stamina (21), Max Power (22), Max Guts (23), Max Wit (24), Minigame Effectiveness (29), Hint Quantity Bonus (33), id 41, id 9991
+- `calc`: —
+- Coverage on the 312 `[JP]` SSR records: 0
 
 Three things in that table are worth more than the rest.
 
@@ -671,14 +1088,47 @@ Inheritance pays out at three fixed moments: career start, early April of the cl
 
 `[JP]` names four colors plus the scenario kind, `[Global]` renders them as Blue, Pink, Green, and White Sparks. The 2021-era framing that green means skills and white means unique no longer matches either client: skill hints are white on `[Global]`, and unique-skill inheritance is green on both servers.
 
-| Category       | `[JP]`               | `[Global]`                  | Effect                                                                                        | Export records   | Basis               |
-| -------------- | -------------------- | --------------------------- | --------------------------------------------------------------------------------------------- | ---------------- | ------------------- |
-| Stat           | 青因子               | Blue Sparks                 | One stat up +5, +12, or +21 at career start for 1, 2, or 3 stars                              | 5                | `[A]`+`[A]`+`[B]`   |
-| Aptitude       | 赤因子               | Pink Sparks                 | Track, distance, strategy: 1 star = +1 grade, 4 = +2, 7 = +3, 10 to 18 = +4                   | 10               | `[A]`+`[A]`+`[B]`   |
-| Unique skill   | 緑因子 / 固有因子    | Green Sparks                | Carries one character's own unique skill as 1 to 3 hint levels                                | 268              | `[A]`+`[A]`+`[B]`   |
-| Skill          | 白因子（スキル因子） | White Sparks, skill         | Mid-run hint of level +1 to +5, or a small stat top-up if already learned                     | 452              | `[A]`+`[A]`+`[B]`   |
-| Competition    | 白因子（レース因子） | White Sparks, competition   | From top-grade (G1) wins; 3, 6, or 9 stat per event, sometimes a hint                         | 37               | `[A]`+`[A]`+`[B]`   |
-| Scenario       | シナリオ因子         | Scenario Sparks             | From clearing a scenario's final conditions; about 10 to 30 per stat, over 200 when stacked   | 34               | `[A]`+`[A]`+`[B]`   |
+**Stat**
+- `[JP]`: 青因子
+- `[Global]`: Blue Sparks
+- Effect: One stat up +5, +12, or +21 at career start for 1, 2, or 3 stars
+- Export records: 5
+- Basis: `[A]`+`[A]`+`[B]`
+
+**Aptitude**
+- `[JP]`: 赤因子
+- `[Global]`: Pink Sparks
+- Effect: Track, distance, strategy: 1 star = +1 grade, 4 = +2, 7 = +3, 10 to 18 = +4
+- Export records: 10
+- Basis: `[A]`+`[A]`+`[B]`
+
+**Unique skill**
+- `[JP]`: 緑因子 / 固有因子
+- `[Global]`: Green Sparks
+- Effect: Carries one character's own unique skill as 1 to 3 hint levels
+- Export records: 268
+- Basis: `[A]`+`[A]`+`[B]`
+
+**Skill**
+- `[JP]`: 白因子（スキル因子）
+- `[Global]`: White Sparks, skill
+- Effect: Mid-run hint of level +1 to +5, or a small stat top-up if already learned
+- Export records: 452
+- Basis: `[A]`+`[A]`+`[B]`
+
+**Competition**
+- `[JP]`: 白因子（レース因子）
+- `[Global]`: White Sparks, competition
+- Effect: From top-grade (G1) wins; 3, 6, or 9 stat per event, sometimes a hint
+- Export records: 37
+- Basis: `[A]`+`[A]`+`[B]`
+
+**Scenario**
+- `[JP]`: シナリオ因子
+- `[Global]`: Scenario Sparks
+- Effect: From clearing a scenario's final conditions; about 10 to 30 per stat, over 200 when stacked
+- Export records: 34
+- Basis: `[A]`+`[A]`+`[B]`
 
 The ten aptitude records are the two surfaces, four distances, and four running styles that every trainable Umamusume carries `[B]` + `[A]`. The other 68 records in the export are older aptitude and stat items plus the carnival bonus, which no page in this pass explains; they are counted, not described.
 
@@ -690,11 +1140,20 @@ The ten aptitude records are the two surfaces, four distances, and four running 
 
 Factors carry 1 to 3 stars and three is the ceiling; more stars mean larger payouts and better trigger odds `[Both]`. The count is rolled from the run's results, never chosen, and the published `[Global]` odds for a stat factor follow the final value of that stat:
 
-| Final stat value   | 1 star      | 2 stars     | 3 stars     |
-| ------------------ | ----------- | ----------- | ----------- |
-| Below 600          | about 90%   | about 10%   | 0%          |
-| 600 to 1100        | about 50%   | about 45%   | about 6%    |
-| Above 1100         | about 20%   | about 70%   | about 10%   |
+**Below 600**
+- 1 star: about 90%
+- 2 stars: about 10%
+- 3 stars: 0%
+
+**600 to 1100**
+- 1 star: about 50%
+- 2 stars: about 45%
+- 3 stars: about 6%
+
+**Above 1100**
+- 1 star: about 20%
+- 2 stars: about 70%
+- 3 stars: about 10%
 
 The same thresholds are the `[JP]` planning rule: guides tell farmers to finish an ancestor with the target stat above 600 and, for a real shot at three stars, above 1100, so a three-star stat factor is unreachable below 600 in that stat `[Both]`. Read the table as probabilities, not as an award schedule: **crossing 1100 buys a roughly 1-in-10 roll at three stars, not a three-star factor**, and below 600 the three-star branch is 0% rather than unlikely. Any planner output that states "Speed 1100 → ★★★" as a deterministic mapping is wrong on this row, and the run's own ★ count is rolled, never chosen.
 
@@ -738,32 +1197,137 @@ The 2021-era four-member rotation, cycling the same four Umamusume through paren
 
 Mode names are `[JP]` client wording first, `[Global]` client wording second.
 
-| Mode                                                                 | `[JP]` state on 2026-09-27                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | `[Global]` state on 2026-09-27                                                                                                                                                                                                                                     | Entry gate                                                                | Main payout                                                            | Evidence                                                                                                                                                                                                                                                                         |
-| -------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Training scenarios (育成シナリオ)                                    | Live: いらっしゃい！トレセン軒！ since 2026-06-29, 14 total selectable, and a 15th is **announced** for late October 2026 as 「朋、史解き ―午式駿大祭―」 ([gamebiz 2026-09-27](https://gamebiz.jp/news/433236): 「新育成シナリオ「朋、史解き ―午式駿大祭―」が追加決定した」; [GameWith 2026-10-04](https://gamewith.jp/uma-musume/article/show/578834) calls it the 15th, which is the guide's count and not an official one; official notice [JP 3479](https://umamusume.jp/news/detail?id=3479) is image-only, and the two dash glyphs in the subtitle differ between sources) | Live: Brighter Together Our Grand Concert since 2026-07-22, 4 total selectable                                                                                                                                                                                     | Story/Career start screen                                                 | A Veteran Umamusume plus Factor and title rewards                      | `scenarios.json`; [JP news index](https://umamusume.jp/news/?t=game)                                                                                                                                                                                                             |
-| Champions Meeting (チャンピオンズミーティング / "Champions Meeting") | MILE ran 09-18 12:00 to 09-24 11:59; CLASSIC league selection open since 09-26, race 09-29 to 10-05                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Scorpio Cup ran 09-19 22:00 to 09-25 21:59 UTC; next edition unannounced at the anchor                                                                                                                                                                             | Team Rank E2, three Veteran Umamusume                                     | Carats, Scout Tickets, league and placement titles                     | [JP 3453](https://umamusume.jp/news/detail?id=3453), [JP 3463](https://umamusume.jp/news/detail?id=3463), [Global 1050](https://umamusume.com/news/1050/)                                                                                                                        |
-| Masters Challenge (マスターズチャレンジ)                             | Live: 9th edition 07-30 12:00 to 10-26 11:59                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | ❌ UNVERIFIED, no Global notice in the Global index                                                                                                                                                                                                                | None stated, open during the window                                       | 300 Carats per first clear per level, Crystal Shards, titles           | [JP 3363](https://umamusume.jp/news/detail?id=3363), [GameWith 2026-09-26](https://gamewith.jp/uma-musume/article/show/431722), [Kamigame 2026-08-01](https://kamigame.jp/umamusume/page/296436114980404472.html)                                                                |
-| Team Trials (チーム競技場)                                           | Live, permanent, daily mission                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Live, permanent, daily mission "[Daily 4] Play Team Trials"                                                                                                                                                                                                        | Unlocks early in the tutorial, 1 RP per entry per game8.co                | Carats and Friend Points at class endpoints, Winning Rewards           | [game8.co 2026-09-23](https://game8.co/games/Umamusume-Pretty-Derby/archives/536831), [Kamigame 2026-09-18](https://kamigame.jp/umamusume/page/144381813119318601.html), `en/missions/daily`                                                                                     |
-| Racing Carnival (レーシングカーニバル)                               | No edition after 2024-10-20 in the `[JP]` mission export or on the guide page                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Recurring; export records editions 2026-02-05 to 02-15 and 2026-04-16 to 04-23, and an edition ran **2026-11-05 22:00 to 2026-11-12 21:59 UTC** with the point exchange open to 2026-11-15 21:59 UTC ([Global 1151](https://umamusume.com/news/1151); the 2026-11-05 13:30 UTC defect notice [100119](https://umamusume.com/news/100119) concerns the same edition)                                                                                                                                                                                     | Event window only                                                         | Carnival Pts, spent in the event shop on Uncap Crystals and tickets    | `missions/racingcarnival-daily`, `en/missions/racingcarnival-*`; [Game8 2026-04-14](https://game8.jp/umamusume/421662)                                                                                                                                                           |
-| Legend Race (レジェンドレース)                                       | Monthly, ~6-day windows; newest export record スワンステークス 09-06 12:00 to 09-12 04:59 JST                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Monthly; newest export record 2026-09-03 22:00 to 09-09 14:59 UTC (2 stages, 2000m, name field empty)                                                                                                                                                              | Legend Race Ticket, granted at the 05:00 server reset during an edition   | Character Pieces, Carats, Monies, Support Points                       | `events__legend-race.json`, `en/events/legend-race`; [GameWith 2026-09-23](https://gamewith.jp/uma-musume/article/show/261413)                                                                                                                                                   |
-| Daily Legend Race (デイリーレジェンドレース)                         | Live, permanent rotation                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Live, permanent (Global mission text "Run in 21 Legend Races")                                                                                                                                                                                                     | Daily Legend Race Ticket, one per daily reset                             | Same family as Legend Race, smaller                                    | `items.json` id 168, `en/missions/legendrace-limited`                                                                                                                                                                                                                            |
-| Training Pass (トレーニングパス)                                     | Live: aggregation period 09-24 12:00 to 10-26 11:59                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | ❌ UNVERIFIED, no Global notice                                                                                                                                                                                                                                    | Menu, then トレーニングパス                                               | Free track plus a once-per-period Premium Pass worth 350 paid Carats   | [JP 3455](https://umamusume.jp/news/detail?id=3455)                                                                                                                                                                                                                              |
-| 自主トレ育成 ("Independent Training")                                | Live since the 2026-06-29 update                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Live since **2026-07-22 08:00 UTC**, fourteen hours before the 22:00 update that carried Grand Concert, and usable in **all** Career scenarios; about 50 minutes per Career, runs with the app closed, no race trophies, Career events and concerts not viewable   | Own tab on the pre-training confirmation screen                           | Fans, Carats, Club Points, winner's sashes, Factors                    | [Game8 2026-06-30](https://game8.jp/umamusume/794628), [Kamigame 2026-07-20](https://kamigame.jp/umamusume/page/429951462450165905.html), [JP 3476](https://umamusume.jp/news/detail?id=3476), [Global 100087, posted 2026-07-22 08:30 UTC](https://umamusume.com/news/100087)   |
-| Transfer Requests (Global wording)                                   | Not documented in the sources read for this section                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Live on a **repeating four-day cycle**: first window 2026-09-24 22:00 to 2026-09-28 21:59 UTC, and the cycle current at 2026-11-12 is 2026-11-05 22:00 to 2026-11-09 21:59 UTC ([Global 1157](https://umamusume.com/news/1157)). A single window recorded as the feature's state is misleading — the window closes and reopens                                                                                                                                                                                                        | Request list refreshed every two days                                     | Trainee Star Pieces, Monies, Support Points                            | [Global 1058](https://umamusume.com/news/1058/), [game8.co 2025-10-05, ⚠️ STALE](https://game8.co/games/Umamusume-Pretty-Derby/archives/554781)                                                                                                                                  |
-| Aim for the Stars! Dream Team (目指せ！最強チーム)                   | Limited event, Scout Race sub-mode                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Limited event, editions recorded in Global mission keys                                                                                                                                                                                                            | Scout Race Ticket                                                         | Scout Points, used to recruit team members                             | `items.json` ids 1001 and 2001, `en/missions/teamscout-*`                                                                                                                                                                                                                        |
-| League of Heroes (リーグ オブ ヒーローズ)                            | Race mode behind item 3001; out of scope for 1.6                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Global client text exists ("a League of Heroes race")                                                                                                                                                                                                              | League Ticket                                                             | Not researched here                                                    | `items.json` id 3001                                                                                                                                                                                                                                                             |
+Training scenarios (育成シナリオ)
+
+- `[JP]` state on 2026-09-27: Live: いらっしゃい！トレセン軒！ since 2026-06-29, 14 total selectable, and a 15th is **announced** for late October 2026 as 「朋、史解き ―午式駿大祭―」 ([gamebiz 2026-09-27](https://gamebiz.jp/news/433236): 「新育成シナリオ「朋、史解き ―午式駿大祭―」が追加決定した」; [GameWith 2026-10-04](https://gamewith.jp/uma-musume/article/show/578834) calls it the 15th, which is the guide's count and not an official one; official notice [JP 3479](https://umamusume.jp/news/detail?id=3479) is image-only, and the two dash glyphs in the subtitle differ between sources)
+- `[Global]` state on 2026-09-27: Live: Brighter Together Our Grand Concert since 2026-07-22, 4 total selectable
+- Entry gate: Story/Career start screen
+- Main payout: A Veteran Umamusume plus Factor and title rewards
+- Evidence: `scenarios.json`; [JP news index](https://umamusume.jp/news/?t=game)
+
+Champions Meeting (チャンピオンズミーティング / "Champions Meeting")
+
+- `[JP]` state on 2026-09-27: MILE ran 09-18 12:00 to 09-24 11:59; CLASSIC league selection open since 09-26, race 09-29 to 10-05
+- `[Global]` state on 2026-09-27: Scorpio Cup ran 09-19 22:00 to 09-25 21:59 UTC; next edition unannounced at the anchor
+- Entry gate: Team Rank E2, three Veteran Umamusume
+- Main payout: Carats, Scout Tickets, league and placement titles
+- Evidence: [JP 3453](https://umamusume.jp/news/detail?id=3453), [JP 3463](https://umamusume.jp/news/detail?id=3463), [Global 1050](https://umamusume.com/news/1050/)
+
+Masters Challenge (マスターズチャレンジ)
+
+- `[JP]` state on 2026-09-27: Live: 9th edition 07-30 12:00 to 10-26 11:59
+- `[Global]` state on 2026-09-27: ❌ UNVERIFIED, no Global notice in the Global index
+- Entry gate: None stated, open during the window
+- Main payout: 300 Carats per first clear per level, Crystal Shards, titles
+- Evidence: [JP 3363](https://umamusume.jp/news/detail?id=3363), [GameWith 2026-09-26](https://gamewith.jp/uma-musume/article/show/431722), [Kamigame 2026-08-01](https://kamigame.jp/umamusume/page/296436114980404472.html)
+
+Team Trials (チーム競技場)
+
+- `[JP]` state on 2026-09-27: Live, permanent, daily mission
+- `[Global]` state on 2026-09-27: Live, permanent, daily mission "[Daily 4] Play Team Trials"
+- Entry gate: Unlocks early in the tutorial, 1 RP per entry per game8.co
+- Main payout: Carats and Friend Points at class endpoints, Winning Rewards
+- Evidence: [game8.co 2026-09-23](https://game8.co/games/Umamusume-Pretty-Derby/archives/536831), [Kamigame 2026-09-18](https://kamigame.jp/umamusume/page/144381813119318601.html), `en/missions/daily`
+
+Racing Carnival (レーシングカーニバル)
+
+- `[JP]` state on 2026-09-27: No edition after 2024-10-20 in the `[JP]` mission export or on the guide page
+- `[Global]` state on 2026-09-27: Recurring; export records editions 2026-02-05 to 02-15 and 2026-04-16 to 04-23, and an edition ran **2026-11-05 22:00 to 2026-11-12 21:59 UTC** with the point exchange open to 2026-11-15 21:59 UTC ([Global 1151](https://umamusume.com/news/1151); the 2026-11-05 13:30 UTC defect notice [100119](https://umamusume.com/news/100119) concerns the same edition)
+- Entry gate: Event window only
+- Main payout: Carnival Pts, spent in the event shop on Uncap Crystals and tickets
+- Evidence: `missions/racingcarnival-daily`, `en/missions/racingcarnival-*`; [Game8 2026-04-14](https://game8.jp/umamusume/421662)
+
+Legend Race (レジェンドレース)
+
+- `[JP]` state on 2026-09-27: Monthly, ~6-day windows; newest export record スワンステークス 09-06 12:00 to 09-12 04:59 JST
+- `[Global]` state on 2026-09-27: Monthly; newest export record 2026-09-03 22:00 to 09-09 14:59 UTC (2 stages, 2000m, name field empty)
+- Entry gate: Legend Race Ticket, granted at the 05:00 server reset during an edition
+- Main payout: Character Pieces, Carats, Monies, Support Points
+- Evidence: `events__legend-race.json`, `en/events/legend-race`; [GameWith 2026-09-23](https://gamewith.jp/uma-musume/article/show/261413)
+
+Daily Legend Race (デイリーレジェンドレース)
+
+- `[JP]` state on 2026-09-27: Live, permanent rotation
+- `[Global]` state on 2026-09-27: Live, permanent (Global mission text "Run in 21 Legend Races")
+- Entry gate: Daily Legend Race Ticket, one per daily reset
+- Main payout: Same family as Legend Race, smaller
+- Evidence: `items.json` id 168, `en/missions/legendrace-limited`
+
+Training Pass (トレーニングパス)
+
+- `[JP]` state on 2026-09-27: Live: aggregation period 09-24 12:00 to 10-26 11:59
+- `[Global]` state on 2026-09-27: ❌ UNVERIFIED, no Global notice
+- Entry gate: Menu, then トレーニングパス
+- Main payout: Free track plus a once-per-period Premium Pass worth 350 paid Carats
+- Evidence: [JP 3455](https://umamusume.jp/news/detail?id=3455)
+
+自主トレ育成 ("Independent Training")
+
+- `[JP]` state on 2026-09-27: Live since the 2026-06-29 update
+- `[Global]` state on 2026-09-27: Live since **2026-07-22 08:00 UTC**, fourteen hours before the 22:00 update that carried Grand Concert, and usable in **all** Career scenarios; about 50 minutes per Career, runs with the app closed, no race trophies, Career events and concerts not viewable
+- Entry gate: Own tab on the pre-training confirmation screen
+- Main payout: Fans, Carats, Club Points, winner's sashes, Factors
+- Evidence: [Game8 2026-06-30](https://game8.jp/umamusume/794628), [Kamigame 2026-07-20](https://kamigame.jp/umamusume/page/429951462450165905.html), [JP 3476](https://umamusume.jp/news/detail?id=3476), [Global 100087, posted 2026-07-22 08:30 UTC](https://umamusume.com/news/100087)
+
+Transfer Requests (Global wording)
+
+- `[JP]` state on 2026-09-27: Not documented in the sources read for this section
+- `[Global]` state on 2026-09-27: Live on a **repeating four-day cycle**: first window 2026-09-24 22:00 to 2026-09-28 21:59 UTC, and the cycle current at 2026-11-12 is 2026-11-05 22:00 to 2026-11-09 21:59 UTC ([Global 1157](https://umamusume.com/news/1157)). A single window recorded as the feature's state is misleading — the window closes and reopens
+- Entry gate: Request list refreshed every two days
+- Main payout: Trainee Star Pieces, Monies, Support Points
+- Evidence: [Global 1058](https://umamusume.com/news/1058/), [game8.co 2025-10-05, ⚠️ STALE](https://game8.co/games/Umamusume-Pretty-Derby/archives/554781)
+
+Aim for the Stars! Dream Team (目指せ！最強チーム)
+
+- `[JP]` state on 2026-09-27: Limited event, Scout Race sub-mode
+- `[Global]` state on 2026-09-27: Limited event, editions recorded in Global mission keys
+- Entry gate: Scout Race Ticket
+- Main payout: Scout Points, used to recruit team members
+- Evidence: `items.json` ids 1001 and 2001, `en/missions/teamscout-*`
+
+League of Heroes (リーグ オブ ヒーローズ)
+
+- `[JP]` state on 2026-09-27: Race mode behind item 3001; out of scope for 1.6
+- `[Global]` state on 2026-09-27: Global client text exists ("a League of Heroes race")
+- Entry gate: League Ticket
+- Main payout: Not researched here
+- Evidence: `items.json` id 3001
+
 
 #### 1.6.1 Training scenarios
 
 A Career run picks one scenario, and the scenario decides the target-race calendar, the scenario-exclusive mechanics, and the stat caps. The live list is the export list, not a remembered one: `scenarios.json` carries 14 rows with per-server start epochs.
 
-| Order     | `[JP]` title                                                                                                                  | `[Global]` title (client or export label)                                | `[JP]` live since          | `[Global]` live since   | Tag           |
-| --------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ | -------------------------- | ----------------------- | ------------- |
-| 1         | 新設！URAファイナルズ                                                                                                         | Ura Finale (full: The Beginning: URA Finale)                             | 2021-02-24                 | 2025-06-26              | `[Both]`      |
-| 2         | アオハル杯                                                                                                                    | Unity Cup (full: Unity Cup: Shine On, Team Spirit!)                      | 2021-08-30                 | 2025-11-06              | `[Both]`      |
-| 3         | Make a new track!! クライマックス開幕                                                                                         | export label Trackblazer; Global mission text says Twinkle Star Climax   | 2022-02-24                 | 2026-03-12              | `[Both]`      |
-| 4         | つなげ、照らせ、ひかれ。私たちのグランドライブ                                                                                | Brighter Together Our Grand Concert                                      | 2022-08-24                 | 2026-07-22              | `[Both]`      |
-| 5 to 14   | グランドマスターズ, L'Arc, U.A.F., 大豊食祭, メカウマ娘, The Twinkle Legends, 無人島, ゆこま温泉郷, Beyond Dreams, トレセン軒 | no Global release date in the export (`start_en` absent)                 | 2023-02-24 to 2026-06-29   | none                    | `[JP-Only]`   |
+**1 — 新設！URAファイナルズ**
+- `[Global]` title (client or export label): Ura Finale (full: The Beginning: URA Finale)
+- `[JP]` live since: 2021-02-24
+- `[Global]` live since: 2025-06-26
+- Tag: `[Both]`
+
+**2 — アオハル杯**
+- `[Global]` title (client or export label): Unity Cup (full: Unity Cup: Shine On, Team Spirit!)
+- `[JP]` live since: 2021-08-30
+- `[Global]` live since: 2025-11-06
+- Tag: `[Both]`
+
+**3 — Make a new track!! クライマックス開幕**
+- `[Global]` title (client or export label): export label Trackblazer; Global mission text says Twinkle Star Climax
+- `[JP]` live since: 2022-02-24
+- `[Global]` live since: 2026-03-12
+- Tag: `[Both]`
+
+**4 — つなげ、照らせ、ひかれ。私たちのグランドライブ**
+- `[Global]` title (client or export label): Brighter Together Our Grand Concert
+- `[JP]` live since: 2022-08-24
+- `[Global]` live since: 2026-07-22
+- Tag: `[Both]`
+
+**5 to 14**
+- `[JP]` title: グランドマスターズ, L'Arc, U.A.F., 大豊食祭, メカウマ娘, The Twinkle Legends, 無人島, ゆこま温泉郷, Beyond Dreams, トレセン軒
+- `[Global]` title (client or export label): no Global release date in the export (`start_en` absent)
+- `[JP]` live since: 2023-02-24 to 2026-06-29
+- `[Global]` live since: none
+- Tag: `[JP-Only]`
 
 So the current scenario is トレセン軒 on `[JP]` (order 14, `start_ja` 2026-06-29) and Brighter Together Our Grand Concert on `[Global]` (order 4, `start_en` 2026-07-22). Two independent confirmations for the `[JP]` date: the 自主トレ育成 bug window in the official notice opens 2026/6/29 12:00, the same update boundary ([Umamusume JP Official News, 2026.09.25](https://umamusume.jp/news/detail?id=3476)), and Kamigame carries a scenario guide titled 新シナリオ「トレセン軒」の攻略と立ち回り dated 2026-09-11 ([Kamigame](https://kamigame.jp/umamusume/page/427218893275192287.html)). The English titles for orders 5 to 14 in the export are GameTora labels, not Global client names, because those scenarios never shipped on Global; do not treat them as official `[Global]` wording.
 
@@ -854,16 +1418,46 @@ Spendable items are not support effects, and the two are conflated constantly in
 
 ⚠️ Likewise, a **"Goddess Statue"** (`[JP]` 「女神像」) exists on `[Global]` but is **pure currency**: exchanged for Trainee Star Pieces in the **Statue Exchange** shop on an escalating **×1 → ×5** rate, **650 Star Pieces** to max a trainee, with the client stating statues "cannot be used to unlock an unscouted Trainee". **It grants no buff**, so it is not a scenario modifier of any kind.
 
-| Item (`[Global]` client name)                                                                       | Effect, as the client puts it                                                  | Where it is spent                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| --------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Alarm Clock**                                                                                     | "Lets you try again on a Career goal race"                                     | **Career only.** Retries a missed mandatory placing (1.2.6), and a lost Unity Cup **Team Race** since the 2026-07-01 rework (2.2). Also paid as a league-selection participation reward (1.6.2)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| **Toughness 30**                                                                                    | "Restores 30 TP"                                                               | Compensation currency (1.1.7, 1.6.3). ~~❌ **What TP governs is unverified**~~ **closed 2026-10-05:** TP is the cost of *starting a Career*, not a per-turn resource. [Game8's TP and RP guide, last updated 2025-08-04, ⚠️ STALE](https://game8.co/games/Umamusume-Pretty-Derby/archives/538079) prints "each career run costing 30 TP", a **100 TP** ceiling, "1 TP takes 10 minutes to recharge", "5 hours for one Career Mode run", 10 Carats buying 30 TP, and that a stockpile above 100 stops the passive recharge. The client copy this row already carried ("Restores 30 TP") matches the 30-per-Career figure, and the earlier guard stands corroborated rather than reversed: **TP is not the training Energy bar.** What remains unverified is the expansion of the two abbreviations: that page never writes them out, so "Training Points" and "Race Points" are still not client strings  |
-| **Pleasing Parfait**                                                                                | "Raises a runner's mood to Great"                                              | **Team Trials and Daily Races** (1.6.4)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| **Sunshine Doll** / **Rainfall Doll**                                                               | Set weather to **Sunny** and footing to **Firm** / to **Rain** and **Heavy**   | Team Trials and Daily Races. ⚠️ Note the interaction with 1.2.5: choosing Rain via the doll makes Soft-or-Heavy footing near-mandatory, so the two effects are one decision, not two                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| **Inner Post Raffle Ball** / **Outer Post Raffle Ball**                                             | Draw an **inner bracket (1-3)** / an **outer (6-8)** gate                      | Team Trials and Daily Races. Gate *position* is separate from the slow-start penalty mechanics in 1.2.3                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| **Books of Hints** — Book of Hints, Rare Book of Hints, Textbook of Hints, Rare Textbook of Hints   | Raise a skill's **hint level**                                                 | **Before** a run, on the deck/build screen. Costs on an unenhanced card to Lv3: 12 / 6 / 30 of 「ヒント本 / ヒント専門書 / 夢の煌めき」 (Dream Glimmer), 1.4.4                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| **Rainbow / Gold Uncap Crystal**                                                                    | "Uncaps an SSR / SR Support Card"                                              | Card leveling, `[Global]` only — `[JP]` replaced that model on 2025-10-07 (1.4.2)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| **Rainbow / Gold Crystal Shard**                                                                    | Exchange material                                                              | Bought with Carnival Pts in the Racing Carnival shop (1.6.5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+**Alarm Clock**
+
+- Effect, as the client puts it: "Lets you try again on a Career goal race"
+- Where it is spent: **Career only.** Retries a missed mandatory placing (1.2.6), and a lost Unity Cup **Team Race** since the 2026-07-01 rework (2.2). Also paid as a league-selection participation reward (1.6.2)
+
+**Toughness 30**
+
+- Effect, as the client puts it: "Restores 30 TP"
+- Where it is spent: Compensation currency (1.1.7, 1.6.3). ~~❌ **What TP governs is unverified**~~ **closed 2026-10-05:** TP is the cost of *starting a Career*, not a per-turn resource. [Game8's TP and RP guide, last updated 2025-08-04, ⚠️ STALE](https://game8.co/games/Umamusume-Pretty-Derby/archives/538079) prints "each career run costing 30 TP", a **100 TP** ceiling, "1 TP takes 10 minutes to recharge", "5 hours for one Career Mode run", 10 Carats buying 30 TP, and that a stockpile above 100 stops the passive recharge. The client copy this row already carried ("Restores 30 TP") matches the 30-per-Career figure, and the earlier guard stands corroborated rather than reversed: **TP is not the training Energy bar.** What remains unverified is the expansion of the two abbreviations: that page never writes them out, so "Training Points" and "Race Points" are still not client strings
+
+**Pleasing Parfait**
+
+- Effect, as the client puts it: "Raises a runner's mood to Great"
+- Where it is spent: **Team Trials and Daily Races** (1.6.4)
+
+**Sunshine Doll** / **Rainfall Doll**
+
+- Effect, as the client puts it: Set weather to **Sunny** and footing to **Firm** / to **Rain** and **Heavy**
+- Where it is spent: Team Trials and Daily Races. ⚠️ Note the interaction with 1.2.5: choosing Rain via the doll makes Soft-or-Heavy footing near-mandatory, so the two effects are one decision, not two
+
+**Inner Post Raffle Ball** / **Outer Post Raffle Ball**
+
+- Effect, as the client puts it: Draw an **inner bracket (1-3)** / an **outer (6-8)** gate
+- Where it is spent: Team Trials and Daily Races. Gate *position* is separate from the slow-start penalty mechanics in 1.2.3
+
+**Books of Hints** — Book of Hints, Rare Book of Hints, Textbook of Hints, Rare Textbook of Hints
+
+- Effect, as the client puts it: Raise a skill's **hint level**
+- Where it is spent: **Before** a run, on the deck/build screen. Costs on an unenhanced card to Lv3: 12 / 6 / 30 of 「ヒント本 / ヒント専門書 / 夢の煌めき」 (Dream Glimmer), 1.4.4
+
+**Rainbow / Gold Uncap Crystal**
+
+- Effect, as the client puts it: "Uncaps an SSR / SR Support Card"
+- Where it is spent: Card leveling, `[Global]` only — `[JP]` replaced that model on 2025-10-07 (1.4.2)
+
+**Rainbow / Gold Crystal Shard**
+
+- Effect, as the client puts it: Exchange material
+- Where it is spent: Bought with Carnival Pts in the Racing Carnival shop (1.6.5)
+
 
 ⚠️ **Spend-site error to avoid:** the mood, weather and gate items above are **Team Trials** (`[JP]` チーム競技場) and **Daily Races** consumables. Guides routinely place them in **Champions Meeting**, which publishes no such item path (1.6.2, 1.6.4). ❌ **`"Special Katsu Curry"` appears in no Global item list found**; treat it as not-Global rather than as a hidden Energy item.
 
@@ -907,12 +1501,29 @@ taken and parked in this directory, unused here.
 between the servers is ten scenarios, which is why scenario advice copied from `[JP]` sources is
 usually not actionable here.
 
-| #     | Scenario (`[Global]` EN)     | JP name                                        | `[Global]` start (UTC)   | JP start (JST)   | Stat cap Sp / St / Pw / Gu / Wi                                                                                                                                                                                                                                                                                  |
-| ----- | ---------------------------- | ---------------------------------------------- | ------------------------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1     | URA Finale                   | 新設！URAファイナルズ                          | 2025-06-26               | 2021-02-24       | 1400 / 1400 / 1400 / 1400 / 1400                                                                                                                                                                                                                                                                                 |
-| 2     | Unity Cup                    | アオハル杯～輝け、チームの絆～                 | 2025-11-06               | 2021-08-30       | 1300 / 1300 / 1300 / 1300 / 1800                                                                                                                                                                                                                                                                                 |
-| 3     | Trackblazer                  | Make a new track!!～クライマックス開幕～       | 2026-03-12               | 2022-02-24       | 1200 / 1900 / 1200 / 1200 / 1500                                                                                                                                                                                                                                                                                 |
-| 4     | Grand Live (Grand Concert)   | つなげ、照らせ、ひかれ。私たちのグランドライブ | 2026-07-22               | 2022-08-24       | 1600 / 1300 / 1300 / 1500 / 1300 (derived from the export, and **corroborated 2026-10-05** by the community wiki's 1600 / 1300 / 1300 / 1500 / 1300 for Speed / Stamina / Power / Guts / Wit plus a second, lower-tier preview article printing the same five figures; two independent pages, neither Cygames)   |
+**1 — URA Finale**
+- JP name: 新設！URAファイナルズ
+- `[Global]` start (UTC): 2025-06-26
+- JP start (JST): 2021-02-24
+- Stat cap Sp / St / Pw / Gu / Wi: 1400 / 1400 / 1400 / 1400 / 1400
+
+**2 — Unity Cup**
+- JP name: アオハル杯～輝け、チームの絆～
+- `[Global]` start (UTC): 2025-11-06
+- JP start (JST): 2021-08-30
+- Stat cap Sp / St / Pw / Gu / Wi: 1300 / 1300 / 1300 / 1300 / 1800
+
+**3 — Trackblazer**
+- JP name: Make a new track!!～クライマックス開幕～
+- `[Global]` start (UTC): 2026-03-12
+- JP start (JST): 2022-02-24
+- Stat cap Sp / St / Pw / Gu / Wi: 1200 / 1900 / 1200 / 1200 / 1500
+
+**4 — Grand Live (Grand Concert)**
+- JP name: つなげ、照らせ、ひかれ。私たちのグランドライブ
+- `[Global]` start (UTC): 2026-07-22
+- JP start (JST): 2022-08-24
+- Stat cap Sp / St / Pw / Gu / Wi: 1600 / 1300 / 1300 / 1500 / 1300 (derived from the export, and **corroborated 2026-10-05** by the community wiki's 1600 / 1300 / 1300 / 1500 / 1300 for Speed / Stamina / Power / Guts / Wit plus a second, lower-tier preview article printing the same five figures; two independent pages, neither Cygames)
 
 Dates and the cap formula come from the GameTora data export
 ([scenarios dataset](https://gametora.com/data/umamusume/scenarios.61b7c51c.json)), fetched
@@ -928,11 +1539,20 @@ The export stores a `stats` array per scenario. It is not a starting-stat alloca
 per-stat cap bonus over a base cap of 1200. Three independent readings confirm it, each matching the
 arithmetic exactly:
 
-| Scenario        | Export `stats`              | 1200 + bonus                       | Published by an independent source                                |
-| --------------- | --------------------------- | ---------------------------------- | ----------------------------------------------------------------- |
-| URA Finale      | [200, 200, 200, 200, 200]   | 1400 across all five               | Stated as 1400 across all five stats                              |
-| Unity Cup       | [100, 100, 100, 100, 600]   | 1300 x4, Wit 1800                  | `docs/scenarios/02-unity-cup.md:170` states exactly 1300 / 1800   |
-| Grand Masters   | [300, 200, 300, 100, 100]   | 1500 / 1400 / 1500 / 1300 / 1300   | `[JP]` only, listed here as a formula check, not as Global data   |
+**URA Finale**
+- Export `stats`: [200, 200, 200, 200, 200]
+- 1200 + bonus: 1400 across all five
+- Published by an independent source: Stated as 1400 across all five stats
+
+**Unity Cup**
+- Export `stats`: [100, 100, 100, 100, 600]
+- 1200 + bonus: 1300 x4, Wit 1800
+- Published by an independent source: `docs/scenarios/02-unity-cup.md:170` states exactly 1300 / 1800
+
+**Grand Masters**
+- Export `stats`: [300, 200, 300, 100, 100]
+- 1200 + bonus: 1500 / 1400 / 1500 / 1300 / 1300
+- Published by an independent source: `[JP]` only, listed here as a formula check, not as Global data
 
 The same arithmetic also explains a contested figure in `docs/UMAMUSUME_REFERENCE.md`: a 2100 Speed
 target is Beyond Dreams' Speed cap (1200 + 900), and 2000 is the separate database `hard_caps`
@@ -1092,13 +1712,25 @@ name"). With no link character present the name defaults to **Team Carrot**. The
 sets the **gold skill granted for beating Team Zenith in the finals**, and the skill arrives on the win, not
 on the pick (`docs/scenarios/02-unity-cup.md`: "simply picking the team name isn't enough").
 
-| Team name | Linked character | Gold skill on beating Zenith |
-| --- | --- | --- |
-| Happy Hoppers | Taiki Shuttle | Mile Maven |
-| Sunny Runners | Matikanefukukitaru | Clairvoyance |
-| Carrot Pudding | Haru Urara | Indomitable |
-| Blue Bloom | Rice Shower | Cooldown |
-| Team Carrot (default) | none of the above | No Stopping Me! |
+**Happy Hoppers**
+- Linked character: Taiki Shuttle
+- Gold skill on beating Zenith: Mile Maven
+
+**Sunny Runners**
+- Linked character: Matikanefukukitaru
+- Gold skill on beating Zenith: Clairvoyance
+
+**Carrot Pudding**
+- Linked character: Haru Urara
+- Gold skill on beating Zenith: Indomitable
+
+**Blue Bloom**
+- Linked character: Rice Shower
+- Gold skill on beating Zenith: Cooldown
+
+**Team Carrot (default)**
+- Linked character: none of the above
+- Gold skill on beating Zenith: No Stopping Me!
 
 Two separate gift mechanisms sit side by side here and are easy to conflate. The table above is the
 **team-name** gift, paid on the finals win. A **Linked Gift Skill** is a second, different payout that
@@ -1118,13 +1750,25 @@ at least three of the five** ([Game8 563652](https://game8.co/games/Umamusume-Pr
 Dirt). You pick one of **three NPC teams** of varying difficulty; a win raises league rank by more the
 stronger the opponent, and a loss **lowers** it, so the difficulty chosen compounds across the run.
 
-| Round | When | Opponent |
-| --- | --- | --- |
-| Preseason 1 | Junior Year Late December | Your choice of a Tracen team |
-| Preseason 2 | Classic Year Late June | Your choice of a Tracen team |
-| Preseason 3 | Classic Year Late December | Your choice of a Tracen team |
-| Preseason 4 | Senior Year Late June | Tracen team; **Elite Team** if eligible |
-| Finals | Senior Year Late December | **Team Zenith** |
+**Preseason 1**
+- When: Junior Year Late December
+- Opponent: Your choice of a Tracen team
+
+**Preseason 2**
+- When: Classic Year Late June
+- Opponent: Your choice of a Tracen team
+
+**Preseason 3**
+- When: Classic Year Late December
+- Opponent: Your choice of a Tracen team
+
+**Preseason 4**
+- When: Senior Year Late June
+- Opponent: Tracen team; **Elite Team** if eligible
+
+**Finals**
+- When: Senior Year Late December
+- Opponent: **Team Zenith**
 
 Sources for the table: [GameTora Unity Cup](https://gametora.com/umamusume/unity-cup) (the five rows
 verbatim), [Umamusume Wiki Unity Cup](https://umamusu.wiki/Game:Unity_Cup:_Shine_On,_Team_Spirit!) (same
@@ -1469,16 +2113,37 @@ date.
 Source: [Kamigame 育成のコツと立ち回り｜全シナリオの共通知識を解説！](https://kamigame.jp/umamusume/page/114672877806026759.html),
 `⚠️ STALE: 最終更新日 2025-03-07`, read 2026-09-26 through a rendering browser.
 
-| Rule as published                                            | English mechanical reading                                                                                   | Threshold              |
-| ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ | ---------------------- |
-| 絆ゲージが8割以上になると友情練習が可能になる                | Friendship training unlocks once the bond gauge reaches 80 percent                                           | 80                     |
-| 体力5割未満か強い練習が無い時はお休み                        | Rest when energy falls below half, or when no strong training option exists                                  | 50 percent of energy   |
-| やる気は「絶好調」を維持する                                 | Keep motivation at the top tier; it raises both stat and skill-point gains and in-race performance           | top tier               |
-| 夏合宿中は友情練習4回を狙う、直前に回復しておく              | Aim for four friendship sessions during summer camp and enter it near full energy                            | 4 turns                |
-| バッドコンディションになったら保健室                         | Treat a bad condition at the infirmary                                                                       | condition              |
-| 「練習ベタ」はトレーニング失敗率が2%増えるだけで影響は小さい | The practice-unskilled condition adds only 2 percent to failure rate, so skipping treatment can be correct   | +2 percent             |
-| 目標外のレース出走は控える                                   | Off-objective races pay fewer stats than a training turn, so skip them unless fan counts demand them         | rule                   |
-| 育成開始時に適性をAにする（赤因子で上げる）                  | Raise turf, distance and strategy aptitude to A before starting via red factors; distance matters most       | A                      |
+**絆ゲージが8割以上になると友情練習が可能になる**
+- English mechanical reading: Friendship training unlocks once the bond gauge reaches 80 percent
+- Threshold: 80
+
+**体力5割未満か強い練習が無い時はお休み**
+- English mechanical reading: Rest when energy falls below half, or when no strong training option exists
+- Threshold: 50 percent of energy
+
+**やる気は「絶好調」を維持する**
+- English mechanical reading: Keep motivation at the top tier; it raises both stat and skill-point gains and in-race performance
+- Threshold: top tier
+
+**夏合宿中は友情練習4回を狙う、直前に回復しておく**
+- English mechanical reading: Aim for four friendship sessions during summer camp and enter it near full energy
+- Threshold: 4 turns
+
+**バッドコンディションになったら保健室**
+- English mechanical reading: Treat a bad condition at the infirmary
+- Threshold: condition
+
+**「練習ベタ」はトレーニング失敗率が2%増えるだけで影響は小さい**
+- English mechanical reading: The practice-unskilled condition adds only 2 percent to failure rate, so skipping treatment can be correct
+- Threshold: +2 percent
+
+**目標外のレース出走は控える**
+- English mechanical reading: Off-objective races pay fewer stats than a training turn, so skip them unless fan counts demand them
+- Threshold: rule
+
+**育成開始時に適性をAにする（赤因子で上げる）**
+- English mechanical reading: Raise turf, distance and strategy aptitude to A before starting via red factors; distance matters most
+- Threshold: A
 
 The 80 percent bond line is a real gate, since friendship training cannot fire below it. The 50
 percent rest line is advice rather than a game threshold, see section 2.6, so a planner should encode
@@ -1491,18 +2156,55 @@ them.
 
 ### 2.4. Source ledger and conflicts
 
-| Source                                                                                                                    | Tier   | Date                          | Used for                                                                                                                                  |
-| ------------------------------------------------------------------------------------------------------------------------- | ------ | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| [GameTora scenarios dataset](https://gametora.com/data/umamusume/scenarios.61b7c51c.json)                                 | B      | fetched 2026-09-27            | scenario list, both server dates, `stats` and `hard_caps`, linked-character counts                                                        |
-| `docs/scenarios/01-ura-finale.md`                                                                                         | A      | read 2026-09-27               | URA mechanics, deck shapes, fan gates, strategy targets                                                                                   |
-| `docs/scenarios/02-unity-cup.md`                                                                                          | A      | read 2026-09-27               | Unity Cup mechanics and the 1300 / 1800 cap line                                                                                          |
-| `docs/scenarios/03-trackblazer.md`                                                                                        | A      | read 2026-09-27               | Trackblazer no-goals and trophy notes                                                                                                     |
-| [Game8 scenario guides 536520, 545572, 580723](https://game8.co/games/Umamusume-Pretty-Derby/archives/536520)             | A      | per-page dates not captured   | duel, Extreme Spirit Burst and Shop Coin specifics                                                                                        |
-| [Kamigame shared training guide](https://kamigame.jp/umamusume/page/114672877806026759.html)                              | A      | 2025-03-07, stale             | shared thresholds and the failure-rate figure                                                                                             |
-| [Game8 Grand Live (Grand Concert) Scenario Guide 607337](https://game8.co/games/Umamusume-Pretty-Derby/archives/607337)   | A      | last updated 2026-07-26       | the loop, the caps, both objective thresholds, the 23 Song titles in English, the five lyric-line hints, deck advice                      |
-| [Game8 Fully Charged Explained 607687](https://game8.co/games/Umamusume-Pretty-Derby/archives/607687)                     | A      | last updated 2026-07-02       | what 「Fully Charged」 actually is, which closes conflict 4 the other direction                                                           |
-| [GameTora Our Grand Concert scenario page](https://gametora.com/umamusume/our-grand-concert)                              | B      | last updated 2026-07-22       | the mechanics body: token cap, live payouts, Lesson patterns, base training values, fan gates, inheritance uncaps                         |
-| [Umamusume Global Official News 899](https://umamusume.com/news/899)                                                      | S      | posted 2026-07-22 22:00 UTC   | the launch boundary to the hour, the scenario name in official English, the debut trainee and the three debut support cards, "Pal type"   |
+**[GameTora scenarios dataset](https://gametora.com/data/umamusume/scenarios.61b7c51c.json)**
+- Tier: B
+- Date: fetched 2026-09-27
+- Used for: scenario list, both server dates, `stats` and `hard_caps`, linked-character counts
+
+**`docs/scenarios/01-ura-finale.md`**
+- Tier: A
+- Date: read 2026-09-27
+- Used for: URA mechanics, deck shapes, fan gates, strategy targets
+
+**`docs/scenarios/02-unity-cup.md`**
+- Tier: A
+- Date: read 2026-09-27
+- Used for: Unity Cup mechanics and the 1300 / 1800 cap line
+
+**`docs/scenarios/03-trackblazer.md`**
+- Tier: A
+- Date: read 2026-09-27
+- Used for: Trackblazer no-goals and trophy notes
+
+**[Game8 scenario guides 536520, 545572, 580723](https://game8.co/games/Umamusume-Pretty-Derby/archives/536520)**
+- Tier: A
+- Date: per-page dates not captured
+- Used for: duel, Extreme Spirit Burst and Shop Coin specifics
+
+**[Kamigame shared training guide](https://kamigame.jp/umamusume/page/114672877806026759.html)**
+- Tier: A
+- Date: 2025-03-07, stale
+- Used for: shared thresholds and the failure-rate figure
+
+**[Game8 Grand Live (Grand Concert) Scenario Guide 607337](https://game8.co/games/Umamusume-Pretty-Derby/archives/607337)**
+- Tier: A
+- Date: last updated 2026-07-26
+- Used for: the loop, the caps, both objective thresholds, the 23 Song titles in English, the five lyric-line hints, deck advice
+
+**[Game8 Fully Charged Explained 607687](https://game8.co/games/Umamusume-Pretty-Derby/archives/607687)**
+- Tier: A
+- Date: last updated 2026-07-02
+- Used for: what 「Fully Charged」 actually is, which closes conflict 4 the other direction
+
+**[GameTora Our Grand Concert scenario page](https://gametora.com/umamusume/our-grand-concert)**
+- Tier: B
+- Date: last updated 2026-07-22
+- Used for: the mechanics body: token cap, live payouts, Lesson patterns, base training values, fan gates, inheritance uncaps
+
+**[Umamusume Global Official News 899](https://umamusume.com/news/899)**
+- Tier: S
+- Date: posted 2026-07-22 22:00 UTC
+- Used for: the launch boundary to the hour, the scenario name in official English, the debut trainee and the three debut support cards, "Pal type"
 
 #### Conflicts and open items
 
@@ -1580,13 +2282,26 @@ five for URA and 1300 with 1800 Wit for Unity Cup, exactly as 1200 + `scenarios.
 
 #### Closed and still open
 
-| Item                               | Status after the read                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Conflict 3, URA cap wording        | CLOSED, dated rework of 2026-07-01                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| Conflict 5, missing page dates     | CLOSED, all three captured above                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| Conflict 1, Trackblazer caps       | CLOSED on the five figures. The GameTora scenario page prints 1200 / 1900 / 1200 / 1200 / 1500, the same values the export predicts, so the numbers are HIGH. Open only on the narrower claim that the raised caps are live on `[Global]` today                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| Conflict 4, Grand Live mechanics   | OPEN, narrowed twice. The pages reference a `Fully Charged` mechanic requiring Power at 1200 or more, and Game8 has a dedicated page dated 2026-07-02, so the resource to model is named even though its rules are still unextracted. The 2026-10-05 pass added the scenario's whole shape from GameTora and uma.guide (5 Performance Tokens, Lessons spending them for Practice and Live Bonuses, a Hype Level gating four Promotional Lives before the final Grand Live, 23 songs, the 5 linked characters named), recorded in 2.2.4. It stays OPEN because 2.2.4 requires a primary read and those two are tier B and tier C, exactly the paraphrase its re-opening rule refuses. **Superseded the same day: CLOSED by the primary read in 2.8, and the `Fully Charged` half of this row is refuted there rather than extracted, because it is a race mechanic and not a scenario resource**   |
-| Section 3 mood bonus               | RESOLVED. Game8 prints 20 percent training stat increase at Great mood tagged `[Both]`, independently matching the JP guide and `docs/scenarios/01`. The Global mood label list is also confirmed: the client's own Mood Effect panel carries `GREAT` / `GOOD` / `NORMAL` / `BAD` / `AWFUL` (1.1.6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+Conflict 3, URA cap wording
+
+- Status after the read: CLOSED, dated rework of 2026-07-01
+
+Conflict 5, missing page dates
+
+- Status after the read: CLOSED, all three captured above
+
+Conflict 1, Trackblazer caps
+
+- Status after the read: CLOSED on the five figures. The GameTora scenario page prints 1200 / 1900 / 1200 / 1200 / 1500, the same values the export predicts, so the numbers are HIGH. Open only on the narrower claim that the raised caps are live on `[Global]` today
+
+Conflict 4, Grand Live mechanics
+
+- Status after the read: OPEN, narrowed twice. The pages reference a `Fully Charged` mechanic requiring Power at 1200 or more, and Game8 has a dedicated page dated 2026-07-02, so the resource to model is named even though its rules are still unextracted. The 2026-10-05 pass added the scenario's whole shape from GameTora and uma.guide (5 Performance Tokens, Lessons spending them for Practice and Live Bonuses, a Hype Level gating four Promotional Lives before the final Grand Live, 23 songs, the 5 linked characters named), recorded in 2.2.4. It stays OPEN because 2.2.4 requires a primary read and those two are tier B and tier C, exactly the paraphrase its re-opening rule refuses. **Superseded the same day: CLOSED by the primary read in 2.8, and the `Fully Charged` half of this row is refuted there rather than extracted, because it is a race mechanic and not a scenario resource**
+
+Section 3 mood bonus
+
+- Status after the read: RESOLVED. Game8 prints 20 percent training stat increase at Great mood tagged `[Both]`, independently matching the JP guide and `docs/scenarios/01`. The Global mood label list is also confirmed: the client's own Mood Effect panel carries `GREAT` / `GOOD` / `NORMAL` / `BAD` / `AWFUL` (1.1.6)
+
 
 #### Two naming decisions an importer must make
 
@@ -1624,12 +2339,13 @@ A run planner should treat 50 percent as a house rule a Trainer may adopt, not a
 
 #### What the failure model actually is
 
-| Rule as printed                                            | English mechanical reading                                                                                                       |
-| ---------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| 失敗率×失敗率ダウン＋コンディション補正＝失敗率            | Final failure rate equals the base rate multiplied by a failure-rate-down multiplier, plus a condition correction                |
-| 練習上手◯: トレーニング失敗率が−2%される                   | Practice Skilled reduces failure rate by 2 percentage points                                                                     |
-| 練習ベタはトレーニング失敗率が2%増えるだけ                 | Practice Unskilled adds 2 percentage points, small enough that leaving it untreated can be correct                               |
-| 失敗率が高いほど失敗した時のペナルティも大きくなってしまう | Penalty magnitude scales with the failure rate itself, so a risky turn is worse on average than its probability alone suggests   |
+- **失敗率×失敗率ダウン＋コンディション補正＝失敗率**: Final failure rate equals the base rate multiplied by a failure-rate-down multiplier, plus a condition correction
+
+- **練習上手◯: トレーニング失敗率が−2%される**: Practice Skilled reduces failure rate by 2 percentage points
+
+- **練習ベタはトレーニング失敗率が2%増えるだけ**: Practice Unskilled adds 2 percentage points, small enough that leaving it untreated can be correct
+
+- **失敗率が高いほど失敗した時のペナルティも大きくなってしまう**: Penalty magnitude scales with the failure rate itself, so a risky turn is worse on average than its probability alone suggests
 
 The multiplier-then-additive-order matters if the app models failure: the two effects do not commute,
 and a flat subtraction applied before the multiplier gives a different number than the printed formula.
@@ -1650,10 +2366,9 @@ which is what a 1900 stamina cap would imply, without confirming the number.
 
 Superseded in place. This subsection originally recorded the race-side percentage as unsettled. It is settled: see 1.1.6, which carries the client's own Mood Effect panel, the ten percentages it prints, and the reasoning. The table below is kept as the record of the disagreement, because the disagreement is still the reason 1.1.6 bothers to explain itself.
 
-| Publisher            | Figure printed                                                                   |
-| -------------------- | -------------------------------------------------------------------------------- |
-| GameWith             | mood race effect of plus or minus 4 percent, with the second tier at 2 percent   |
-| Game8 and Kamigame   | plus or minus 10 percent, with the second tier at 5 percent                      |
+- **GameWith**: mood race effect of plus or minus 4 percent, with the second tier at 2 percent
+
+- **Game8 and Kamigame**: plus or minus 10 percent, with the second tier at 5 percent
 
 These cannot both describe the same quantity. `docs/scenarios/01-ura-finale.md` carries
 "+20% training stat gains, +4% race performance" at Great mood, which matches the GameWith camp,
@@ -1842,14 +2557,29 @@ documentation built on this reference. They cite this file by source id (A1–A1
 mechanics detail, test states, and information gaps that are too procedural for a reference document but
 load-bearing for any scenario walk.
 
-| Document | What it holds | When to read it |
-|---|---|---|
-| `scenario-research-sources.md` | Source register: 29 sources (14 publisher tier A, 7 tier B, 8 tier C), 5 captured `[Global]` frames, URL per row, page date, region, what each supports. Fetch date 2026-11-12 for the whole set. | Before citing a scenario fact; to verify a URL or tier |
-| `ura-finale-test-case.md` | URA Finale test case: scenario key `ura_finale`, caps 1400×5, Special Week's 8-row goal ladder, fan gates (Early Feb Senior 60,000/40,000 turf/dirt; Early April 70,000/60,000 plus green Akikawa bond; Late Dec 120,000/80,000), Happy Meek duel ladder by level (+10/+25 stat, +30 SP per win, +4 max energy), finals on turns 74/76/78, deck shape, 15 test states S1–S15, 10 assertions | URA Finale walk or audit |
-| `trackblazer-test-case.md` | Trackblazer test case: scenario key `trackblazer`, caps 1200/1900/1200/1200/1500, Result Points vs Grade Points naming conflict (§1), four objectives (60/300/300 standard track; 30/200/300 dirt-leaning; 60/200/300 limited-turf-range decided from `aptitude_turf`/`aptitude_dirt`), Pro Shop/Shop Coins, Twinkle Star Climax name verified from tier A/B sources, 20 test states T1–T20, 10 assertions | Trackblazer walk or audit |
-| `our-grand-concert-test-case.md` | Grand Concert test case: scenario key `our_grand_concert`, caps 1600/1300/1300/1500/1300, Silence Suzuka as trainee (scenario link character), SSR [Passing the Dream On] Team Sirius banned from the deck, Performance Points balance not stored (no column, no payload), 17 test states G1–G17, 10 assertions, three deliberate refusals | Grand Concert walk or audit |
-| `scenario-information-gaps.md` | 17 gaps ranked by what they block, 9 source conflicts (row 9: preflight Happy Meek cap-tier vs +4-points copy), 4 rulings owed (§3.1 Result Points vocabulary, §3.2 Grand Concert finale name surface, §3.3 duel cap copy, §3.4 Trackblazer variant-track selector) | Before filing a scenario finding; to check whether a gap is deliberate |
-| `scenario-test-data-matrix.md` | Cross-scenario test matrix (18 rows × 4 scenarios), blocked-cell analysis, safe database strategy (session-private scratch copies, never `database/database.sqlite`), synthetic fixture rules, walk sequencing (Trackblazer → URA Finale → Grand Concert → Unity Cup retest) | Planning a scenario walk programme |
+**`scenario-research-sources.md`**
+- What it holds: Source register: 29 sources (14 publisher tier A, 7 tier B, 8 tier C), 5 captured `[Global]` frames, URL per row, page date, region, what each supports. Fetch date 2026-11-12 for the whole set.
+- When to read it: Before citing a scenario fact; to verify a URL or tier
+
+**`ura-finale-test-case.md`**
+- What it holds: URA Finale test case: scenario key `ura_finale`, caps 1400×5, Special Week's 8-row goal ladder, fan gates (Early Feb Senior 60,000/40,000 turf/dirt; Early April 70,000/60,000 plus green Akikawa bond; Late Dec 120,000/80,000), Happy Meek duel ladder by level (+10/+25 stat, +30 SP per win, +4 max energy), finals on turns 74/76/78, deck shape, 15 test states S1–S15, 10 assertions
+- When to read it: URA Finale walk or audit
+
+**`trackblazer-test-case.md`**
+- What it holds: Trackblazer test case: scenario key `trackblazer`, caps 1200/1900/1200/1200/1500, Result Points vs Grade Points naming conflict (§1), four objectives (60/300/300 standard track; 30/200/300 dirt-leaning; 60/200/300 limited-turf-range decided from `aptitude_turf`/`aptitude_dirt`), Pro Shop/Shop Coins, Twinkle Star Climax name verified from tier A/B sources, 20 test states T1–T20, 10 assertions
+- When to read it: Trackblazer walk or audit
+
+**`our-grand-concert-test-case.md`**
+- What it holds: Grand Concert test case: scenario key `our_grand_concert`, caps 1600/1300/1300/1500/1300, Silence Suzuka as trainee (scenario link character), SSR [Passing the Dream On] Team Sirius banned from the deck, Performance Points balance not stored (no column, no payload), 17 test states G1–G17, 10 assertions, three deliberate refusals
+- When to read it: Grand Concert walk or audit
+
+**`scenario-information-gaps.md`**
+- What it holds: 17 gaps ranked by what they block, 9 source conflicts (row 9: preflight Happy Meek cap-tier vs +4-points copy), 4 rulings owed (§3.1 Result Points vocabulary, §3.2 Grand Concert finale name surface, §3.3 duel cap copy, §3.4 Trackblazer variant-track selector)
+- When to read it: Before filing a scenario finding; to check whether a gap is deliberate
+
+**`scenario-test-data-matrix.md`**
+- What it holds: Cross-scenario test matrix (18 rows × 4 scenarios), blocked-cell analysis, safe database strategy (session-private scratch copies, never `database/database.sqlite`), synthetic fixture rules, walk sequencing (Trackblazer → URA Finale → Grand Concert → Unity Cup retest)
+- When to read it: Planning a scenario walk programme
 
 **URA Finale fan gates, timing added from the test case.** The three gates run on a fixed Senior-year calendar rather than being continuous: Early February (turf 60,000 / dirt 40,000 → Unique Skill level up), Early April (70,000 / 60,000 plus a green Director Akikawa bond → Unique Skill level up), Late December (120,000 / 80,000 → Unique Skill level up). The April gate's bond half has no column in the app and cannot be evaluated; a surface must print the requirement and the absence of a reading, never a verdict.
 
@@ -1867,15 +2597,19 @@ load-bearing for any scenario walk.
 
 Counts read from the GameTora data export on 2026-09-27 (`characters.json`, `character-cards.json`).
 
-| Measure                                                      | Value          |
-| ------------------------------------------------------------ | -------------- |
-| Distinct trainable Umamusume, any server                     | 135            |
-| Released on `[Both]`                                         | 68             |
-| `[JP-Only]`                                                  | 67             |
-| Trainable cards total (debut forms and alternate costumes)   | 268            |
-| Cards with a `[Global]` release date                         | 105            |
-| Cards with a `[JP]` release date                             | 268            |
-| Units with 1 / 2 / 3 cards                                   | 33 / 71 / 31   |
+- **Distinct trainable Umamusume, any server**: 135
+
+- **Released on `[Both]`**: 68
+
+- **`[JP-Only]`**: 67
+
+- **Trainable cards total (debut forms and alternate costumes)**: 268
+
+- **Cards with a `[Global]` release date**: 105
+
+- **Cards with a `[JP]` release date**: 268
+
+- **Units with 1 / 2 / 3 cards**: 33 / 71 / 31
 
 Server status is asserted per card, not per unit. 61 alternate-costume cards belong to a unit that is
 already live on `[Global]` while the card itself has never shipped there, so those rows read `[JP-Only]` next to an
@@ -2197,11 +2931,26 @@ Selected units are diagnostic by design: two carry Dirt A against Turf E or Turf
 
 #### Task 1 Comparison Table
 
-| Unit                                                                                            | Server tag                                                         | GameTora rendered unit page (tier B)                                                | Independent site (tier A)                                                                                                   | Export array                                | Agreement   |
-| ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ | ----------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------- | ----------- |
-| 100101 Special Week / スペシャルウィーク                                                        | [Both]                                                             | Turf A, Dirt G, Short F, Mile C, Medium A, Long A, Front G, Pace A, Late A, End C   | game8.co "Special Week (Ruler of Japan)": Turf A, Dirt G, Sprint F, Mile C, Med A, Long A, Front G, Pace A, Late A, End C   | ["A","G","F","C","A","A","G","A","A","C"]   | 10 of 10    |
-| 104601 Smart Falcon / スマートファルコン, Dirt A against Turf E                                 | [Both]                                                             | Turf E, Dirt A, Short B, Mile A, Medium A, Long E, Front A, Pace D, Late G, End G   | kamigame.jp: 芝 E, ダート A, 短距離 B, マイル A, 中距離 A, 長距離 E, 逃げ A, 先行 D, 差し G, 追込 G                         | ["E","A","B","A","A","E","A","D","G","G"]   | 10 of 10    |
-| 110001 Wonder Acute / ワンダーアキュート, [Global] release_en 2026-09-24, Dirt A against Turf G | [Global] for the 2026 release date, [Both] for the aptitude read   | Turf G, Dirt A, Short D, Mile A, Medium A, Long E, Front C, Pace A, Late C, End E   | kamigame.jp: 芝 G, ダート A, 短距離 D, マイル A, 中距離 A, 長距離 E, 逃げ C, 先行 A, 差し C, 追込 E                         | ["G","A","D","A","A","E","C","A","C","E"]   | 10 of 10    |
+**100101 Special Week / スペシャルウィーク**
+- Server tag: [Both]
+- GameTora rendered unit page (tier B): Turf A, Dirt G, Short F, Mile C, Medium A, Long A, Front G, Pace A, Late A, End C
+- Independent site (tier A): game8.co "Special Week (Ruler of Japan)": Turf A, Dirt G, Sprint F, Mile C, Med A, Long A, Front G, Pace A, Late A, End C
+- Export array: ["A","G","F","C","A","A","G","A","A","C"]
+- Agreement: 10 of 10
+
+**104601 Smart Falcon / スマートファルコン, Dirt A against Turf E**
+- Server tag: [Both]
+- GameTora rendered unit page (tier B): Turf E, Dirt A, Short B, Mile A, Medium A, Long E, Front A, Pace D, Late G, End G
+- Independent site (tier A): kamigame.jp: 芝 E, ダート A, 短距離 B, マイル A, 中距離 A, 長距離 E, 逃げ A, 先行 D, 差し G, 追込 G
+- Export array: ["E","A","B","A","A","E","A","D","G","G"]
+- Agreement: 10 of 10
+
+**110001 Wonder Acute / ワンダーアキュート, [Global] release_en 2026-09-24, Dirt A against Turf G**
+- Server tag: [Global] for the 2026 release date, [Both] for the aptitude read
+- GameTora rendered unit page (tier B): Turf G, Dirt A, Short D, Mile A, Medium A, Long E, Front C, Pace A, Late C, End E
+- Independent site (tier A): kamigame.jp: 芝 G, ダート A, 短距離 D, マイル A, 中距離 A, 長距離 E, 逃げ C, 先行 A, 差し C, 追込 E
+- Export array: ["G","A","D","A","A","E","C","A","C","E"]
+- Agreement: 10 of 10
 
 Units tested: 3. All 3 agreed, 30 of 30 cells. Two independent sources per unit, and the two independent sites used are different properties (game8.co English, kamigame.jp Japanese).
 
@@ -2209,12 +2958,26 @@ Units tested: 3. All 3 agreed, 30 of 30 cells. Two independent sources per unit,
 
 Export figures read from `GameTora data export` ([manifest](https://gametora.com/data/manifests/umamusume.json)): `GameTora data export` ([manifest](https://gametora.com/data/manifests/umamusume.json)): 268 card rows, 163 character rows.
 
-| Claim                                                       | Independent support found                                                                                                                                                                                                                                                                                                                                                                    | Status                                                                                                                                                                                                                                                                                     |
-| ----------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 135 trainable Umamusume on [JP]                             | Export is internally consistent: 135 distinct `char_id` carry `playable` true, of 163 character rows. No external per-character tally located.                                                                                                                                                                                                                                               | Could not confirm                                                                                                                                                                                                                                                                          |
-| 68 of those playable on [Global]                            | Export is internally consistent: 68 distinct `char_id` carry `playable_en` true, and exactly 68 distinct `char_id` own a card with a `release_en` value, with zero characters flagged `playable_en` but lacking one. The game8.co global trainee list rendered 104 entries; that is a per-card-variant tally and it lines up with the 105 export cards carrying `release_en`, not with 68.   | Count 68 could not be confirmed by an independent tally; the card-level figure was corroborated at 104 against 105                                                                                                                                                                         |
-| [Global] first opened in 2025                               | Export `release_en` minimum is 2025-06-26 across 105 cards. Cygames' official English news item "Umamusume: Pretty Derby English Version Now Available" is indexed with the date 2025-06-26; a direct fetch of that page returned HTTP 403.                                                                                                                                                  | SUPPORTED at 2025-06-26 by the export minimum across 105 cards; the official page was not readable (HTTP 403), so this is one readable source plus an indexed title rather than a quoted announcement, with the official-page date taken from the search index rather than the page body   |
-| Per-card `release` for [JP] and `release_en` for [Global]   | Export ranges: `release` 2021-02-24 to 2026-09-18, `release_en` 2025-06-26 to **2026-09-28**. **107** of 268 cards carry `release_en`. *(Re-measured 2026-11-12 against `database/seeders/data/gametora-characters.897e63ea.json`: the row read 105 and 2026-09-24. Both exports in the folder carry identical bytes, so this is one measurement, not a choice between two files. Two of the 107 sit after 2026-09-24, both dated 2026-09-28, which is the drift's whole arithmetic.)* The [JP] start of the range matches the [JP] launch and the [Global] start matches the confirmed 2025 opening.                                                                                                                                                | Field structure and range endpoints consistent; individual dates not checked against announcements                                                                                                                                                                                         |
+135 trainable Umamusume on [JP]
+
+- Independent support found: Export is internally consistent: 135 distinct `char_id` carry `playable` true, of 163 character rows. No external per-character tally located.
+- Status: Could not confirm
+
+68 of those playable on [Global]
+
+- Independent support found: Export is internally consistent: 68 distinct `char_id` carry `playable_en` true, and exactly 68 distinct `char_id` own a card with a `release_en` value, with zero characters flagged `playable_en` but lacking one. The game8.co global trainee list rendered 104 entries; that is a per-card-variant tally and it lines up with the 105 export cards carrying `release_en`, not with 68.
+- Status: Count 68 could not be confirmed by an independent tally; the card-level figure was corroborated at 104 against 105
+
+[Global] first opened in 2025
+
+- Independent support found: Export `release_en` minimum is 2025-06-26 across 105 cards. Cygames' official English news item "Umamusume: Pretty Derby English Version Now Available" is indexed with the date 2025-06-26; a direct fetch of that page returned HTTP 403.
+- Status: SUPPORTED at 2025-06-26 by the export minimum across 105 cards; the official page was not readable (HTTP 403), so this is one readable source plus an indexed title rather than a quoted announcement, with the official-page date taken from the search index rather than the page body
+
+Per-card `release` for [JP] and `release_en` for [Global]
+
+- Independent support found: Export ranges: `release` 2021-02-24 to 2026-09-18, `release_en` 2025-06-26 to **2026-09-28**. **107** of 268 cards carry `release_en`. *(Re-measured 2026-11-12 against `database/seeders/data/gametora-characters.897e63ea.json`: the row read 105 and 2026-09-24. Both exports in the folder carry identical bytes, so this is one measurement, not a choice between two files. Two of the 107 sit after 2026-09-24, both dated 2026-09-28, which is the drift's whole arithmetic.)* The [JP] start of the range matches the [JP] launch and the [Global] start matches the confirmed 2025 opening.
+- Status: Field structure and range endpoints consistent; individual dates not checked against announcements
+
 
 Counts an independent source supports: the `[Global]` opening window, 2025, date 2025-06-26. Counts no independent source supports: 135 `[JP]` trainable (closed by the whole-roster set diff in 3.5) and 68 `[Global]` playable (still open).
 
@@ -2320,11 +3083,20 @@ Source: [Kamigame 育成キャラ一覧, page stamped 最終更新日 2026-09-18
 | 102003    | セイウンスカイ     | 1020      |
 | 107403    | メジロブライト     | 1074      |
 
-| Measure                          | GameTora data export (tier B)   | Kamigame (tier A)   | Agreement            |
-| -------------------------------- | ------------------------------- | ------------------- | -------------------- |
-| Trainable costume-card rows      | 268                             | 268                 | exact                |
-| Distinct trainable Umamusume     | 135                             | 135                 | exact                |
-| Names present on one side only   | 0                               | 0                   | set equality holds   |
+**Trainable costume-card rows**
+- GameTora data export (tier B): 268
+- Kamigame (tier A): 268
+- Agreement: exact
+
+**Distinct trainable Umamusume**
+- GameTora data export (tier B): 135
+- Kamigame (tier A): 135
+- Agreement: exact
+
+**Names present on one side only**
+- GameTora data export (tier B): 0
+- Kamigame (tier A): 0
+- Agreement: set equality holds
 
 Two naming anomalies surfaced and resolved rather than ignored: two Kamigame rows carry the identical unit name `マルゼンスキー` because the variant marker sits only in the card title, and one variant `ゼンノロブロイ（お月見）` exists solely as a parenthetical. Both collapse correctly at unit level and neither changes the count.
 
@@ -2423,19 +3195,49 @@ instant the server had no live story event and no live race event. That gap has 
 
 **Live as of 2026-11-12, all windows from the notices' own text:**
 
-| Event | Window (UTC) | Source |
-| --- | --- | --- |
-| Story event **Sweet Memories Teatime** | 2026-11-09 22:00 → 2026-11-23 21:59; reward collection to 2026-11-26 21:59 | [S] [notice 1159](https://umamusume.com/news/1159) |
-| Spotlight Scout (Ines Fujin `[Melt Your Heart]`, Mejiro Ryan `[Marguerite Latte]` + SSR/SR/R supports) | 2026-11-09 22:00 → 2026-11-23 21:59 | [S] [notice 1165](https://umamusume.com/news/1165) |
-| Spotlight Scout (Daitaku Helios `[Fun☆Fun☆Party Night]` + K.S.Miracle / Aston Machan supports) | 2026-11-05 22:00 → 2026-11-15 21:59 | [S] [notice 1146](https://umamusume.com/news/1146) |
-| **Unity Cup** Scout + Support Card Scout (Rice Shower `[Vampire Makeover!]`, Haru Urara `[New Year ♪ New Urara!]`) | 2026-11-05 22:00 → 2026-11-15 21:59 | [S] [notice 1149](https://umamusume.com/news/1149) |
-| Unity Cup Halved TP Costs + 2x Career Mode Rewards | 2026-11-05 22:00 → 2026-11-15 21:59 | [S] [notice 1155](https://umamusume.com/news/1155) |
-| **Racing Carnival** (event races; Hishi Akebono among the opponents) | 2026-11-05 22:00 → 2026-11-12 21:59; point exchange to 2026-11-15 21:59 | [S] [notice 1151](https://umamusume.com/news/1151) |
-| Transfer Requests | 2026-11-05 22:00 → 2026-11-09 21:59 (**closed**) | [S] [notice 1157](https://umamusume.com/news/1157) |
-| Let's Go! Uma Outing | 2026-11-05 22:00 → 2026-11-15 21:59 | [S] [notice 1154](https://umamusume.com/news/1154) |
-| the Stage – Sprinters' Story celebration + login bonus (500 carats) | 2026-11-05 22:00 → 2026-11-19 14:59 | [S] [notice 1117](https://umamusume.com/news/1117) |
-| New title missions | opened 2026-11-09 22:00 | [S] [notice 1168](https://umamusume.com/news/1168) |
-| Bonus Star Piece rewards in Career (Hopeful Stakes G1 celebration) | posted 2026-11-10 22:00; per-day entry claim | [S] [notice 1091](https://umamusume.com/news/1091) |
+**Story event Sweet Memories Teatime**
+- Window (UTC): 2026-11-09 22:00 → 2026-11-23 21:59; reward collection to 2026-11-26 21:59
+- Source: [S] [notice 1159](https://umamusume.com/news/1159)
+
+**Spotlight Scout (Ines Fujin `[Melt Your Heart]`, Mejiro Ryan `[Marguerite Latte]` + SSR/SR/R supports)**
+- Window (UTC): 2026-11-09 22:00 → 2026-11-23 21:59
+- Source: [S] [notice 1165](https://umamusume.com/news/1165)
+
+**Spotlight Scout (Daitaku Helios `[Fun☆Fun☆Party Night]` + K.S.Miracle / Aston Machan supports)**
+- Window (UTC): 2026-11-05 22:00 → 2026-11-15 21:59
+- Source: [S] [notice 1146](https://umamusume.com/news/1146)
+
+**Unity Cup Scout + Support Card Scout (Rice Shower `[Vampire Makeover!]`, Haru Urara `[New Year ♪ New Urara!]`)**
+- Window (UTC): 2026-11-05 22:00 → 2026-11-15 21:59
+- Source: [S] [notice 1149](https://umamusume.com/news/1149)
+
+**Unity Cup Halved TP Costs + 2x Career Mode Rewards**
+- Window (UTC): 2026-11-05 22:00 → 2026-11-15 21:59
+- Source: [S] [notice 1155](https://umamusume.com/news/1155)
+
+**Racing Carnival (event races; Hishi Akebono among the opponents)**
+- Window (UTC): 2026-11-05 22:00 → 2026-11-12 21:59; point exchange to 2026-11-15 21:59
+- Source: [S] [notice 1151](https://umamusume.com/news/1151)
+
+**Transfer Requests**
+- Window (UTC): 2026-11-05 22:00 → 2026-11-09 21:59 (**closed**)
+- Source: [S] [notice 1157](https://umamusume.com/news/1157)
+
+**Let's Go! Uma Outing**
+- Window (UTC): 2026-11-05 22:00 → 2026-11-15 21:59
+- Source: [S] [notice 1154](https://umamusume.com/news/1154)
+
+**the Stage – Sprinters' Story celebration + login bonus (500 carats)**
+- Window (UTC): 2026-11-05 22:00 → 2026-11-19 14:59
+- Source: [S] [notice 1117](https://umamusume.com/news/1117)
+
+**New title missions**
+- Window (UTC): opened 2026-11-09 22:00
+- Source: [S] [notice 1168](https://umamusume.com/news/1168)
+
+**Bonus Star Piece rewards in Career (Hopeful Stakes G1 celebration)**
+- Window (UTC): posted 2026-11-10 22:00; per-day entry claim
+- Source: [S] [notice 1091](https://umamusume.com/news/1091)
 
 **Announced upcoming, `[Global]`:**
 
@@ -2563,18 +3365,86 @@ re-checked on 2026-11-12** — re-read the JP notice stream before quoting anyth
 
 Cadence is computed from the local event exports (`events__champions-meeting.json` 49 JP records, `en/events/champions-meeting` 19 Global records, `events__story-events.json` 57 JP records, `events__legend-race.json` 57 JP records) and each row's naming is checked against the official notices read in this session.
 
-| Type                                                                                    | Servers                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Cadence in the data                                                                                                                                                                                                                                                                                                                                         | Naming pattern in the data                                                                                                                                                                                                                                                                                                          | Mechanics summary                                                                                                                                                                                                                                                                                         | Evidence                                                                                                                                                            |
-| --------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Champions Meeting (race event)                                                          | both                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | JP editions span 6 days and are spaced 31 to 61 days apart in 2026 (records 2026-01-22, 03-22, 04-23, 06-23, 07-24, 09-18, 09-29), with the last two only 11 days apart because one is a special commemoration holding; Global editions span 6 to 7 days and are spaced 20 to 24 days apart (2026-04-23, 05-14, 06-04, 06-24, 07-15, 08-08, 08-28, 09-19)   | `[JP]` labels every 2025 and 2026 record by distance or surface class (CLASSIC / SPRINT / MILE / LONG / DIRT) while the earliest records use zodiac names (id 1 = タウラス杯); `[Global]` uses zodiac cup names in all 19 records, restarting the zodiac series each year without completing it, 19 records over two partial cycles | League selection opens 3 to 4 days before Round 1; Round 1, Round 2, then a Final Round with registration, matching and race sub-windows; a team of three previously trained Umamusume; unlocked at Team Rank E2 on Global; each edition publishes a skill-disable list and occasionally a special rule   | [S] `umamusume.com/news/1050/`, [S] `umamusume.jp/news/detail?id=3444`, [B] both champions-meeting exports                                                          |
-| Story event                                                                             | both                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | JP editions run 11 to 17 days and start 29 to 62 days apart (the seven 2026 records: 01-30, 03-30, 04-30, 05-29, 07-30, 08-31, next 09-30); the Global export cannot support a cadence figure because it stops at 2026-01-29                                                                                                                                | JP uses poetic Japanese titles; Global uses its own English titles which are not literal translations                                                                                                                                                                                                                               | Complete Career playthroughs to bank Event Points; point rewards plus a bingo-style card in the Global data (`bingo` blocks with `pityNumber`, `linesToReset`); reward track includes an event-exclusive support card; an exclusive story unlocks as you progress                                         | [S] `umamusume.com/news/1076/`, [S] `umamusume.jp/news/detail?id=3428`, [B] `events__story-events.json`, `en__storyevents.json`                                     |
-| Legend Race (single-player challenge against a preset rival line-up)                    | `[JP]` confirmed; `[Global]` **confirmed, and the gap this row carried was false in this file's own data**: 1.6.6 lists `en/events/legend-race` with 15 Global rows, newest 2026-09-03 22:00 to 09-09 14:59 UTC over 2000m with an empty name field, so "no Global record in the data exports" contradicted a section 200 lines above it. The 2026-10-05 pass adds a Global schedule listing Legend Races for Tamamo Cross and Meisho Doto over 2026-06-07 to 06-13, from a tier-C outlet, which corroborates rather than establishes   | JP monthly, each edition runs 5.7 days (open 12:00, close 04:59 on the sixth day) and the nine 2026 records start 25 to 35 days apart; the record closing 2026-09-12 04:59 JST ran two stages, 09-06 12:00 -> 09-09 04:59 then 09-09 05:00 -> 09-12 04:59                                                                                                   | Edition names come from the fixture the event models; the record read here is スワンステークス                                                                                                                                                                                                                                      | Two back-to-back limited stages, each with its own start and end and its own rival line-up with published stat totals                                                                                                                                                                                     | [S] `umamusume.jp/news/detail?id=3426` (index line 2026-09-06 12:00), [B] `events__legend-race.json`, [B] `en/events/legend-race` (15 Global rows, read in 1.6.6)   |
-| Special event (factor / item research style)                                            | `[JP]` confirmed; `[Global]` ❌ UNVERIFIED for this label                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | One observed window: running per the 2026-09-11 12:00 JST notice titled 開催中 and closed per the 2026-09-18 12:00 JST notice titled 終了, so about 7 days; the opening time is not restated in either notice                                                                                                                                               | 特別イベント「...」                                                                                                                                                                                                                                                                                                                 | Time-boxed objective chain that pays a progression currency; opened by an advance notice and closed by an 終了 notice                                                                                                                                                                                     | [S] `umamusume.jp/news/detail?id=3447` and `?id=3448`, advance notice `?id=3446`                                                                                    |
-| Masters Challenge (limited-time race set)                                               | `[JP]` confirmed; `[Global]` ❌ UNVERIFIED                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Long window: still running at 2026-09-27 with a 2026-10-26 11:59 JST close, so at least ~5 weeks in the observed case                                                                                                                                                                                                                                       | イベント「マスターズチャレンジ」                                                                                                                                                                                                                                                                                                    | Replayable limited-time courses paying Jewels and crystal shards; expired races are planned for the Archives with rewards unchanged                                                                                                                                                                       | [S] `umamusume.jp/news/detail?id=3363`                                                                                                                              |
-| Season pass                                                                             | `[JP]` confirmed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Update notice 2026-09-24 12:00 JST; the previous pass cycle boundaries are not in any data export                                                                                                                                                                                                                                                           | トレーニングパス                                                                                                                                                                                                                                                                                                                    | Structure, tiers and rewards: ❌ UNVERIFIED, published in-app only; the web notice states only that the pass was updated                                                                                                                                                                                  | [S] `umamusume.jp/news/?t=game` (id 3455)                                                                                                                           |
-| Campaign tied to a real-world race calendar, including premium-partner commemorations   | `[JP]` confirmed; `[Global]` ❌ UNVERIFIED                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Follows the Japanese GⅠ calendar; five mission windows plus five mail gifts in phase 1 alone. The premium-partner commemoration ran 2026-09-11 12:00 -> 2026-10-13 11:59 JST                                                                                                                                                                                | 「秋のGⅠキャンペーン第N弾」, 「カタール凱旋門賞 プレミアムパートナー就任記念キャンペーン」                                                                                                                                                                                                                                          | Home-screen limited missions paying ジュエル, マニー, フレンドPt and themed Star Pieces; mail gifts of マニー ×100000; a pair of guaranteed gacha; a special Champions Meeting holding; a web-store campaign; balance additions such as 覚醒Lv6/Lv7                                                       | [S] `umamusume.jp/news/detail?id=3458`, `?id=3440`, `?id=3449`, `?id=3444`, `?id=3443`; [A] `gamewith.jp/uma-musume/article/show/520191`                            |
-| Anniversary campaign ladder                                                             | `[JP]` confirmed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | 5.5th Anniversary, 第3弾 notice on 2026-09-11 12:00 JST, gacha window 2026-08-24 to 2026-09-26 JST                                                                                                                                                                                                                                                          | 「5.5th Anniversaryキャンペーン第N弾」 plus 「5.5th Anniv.セレクトピックアップ」 gacha naming                                                                                                                                                                                                                                       | Numbered phases with login gifts, a select-pickup gacha and pass content                                                                                                                                                                                                                                  | [S] `umamusume.jp/news/?t=game` (ids 3437, 3457), [A] `gamewith.jp/uma-musume/article/show/257332`                                                                  |
-| Versus race schedule notice                                                             | `[JP]` confirmed as a recurring publication type; contents not read                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Seasonal: notice titled 9月～2月対戦レースイベント, 2026-09-09 17:00 JST                                                                                                                                                                                                                                                                                    | 対戦レースイベント                                                                                                                                                                                                                                                                                                                  | Periodic listing of the upcoming versus-race calendar                                                                                                                                                                                                                                                     | [S] `umamusume.jp/news/detail?id=3445` (index line only)                                                                                                            |
-| Story-unlock campaign (paired with a new release)                                       | both confirmed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Runs exactly as long as the paired debut gacha window (JP 09-18 to 09-30 JST; Global 09-23 22:00 to 10-04 21:59 UTC)                                                                                                                                                                                                                                        | JP ウマ娘ストーリー解放キャンペーン; Global Umamusume Story Sneak Peek                                                                                                                                                                                                                                                              | Episodes 1-4 unlocked without meeting the normal conditions; unwatched episodes re-lock                                                                                                                                                                                                                   | [S] `umamusume.jp/news/detail?id=3457`, [S] `umamusume.com/news/1052/`                                                                                              |
+Champions Meeting (race event)
+
+- Servers: both
+- Cadence in the data: JP editions span 6 days and are spaced 31 to 61 days apart in 2026 (records 2026-01-22, 03-22, 04-23, 06-23, 07-24, 09-18, 09-29), with the last two only 11 days apart because one is a special commemoration holding; Global editions span 6 to 7 days and are spaced 20 to 24 days apart (2026-04-23, 05-14, 06-04, 06-24, 07-15, 08-08, 08-28, 09-19)
+- Naming pattern in the data: `[JP]` labels every 2025 and 2026 record by distance or surface class (CLASSIC / SPRINT / MILE / LONG / DIRT) while the earliest records use zodiac names (id 1 = タウラス杯); `[Global]` uses zodiac cup names in all 19 records, restarting the zodiac series each year without completing it, 19 records over two partial cycles
+- Mechanics summary: League selection opens 3 to 4 days before Round 1; Round 1, Round 2, then a Final Round with registration, matching and race sub-windows; a team of three previously trained Umamusume; unlocked at Team Rank E2 on Global; each edition publishes a skill-disable list and occasionally a special rule
+- Evidence: [S] `umamusume.com/news/1050/`, [S] `umamusume.jp/news/detail?id=3444`, [B] both champions-meeting exports
+
+Story event
+
+- Servers: both
+- Cadence in the data: JP editions run 11 to 17 days and start 29 to 62 days apart (the seven 2026 records: 01-30, 03-30, 04-30, 05-29, 07-30, 08-31, next 09-30); the Global export cannot support a cadence figure because it stops at 2026-01-29
+- Naming pattern in the data: JP uses poetic Japanese titles; Global uses its own English titles which are not literal translations
+- Mechanics summary: Complete Career playthroughs to bank Event Points; point rewards plus a bingo-style card in the Global data (`bingo` blocks with `pityNumber`, `linesToReset`); reward track includes an event-exclusive support card; an exclusive story unlocks as you progress
+- Evidence: [S] `umamusume.com/news/1076/`, [S] `umamusume.jp/news/detail?id=3428`, [B] `events__story-events.json`, `en__storyevents.json`
+
+Legend Race (single-player challenge against a preset rival line-up)
+
+- Servers: `[JP]` confirmed; `[Global]` **confirmed, and the gap this row carried was false in this file's own data**: 1.6.6 lists `en/events/legend-race` with 15 Global rows, newest 2026-09-03 22:00 to 09-09 14:59 UTC over 2000m with an empty name field, so "no Global record in the data exports" contradicted a section 200 lines above it. The 2026-10-05 pass adds a Global schedule listing Legend Races for Tamamo Cross and Meisho Doto over 2026-06-07 to 06-13, from a tier-C outlet, which corroborates rather than establishes
+- Cadence in the data: JP monthly, each edition runs 5.7 days (open 12:00, close 04:59 on the sixth day) and the nine 2026 records start 25 to 35 days apart; the record closing 2026-09-12 04:59 JST ran two stages, 09-06 12:00 -> 09-09 04:59 then 09-09 05:00 -> 09-12 04:59
+- Naming pattern in the data: Edition names come from the fixture the event models; the record read here is スワンステークス
+- Mechanics summary: Two back-to-back limited stages, each with its own start and end and its own rival line-up with published stat totals
+- Evidence: [S] `umamusume.jp/news/detail?id=3426` (index line 2026-09-06 12:00), [B] `events__legend-race.json`, [B] `en/events/legend-race` (15 Global rows, read in 1.6.6)
+
+Special event (factor / item research style)
+
+- Servers: `[JP]` confirmed; `[Global]` ❌ UNVERIFIED for this label
+- Cadence in the data: One observed window: running per the 2026-09-11 12:00 JST notice titled 開催中 and closed per the 2026-09-18 12:00 JST notice titled 終了, so about 7 days; the opening time is not restated in either notice
+- Naming pattern in the data: 特別イベント「...」
+- Mechanics summary: Time-boxed objective chain that pays a progression currency; opened by an advance notice and closed by an 終了 notice
+- Evidence: [S] `umamusume.jp/news/detail?id=3447` and `?id=3448`, advance notice `?id=3446`
+
+Masters Challenge (limited-time race set)
+
+- Servers: `[JP]` confirmed; `[Global]` ❌ UNVERIFIED
+- Cadence in the data: Long window: still running at 2026-09-27 with a 2026-10-26 11:59 JST close, so at least ~5 weeks in the observed case
+- Naming pattern in the data: イベント「マスターズチャレンジ」
+- Mechanics summary: Replayable limited-time courses paying Jewels and crystal shards; expired races are planned for the Archives with rewards unchanged
+- Evidence: [S] `umamusume.jp/news/detail?id=3363`
+
+Season pass
+
+- Servers: `[JP]` confirmed
+- Cadence in the data: Update notice 2026-09-24 12:00 JST; the previous pass cycle boundaries are not in any data export
+- Naming pattern in the data: トレーニングパス
+- Mechanics summary: Structure, tiers and rewards: ❌ UNVERIFIED, published in-app only; the web notice states only that the pass was updated
+- Evidence: [S] `umamusume.jp/news/?t=game` (id 3455)
+
+Campaign tied to a real-world race calendar, including premium-partner commemorations
+
+- Servers: `[JP]` confirmed; `[Global]` ❌ UNVERIFIED
+- Cadence in the data: Follows the Japanese GⅠ calendar; five mission windows plus five mail gifts in phase 1 alone. The premium-partner commemoration ran 2026-09-11 12:00 -> 2026-10-13 11:59 JST
+- Naming pattern in the data: 「秋のGⅠキャンペーン第N弾」, 「カタール凱旋門賞 プレミアムパートナー就任記念キャンペーン」
+- Mechanics summary: Home-screen limited missions paying ジュエル, マニー, フレンドPt and themed Star Pieces; mail gifts of マニー ×100000; a pair of guaranteed gacha; a special Champions Meeting holding; a web-store campaign; balance additions such as 覚醒Lv6/Lv7
+- Evidence: [S] `umamusume.jp/news/detail?id=3458`, `?id=3440`, `?id=3449`, `?id=3444`, `?id=3443`; [A] `gamewith.jp/uma-musume/article/show/520191`
+
+Anniversary campaign ladder
+
+- Servers: `[JP]` confirmed
+- Cadence in the data: 5.5th Anniversary, 第3弾 notice on 2026-09-11 12:00 JST, gacha window 2026-08-24 to 2026-09-26 JST
+- Naming pattern in the data: 「5.5th Anniversaryキャンペーン第N弾」 plus 「5.5th Anniv.セレクトピックアップ」 gacha naming
+- Mechanics summary: Numbered phases with login gifts, a select-pickup gacha and pass content
+- Evidence: [S] `umamusume.jp/news/?t=game` (ids 3437, 3457), [A] `gamewith.jp/uma-musume/article/show/257332`
+
+Versus race schedule notice
+
+- Servers: `[JP]` confirmed as a recurring publication type; contents not read
+- Cadence in the data: Seasonal: notice titled 9月～2月対戦レースイベント, 2026-09-09 17:00 JST
+- Naming pattern in the data: 対戦レースイベント
+- Mechanics summary: Periodic listing of the upcoming versus-race calendar
+- Evidence: [S] `umamusume.jp/news/detail?id=3445` (index line only)
+
+Story-unlock campaign (paired with a new release)
+
+- Servers: both confirmed
+- Cadence in the data: Runs exactly as long as the paired debut gacha window (JP 09-18 to 09-30 JST; Global 09-23 22:00 to 10-04 21:59 UTC)
+- Naming pattern in the data: JP ウマ娘ストーリー解放キャンペーン; Global Umamusume Story Sneak Peek
+- Mechanics summary: Episodes 1-4 unlocked without meeting the normal conditions; unwatched episodes re-lock
+- Evidence: [S] `umamusume.jp/news/detail?id=3457`, [S] `umamusume.com/news/1052/`
+
 
 Lore note for this subsection: the character data in these exports contains a `race` object (distance, ground, track, season, weather) and an `aptitude` array. Those are event and stat configuration, not character attributes, and none of them are published as character traits in this document.
 
@@ -2597,13 +3467,25 @@ below is the state on the wire.
 
 **Live on `[Global]` as of 2026-10-05** (all `[S]`, from the bodies themselves):
 
-| Item                                                     | Notice                                                              | Window                                                                                                                                                                                                                                                                                                                                                                                                   |
-| -------------------------------------------------------- | ------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Story event "Illuminate the Heart"                       | [1077](https://umamusume.com/news/1077), 2026-09-28 22:00           | event 2026-09-28 22:00 to **2026-10-12 21:59 UTC**, reward collection to **2026-10-15 21:59 UTC**; reward "**[Don't Stop Anymore!] Sakura Laurel**" SSR plus the event-exclusive title of the same name, and the debuting Scout cards are "featured as event bonuses in the ongoing story event"                                                                                                         |
-| Spotlight Pretty Derby / Spotlight Support Card Scouts   | [1073](https://umamusume.com/news/1073), 2026-09-28 22:00           | **2026-09-28 22:00 to 2026-10-12 21:59 UTC**, debut trainee `[Fiery Aqua Vitae] Vodka`                                                                                                                                                                                                                                                                                                                   |
-| Holiday Celebration Part 1                               | [1079](https://umamusume.com/news/1079), 2026-09-28 22:00           | holiday Home screen and exclusive shop **2026-09-28 22:00 to 2026-10-29 21:59 UTC**; "The full celebration is planned to comprise two parts", so Part 2 is announced in shape with no date                                                                                                                                                                                                               |
-| Champions Meeting: Sagittarius Cup                       | [1065](https://umamusume.com/news/1065), 2026-09-26 22:00           | **upcoming, not live:** League Selection from 2026-10-07 22:00 UTC, Round 1 from 2026-10-10 22:00 UTC; course "Nakayama / Turf / 2,500m (Long) / Right-Handed / Inner / Winter / Cloudy / Good"; disabled skills are the three families **Night Races**, **Sharp Turns** and **Collaborative Graded Races** at ◎/○/×; "The full schedule and other details will be posted once they have been decided"   |
-| 1.5-Year Anniversary                                     | [963](https://umamusume.com/news/963) "…ending soon!", 2026-08-23   | **finished.** The celebration parts ran from late July; the guaranteed Scouts closed 2026-08-27 21:59 UTC ([897](https://umamusume.com/news/897))                                                                                                                                                                                                                                                        |
+**Story event "Illuminate the Heart"**
+- Notice: [1077](https://umamusume.com/news/1077), 2026-09-28 22:00
+- Window: event 2026-09-28 22:00 to **2026-10-12 21:59 UTC**, reward collection to **2026-10-15 21:59 UTC**; reward "**[Don't Stop Anymore!] Sakura Laurel**" SSR plus the event-exclusive title of the same name, and the debuting Scout cards are "featured as event bonuses in the ongoing story event"
+
+**Spotlight Pretty Derby / Spotlight Support Card Scouts**
+- Notice: [1073](https://umamusume.com/news/1073), 2026-09-28 22:00
+- Window: **2026-09-28 22:00 to 2026-10-12 21:59 UTC**, debut trainee `[Fiery Aqua Vitae] Vodka`
+
+**Holiday Celebration Part 1**
+- Notice: [1079](https://umamusume.com/news/1079), 2026-09-28 22:00
+- Window: holiday Home screen and exclusive shop **2026-09-28 22:00 to 2026-10-29 21:59 UTC**; "The full celebration is planned to comprise two parts", so Part 2 is announced in shape with no date
+
+**Champions Meeting: Sagittarius Cup**
+- Notice: [1065](https://umamusume.com/news/1065), 2026-09-26 22:00
+- Window: **upcoming, not live:** League Selection from 2026-10-07 22:00 UTC, Round 1 from 2026-10-10 22:00 UTC; course "Nakayama / Turf / 2,500m (Long) / Right-Handed / Inner / Winter / Cloudy / Good"; disabled skills are the three families **Night Races**, **Sharp Turns** and **Collaborative Graded Races** at ◎/○/×; "The full schedule and other details will be posted once they have been decided"
+
+**1.5-Year Anniversary**
+- Notice: [963](https://umamusume.com/news/963) "…ending soon!", 2026-08-23
+- Window: **finished.** The celebration parts ran from late July; the guaranteed Scouts closed 2026-08-27 21:59 UTC ([897](https://umamusume.com/news/897))
 
 **Status update (2026-10-20): what closed inside the window, and what the October schedule adds.** The table above is the state on the wire on 2026-10-05 and is kept as it stood. Dated against a later read, four of its five rows have moved:
 
@@ -2631,14 +3513,29 @@ scenario pass took earlier the same day. So the endpoint does not have an offset
 
 Four populations were then tested against the 154, and none of them produces it:
 
-| Population tried | Count | Verdict |
-| --- | --- | --- |
-| `announce_label` 0, whole archive | **181** | current total |
-| `announce_label` 1 | **163** | label 1 is label 0 minus the 18 label-3 rows, verified as a set difference, not a second population |
-| `announce_label` 3 | 18 | a strict subset of label 0, so it adds no rows |
-| Rows with `post_at` at or before the prior pass's own newest notice, 2026-09-29 08:15 | **107** | the count a growing archive would have shown it |
-| Rows with `post_at` at or before the prior pass's stamp, 2026-10-05 | **109** | same, one week later |
-| `post_platform_flag` 62, whole archive | 155 | the closest single number found, and it is **not** 154: one row of it postdates the prior pass |
+**`announce_label` 0, whole archive**
+- Count: **181**
+- Verdict: current total
+
+**`announce_label` 1**
+- Count: **163**
+- Verdict: label 1 is label 0 minus the 18 label-3 rows, verified as a set difference, not a second population
+
+**`announce_label` 3**
+- Count: 18
+- Verdict: a strict subset of label 0, so it adds no rows
+
+**Rows with `post_at` at or before the prior pass's own newest notice, 2026-09-29 08:15**
+- Count: **107**
+- Verdict: the count a growing archive would have shown it
+
+**Rows with `post_at` at or before the prior pass's stamp, 2026-10-05**
+- Count: **109**
+- Verdict: same, one week later
+
+**`post_platform_flag` 62, whole archive**
+- Count: 155
+- Verdict: the closest single number found, and it is **not** 154: one row of it postdates the prior pass
 
 **A second discriminating test, run 2026-11-12 after the first one.** The prior pass left one description of its
 own instrument that the current archive can be checked against: §4.6's paragraph says **"Labels 0 and 1 return the
@@ -2856,11 +3753,20 @@ Six gacha were live at 2026-09-27 02:05 JST. Rates below are GameTora per-card w
 pairs are live, plus the permanent pools. The 2026-09-26 pair below ([Butterfly Sting] Wonder Acute and the
 Eishin Flash / Narita Top Road supports) **closed 2026-10-04 21:59 UTC** and is kept as history.
 
-| Banner | Featured | Window (UTC) | Source |
-| --- | --- | --- | --- |
-| Spotlight Pretty Derby + Support Card Scout | ★★★ [Melt Your Heart] Ines Fujin; ★★★ [Marguerite Latte] Mejiro Ryan; SSR [Marvelous☆Chocolate Show] Marvelous Sunday; SSR [Transform! Garçon Form!] Biko Pegasus | 2026-11-09 22:00 → 2026-11-23 21:59 | [S] [notice 1165](https://umamusume.com/news/1165) |
-| Spotlight Pretty Derby + Support Card Scout | ★★★ [Fun☆Fun☆Party Night] Daitaku Helios; SSR [To You] K.S.Miracle; SR [A Clip to Keep Your Heart Warm] Aston Machan; R [Tracen Academy] Aston Machan | 2026-11-05 22:00 → 2026-11-15 21:59 | [S] [notice 1146](https://umamusume.com/news/1146) |
-| **Unity Cup** Scout + Support Card Scout | ★★★ [Vampire Makeover!] Rice Shower; ★★★ [New Year ♪ New Urara!] Haru Urara; SSR [Hands Up, Crook!] Taiki Shuttle; SSR [Touching Sleeves Is Good Luck! ♪] Matikanefukukitaru | 2026-11-05 22:00 → 2026-11-15 21:59 | [S] [notice 1149](https://umamusume.com/news/1149) |
+**Spotlight Pretty Derby + Support Card Scout**
+- Featured: ★★★ [Melt Your Heart] Ines Fujin; ★★★ [Marguerite Latte] Mejiro Ryan; SSR [Marvelous☆Chocolate Show] Marvelous Sunday; SSR [Transform! Garçon Form!] Biko Pegasus
+- Window (UTC): 2026-11-09 22:00 → 2026-11-23 21:59
+- Source: [S] [notice 1165](https://umamusume.com/news/1165)
+
+**Spotlight Pretty Derby + Support Card Scout**
+- Featured: ★★★ [Fun☆Fun☆Party Night] Daitaku Helios; SSR [To You] K.S.Miracle; SR [A Clip to Keep Your Heart Warm] Aston Machan; R [Tracen Academy] Aston Machan
+- Window (UTC): 2026-11-05 22:00 → 2026-11-15 21:59
+- Source: [S] [notice 1146](https://umamusume.com/news/1146)
+
+**Unity Cup Scout + Support Card Scout**
+- Featured: ★★★ [Vampire Makeover!] Rice Shower; ★★★ [New Year ♪ New Urara!] Haru Urara; SSR [Hands Up, Crook!] Taiki Shuttle; SSR [Touching Sleeves Is Good Luck! ♪] Matikanefukukitaru
+- Window (UTC): 2026-11-05 22:00 → 2026-11-15 21:59
+- Source: [S] [notice 1149](https://umamusume.com/news/1149)
 
 **The Unity Cup pair is the one to note for this document's own subject matter.** Its notice is explicit that
 the spotlighted cards are *the scenario's link characters*: "The Trainee Umamusume and Support Cards spotlighted
@@ -2913,13 +3819,25 @@ rules are now officially sourced; the **200-Point** exchange price remains ⚠�
 
 **Re-checked 2026-10-20: the Global banner picture has moved, and the official side was not re-read.** The sentence above is the state at 2026-09-26 17:16 UTC and is kept as it stood. What a tier-A publisher's own October schedule now carries, all windows UTC and all `[A]` rather than `[S]` ([A] [Game8's October 2026 Release Schedule, last updated 2026-10-15 06:05](https://game8.co/games/Umamusume-Pretty-Derby/archives/626187), read 2026-10-20):
 
-| Global banner (tier-A schedule)                                                                          | Window (UTC)              | Notes                                                                            |
-| ---------------------------------------------------------------------------------------------------------- | ------------------------- | -------------------------------------------------------------------------------- |
-| Zenno Rob Roy (Heroic Author)                                                                              | 2026-10-07 to 2026-10-15 | With Light Hello Pal SSR and Mayano Top Gun Speed SSR **reruns**                  |
-| Narita Brian (Blaze)                                                                                        | 2026-10-14 to 2026-10-23 | With Yamanin Zephyr Guts SSR and T.M. Opera Stamina SR                            |
-| New Year Kitasan Black and Satono Diamond                                                                   | 2026-10-20 to 2026-11-01 | With Special Week Stamina SSR and Sweep Tosho Wit SSR; New Year outfits          |
-| Hokko Tarumae                                                                                               | 2026-10-24 to 2026-11-06 | The Dirt Mile/Medium runner the same page profiles                                |
-| Agnes Tachyon Speed SSR and Tokai Teio Wit SSR reruns                                                      | 2026-10-27 to 2026-11-06 | Both reruns                                                                       |
+**Zenno Rob Roy (Heroic Author)**
+- Window (UTC): 2026-10-07 to 2026-10-15
+- Notes: With Light Hello Pal SSR and Mayano Top Gun Speed SSR **reruns**
+
+**Narita Brian (Blaze)**
+- Window (UTC): 2026-10-14 to 2026-10-23
+- Notes: With Yamanin Zephyr Guts SSR and T.M. Opera Stamina SR
+
+**New Year Kitasan Black and Satono Diamond**
+- Window (UTC): 2026-10-20 to 2026-11-01
+- Notes: With Special Week Stamina SSR and Sweep Tosho Wit SSR; New Year outfits
+
+**Hokko Tarumae**
+- Window (UTC): 2026-10-24 to 2026-11-06
+- Notes: The Dirt Mile/Medium runner the same page profiles
+
+**Agnes Tachyon Speed SSR and Tokai Teio Wit SSR reruns**
+- Window (UTC): 2026-10-27 to 2026-11-06
+- Notes: Both reruns
 
 The first of 5.3a's five estimated pairs has run and closed: the Vodka and Daiwa Scarlet pair, estimated 2026-09-30 by GameTora and banded "Sep. 28 - Oct. 12, 2026" by Game8, is the pair 4.6 carries from notice 1073 as **2026-09-28 22:00 to 2026-10-12 21:59 UTC**. The other four are the rows above, and their support sets match 5.3a's GameTora rows one for one — Light Hello and Mayano Top Gun under Zenno Rob Roy, T.M. Opera and Yamanin Zephyr under Narita Brian, Special Week and Sweep Tosho under Kitasan Black and Satono Diamond, Agnes Tachyon and Tokai Teio under Hokko Tarumae. **The official side is unchanged and unverified by this pass:** `umamusume.com/news/` is a JS-rendered SPA whose index returns no text to a plain fetch, so whether an official Global Scout notice was published for each pair was not re-checked here. The schedule is `[A]`; the tier only becomes `[S]` where a notice body has actually been read, which is why the 2026-10-05 pass's notice read and this pass's schedule read are kept apart rather than merged.
 
@@ -2956,14 +3874,29 @@ The two servers run the same system with different labels and different reset zo
 
 **Exchange / spark system, per server.**
 
-| Item                                         | `[JP]`                                                                                             | `[Global]`                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exchange currencies, character and support   | 育成ウマ娘交換Pt and サポートカード交換Pt                                                          | Trainee Exchange Points and Support Card Exchange Points                                                                                                                                                                                                                                                                                                                                                                             |
-| Cost of the featured ★3 / SSR                | 200 Pt                                                                                             | 200 Points (⚠️ STALE: Game8 pity guide dated 2025-08-08)                                                                                                                                                                                                                                                                                                                                                                             |
-| Earn rate                                    | 1 Pt per pull, per GameWith's "200回ガチャを引いた後、交換可能"; not stated on the official notice | 1 Point per roll, per the same tier-A guide                                                                                                                                                                                                                                                                                                                                                                                          |
-| Carryover                                    | Never. Official: cannot be carried to other or future gacha                                        | Never. Official notice item 1                                                                                                                                                                                                                                                                                                                                                                                                        |
-| Expired balance                              | Auto-converted to クローバー at close, official                                                    | Auto-converted to Clovers, official notice item 2                                                                                                                                                                                                                                                                                                                                                                                    |
-| Premium currency                             | ジュエル (single 150, 10-pull 1500, daily limited single 50 有償)                                  | Carats: a single Scout costs 150, a 10-pull 1,500, and a separate once-per-banner daily single costs 50 paid Carats. Closed 2026-10-05 from community outlets ([C] deltiasgaming plus one further page; see 8.4 on the labels this pass kept), mirroring the `[JP]` figures figure for figure. No official web page states them, so this cell sits a grade below the `[JP]` one and keeps the in-app Scout screen as its authority   |
+**Exchange currencies, character and support**
+- `[JP]`: 育成ウマ娘交換Pt and サポートカード交換Pt
+- `[Global]`: Trainee Exchange Points and Support Card Exchange Points
+
+**Cost of the featured ★3 / SSR**
+- `[JP]`: 200 Pt
+- `[Global]`: 200 Points (⚠️ STALE: Game8 pity guide dated 2025-08-08)
+
+**Earn rate**
+- `[JP]`: 1 Pt per pull, per GameWith's "200回ガチャを引いた後、交換可能"; not stated on the official notice
+- `[Global]`: 1 Point per roll, per the same tier-A guide
+
+**Carryover**
+- `[JP]`: Never. Official: cannot be carried to other or future gacha
+- `[Global]`: Never. Official notice item 1
+
+**Expired balance**
+- `[JP]`: Auto-converted to クローバー at close, official
+- `[Global]`: Auto-converted to Clovers, official notice item 2
+
+**Premium currency**
+- `[JP]`: ジュエル (single 150, 10-pull 1500, daily limited single 50 有償)
+- `[Global]`: Carats: a single Scout costs 150, a 10-pull 1,500, and a separate once-per-banner daily single costs 50 paid Carats. Closed 2026-10-05 from community outlets ([C] deltiasgaming plus one further page; see 8.4 on the labels this pass kept), mirroring the `[JP]` figures figure for figure. No official web page states them, so this cell sits a grade below the `[JP]` one and keeps the in-app Scout screen as its authority
 
 **Advertised rates.** Standard structure on both servers, computed from GameTora weights and summing to 100.00% on every banner sampled: ★3/SSR 3.00%, ★2/SR 18.00%, ★1/R 79.00%, with each featured ★3 or SSR at 0.75% and a featured SR support at 2.25%. Newly released R support cards are given a temporary high weight inside the same pool (observed: 2 new R cards at 2.5% each in support gacha 30463, one new R card at 37.5% in 30465). Neither server publishes these numbers on the web notices read in this session; the official pages route the player to the in-app [ガチャ詳細] / Scout Rates tab, so every rate in this document is tier-B arithmetic plus tier-A corroboration and is marked as such. GameWith's JP table states ★★★ 3.0%, ★★ 18.0%, ★ 79.0% independently; the Global tier-A guide states 3% / 18% and a contradictory 97% for ★/R (see Source Conflict Log row 35).
 
@@ -2979,36 +3912,168 @@ Every row is a GameTora record whose id chain resolved to a name, cross-checked 
 
 #### `[JP]` (12 resolved records overlapping the window, plus 1 unresolved)
 
-| Gacha id                                                                      | Type                         | Window (JST)                               | Featured (resolved via id chain)                                                                                                   | 2nd source                                                                                                                                | Status             |
-| ----------------------------------------------------------------------------- | ---------------------------- | ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| 30462 char                                                                    | pickup                       | 2026-08-24 12:00 -> 2026-09-26 11:59       | エピファネイア (114101, JP release 2026-08-24)                                                                                     | [A] GameWith window 8/24-9/26; the matching official notice sits on page 5 or later of the JP index, which was not read in this session   | Ended 09-26        |
-| 30463 support                                                                 | 5.5th Anniv. support         | 2026-08-24 12:00 -> 2026-09-26 11:59       | エフフォーリア (30311) and ミスターシービー (30312), plus new R cards エフフォーリア (10146) / ルーラーシップ (10147) at 2.5% each | [A] GameWith "5.5thAnnivサポートカードガチャ" same window                                                                                 | Ended 09-26        |
-| 30464 char                                                                    | pickup                       | 2026-08-31 12:00 -> 2026-09-11 11:59       | シンコウウインディ (104302) and フェノーメノ (112702)                                                                              | [S] news index 2026-08-31 12:00 "育成ウマ娘&サポートカード新登場" (id 3419); date is local-only                                           | Ended 09-11        |
-| 30465 support                                                                 | pickup                       | 2026-08-31 12:00 -> 2026-09-11 11:59       | ハルウララ (30314) and ビコーペガサス (30315), plus new R サムソンビッグ (10148) at 37.5%                                          | same official index line; end date local-only                                                                                             | Ended 09-11        |
-| 30466 char                                                                    | Twinkle Collection           | 2026-09-01 12:00 -> 2026-10-01 11:59       | 8 ★3, all resolved, see 5.1                                                                                                        | [S] `?id=3421`, [A] GameWith                                                                                                              | Active             |
-| 50245 support                                                                 | SSR確定パワー                | 2026-09-01 12:00 -> 2026-10-01 11:59       | 15 power SSR, all resolved                                                                                                         | [S] `?id=3421`, [A] GameWith                                                                                                              | Active             |
-| 30468 char                                                                    | pickup                       | 2026-09-11 12:00 -> 2026-09-18 11:59       | ファレノプシス (114901, JP release 2026-09-11)                                                                                     | [S] news index 2026-09-11 12:00 (id 3439) and 2026-09-10 予告 (id 3438); end date local-only                                              | Ended 09-18        |
-| 30469 support                                                                 | pickup                       | 2026-09-11 12:00 -> 2026-09-18 11:59       | SSR マチカネタンホイザ (30317) and SR ゼンノロブロイ (20101)                                                                       | same official line; end date local-only                                                                                                   | Ended 09-18        |
-| 50246 char                                                                    | ★3確定 凱旋門賞              | 2026-09-11 12:00 -> 2026-10-13 11:59       | 9 ★3, all resolved                                                                                                                 | [S] `?id=3440`                                                                                                                            | Active             |
-| 50247 support                                                                 | SSR確定 凱旋門賞             | 2026-09-11 12:00 -> 2026-10-13 11:59       | 6 SSR, all resolved                                                                                                                | [S] `?id=3440`                                                                                                                            | Active             |
-| 30470 char                                                                    | pickup                       | 2026-09-18 12:00 -> 2026-09-30 11:59       | ローズキングダム (114401)                                                                                                          | [S] `?id=3457`, [A] GameWith, [A] Kamigame (Kamigame reads the close as 2026-09-30 12:00)                                                 | Ended 2026-09-30   |
-| 30471 support                                                                 | 5.5th Anniv. select pickup   | 2026-09-18 12:00 -> 2026-09-30 11:59       | player-selected pair, local ids 301/302 ❌ UNVERIFIED by design; 10-candidate list is official                                     | [S] `?id=3457`, [A] GameWith                                                                                                              | Active             |
-| [JP 3415](https://umamusume.jp/news/detail?id=3415), id resolved 2026-10-05   | support                      | 2026-08-24 12:00 -> 2026-09-30 11:59 JST   | "SSRセレクトステップアップガチャ", 10 player-chosen SSR released by 2026-07-31                                                     | [A] GameWith only; no matching record in any data export                                                                                  | ❌ UNVERIFIED      |
+**30462 char**
+- Type: pickup
+- Window (JST): 2026-08-24 12:00 -> 2026-09-26 11:59
+- Featured (resolved via id chain): エピファネイア (114101, JP release 2026-08-24)
+- 2nd source: [A] GameWith window 8/24-9/26; the matching official notice sits on page 5 or later of the JP index, which was not read in this session
+- Status: Ended 09-26
+
+**30463 support**
+- Type: 5.5th Anniv. support
+- Window (JST): 2026-08-24 12:00 -> 2026-09-26 11:59
+- Featured (resolved via id chain): エフフォーリア (30311) and ミスターシービー (30312), plus new R cards エフフォーリア (10146) / ルーラーシップ (10147) at 2.5% each
+- 2nd source: [A] GameWith "5.5thAnnivサポートカードガチャ" same window
+- Status: Ended 09-26
+
+**30464 char**
+- Type: pickup
+- Window (JST): 2026-08-31 12:00 -> 2026-09-11 11:59
+- Featured (resolved via id chain): シンコウウインディ (104302) and フェノーメノ (112702)
+- 2nd source: [S] news index 2026-08-31 12:00 "育成ウマ娘&サポートカード新登場" (id 3419); date is local-only
+- Status: Ended 09-11
+
+**30465 support**
+- Type: pickup
+- Window (JST): 2026-08-31 12:00 -> 2026-09-11 11:59
+- Featured (resolved via id chain): ハルウララ (30314) and ビコーペガサス (30315), plus new R サムソンビッグ (10148) at 37.5%
+- 2nd source: same official index line; end date local-only
+- Status: Ended 09-11
+
+**30466 char**
+- Type: Twinkle Collection
+- Window (JST): 2026-09-01 12:00 -> 2026-10-01 11:59
+- Featured (resolved via id chain): 8 ★3, all resolved, see 5.1
+- 2nd source: [S] `?id=3421`, [A] GameWith
+- Status: Active
+
+**50245 support**
+- Type: SSR確定パワー
+- Window (JST): 2026-09-01 12:00 -> 2026-10-01 11:59
+- Featured (resolved via id chain): 15 power SSR, all resolved
+- 2nd source: [S] `?id=3421`, [A] GameWith
+- Status: Active
+
+**30468 char**
+- Type: pickup
+- Window (JST): 2026-09-11 12:00 -> 2026-09-18 11:59
+- Featured (resolved via id chain): ファレノプシス (114901, JP release 2026-09-11)
+- 2nd source: [S] news index 2026-09-11 12:00 (id 3439) and 2026-09-10 予告 (id 3438); end date local-only
+- Status: Ended 09-18
+
+**30469 support**
+- Type: pickup
+- Window (JST): 2026-09-11 12:00 -> 2026-09-18 11:59
+- Featured (resolved via id chain): SSR マチカネタンホイザ (30317) and SR ゼンノロブロイ (20101)
+- 2nd source: same official line; end date local-only
+- Status: Ended 09-18
+
+**50246 char**
+- Type: ★3確定 凱旋門賞
+- Window (JST): 2026-09-11 12:00 -> 2026-10-13 11:59
+- Featured (resolved via id chain): 9 ★3, all resolved
+- 2nd source: [S] `?id=3440`
+- Status: Active
+
+**50247 support**
+- Type: SSR確定 凱旋門賞
+- Window (JST): 2026-09-11 12:00 -> 2026-10-13 11:59
+- Featured (resolved via id chain): 6 SSR, all resolved
+- 2nd source: [S] `?id=3440`
+- Status: Active
+
+**30470 char**
+- Type: pickup
+- Window (JST): 2026-09-18 12:00 -> 2026-09-30 11:59
+- Featured (resolved via id chain): ローズキングダム (114401)
+- 2nd source: [S] `?id=3457`, [A] GameWith, [A] Kamigame (Kamigame reads the close as 2026-09-30 12:00)
+- Status: Ended 2026-09-30
+
+**30471 support**
+- Type: 5.5th Anniv. select pickup
+- Window (JST): 2026-09-18 12:00 -> 2026-09-30 11:59
+- Featured (resolved via id chain): player-selected pair, local ids 301/302 ❌ UNVERIFIED by design; 10-candidate list is official
+- 2nd source: [S] `?id=3457`, [A] GameWith
+- Status: Active
+
+**[JP 3415](https://umamusume.jp/news/detail?id=3415), id resolved 2026-10-05**
+- Type: support
+- Window (JST): 2026-08-24 12:00 -> 2026-09-30 11:59 JST
+- Featured (resolved via id chain): "SSRセレクトステップアップガチャ", 10 player-chosen SSR released by 2026-07-31
+- 2nd source: [A] GameWith only; no matching record in any data export
+- Status: ❌ UNVERIFIED
 
 #### `[Global]` (10 records overlapping the window, UTC)
 
-| Gacha id        | Type        | Window (UTC)                           | Featured (resolved via id chain)                               | 2nd source                                                                                         | Status        |
-| --------------- | ----------- | -------------------------------------- | -------------------------------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------- |
-| 30120 char      | Spotlight   | 2026-08-25 22:00 -> 2026-09-02 21:59   | Aston Machan (108701, `release_en` 2026-08-25)                 | ❌ single source (GameTora + same-vendor release field)                                            | Ended 09-02   |
-| 30121 support   | Spotlight   | 2026-08-25 22:00 -> 2026-09-02 21:59   | Fine Motion (30010) and Maruzensky (30107)                     | ❌ single source                                                                                   | Ended 09-02   |
-| 30122 char      | Spotlight   | 2026-09-01 22:00 -> 2026-09-10 21:59   | Yamanin Zephyr [Fluttertail Spirit] (107801)                   | [A] Game8 "Yamanin Zephyr ... Sep. 1 - 10"                                                         | Ended 09-10   |
-| 30123 support   | Spotlight   | 2026-09-01 22:00 -> 2026-09-10 21:59   | SSR Symboli Kris S (30118) and SR Tsurumaru Tsuyoshi (20052)   | [A] Game8 same row names both supports                                                             | Ended 09-10   |
-| 30124 char      | Spotlight   | 2026-09-07 22:00 -> 2026-09-19 21:59   | Tamamo Cross (102102) and Inari One (103402)                   | [A] Game8 "Tamamo Cross and Inari One ... Sep. 7 - 19"                                             | Ended 09-19   |
-| 30125 support   | Spotlight   | 2026-09-07 22:00 -> 2026-09-19 21:59   | Oguri Cap (30146) and Yaeno Muteki (30120)                     | [A] Game8 same row                                                                                 | Ended 09-19   |
-| 30126 char      | Spotlight   | 2026-09-15 22:00 -> 2026-09-23 21:59   | Nakayama Festa [Dramatic Turnabout] (104901)                   | [S] `umamusume.com/news/1040/` 2026-09-15 22:00 UTC; [A] Game8 "Nakayama Festa ... Sep. 15 - 23"   | Ended 09-23   |
-| 30127 support   | Spotlight   | 2026-09-15 22:00 -> 2026-09-23 21:59   | Super Creek (30016) and Mr. C.B. (30097), both reruns          | [S] `news/1040/`, [A] Game8 same row                                                               | Ended 09-23   |
-| 30128 char      | Spotlight   | 2026-09-23 22:00 -> 2026-10-04 21:59   | Wonder Acute [Butterfly Sting] (110001)                        | [S] `news/1052/` (window quoted in UTC), [A] Game8                                                 | Active        |
-| 30129 support   | Spotlight   | 2026-09-23 22:00 -> 2026-10-04 21:59   | SSR Eishin Flash (30122) and SR Narita Top Road (20053)        | [S] `news/1052/`, [A] Game8                                                                        | Active        |
+**30120 char**
+- Type: Spotlight
+- Window (UTC): 2026-08-25 22:00 -> 2026-09-02 21:59
+- Featured (resolved via id chain): Aston Machan (108701, `release_en` 2026-08-25)
+- 2nd source: ❌ single source (GameTora + same-vendor release field)
+- Status: Ended 09-02
+
+**30121 support**
+- Type: Spotlight
+- Window (UTC): 2026-08-25 22:00 -> 2026-09-02 21:59
+- Featured (resolved via id chain): Fine Motion (30010) and Maruzensky (30107)
+- 2nd source: ❌ single source
+- Status: Ended 09-02
+
+**30122 char**
+- Type: Spotlight
+- Window (UTC): 2026-09-01 22:00 -> 2026-09-10 21:59
+- Featured (resolved via id chain): Yamanin Zephyr [Fluttertail Spirit] (107801)
+- 2nd source: [A] Game8 "Yamanin Zephyr ... Sep. 1 - 10"
+- Status: Ended 09-10
+
+**30123 support**
+- Type: Spotlight
+- Window (UTC): 2026-09-01 22:00 -> 2026-09-10 21:59
+- Featured (resolved via id chain): SSR Symboli Kris S (30118) and SR Tsurumaru Tsuyoshi (20052)
+- 2nd source: [A] Game8 same row names both supports
+- Status: Ended 09-10
+
+**30124 char**
+- Type: Spotlight
+- Window (UTC): 2026-09-07 22:00 -> 2026-09-19 21:59
+- Featured (resolved via id chain): Tamamo Cross (102102) and Inari One (103402)
+- 2nd source: [A] Game8 "Tamamo Cross and Inari One ... Sep. 7 - 19"
+- Status: Ended 09-19
+
+**30125 support**
+- Type: Spotlight
+- Window (UTC): 2026-09-07 22:00 -> 2026-09-19 21:59
+- Featured (resolved via id chain): Oguri Cap (30146) and Yaeno Muteki (30120)
+- 2nd source: [A] Game8 same row
+- Status: Ended 09-19
+
+**30126 char**
+- Type: Spotlight
+- Window (UTC): 2026-09-15 22:00 -> 2026-09-23 21:59
+- Featured (resolved via id chain): Nakayama Festa [Dramatic Turnabout] (104901)
+- 2nd source: [S] `umamusume.com/news/1040/` 2026-09-15 22:00 UTC; [A] Game8 "Nakayama Festa ... Sep. 15 - 23"
+- Status: Ended 09-23
+
+**30127 support**
+- Type: Spotlight
+- Window (UTC): 2026-09-15 22:00 -> 2026-09-23 21:59
+- Featured (resolved via id chain): Super Creek (30016) and Mr. C.B. (30097), both reruns
+- 2nd source: [S] `news/1040/`, [A] Game8 same row
+- Status: Ended 09-23
+
+**30128 char**
+- Type: Spotlight
+- Window (UTC): 2026-09-23 22:00 -> 2026-10-04 21:59
+- Featured (resolved via id chain): Wonder Acute [Butterfly Sting] (110001)
+- 2nd source: [S] `news/1052/` (window quoted in UTC), [A] Game8
+- Status: Active
+
+**30129 support**
+- Type: Spotlight
+- Window (UTC): 2026-09-23 22:00 -> 2026-10-04 21:59
+- Featured (resolved via id chain): SSR Eishin Flash (30122) and SR Narita Top Road (20053)
+- 2nd source: [S] `news/1052/`, [A] Game8
+- Status: Active
 
 Cadence read from the table: Global ran 5 character Scout pairs and 5 support Scout pairs in 31 days (about one pair every 6 to 8 days, windows overlapping), while JP ran 4 debut pickup pairs plus 4 themed or guaranteed special gacha in the same span. The Global count is consistent with the Game8 schedule page's own description of adjusting Japanese release timing to the English server's average monthly rollout pace.
 
@@ -3020,36 +4085,202 @@ Cadence read from the table: Global ran 5 character Scout pairs and 5 support Sc
 
 One concept per row, `[JP]` client wording against `[Global]` client wording. The Global column is client text: `name_en_gl` / `desc_en_gl` in `items.json`, `nicknames.json` and `factors.json`, the `originalText` of the `en/*` mission datasets, or the official Global notices. The last column flags whether the two servers share the concept or only share a row.
 
-| Concept                                                | `[JP]` wording                                                                                                                                                                                                                                                                   | `[Global]` official English                                                                                                                                                                                                                                                                                                                                                                                   | Equivalent?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Evidence                                                                                                                                                                                                                                     |
-| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Gacha system                                           | ガチャ (育成ウマ娘ガチャ, サポートカードガチャ)                                                                                                                                                                                                                                  | Scouts: "Pretty Derby Scout", "Support Card Scout", "Spotlight Pretty Derby / Spotlight Support Card Scouts"                                                                                                                                                                                                                                                                                                  | Same concept, different word                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | [Global index](https://umamusume.com/news/), `items.json` ids 41, 111                                                                                                                                                                        |
-| Featured / pickup tag                                  | ピックアップ, セレクト                                                                                                                                                                                                                                                           | "Spotlight", "Select"                                                                                                                                                                                                                                                                                                                                                                                         | Naming only                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | [Global index](https://umamusume.com/news/), [JP index](https://umamusume.jp/news/?t=game)                                                                                                                                                   |
-| Pull currency                                          | ジュエル                                                                                                                                                                                                                                                                         | Carats                                                                                                                                                                                                                                                                                                                                                                                                        | Same concept                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `items.json` id 43: 「虹色に輝く…ニンジン型の宝石」 vs "A rainbow-colored jewel in the shape of a carrot"                                                                                                                                    |
-| Per-pull exchange currency                             | 育成ウマ娘交換Pt / サポートカード交換Pt                                                                                                                                                                                                                                          | Trainee Exchange Points / Support Card Exchange Points                                                                                                                                                                                                                                                                                                                                                        | Same concept, different wording                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | [JP official news id 3457](https://umamusume.jp/news/detail?id=3457) and the Global Scout notice; neither string appears in `items.json`, whose ids 1001 and 110 are the Dream Team event currency and the old support-card level currency   |
-| Card max-limit item and verb                           | 虹の解放結晶, 金の解放結晶, 虹の結晶片, 金の結晶片; JP slot term 限界突破                                                                                                                                                                                                        | "Rainbow Uncap Crystal", "Gold Uncap Crystal", "Rainbow Crystal Shard", "Gold Crystal Shard"; verb "Uncaps an SSR Support Card"                                                                                                                                                                                                                                                                               | Same concept; Global verb is Uncap                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | `items.json` ids 144, 145, 149, 150                                                                                                                                                                                                          |
-| Card shop amulet                                       | 虹の蹄鉄 / 金の蹄鉄 / 銀の蹄鉄 (fan English exports render this name with an equine noun)                                                                                                                                                                                        | "Rainbow Cleat", "Gold Cleat", "Silver Cleat"                                                                                                                                                                                                                                                                                                                                                                 | Same concept; **do not key on the fan English string**. These are a **shop currency**, not a training buff: 1 duplicate SSR card → 10 Rainbow Cleats, spent in "Cleat Exchange". See 1.6.10                                                                                                                                                                                                                                                                                                                                                               | `items.json` ids 48, 49, 50; [game8.co 2026-03-12](https://game8.co/games/Umamusume-Pretty-Derby/archives/543930)                                                                                                                            |
-| Trainee exchange statue                                | 女神像                                                                                                                                                                                                                                                                           | "Goddess Statue"                                                                                                                                                                                                                                                                                                                                                                                              | Same concept; **currency only, no buff**. Exchanged for Trainee Star Pieces in the "Statue Exchange" shop on an escalating ×1→×5 rate; 650 pieces maxes a trainee, and statues "cannot be used to unlock an unscouted Trainee"                                                                                                                                                                                                                                                                                                                            | [game8.co 2026-03-12](https://game8.co/games/Umamusume-Pretty-Derby/archives/542870)                                                                                                                                                         |
-| Trackblazer race item                                  | JP string ❌ not verified in this pass                                                                                                                                                                                                                                           | "Artisan Cleat Hammer" (25 coins), "Master Cleat Hammer" (40 coins)                                                                                                                                                                                                                                                                                                                                           | **Name-collision hazard:** a *Hammer* is a one-turn Race Bonus purchase in the Trackblazer shop, not the Cleat currency above                                                                                                                                                                                                                                                                                                                                                                                                                             | `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Full Shop Item List"                                                                                                                                                       |
-| Support card rarity                                    | R / SR / SSR plus ★1 to ★3                                                                                                                                                                                                                                                       | R, SR, SSR plus "3★", "SR+", "SSR"                                                                                                                                                                                                                                                                                                                                                                            | Same                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | `items.json` ids 113 to 115, 130; `support-cards.json` rarity 1/2/3                                                                                                                                                                          |
-| Support card types                                     | スピード, スタミナ, パワー, 根性, 賢さ, 友人, グループ                                                                                                                                                                                                                           | Speed, Stamina, Power, Guts, Wit, Pal, Group                                                                                                                                                                                                                                                                                                                                                                  | 友人 to "Pal" is a label change; the JP export holds 23 friend-type rows and game8.co's Pal page lists the subset live on Global (Light Hello, Sasami Anshinzawa, Riko Kashimoto, Tazuna Hayakawa, Aoi Kiryuin, Wallflower, Corner Recovery). **The "Pal" label gained a tier-S confirmation on 2026-10-05:** notice 899 writes "including some of the Pal type" in its own sentence, and Light Hello's two cards are in the committed export as type `friend` with `release_en` 2026-07-22, which is where `lang/en/uma.php` `card_pal` gets its footing | `support-cards.json` type keys and `release_en`, [game8.co 2026-08-12](https://game8.co/games/Umamusume-Pretty-Derby/archives/537276), [Global 899](https://umamusume.com/news/899)                                                          |
-| Fourth Career Scenario, and the vocabulary inside it   | シナリオ名 つなげ、照らせ、ひかれ。私たちのグランドライブ; in-scenario strings read off the client through a publisher: ライブテクニック, 楽曲, 習得, 予約, 習得ボーナス, ライブボーナス, ライブ期待度, 大成功, 「グランドライブ再建計画、開始！」, 「あなたと私を繋げるライブ」 | "Brighter Together Our Grand Concert" in the export and every repo document, "Brighter Together! Our Grand Concert" in the official notice. **The `[Global]` client strings are now measured (2026-11-12)**: five captured Global frames print **`Performance Points`**; the five types **`Dance` `Passion` `Vocals` `Visuals` `Composure`** (abbreviated `Da` `Pa` `Vo` `Vi` `Co`); the screen title **`Lessons`**; the instruction **`Select a technique or song to learn.`**; the cost heading **`Performance Point Cost`**; the state pills **`Learn` / `Learnable!` / `Locked`**; the refusal **`Not enough performance points`**; the gauge **`Hype Level`** with state **`Mild Hype`**; and the second bonus layer as **`Specialty Priority` / `Friendship Training Effectiveness` / `Support Chain Event Frequency`**. Still unmeasured: the reserve button, the full Hype ladder, and every per-level magnitude. GameTora prints performance tokens with Dance, Passion, Vocal, Visual, Mental — its `Mental` is the one word of the five that is wrong   | Scenario name: same concept, one character apart, row 52. Interior vocabulary: **mapped as of 2026-11-12, on captured Global frames rather than on either publisher's English.** A JP string here is still not evidence of the Global word; the frames are. The frames were captured by a third party, so the mapping is client-observed without being client-owned — see 2.2.4 and row 62                                                                                                                                                                                                                                                                                                                                                   | [Global 899](https://umamusume.com/news/899), `scenarios.json` order 4, `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Our Grand Concert: the 2026-10-05 primary read", §7 rows 48 to 52                                  |
-| Inheritance factor                                     | 因子 (因子研究レポート, 因子強化)                                                                                                                                                                                                                                                | Spark ("Spark Research Report", "Can be used for Spark Enhancement", "Carnival Bonus Spark")                                                                                                                                                                                                                                                                                                                  | Same concept, different word                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `items.json` id 195, `en/missions/racingcarnival-limited`                                                                                                                                                                                    |
-| Character with a finished Career                       | 殿堂入りウマ娘                                                                                                                                                                                                                                                                   | Veteran Umamusume                                                                                                                                                                                                                                                                                                                                                                                             | Same concept                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | [Global 1050](https://umamusume.com/news/1050/), [Global 1058](https://umamusume.com/news/1058/)                                                                                                                                             |
-| Character being trained                                | 育成ウマ娘                                                                                                                                                                                                                                                                       | Trainee Umamusume (ticket text: "Trainee Scout Ticket")                                                                                                                                                                                                                                                                                                                                                       | Same concept                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `items.json` id 41                                                                                                                                                                                                                           |
-| ウマ娘 inside titles                                   | ウマ娘                                                                                                                                                                                                                                                                           | "Umamusume" in body text, "Runner" in titles (レイニーウマ娘 → "Rainy Runner")                                                                                                                                                                                                                                                                                                                                | Naming only                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `nicknames.json` id 1                                                                                                                                                                                                                        |
-| Race event / limited race mode                         | レースイベント                                                                                                                                                                                                                                                                   | "race event"                                                                                                                                                                                                                                                                                                                                                                                                  | Same concept                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | [Global 1050](https://umamusume.com/news/1050/)                                                                                                                                                                                              |
-| Champions Meeting edition name                         | category tag: SPRINT / MILE / CLASSIC / LONG / DIRT (post-2023-06)                                                                                                                                                                                                               | zodiac cup: "Champions Meeting: Scorpio Cup"                                                                                                                                                                                                                                                                                                                                                                  | NOT equivalent: `[Global]` runs the series `[JP]` retired in 2023; join on `resource_id`                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | `events__champions-meeting.json`, `en/events/champions-meeting`, [JP 3463](https://umamusume.jp/news/detail?id=3463)                                                                                                                         |
-| CM brackets                                            | グレードリーグ / オープンリーグ; A・Bグループ; チームランク E2; 育成ランク                                                                                                                                                                                                       | Graded League / Open League; Group A/B; Team Rank E2; Career Rank                                                                                                                                                                                                                                                                                                                                             | Concept split: Open League caps at [UC] on `[JP]` and at A+ on `[Global]`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | [JP 3463](https://umamusume.jp/news/detail?id=3463), [Global 1050](https://umamusume.com/news/1050/)                                                                                                                                         |
-| Four distances                                         | 短距離 / マイル / 中距離 / 長距離                                                                                                                                                                                                                                                | Sprint / Mile / Medium / Long                                                                                                                                                                                                                                                                                                                                                                                 | Same                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | `factors.json` ids 31 to 34 `name_en_gl`, `items.json` ids 1, 4, 7, 10, Global race line "2,200m (Medium)"                                                                                                                                   |
-| Fifth race category                                    | ダート (a surface, not a distance), 芝                                                                                                                                                                                                                                           | Dirt, Turf                                                                                                                                                                                                                                                                                                                                                                                                    | Same concept; Team Trials and Champions Meeting list Dirt beside the four distances as one of five categories                                                                                                                                                                                                                                                                                                                                                                                                                                             | `factors.json` ids 11, 12; `items.json` ids 1, 4, 7, 10, 13 (five "Racing Shoes", the Dirt pair included)                                                                                                                                    |
-| Four running strategies                                | 作戦: 逃げ / 先行 / 差し / 追込                                                                                                                                                                                                                                                  | Front Runner / Pace Chaser / Late Surger / End Closer                                                                                                                                                                                                                                                                                                                                                         | Same concept; one wiki labels 追込 "Runner" (conflict row 25)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | `factors.json` ids 21 to 24 `name_en_gl`, `nicknames.json` Global text "as a Front Runner or Pace Chaser"                                                                                                                                    |
-| Five stats                                             | スピード / スタミナ / パワー / 根性 / 賢さ                                                                                                                                                                                                                                       | Speed / Stamina / Power / Guts / Wit                                                                                                                                                                                                                                                                                                                                                                          | Same; export key for 賢さ is `intelligence`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | `factors.json` ids 1 to 5 `name_en_gl`, [game8.co 2026-09-25](https://game8.co/games/Umamusume-Pretty-Derby/archives/536352)                                                                                                                 |
-| Friendship training                                    | 友情トレーニング / 友情ボーナス                                                                                                                                                                                                                                                  | Friendship Training / Friendship Bonus                                                                                                                                                                                                                                                                                                                                                                        | Same                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | `en/missions/limited`, `support_effects.json` id 1 (`*_eon` field)                                                                                                                                                                           |
-| Team race mode                                         | チーム競技場, ウイニング報酬, チーム編成                                                                                                                                                                                                                                         | Team Trials, Winning Reward, team setup                                                                                                                                                                                                                                                                                                                                                                       | Same concept; "Team Stadium" is neither server's word                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | `missions/daily`, `en/missions/daily`, [game8.co 2026-09-23](https://game8.co/games/Umamusume-Pretty-Derby/archives/536831)                                                                                                                  |
-| Self-directed idle training                            | 自主トレ育成                                                                                                                                                                                                                                                                     | "Independent Training"                                                                                                                                                                                                                                                                                                                                                                                        | Same; released on `[Global]` 2026-07-22. This row read "NOT equivalent until Global release is confirmed" until the 2026-10-05 pass closed it                                                                                                                                                                                                                                                                                                                                                                                                             | `nicknames.json` id 394 `name_en_gl`; [Global 100087](https://umamusume.com/news/100087), posted 2026-07-22 08:30 UTC                                                                                                                        |
-| Team-building limited event                            | 目指せ！最強チーム, スカウトレース                                                                                                                                                                                                                                               | "Aim for the Stars! Dream Team", "Scout Race"                                                                                                                                                                                                                                                                                                                                                                 | Same concept; do not confuse スカウトレース with Team Trials                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | `items.json` ids 1001, 2001                                                                                                                                                                                                                  |
-| Trophy / rank currency                                 | 栄誉のメダリオン                                                                                                                                                                                                                                                                 | not present in the Global strings read here                                                                                                                                                                                                                                                                                                                                                                   | `[JP-Only]` for now                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | `items.json` id 268, [JP 3463](https://umamusume.jp/news/detail?id=3463)                                                                                                                                                                     |
-| Monies and club currency                               | マニー / トレーナーメダル / ルーレットコイン                                                                                                                                                                                                                                     | Monies / Club Points / Prize Coin                                                                                                                                                                                                                                                                                                                                                                             | Same                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | `items.json` ids 59, 134, 45                                                                                                                                                                                                                 |
+Gacha system
+
+- `[JP]` wording: ガチャ (育成ウマ娘ガチャ, サポートカードガチャ)
+- `[Global]` official English: Scouts: "Pretty Derby Scout", "Support Card Scout", "Spotlight Pretty Derby / Spotlight Support Card Scouts"
+- Equivalent?: Same concept, different word
+- Evidence: [Global index](https://umamusume.com/news/), `items.json` ids 41, 111
+
+Featured / pickup tag
+
+- `[JP]` wording: ピックアップ, セレクト
+- `[Global]` official English: "Spotlight", "Select"
+- Equivalent?: Naming only
+- Evidence: [Global index](https://umamusume.com/news/), [JP index](https://umamusume.jp/news/?t=game)
+
+Pull currency
+
+- `[JP]` wording: ジュエル
+- `[Global]` official English: Carats
+- Equivalent?: Same concept
+- Evidence: `items.json` id 43: 「虹色に輝く…ニンジン型の宝石」 vs "A rainbow-colored jewel in the shape of a carrot"
+
+Per-pull exchange currency
+
+- `[JP]` wording: 育成ウマ娘交換Pt / サポートカード交換Pt
+- `[Global]` official English: Trainee Exchange Points / Support Card Exchange Points
+- Equivalent?: Same concept, different wording
+- Evidence: [JP official news id 3457](https://umamusume.jp/news/detail?id=3457) and the Global Scout notice; neither string appears in `items.json`, whose ids 1001 and 110 are the Dream Team event currency and the old support-card level currency
+
+Card max-limit item and verb
+
+- `[JP]` wording: 虹の解放結晶, 金の解放結晶, 虹の結晶片, 金の結晶片; JP slot term 限界突破
+- `[Global]` official English: "Rainbow Uncap Crystal", "Gold Uncap Crystal", "Rainbow Crystal Shard", "Gold Crystal Shard"; verb "Uncaps an SSR Support Card"
+- Equivalent?: Same concept; Global verb is Uncap
+- Evidence: `items.json` ids 144, 145, 149, 150
+
+Card shop amulet
+
+- `[JP]` wording: 虹の蹄鉄 / 金の蹄鉄 / 銀の蹄鉄 (fan English exports render this name with an equine noun)
+- `[Global]` official English: "Rainbow Cleat", "Gold Cleat", "Silver Cleat"
+- Equivalent?: Same concept; **do not key on the fan English string**. These are a **shop currency**, not a training buff: 1 duplicate SSR card → 10 Rainbow Cleats, spent in "Cleat Exchange". See 1.6.10
+- Evidence: `items.json` ids 48, 49, 50; [game8.co 2026-03-12](https://game8.co/games/Umamusume-Pretty-Derby/archives/543930)
+
+Trainee exchange statue
+
+- `[JP]` wording: 女神像
+- `[Global]` official English: "Goddess Statue"
+- Equivalent?: Same concept; **currency only, no buff**. Exchanged for Trainee Star Pieces in the "Statue Exchange" shop on an escalating ×1→×5 rate; 650 pieces maxes a trainee, and statues "cannot be used to unlock an unscouted Trainee"
+- Evidence: [game8.co 2026-03-12](https://game8.co/games/Umamusume-Pretty-Derby/archives/542870)
+
+Trackblazer race item
+
+- `[JP]` wording: JP string ❌ not verified in this pass
+- `[Global]` official English: "Artisan Cleat Hammer" (25 coins), "Master Cleat Hammer" (40 coins)
+- Equivalent?: **Name-collision hazard:** a *Hammer* is a one-turn Race Bonus purchase in the Trackblazer shop, not the Cleat currency above
+- Evidence: `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Full Shop Item List"
+
+Support card rarity
+
+- `[JP]` wording: R / SR / SSR plus ★1 to ★3
+- `[Global]` official English: R, SR, SSR plus "3★", "SR+", "SSR"
+- Equivalent?: Same
+- Evidence: `items.json` ids 113 to 115, 130; `support-cards.json` rarity 1/2/3
+
+Support card types
+
+- `[JP]` wording: スピード, スタミナ, パワー, 根性, 賢さ, 友人, グループ
+- `[Global]` official English: Speed, Stamina, Power, Guts, Wit, Pal, Group
+- Equivalent?: 友人 to "Pal" is a label change; the JP export holds 23 friend-type rows and game8.co's Pal page lists the subset live on Global (Light Hello, Sasami Anshinzawa, Riko Kashimoto, Tazuna Hayakawa, Aoi Kiryuin, Wallflower, Corner Recovery). **The "Pal" label gained a tier-S confirmation on 2026-10-05:** notice 899 writes "including some of the Pal type" in its own sentence, and Light Hello's two cards are in the committed export as type `friend` with `release_en` 2026-07-22, which is where `lang/en/uma.php` `card_pal` gets its footing
+- Evidence: `support-cards.json` type keys and `release_en`, [game8.co 2026-08-12](https://game8.co/games/Umamusume-Pretty-Derby/archives/537276), [Global 899](https://umamusume.com/news/899)
+
+Fourth Career Scenario, and the vocabulary inside it
+
+- `[JP]` wording: シナリオ名 つなげ、照らせ、ひかれ。私たちのグランドライブ; in-scenario strings read off the client through a publisher: ライブテクニック, 楽曲, 習得, 予約, 習得ボーナス, ライブボーナス, ライブ期待度, 大成功, 「グランドライブ再建計画、開始！」, 「あなたと私を繋げるライブ」
+- `[Global]` official English: "Brighter Together Our Grand Concert" in the export and every repo document, "Brighter Together! Our Grand Concert" in the official notice. **The `[Global]` client strings are now measured (2026-11-12)**: five captured Global frames print **`Performance Points`**; the five types **`Dance` `Passion` `Vocals` `Visuals` `Composure`** (abbreviated `Da` `Pa` `Vo` `Vi` `Co`); the screen title **`Lessons`**; the instruction **`Select a technique or song to learn.`**; the cost heading **`Performance Point Cost`**; the state pills **`Learn` / `Learnable!` / `Locked`**; the refusal **`Not enough performance points`**; the gauge **`Hype Level`** with state **`Mild Hype`**; and the second bonus layer as **`Specialty Priority` / `Friendship Training Effectiveness` / `Support Chain Event Frequency`**. Still unmeasured: the reserve button, the full Hype ladder, and every per-level magnitude. GameTora prints performance tokens with Dance, Passion, Vocal, Visual, Mental — its `Mental` is the one word of the five that is wrong
+- Equivalent?: Scenario name: same concept, one character apart, row 52. Interior vocabulary: **mapped as of 2026-11-12, on captured Global frames rather than on either publisher's English.** A JP string here is still not evidence of the Global word; the frames are. The frames were captured by a third party, so the mapping is client-observed without being client-owned — see 2.2.4 and row 62
+- Evidence: [Global 899](https://umamusume.com/news/899), `scenarios.json` order 4, `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` section "Our Grand Concert: the 2026-10-05 primary read", §7 rows 48 to 52
+
+Inheritance factor
+
+- `[JP]` wording: 因子 (因子研究レポート, 因子強化)
+- `[Global]` official English: Spark ("Spark Research Report", "Can be used for Spark Enhancement", "Carnival Bonus Spark")
+- Equivalent?: Same concept, different word
+- Evidence: `items.json` id 195, `en/missions/racingcarnival-limited`
+
+Character with a finished Career
+
+- `[JP]` wording: 殿堂入りウマ娘
+- `[Global]` official English: Veteran Umamusume
+- Equivalent?: Same concept
+- Evidence: [Global 1050](https://umamusume.com/news/1050/), [Global 1058](https://umamusume.com/news/1058/)
+
+Character being trained
+
+- `[JP]` wording: 育成ウマ娘
+- `[Global]` official English: Trainee Umamusume (ticket text: "Trainee Scout Ticket")
+- Equivalent?: Same concept
+- Evidence: `items.json` id 41
+
+ウマ娘 inside titles
+
+- `[JP]` wording: ウマ娘
+- `[Global]` official English: "Umamusume" in body text, "Runner" in titles (レイニーウマ娘 → "Rainy Runner")
+- Equivalent?: Naming only
+- Evidence: `nicknames.json` id 1
+
+Race event / limited race mode
+
+- `[JP]` wording: レースイベント
+- `[Global]` official English: "race event"
+- Equivalent?: Same concept
+- Evidence: [Global 1050](https://umamusume.com/news/1050/)
+
+Champions Meeting edition name
+
+- `[JP]` wording: category tag: SPRINT / MILE / CLASSIC / LONG / DIRT (post-2023-06)
+- `[Global]` official English: zodiac cup: "Champions Meeting: Scorpio Cup"
+- Equivalent?: NOT equivalent: `[Global]` runs the series `[JP]` retired in 2023; join on `resource_id`
+- Evidence: `events__champions-meeting.json`, `en/events/champions-meeting`, [JP 3463](https://umamusume.jp/news/detail?id=3463)
+
+CM brackets
+
+- `[JP]` wording: グレードリーグ / オープンリーグ; A・Bグループ; チームランク E2; 育成ランク
+- `[Global]` official English: Graded League / Open League; Group A/B; Team Rank E2; Career Rank
+- Equivalent?: Concept split: Open League caps at [UC] on `[JP]` and at A+ on `[Global]`
+- Evidence: [JP 3463](https://umamusume.jp/news/detail?id=3463), [Global 1050](https://umamusume.com/news/1050/)
+
+Four distances
+
+- `[JP]` wording: 短距離 / マイル / 中距離 / 長距離
+- `[Global]` official English: Sprint / Mile / Medium / Long
+- Equivalent?: Same
+- Evidence: `factors.json` ids 31 to 34 `name_en_gl`, `items.json` ids 1, 4, 7, 10, Global race line "2,200m (Medium)"
+
+Fifth race category
+
+- `[JP]` wording: ダート (a surface, not a distance), 芝
+- `[Global]` official English: Dirt, Turf
+- Equivalent?: Same concept; Team Trials and Champions Meeting list Dirt beside the four distances as one of five categories
+- Evidence: `factors.json` ids 11, 12; `items.json` ids 1, 4, 7, 10, 13 (five "Racing Shoes", the Dirt pair included)
+
+Four running strategies
+
+- `[JP]` wording: 作戦: 逃げ / 先行 / 差し / 追込
+- `[Global]` official English: Front Runner / Pace Chaser / Late Surger / End Closer
+- Equivalent?: Same concept; one wiki labels 追込 "Runner" (conflict row 25)
+- Evidence: `factors.json` ids 21 to 24 `name_en_gl`, `nicknames.json` Global text "as a Front Runner or Pace Chaser"
+
+Five stats
+
+- `[JP]` wording: スピード / スタミナ / パワー / 根性 / 賢さ
+- `[Global]` official English: Speed / Stamina / Power / Guts / Wit
+- Equivalent?: Same; export key for 賢さ is `intelligence`
+- Evidence: `factors.json` ids 1 to 5 `name_en_gl`, [game8.co 2026-09-25](https://game8.co/games/Umamusume-Pretty-Derby/archives/536352)
+
+Friendship training
+
+- `[JP]` wording: 友情トレーニング / 友情ボーナス
+- `[Global]` official English: Friendship Training / Friendship Bonus
+- Equivalent?: Same
+- Evidence: `en/missions/limited`, `support_effects.json` id 1 (`*_eon` field)
+
+Team race mode
+
+- `[JP]` wording: チーム競技場, ウイニング報酬, チーム編成
+- `[Global]` official English: Team Trials, Winning Reward, team setup
+- Equivalent?: Same concept; "Team Stadium" is neither server's word
+- Evidence: `missions/daily`, `en/missions/daily`, [game8.co 2026-09-23](https://game8.co/games/Umamusume-Pretty-Derby/archives/536831)
+
+Self-directed idle training
+
+- `[JP]` wording: 自主トレ育成
+- `[Global]` official English: "Independent Training"
+- Equivalent?: Same; released on `[Global]` 2026-07-22. This row read "NOT equivalent until Global release is confirmed" until the 2026-10-05 pass closed it
+- Evidence: `nicknames.json` id 394 `name_en_gl`; [Global 100087](https://umamusume.com/news/100087), posted 2026-07-22 08:30 UTC
+
+Team-building limited event
+
+- `[JP]` wording: 目指せ！最強チーム, スカウトレース
+- `[Global]` official English: "Aim for the Stars! Dream Team", "Scout Race"
+- Equivalent?: Same concept; do not confuse スカウトレース with Team Trials
+- Evidence: `items.json` ids 1001, 2001
+
+Trophy / rank currency
+
+- `[JP]` wording: 栄誉のメダリオン
+- `[Global]` official English: not present in the Global strings read here
+- Equivalent?: `[JP-Only]` for now
+- Evidence: `items.json` id 268, [JP 3463](https://umamusume.jp/news/detail?id=3463)
+
+Monies and club currency
+
+- `[JP]` wording: マニー / トレーナーメダル / ルーレットコイン
+- `[Global]` official English: Monies / Club Points / Prize Coin
+- Equivalent?: Same
+- Evidence: `items.json` ids 59, 134, 45
+
 
 **Sources:** data export datasets `items.json`, `factors.json`, `nicknames.json`, `support-cards.json`, `events__champions-meeting.json`, `en/events/champions-meeting`, `missions/*` and `en/missions/*` (tier B, fetched 2026-09-27); **the Grand Concert row's Global column is from five captured client frames read 2026-11-12** ([GameObserver, 2026-07-31](https://gameobserver.com/umamusume-pretty-derby-grand-concert-scenario-guide/)) **plus one open-source automation bot's string table** ([`steve1316/uma-android-automation`](https://github.com/steve1316/uma-android-automation), a third-party transcription of the client's own text, used only for the 23 song titles); [Umamusume Global Official News index and items 1050, 1058](https://umamusume.com/news/); [Umamusume JP Official News index and items 3363, 3453, 3463, 3476](https://umamusume.jp/news/?t=game); [game8.co Global guides, 2026-08-12, 2026-09-23, 2026-09-25](https://game8.co/games/Umamusume-Pretty-Derby/archives/536831).
 
@@ -3132,11 +4363,11 @@ The body was put in front of a fresh-context adversarial reviewer that had not w
 
 Outcome, per finding class:
 
-| Class        | Result                                                                                                                          |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------- |
-| 3 blocking   | All three were correct and are fixed. Two of them were defects in this document's own generator, not in a researcher's prose.   |
-| 11 major     | 10 accepted and patched; 1 (finding 18) refuted by recompute, and the line was rewritten so the ambiguity cannot recur.         |
-| 10 minor     | 9 patched, 1 (heading em dashes) already handled by the build step.                                                             |
+- **3 blocking**: All three were correct and are fixed. Two of them were defects in this document's own generator, not in a researcher's prose.
+
+- **11 major**: 10 accepted and patched; 1 (finding 18) refuted by recompute, and the line was rewritten so the ambiguity cannot recur.
+
+- **10 minor**: 9 patched, 1 (heading em dashes) already handled by the build step.
 
 The two blocking generator defects, stated plainly because they are the kind of error a reader cannot see:
 
@@ -3149,21 +4380,71 @@ Pointer drift was the third blocking item, and it was mechanical: consolidating 
 
 ### 8.2 Confidence per section
 
-| Section                                          | Confidence                                                                                                    | Why that rating                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1.1 Training System                              | MEDIUM                                                                                                        | Mechanics and gating corroborated across three wikis plus official notices. Per-session gain ranges rest on a GameWith base-value table dated 2023-02-25 and carry `⚠️ STALE`. Two sub-claims sit at LOW: whether Wit training can fail, and the current `[JP]` Speed ceiling.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| 1.2 Race Mechanics                               | MEDIUM-HIGH                                                                                                   | Numeric codes decoded from client copy plus a wiki, and every course figure in this section was re-derived from the export twice, once by the reviewer and once here. The Stamina side of footing closed on 2026-10-05 at community grade (1.2, the multiplier band). Several magnitudes stay `❌ UNVERIFIED` and some grade-tier labels are unresolved.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| 1.3 Stat System                                  | MEDIUM                                                                                                        | The sum structure (`★4` rows total 500, `★5` total 550, across all 268 cards) is arithmetic over the whole dataset, the strongest evidence in the document. The Speed ceiling is contested 2100 against 2000.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| 1.4 Support Cards                                | MEDIUM                                                                                                        | Type and rarity distributions from the full export; top-tier lists dated from two publishers per server. Two items sit below that line. The hint-stage coloring stays `❌ UNVERIFIED`, and the 2026-10-05 pass made the premise itself doubtful: sources describe a red exclamation mark and put the orange on the bond gauge. The Unique Perk is worse documented than this row allowed for: no value table anywhere, one flat magnitude published, and conflict row 47 now questions whether the panel badge this section reads as a perk level is instead the card level that unlocks it. The `[Global]` per-break level gain is settled, by the client on 2026-09-27 with a third corroboration on 2026-10-05.                                                                                                                                                                                                                                                                                                                                                                                    |
-| 1.5 Inheritance                                  | MEDIUM                                                                                                        | Factor categories confirmed against official notice id 3457 and two wikis. The factor-slot question is bounded rather than answered: 1 Blue, 1 Pink, at most 1 Green, unbounded White, no stated maximum, and per-run top-grade farming counts stay LOW.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| 1.6 Game Modes                                   | MEDIUM                                                                                                        | Existence and timing are S-tier official. 自主トレ育成 stopped being an unknown on 2026-10-05: it is live on `[Global]` since 2026-07-22. Whether Masters Challenge and Training Pass exist on `[Global]` is genuinely unknown rather than merely uncited.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| 2 Scenario Strategies and Mechanics `[Global]`   | MEDIUM-HIGH on caps, MEDIUM-HIGH on the Grand Live loop, LOW only on its English names                        | The four Global scenarios, their dates and their cap figures are derived from the export and triple-checked by arithmetic (2.1). Grand Live's caps gained two independent published corroborations on 2026-10-05, and the same day's primary read (§2.8) took both Game8 pages to the end of the body, re-read GameTora's mechanics sections and rendered `[Global]` notice 899, which fixes the launch boundary to 22:00 UTC: the loop, the live schedule, the Lesson structure, both objective thresholds, the 23-song count, the five linked characters and the URA-shaped fan gates are on file with a source and a date. What keeps a LOW grade is now much narrower than what this row claimed, and on 2026-11-12 the LOW clause changed meaning rather than disappearing. **The English names are measured**: five `[Global]` client frames were read this pass, giving `Performance Points`, the five type names, the Lesson screen's full wording and the gauge's `Hype Level` (2.2.4, §7 rows 61 and 62). What remains LOW is **(a)** the reserve button's own label, **(b)** the Hype ladder beyond the `Mild Hype` state, and **(c)** every per-level magnitude — no Lesson cost curve, no Hype value per song, no Live Bonus ladder appears on any page read, and three GameTora tables stay image-rendered and unextracted. The repository's own `docs/game-screenshots/` still holds 0 frames for this scenario; the frames that closed the names came from a third-party guide, which is why the closure is recorded as client-observed-but-not-client-owned. The owner's 2026-09-27 suspension is discharged by the read it asked for and by the 2026-10-05 instruction that reopened the work.   |
-| 3 Character Roster                               | HIGH on the set, the labels and the letters; MEDIUM on dates                                                  | 135 units and 268 cards reproduced exactly by an independent A-tier publisher with zero name differences (3.5); aptitude order verified 30 of 30 cells against two publishers; labels now taken from client strings. `[Global]` dates still rest on tier B for breadth.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| 4 Live Operations & Events                       | **HIGH for `[Global]` as of 2026-11-12**; LOW for `[JP]`, which was not re-checked this pass               | The `[Global]` half was rebuilt from the complete notice archive (181 notices, read end to end) rather than from a sampled window: every live item in 4.2 carries its own official notice and UTC window, and 4.3 lists only what the archive supports as upcoming. That is the strongest this section has ever been on `[Global]`. Two things keep it below HIGH overall. **The `[JP]` half is dated 2026-09-27 and its items have all expired** — 4.3 states plainly that JP was not re-checked, which is a coverage gap rather than a rating. And the prior passes' `154`-notice figure **does not reconcile** with this pass's 181 (4.6 records the discrepancy and both possible explanations instead of explaining it away), so the archive's own completeness is open.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| 5 Gacha & Banners                                | **MEDIUM-HIGH on `[Global]` as of 2026-11-12**; rates still MEDIUM                                              | The `[Global]` schedule was rebuilt from notices 1165, 1146 and 1149 and every window is the notice's own, so 5.2 is current rather than expired; the two blocks that had been marked `Active` past their end dates are now `Closed` with the correction recorded. **Rates remain unchanged and unresolved**: neither server publishes pull rates on the web, both route to an in-game tab (each of the three notices read this pass does exactly that), so the figures stay tier-B arithmetic and the `❌ UNVERIFIED` on web publication stands. The 200-Point exchange price remains ⚠️ STALE.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| 6 Server Terminology Map                         | HIGH                                                                                                          | Built from official page copy on both servers plus client strings. The 追込 label and the third scenario's Global name are the two soft cells.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| 7 Source Attribution and Conflict Log            | MEDIUM-HIGH                                                                                                   | 62 rows, each naming both sources and a resolution. Three rows were reworded or re-pointed in the 2026-10-02 pass (see 8.1), rows 48 to 52 were added by the 2026-10-05 Grand Concert read, rows 53 to 56 by the 2026-10-15 research-scratch integration, and rows 60 to 62 by the 2026-11-12 scenario-knowledge pass.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| 8 Self-Audit Report                              | **Stale against the document.**                                                                               | The checks in 8.5 were run before 1.4.7, 1.4.8, 1.6.10 and the 2026-09-29 race-tier work existed. This row carried two cells in a three-column table until the 2026-10-05 pass split the rating from its reason; no audit number was otherwise touched.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+1.1 Training System
+
+- Confidence: MEDIUM
+- Why that rating: Mechanics and gating corroborated across three wikis plus official notices. Per-session gain ranges rest on a GameWith base-value table dated 2023-02-25 and carry `⚠️ STALE`. Two sub-claims sit at LOW: whether Wit training can fail, and the current `[JP]` Speed ceiling.
+
+1.2 Race Mechanics
+
+- Confidence: MEDIUM-HIGH
+- Why that rating: Numeric codes decoded from client copy plus a wiki, and every course figure in this section was re-derived from the export twice, once by the reviewer and once here. The Stamina side of footing closed on 2026-10-05 at community grade (1.2, the multiplier band). Several magnitudes stay `❌ UNVERIFIED` and some grade-tier labels are unresolved.
+
+1.3 Stat System
+
+- Confidence: MEDIUM
+- Why that rating: The sum structure (`★4` rows total 500, `★5` total 550, across all 268 cards) is arithmetic over the whole dataset, the strongest evidence in the document. The Speed ceiling is contested 2100 against 2000.
+
+1.4 Support Cards
+
+- Confidence: MEDIUM
+- Why that rating: Type and rarity distributions from the full export; top-tier lists dated from two publishers per server. Two items sit below that line. The hint-stage coloring stays `❌ UNVERIFIED`, and the 2026-10-05 pass made the premise itself doubtful: sources describe a red exclamation mark and put the orange on the bond gauge. The Unique Perk is worse documented than this row allowed for: no value table anywhere, one flat magnitude published, and conflict row 47 now questions whether the panel badge this section reads as a perk level is instead the card level that unlocks it. The `[Global]` per-break level gain is settled, by the client on 2026-09-27 with a third corroboration on 2026-10-05.
+
+1.5 Inheritance
+
+- Confidence: MEDIUM
+- Why that rating: Factor categories confirmed against official notice id 3457 and two wikis. The factor-slot question is bounded rather than answered: 1 Blue, 1 Pink, at most 1 Green, unbounded White, no stated maximum, and per-run top-grade farming counts stay LOW.
+
+1.6 Game Modes
+
+- Confidence: MEDIUM
+- Why that rating: Existence and timing are S-tier official. 自主トレ育成 stopped being an unknown on 2026-10-05: it is live on `[Global]` since 2026-07-22. Whether Masters Challenge and Training Pass exist on `[Global]` is genuinely unknown rather than merely uncited.
+
+2 Scenario Strategies and Mechanics `[Global]`
+
+- Confidence: MEDIUM-HIGH on caps, MEDIUM-HIGH on the Grand Live loop, LOW only on its English names
+- Why that rating: The four Global scenarios, their dates and their cap figures are derived from the export and triple-checked by arithmetic (2.1). Grand Live's caps gained two independent published corroborations on 2026-10-05, and the same day's primary read (§2.8) took both Game8 pages to the end of the body, re-read GameTora's mechanics sections and rendered `[Global]` notice 899, which fixes the launch boundary to 22:00 UTC: the loop, the live schedule, the Lesson structure, both objective thresholds, the 23-song count, the five linked characters and the URA-shaped fan gates are on file with a source and a date. What keeps a LOW grade is now much narrower than what this row claimed, and on 2026-11-12 the LOW clause changed meaning rather than disappearing. **The English names are measured**: five `[Global]` client frames were read this pass, giving `Performance Points`, the five type names, the Lesson screen's full wording and the gauge's `Hype Level` (2.2.4, §7 rows 61 and 62). What remains LOW is **(a)** the reserve button's own label, **(b)** the Hype ladder beyond the `Mild Hype` state, and **(c)** every per-level magnitude — no Lesson cost curve, no Hype value per song, no Live Bonus ladder appears on any page read, and three GameTora tables stay image-rendered and unextracted. The repository's own `docs/game-screenshots/` still holds 0 frames for this scenario; the frames that closed the names came from a third-party guide, which is why the closure is recorded as client-observed-but-not-client-owned. The owner's 2026-09-27 suspension is discharged by the read it asked for and by the 2026-10-05 instruction that reopened the work.
+
+3 Character Roster
+
+- Confidence: HIGH on the set, the labels and the letters; MEDIUM on dates
+- Why that rating: 135 units and 268 cards reproduced exactly by an independent A-tier publisher with zero name differences (3.5); aptitude order verified 30 of 30 cells against two publishers; labels now taken from client strings. `[Global]` dates still rest on tier B for breadth.
+
+4 Live Operations & Events
+
+- Confidence: **HIGH for `[Global]` as of 2026-11-12**; LOW for `[JP]`, which was not re-checked this pass
+- Why that rating: The `[Global]` half was rebuilt from the complete notice archive (181 notices, read end to end) rather than from a sampled window: every live item in 4.2 carries its own official notice and UTC window, and 4.3 lists only what the archive supports as upcoming. That is the strongest this section has ever been on `[Global]`. Two things keep it below HIGH overall. **The `[JP]` half is dated 2026-09-27 and its items have all expired** — 4.3 states plainly that JP was not re-checked, which is a coverage gap rather than a rating. And the prior passes' `154`-notice figure **does not reconcile** with this pass's 181 (4.6 records the discrepancy and both possible explanations instead of explaining it away), so the archive's own completeness is open.
+
+5 Gacha & Banners
+
+- Confidence: **MEDIUM-HIGH on `[Global]` as of 2026-11-12**; rates still MEDIUM
+- Why that rating: The `[Global]` schedule was rebuilt from notices 1165, 1146 and 1149 and every window is the notice's own, so 5.2 is current rather than expired; the two blocks that had been marked `Active` past their end dates are now `Closed` with the correction recorded. **Rates remain unchanged and unresolved**: neither server publishes pull rates on the web, both route to an in-game tab (each of the three notices read this pass does exactly that), so the figures stay tier-B arithmetic and the `❌ UNVERIFIED` on web publication stands. The 200-Point exchange price remains ⚠️ STALE.
+
+6 Server Terminology Map
+
+- Confidence: HIGH
+- Why that rating: Built from official page copy on both servers plus client strings. The 追込 label and the third scenario's Global name are the two soft cells.
+
+7 Source Attribution and Conflict Log
+
+- Confidence: MEDIUM-HIGH
+- Why that rating: 62 rows, each naming both sources and a resolution. Three rows were reworded or re-pointed in the 2026-10-02 pass (see 8.1), rows 48 to 52 were added by the 2026-10-05 Grand Concert read, rows 53 to 56 by the 2026-10-15 research-scratch integration, and rows 60 to 62 by the 2026-11-12 scenario-knowledge pass.
+
+8 Self-Audit Report
+
+- Confidence: **Stale against the document.**
+- Why that rating: The checks in 8.5 were run before 1.4.7, 1.4.8, 1.6.10 and the 2026-09-29 race-tier work existed. This row carried two cells in a three-column table until the 2026-10-05 pass split the rating from its reason; no audit number was otherwise touched.
+
 
 Conflict log disposition: **62 rows** as of 2026-11-12, one added by the second web pass on 2026-10-05 (row 47, the Unique Perk badge reading), five the Grand Concert read the same day (rows 48 to 52), four by the 2026-10-15 research-scratch integration (rows 53 to 56), three by the 2026-11-06 career-flow reconciliation (rows 57 to 59: the burst-band overlap, the 72/75/78 convention split, and the borrowed deck slot), and three by the 2026-11-12 scenario-knowledge pass (row 60, the Trackblazer currency term; row 61, the Grand Concert bonus-layer name; row 62, the frame-count premise). Re-derived from the table, not from this sentence: **22 High, 17 Medium, 4 Low** on the strict single-word label, with **19 rows carrying compound or revised ratings** (for example "Medium, breadth gap only", "Low, by design", "Medium on dates, none on name", "High on the official string; the export field stays the data join key", and "High: object, noun and all five type names on official copy"), which is why 22+17+4 does not equal 62. *(Recomputed 2026-11-12; the previous tally read 20/17/4 against 15 compound rows, and had been wrong since rows 57 to 59 landed.)* Nothing rated LOW is presented elsewhere as settled. ⚠️ This line is the second count in this file that went stale by being written as prose instead of derived from the table; both now say how to re-derive them. The count 46 in the earlier version of this line was a 2026-09-27 figure that rows 48 to 56 had already outgrown.
 
@@ -3317,25 +4598,108 @@ therefore not a prediction, which is the question `docs/audits/trainer-desk-v3-u
 
 **Screenshot-corpus provenance, added 2026-10-15 (a coverage statement, not a run over this document).** The client observations this file now cites by frame (1.1.5, 1.1.6, 1.3.4, 1.3.5, 1.6.11) come from a corpus of **1,159 screenshots** captured 2026-07-14 to 2026-07-18, all SHA-256-unique, clustered into 750 perceptual groups (the largest a 58-frame group represented by `2026-07-18 001811`). As of the registry's last coverage pass (2026-10-11) the corpus stood at **132 verified, 1,023 not_reviewed, 4 partial**, so most of the corpus has not been visually inspected and the frames cited here are the reviewed minority. Per `docs/research-scratch/screenshot-registry/COVERAGE.md` (2026-10-11) and `findings.md`. Two citations in the registry do not resolve to a current frame and are recorded as legitimate gaps rather than re-pointed: `2026-07-14 185506.png` (absent from disk, no git history) and `2026-07-15 005040.png` (marked missing in `accents.json`); a third, `2026-07-18 235511.png`, is a typo for `2026-07-17 235511.png` (KI-57) and the correct frame exists.
 
-| Gate                                          | How it was run                                                                     | Result                                                                                                                                                                                                                            | Still true?                                                                                                                                                                                                                          |
-| --------------------------------------------- | ---------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Independent adversarial review                | Fresh-context reviewer over the whole body, re-deriving figures from the export    | 24 findings, 3 blocking, all addressed or refuted with evidence; verdict moved from "do not ship"                                                                                                                                 | Yes for the body as of 2026-09-27; the ~900 lines added since were not reviewed this way                                                                                                                                             |
-| Roster recomputation                          | All 268 rows compared cell by cell against the export, twice by separate parties   | Full agreement on names, ten aptitude letters, rarity, both server dates, ★5 ceiling, variant count and `stat_bonus`                                                                                                              | Yes                                                                                                                                                                                                                                  |
-| Roster set equality                           | Diff against the Kamigame `[JP]` index                                             | 135 against 135 units, 268 against 268 cards, 0 names unique to either side                                                                                                                                                       | Yes                                                                                                                                                                                                                                  |
-| Aptitude order                                | Three diagnostic units, two publishers each                                        | 30 of 30 cells agree                                                                                                                                                                                                              | Yes                                                                                                                                                                                                                                  |
-| Server-status consistency                     | Row-level assertion over the finished tables                                       | 0 rows tagged `[Both]` while carrying no `[Global]` release date, after 61 such rows were found and fixed                                                                                                                         | Yes                                                                                                                                                                                                                                  |
-| Lore sweep, word boundaries                   | `gates.py` and `final_measure.py` over the finished document                       | 23 hits, all of them the document naming the ban list at itself: 10 in the lore policy statement and 13 in this audit's enumeration. 0 hits anywhere else                                                                         | **Needs a re-run.** The lore rulings section added after 2026-09-27 adds quoted material, including a heading that was itself a finding.                                                                                             |
-| Lore sweep, substrings                        | same                                                                               | 30 hits, every one inside a longer word or a proper noun: "desired" in ordinary prose, the Umamusume named Red Desire and its URL slug, "damaged", and the Italian epithet "La dama perfetta"                                     | Needs a re-run, same reason                                                                                                                                                                                                          |
-| Independent adversarial review note on lore   | reviewer's own sweep                                                               | 0 confirmed violations; it also recorded two places where this document declined to reproduce an equine string from the export and printed the official wording instead                                                           | Yes for 2026-09-27                                                                                                                                                                                                                   |
-| Dead citations                                | `checklinks.py`, 12 workers, every distinct link target                            | 0 non-200 across every link in the document                                                                                                                                                                                       | **Needs a re-run.** Links added with 1.4.7, 1.4.8, 1.6.10 and 3.5 were never checked.                                                                                                                                                |
-| Machine-local paths                           | Absolute-path sweep                                                                | 0 references to the build machine's working directory, so the document stands alone                                                                                                                                               | Needs a re-run; cheap to check                                                                                                                                                                                                       |
-| Empty table cells and placeholders            | `final_measure.py`                                                                 | 0 empty cells. The only occurrences of TODO, TBD and "data pending" in the file are in this audit's statement that they are forbidden                                                                                             | **False as of 2026-09-27 onward.** The placeholder citation `[User-Supplied / ...]` appeared in six places and was removed on 2026-10-02; the sweep predates its own discovery.                                                      |
-| Hedging and AI filler                         | `final_measure.py`                                                                 | 0 in the body. Every hit for the forbidden phrases sits in this audit's own list of terms the document forbids                                                                                                                    | **False.** First-person drafting voice ("my earlier inference", "Counts I can support") and the label "lead's read" were present at audit time and were rewritten on 2026-10-02. The original run evidently did not look for them.   |
-| Em dash                                       | counted over the finished file                                                     | 5 occurrences, 0 of them prose: 4 inside verbatim skill names in the roster tables, 1 inside the lore policy statement quoting such a name. The five section headings that carried one were rewritten with colons at build time   | **False, and re-measured 2026-11-12: the file carries 152 em dashes, the great majority in prose.** The rule they would violate is `AGENTS.md` §5's "no em dashes in **shipped copy**", which governs UI strings rather than a reference document, and the section headings are still colon-only, so the two things the original sweep was actually checking for hold. The count of 5 has not been the count since 2026-09-29. Recorded rather than mass-replaced: they are spread across every pass and a blind rewrite would touch verbatim quoted strings. |
-| Server tagging                                | counted over the finished file                                                      | 451 `[JP]`, 588 `[Global]`, 156 `[Both]`, 171 `[JP-Only]` markers                                                                                                                                                                 | **Re-derived 2026-11-12: 488 `[JP]`, 750 `[Global]`, 163 `[Both]`, 190 `[JP-Only]`** on a bare-token count. The old figures were low by 30 to 160 each, and the file has only grown, so they were stale rather than measured differently. Re-derive rather than quote, as the row already says. |
-| Table integrity                               | Column-count scan over every table                                                 | 29 tables, 0 column mismatches, 0 missing separators, 0 truncated rows; one nine-cell-against-eight-column defect was found in the merge step and fixed before this scan                                                          | Needs a re-run; the 61-row `char_id` table added to 3.5 is new                                                                                                                                                                       |
-| Date arithmetic                               | Window comparison for every active and upcoming item                               | 0 items whose end precedes its start; 0 "active" items already closed; 0 "upcoming" items already open                                                                                                                            | **Re-run 2026-11-12 and this time the row found failures worth naming.** Sections 4 and 5 had drifted the way this row warns about: two banner blocks in 5.2 still read `Active` past their own end dates, all nine items in 4.3 had expired, and 4.2's Spotlight row paired one notice's window with a different notice's featured trainee. All four are corrected; the drift is what a currency note does not prevent on its own. |
-| Future-dated roster rows                      | Date filter over the export                                                        | 0 cards dated after 2026-09-27 on either server                                                                                                                                                                                   | True for the 2026-09-27 export; needs a re-pull to say anything about today                                                                                                                                                          |
+Independent adversarial review
+
+- How it was run: Fresh-context reviewer over the whole body, re-deriving figures from the export
+- Result: 24 findings, 3 blocking, all addressed or refuted with evidence; verdict moved from "do not ship"
+- Still true?: Yes for the body as of 2026-09-27; the ~900 lines added since were not reviewed this way
+
+Roster recomputation
+
+- How it was run: All 268 rows compared cell by cell against the export, twice by separate parties
+- Result: Full agreement on names, ten aptitude letters, rarity, both server dates, ★5 ceiling, variant count and `stat_bonus`
+- Still true?: Yes
+
+Roster set equality
+
+- How it was run: Diff against the Kamigame `[JP]` index
+- Result: 135 against 135 units, 268 against 268 cards, 0 names unique to either side
+- Still true?: Yes
+
+Aptitude order
+
+- How it was run: Three diagnostic units, two publishers each
+- Result: 30 of 30 cells agree
+- Still true?: Yes
+
+Server-status consistency
+
+- How it was run: Row-level assertion over the finished tables
+- Result: 0 rows tagged `[Both]` while carrying no `[Global]` release date, after 61 such rows were found and fixed
+- Still true?: Yes
+
+Lore sweep, word boundaries
+
+- How it was run: `gates.py` and `final_measure.py` over the finished document
+- Result: 23 hits, all of them the document naming the ban list at itself: 10 in the lore policy statement and 13 in this audit's enumeration. 0 hits anywhere else
+- Still true?: **Needs a re-run.** The lore rulings section added after 2026-09-27 adds quoted material, including a heading that was itself a finding.
+
+Lore sweep, substrings
+
+- How it was run: same
+- Result: 30 hits, every one inside a longer word or a proper noun: "desired" in ordinary prose, the Umamusume named Red Desire and its URL slug, "damaged", and the Italian epithet "La dama perfetta"
+- Still true?: Needs a re-run, same reason
+
+Independent adversarial review note on lore
+
+- How it was run: reviewer's own sweep
+- Result: 0 confirmed violations; it also recorded two places where this document declined to reproduce an equine string from the export and printed the official wording instead
+- Still true?: Yes for 2026-09-27
+
+Dead citations
+
+- How it was run: `checklinks.py`, 12 workers, every distinct link target
+- Result: 0 non-200 across every link in the document
+- Still true?: **Needs a re-run.** Links added with 1.4.7, 1.4.8, 1.6.10 and 3.5 were never checked.
+
+Machine-local paths
+
+- How it was run: Absolute-path sweep
+- Result: 0 references to the build machine's working directory, so the document stands alone
+- Still true?: Needs a re-run; cheap to check
+
+Empty table cells and placeholders
+
+- How it was run: `final_measure.py`
+- Result: 0 empty cells. The only occurrences of TODO, TBD and "data pending" in the file are in this audit's statement that they are forbidden
+- Still true?: **False as of 2026-09-27 onward.** The placeholder citation `[User-Supplied / ...]` appeared in six places and was removed on 2026-10-02; the sweep predates its own discovery.
+
+Hedging and AI filler
+
+- How it was run: `final_measure.py`
+- Result: 0 in the body. Every hit for the forbidden phrases sits in this audit's own list of terms the document forbids
+- Still true?: **False.** First-person drafting voice ("my earlier inference", "Counts I can support") and the label "lead's read" were present at audit time and were rewritten on 2026-10-02. The original run evidently did not look for them.
+
+Em dash
+
+- How it was run: counted over the finished file
+- Result: 5 occurrences, 0 of them prose: 4 inside verbatim skill names in the roster tables, 1 inside the lore policy statement quoting such a name. The five section headings that carried one were rewritten with colons at build time
+- Still true?: **False, and re-measured 2026-11-12: the file carries 152 em dashes, the great majority in prose.** The rule they would violate is `AGENTS.md` §5's "no em dashes in **shipped copy**", which governs UI strings rather than a reference document, and the section headings are still colon-only, so the two things the original sweep was actually checking for hold. The count of 5 has not been the count since 2026-09-29. Recorded rather than mass-replaced: they are spread across every pass and a blind rewrite would touch verbatim quoted strings.
+
+Server tagging
+
+- How it was run: counted over the finished file
+- Result: 451 `[JP]`, 588 `[Global]`, 156 `[Both]`, 171 `[JP-Only]` markers
+- Still true?: **Re-derived 2026-11-12: 488 `[JP]`, 750 `[Global]`, 163 `[Both]`, 190 `[JP-Only]`** on a bare-token count. The old figures were low by 30 to 160 each, and the file has only grown, so they were stale rather than measured differently. Re-derive rather than quote, as the row already says.
+
+Table integrity
+
+- How it was run: Column-count scan over every table
+- Result: 29 tables, 0 column mismatches, 0 missing separators, 0 truncated rows; one nine-cell-against-eight-column defect was found in the merge step and fixed before this scan
+- Still true?: Needs a re-run; the 61-row `char_id` table added to 3.5 is new
+
+Date arithmetic
+
+- How it was run: Window comparison for every active and upcoming item
+- Result: 0 items whose end precedes its start; 0 "active" items already closed; 0 "upcoming" items already open
+- Still true?: **Re-run 2026-11-12 and this time the row found failures worth naming.** Sections 4 and 5 had drifted the way this row warns about: two banner blocks in 5.2 still read `Active` past their own end dates, all nine items in 4.3 had expired, and 4.2's Spotlight row paired one notice's window with a different notice's featured trainee. All four are corrected; the drift is what a currency note does not prevent on its own.
+
+Future-dated roster rows
+
+- How it was run: Date filter over the export
+- Result: 0 cards dated after 2026-09-27 on either server
+- Still true?: True for the 2026-09-27 export; needs a re-pull to say anything about today
+
 
 ### 8.6 Deviations from the commissioned method, stated plainly
 
@@ -3381,11 +4745,17 @@ contradictory 79 against 97 percent for the common tier is logged rather than re
 `CONSTRAINTS.md` C-4 greps tracked text for the banned patterns, and this document will produce hits
 of three kinds, none of them a violation:
 
-| Kind                                                     | Where                                                                                                                                          | Why it is not a violation                                                                           |
-| -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| Naming the ban in order to forbid it                     | the lore policy section, and 5.5 above                                                                                                         | Same purpose as the `docs/research-scratch/GOVERNANCE.md` lines already exempted under C-4 as elimination evidence   |
-| Banned substrings inside ordinary words and real names   | "desired" in skill-planning prose, the Umamusume named `Red Desire` and its URL slug, "damaged", the support-card epithet "La dama perfetta"   | A substring is not a vocabulary choice, and the names are the data                                  |
-| Four em dashes inside verbatim skill names               | three roster table rows                                                                                                                        | Quoted product strings. Rewriting them to satisfy a style rule would falsify the reference          |
+**Naming the ban in order to forbid it**
+- Where: the lore policy section, and 5.5 above
+- Why it is not a violation: Same purpose as the `docs/research-scratch/GOVERNANCE.md` lines already exempted under C-4 as elimination evidence
+
+**Banned substrings inside ordinary words and real names**
+- Where: "desired" in skill-planning prose, the Umamusume named `Red Desire` and its URL slug, "damaged", the support-card epithet "La dama perfetta"
+- Why it is not a violation: A substring is not a vocabulary choice, and the names are the data
+
+**Four em dashes inside verbatim skill names**
+- Where: three roster table rows
+- Why it is not a violation: Quoted product strings. Rewriting them to satisfy a style rule would falsify the reference
 
 The document is currently untracked, so `make lore` will not see it until it is committed. When it
 is, the C-4 adjudication belongs to the Lore Guardian, and the three rows above are the reasoning

@@ -699,7 +699,7 @@ The keys that could have been a `best_for` under another name are not one, read 
 
 #### The one signal that is a client fact, and its coverage
 
-`docs/UMAMUSUME_REFERENCE.md:242` states the mechanic: a skill whose condition contains `running_style==N`
+`docs/UMAMUSUME_REFERENCE.md:383` states the mechanic: a skill whose condition contains `running_style==N`
 **cannot fire for any other style**, so the label rewrites the usable skill list rather than a hidden curve.
 That is genuine "who is this for" information, published by the client, and it is the only such signal found.
 
@@ -755,7 +755,7 @@ Checked, and **neither carries skill-role framing**. What they do say about skil
 The concept sweep across `docs/scenarios/` and `docs/UMAMUSUME_REFERENCE.md` returned three hits, and the two
 that are not the scenario docs above are:
 
-- `UMAMUSUME_REFERENCE.md:146` — the closest thing to a real skill-priority concept anywhere: the
+- `UMAMUSUME_REFERENCE.md:240` — the closest thing to a real skill-priority concept anywhere: the
   「スキルセット」 feature sorts desired skills into **three priority groups** (超優先 / 優先 / 通常). It is
   **`[JP]`** official news 2026.09.11, it is **player-authored** rather than published per skill, and the same
   line records that **no `[Global]` notice for an equivalent feature** appears in the Global news index
@@ -895,7 +895,7 @@ Each line is `file:line` plus the evidence, per instruction. **Filed, not fixed.
   Filed for the next PRD pass: retarget the citation to the aptitude columns. Not edited here, because the
   fence says the PRD is read, not rewritten.
 
-- **P-7: the four running-style counts at `UMAMUSUME_REFERENCE.md:231-234` do not state their denominator.**
+- **P-7: the four running-style counts at `UMAMUSUME_REFERENCE.md:372-375` do not state their denominator.**
   The column "Skills gated to it" reads 107, 220, 166 and 115. Measured over the whole export body
   `database/seeders/data/skills.609afe88.json`, which holds 1,910 records, counting skills whose condition set
   pins exactly one `running_style` value gives 107, 220, 166, 115. Those four numbers reproduce, so the table
@@ -944,7 +944,7 @@ Each line is `file:line` plus the evidence, per instruction. **Filed, not fixed.
 
 | Class                     | Count   | Items                                                                                                                                                                                                                                                                             |
 | ------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Resolves from repo root   | 10      | `AGENTS.md:59`, `tests/Feature/CatalogDetailPageTest.php:82`, `docs/adr/0012…:87`, `CONSTRAINTS.md:143,166`, `DESIGN.md:180`, `config/uma.php:181`, `KNOWN-ISSUES.md:184`, `docs/UMAMUSUME_REFERENCE.md:184`, `docs/design-research/slice-5-phase-a-best-for-2026-10-01.md:184`   |
+| Resolves from repo root   | 10      | `AGENTS.md:59`, `tests/Feature/CatalogDetailPageTest.php:82`, `docs/adr/0012…:87`, `CONSTRAINTS.md:143,166`, `DESIGN.md:180`, `config/uma.php:181`, `KNOWN-ISSUES.md:184`, `docs/UMAMUSUME_REFERENCE.md:278`, `docs/design-research/slice-5-phase-a-best-for-2026-10-01.md:184`   |
 | Loose but findable        | 3       | `components/layout.blade.php:36` → `resources/views/components/…`; `2026_09_29_182820_create_umamusume_profiles_table.php:84` → `database/migrations/…`; `factors.json:184` → **not tracked** (see P-6)                                                                           |
 | Not citations at all      | 8       | `GET /umamusume…:26,31`, `.json:31`, `/api/v1:34,148`, `Asia/Tokyo:124`, `maatwebsite/excel:168`, `Tier / Skill / Points:184`                                                                                                                                                     |
 
@@ -3001,7 +3001,7 @@ Bloom (`02-unity-cup.md:183`, `:156`). Picking the name is not enough; the win i
    left. In order: an Extreme Burst tile (0% failure, scoped to the facility holding the Burst,
    `02-unity-cup.md:113`), a Wit turn (no Energy cost, and a Burst there returns +5 Energy), or Rest
    for Energy. Corrected 2026-10-03: this step was written as "Rest for +30 Energy" on
-   `docs/UMAMUSUME_REFERENCE.md:162`, and the repository's own §2.1 in
+   `docs/UMAMUSUME_REFERENCE.md:256`, and the repository's own §2.1 in
    `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` measures the modal rest at +50 with +30 as
    the under-slept failure tier. The order of the three options does not depend on which tier lands;
    how many training turns the rest buys back does, so the figure is left open here rather than picked.

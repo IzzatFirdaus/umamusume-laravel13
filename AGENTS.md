@@ -74,9 +74,52 @@ No new markdown in repo root; new docs go into `docs/research-scratch/` masters 
 | `docs/scenarios/01,02,03,07,08,09` | per-scenario guides (08 JP-only, don't import) |
 | `PRODUCT.md` | generated; don't hand-edit |
 | `docs/deprecated/` | retired legacy PDFs; not a source |
+| `docs/adr/` | Architecture Decision Records (0001-0037); `docs/adr/README.md` is the derived index, Accepted binds only |
+| `docs/audits/` | Repository audits only (browser observations, RS-UC audits, UX walks); dated dirs, register in `docs/audits/INDEX.md` |
+| `docs/archive/` | Superseded artifacts (mockups, screenshots, captures); not a source |
+| `docs/game-screenshots/` | Raw Global client screenshots; reference only |
+| `docs/imports/` | Legacy tracker run records; folded into `TRAINING-RUN-IMPORTS.md` master; files remain as record |
+| `docs/plan/` | Dated execution plans (session plans and legacy plans) |
+| `docs/proposals/` | Descriptive proposals, not authoritative; verify paths against the tree before trusting |
+| `docs/research/` | Flow briefs (`flows-*.md`), `SYSTEM-FLOWS.md`, mechanics source research |
+| `docs/research-scratch/` | Process masters (`GOVERNANCE.md`, `PROCESS-PLANS.md`, `SLICE-RECORDS.md`, `PLANS-AND-BRIEFS.md`); no new files unless owner names the path |
+| `docs/research-scratch-source/` | Umamusume game knowledge ONLY (`data/`, `scripts/`); no repo process docs |
+| `docs/roadmap/` | Live roadmaps + verifications (`MASTER-IMPLEMENTATION-ROADMAP-2026-11-18.md`, `INDEX.md`) |
+| `docs/sitrep/` | Session reports and handoffs |
 
 When docs disagree: quality bar > gate registry > ADRs > DESIGN.md > slice plans; ARCHITECTURE.md
 over digest; PRD is product truth.
+
+### Default placement (no path specified)
+
+When no path is specified, place by document class:
+
+- New defect → `KNOWN-ISSUES.md` (`KI-nn`, four-part form, never renumber).
+- Repository audit artifact → `docs/audits/<dated-slug>/`, then register in `docs/audits/INDEX.md`.
+- Umamusume game-mechanics fact → `docs/research-scratch-source/` — game knowledge only, and only on owner direction.
+- Architecture decision → `docs/adr/`, then regenerate `docs/adr/README.md`.
+- Process or planning doc → append to the owning `docs/research-scratch/` master. Do not create a new master; the owner must name the path.
+- Anything else → ask the owner. Do not invent a folder or place by guess.
+
+Check order: `AGENTS.md` §3 → `docs/INDEX.md` → the folder's own `INDEX.md` (`docs/audits/`, `docs/roadmap/`, `docs/research-scratch-source/`, `docs/design-research/_scratch/` each carry one).
+
+## 3a. Cross-directory workflow (proposals → roadmap → plan → sitrep)
+
+Four doc directories form one execution loop. A slice moves through them in order; each directory owns exactly one step:
+
+| Step | Directory | Owns | Relation |
+|---|---|---|---|
+| Propose | `docs/proposals/` | Descriptive ideas, **not** authoritative | Accepted ideas sequence into a roadmap slice; cited as source |
+| Sequence | `docs/roadmap/` | Live roadmap + verifications; **ordering authority** | `MASTER-IMPLEMENTATION-ROADMAP-2026-11-18.md` holds slices S0.1–S4.4; plans cite slice ids |
+| Plan | `docs/plan/` | Dated execution plans | `PLAN-CONTRACT` `slices:` lists roadmap slice(s) the plan covers; roadmap governs, plan corrects |
+| Report | `docs/sitrep/` | Session reports and handoffs | Sitreps record progress on plan slices and update roadmap acceptance status; remaining work feeds back |
+
+Rules:
+- **Propose → Sequence → Plan → Report** is the forward direction. Sitrep outcomes feed remaining work back into the roadmap's acceptance list (§16 of MASTER-IMPLEMENTATION-ROADMAP); never rewrite a landed plan.
+- Proposals are descriptive only — verify paths against `git ls-files` before reading; plan text re-measured against the tree.
+- No roadmap ↔ plan pair references another pair file; shared facts live in `mnemon`, never inside a pair file (owner ruling 2026-11-16).
+- A plan's `PLAN-CONTRACT` `slices:` field is the machine-readable join to its roadmap slice(s); a sitrep names the plan file(s) and slice(s) it worked on.
+- Historical pair files stay on disk as record; they own no current execution order and are never edited (`docs/roadmap/INDEX.md`).
 
 ## 4. Roles and escalation
 
@@ -139,7 +182,10 @@ lang/en/uma.php           displayed vocabulary + Global terms map
 routes/                   web.php (browser), api.php (JSON)
 tests/                    Feature/ (bulk), Unit/ (no DB), Fixtures/ (stored bodies)
 tools/                    lore.php, gate.py, doc_census.py, roster-crosscheck.php, check_untracked.py
-docs/                     adr/, scenarios/, proposals/, research-scratch/ masters, deprecated/
+docs/                     adr/, audits/, archive/, game-screenshots/, imports/,
+                          plan/, plans/, proposals/, research/, research-scratch/
+                          masters, research-scratch-source/, roadmap/, scenarios/,
+                          sitrep/, deprecated/
 ```
 
 ## 7. Coding conventions

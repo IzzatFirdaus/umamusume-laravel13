@@ -27,7 +27,7 @@ counted as progress here is a documentation update, a plan, or a report.
 
 ## Laws that bind every slice
 
-Carried forward from `docs/plans/implementation-roadmap-v3.0.0.md` and `AGENTS.md`; they are the
+Carried forward from `docs/plan/implementation-roadmap-v3.0.0.md` and `AGENTS.md`; they are the
 reason several slices below are shaped the way they are.
 
 | # | Law | Consequence for this plan |

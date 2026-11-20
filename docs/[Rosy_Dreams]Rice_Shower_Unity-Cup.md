@@ -1,5 +1,74 @@
 # Unity Cup run report: [Rosy Dreams] Rice Shower
 
+## How to read this file
+
+This report is written for agents first (§7 tasks, planning, verification), so it is dense. If you are the owner reading it:
+
+- **Read §0 Executive Summary first** — what changed, what's open, where to look.
+- **Use the Section map** — every section is tagged `human` (owner-readable), `agent` (agent-ready detail), or `both`.
+- **Skip `agent`-only sections** unless verifying a specific claim; they carry line numbers that code and other docs cite by reference.
+- Section numbers (§1.2, §1.4, ...) are stable across edits. Line numbers shift only when this front matter grows.
+
+## Section map
+
+**§0 Executive Summary**
+- About: What changed, what's open, where to look
+- Audience: human
+
+**§1 What the screenshots establish**
+- About: Frame observations: run identity, stats, deck, mood, roster
+- Audience: both
+
+**§2 The skill pool, and what 173 SP buys**
+- About: Hint ladder, purchasable skills, spend plan, burst economy, training levels
+- Audience: agent
+
+**§3 What this run looks like it was doing**
+- About: Inferred intent across the five remaining turns
+- Audience: both
+
+**§4 What is closed off, and one thing the corpus cannot settle**
+- About: Dead ends and open disagreements
+- Audience: human
+
+**§5 The plan for the five remaining turns**
+- About: Turn-by-turn plan
+- Audience: both
+
+**§6 What is still missing**
+- About: Gaps and unresolved questions
+- Audience: human
+
+**§7 Corpus findings, and the edits they caused**
+- About: Findings that changed code / other docs
+- Audience: agent
+
+**§8 Research pass results, 2026-10-03**
+- About: Online pass results: Spirit Burst, caps, finals
+- Audience: agent
+
+**§9 System values not observed in this run's frames**
+- About: Publisher knowledge not in frames
+- Audience: agent
+
+**§10 This run's position in the career flow**
+- About: Stage table vs whole career flow
+- Audience: both
+
+**§11 Revision table — 2026-11-06 frame re-read**
+- About: Corrections and additions
+- Audience: both
+
+## §0 Executive Summary
+
+**Where to start.** §1 establishes what the screenshots show; §5 is the plan for the five remaining turns; §6 lists what is still missing; §4 marks what is closed off and the one open disagreement.
+
+**Key numbers (from §1.1–1.2).** Unity Cup scenario; Rice Shower `[Rosy Dreams]` ★3 Potential Lvl 2; Senior Year Early Oct, **5 turns left, 5 turns until the Unity Cup**. Fans 209,245 (class Star); Top Star is 240,000, so **30,755 fans** is the open numeric target. Live stats: Speed 607 (B, cap 1325), Stamina 577 (C+, cap 1322), Power 549 (C+, cap 1368).
+
+**Open items.** The Extreme Bursts / gold disagreement (§8.2, live — decides this run), energy back-solve (§8.6), and the cap-shortfall candidate (§8.5). §6 carries the full missing list; §4 names the one thing the corpus cannot settle.
+
+**Recent.** Revision table §11 is the 2026-11-06 frame re-read (corrections + additions). Publisher disclosures in §1.8, §1.9, §2.5, §2.6, §8.3 and §9 carry ⚠️ STALE marks on anything older than 90 days; two §2.4-cited pages without a marker carry one here.
+
 **Evidence base:** 68 `[Global]` client frames captured 2026-10-03: 19 at 16:09, 19 at 16:27, 20 at 17:07
 and 10 at 17:53. One pair from the 17:07 set is byte-identical, so 67 distinct. Frame references are the
 first eight characters of each capture filename. The deck's effect sets and skill lists come from a
@@ -53,13 +122,40 @@ puts Top Star at 240,000, so **30,755 fans** is the open numeric target (`7a68ae
 
 ### 1.2 Live stat line and the caps above it
 
-| Stat    | Value | Rank | Cap shown | Growth | Over the 1300 floor   |  |
-| ------- | ----- | ---- | --------- | ------ | --------------------- |  |
-| Speed   | 607   | B    | 1325      | +0%    | +25                   |  |
-| Stamina | 577   | C+   | 1322      | +10%   | +22                   |  |
-| Power   | 549   | C+   | 1368      | +0%    | +68                   |  |
-| Guts    | 736   | B+   | 1308      | +20%   | +8                    |  |
-| Wit     | 397   | D+   | 1800      | +0%    | N/A (different floor) |  |
+**Speed**
+- Value: 607
+- Rank: B
+- Cap shown: 1325
+- Growth: +0%
+- Over the 1300 floor: +25
+
+**Stamina**
+- Value: 577
+- Rank: C+
+- Cap shown: 1322
+- Growth: +10%
+- Over the 1300 floor: +22
+
+**Power**
+- Value: 549
+- Rank: C+
+- Cap shown: 1368
+- Growth: +0%
+- Over the 1300 floor: +68
+
+**Guts**
+- Value: 736
+- Rank: B+
+- Cap shown: 1308
+- Growth: +20%
+- Over the 1300 floor: +8
+
+**Wit**
+- Value: 397
+- Rank: D+
+- Cap shown: 1800
+- Growth: +0%
+- Over the 1300 floor: N/A (different floor)
 
 Skill Points: **173 unspent** (`09e754d6`). The 1300 / 1300 / 1300 / 1300 / 1800 floor is the scenario
 base: the 2026-07 rework added +100 to Speed, Stamina, Power and Guts and +600 to Wit ([game8.co
@@ -116,14 +212,41 @@ which carries each card's effects at their maximum anchors. The client popup sho
 has reached at its current level and limit breaks, so the two columns below are different things: the
 catalog is what the card can be, the client column is what this run has.
 
-| Card                                   | Type    | Client level | Unique Perk                                                             | Scenario link |  |
-| -------------------------------------- | ------- | ------------ | ----------------------------------------------------------------------- | ------------- |  |
-| Tokai Teio [Dream Big!]                | Speed   | 35/35        | Dream Big! L30: Friendship Bonus and Initial Speed                      | no            |  |
-| Nishino Flower [Even the Littlest Bud] | Speed   | 30/30        | Even the Littlest Bud L30: Mood Effect and Initial Friendship Gauge     | no            |  |
-| Biko Pegasus [Double Carrot Punch!]    | Speed   | 30/30        | Double Carrot Punch! L30: Training Effectiveness and Specialty Priority | no            |  |
-| Super Creek [Piece of Mind]            | Stamina | 50/50        | Piece of Mind L30: Friendship Bonus and Specialty Priority              | no            |  |
-| Matikanetannhauser [Just Keep Going]   | Guts    | 30/30        | Just Keep Going L40: Friendship Bonus and Initial Guts                  | no            |  |
-| Haru Urara [Urara's Day Off!]          | Guts    | 35/35        | Urara's Day Off! L40: Friendship Bonus and Race Bonus                   | **yes**       |  |
+**Tokai Teio [Dream Big!]**
+- Type: Speed
+- Client level: 35/35
+- Unique Perk: Dream Big! L30: Friendship Bonus and Initial Speed
+- Scenario link: no
+
+**Nishino Flower [Even the Littlest Bud]**
+- Type: Speed
+- Client level: 30/30
+- Unique Perk: Even the Littlest Bud L30: Mood Effect and Initial Friendship Gauge
+- Scenario link: no
+
+**Biko Pegasus [Double Carrot Punch!]**
+- Type: Speed
+- Client level: 30/30
+- Unique Perk: Double Carrot Punch! L30: Training Effectiveness and Specialty Priority
+- Scenario link: no
+
+**Super Creek [Piece of Mind]**
+- Type: Stamina
+- Client level: 50/50
+- Unique Perk: Piece of Mind L30: Friendship Bonus and Specialty Priority
+- Scenario link: no
+
+**Matikanetannhauser [Just Keep Going]**
+- Type: Guts
+- Client level: 30/30
+- Unique Perk: Just Keep Going L40: Friendship Bonus and Initial Guts
+- Scenario link: no
+
+**Haru Urara [Urara's Day Off!]**
+- Type: Guts
+- Client level: 35/35
+- Unique Perk: Urara's Day Off! L40: Friendship Bonus and Race Bonus
+- Scenario link: **yes**
 
 Three Speed, one Stamina, two Guts, no Wit, no Pal. The sixth slot is a **friend card**: the Career
 Profile rail tags Super Creek's entry with a "Friends" pill where the other five carry their discipline
@@ -136,27 +259,40 @@ Haru Urara is the deck's only Unity Cup link, so every Special Training and Burs
 carries the +1 (`02-unity-cup.md:78`). Super Creek at 50/50 is the only maxed card, and every client row
 visible for her equals her catalog maximum, which is the check that the two columns mean what they say.
 
-| Card               | Effect set, values at max (catalog)                                                                                                                                   | Client rows visible                                                                                                                |  |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |  |
-| Tokai Teio         | Friendship Bonus 20, Mood Effect 60, Power Bonus 1, Initial Friendship Gauge 25, Race Bonus 10, Fan Bonus 15, Hint Levels 2, Hint Frequency 40, Specialty Priority 35 | FB 16, Mood 45, Power Bonus 1, Hint Freq 33, Specialty Priority 25, Hint Levels (row cut), Race 45 locked, Fan 45 locked           |  |
-| Nishino Flower     | FB 20, Mood 30, Speed Bonus 1, Training Effectiveness 10, Initial Speed 30, Initial Friendship Gauge 35, Race 5, Fan 15, Hint Levels 3, Hint Frequency 50             | FB 15, Mood 20, Training Eff 5, Hint Levels Lv2, Hint Freq 40, Speed Bonus 35 locked, Initial Speed 45 locked                      |  |
-| Biko Pegasus       | FB 25, Speed Bonus 1, Training Eff 15, Initial Speed 35, Initial Friendship Gauge 30, Race 10, Fan 20, Specialty Priority 35                                          | FB 20, Training Eff 10, Initial Speed 25, Fan 15, Specialty Priority 20, Speed Bonus 35 locked, Initial Friendship Gauge 45 locked |  |
-| Super Creek        | FB 25, Stamina Bonus 1, Training Eff 15, Initial Stamina 35, Initial Friendship Gauge 30, Race 10, Fan 20, Specialty Priority 35                                      | FB 25, Stamina Bonus 1, Training Eff 15, Initial Friendship Gauge 30, Race 10, Fan 20, Specialty Priority 35                       |  |
-| Matikanetannhauser | FB 25, Mood 30, Guts Bonus 1, Training Eff 5, Initial Guts 35, Race 5, Fan 10, Specialty Priority 65                                                                  | FB 20, Training Eff 5, Initial Guts 25, Fan 5, Specialty Priority 50, Guts Bonus 35 locked, Mood 45 locked                         |  |
-| Haru Urara         | FB 20, Mood 30, Training Eff 15, Initial Guts 35, Race 5, Fan 10, Specialty Priority 50, Skill Point Bonus 1                                                          | FB 16, Training Eff 11, Initial Guts 27, Fan 6, Specialty Priority 40, Skill Point Bonus 1, Mood 45 locked                         |  |
+### Tokai Teio [Dream Big!]
+- Catalog effects (max): Friendship Bonus 20, Mood Effect 60, Power Bonus 1, Initial Friendship Gauge 25, Race Bonus 10, Fan Bonus 15, Hint Levels 2, Hint Frequency 40, Specialty Priority 35
+- Client rows visible: FB 16, Mood 45, Power Bonus 1, Hint Freq 33, Specialty Priority 25, Hint Levels (row cut), Race 45 locked, Fan 45 locked
+
+### Nishino Flower [Even the Littlest Bud]
+- Catalog effects (max): FB 20, Mood 30, Speed Bonus 1, Training Effectiveness 10, Initial Speed 30, Initial Friendship Gauge 35, Race 5, Fan 15, Hint Levels 3, Hint Frequency 50
+- Client rows visible: FB 15, Mood 20, Training Eff 5, Hint Levels Lv2, Hint Freq 40, Speed Bonus 35 locked, Initial Speed 45 locked
+
+### Biko Pegasus [Double Carrot Punch!]
+- Catalog effects (max): FB 25, Speed Bonus 1, Training Eff 15, Initial Speed 35, Initial Friendship Gauge 30, Race 10, Fan 20, Specialty Priority 35
+- Client rows visible: FB 20, Training Eff 10, Initial Speed 25, Fan 15, Specialty Priority 20, Speed Bonus 35 locked, Initial Friendship Gauge 45 locked
+
+### Super Creek [Piece of Mind]
+- Catalog effects (max): FB 25, Stamina Bonus 1, Training Eff 15, Initial Stamina 35, Initial Friendship Gauge 30, Race 10, Fan 20, Specialty Priority 35
+- Client rows visible: FB 25, Stamina Bonus 1, Training Eff 15, Initial Friendship Gauge 30, Race 10, Fan 20, Specialty Priority 35
+
+### Matikanetannhauser [Just Keep Going]
+- Catalog effects (max): FB 25, Mood 30, Guts Bonus 1, Training Eff 5, Initial Guts 35, Race 5, Fan 10, Specialty Priority 65
+- Client rows visible: FB 20, Training Eff 5, Initial Guts 25, Fan 5, Specialty Priority 50, Guts Bonus 35 locked, Mood 45 locked
+
+### Haru Urara [Urara's Day Off!]
+- Catalog effects (max): FB 20, Mood 30, Training Eff 15, Initial Guts 35, Race 5, Fan 10, Specialty Priority 50, Skill Point Bonus 1
+- Client rows visible: FB 16, Training Eff 11, Initial Guts 27, Fan 6, Specialty Priority 40, Skill Point Bonus 1, Mood 45 locked
 
 **Correction to the first pass:** the number beside a padlock in the client popup is the card level at
 which that effect unlocks, not a value. "Race Bonus 🔒 Lvl 45" means the effect arrives at level 45,
 which these cards cannot reach until their limit breaks raise the cap. It is not a 45% anything.
 
-| Card               | Hint pool (catalog)                                                                                                     | Story-event skills (catalog)                      |  |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |  |
-| Tokai Teio         | Prudent Positioning, Nimble Navigator, Go with the Flow, Thunderbolt Step, Soft Step, Shrewd Step                       | Rushing Gale!, Pace Chaser Straightaways ○        |  |
-| Nishino Flower     | Hanshin Racecourse ○, Standard Distance ○, Firm Conditions ○, Updrafters, Pace Chaser Corners ○                         | Beeline Burst, Straightaway Adept, Countermeasure |  |
-| Biko Pegasus       | Outer Post Proficiency ○, Wait-and-See, Gap Closer, Productive Plan, Updrafters, Meticulous Measures, Stop Right There! | Sprint Straightaways ○, Plan X                    |  |
-| Super Creek        | Firm Conditions ○, Corner Recovery ○, Ramp Up, Homestretch Haste, Hesitant Pace Chasers                                 | Swinging Maestro, Deep Breaths                    |  |
-| Matikanetannhauser | Lay Low, Pace Strategy, Steadfast, Deep Breaths, Fighter                                                                | Unruffled, Calm in a Crowd, Subdued Front Runners |  |
-| Haru Urara         | none stored                                                                                                             | Long Shot ○, Unruffled                            |  |
+**Tokai Teio [Dream Big!]** — hint pool: Prudent Positioning, Nimble Navigator, Go with the Flow, Thunderbolt Step, Soft Step, Shrewd Step · story-event skills: Rushing Gale!, Pace Chaser Straightaways ○
+**Nishino Flower [Even the Littlest Bud]** — hint pool: Hanshin Racecourse ○, Standard Distance ○, Firm Conditions ○, Updrafters, Pace Chaser Corners ○ · story-event skills: Beeline Burst, Straightaway Adept, Countermeasure
+**Biko Pegasus [Double Carrot Punch!]** — hint pool: Outer Post Proficiency ○, Wait-and-See, Gap Closer, Productive Plan, Updrafters, Meticulous Measures, Stop Right There! · story-event skills: Sprint Straightaways ○, Plan X
+**Super Creek [Piece of Mind]** — hint pool: Firm Conditions ○, Corner Recovery ○, Ramp Up, Homestretch Haste, Hesitant Pace Chasers · story-event skills: Swinging Maestro, Deep Breaths
+**Matikanetannhauser [Just Keep Going]** — hint pool: Lay Low, Pace Strategy, Steadfast, Deep Breaths, Fighter · story-event skills: Unruffled, Calm in a Crowd, Subdued Front Runners
+**Haru Urara [Urara's Day Off!]** — hint pool: none stored · story-event skills: Long Shot ○, Unruffled
 
 This closes the per-card Skills question from the catalog rather than from the frames, and it cross-
 validates the Learn screen: Soft Step at `Lv Max`, Shrewd Step and Nimble Navigator Obtained (Teio);
@@ -185,14 +321,43 @@ Rice Shower
       └── Taiki Shuttle [Wild Frontier]  rank UG
 ```
 
-| Ancestor                     | Blue            | Pink             | Green unique              | White sparks                                                                                                                                                                                                                                                       |  |
-| ---------------------------- | --------------- | ---------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |  |
-| Vodka                        | Power ★☆☆       | Late Surger ★★☆  | Cut and Drive! ★★☆        | Oka Sho ★☆☆, Victoria Mile ★☆☆, Shuka Sho ★★☆, Japan C. ★★☆, Extra Tank ★★☆, Soft Step ★★★                                                                                                                                                                         |  |
-| Daiwa Scarlet, Legacy 1 side | Guts ★☆☆        | Mile ★☆☆         | Resplendent Red Ace ★☆☆   | Osaka Hai ★★☆, Tenno Sho (Autumn) ★☆☆, Competitive Spirit ○ ★★★, Pace Chaser Straightaways ○ ★★☆                                                                                                                                                                   |  |
-| Seiun Sky                    | **Stamina ★★★** | Turf ★★☆         | Angling and Scheming ★★☆  | Kikuka Sho ★☆☆, Corner Recovery ○ ★★☆, URA Finale ★☆☆                                                                                                                                                                                                              |  |
-| Maruzensky                   | Speed ★★☆       | Turf ★★☆         | Red Shift/LP1211-M ★☆☆    | Takarazuka Kinen ★★☆, Asahi Hai F.S. ★★☆, Corner Adept ○ ★★☆, Ramp Up ★★☆, Mile Straightaways ○ ★☆☆, **Ignited Spirit: Guts +** ★☆☆                                                                                                                                |  |
-| Daiwa Scarlet, Legacy 2 side | Speed ★★☆       | Front Runner ★★☆ | Resplendent Red Ace ★☆☆   | Osaka Hai ★★☆, Tenno Sho (Spring) ★★☆, NHK Mile C. ★★☆, Japan C. ★★☆, Corner Adept ○ ★★☆, Unyielding Spirit ★★☆, Front Runner Savvy ○ ★☆☆                                                                                                                          |  |
-| Taiki Shuttle                | **Power ★★★**   | Pace Chaser ★★☆  | Shooting for Victory! ★★☆ | NHK Mile C. ★★☆, Sprinters S. ★☆☆, JBC L. Classic ★★☆, Tokyo Daishoten ★★☆, Corner Adept ○ ★★☆, Corner Acceleration ○ ★★☆, Shifting Gears ★☆☆, Productive Plan ★★☆, Pace Chaser Straightaways ○ ★★★, Disorient ★★☆, Sympathy ★★☆, Head-On ★★☆, Glittering Star ★★☆ |  |
+**Vodka**
+- Blue: Power ★☆☆
+- Pink: Late Surger ★★☆
+- Green unique: Cut and Drive! ★★☆
+
+**Daiwa Scarlet, Legacy 1 side**
+- Blue: Guts ★☆☆
+- Pink: Mile ★☆☆
+- Green unique: Resplendent Red Ace ★☆☆
+
+**Seiun Sky**
+- Blue: **Stamina ★★★**
+- Pink: Turf ★★☆
+- Green unique: Angling and Scheming ★★☆
+
+**Maruzensky**
+- Blue: Speed ★★☆
+- Pink: Turf ★★☆
+- Green unique: Red Shift/LP1211-M ★☆☆
+
+**Daiwa Scarlet, Legacy 2 side**
+- Blue: Speed ★★☆
+- Pink: Front Runner ★★☆
+- Green unique: Resplendent Red Ace ★☆☆
+
+**Taiki Shuttle**
+- Blue: **Power ★★★**
+- Pink: Pace Chaser ★★☆
+- Green unique: Shooting for Victory! ★★☆
+
+White sparks:
+- Vodka: Oka Sho ★☆☆, Victoria Mile ★☆☆, Shuka Sho ★★☆, Japan C. ★★☆, Extra Tank ★★☆, Soft Step ★★★
+- Daiwa Scarlet (Legacy 1 side): Osaka Hai ★★☆, Tenno Sho (Autumn) ★☆☆, Competitive Spirit ○ ★★★, Pace Chaser Straightaways ○ ★★☆
+- Seiun Sky: Kikuka Sho ★☆☆, Corner Recovery ○ ★★☆, URA Finale ★☆☆
+- Maruzensky: Takarazuka Kinen ★★☆, Asahi Hai F.S. ★★☆, Corner Adept ○ ★★☆, Ramp Up ★★☆, Mile Straightaways ○ ★☆☆, Ignited Spirit: Guts + ★☆☆
+- Daiwa Scarlet (Legacy 2 side): Osaka Hai ★★☆, Tenno Sho (Spring) ★★☆, NHK Mile C. ★★☆, Japan C. ★★☆, Corner Adept ○ ★★☆, Unyielding Spirit ★★☆, Front Runner Savvy ○ ★☆☆
+- Taiki Shuttle: NHK Mile C. ★★☆, Sprinters S. ★☆☆, JBC L. Classic ★★☆, Tokyo Daishoten ★★☆, Corner Adept ○ ★★☆, Corner Acceleration ○ ★★☆, Shifting Gears ★☆☆, Productive Plan ★★☆, Pace Chaser Straightaways ○ ★★★, Disorient ★★☆, Sympathy ★★☆, Head-On ★★☆, Glittering Star ★★☆
 
 **These panels replace the star reads in the first version of this section, and three of them were
 wrong.** Reading stars off the scrolling Sparks grid gave Shooting for Victory! ★★★ (it is ★★☆),
@@ -223,10 +388,17 @@ and the **Arima Kinen** goal slot at Late Dec.
 **Race day, Senior Early Oct** (`85e4c75a`, `f49bd7b1`, `714f495d`). The turn offers two races and the
 client marks the first one Recommended:
 
-| Option                      | Grade | Course                                                  | Fans on a win | Her fit          |  |
-| --------------------------- | ----- | ------------------------------------------------------- | ------------- | ---------------- |  |
-| Kyoto Daishoten             | G2    | Kyoto Turf 2400m (Medium) Right / Outer, Fall, **Soft** | 6,700         | Turf A, Medium A |  |
-| Mile Championship Nambu Hai | G1    | Morioka **Dirt** 1600m (Mile) Left                      | 6,000         | Dirt C, Mile B   |  |
+**Kyoto Daishoten**
+- Grade: G2
+- Course: Kyoto Turf 2400m (Medium) Right / Outer, Fall, **Soft**
+- Fans on a win: 6,700
+- Her fit: Turf A, Medium A
+
+**Mile Championship Nambu Hai**
+- Grade: G1
+- Course: Morioka **Dirt** 1600m (Mile) Left
+- Fans on a win: 6,000
+- Her fit: Dirt C, Mile B
 
 The Daishoten card: Full Gate 18, held in Classic Year / Senior Year Oct, entry criteria "2,000 fans or
 more" met at 209,245, and fan rewards of 6,700 / 2,680 / 1,675 / 1,005 / 670 for first through fifth,
@@ -269,15 +441,19 @@ levels: Speed 4, Stamina 4, Power 4, **Guts 5**, Wit 4.
 
 The control beside the Team Rank display, opened (`3cc1c271`, `556e1d6c`):
 
-| Field                 | Value                                                       |  |
-| --------------------- | ----------------------------------------------------------- |  |
-| Team                  | Blue Bloom, motto "Dreaming Big", league **8th**            |  |
-| Team Rank             | S (five stars), **Team Ranking Bonus: All Attributes + 30** |  |
-| Team stat grades      | Speed A, Stamina A, Power A, **Guts S**, Wit A              |  |
-| Unity Trainings       | **55**                                                      |  |
-| Spirit Bursts         | **6**                                                       |  |
-| Extreme Spirit Bursts | **5**                                                       |  |
-| Members               | **20 / 20**                                                 |  |
+- **Team**: Blue Bloom, motto "Dreaming Big", league **8th**
+
+- **Team Rank**: S (five stars), **Team Ranking Bonus: All Attributes + 30**
+
+- **Team stat grades**: Speed A, Stamina A, Power A, **Guts S**, Wit A
+
+- **Unity Trainings**: **55**
+
+- **Spirit Bursts**: **6**
+
+- **Extreme Spirit Bursts**: **5**
+
+- **Members**: **20 / 20**
 
 Two of these are decision-bearing. **11 combined bursts** (6 + 5) sits in the 10–12 band, so the
 November event pays the **gold** scenario skill at Lv1, and 13 would pay it at Lv3. And the team's
@@ -337,28 +513,107 @@ the seeded catalog rather than from the inspector, and they would read the same 
 precisely why the distinction matters for a form: a catalog-sourced skill list and a client-read skill list
 are different provenance and must not be merged into one field.
 
-| Deck character     | Grade | Stats                            | Caps                  | Aptitudes of note                        |  |
-| ------------------ | ----- | -------------------------------- | --------------------- | ---------------------------------------- |  |
-| Haru Urara         | **A** | 733 / 572 / 728 / **1068** / 621 | 900/860/900/1140/850  | Dirt A, Sprint A, Late A; Turf G         |  |
-| Tokai Teio         | B     | 885 / 571 / 702 / 754 / 597      | 1080/860/960/880/850  | Turf A, Medium A, Pace A                 |  |
-| Nishino Flower     | B     | 806 / 591 / 680 / 625 / 610      | 1080/860/960/880/850  | Turf A, Sprint A, Mile A, Pace A, Late A |  |
-| Super Creek        | B     | 563 / 888 / 527 / 764 / 633      | 860/1100/860/1000/850 | Turf A, Medium A, Long A, Pace A         |  |
-| Biko Pegasus       | C     | 776 / 534 / 660 / 593 / 534      | 1080/860/960/880/850  | Turf A, Sprint A, Late A                 |  |
-| Matikanetannhauser | C     | 431 / 418 / 423 / 509 / 377      | 710/700/710/750/700   | Turf A, Medium A, Long A, Pace A, Late A |  |
+**Haru Urara**
+- Grade: **A**
+- Stats: 733 / 572 / 728 / **1068** / 621
+- Caps: 900/860/900/1140/850
+- Aptitudes of note: Dirt A, Sprint A, Late A; Turf G
 
-| Guest teammate     | Grade | Stats                       | Caps                | Aptitudes of note                                |  |
-| ------------------ | ----- | --------------------------- | ------------------- | ------------------------------------------------ |  |
-| Fine Motion        | B     | 643 / 599 / 620 / 664 / 549 | 770/750/750/750/750 | Turf A, Mile A, Medium A, Pace A                 |  |
-| King Halo          | B     | 603 / 556 / 633 / 725 / 526 | 800/750/770/750/700 | Turf A, Sprint A, Late A                         |  |
-| Seeking the Pearl  | C     | 655 / 560 / 600 / 581 / 533 | 710/700/710/750/700 | Turf A, Sprint A, Mile A, Late A                 |  |
-| Shinko Windy       | C     | 566 / 544 / 566 / 556 / 528 | 750/700/720/700/700 | Dirt A, Mile A, Pace A                           |  |
-| Inari One          | C     | 576 / 597 / 616 / 556 / 569 | 700/720/750/700/700 | Turf A, Dirt A, Medium A, Long A, End A          |  |
-| Nakayama Festa     | C     | 533 / 475 / 504 / 666 / 502 | 700/750/700/720/700 | Turf A, Medium A, Late A                         |  |
-| Agnes Digital      | C     | 504 / 493 / 552 / 650 / 494 | 700/720/750/700/700 | Turf A, Dirt A, Mile A, Medium A, Pace A, Late A |  |
-| Eishin Flash       | C     | 540 / 501 / 497 / 568 / 542 | 750/700/720/700/700 | Turf A, Medium A, Long A, Late A                 |  |
-| Matikanefukukitaru | C     | 501 / 483 / 513 / 532 / 543 | 830/780/780/790/900 | Turf A, Medium A, Long A, Late A                 |  |
-| Taiki Shuttle      | C     | 411 / 411 / 467 / 398 / 375 | 750/700/720/700/700 | Turf A, Sprint A, Mile A, Pace A                 |  |
-| Gold Ship          | C     | 475 / 426 / 455 / 403 / 389 | 700/750/700/720/700 | Turf A, Medium A, Long A, End A                  |  |
+**Tokai Teio**
+- Grade: B
+- Stats: 885 / 571 / 702 / 754 / 597
+- Caps: 1080/860/960/880/850
+- Aptitudes of note: Turf A, Medium A, Pace A
+
+**Nishino Flower**
+- Grade: B
+- Stats: 806 / 591 / 680 / 625 / 610
+- Caps: 1080/860/960/880/850
+- Aptitudes of note: Turf A, Sprint A, Mile A, Pace A, Late A
+
+**Super Creek**
+- Grade: B
+- Stats: 563 / 888 / 527 / 764 / 633
+- Caps: 860/1100/860/1000/850
+- Aptitudes of note: Turf A, Medium A, Long A, Pace A
+
+**Biko Pegasus**
+- Grade: C
+- Stats: 776 / 534 / 660 / 593 / 534
+- Caps: 1080/860/960/880/850
+- Aptitudes of note: Turf A, Sprint A, Late A
+
+**Matikanetannhauser**
+- Grade: C
+- Stats: 431 / 418 / 423 / 509 / 377
+- Caps: 710/700/710/750/700
+- Aptitudes of note: Turf A, Medium A, Long A, Pace A, Late A
+
+**Fine Motion**
+- Grade: B
+- Stats: 643 / 599 / 620 / 664 / 549
+- Caps: 770/750/750/750/750
+- Aptitudes of note: Turf A, Mile A, Medium A, Pace A
+
+**King Halo**
+- Grade: B
+- Stats: 603 / 556 / 633 / 725 / 526
+- Caps: 800/750/770/750/700
+- Aptitudes of note: Turf A, Sprint A, Late A
+
+**Seeking the Pearl**
+- Grade: C
+- Stats: 655 / 560 / 600 / 581 / 533
+- Caps: 710/700/710/750/700
+- Aptitudes of note: Turf A, Sprint A, Mile A, Late A
+
+**Shinko Windy**
+- Grade: C
+- Stats: 566 / 544 / 566 / 556 / 528
+- Caps: 750/700/720/700/700
+- Aptitudes of note: Dirt A, Mile A, Pace A
+
+**Inari One**
+- Grade: C
+- Stats: 576 / 597 / 616 / 556 / 569
+- Caps: 700/720/750/700/700
+- Aptitudes of note: Turf A, Dirt A, Medium A, Long A, End A
+
+**Nakayama Festa**
+- Grade: C
+- Stats: 533 / 475 / 504 / 666 / 502
+- Caps: 700/750/700/720/700
+- Aptitudes of note: Turf A, Medium A, Late A
+
+**Agnes Digital**
+- Grade: C
+- Stats: 504 / 493 / 552 / 650 / 494
+- Caps: 700/720/750/700/700
+- Aptitudes of note: Turf A, Dirt A, Mile A, Medium A, Pace A, Late A
+
+**Eishin Flash**
+- Grade: C
+- Stats: 540 / 501 / 497 / 568 / 542
+- Caps: 750/700/720/700/700
+- Aptitudes of note: Turf A, Medium A, Long A, Late A
+
+**Matikanefukukitaru**
+- Grade: C
+- Stats: 501 / 483 / 513 / 532 / 543
+- Caps: 830/780/780/790/900
+- Aptitudes of note: Turf A, Medium A, Long A, Late A
+
+**Taiki Shuttle**
+- Grade: C
+- Stats: 411 / 411 / 467 / 398 / 375
+- Caps: 750/700/720/700/700
+- Aptitudes of note: Turf A, Sprint A, Mile A, Pace A
+
+**Gold Ship**
+- Grade: C
+- Stats: 475 / 426 / 455 / 403 / 389
+- Caps: 700/750/700/720/700
+- Aptitudes of note: Turf A, Medium A, Long A, End A
 
 That is 17 named members plus the trainee. The Roster grid's bottom row is clipped in the capture, so
 two members are unaccounted for against the 20/20 count.
@@ -424,40 +679,133 @@ Hint badge values as printed: `Hint Lvl 1` + `10% OFF!`, `Hint Lvl 2` + `20% OFF
 
 The printed price is the hint-discounted price, floored rather than rounded. Recorded as the client's own numbers, each with the hint level it is shown at (Pace Chaser Corners ○ settles the rounding rule: a base of 130 at 35% off is 84.5 and the client prints 84):
 
-| Skill | Hint shown | Price printed |
-| --- | --- | --- |
-| Ignited Spirit SPD | Lv 1, 10% | 180 |
-| Ignited Spirit STA | Lv 3, 30% | 140 |
-| Ignited Spirit PWR | Lv 1, 10% | 180 |
-| Ignited Spirit GUTS | Lv 4, 35% | 130 |
-| Straight Descent | none shown | 120 |
-| Highlander | none shown | 160 |
-| Front Runner Corners ○ | Lv 3, 30% | 91 |
-| Pace Chaser Straightaways ○ | Lv 4, 35% | 91 |
-| Pace Chaser Corners ○ | Lv 4, 35% | 84 |
-| Plan X | Lv 1, 10% | 272 |
-| Countermeasure | Lv 2, 20% | 128 |
-| Soft Step | Lv Max, 40% | 96 |
-| Subdued Front Runners | Lv 1, 10% | 117 |
-| Subdued Pace Chasers | Lv 1, 10% | 130 |
-| Hesitant Pace Chasers | Lv 2, 20% | 104 |
-| Outer Swell | Lv 1, 10% | 162 |
-| Gap Closer | Lv 1, 10% | 144 |
-| Productive Plan | Lv 3, 30% | 112 |
-| Calm in a Crowd | none shown | 170 |
-| Ramp Up | none shown | 170 |
-| Straightaway Acceleration | none shown | 170 |
-| It's On! | Lv 3, 30% | 289 |
-| Unruffled | Lv 4, 35% | 280 |
-| Rushing Gale! | Lv 1, 10% | 323 |
-| Long Shot ○ | Lv 1, 10% | 81 |
-| Firm Conditions ○ | Lv 1, 10% | 81 |
-| Sunny Days ○ | Lv 1, 10% | 81 |
-| Inner Post Proficiency ○ | Lv 1, 10% | 81 |
-| Kyoto Racecourse ○ | Lv 1, 10% | 81 |
-| Hakodate Racecourse ○ | Lv 2, 20% | 56 |
-| Cut and Drive! | Lv 2, 20% | 160 |
-| Resplendent Red Ace | Lv 1, 10% | 180 |
+**Ignited Spirit SPD**
+- Hint shown: Lv 1, 10%
+- Price printed: 180
+
+**Ignited Spirit STA**
+- Hint shown: Lv 3, 30%
+- Price printed: 140
+
+**Ignited Spirit PWR**
+- Hint shown: Lv 1, 10%
+- Price printed: 180
+
+**Ignited Spirit GUTS**
+- Hint shown: Lv 4, 35%
+- Price printed: 130
+
+**Straight Descent**
+- Hint shown: none shown
+- Price printed: 120
+
+**Highlander**
+- Hint shown: none shown
+- Price printed: 160
+
+**Front Runner Corners ○**
+- Hint shown: Lv 3, 30%
+- Price printed: 91
+
+**Pace Chaser Straightaways ○**
+- Hint shown: Lv 4, 35%
+- Price printed: 91
+
+**Pace Chaser Corners ○**
+- Hint shown: Lv 4, 35%
+- Price printed: 84
+
+**Plan X**
+- Hint shown: Lv 1, 10%
+- Price printed: 272
+
+**Countermeasure**
+- Hint shown: Lv 2, 20%
+- Price printed: 128
+
+**Soft Step**
+- Hint shown: Lv Max, 40%
+- Price printed: 96
+
+**Subdued Front Runners**
+- Hint shown: Lv 1, 10%
+- Price printed: 117
+
+**Subdued Pace Chasers**
+- Hint shown: Lv 1, 10%
+- Price printed: 130
+
+**Hesitant Pace Chasers**
+- Hint shown: Lv 2, 20%
+- Price printed: 104
+
+**Outer Swell**
+- Hint shown: Lv 1, 10%
+- Price printed: 162
+
+**Gap Closer**
+- Hint shown: Lv 1, 10%
+- Price printed: 144
+
+**Productive Plan**
+- Hint shown: Lv 3, 30%
+- Price printed: 112
+
+**Calm in a Crowd**
+- Hint shown: none shown
+- Price printed: 170
+
+**Ramp Up**
+- Hint shown: none shown
+- Price printed: 170
+
+**Straightaway Acceleration**
+- Hint shown: none shown
+- Price printed: 170
+
+**It's On!**
+- Hint shown: Lv 3, 30%
+- Price printed: 289
+
+**Unruffled**
+- Hint shown: Lv 4, 35%
+- Price printed: 280
+
+**Rushing Gale!**
+- Hint shown: Lv 1, 10%
+- Price printed: 323
+
+**Long Shot ○**
+- Hint shown: Lv 1, 10%
+- Price printed: 81
+
+**Firm Conditions ○**
+- Hint shown: Lv 1, 10%
+- Price printed: 81
+
+**Sunny Days ○**
+- Hint shown: Lv 1, 10%
+- Price printed: 81
+
+**Inner Post Proficiency ○**
+- Hint shown: Lv 1, 10%
+- Price printed: 81
+
+**Kyoto Racecourse ○**
+- Hint shown: Lv 1, 10%
+- Price printed: 81
+
+**Hakodate Racecourse ○**
+- Hint shown: Lv 2, 20%
+- Price printed: 56
+
+**Cut and Drive!**
+- Hint shown: Lv 2, 20%
+- Price printed: 160
+
+**Resplendent Red Ace**
+- Hint shown: Lv 1, 10%
+- Price printed: 180
 
 Also record: the shop sells skills that originate in the **ancestry tree**, not only the trainee's cards (`Cut and Drive!` is Vodka's unique skill, `Resplendent Red Ace` is one of Daiwa Scarlet's green sparks); rows are tinted — plain, an olive-gold band on rows including `It's On!`, `Unruffled`, `Rushing Gale!` and `Swinging Maestro`, and a green-to-pink rainbow gradient on `Blue Rose Closer`, the trainee's own max-level unique skill — and the client does not explain the tint (open item, §6); and the same tints appear on the `Umamusume Details` skill chips, so the tint travels with the skill rather than belonging to a screen.
 
@@ -493,13 +841,25 @@ section the first pass could not write.
 
 The Learn screen prints the discount itself, `Hint Lvl N` above `NN% OFF`:
 
-| Caption        | Discount | Observed on                                                                                                                                                                |  |
-| -------------- | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |  |
-| `Hint Lvl 1`   | 10%      | Rushing Gale!, Outer Swell, Ignited Spirit SPD/PWR, Plan X, Kyoto Racecourse ○, Resplendent Red Ace, Firm Conditions ○, Sunny Days ○, Inner Post Proficiency ○, Gap Closer |  |
-| `Hint Lvl 2`   | 20%      | Hesitant Pace Chasers, Cut and Drive!, Countermeasure, Hakodate Racecourse ○                                                                                               |  |
-| `Hint Lvl 3`   | 30%      | It's On!, Ignited Spirit STA, Front Runner Corners ○, Productive Plan                                                                                                      |  |
-| `Hint Lvl 4`   | 35%      | Unruffled, Pace Chaser Straightaways ◎, Pace Chaser Corners ○, Ignited Spirit GUTS                                                                                         |  |
-| `Hint Lvl Max` | 40%      | Soft Step                                                                                                                                                                  |  |
+**`Hint Lvl 1`**
+- Discount: 10%
+- Observed on: Rushing Gale!, Outer Swell, Ignited Spirit SPD/PWR, Plan X, Kyoto Racecourse ○, Resplendent Red Ace, Firm Conditions ○, Sunny Days ○, Inner Post Proficiency ○, Gap Closer
+
+**`Hint Lvl 2`**
+- Discount: 20%
+- Observed on: Hesitant Pace Chasers, Cut and Drive!, Countermeasure, Hakodate Racecourse ○
+
+**`Hint Lvl 3`**
+- Discount: 30%
+- Observed on: It's On!, Ignited Spirit STA, Front Runner Corners ○, Productive Plan
+
+**`Hint Lvl 4`**
+- Discount: 35%
+- Observed on: Unruffled, Pace Chaser Straightaways ◎, Pace Chaser Corners ○, Ignited Spirit GUTS
+
+**`Hint Lvl Max`**
+- Discount: 40%
+- Observed on: Soft Step
 
 Displayed cost is base × (1 − discount), floored to the integer. Bases 130, 160, 180 and 200 all
 reconcile: 130 → 104/91/84, 160 → 144/128/112/96, 180 → 162, 200 → 180/140/130. The one fractional case
@@ -513,33 +873,118 @@ carries Hint Levels Lv2, which lands exactly on the Lv4 captions seen on the Pac
 
 ### 2.2 Purchasable at or under 173 SP
 
-| Skill                       | Cost | Hint   | Gate or note                                                   |  |
-| --------------------------- | ---- | ------ | -------------------------------------------------------------- |  |
-| Pace Chaser Straightaways ◎ | 91   | Lv4    | Style match. The tier above the ○ she owns                     |  |
-| Pace Chaser Corners ○       | 84   | Lv4    | Style match                                                    |  |
-| Straight Descent            | 120  | none   | (Pace Chaser)                                                  |  |
-| Subdued Pace Chasers        | 130  | none   |                                                                |  |
-| Subdued Front Runners       | 117  | Lv1    |                                                                |  |
-| Hesitant Pace Chasers       | 104  | Lv2    |                                                                |  |
-| Ignited Spirit GUTS         | 130  | Lv4    | Scenario skill, late-race vigor scaled to team Guts total      |  |
-| Ignited Spirit STA          | 140  | Lv3    | Scenario skill, mid-race recovery scaled to team Stamina total |  |
-| Cut and Drive!              | 160  | Lv2    | Front-half, last 200m                                          |  |
-| Outer Swell                 | 162  | Lv1    | (Late Surger). She is Late B                                   |  |
-| Highlander                  | 160  | none   |                                                                |  |
-| Ramp Up                     | 170  | none   |                                                                |  |
-| Straightaway Acceleration   | 170  | none   |                                                                |  |
-| Calm in a Crowd             | 170  | none   |                                                                |  |
-| Soft Step                   | 96   | Lv Max |                                                                |  |
-| Countermeasure              | 128  | Lv2    | (Sprint). She is Sprint E                                      |  |
-| Gap Closer                  | 144  | Lv1    | (Sprint)                                                       |  |
-| Productive Plan             | 112  | Lv3    | (Mile)                                                         |  |
-| Long Shot ○                 | 81   | Lv1    | 4th favourite or below                                         |  |
-| Kyoto Racecourse ○          | 81   | Lv1    | This turn's Daishoten                                          |  |
-| Hakodate Racecourse ○       | 56   | Lv2    |                                                                |  |
-| Firm Conditions ○           | 81   | Lv1    |                                                                |  |
-| Sunny Days ○                | 81   | Lv1    |                                                                |  |
-| Inner Post Proficiency ○    | 81   | Lv1    |                                                                |  |
-| Front Runner Corners ○      | 91   | Lv3    | Wrong style                                                    |  |
+**Pace Chaser Straightaways ◎**
+- Cost: 91
+- Hint: Lv4
+- Gate or note: Style match. The tier above the ○ she owns
+
+**Pace Chaser Corners ○**
+- Cost: 84
+- Hint: Lv4
+- Gate or note: Style match
+
+**Straight Descent**
+- Cost: 120
+- Hint: none
+- Gate or note: (Pace Chaser)
+
+**Subdued Pace Chasers**
+- Cost: 130
+- Hint: none
+
+**Subdued Front Runners**
+- Cost: 117
+- Hint: Lv1
+
+**Hesitant Pace Chasers**
+- Cost: 104
+- Hint: Lv2
+
+**Ignited Spirit GUTS**
+- Cost: 130
+- Hint: Lv4
+- Gate or note: Scenario skill, late-race vigor scaled to team Guts total
+
+**Ignited Spirit STA**
+- Cost: 140
+- Hint: Lv3
+- Gate or note: Scenario skill, mid-race recovery scaled to team Stamina total
+
+**Cut and Drive!**
+- Cost: 160
+- Hint: Lv2
+- Gate or note: Front-half, last 200m
+
+**Outer Swell**
+- Cost: 162
+- Hint: Lv1
+- Gate or note: (Late Surger). She is Late B
+
+**Highlander**
+- Cost: 160
+- Hint: none
+
+**Ramp Up**
+- Cost: 170
+- Hint: none
+
+**Straightaway Acceleration**
+- Cost: 170
+- Hint: none
+
+**Calm in a Crowd**
+- Cost: 170
+- Hint: none
+
+**Soft Step**
+- Cost: 96
+- Hint: Lv Max
+
+**Countermeasure**
+- Cost: 128
+- Hint: Lv2
+- Gate or note: (Sprint). She is Sprint E
+
+**Gap Closer**
+- Cost: 144
+- Hint: Lv1
+- Gate or note: (Sprint)
+
+**Productive Plan**
+- Cost: 112
+- Hint: Lv3
+- Gate or note: (Mile)
+
+**Long Shot ○**
+- Cost: 81
+- Hint: Lv1
+- Gate or note: 4th favourite or below
+
+**Kyoto Racecourse ○**
+- Cost: 81
+- Hint: Lv1
+- Gate or note: This turn's Daishoten
+
+**Hakodate Racecourse ○**
+- Cost: 56
+- Hint: Lv2
+
+**Firm Conditions ○**
+- Cost: 81
+- Hint: Lv1
+
+**Sunny Days ○**
+- Cost: 81
+- Hint: Lv1
+
+**Inner Post Proficiency ○**
+- Cost: 81
+- Hint: Lv1
+
+**Front Runner Corners ○**
+- Cost: 91
+- Hint: Lv3
+- Gate or note: Wrong style
 
 The Unity Cup line on the Learn screen is **Ignited Spirit SPD / STA / PWR / GUTS** at 180/140/180/130,
 all four on a base of 200 and separated only by hint level. The series runs to five per the client
@@ -644,13 +1089,40 @@ exactly what a form entry has to survive.
 
 **The teammate's share — the larger table.** What a *teammate* gains when the burst fires:
 
-| Burst on | Speed | Stamina | Power | Guts | Wit |
-| -------- | ----- | ------- | ----- | ---- | --- |
-| Speed    | 150   | 80      | 110   | 80   | 70  |
-| Stamina  | 80    | 150     | 80    | 110  | 70  |
-| Power    | 80    | 110     | 150   | 80   | 70  |
-| Guts     | 90    | 80      | 90    | 150  | 70  |
-| Wit      | 110   | 80      | 80    | 80   | 150 |
+**Speed**
+- Speed: 150
+- Stamina: 80
+- Power: 110
+- Guts: 80
+- Wit: 70
+
+**Stamina**
+- Speed: 80
+- Stamina: 150
+- Power: 80
+- Guts: 110
+- Wit: 70
+
+**Power**
+- Speed: 80
+- Stamina: 110
+- Power: 150
+- Guts: 80
+- Wit: 70
+
+**Guts**
+- Speed: 90
+- Stamina: 80
+- Power: 90
+- Guts: 150
+- Wit: 70
+
+**Wit**
+- Speed: 110
+- Stamina: 80
+- Power: 80
+- Guts: 80
+- Wit: 150
 
 **Tier `[B]`** — [umareference.com, "Unity Cup Scenario: Advanced Training Strategy",
 2026-08-26](https://www.umareference.com/guide/advanced-training-strategy/unity-cup-scenario-1). An unofficial
@@ -671,13 +1143,45 @@ that member's growth bonus, and they are **not** the number the trainee's own tr
 
 **The trainee's share — the smaller table.** What the burst adds to the *trainee*:
 
-| Trained facility | Speed | Stamina | Power | Guts | Wit | Skill points |
-| ---------------- | ----- | ------- | ----- | ---- | --- | ------------ |
-| Speed            | 15    | —       | 7     | —    | —   | 5            |
-| Stamina          | —     | 15      | —     | 7    | —   | 5            |
-| Power            | —     | 7       | 15    | —    | —   | 5            |
-| Guts             | 3     | —       | 3     | 15   | —   | 5            |
-| Wit              | 2     | —       | —     | —    | 15  | 5            |
+**Speed**
+- Speed: 15
+- Stamina: —
+- Power: 7
+- Guts: —
+- Wit: —
+- Skill points: 5
+
+**Stamina**
+- Speed: —
+- Stamina: 15
+- Power: —
+- Guts: 7
+- Wit: —
+- Skill points: 5
+
+**Power**
+- Speed: —
+- Stamina: 7
+- Power: 15
+- Guts: —
+- Wit: —
+- Skill points: 5
+
+**Guts**
+- Speed: 3
+- Stamina: —
+- Power: 3
+- Guts: 15
+- Wit: —
+- Skill points: 5
+
+**Wit**
+- Speed: 2
+- Stamina: —
+- Power: —
+- Guts: —
+- Wit: 15
+- Skill points: 5
 
 **Tier `[B]`** — gametora's Unity Cup page ([⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup)),
 extracted verbatim in this repo at `SCENARIO-PUBLISHER-REFERENCES.md:717-725`. **Tier `[A]`** for game8.co's
@@ -759,9 +1263,15 @@ number of team average that sits them there, and no frame in the 67 carries one.
 
 **Grade → level.** The grade the Team Info panel prints for that stat sets the level:
 
-| Team's grade for the stat | F | G | E | D | C | B | A | S |
-| -------------------------- | - | - | - | - | - | - | - | - |
-| Facility level             | 1 | 1 | 2 | 2 | 3 | 3 | 4 | 5 |
+**Facility level**
+- F: 1
+- G: 1
+- E: 2
+- D: 2
+- C: 3
+- B: 3
+- A: 4
+- S: 5
 
 **Tier `[B]`** — gametora ([⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup)), extracted in
 this repo at `SCENARIO-PUBLISHER-REFERENCES.md:771-781`, whose own worked example is "a team-wide Speed rank
@@ -775,9 +1285,11 @@ the join.
 
 **Average stat → grade → level.** The numeric bridge, for when a level number is not on screen:
 
-| Facility level      | 2    | 3    | 4    | 5    |
-| ------------------- | ---- | ---- | ---- | ---- |
-| Team's average stat | ~200 | ~340 | ~510 | ~610 |
+**Team's average stat**
+- 2: ~200
+- 3: ~340
+- 4: ~510
+- 5: ~610
 
 **Tier `[B]`** — [umareference.com, 2026-08-26](https://www.umareference.com/guide/advanced-training-strategy/unity-cup-scenario-1):
 "The training levels are based on the average stat of your umas. Speed training is based on their average
@@ -871,7 +1383,7 @@ Bloom (`02-unity-cup.md:183`, `:156`). Picking the name is not enough; the win i
    left. In order: an Extreme Burst tile (0% failure, scoped to the facility holding the Burst,
    `02-unity-cup.md:113`), a Wit turn (no Energy cost, and a Burst there returns +5 Energy), or Rest
    for Energy. Corrected 2026-10-03: this step was written as "Rest for +30 Energy" on
-   `docs/UMAMUSUME_REFERENCE.md:162`, and the repository's own §2.1 in
+   `docs/UMAMUSUME_REFERENCE.md:256`, and the repository's own §2.1 in
    `docs/research-scratch/SCENARIO-PUBLISHER-REFERENCES.md` measures the modal rest at +50 with +30 as
    the under-slept failure tier. The order of the three options does not depend on which tier lands;
    how many training turns the rest buys back does, so the figure is left open here rather than picked.
@@ -1423,17 +1935,59 @@ outside the window when it was first cited. §§1 to 8 cite the first two withou
 written against the 2026-10-03 research pass, when they were still inside the window. That is a fact about the
 age of a page, not a change in any claim, and the earlier sections are left exactly as they were.
 
-| Item | Where in the document | Source | Tier | Observed in this run's frames? |
-| ---- | --------------------- | ------ | ---- | -------------------------------- |
-| Spirit Burst — the **teammate's** stat gain | §2.5 | [umareference.com, 2026-08-26](https://www.umareference.com/guide/advanced-training-strategy/unity-cup-scenario-1) | `[B]` | No — re-read 2026-10-21; the 70 / 150 set is confirmed and appears on no reachable game8.co page |
-| Spirit Burst — the **trainee's** own share | §2.5 | [gametora, ⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup) (repo master `:717-725`); [game8.co 545572, ⚠️ STALE: 2026-07-07](https://game8.co/games/Umamusume-Pretty-Derby/archives/545572) | `[B]` / `[A]` | No — game8.co's rendering is the **pre-rework** table (Wit 2 / 10 / 5, Skill Points only on the Wit row) and the current one is gametora's Wit 2 / 15 / 5 with 5 Skill Points on every row (§2.5) |
-| Burst → race-result bonus (+50 all stats on a win, +10 on a loss or draw) | §2.5 | [umareference.com, 2026-08-26](https://www.umareference.com/guide/advanced-training-strategy/unity-cup-scenario-1); [umamusume.net, ⚠️ STALE: 2021-09-07](https://umamusume.net/archives/17316) | `[B]` / `[C]` | No |
-| Team **stat grade** → training facility level | §2.6 | [gametora, ⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup) (repo master `:771-781`); [game8.jp 395608, ⚠️ STALE: 2025-11-20](https://game8.jp/umamusume/395608) | `[B]` / `[A]` | No — the level (§1.7) and the grade (§1.8) are each observed; the **mapping** between them is not, and it matches all five. Now carried by two independent publishers |
-| League-placement bonus (2〜5th +50 · 6〜10th +30 · 11〜15th +20 · 16〜20th +10) | §1.8, §7 finding 11 | [game8.jp 395608, ⚠️ STALE: 2025-11-20](https://game8.jp/umamusume/395608); [game8.co 563652, ⚠️ STALE: 2025-11-27](https://game8.co/games/Umamusume-Pretty-Derby/archives/563652); [gamewith 287164, ⚠️ STALE: 2023-01-20](https://gamewith.jp/uma-musume/article/show/287164) | `[A]` | No for the ladder — but the run's 8th-place league standing falls in the +30 band under **both** printed variants and the client's tooltip reads +30, which corroborates it (§7 finding 11). The **band edges conflict** between publishers and are recorded, not resolved (§8.3) |
-| Team **average stat** → training level thresholds | §2.6 | [umareference.com, 2026-08-26](https://www.umareference.com/guide/advanced-training-strategy/unity-cup-scenario-1) | `[B]` | No — the **basis** is tri-sourced (umareference, gamewith 2023-01-20, and a JP wiki lead that is not a citable read) and the **mapping** is carried by four publishers, but the four numeric cut-points stay single-source `[B]`; this run's capture does not show the team average (§1.7), so they are not observable from the frames in hand |
-| Team Race countdown — where it sits on the career screen | §1.8 method note | [gametora, ⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup); `02-unity-cup.md:153`; repo master `:658` | `[B]` | Partial — this run's screen carries "5 turn(s) until the Unity Cup" (`297b931b`), which counts down to the **finals**, not to the next Team Race |
-| Member **skill inspector** — how it is opened | §1.9 system note | [game8.co 563652, ⚠️ STALE: 2025-11-27](https://game8.co/games/Umamusume-Pretty-Derby/archives/563652) | `[A]` | No — quote re-verified 2026-10-21 and documented by a publisher; the page's own date is 328 days old and pre-rework, so the current build is still unobserved |
-| Finals — **venue and exact distance** of each of the five races | §8.3 extension; §6 item 8 | [owadablog.com/team-arena-summary, 2021-05-12](https://owadablog.com/team-arena-summary/); [gametora, ⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup) | `[C]` / `[B]` | No — the **rule** is published (five categories, dirt always a mile, ground drawn at random per set from a fixed pool of real-modelled races) and the per-set values stay **❌ UNVERIFIED**: only the client shows them |
+**Spirit Burst — the teammate's stat gain**
+- Where in the document: §2.5
+- Source: [umareference.com, 2026-08-26](https://www.umareference.com/guide/advanced-training-strategy/unity-cup-scenario-1)
+- Tier: `[B]`
+- Observed in this run's frames?: No — re-read 2026-10-21; the 70 / 150 set is confirmed and appears on no reachable game8.co page
+
+**Spirit Burst — the trainee's own share**
+- Where in the document: §2.5
+- Source: [gametora, ⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup) (repo master `:717-725`); [game8.co 545572, ⚠️ STALE: 2026-07-07](https://game8.co/games/Umamusume-Pretty-Derby/archives/545572)
+- Tier: `[B]` / `[A]`
+- Observed in this run's frames?: No — game8.co's rendering is the **pre-rework** table (Wit 2 / 10 / 5, Skill Points only on the Wit row) and the current one is gametora's Wit 2 / 15 / 5 with 5 Skill Points on every row (§2.5)
+
+**Burst → race-result bonus (+50 all stats on a win, +10 on a loss or draw)**
+- Where in the document: §2.5
+- Source: [umareference.com, 2026-08-26](https://www.umareference.com/guide/advanced-training-strategy/unity-cup-scenario-1); [umamusume.net, ⚠️ STALE: 2021-09-07](https://umamusume.net/archives/17316)
+- Tier: `[B]` / `[C]`
+- Observed in this run's frames?: No
+
+**Team stat grade → training facility level**
+- Where in the document: §2.6
+- Source: [gametora, ⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup) (repo master `:771-781`); [game8.jp 395608, ⚠️ STALE: 2025-11-20](https://game8.jp/umamusume/395608)
+- Tier: `[B]` / `[A]`
+- Observed in this run's frames?: No — the level (§1.7) and the grade (§1.8) are each observed; the **mapping** between them is not, and it matches all five. Now carried by two independent publishers
+
+**League-placement bonus (2〜5th +50 · 6〜10th +30 · 11〜15th +20 · 16〜20th +10)**
+- Where in the document: §1.8, §7 finding 11
+- Source: [game8.jp 395608, ⚠️ STALE: 2025-11-20](https://game8.jp/umamusume/395608); [game8.co 563652, ⚠️ STALE: 2025-11-27](https://game8.co/games/Umamusume-Pretty-Derby/archives/563652); [gamewith 287164, ⚠️ STALE: 2023-01-20](https://gamewith.jp/uma-musume/article/show/287164)
+- Tier: `[A]`
+- Observed in this run's frames?: No for the ladder — but the run's 8th-place league standing falls in the +30 band under **both** printed variants and the client's tooltip reads +30, which corroborates it (§7 finding 11). The **band edges conflict** between publishers and are recorded, not resolved (§8.3)
+
+**Team average stat → training level thresholds**
+- Where in the document: §2.6
+- Source: [umareference.com, 2026-08-26](https://www.umareference.com/guide/advanced-training-strategy/unity-cup-scenario-1)
+- Tier: `[B]`
+- Observed in this run's frames?: No — the **basis** is tri-sourced (umareference, gamewith 2023-01-20, and a JP wiki lead that is not a citable read) and the **mapping** is carried by four publishers, but the four numeric cut-points stay single-source `[B]`; this run's capture does not show the team average (§1.7), so they are not observable from the frames in hand
+
+**Team Race countdown — where it sits on the career screen**
+- Where in the document: §1.8 method note
+- Source: [gametora, ⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup); `02-unity-cup.md:153`; repo master `:658`
+- Tier: `[B]`
+- Observed in this run's frames?: Partial — this run's screen carries "5 turn(s) until the Unity Cup" (`297b931b`), which counts down to the **finals**, not to the next Team Race
+
+**Member skill inspector — how it is opened**
+- Where in the document: §1.9 system note
+- Source: [game8.co 563652, ⚠️ STALE: 2025-11-27](https://game8.co/games/Umamusume-Pretty-Derby/archives/563652)
+- Tier: `[A]`
+- Observed in this run's frames?: No — quote re-verified 2026-10-21 and documented by a publisher; the page's own date is 328 days old and pre-rework, so the current build is still unobserved
+
+**Finals — venue and exact distance of each of the five races**
+- Where in the document: §8.3 extension; §6 item 8
+- Source: [owadablog.com/team-arena-summary, 2021-05-12](https://owadablog.com/team-arena-summary/); [gametora, ⚠️ STALE: 2026-07-20](https://gametora.com/umamusume/unity-cup)
+- Tier: `[C]` / `[B]`
+- Observed in this run's frames?: No — the **rule** is published (five categories, dirt always a mile, ground drawn at random per set from a fixed pool of real-modelled races) and the per-set values stay **❌ UNVERIFIED**: only the client shows them
 
 **Why this matters for Trainer Desk v2.0 form entry.** The Trainer Desk form is where a run becomes a row,
 and every row above is a field the form can hold that the frame set cannot supply. The risk in each case is
@@ -1571,14 +2125,29 @@ from the Team tab, and no arithmetic in this document produces them.
 
 Added 2026-11-06. The 67 frames cover **one end** of a Unity Cup career — the last five turns of Senior year — and more of it than the earlier wording implied. The pre-career setup flow (scenario, trainee, two legacies, six-card deck, Start Career) and turn 0 (Junior Early January, 11 turns to the debut) are **unfilmed**, as are the preseason rounds' own screens, the finals' race cards, and the post-finals state. But the in-career screens **are** captured and are recorded in §§1.10–1.15: the in-career `Career` screen (the Cockpit equivalent), the in-career `Sparks` screen, the `Perks` panel, the `Learn` screen, the `Log` screen and the in-career rail, and the five `Career Profile` panels (Featured Cards, Unity Cup Available, Umamusume Class, Goals, Umamusume Details). The flow map this report was cross-checked against covers the opposite end, and read together they describe one state machine from both sides. This section states which stages this capture set covers, because until now the file recorded what the frames **show** (§9's column) without ever recording what they **reach**.
 
-| Flow stage | Covered by a frame here? | What this report knows about it |
-| --- | --- | --- |
-| Career setup: scenario, trainee, two legacies, six-card deck, Start Career | **No** | §1.4 and §1.5 reconstruct the deck and the ancestry tree from in-run panels; the setup screens themselves are not in the set |
-| Turn 0, Junior Early January, 11 turns to the debut | **No** | §1.1 covers the far end of the same counter ("5 turns until the Unity Cup"); the pre-debut window is unobserved |
-| Tazuna tutorial, team formation, team-name selection | **No** | §1.6 records the name as **already fixed and paid for** — Blue Bloom is chosen, and the finals are yet to run |
-| Preseason rounds 1–4 | **No** (result only) | §1.6 records all four as won, with their dates, but no round's own screen is in the set |
-| Senior-year endgame, Arima Kinen pending | **Yes** — §1.6, §1.7 | The richest part of the set: race card, training tile, Team Info panel, Learn screen, roster, Sparks |
-| Finals against Team Zenith | **No** (programme only) | §1.8's five-column Team tab is the programme; §8.3 establishes the shape and §9 marks the venue and distance ❌ UNVERIFIED |
+**Career setup: scenario, trainee, two legacies, six-card deck, Start Career**
+- Covered by a frame here?: **No**
+- What this report knows about it: §1.4 and §1.5 reconstruct the deck and the ancestry tree from in-run panels; the setup screens themselves are not in the set
+
+**Turn 0, Junior Early January, 11 turns to the debut**
+- Covered by a frame here?: **No**
+- What this report knows about it: §1.1 covers the far end of the same counter ("5 turns until the Unity Cup"); the pre-debut window is unobserved
+
+**Tazuna tutorial, team formation, team-name selection**
+- Covered by a frame here?: **No**
+- What this report knows about it: §1.6 records the name as **already fixed and paid for** — Blue Bloom is chosen, and the finals are yet to run
+
+**Preseason rounds 1–4**
+- Covered by a frame here?: **No** (result only)
+- What this report knows about it: §1.6 records all four as won, with their dates, but no round's own screen is in the set
+
+**Senior-year endgame, Arima Kinen pending**
+- Covered by a frame here?: **Yes** — §1.6, §1.7
+- What this report knows about it: The richest part of the set: race card, training tile, Team Info panel, Learn screen, roster, Sparks
+
+**Finals against Team Zenith**
+- Covered by a frame here?: **No** (programme only)
+- What this report knows about it: §1.8's five-column Team tab is the programme; §8.3 establishes the shape and §9 marks the venue and distance ❌ UNVERIFIED
 
 **The consequence worth carrying: the setup screens and turn 0 have no client capture at all.** They are also
 the parts of the flow that published documentation covers in the most detail, which is why they read as
@@ -1608,13 +2177,31 @@ open.
 
 ### Corrections
 
-| # | Where | Old value | New value | Evidence |
-| --- | --- | --- | --- | --- |
-| C-01 | §1.2 aptitude list for the `[Rosy Dreams]` card | `Dirt G` | `Dirt C` | Frame `1dde6b2f`, `Umamusume Details` panel. Downstream race-fit references (§1.6, §5) updated to match. |
-| C-02 | §1.2 aptitude list for the `[Rosy Dreams]` card | `End G` | `End C` | Frame `1dde6b2f`, same panel. |
-| C-03 | §1.5 inheritance tree, second `[Peak Blue]` Daiwa Scarlet (Legacy 2) | rank `UG` | rank `S+` | In-career `Sparks` screen shows `S+`; the earlier post-career tree crop read `UG`. |
-| C-04 | §1.3 attribution of the ten-skill list | "the Skills tab" (ambiguous) | "`Umamusume Details` → `Skills` tab" | Frame `1dde6b2f`. It is **not** the `Perks` panel's `Skills` tab, which holds a different list — which is why the two lists in this file disagree. |
-| C-05 | §10 coverage statement | frames cover the endgame only | qualified: pre-career setup flow and turn 0 unfilmed, but the in-career `Career`, `Sparks`, `Perks`, `Learn`, `Log` and `Career Profile` screens are captured (§§1.10–1.15) | Frame `297b931b` and the set's other in-career captures. |
+**C-01 — §1.2 aptitude list for the `[Rosy Dreams]` card**
+- Old value: `Dirt G`
+- New value: `Dirt C`
+- Evidence: Frame `1dde6b2f`, `Umamusume Details` panel. Downstream race-fit references (§1.6, §5) updated to match.
+
+**C-02 — §1.2 aptitude list for the `[Rosy Dreams]` card**
+- Old value: `End G`
+- New value: `End C`
+- Evidence: Frame `1dde6b2f`, same panel.
+
+**C-03**
+- Where: §1.5 inheritance tree, second `[Peak Blue]` Daiwa Scarlet (Legacy 2)
+- Old value: rank `UG`
+- New value: rank `S+`
+- Evidence: In-career `Sparks` screen shows `S+`; the earlier post-career tree crop read `UG`.
+
+**C-04 — §1.3 attribution of the ten-skill list**
+- Old value: "the Skills tab" (ambiguous)
+- New value: "`Umamusume Details` → `Skills` tab"
+- Evidence: Frame `1dde6b2f`. It is **not** the `Perks` panel's `Skills` tab, which holds a different list — which is why the two lists in this file disagree.
+
+**C-05 — §10 coverage statement**
+- Old value: frames cover the endgame only
+- New value: qualified: pre-career setup flow and turn 0 unfilmed, but the in-career `Career`, `Sparks`, `Perks`, `Learn`, `Log` and `Career Profile` screens are captured (§§1.10–1.15)
+- Evidence: Frame `297b931b` and the set's other in-career captures.
 
 `Mile B`, `Front A` and `Late B` are **not** changed. The file's erratum of 2026-10-09 already records
 that the client prints those and that the application's catalogue export is the deviating side; the
@@ -1622,22 +2209,52 @@ frames confirm the client, so the erratum stands and needs no edit.
 
 ### Additions
 
-| # | What | Where | Evidence |
-| --- | --- | --- | --- |
-| A | In-career `Career` screen (Cockpit equivalent): header, calendar tile `5 turn(s) left` / `Senior Year Early Oct`, goal bar `Place 1st in Arima Kinen` with `Entry criteria met!`, second badge `5 Turn(s) Until the Unity Cup`, `Energy` bar, mood chip `↑ GREAT`, team emblem `Blue Bloom` / `S` / five stars / `Dreaming Big`, Tazuna hint bubble, trainee bubble, class badge `Star`, stat strip with grade letter and in-force cap, action buttons, `Skip ▶▶` / `Quick` / menu; three counters recorded as three distinct widgets | §1.10 | `297b931b`, `09e754d6`, `885d4671`, `eccdc650`; layout awaiting a frame reference |
-| B | In-career `Sparks` screen: green `1st Legacy` / `2nd Legacy` tabs, single column, portrait with rank badge, spark rows with star counts and `i` button; chains in the trainer's own form (1st Legacy: Vodka → Daiwa Scarlet → Seiun Sky; 2nd Legacy: Maruzensky → Daiwa Scarlet → Taiki Shuttle) kept alongside the existing row-by-row table | §1.11 | `fd78e996`, `31fd26c4`, `f7a6952f`, `e771563c`, `24f5b5d0`, `eea37f2a`; layout awaiting a frame reference |
-| C | `Perks` panel: tabs `Support Effects` / `Skills`; grouping into `Trainee Skills` (no chip) and `Card Skills` (source portraits); skill name in both groups possible, one skill with two chips; `○` corner variant; icon-tile taxonomy (orange running/positioning, blue recovery/endurance, green condition/venue) | §1.12 | awaiting a frame reference |
-| D | `Learn` screen: header `Learn` with `i`, trainee portrait, `Full Stats`, `Skill Points 173`, scrollable list with coloured icon tile, skill name with `○`, effect text, orange hint badge, `-` / price / `+`, `Obtained` tag on greyed rows, `Confirm` / `Reset`, bottom rail; hint badges `Hint Lvl 1` … `Hint Lvl Max` at 10/20/30/35/40% off; thirty-three printed price rows; shop sells ancestry-tree skills; row tints recorded; tints travel with the skill | §1.13 | `09e754d6`, `c1ee4d11`, `c8b2dcad` |
-| E | `Log` screen and in-career rail: `Log` reads `There is no log.`; rail is Jukebox, Sparks, Log, Career Profile, Agenda, Item Request, Menu; PC layout with active screen left, rail and secondary pane right; Steam overlay present in one frame | §1.14 | awaiting a frame reference |
-| F | `Career Profile` panels: Featured Cards (Nishino Flower SSR, unique perk, four tabs), Unity Cup Available (round-by-round with results and `NEXT`), Umamusume Class (nine-step fan pyramid, `Fans 209,245`, `Star`, 30,755 to Top Star), Goals (title, race day, fan criterion, state), Umamusume Details (card art, three stars, potential level, stats, aptitudes, growth rate, tabs, ten chips) | §1.15 | `85e4c75a`, `885d4671`, `7a68aedc`, `1dde6b2f`; several panels awaiting a frame reference |
+**A**
+- What: In-career `Career` screen (Cockpit equivalent): header, calendar tile `5 turn(s) left` / `Senior Year Early Oct`, goal bar `Place 1st in Arima Kinen` with `Entry criteria met!`, second badge `5 Turn(s) Until the Unity Cup`, `Energy` bar, mood chip `↑ GREAT`, team emblem `Blue Bloom` / `S` / five stars / `Dreaming Big`, Tazuna hint bubble, trainee bubble, class badge `Star`, stat strip with grade letter and in-force cap, action buttons, `Skip ▶▶` / `Quick` / menu; three counters recorded as three distinct widgets
+- Where: §1.10
+- Evidence: `297b931b`, `09e754d6`, `885d4671`, `eccdc650`; layout awaiting a frame reference
+
+**B**
+- What: In-career `Sparks` screen: green `1st Legacy` / `2nd Legacy` tabs, single column, portrait with rank badge, spark rows with star counts and `i` button; chains in the trainer's own form (1st Legacy: Vodka → Daiwa Scarlet → Seiun Sky; 2nd Legacy: Maruzensky → Daiwa Scarlet → Taiki Shuttle) kept alongside the existing row-by-row table
+- Where: §1.11
+- Evidence: `fd78e996`, `31fd26c4`, `f7a6952f`, `e771563c`, `24f5b5d0`, `eea37f2a`; layout awaiting a frame reference
+
+**C**
+- What: `Perks` panel: tabs `Support Effects` / `Skills`; grouping into `Trainee Skills` (no chip) and `Card Skills` (source portraits); skill name in both groups possible, one skill with two chips; `○` corner variant; icon-tile taxonomy (orange running/positioning, blue recovery/endurance, green condition/venue)
+- Where: §1.12
+- Evidence: awaiting a frame reference
+
+**D**
+- What: `Learn` screen: header `Learn` with `i`, trainee portrait, `Full Stats`, `Skill Points 173`, scrollable list with coloured icon tile, skill name with `○`, effect text, orange hint badge, `-` / price / `+`, `Obtained` tag on greyed rows, `Confirm` / `Reset`, bottom rail; hint badges `Hint Lvl 1` … `Hint Lvl Max` at 10/20/30/35/40% off; thirty-three printed price rows; shop sells ancestry-tree skills; row tints recorded; tints travel with the skill
+- Where: §1.13
+- Evidence: `09e754d6`, `c1ee4d11`, `c8b2dcad`
+
+**E**
+- What: `Log` screen and in-career rail: `Log` reads `There is no log.`; rail is Jukebox, Sparks, Log, Career Profile, Agenda, Item Request, Menu; PC layout with active screen left, rail and secondary pane right; Steam overlay present in one frame
+- Where: §1.14
+- Evidence: awaiting a frame reference
+
+**F**
+- What: `Career Profile` panels: Featured Cards (Nishino Flower SSR, unique perk, four tabs), Unity Cup Available (round-by-round with results and `NEXT`), Umamusume Class (nine-step fan pyramid, `Fans 209,245`, `Star`, 30,755 to Top Star), Goals (title, race day, fan criterion, state), Umamusume Details (card art, three stars, potential level, stats, aptitudes, growth rate, tabs, ten chips)
+- Where: §1.15
+- Evidence: `85e4c75a`, `885d4671`, `7a68aedc`, `1dde6b2f`; several panels awaiting a frame reference
 
 ### Open items recorded, not closed
 
-| # | Item | Status | What would close it |
-| --- | --- | --- | --- |
-| 10 | Vodka's `Power` spark: ★★☆ on the in-career `Sparks` screen, ★☆☆ on the post-career tree crop | Open | Higher-resolution capture of both screens, or a publisher statement of the transfer rule |
-| 11 | Maruzensky's rank badge: frames read `UG`, trainer reads `UG1` | Open | Higher-resolution capture |
-| 12 | Olive-gold and rainbow row tints on the `Learn` screen and the `Umamusume Details` skill chips | Open (observed, unexplained) | A publisher note or a tooltip capture |
+**10**
+- Item: Vodka's `Power` spark: ★★☆ on the in-career `Sparks` screen, ★☆☆ on the post-career tree crop
+- Status: Open
+- What would close it: Higher-resolution capture of both screens, or a publisher statement of the transfer rule
+
+**11**
+- Item: Maruzensky's rank badge: frames read `UG`, trainer reads `UG1`
+- Status: Open
+- What would close it: Higher-resolution capture
+
+**12**
+- Item: Olive-gold and rainbow row tints on the `Learn` screen and the `Umamusume Details` skill chips
+- Status: Open (observed, unexplained)
+- What would close it: A publisher note or a tooltip capture
 
 The cap arithmetic (§1.2: +25 / +22 / +68 / +8 over the 1300 floor) and the inheritance attribution
 (§1.2, §8.5) remain open exactly as they were: the six blue sparks account for the Guts +8 and

@@ -54,7 +54,7 @@ Measured 2026-11-17, 20:00-21:00 MPST, at `HEAD be8893a2` / `origin/master 0bb3e
 | M-13 | `career-preflight-indep` drives removed controls | `grep -rn 'Career mode' resources/js` | 0 hits |
 | M-14 | Fence tool bare invocation | `python tools/md_fence_check.py` | crash on the first deleted tracked doc |
 | M-15 | Fan ladder | `config/uma.php:578-580` | one band, `Star 0-240000` |
-| M-16 | Ladder source | `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:474`; `docs/research-scratch/DESIGN-CORPUS.md:1388-1400` | nine tiers with thresholds, two non-numeric |
+| M-16 | Ladder source | `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:531`; `docs/research-scratch/DESIGN-CORPUS.md:1388-1400` | nine tiers with thresholds, two non-numeric |
 | M-17 | `FanLadderTest` pins the one-band behaviour | `tests/Feature/FanLadderTest.php:41` | asserts `classFor(240_000)` is null |
 | M-18 | KI-166 probe refuted its own candidate | `KNOWN-ISSUES.md` KI-166 dated note | `culprits: []`, `cardHasRuleMatched: true`, `docOverflow: 59` |
 | M-19 | No reflow case on the races page | `grep -c '320' tests/browser/career-race-decision.spec.ts` | 0 |

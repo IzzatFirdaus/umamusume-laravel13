@@ -41,7 +41,7 @@ size. Nothing here is contradicted; a reader comparing the two sets of figures s
 on `umamusume_id`, so every stored row describes a character rather than a scenario.
 
 Two independent readings confirm the decode rather than one. The `[Global]` client captures in
-`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:186-191` state Rice Shower's four Senior objectives with month and
+`docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:237-242` state Rice Shower's four Senior objectives with month and
 half, and the export's ladder for `char_id 1030` lands on the same turns, the same races and the same placings.
 A published client readout of Haru Urara's ladder states "Have at least 5000 fans … Turn: 37 … Classic Class …
 Early July", and the export's `cond_type 3, cond_value 5000` at turn 37 is that row — which also settles the

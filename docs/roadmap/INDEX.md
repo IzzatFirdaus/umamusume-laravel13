@@ -97,11 +97,28 @@ Round 4 also folded `WEB-FINDINGS.md` (390 lines) into `DESIGN-CORPUS.md` as its
 | `calendar-tables.md`                                 | 400+ rows   | **Not dissolved.** Bound to `RACE-AND-SLICE-RESEARCH.md` as its generated data companion           | 400+ generated rows with no markdown headings, rendered by `research-scratch/scripts/gen_calendar.py` and re-synced by `resync_doc.py` matching its `@@` markers. Both scripts are gitignored, so a move could not be committed with its fix. Nothing in it was redundant.                                        |
 
 Every absorbed file was embedded verbatim with headings demoted one level, per the convention above.
-Three inbound citations were repointed: `docs/UMAMUSUME_REFERENCE.md:1007` and `:1055`, and
+Three inbound citations were repointed: `docs/UMAMUSUME_REFERENCE.md:1627` and `:1675`, and
 `docs/scenarios/09-global-race-calendar.md:727`. The pipeline paragraph at
 `docs/scenarios/09-global-race-calendar.md:729` also had its two script paths corrected (they live under
 `research-scratch/scripts/`, not `research-scratch/`) and its "replaces each table in this file" clause
 corrected to name `calendar-tables.md`, which is the file it actually edits.
+
+## Cross-directory workflow (proposals → roadmap → plan → sitrep)
+
+The four directories form one execution loop. A slice moves through them in order, and each directory owns exactly one step:
+
+| Step | Directory | Owns | Relation |
+|---|---|---|---|
+| Propose | `docs/proposals/` | Descriptive ideas, **not** authoritative | Accepted ideas sequence into a roadmap slice; the proposal is cited as source |
+| Sequence | `docs/roadmap/` | Live roadmap + verifications; **ordering authority** | `MASTER-IMPLEMENTATION-ROADMAP-2026-11-18.md` holds slices S0.1–S4.4; plans cite slice ids |
+| Plan | `docs/plan/` | Dated execution plans | `PLAN-CONTRACT` `slices:` lists the roadmap slice(s) a plan covers; roadmap governs, plan corrects |
+| Report | `docs/sitrep/` | Session reports and handoffs | Sitreps record progress on plan slices and update roadmap acceptance status; remaining work feeds back to roadmap |
+
+Rules:
+- **Propose → Sequence → Plan → Report** is the forward direction. Sitrep outcomes feed remaining work back into the roadmap's acceptance list (§16 of the MASTER roadmap), never rewrite a landed plan.
+- Proposals are descriptive only — verify paths against `git ls-files` before reading; plan text re-measured against the tree.
+- No roadmap ↔ plan pair references another pair file; shared facts live in `mnemon`, never inside a pair file (owner ruling 2026-11-16).
+- A plan's `PLAN-CONTRACT` `slices:` field is the machine-readable join to its roadmap slice(s); a sitrep names the plan file(s) and slice(s) it worked on.
 
 > **Corrected forward 2026-10-04 (Round 11).** The `calendar-tables.md` row above was reversed by an
 > owner ruling: the tables are now the `## calendar-tables.md` section of `RACE-AND-SLICE-RESEARCH.md`,

@@ -116,7 +116,7 @@ KI-163 CLOSED 2026-11-18 — shared type landed; typecheck + 26 focused tests gr
 KI-164 CLOSED 2026-11-18 — keyed reviewField helper landed; 26 focused tests green — test-shape debt: `SnapshotReviewTest` asserts `fields.N` by position, so any added payload row costs a re-derivation (two rows cost four assertion edits, 2026-11-17)
 KI-165 CLOSED 2026-11-17 — the ladder filled: `config('uma.fan_ladder')` now carries the seven fan-counted tiers (Bronze 5,000 → Legend 320,000, half-open bands keyed on each tier's own published threshold; see body for provenance and the divergence from plan-defects slice 3.2); service answers null below 5,000 and class-without-gap at the PHP_INT_MAX ceiling (PHP_INT_MAX leak caught by the new cases); audited 209,245 reading unchanged; FanLadderTest 22 passed / CockpitRunIdentityTest 30 passed. Two non-numeric tiers (`Beginner`, `Debut / Maiden`) stay unrepresentable by ruling — no fan count to key on. Rendered presence proven by `career-cockpit.spec.ts:870` (1 passed, 2026-11-17)
 KI-167 CLOSED 2026-11-18 — root cause found and fixed. `ScenarioSelect.vue` carried `:disabled="form.processing"` on each radio: `put()` flips `processing` synchronously, so the control that had focus was disabled mid-press and the browser moved focus to `body`, after which `onSuccess` tried to refocus a still-disabled radio (a silent no-op). Replaced with a `form.processing` re-entry guard in `choose()`. Proven by a throwaway probe that logged `document.activeElement` at four points: before the fix focus read `body` immediately after `Space` and a `focusin` listener never fired; after the fix it reads `input#scenario-radio-trackblazer` at every point. `career-scenario-select.spec.ts` 11 passed, 0 failed
-KI-168 TERMINAL 2026-11-18 — owner ruling on file, and it is not a code defect. `config/scenarios.php`'s `unity_cup` block carries no `finale` key, so `ScenarioSectionBuilder::finaleAbsence()` prints "declares no structure beyond it" while the finale races sit on the calendar. The reference names the Unity Cup Finals only descriptively (`UMAMUSUME_REFERENCE.md:1150-1158`) with no distinct captured client string, and D-20 forbids promoting an uncaptured label into UI copy, so adding a config entry would print invented guidance. Adding a label needs an owner-supplied client capture first
+KI-168 TERMINAL 2026-11-18 — owner ruling on file, and it is not a code defect. `config/scenarios.php`'s `unity_cup` block carries no `finale` key, so `ScenarioSectionBuilder::finaleAbsence()` prints "declares no structure beyond it" while the finale races sit on the calendar. The reference names the Unity Cup Finals only descriptively (`UMAMUSUME_REFERENCE.md:1794-1802`) with no distinct captured client string, and D-20 forbids promoting an uncaptured label into UI copy, so adding a config entry would print invented guidance. Adding a label needs an owner-supplied client capture first
 
 # Known issues
 
@@ -5276,7 +5276,7 @@ assertions; the R8 E-04 change required edits at six of them and a corrected `ha
 **Closure, measured.** `config('uma.fan_ladder')` now carries the seven fan-counted tiers as half-open
 `[from, to)` bands keyed on each tier's own published threshold (reach N → that class): Bronze 5,000,
 Silver 20,000, Gold 50,000, Platinum 100,000, Star 160,000, Top Star 240,000, Legend 320,000 with a
-PHP_INT_MAX ceiling. Mapping provenance: `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:474` (the nine-step
+PHP_INT_MAX ceiling. Mapping provenance: `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:531` (the nine-step
 pyramid, frame-verified; restated `docs/audits/ux-walkthroughs/rice-shower-unity-cup-ux-walk-9.md:194`,
 SR §1.15) is the only source stating a *class for a known fan count*, and its audited run — 209,245
 fans printing `Star` with a 30,755-fan gap to `Top Star` — fixes the boundaries to the label's range,
@@ -5489,7 +5489,7 @@ finale races sit on the calendar.
 
 **Why it is terminal, not fixable.** `docs/proposals/Unity-Cup-plan.md` item 12 (reviewed 2026-11-18,
 roadmap slice 3.2) records the owner ruling: the reference names the Unity Cup Finals only descriptively
-(`UMAMUSUME_REFERENCE.md:1150-1158`) without a distinct captured client string, and D-20 forbids promoting
+(`UMAMUSUME_REFERENCE.md:1794-1802`) without a distinct captured client string, and D-20 forbids promoting
 an uncaptured label into UI copy. Adding a config entry would print invented guidance — the one thing the
 repo bans outright. The descriptive phrase stays prose-only, tagged `unknown`; adding a label needs an
 owner-supplied client capture first.

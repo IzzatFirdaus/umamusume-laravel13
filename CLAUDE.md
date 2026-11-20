@@ -12,8 +12,11 @@ C-1 to C-9)", the bar wins and the conflict gets reported, not silently resolved
 (`CONSTRAINTS.md` was folded into that master in `1e84b0c`; the root file no longer exists.)
 
 One correction to the previous version of this file: `CLAUDE.md` is **tracked** in git and
-is yours to edit. `.claude/` **is** gitignored (`.gitignore:48`), so the hooks, skills, and
-agent files under it are local configuration, not repository truth.
+is yours to edit. The earlier claim that `.claude/` is gitignored does not hold on this
+host: `git ls-files .claude .tooling` lists 30 tracked files (11 hook adapters, four
+agents, three skills, `settings.json`, and the `.tooling/` control layer). Measured
+2026-11-19 with `git check-ignore` (exit 1 = not ignored); treat those files as committed
+configuration and edit them only with an explicit path authorisation.
 
 ## 1. Instruction precedence, for Claude specifically
 
@@ -73,13 +76,14 @@ rendered checks, and the repo's own Playwright suite is `@playwright/test` with
 `playwright.config.ts` and specs under `tests/browser/` (`npm run test:browser`,
 session-private per `AGENTS.md` §9 "Testing and validation"). `.mcp.json` registers `filesystem`, `laravel-boost`, and `playwright` (the pruned 3-server set; `git` and `context7` were dropped for tool-count and cold-start reasons, and no inline secrets remain).
 
-**Hooks**: `.claude/settings.local.json` registers an impeccable design check after every
-`Edit`/`Write` and a deeper pass at `Stop`. The check is active on this host: the script
-resolves to a user-level installation outside the repository, so it runs here but not for
-anyone who clones. Both are local, gitignored config. Do not edit that file as part of a
-feature change. The hook controls added under `.claude/hooks/` (terminal denial and the
-subagent depth cap) follow the same per-host model: they are gitignored local
-configuration, not repository truth, and do not travel to a fresh clone.
+**Hooks**: `.claude/settings.local.json` (host-local, not in `git ls-files`) registers an
+impeccable design check after every `Edit`/`Write` and a deeper pass at `Stop`. The check
+is active on this host: the script resolves to a user-level installation outside the
+repository, so it runs here but not for anyone who clones. Do not edit that file as part
+of a feature change. The hook adapters under `.claude/hooks/` and the `.tooling/` policy
+layer are committed files, not local scaffolding: `git ls-files .claude .tooling` lists 30
+of them, so they travel to a fresh clone. Measured 2026-11-19; the earlier "gitignored
+local" claim did not hold.
 
 **Skills** in `.claude/skills/`: `laravel-best-practices`, `pest-testing`,
 `testing-best-practices`, `running-tests`, `tailwindcss-development`, `creating-models`,

@@ -56,7 +56,7 @@ stays in place; nothing was deleted and no citation was repointed.
 > ("Factor", "Motivation", "parents") fails `make lore-code` despite its own terminology map at line 1098,
 > and about a third of Part 1 specifies screens `PRD.md` §6 excludes. It also reproduces one error that
 > was **ours**: the Trackblazer cap row at line 862 copies the transposed figure from
-> `UMAMUSUME_REFERENCE.md:357`, since corrected. Do not treat agreement with this file as corroboration —
+> `UMAMUSUME_REFERENCE.md:574`, since corrected. Do not treat agreement with this file as corroboration —
 > it cites our own reference guide as its source, so it is a mirror (D-285).
 
 ### Document Purpose

@@ -18,8 +18,8 @@ Current version: `3.0.0`, pre-release and untagged (see `VERSION.md`). Phase 1 o
 
 | Area            | Technology                                                                                                                                                                      |
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Runtime         | PHP >= 8.3 (`composer.json`; developed on 8.5.8) with `pdo_sqlite` and `intl`                                                                                                   |
-| Framework       | Laravel 13 (`laravel/framework` 13.32.0)                                                                                                                                        |
+| Runtime         | PHP >= 8.4.1 (`composer.json`; developed on 8.5.8) with `pdo_sqlite` and `intl`                                                                                                  |
+| Framework       | Laravel 13 (`laravel/framework` 13.42.0)                                                                                                                                         |
 | Database        | SQLite only, WAL mode + `busy_timeout` (`database/database.sqlite`, gitignored)                                                                                                 |
 | Cache / Queue   | framework `database` stores (no Redis)                                                                                                                                          |
 | Frontend        | Inertia + Vue 3 + TypeScript (`inertiajs/inertia-laravel`, `@inertiajs/vue3`), Tailwind CSS v4 (CSS-first `@theme` in `resources/css/app.css`, no `tailwind.config.js`), Vite 7 |
@@ -31,7 +31,7 @@ Deliberately absent (PRD §6): auth packages, Livewire, Excel export, Redis, MyS
 
 ## Requirements
 
-- PHP >= 8.3 with `pdo_sqlite` and `intl` (`intl` is used by `App\Services\DataPipeline\NameNormalizer`)
+- PHP >= 8.4.1 with `pdo_sqlite` and `intl` (`intl` is used by `App\Services\DataPipeline\NameNormalizer`)
 - Composer and Node.js with npm (Vite build)
 - No database server: SQLite is the only supported driver
 

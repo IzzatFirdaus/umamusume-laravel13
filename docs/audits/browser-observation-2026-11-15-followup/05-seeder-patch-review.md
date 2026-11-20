@@ -180,7 +180,7 @@ A write succeeds (the seeder bypasses payload validation); the screen 500s.
 All-or-nothing: `assertKeys` rejects unknown and missing keys in one check, so no partial shape slips through.
 
 **The convenient part the verification also surfaced:** the canonical payload for this exact run is already on file.
-The class docblock cites `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:153-155` for the `UG` rank letters, and the
+The class docblock cites `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md:203-205` for the `UG` rank letters, and the
 doc's §1.5 carries the whole six-ancestor tree with its six blue sparks (Stamina ★★★, Power ★★★, Speed ★★☆ ×2,
 Guts ★☆☆, Power ★☆☆). The seeder should transcribe that section into the contract above rather than invent a
 shape — the doc is the Trainer's read-back, which is precisely what this payload records.

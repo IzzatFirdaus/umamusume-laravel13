@@ -41,7 +41,7 @@ The page carries several `HFW-OVERRIDE` notes in its script block, each recordin
 | --- | --- |
 | `keyboard: keys` | Only Tab/Shift+Tab, Enter/Space, Esc (the mobile More disclosure) and the skip link are wired; printing `1-5` would document controls that do nothing |
 | `rules: career length` | The 72-turn grid the app enforces (`CareerCalendar::TURNS_PER_CAREER`); the mock draws five |
-| `rules: deck` | Six support-card slots, and two copies of one card cannot be equipped together (`UMAMUSUME_REFERENCE.md:533`). The old sentence about a guest rental is deleted — a rental is a parent, not a deck slot |
+| `rules: deck` | Six support-card slots, and two copies of one card cannot be equipped together (`UMAMUSUME_REFERENCE.md:885`). The old sentence about a guest rental is deleted — a rental is a parent, not a deck slot |
 | `rules: sparks` | The four `[Global]` spark colours (reference §1.5.2); the mock names only Blue and Pink |
 | `rows: diagnostics` | The fourth row is this build's own: "A date looks old" leads to the source ledger, which is the page's answer to a stale figure |
 | `copy: import` | CSV import persists every supplied turn, not just a current position |
