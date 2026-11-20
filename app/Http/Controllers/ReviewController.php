@@ -8,6 +8,7 @@ use App\Actions\ResolveMatchCandidate;
 use App\Enums\AliasLanguage;
 use App\Enums\CandidateStatus;
 use App\Enums\CardRarity;
+use App\Http\Requests\BulkRejectRequest;
 use App\Http\Requests\ResolveMatchCandidateRequest;
 use App\Models\CharacterCard;
 use App\Models\MatchCandidate;
@@ -16,6 +17,7 @@ use App\Models\UmamusumeAlias;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -34,13 +36,25 @@ class ReviewController extends Controller
      */
     public function index(Request $request): Response|RedirectResponse
     {
+        $filters = [
+            'entity' => $request->string('entity')->toString(),
+            'match_tier' => $request->string('match_tier')->toString(),
+        ];
         $candidates = self::pendingCandidates()
+            ->when($filters['entity'] !== '', function (Builder $q) use ($filters): void {
+                // ADR-0037: entity lives in the candidate payload; there is no schema column.
+                $q->whereJsonContains('payload->entity', $filters['entity']);
+            })
+            ->when($filters['match_tier'] !== '', function (Builder $q) use ($filters): void {
+                $q->where('match_tier', $filters['match_tier']);
+            })
             ->with('suggestedUmamusume')
-            ->paginate(self::PAGE_SIZE);
+            ->paginate(self::PAGE_SIZE)
+            ->withQueryString();
 
         $page = $candidates->currentPage();
         if ($page > $candidates->lastPage()) {
-            return redirect()->route('review.index', self::pageParameters($candidates->lastPage()));
+            return redirect()->route('review.index', self::pageParameters($candidates->lastPage(), $filters));
         }
 
         $continuation = $request->session()->get('reviewContinuation');
@@ -69,6 +83,7 @@ class ReviewController extends Controller
 
         return Inertia::render('Review/Index', [
             'candidates' => $candidates,
+            'filters' => $filters,
             'queueUrl' => route('review.index', absolute: false),
             'databaseUrl' => route('database.index', absolute: false),
             'nextReviewUrl' => $next === null
@@ -262,6 +277,28 @@ class ReviewController extends Controller
     }
 
     /**
+     * Dispose of a batch of candidates with one Reject verdict.
+     *
+     * Reject-only by contract: the backlog this endpoint exists to clear is race candidates, which
+     * `ResolveMatchCandidate` refuses to promote. Each row goes through that same action inside one
+     * transaction, so a failure on any row rolls the whole batch back and no half-disposed queue can
+     * be observed. Per-row provenance is the action's existing stamp — nothing here writes directly.
+     */
+    public function bulk(BulkRejectRequest $request, ResolveMatchCandidate $action): RedirectResponse
+    {
+        $ids = $request->candidateIds();
+
+        DB::transaction(function () use ($ids, $action): void {
+            foreach (MatchCandidate::query()->whereIn('id', $ids)->lockForUpdate()->get() as $candidate) {
+                $action->handle($candidate, ['status' => CandidateStatus::Rejected->value]);
+            }
+        });
+
+        return redirect()->route('review.index')
+            ->with('status', sprintf('%d candidates rejected.', count($ids)));
+    }
+
+    /**
      * Suggested cases first, then newest fetch first, with a stable tie-break for one fetch batch.
      *
      * @return Builder<MatchCandidate>
@@ -276,10 +313,13 @@ class ReviewController extends Controller
     }
 
     /**
-     * @return array{page?: int}
+     * @param  array{entity?: string, match_tier?: string}  $filters
+     * @return array{page?: int, entity?: string, match_tier?: string}
      */
-    private static function pageParameters(int $page): array
+    private static function pageParameters(int $page, array $filters = []): array
     {
-        return $page === 1 ? [] : ['page' => $page];
+        $parameters = $page === 1 ? [] : ['page' => $page];
+
+        return array_filter([...$parameters, ...$filters], static fn ($value): bool => $value !== '');
     }
 }

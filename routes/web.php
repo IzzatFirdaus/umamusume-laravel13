@@ -246,6 +246,7 @@ Route::post('/training-runs/{run}/races', [TrainingRunController::class, 'storeR
 Route::post('/training-runs/{run}/purchases', [TrainingRunController::class, 'storePurchase'])->name('runs.purchases.store');
 Route::put('/training-runs/{run}/build-target', [TrainingRunController::class, 'updateBuildTarget'])->name('runs.build-target.update');
 
+Route::post('/review/bulk', [ReviewController::class, 'bulk'])->name('review.bulk');
 Route::get('/review', [ReviewController::class, 'index'])->name('review.index');
 // The detail route is declared before the POST so the GET is not shadowed by the verb-less match a
 // reader might expect; the two differ by method, and either order binds the same `{candidate}`.

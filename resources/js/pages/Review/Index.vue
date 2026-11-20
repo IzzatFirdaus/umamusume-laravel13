@@ -4,7 +4,7 @@ import AppLayout from '../../layouts/AppLayout.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import Pagination from '../../components/ui/Pagination.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 
 interface Candidate {
     id: number;
@@ -30,6 +30,7 @@ interface Paginator<T> {
 
 const props = defineProps<{
     candidates: Paginator<Candidate>;
+    filters: { entity: string; match_tier: string };
     neverFetched: boolean;
     queueUrl: string;
     databaseUrl: string;
@@ -70,6 +71,38 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
 // the client's own vocabulary so a race row cannot read as a trainee whose Confirm would 500.
 function entityLabel(entity: string): string {
     return entity === 'race' ? 'Race' : 'Trainee Umamusume';
+}
+
+// N2.8: the 304-row backlog is disposable without a Confirm button. Selection is local to this page;
+// the write is one Reject-only POST with a Form Request and a transaction on the server.
+const selected = ref<number[]>([]);
+const allSelected = computed(() =>
+    props.candidates.data.length > 0 && selected.value.length === props.candidates.data.length,
+);
+
+function toggleAll(): void {
+    selected.value = allSelected.value ? [] : props.candidates.data.map((c) => c.id);
+}
+
+function bulkReject(): void {
+    if (selected.value.length === 0) {
+        return;
+    }
+    router.post('/review/bulk', {
+        ids: selected.value,
+        status: 'Rejected',
+        entity: props.filters.entity,
+        match_tier: props.filters.match_tier,
+    }, { preserveScroll: true, onSuccess: () => { selected.value = []; } });
+}
+
+function applyFilters(event: Event): void {
+    const form = event.target as HTMLFormElement;
+    const data = new FormData(form);
+    router.get('/review', {
+        entity: String(data.get('entity') ?? ''),
+        match_tier: String(data.get('match_tier') ?? ''),
+    }, { preserveState: true });
 }
 </script>
 
@@ -143,11 +176,52 @@ function entityLabel(entity: string): string {
             </div>
 
             <h2 class="mt-5 text-lg font-semibold text-ink-strong">Pending cases</h2>
+
+            <form class="mt-3 flex flex-wrap items-end gap-3" @submit.prevent="applyFilters">
+                <label class="text-xs font-medium text-ink-muted">
+                    Entity
+                    <select name="entity" class="mt-0.5 min-h-11 rounded-md border border-rule bg-raised px-2 text-sm text-ink">
+                        <option value="">All kinds</option>
+                        <option value="race" :selected="props.filters.entity === 'race'">Race</option>
+                        <option value="umamusume" :selected="props.filters.entity === 'umamusume'">Trainee Umamusume</option>
+                    </select>
+                </label>
+                <label class="text-xs font-medium text-ink-muted">
+                    Match tier
+                    <select name="match_tier" class="mt-0.5 min-h-11 rounded-md border border-rule bg-raised px-2 text-sm text-ink">
+                        <option value="">All tiers</option>
+                        <option value="Fuzzy" :selected="props.filters.match_tier === 'Fuzzy'">Fuzzy</option>
+                        <option value="None" :selected="props.filters.match_tier === 'None'">None</option>
+                    </select>
+                </label>
+                <button type="submit" class="min-h-11 rounded-md border border-rule bg-raised px-3 text-sm font-semibold text-ink">Apply filters</button>
+            </form>
+
+            <!-- Reject is the only bulk verdict: a race candidate cannot be promoted by this queue. -->
+            <div class="mt-3 flex flex-wrap items-center gap-3 rounded-md border border-rule bg-panel px-3 py-2">
+                <button
+                    type="button"
+                    class="min-h-11 rounded-md border border-risk bg-raised px-3 text-sm font-semibold text-risk disabled:cursor-not-allowed disabled:opacity-50"
+                    :disabled="selected.length === 0"
+                    data-testid="bulk-reject"
+                    @click="bulkReject"
+                >
+                    Reject {{ selected.length }} selected
+                </button>
+                <p v-if="selected.length > 0" role="status" class="text-xs text-ink-muted">
+                    {{ selected.length }} of {{ candidates.data.length }} rows on this page selected.
+                </p>
+            </div>
+
             <div class="mt-3 min-w-0 overflow-x-auto scroll-p-2 rounded-md border border-rule bg-raised" role="region" tabindex="0" aria-label="Pending match candidates, scrollable">
                 <table class="w-full min-w-2xl border-collapse md:min-w-0">
                     <caption class="sr-only">Pending candidates and their match evidence</caption>
                     <thead>
                         <tr>
+                            <th scope="col" :class="th">
+                                <input type="checkbox" data-testid="select-all" :checked="allSelected" @change="toggleAll" aria-label="Select all rows on this page" class="size-5" />
+                                <span class="sr-only">Select</span>
+                            </th>
                             <th scope="col" :class="th">Imported record</th>
                             <th scope="col" :class="th">Suggested match</th>
                             <th scope="col" :class="th">Evidence</th>
@@ -156,6 +230,9 @@ function entityLabel(entity: string): string {
                     </thead>
                     <tbody id="review-results">
                         <tr v-for="candidate in props.candidates.data" :key="candidate.id">
+                            <td :class="td">
+                                <input type="checkbox" :value="candidate.id" v-model="selected" :aria-label="`Select ${candidate.proposed_name}`" class="size-5" />
+                            </td>
                             <td :class="td">
                                 <b class="text-ink-strong">{{ candidate.proposed_name }}</b>
                                 <span v-if="candidate.proposed_name_ja" lang="ja" class="block text-xs text-ink-muted">

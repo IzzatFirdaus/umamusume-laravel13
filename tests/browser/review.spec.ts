@@ -456,3 +456,26 @@ test('leaves a decision unsaved, then resolves one case and continues on the sam
     await continuation.click();
     await expect(page).toHaveURL(url => url.pathname + url.search === next);
 });
+
+test('select-all and bulk Reject dispose a page of candidates (N2.8)', async ({ page }) => {
+    const rows = seedPendingCandidates(3);
+    await page.goto('/review');
+    await page.locator('#app > *').first().waitFor();
+
+    const button = page.getByTestId('bulk-reject');
+    await expect(button).toBeDisabled();
+
+    await page.getByTestId('select-all').check();
+    await expect(button).toBeEnabled();
+    await expect(button).toContainText('3 selected');
+    await expect(page.getByText('3 of 3 rows on this page selected')).toBeVisible();
+
+    await button.click();
+    await expect(page.getByText(/candidates rejected/)).toBeVisible();
+    await expect(page.locator('#review-results tr')).toHaveCount(0);
+
+    // The rows are gone from the Pending queue, not merely hidden by the client.
+    await page.reload();
+    await expect(page.locator('#review-results tr')).toHaveCount(0);
+    expect(rows).toHaveLength(3);
+});
