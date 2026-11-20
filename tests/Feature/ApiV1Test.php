@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\Umamusume;
+use Illuminate\Support\Facades\Http;
 
 it('returns the catalog list with the documented pagination shape', function (): void {
     Umamusume::factory()->count(2)->create();
@@ -67,4 +68,15 @@ it('returns a validation error shape when the API receives bad JSON expectations
     test()->getJson('/api/v1/nope')
         ->assertNotFound()
         ->assertJsonStructure(['error' => ['code', 'message']]);
+});
+
+it('sends no outbound telemetry from the read-only API surface', function (): void {
+    // NFR-1: the read-only JSON surface must stay offline. This guard makes a future HTTP client
+    // wired into the API path fail a test instead of passing a review. Http::fake() records every
+    // outbound request while letting the in-process request complete normally.
+    Http::fake();
+
+    test()->getJson('/api/v1/umamusume')->assertOk();
+
+    Http::assertNothingSent();
 });
