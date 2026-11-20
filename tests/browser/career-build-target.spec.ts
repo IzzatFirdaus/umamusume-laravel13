@@ -405,3 +405,21 @@ test('the warn block names the defect, not a build that skips the step (walk-8 E
     await expect(warn).toContainText('A run created with no target entered commits with five empty goals.');
     await expect(page.getByText('This is the step the current build skips.')).toHaveCount(0);
 });
+
+test('a figure just below the ceiling is not rounded up to 100% (N3.19)', async ({ page }) => {
+    // 1199/1200 rounds to 100 with whole numbers, printing "100% of the ceiling" while one point
+    // remained. Exact equality is the only 100%; a near miss reads with one decimal instead.
+    await page.goto('/career/setup/target');
+    await page.locator('#app > *').first().waitFor();
+
+    // cap() reads the server's caps prop, not the entered ceiling field; the base cap is 1200 here.
+    await page.getByLabel('Speed', { exact: true }).fill('1199');
+
+    const share = page.locator('[data-stat="Speed"] [data-field="percent-of-cap"]');
+    await expect(share).toContainText('99.9% of the ceiling');
+    await expect(share).not.toContainText('100%');
+
+    // Equality still prints the whole number; the precision rule does not move the exact case.
+    await page.getByLabel('Speed', { exact: true }).fill('1400');
+    await expect(share).toContainText('100% of the ceiling');
+});

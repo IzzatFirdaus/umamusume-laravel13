@@ -18,6 +18,12 @@
  * map. Only Tab/Shift+Tab, Enter/Space, Esc (the mobile More disclosure) and the skip link are wired,
  * so the table names those; printing 1-5 would document controls that do nothing.
  *
+ * Dated correction 2026-11-20 (N6.15): the sentence above was true when written and is stale at HEAD.
+ * The TrainingDetail decision screen now wires 1-5 to pick an option, Enter to record the focused
+ * choice and Esc to go back (`resources/js/pages/Career/TrainingDetail.vue:464-497`), with a typing
+ * guard so keys pressed in an input are not intercepted. The table below adds those rows scoped to
+ * that screen; the original override is kept as the record of the earlier build.
+ *
  * HFW-OVERRIDE (rules: career length) - the sixth row states the 72-turn grid the app enforces
  * (`CareerCalendar::TURNS_PER_CAREER`); `help.html:132-136` draws five.
  * HFW-OVERRIDE (rules: deck) - the row prints the sourced rule only: a deck holds six support-card slots
@@ -85,6 +91,9 @@ const keys: { key: string; does: string }[] = [
     { key: 'Enter / Space', does: 'Activate the focused control, including a card that is itself the button.' },
     { key: 'Esc', does: 'Close the mobile More disclosure and return focus to it.' },
     { key: 'Skip to content', does: 'The first control on every screen; it lands in the page body, past the navigation.' },
+    { key: '1–5 (training decisions only)', does: 'Pick the matching option on a training decision. Ignored while typing in a field.' },
+    { key: 'Enter (training decisions only)', does: 'Record the focused choice on a training decision.' },
+    { key: 'Esc (training decisions only)', does: 'Go back from a training decision.' },
 ];
 </script>
 

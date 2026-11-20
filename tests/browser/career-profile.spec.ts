@@ -156,3 +156,22 @@ test.describe('Trainee Profile (Phase 4)', () => {
         }
     });
 });
+
+test('growth tiles read as one row wide and stack narrow (N3.26)', async ({ page }) => {
+    // This case sits outside the describe, so it opens the read screen itself.
+    await page.goto('/career/setup/trainee/admire-vega');
+    await page.locator('#app > *').first().waitFor();
+
+    const row = page.locator('[data-field="growth"]');
+    await expect(row.locator('.tile')).toHaveCount(5);
+
+    await page.setViewportSize({ width: 1280, height: 900 });
+    const wideTops = await row.locator('.tile').evaluateAll((nodes) => nodes.map((n) => Math.round(n.getBoundingClientRect().top)));
+    expect(new Set(wideTops).size).toBeLessThan(5);
+
+    await page.setViewportSize({ width: 390, height: 844 });
+    const narrowTops = await row.locator('.tile').evaluateAll((nodes) => nodes.map((n) => Math.round(n.getBoundingClientRect().top)));
+    // At 390px the token fits three 7.5rem columns, so the five tiles wrap to more than one row;
+    // the point of the slice is that they no longer stack five full-width boxes.
+    expect(new Set(narrowTops).size).toBeGreaterThan(1);
+});

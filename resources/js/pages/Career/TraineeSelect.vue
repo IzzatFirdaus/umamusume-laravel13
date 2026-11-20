@@ -427,9 +427,26 @@ function headlineForm(row: TraineeRow): FormRow | null {
  * saying she was set (D5). The server sends her own row, so the frame, the form picker and the aptitude
  * sentence all print whatever the draft names, whether or not she is on this page.
  */
-const selectedHeadlineForm = computed<FormRow | null>(() =>
-    props.selectedTrainee === null ? null : headlineForm(props.selectedTrainee),
-);
+/**
+ * The form the Selected summary is allowed to name. A single-form trainee is auto-selected, so her
+ * one form is a fact; a multi-form trainee with no pick has no chosen form to print, and falling back
+ * to `forms[0]` named an unchosen one beside a "Select a form" placeholder (N3.25).
+ */
+const selectedHeadlineForm = computed<FormRow | null>(() => {
+    const row = props.selectedTrainee;
+
+    if (row === null) {
+        return null;
+    }
+
+    const picked = pickedForm.value[row.id] ?? null;
+
+    if (picked !== null) {
+        return row.forms.find((form) => form.id === picked) ?? null;
+    }
+
+    return row.forms.length === 1 ? row.forms[0] : null;
+});
 
 const selectedFormOptions = computed(() =>
     (props.selectedTrainee?.forms ?? []).map((form) => ({ value: form.id, label: form.title })),
@@ -652,6 +669,9 @@ const sortLabel = computed(
                         {{ props.selectedName }}
                         <span v-if="selectedHeadlineForm" class="font-semibold text-ink-muted">
                             {{ selectedHeadlineForm.title }}
+                        </span>
+                        <span v-else-if="(props.selectedTrainee?.forms.length ?? 0) > 1" class="font-semibold text-ink-muted">
+                            Choose a form
                         </span>
                     </p>
                     <p class="text-xs text-ink-muted">

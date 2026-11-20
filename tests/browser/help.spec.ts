@@ -103,3 +103,15 @@ test('the wireframe apparatus is absent and the console stays clean', async ({ p
 
     expect(errors).toEqual([]);
 });
+
+test('the keyboard table names only controls the build wires (N6.15)', async ({ page }) => {
+    // The old override said 1-5 did nothing, but TrainingDetail picks an option with them. The
+    // table now names those accelerators with their screen scope and typing guard.
+    await page.goto('/help');
+    await page.locator('#app > *').first().waitFor();
+
+    await expect(page.getByText(/1–5 \(training decisions only\)/)).toBeVisible();
+    await expect(page.getByText(/Ignored while typing in a field/)).toBeVisible();
+    await expect(page.getByText(/Enter \(training decisions only\)/)).toBeVisible();
+    await expect(page.getByText(/Esc \(training decisions only\)/)).toBeVisible();
+});

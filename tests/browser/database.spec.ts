@@ -444,13 +444,14 @@ test('the scenario matrix prints config/scenarios.php, verification date and all
 
     // Panel state is the word itself, so the state never rides on a glyph or on colour alone
     // (design-2.0 §42). A tick used to sit beside the word and an em dash stood for "off"; the
-    // dash is banned in shipped copy (R-02, D-79) and the tick was decoration, so the word is
-    // printed and the glyph pair is gone.
-    const panels = page.getByRole('table', { name: /panels$/ }).first();
+    // dash is banned in shipped copy (R-02, D-79) and the tick was decoration. N6.7 (2026-11-20)
+    // inverted these pins: "on"/"off" were config key words, not the client's own answer to
+    // "does this scenario compose this panel?"; "Included"/"Not included" are client vocabulary.
+    const panels = page.getByRole('table', { name: /Panels each scenario composes/i }).first();
     await expect(panels).toBeVisible();
-    await expect(panels.getByText('on', { exact: true }).first()).toBeVisible();
-    // Some scenario has an off panel, and its word is in that table for a screen reader to read.
-    await expect(page.getByText('off', { exact: true }).first()).toBeVisible();
+    await expect(panels.getByText('Included', { exact: true }).first()).toBeVisible();
+    // Some scenario does not compose a panel, and the table says so in words.
+    await expect(page.getByText('Not included', { exact: true }).first()).toBeVisible();
 
     const caps = page.getByRole('table', { name: 'URA Finale stat caps' });
     await expect(caps).toBeVisible();
@@ -755,4 +756,21 @@ test('sorts filtered races before pagination and exposes the active direction', 
     } finally {
         removeRaceSlots(seeded);
     }
+});
+
+test('the ledger prose states the conflict count it renders (N6.1)', async ({ page }) => {
+    // The tile and the table both derive from CONFLICTS.length; a hardcoded word in the note used to
+    // say three while four rows rendered. The note now reads the same list.
+    await page.goto('/database/sources');
+    await page.locator('#app > *').first().waitFor();
+
+    const conflicts = page.locator('[aria-labelledby="conflicts-heading"]');
+    const rows = await conflicts.locator('tbody tr').count();
+    const tile = await page.locator('.tile').filter({ hasText: 'Open conflicts' }).locator('.v').innerText();
+    const note = await conflicts.locator('p.note').innerText();
+
+    expect(rows).toBeGreaterThan(0);
+    expect(tile.trim()).toBe(String(rows));
+    expect(note).toContain(`${rows} rows above`);
+    expect(note).not.toContain('these three');
 });

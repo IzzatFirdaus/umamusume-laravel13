@@ -227,7 +227,8 @@ test('the Data sources ledger sits on its wireframe', async ({ page }) => {
                 // copy bans the glyph, so the app's colon form is the required divergence.
                 'div.card:nth-child(3) > table.t:nth-child(2) > tbody:nth-child(2) > tr:nth-child(1)',
                 // HFW-OVERRIDE (data: ledger columns): the mock's Tier and State columns have no
-                // per-dataset value in this build, and its eight sources are not this build's twelve.
+                // per-dataset value in this build, and its eight sources are not this build's
+                // seventeen (13 fetched + 4 transcribed, measured 2026-11-20).
                 'div.card:nth-child(4) > table.t',
                 // HFW-OVERRIDE (data: conflicts): the mock lists four open disagreements; the mood race
                 // effect was resolved on 2026-09-27, and the app states each row's two sides in a

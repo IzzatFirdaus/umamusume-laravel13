@@ -227,7 +227,7 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
             <PageHeader
                 eyebrow="Event decision"
                 title="A training event is asking"
-                description="Pick one option. The event resolves immediately and cannot be re-run; an Alarm Clock retries a lost goal race, not an event."
+                description="Pick one option. The event resolves immediately and cannot be re-run."
             >
                 <template #actions>
                     <a :href="props.run.run_url" class="inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-4 text-sm font-semibold text-ink hover:text-ink-strong">Back to cockpit</a>
@@ -386,14 +386,14 @@ const metaTitle = (item: { value: number | string | null; band_text?: string | n
                             <tbody>
                                 <tr class="border-b border-rule-soft"><th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Source</th><td class="py-2">Client screen</td></tr>
                                 <tr class="border-b border-rule-soft"><th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Effect table</th><td class="py-2"><span class="pill pill-caution">Not published</span></td></tr>
-                                <tr><th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Retryable</th><td class="py-2">No: Alarm Clock covers goal races only</td></tr>
-                            </tbody>
-                        </table>
-                        <Note class="mt-2.5">
-                            An Alarm Clock retries a goal race whose placing was missed; it does not re-open an event
-                            choice.
-                        </Note>
-                    </section>
+                        <tr><th scope="row" class="py-2 pr-3 text-left font-medium text-ink">Retryable</th><td class="py-2">No: Alarm Clock covers goal races only</td></tr>
+                    </tbody>
+                </table>
+                <details class="mt-2.5">
+                    <summary class="cursor-pointer text-xs font-medium text-ink">Why an event cannot be retried</summary>
+                    <p class="note mt-1.5">An Alarm Clock retries a goal race whose placing was missed; it does not re-open an event choice.</p>
+                </details>
+            </section>
 
                     <div v-if="form.hasErrors" ref="alert" role="alert" tabindex="-1" class="rounded-md border border-risk bg-raised p-3 text-sm text-risk">
                         <p class="font-semibold">The event was not recorded.</p>

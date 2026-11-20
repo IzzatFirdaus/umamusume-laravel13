@@ -199,3 +199,18 @@ it('continues at the next pending case on the page of the manual verdict', funct
 
     expect($next->fresh()->status)->toBe(CandidateStatus::Pending);
 });
+
+it('names the entity kind on each queue row', function (): void {
+    // ADR-0037: entity lives in the payload, never a schema column. The Index renders a kind word
+    // from it so a race candidate cannot be mistaken for a trainee whose Confirm would 500.
+    $candidate = MatchCandidate::factory()->create([
+        'status' => CandidateStatus::Pending,
+        'payload' => ['name_en' => 'February Stakes', 'entity' => 'race'],
+    ]);
+
+    test()->get(route('review.index'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('candidates.data.0.id', $candidate->id)
+            ->where('candidates.data.0.entity', 'race'));
+});

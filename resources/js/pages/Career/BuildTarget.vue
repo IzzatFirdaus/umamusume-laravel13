@@ -230,15 +230,28 @@ const entered = (stat: string): number | null => {
     return typeof value === 'number' && Number.isFinite(value) ? value : null;
 };
 
-const percent = (stat: string): number => {
+/**
+ * The share of the ceiling as a caption, not a rounded whole number. Rounding 1398/1400 to 100%
+ * claimed the ceiling had been reached when two points remained; exact equality is the only 100%.
+ * One decimal below equality keeps the difference visible without implying sub-point precision.
+ */
+const percent = (stat: string): string => {
     const value = entered(stat);
     const ceiling = cap(stat);
 
     if (value === null || ceiling <= 0) {
-        return 0;
+        return '0';
     }
 
-    return Math.min(100, Math.max(0, Math.round((value / ceiling) * 100)));
+    if (value >= ceiling) {
+        return '100';
+    }
+
+    const share = (value / ceiling) * 100;
+
+    // One decimal below equality: even 99.83% must not read as 100%. Capped at 99.9 so a value
+    // infinitesimally below the ceiling never rounds up to the equality word.
+    return Math.min(99.9, Number(share.toFixed(1))).toFixed(1);
 };
 
 /** The sum of the five entered targets, or null while any one of them is still empty. */

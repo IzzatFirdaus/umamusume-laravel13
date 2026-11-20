@@ -12,6 +12,7 @@ interface Candidate {
     proposed_name_ja: string | null;
     match_tier: string;
     match_tier_label: string;
+    entity: string;
     source_key: string;
     created_at: string;
     suggestion: string | null;
@@ -63,6 +64,12 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
     return tier === 'Fuzzy'
         ? { state: 'estimated', title: `Fuzzy match from ${sourceKey}` }
         : { state: 'unknown', title: `No match from ${sourceKey}` };
+}
+
+// ADR-0037: the entity travels in the candidate payload, not in a schema column. Name the kind in
+// the client's own vocabulary so a race row cannot read as a trainee whose Confirm would 500.
+function entityLabel(entity: string): string {
+    return entity === 'race' ? 'Race' : 'Trainee Umamusume';
 }
 </script>
 
@@ -155,7 +162,7 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                                     {{ candidate.proposed_name_ja }}
                                 </span>
                                 <span class="mt-0.5 block text-xs text-ink-muted">
-                                    from {{ candidate.source_key }}
+                                    {{ entityLabel(candidate.entity) }} · from {{ candidate.source_key }}
                                     <time :datetime="candidate.created_at"> · {{ candidate.created_at }}</time>
                                 </span>
                             </td>

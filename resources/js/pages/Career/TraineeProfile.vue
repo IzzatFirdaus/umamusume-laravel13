@@ -331,7 +331,10 @@ function remainingLetters(group: AptitudeGroup): string {
 
                     <p class="sub mt-2">The place this trainee's training gains are weighted.</p>
 
-                    <div class="tiles mt-2" data-field="growth">
+                    <!-- N3.26: the five growth values are one row at wide widths and stack narrow.
+                         Scoped to this block rather than the shared `.tiles` primitive, which other
+                         screens use at other densities. -->
+                    <div class="tiles mt-2 growth-row" data-field="growth">
                         <div v-for="axis in statAxes" :key="axis" class="tile">
                             <p class="k">{{ axis }}</p>
                             <p class="v" :class="growthRates && growthRates[axis] != null ? '' : 'na'">{{ growthRates && growthRates[axis] != null ? `${growthRates[axis]}%` : 'N/A' }}</p>

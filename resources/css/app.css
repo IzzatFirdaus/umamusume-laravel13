@@ -1604,6 +1604,13 @@ table.t tr.is-current td {
     gap:9px;
 }
 
+/* N3.26: the profile's five growth tiles read as one row where they fit and stack narrow. The
+   shared `.tiles` primitive stays at its existing density for every other screen; the token is
+   already defined at :73 and was unused. */
+.growth-row {
+    grid-template-columns:var(--grid-template-columns-tiles);
+}
+
 /* .tile: ported from shell.css; resolves to house tokens. */
 .tile {
     border:1px solid var(--color-rule);

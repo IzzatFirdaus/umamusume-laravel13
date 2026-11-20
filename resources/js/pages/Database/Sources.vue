@@ -228,9 +228,10 @@ const CONFLICTS: ReadonlyArray<{ question: string; state: string }> = [
             <p class="note mt-3">
                 <span class="g" aria-hidden="true">○</span>
                 <span>
-                    A fetched row's date is the newest recorded fetch across every dataset; a transcribed
-                    row's date is the day the transcribing pass read the document. Neither is an update
-                    date, and neither is merged into the other.
+                    A fetched row's date is that dataset's own newest recorded fetch, read from the
+                    provenance the ingest stamped on its rows; a transcribed row's date is the day
+                    the transcribing pass read the document. Neither is an update date, and one
+                    dataset's fetch is never lent to another.
                 </span>
             </p>
         </div>
@@ -263,7 +264,7 @@ const CONFLICTS: ReadonlyArray<{ question: string; state: string }> = [
                         A conflict is printed as a conflict. The app does not pick a side on the Trainer's
                         behalf, because the side that is wrong will cost a run. A disagreement the guide has
                         since resolved leaves this list: the mood race effect settled on 2026-09-27 in the
-                        client panel's favour, so these three are the three still open.
+                        client panel's favour. The {{ CONFLICTS.length }} rows above are the ones still open.
                     </span>
                 </p>
             </div>

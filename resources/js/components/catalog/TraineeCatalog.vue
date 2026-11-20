@@ -398,8 +398,9 @@ const fieldLabel = 'text-xs font-semibold text-ink-muted';
 
         <p class="mt-6 max-w-3xl text-xs text-ink-muted">
             A costume form's rarity is its own, not the trainee's best: a debut form can be an SR while a
-            later form is an SSR. Base stat values, the ★4 and ★5 totals and growth rows are not stored in
-            this catalogue; a run records the growth row its Trainer reads off the card.
+            later form is an SSR. Base stat values and growth rows are stored per costume form
+            (`character_cards`, ADR-0030) and printed below; this page never invents a figure for a
+            form the source document did not publish.
         </p>
     </div>
 </template>

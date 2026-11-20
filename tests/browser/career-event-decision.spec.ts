@@ -189,3 +189,21 @@ test('renders the undo disabled, matching what it says about itself (R7-21, walk
     await expect(undo).toBeDisabled();
     await expect(undo).toHaveAttribute('title', /no undo/);
 });
+
+test('the Alarm Clock explanation appears once at rest (N3.9)', async ({ page }) => {
+    // Three copies used to print: the header lede, the Retryable row, and a standing Note. One
+    // visible sentence sits by the decision; the longer form opens only on demand.
+    await openEventDecision(page);
+
+    const visible = await page.getByText(/Alarm Clock/).evaluateAll((nodes) =>
+        nodes.filter((n) => {
+            const style = getComputedStyle(n);
+            return style.display !== 'none' && style.visibility !== 'hidden' && !n.closest('details:not([open])');
+        }).map((n) => n.textContent?.trim()),
+    );
+    expect(visible).toHaveLength(1);
+    expect(visible[0]).toContain('Alarm Clock covers goal races only');
+
+    await page.getByText('Why an event cannot be retried').click();
+    await expect(page.getByText(/does not re-open an event choice/)).toBeVisible();
+});

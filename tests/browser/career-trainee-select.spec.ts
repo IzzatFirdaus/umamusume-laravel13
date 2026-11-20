@@ -760,3 +760,22 @@ test.describe('Trainee Selection and Profile', () => {
         const rowsAfter = await page.locator('[data-trainee-card]').count();
         expect(rowsAfter, 'the roster must stay narrowed after the pick').toBe(rowsBefore);
     });
+
+test('the Selected headline never names a form the Trainer has not picked (N3.25)', async ({ page }) => {
+    await page.goto('/career/setup/trainee');
+    await page.locator('#app > *').first().waitFor();
+
+    await page.getByLabel('Search').fill('Rice Shower');
+    await card(page, 'Rice Shower').getByRole('button', { name: 'Select', exact: true }).click();
+
+    const selected = page.locator('[data-field="selected-trainee"]');
+    // Rice Shower has two forms and the picker still offers the placeholder. The headline must not
+    // claim the first form while the draft holds no card id.
+    await expect(selected.locator('select#selected-form')).toHaveValue('');
+    await expect(selected).toContainText('Choose a form');
+    await expect(selected).not.toContainText('[Starry Nocturne]');
+
+    // Picking a form replaces the invitation with its name; the single-form path stays auto-selected.
+    await selected.locator('select#selected-form').selectOption({ index: 1 });
+    await expect(selected).not.toContainText('Choose a form');
+});

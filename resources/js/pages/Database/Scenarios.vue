@@ -226,7 +226,7 @@ const panelState = (scenario: Scenario, label: string): boolean =>
                     <tr v-for="panel in panelNames" :key="panel">
                         <th scope="row">{{ panel }}</th>
                         <td v-for="[key, scenario] in entries" :key="key" class="n">
-                            {{ panelState(scenario, panel) ? 'on' : 'off' }}
+                            {{ panelState(scenario, panel) ? 'Included' : 'Not included' }}
                         </td>
                     </tr>
                 </tbody>

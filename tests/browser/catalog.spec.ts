@@ -189,3 +189,14 @@ test('the roster index passes an axe scan at WCAG A and AA', async ({ page }) =>
     const results = await buildAxe(page).analyze();
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
 });
+
+test('the catalog footer states that ADR-0030 stores base stats per form (N6.8)', async ({ page }) => {
+    // The old footer said base stats and growth were not stored in this catalogue, while ADR-0030
+    // stores both on character_cards and this page renders them for the active form.
+    await page.goto('/umamusume');
+    await page.locator('#app > *').first().waitFor();
+
+    const footer = page.getByText(/stored per costume form/);
+    await expect(footer).toBeVisible();
+    await expect(page.getByText(/are not stored in this catalogue/)).toHaveCount(0);
+});
