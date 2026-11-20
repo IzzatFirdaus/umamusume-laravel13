@@ -360,3 +360,13 @@ None of the four is this session's regression. None is claimed as a pass.
 5. **Owner-gated slices parked, not simulated:** S0.1, S0.3, S0.5, S2.5, S3.4, S3.5, S4.3
    signatures, S4.4, and every Phase 5 row.
 6. S0.4 was completed late in the session; it is listed under Phase 0 above rather than here.
+
+## Dated erratum 2026-11-20 (N4.2) — citation ratchet and commit state
+
+The failure rows above naming `DocCitationParityTest` as red (808 vs 708), and the close-out note
+calling the ratchet unmet, were true at the 2026-11-18 HEAD and are preserved as the record of that
+session. At HEAD `8482c112` the citation repoints are committed: `python tools/doc_census.py` reads
+`ratchet: 546 <= 708` and `php artisan test --filter=DocCitationParity` reports 2 passed / 5
+assertions. The 708 baseline was not raised. "Nothing is committed" is likewise a snapshot of that
+session: the current tree is committed and pushed with divergence `0 0`. This erratum changes no
+earlier row; it records what supersedes them.

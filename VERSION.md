@@ -2,7 +2,7 @@
 
 Current version: `3.0.0`, pre-release. Tagged: `0.1.0`, `2.0.1`, `2.0.2`, `2.1.0`, `2.1.1`.
 
-Every figure in this file was re-measured on 2026-11-18 at `HEAD 816e923e`, and each names the command
+Every figure in this file was re-measured on 2026-11-20 at `HEAD 478e947b`, and each names the command
 that produces it. Nothing here is aspirational: a row that cannot be re-derived from a command printed
 beside it does not belong in this file.
 
@@ -14,9 +14,9 @@ beside it does not belong in this file.
 | Release commit | not fixed | `git tag -l 'v3*'` is empty. The tag cannot be cut until the divergence row below reaches `0 0` and the owner authorises it (docs/roadmap/MASTER-IMPLEMENTATION-ROADMAP-2026-11-18.md section S4.4) |
 | Framework | `laravel/framework` **13.42.0** | `composer.lock` (locked `v13.42.0`), constraint `^13.0`; `composer show laravel/framework` -> `versions : * v13.42.0` |
 | Inertia (server) | `inertiajs/inertia-laravel` **3.5.1** | `composer.lock` |
-| Pest | `pestphp/pest` **4.7.8** | `composer.lock`; the PHP floor stays `^8.3` while Pest is on the 4 line |
-| PHP | **8.5.8** | `php -v` -> `PHP 8.5.8 (cli)`, against `require.php: ^8.3` |
-| Divergence from `origin/master` | **8 behind / 38 ahead** | `git rev-list --left-right --count origin/master...HEAD` -> `8  38` |
+| Pest | `pestphp/pest` **4.7.8** | `composer.lock`; the PHP floor was raised to `^8.4.1` on 2026-11-20 (`37320f35`) and the tree is built/tested on 8.5.8 |
+| PHP | **8.5.8** | `php -v` -> `PHP 8.5.8 (cli)`, against `require.php: ^8.4.1` |
+| Divergence from `origin/master` | **0 behind / 0 ahead** | `git rev-list --left-right --count origin/master...HEAD` -> `0	0` (pushed 2026-11-20) |
 
 ## Suite baselines at this HEAD
 
@@ -24,14 +24,15 @@ Both baselines were produced on 2026-11-18 on a quiet box, one process at a time
 
 | Gate | Result | Command |
 | --- | --- | --- |
-| PHP suite | **2467 passed, 2 failed** (37,575 assertions, 504s) | `php artisan test --compact < /dev/null` |
-| Browser suite | not run in full at this HEAD; per-spec runs are recorded in the roadmap's S1.2 deliverable | `npx playwright test --list` -> 884 tests in 126 files |
-| Citation census | **808 dead links against a 708 baseline** (the ratchet is open, not raised) | `python tools/doc_census.py` |
-| ADR checker | 2 findings, both a word-cap breach (ADR-0026, ADR-0029) | `python tools/adr-check.py docs/adr` |
+| PHP suite | **1 failed, 2533 passed** (38,214 assertions, 867s) at `HEAD fc05ba39` (2026-11-20) | `php artisan test --compact < /dev/null`; see N1.1 in the plan's execution log |
+| Browser suite | full run in progress at `HEAD fc05ba39` on a session-private port/scratch DB; result recorded when it closes | `PLAYWRIGHT_PORT=8131 PLAYWRIGHT_SCRATCH_DB=.scratch-uma/n12/browser-8131.sqlite npm run test:browser` |
+| Citation census | **546 dead links against a 708 baseline** (the ratchet is closed, not raised) | `python tools/doc_census.py` -> `ratchet: 546 <= 708` |
+| ADR checker | 0 findings | `python tools/adr-check.py docs/adr` -> `0 finding(s)` |
 
-The two PHP failures are `DocCitationParityTest` (the 808-vs-708 ratchet above, expected red until the
-ratchet slice lands) and `LineEndingGuardTest` (a CRLF file, repaired in this session and green on
-re-run). Neither is a shipped-behaviour defect, and neither is claimed as a pass.
+The one PHP failure is `LineEndingGuardTest` (three CRLF working-tree files whose committed blobs were
+already LF). They were normalized in place and the focused guard re-run passed; no committed-behaviour
+defect is claimed. The four stale 2026-11-18 claims (808 dead links, 2 ADR findings, PHP floor `^8.3`,
+divergence `8/38`) are superseded by the measured rows above, dated here rather than silently rewritten.
 
 ## Why 0.y.z is over
 
@@ -83,7 +84,7 @@ true then. Where a later measurement changes a verdict it is named in the row.
 | (a) US-1..US-3 pass with pipeline test | US-1 (catalog browse), US-2 (fetch cross-reference), US-3 (training run with turn logging) all pass end-to-end against seeded data, including a pipeline test with a faked HTTP source. | Not satisfied as stated: each story has a passing test of its own (US-1 `CatalogRosterTreeTest`, US-2 `FetchPipelineTest` with a faked HTTP source, US-3 `TrainingRunTest` and `TurnEntryFieldSourceTest`; 57 passed / 390 assertions, measured 2026-10-19), but no single gate measures all three end-to-end against seeded data, which is what this criterion asks for. The 2026-11-18 full suite passes at 2467 tests, which strengthens each story's own coverage without creating that single gate. |
 | (b) Known gaps recorded in KNOWN-ISSUES.md | The NFR-20 gaps (no page request triggers background work, loading/error state termination, the refresh test, and the refresh navigation determinism issue) are recorded with status. | Satisfied: every one is recorded in `KNOWN-ISSUES.md` with a status. Measured 2026-10-19; the register is still the status authority (`KNOWN-ISSUES.md:2-117`). |
 | (c) ADR-0025 accepted | The per-run entered ceilings decision is accepted and binding. | Satisfied: ADR-0025 accepted in commit `2ff8c3e`; its status line reads "Accepted (2026-10-18)". Measured 2026-10-19. |
-| (d) Doc ratchet at acceptable level | DocCitationParity count at or below the 708 baseline, or the limit raised with a written reason. | **Not satisfied at this HEAD.** The 2026-10-19 measurement read 698 against the 708 baseline; `python tools/doc_census.py` now reads **808 (808 GONE, 0 UNTRACKED)**. The limit was not raised, and raising it would breach `GOVERNANCE.md` C-8. The ratchet is open work, not a waiver. |
+| (d) Doc ratchet at acceptable level | DocCitationParity count at or below the 708 baseline, or the limit raised with a written reason. | **Satisfied** (measured 2026-11-20): `python tools/doc_census.py` reads `ratchet: 546 <= 708` and `php artisan test --filter=DocCitationParity` reports 2 passed / 5 assertions. The 708 baseline was not raised. Earlier readings (698 on 2026-10-19, 808 at the 2026-11-18 execution record) were superseded by the citation repoints landed in the doc batches; the exec record keeps its original text with a dated erratum. |
 
 ## Documented rules that this file does not restate
 
