@@ -4,26 +4,28 @@ on:
   workflow_run:
     workflows: ["NativePHP Windows Build"]
     types: [completed]
-  workflow_dispatch:
+  workflow_call:
 
 permissions:
   contents: read
   actions: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.id || github.run_id }}
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
   test-packaged-exe:
-    if: ${{ github.event.workflow_run.conclusion == 'success' || github.event_name == 'workflow_dispatch' }}
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: windows-latest
-    timeout-minutes: 15
+    timeout-minutes: 30
     env:
       NATIVEPHP_SECRET: ${{ secrets.NATIVEPHP_SECRET }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
 
       - name: Generate NATIVEPHP_SECRET if not set
         shell: pwsh
@@ -38,29 +40,21 @@ jobs:
 
       - run: npm ci && npx playwright install --with-deps chromium
 
-      - name: Resolve build run ID
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          $runId = "${{ github.event.workflow_run.id }}"
-          if ($runId) {
-            echo "BUILD_RUN_ID=$runId" >> $env:GITHUB_ENV
-          } else {
-            $latestBuild = gh api /repos/${{ github.repository }}/actions/workflows/nativephp-windows.yml/runs --jq '.workflow_runs[] | select(.conclusion == "success") | .id' | Select-Object -First 1
-            if (-not $latestBuild) {
-              Write-Error "No successful build run found. Run the NativePHP Windows Build workflow first."
-              exit 1
-            }
-            echo "BUILD_RUN_ID=$latestBuild" >> $env:GITHUB_ENV
-          }
-
-      - uses: actions/download-artifact@v4
+      - name: Download installer artifact (called workflow — same run as build)
+        if: ${{ github.event_name != 'workflow_run' }}
+        uses: actions/download-artifact@v4
         with:
           name: nativephp-windows-installer
           path: artifacts
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ env.BUILD_RUN_ID }}
+
+      - name: Download installer artifact (independent run — cross-run from trigger)
+        if: ${{ github.event_name == 'workflow_run' }}
+        uses: actions/download-artifact@v4
+        with:
+          name: nativephp-windows-installer
+          path: artifacts
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
 
       - shell: pwsh
         run: |
@@ -143,3 +137,60 @@ jobs:
           name: packaged-app-diagnostics
           path: appdata-dump
           if-no-files-found: ignore
+
+  # The repo's first gate job. The other workflow jobs build and package the installer; without
+  # this one, a lint or citation failure could land with every job green. It runs the same
+  # `tools/gates.sh --fast` an operator runs locally, with that script's own stdin handling and
+  # explicit changed-path collection. PHP 8.5 satisfies composer.json's ^8.4.1 floor and matches
+  # the build workflow; `sockets` is listed because gates.sh names it as required. The PHP suite
+  # is deliberately excluded (--fast): it is the tag-time checkpoint, not a per-build job.
+  # A new workflow file would be invisible here: .gitignore:133 ignores /.github/. Adding the
+  # job to this tracked workflow keeps the gate under version control without changing that
+  # repository policy.
+  gates:
+    name: Repository gates (fast)
+    runs-on: windows-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup PHP 8.5
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          extensions: zip, pdo_sqlite, mbstring, openssl, curl, fileinfo, tokenizer, xml, ctype, json, bcmath, intl, sockets
+          tools: composer:v2
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+
+      - name: Install PHP dependencies
+        run: composer install --no-interaction --prefer-dist --no-progress
+
+      - name: Install Node dependencies
+        run: npm ci
+
+      - name: Prepare environment file
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -f .env.example ]; then cp .env.example .env; fi
+
+      - name: Run gates
+        shell: bash
+        # --whole-tree-pint is the CI-only half: a fresh checkout has no diff against HEAD, so the
+        # change-scoped pint set is empty and style would go unchecked on exactly the tree a merge
+        # lands. Every other step is already tree-scoped (the census and untracked sweep read git
+        # themselves), so --fast otherwise means the same thing locally and here.
+        run: bash tools/gates.sh --fast --whole-tree-pint

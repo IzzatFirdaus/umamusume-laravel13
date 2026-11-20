@@ -2,9 +2,8 @@ name: NativePHP Windows Build
 
 on:
   workflow_dispatch:
+  workflow_call:
   push:
-    tags:
-      - 'v*'
     branches:
       - worktree/cherry-pick
       - master
@@ -17,9 +16,39 @@ concurrency:
   cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
+  gates:
+    name: Repository gates (fast)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v5
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.5'
+          coverage: none
+          extensions: zip, pdo_sqlite, mbstring, openssl, curl, fileinfo, tokenizer, xml, ctype, json, bcmath, intl, sockets
+          tools: composer:v2
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: '24'
+          cache: npm
+      - run: composer install --no-interaction --prefer-dist --no-progress
+      - run: npm ci
+      - run: |
+          if [ -f .env.example ]; then cp .env.example .env; fi
+        shell: bash
+      - run: bash tools/gates.sh --fast --whole-tree-pint
+
   build-windows:
+    name: Build Windows installer
     runs-on: windows-latest
     timeout-minutes: 45
+    needs: gates
+    env:
+      ELECTRON_RUN_AS_NODE: ''
 
     steps:
       - name: Checkout repository
@@ -59,7 +88,9 @@ jobs:
           if [ -f .env ]; then rm -f .env; fi
           if [ -f .env.example ]; then
             cp .env.example .env
-            echo "Created .env from .env.example"
+            sed -i 's/^APP_ENV=.*/APP_ENV=production/' .env
+            sed -i 's/^APP_DEBUG=.*/APP_DEBUG=false/' .env
+            echo "Created .env from .env.example (production settings)"
           else
             echo 'APP_NAME="Trainer Desk"' > .env
             echo 'APP_ENV=production' >> .env
@@ -125,6 +156,7 @@ jobs:
             nativephp/electron/dist/**/*.exe
             nativephp/electron/dist/**/*.7z
             nativephp/electron/dist/**/*.blockmap
+            nativephp/electron/dist/latest.yml
           if-no-files-found: error
 
       - name: Upload failure logs on failure
