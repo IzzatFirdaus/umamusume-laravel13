@@ -63,7 +63,7 @@ async function openComparison(page: import('@playwright/test').Page, trainees: s
         await page.getByRole('checkbox', { name: trainee }).check();
     }
 
-    await page.getByRole('link', { name: `Compare ${trainees.length} selected` }).click();
+    await page.getByRole('button', { name: 'Compare', exact: true }).click();
     // The path, not the query spelling. The href is written `?veterans[]=N`, but Inertia's Link
     // re-serialises the array as `?veterans%5B0%5D=N&veterans%5B1%5D=M`, and PHP builds the same list
     // from either spelling. Matching the query shape is how this helper broke once already.
@@ -132,7 +132,7 @@ test('sizes the comparison controls to the 44px contract', async ({ page }) => {
 
     const libraryTargets = [
         page.locator('label').filter({ has: page.getByRole('checkbox', { name: 'Super Creek' }) }),
-        page.getByRole('link', { name: 'Compare veterans' }),
+        page.getByRole('button', { name: 'Compare', exact: true }),
     ];
 
     for (const target of libraryTargets) {
@@ -227,28 +227,29 @@ test('pins the property column and the header row so a value never loses its lab
     expect(headerComputed.background, 'the sticky header is transparent').not.toBe('rgba(0, 0, 0, 0)');
 });
 
-test('counts the selection on the library door and clears it when the tick comes back off', async ({ page }) => {
+test('announces the selection and only enables Compare for two valid careers', async ({ page }) => {
     createdRunUrls.push(await fileCareer(page, 'Super Creek', 'Speed'));
+    createdRunUrls.push(await fileCareer(page, 'Agnes Digital', null));
+    await page.goto('/veterans');
 
-    await page.goto('/veterans', { waitUntil: 'domcontentloaded' });
-    await page.locator('#app > *').first().waitFor();
+    const compare = page.getByRole('button', { name: 'Compare', exact: true });
+    const clear = page.getByRole('button', { name: 'Clear selection' });
+    const selection = page.getByRole('status').filter({ hasText: /\d+ selected/ });
 
-    // The door is the count. The picker used to carry its own "0 of 6 selected" status beside a button
-    // that disabled itself; on the library the head band's one accented control says the number
-    // instead, so there is no second readout to fall out of step with it.
-    const door = page.getByRole('link', { name: 'Compare veterans' });
-    await expect(door).toBeVisible();
-
+    await expect(compare).toBeDisabled();
+    await expect(clear).toBeDisabled();
     await page.getByRole('checkbox', { name: 'Select Super Creek' }).check();
-    await expect(page.getByRole('link', { name: 'Compare 1 selected' })).toBeVisible();
-    await expect(door).toHaveCount(0);
+    await expect(selection).toContainText('1 selected');
+    await expect(compare).toBeDisabled();
+    await page.getByRole('checkbox', { name: 'Select Agnes Digital' }).check();
+    await expect(selection).toContainText('2 selected');
+    await expect(compare).toBeEnabled();
 
-    await page.getByRole('checkbox', { name: 'Select Super Creek' }).uncheck();
-    await expect(door).toBeVisible();
-    await expect(page.getByRole('link', { name: 'Compare 1 selected' })).toHaveCount(0);
-
-    // "why nothing can compare" moved with the selection. An empty door still leads somewhere honest:
-    // the compare page states the reason in its own empty state, which the case above asserts.
+    await clear.click();
+    await expect(selection).toContainText('0 selected');
+    await expect(page.getByRole('checkbox', { name: 'Select Super Creek' })).not.toBeChecked();
+    await expect(compare).toBeDisabled();
+    await expect(page).toHaveURL(/\/veterans$/);
 });
 
 test('keeps the columns in the order the Trainer ticked them', async ({ page }) => {

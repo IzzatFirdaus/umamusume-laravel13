@@ -34,8 +34,8 @@ import Pagination from '../../components/ui/Pagination.vue';
 import Card from '../../components/ui/Card.vue';
 import Tile from '../../components/ui/Tile.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
+import AbsenceValue from '../../components/AbsenceValue.vue';
 import { BaseInput, BaseSelect, BaseButton, BaseCheckbox, LinkButton } from '../../components/Form';
-import { carriesAncestryNote, veteranResultClause, VETERAN_ANCESTRY_NOTE } from '../../domain/veteranNote';
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 
@@ -44,13 +44,9 @@ interface Veteran {
     run_id: number;
     label: string;
     trainee: string;
-    trainee_ja: string | null;
     scenario_label: string;
     status_label: string;
     tags: string[];
-    notes: string | null;
-    hasSelection: boolean;
-    builder_url: string | null;
     veteran_url: string;
     portrait_url: string | null;
     saved_at: string | null;
@@ -58,7 +54,6 @@ interface Veteran {
     pink: number;
     unique: number;
     used_as_parent_count: number;
-    compare_url: string;
     transfer_url: string | null;
 }
 
@@ -132,22 +127,22 @@ const selected = ref<number[]>([]);
 
 const isChosen = (id: number): boolean => selected.value.includes(id);
 
-const toggleChosen = (id: number): void => {
-    selected.value = isChosen(id)
-        ? selected.value.filter((chosen): boolean => chosen !== id)
-        : [...selected.value, id];
-};
+const selectedCount = computed(() => selected.value.length);
+const canCompare = computed(() => selectedCount.value >= 2 && selectedCount.value <= props.compare_max);
 
-/**
- * The head band's door. With nothing ticked it is the plain compare page, which states its own empty
- * state; with a selection it carries the ids in the parameter the page already validates, `veterans[]`
- * (`VeteranCompareRequest::rules()`), so no new query vocabulary is invented here.
- */
-const compareHref = computed((): string =>
-    selected.value.length === 0
-        ? props.compare_url
-        : `${props.compare_url}?${selected.value.map((id): string => `veterans[]=${id}`).join('&')}`,
-);
+function toggleChosen(id: number): void {
+    if (isChosen(id)) {
+        selected.value = selected.value.filter(chosen => chosen !== id);
+    } else if (selectedCount.value < props.compare_max) {
+        selected.value = [...selected.value, id];
+    }
+}
+
+function compareSelected(): void {
+    if (canCompare.value) {
+        router.get(props.compare_url, { veterans: selected.value });
+    }
+}
 
 function filteredQuery(order: 'newest' | 'oldest'): Record<string, string> {
     const query: Record<string, string> = { order };
@@ -186,11 +181,6 @@ function visitOrder(order: 'newest' | 'oldest'): void {
     router.get(props.searchAction, filteredQuery(order), { preserveScroll: true });
 }
 
-/** The hoisted sentence is only stated when a row on this page actually carried it. */
-const hasSharedAncestryNote = computed(() =>
-    props.veterans.data.some((veteran) => carriesAncestryNote(veteran.notes)),
-);
-
 /**
  * The wireframe's own team arithmetic, stated once as a rule rather than left to the reader:
  * seven registered against three needed is "met twice over" on the HFW; a library of one is not met
@@ -213,18 +203,16 @@ const teamSentence = computed<string>(() => {
 
 /** A page move is a visit, not a client-side slice: the filters and the order ride along (`withQueryString`). */
 function goToPage(page: number): void {
-    router.get(props.searchAction, { ...filteredQuery(props.order), page }, { preserveScroll: true });
+    router.get(props.searchAction, { ...filteredQuery(props.order), page }, {
+        preserveState: true,
+        preserveScroll: true,
+    });
 }
 
 /** Confirm and submit an Offer for Transfer action. Mirrors Show.vue and VeteranRow.vue behavior. */
 function confirmTransfer(url: string, label: string): void {
     if (confirm(`Offer ${label} for transfer? This creates a transfer request that another trainer can complete.`)) {
-        router.post(url, {}, {
-            preserveScroll: true,
-            onSuccess: () => {
-                // Page reloads via Inertia partial reload
-            },
-        });
+        router.post(url, {}, { preserveScroll: true });
     }
 }
 
@@ -246,19 +234,18 @@ const factorGrades: { family: string; note: string }[] = [
                 title="Veteran library"
                 :description="libraryLede"
             >
-                <!-- The head-level Compare door. `compare_url` has always been passed
-                     (`VeteranController@index`); until now it was rendered per row only, so the
-                     library had no way to start a comparison without first finding two rows. The
-                     HFW puts the action in the head band, where a screen-level verb belongs. -->
-                <template #actions>
-                    <!-- The page's one accented control (UI-7, UX-6, DESIGN.md §2.3). The HFW's head
-                         action is `btn-primary`, and the filter commit is a quiet secondary so the
-                         accent has one owner. The label counts the ticked rows because the selection
-                         now lives on this page: `veterans.html` puts the checkboxes in the table, so
-                         the door has to say what it will carry. -->
-                    <LinkButton :href="compareHref" variant="primary">
-                        {{ selected.length > 0 ? `Compare ${selected.length} selected` : 'Compare veterans' }}
-                    </LinkButton>
+                <template v-if="totalCount > 0" #actions>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <p role="status" aria-atomic="true" class="text-sm text-ink-muted">
+                            {{ selectedCount }} selected · Choose 2 to {{ props.compare_max }}
+                        </p>
+                        <BaseButton variant="primary" :disabled="!canCompare" @click="compareSelected">
+                            Compare
+                        </BaseButton>
+                        <BaseButton variant="secondary" :disabled="selectedCount === 0" @click="selected = []">
+                            Clear selection
+                        </BaseButton>
+                    </div>
                 </template>
             </PageHeader>
         </template>
@@ -276,7 +263,7 @@ const factorGrades: { family: string; note: string }[] = [
               - the order pair is a shipped capability with its own stored-order caveat (`SCREEN-021`).
               - `Filter` exists because a real form needs a commit control; the mock has nothing to submit.
         -->
-        <form data-region="filters" class="mt-4 flex flex-wrap items-end gap-2.5 text-sm" @submit.prevent="applyFilters">
+        <form data-region="filters" class="mt-4 flex flex-wrap items-end gap-2.5 rounded-md border border-rule-soft bg-panel p-3 text-sm" :aria-busy="loading" @submit.prevent="applyFilters">
             <label class="flex min-w-0 flex-[1_1_240px] flex-col gap-1 text-[10px] font-extrabold uppercase tracking-[0.07em] text-ink-muted" data-region="field">
                 Search
                 <BaseInput
@@ -360,13 +347,10 @@ const factorGrades: { family: string; note: string }[] = [
                 class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
             >Find parents for this build</a>
             <span>Searches the Legacy Lab with the tags you are filtering by.</span>
-            <span v-if="loading" role="status">Loading results…</span>
-        </p>
-
-        <!-- Stated once for the whole list, above it, rather than once per row: the ancestry sentence is
-             about what the tracker did not record, which is the same for every row here. -->
-        <p v-if="hasSharedAncestryNote" class="mt-2 text-sm text-ink-muted">
-            {{ VETERAN_ANCESTRY_NOTE }}
+            <span role="status" aria-atomic="true">
+                <template v-if="loading">Loading results…</template>
+                <template v-else>{{ veterans.total }} matching of {{ totalCount }} registered</template>
+            </span>
         </p>
 
         <!-- The two lines are different states and neither is an error: an empty library means nothing has
@@ -400,17 +384,16 @@ const factorGrades: { family: string; note: string }[] = [
             <!-- `relative` is load-bearing, not decoration: the table's `sr-only` spans are absolutely
                  positioned, and without a positioned scroll container they resolve against the initial
                  containing block and add their static offset to the document's scrollable overflow. -->
-            <div class="relative min-w-0 overflow-x-auto" role="region" tabindex="0" aria-label="Veterans, scrollable">
-                <table class="t">
+            <div class="relative min-w-0 overflow-x-auto scroll-p-2" role="region" tabindex="0" aria-label="Veterans, scrollable">
+                <table class="t min-w-2xl">
+                    <caption class="sr-only">Filed careers and their recorded Sparks</caption>
                     <thead>
                         <tr>
                             <th scope="col"><span class="sr-only">Select for comparison</span></th>
                             <th scope="col">Trainee</th>
                             <th scope="col">Scenario</th>
-                            <th scope="col">Saved</th>
-                            <th scope="col" class="n">Blue sparks</th>
-                            <th scope="col" class="n">Pink sparks</th>
-                            <th scope="col" class="n">Unique sparks</th>
+                            <th scope="col">Completion</th>
+                            <th scope="col">Recorded Sparks</th>
                             <!-- HFW-OVERRIDE (columns: used-as-parent count). The wireframe draws no
                                  such column; the owner's 2026-11-14 ruling restores the C3 index count
                                  the detail screen's trail already prints, and it sits with the other
@@ -420,7 +403,7 @@ const factorGrades: { family: string; note: string }[] = [
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="veteran in veterans.data" :key="veteran.id" :data-veteran-row="veteran.id">
+                        <tr v-for="veteran in veterans.data" :key="veteran.id" :data-veteran-row="veteran.id" :class="{ 'bg-pick/10': isChosen(veteran.id) }">
                             <td>
                                 <!-- The row's own selection. `srOnlyLabel` keeps the sentence as the
                                      control's accessible name and prints nothing, because the trainee's
@@ -434,11 +417,11 @@ const factorGrades: { family: string; note: string }[] = [
                                     :name="`compare-${veteran.id}`"
                                     :label="`Select ${veteran.label} for comparison`"
                                     sr-only-label
-                                    :disabled="!isChosen(veteran.id) && selected.length >= props.compare_max"
+                                    :disabled="!isChosen(veteran.id) && selectedCount >= props.compare_max"
                                     @update:model-value="toggleChosen(veteran.id)"
                                 />
                             </td>
-                            <td>
+                            <th scope="row" class="font-normal">
                                 <span class="flex items-start gap-2.5">
                                     <ArtworkSlot :url="veteran.portrait_url" alt="" size="size-12" reserve data-region="slot" />
                                     <span class="min-w-0">
@@ -446,54 +429,28 @@ const factorGrades: { family: string; note: string }[] = [
                                             :href="veteran.veteran_url"
                                             class="inline-flex min-h-11 items-center font-semibold text-ink-strong hover:underline transition-colors duration-150 ease-out"
                                         >{{ veteran.trainee }}</Link>
-                                        <span
-                                            v-if="veteran.trainee_ja"
-                                            lang="ja"
-                                            class="block text-xs text-ink-muted"
-                                        >{{ veteran.trainee_ja }}</span>
-
-                                        <!-- HFW-OVERRIDE (row: second line) - the wireframe draws one line per
-                                             row; SCREEN-021 requires the run's state, the Trainer's tags and
-                                             notes, and the two doors. Compressed to one muted line so the row
-                                             still reads as one record. -->
-                                        <span class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-ink-muted">
-                                            <span>{{ veteran.status_label }}</span>
-                                            <span v-if="veteran.tags.length === 0">&middot; No tags recorded</span>
-                                            <span v-else class="flex flex-wrap gap-1">
-                                                <span
-                                                    v-for="tagName in veteran.tags"
-                                                    :key="tagName"
-                                                    class="rounded-pill bg-sunken px-2 py-0.5 text-ink"
-                                                >{{ tagName }}</span>
-                                            </span>
-                                            <span v-if="veteranResultClause(veteran.notes)" class="w-full">{{ veteranResultClause(veteran.notes) }}</span>
-                                            <span class="flex flex-wrap items-center gap-x-3">
-                                                <a v-if="veteran.builder_url" :href="veteran.builder_url" class="inline-flex min-h-11 items-center underline">Legacy builder</a>
-                                                <span v-else>No Legacy selection yet</span>
-                                                <a :href="veteran.compare_url" class="inline-flex min-h-11 items-center underline">Compare</a>
+                                        <span v-if="veteran.tags.length" class="flex flex-wrap gap-1 text-xs">
+                                            <span v-for="tagName in veteran.tags" :key="tagName" class="rounded-pill bg-sunken px-2 py-0.5 text-ink">
+                                                {{ tagName }}
                                             </span>
                                         </span>
                                     </span>
                                 </span>
-                            </td>
+                            </th>
                             <td>{{ veteran.scenario_label }}</td>
-                            <td class="font-mono tabular-nums">
-                                <template v-if="veteran.saved_at">{{ veteran.saved_at }}</template>
-                                <span v-else>N/A<span class="sr-only">, this record states no filing date.</span></span>
+                            <td>
+                                <span class="block font-medium text-ink-strong">{{ veteran.status_label }}</span>
+                                <span v-if="veteran.saved_at" class="text-xs text-ink-muted">Filed {{ veteran.saved_at }}</span>
+                                <AbsenceValue v-else compact reason="No filing date is recorded for this Veteran." />
                             </td>
-                            <!--
-                                One bare integer per cell: the stored spark tally for that family, never a
-                                grade. HFW-OVERRIDE (columns: spark counts, not grades) - the wireframe asks
-                                for three grade columns (annotation 1) and draws stars; ADR-0020 §3 with
-                                FR-G-4 bars deriving a grade from stored sparks. The unit is stated once in
-                                the thead so a count cannot be read as a star rating.
-                            -->
-                            <td class="n font-mono tabular-nums" data-spark="blue">{{ veteran.blue }}</td>
-                            <td class="n font-mono tabular-nums" data-spark="pink">{{ veteran.pink }}</td>
-                            <!-- HFW-OVERRIDE (columns: unique is green). The wireframe heads this
-                                 column "Unique"; the reference's family is Green (§1.5.2), and the row key
-                                 `unique` is `sparkCount($payload, 'green')`. One join, stated once. -->
-                            <td class="n font-mono tabular-nums" data-spark="unique">{{ veteran.unique }}</td>
+                            <td>
+                                <ul v-if="veteran.blue || veteran.pink || veteran.unique" class="list-none space-y-1 text-xs">
+                                    <li v-if="veteran.blue" data-spark="blue">Blue <span class="font-mono">{{ veteran.blue }}</span></li>
+                                    <li v-if="veteran.pink" data-spark="pink">Pink <span class="font-mono">{{ veteran.pink }}</span></li>
+                                    <li v-if="veteran.unique" data-spark="unique">Unique <span class="font-mono">{{ veteran.unique }}</span></li>
+                                </ul>
+                                <AbsenceValue v-else compact reason="No blue, pink or unique Sparks are recorded for this career." />
+                            </td>
                             <!-- C3 remainder: how many careers named this trainee as an inheritance
                                  parent, one bare integer like the spark tallies beside it. The count is
                                  character-keyed (the parent columns hold Umamusume ids), counts runs not
@@ -502,12 +459,12 @@ const factorGrades: { family: string; note: string }[] = [
                                  (no career used the trainee), never an absence. -->
                             <td class="n font-mono tabular-nums" data-used-as-parent>{{ veteran.used_as_parent_count }}</td>
                             <td class="n">
-                                <div class="flex items-center gap-1.5">
-                                    <LinkButton :href="veteran.veteran_url" variant="secondary" size="sm">Open</LinkButton>
+                                <div class="flex flex-col items-end">
+                                    <LinkButton :href="veteran.veteran_url" variant="secondary" :aria-label="`Open ${veteran.label}`">Open</LinkButton>
                                     <form v-if="veteran.transfer_url" @submit.prevent="confirmTransfer(veteran.transfer_url, veteran.label)">
                                         <button
                                             type="submit"
-                                            class="inline-flex min-h-11 items-center rounded-md border border-rule bg-sunken px-3 text-sm font-medium text-ink hover:bg-raised transition-colors duration-150 ease-out"
+                                            class="inline-flex min-h-11 items-center px-3 text-xs font-medium text-ink-muted underline hover:text-ink-strong"
                                         >
                                             Offer for Transfer
                                         </button>
@@ -521,8 +478,9 @@ const factorGrades: { family: string; note: string }[] = [
 
             <!-- HFW-OVERRIDE (copy: pager noun) - the mock prints "7 veterans - page 1 of 2"; the
                  app prints the paginator's own noun, singular "veteran" for a library of one, because the
-                 count is a live figure rather than the mock's fixed seven. -->
-            <!-- The plan asks for the pager to disappear when a single page holds everything, and
+                 count is a live figure rather than the mock's fixed seven.
+
+                 The plan asks for the pager to disappear when a single page holds everything, and
                  `veterans-transfer-requests.spec.ts:56` states the same rule for the lifecycle tabs.
                  It is `v-show`, not `v-if`: `veterans-parity.spec.ts:67` compares the app's `pager`
                  marker against the wireframe's and the capture walks DOM children, so removing the

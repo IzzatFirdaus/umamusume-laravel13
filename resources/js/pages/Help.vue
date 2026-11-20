@@ -21,7 +21,7 @@
  * HFW-OVERRIDE (rules: career length) - the sixth row states the 72-turn grid the app enforces
  * (`CareerCalendar::TURNS_PER_CAREER`); `help.html:132-136` draws five.
  * HFW-OVERRIDE (rules: deck) - the row prints the sourced rule only: a deck holds six support-card slots
- * and two copies of one card cannot be equipped together (`docs/UMAMUSUME_REFERENCE.md:533`). The
+ * and two copies of one card cannot be equipped together (`docs/UMAMUSUME_REFERENCE.md:885`). The
  * sentence this page used to carry, "Five from your own cards and one guest rental", is not in any
  * source: a rental is a parent, not a deck slot, so it is deleted rather than footnoted.
  * HFW-OVERRIDE (rules: sparks) - the row names the four `[Global]` spark colours, which is section 1.5.2

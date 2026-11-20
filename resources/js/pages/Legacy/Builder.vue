@@ -26,7 +26,7 @@
  * `name` attribute and every radio is named by the Spark in its own row ("Primary spark for Vodka:
  * blue speed") rather than the word `Primary` alone, which would be four identical names in one group
  * (WCAG 3.3.2, 4.1.2, 2.5.3). `pick` records the parent's headline Spark for display only —
- * `UMAMUSUME_REFERENCE.md:645` has every recorded factor fire at career start, so the field is not a
+ * `UMAMUSUME_REFERENCE.md:1062` has every recorded factor fire at career start, so the field is not a
  * projection input and `StartingCapProjection` never reads it. It is an index into the Sparks the
  * server stores, so `postedPick()` re-reads it against the posted list: a blank draft row is
  * discarded on the way out and would otherwise shift the pointer onto its neighbour.
@@ -35,7 +35,7 @@
  *  draw a read-only Spark | Grade | Carries | (radio) table). The editor's rows carry inputs the
  *  wireframe's read-only table cannot, so the table shape is refused rather than faked.
  * `HFW-OVERRIDE (data: Carries column - the per-parent "+N aptitude" cell has no reference backing:
- *  UMAMUSUME_REFERENCE.md:649 §1.5.2 gives aptitude grades at 1/4/7/10-18 stars, not a star-to-point
+ *  UMAMUSUME_REFERENCE.md:1066 §1.5.2 gives aptitude grades at 1/4/7/10-18 stars, not a star-to-point
  *  table, so the cell states the absence rather than rendering "+21".)
  * `HFW-OVERRIDE (structure: grandparent editors stay visible under each parent; legacy-builder.html:70
  *  - 97 draws only parents and their Spark rows. The editors carry ancestry state the wireframe's
@@ -112,7 +112,7 @@ const props = defineProps<{
     sparkKinds: Record<string, string>;
     affinityGrades: string[];
     rankLetters: string[];
-    sparkTargets: { Stat: string[]; Aptitude: string[]; Skill: { name: string; name_ja: string | null }[] };
+    sparkTargets: { Stat: string[]; Aptitude: string[]; Race: string[]; Skill: { name: string; name_ja: string | null }[] };
     /**
      * The run's starting ceilings per stat, already owned by `ScenarioCaps::forRun()` server-side
      * (`LegacyController::startingCaps()`, which prints the run's entered ceiling where it states one
@@ -149,11 +149,11 @@ const rosterIdFor = (name: string | null): string => {
 };
 
 /**
- * The three target categories, and the one inference the read-back needs: the payload stores only the
+ * The four target categories, and the one inference the read-back needs: the payload stores only the
  * target string, so a stored Spark's category is recovered from which list holds it. The same words the
  * wizard step uses, because both screens post against the one request.
  */
-const SPARK_CATEGORIES = ['Stat', 'Aptitude', 'Skill'];
+const SPARK_CATEGORIES = ['Stat', 'Aptitude', 'Skill', 'Race'];
 
 function inferCategory(target: string): string {
     if (target === '') {
@@ -166,6 +166,10 @@ function inferCategory(target: string): string {
 
     if (props.sparkTargets.Aptitude.includes(target)) {
         return 'Aptitude';
+    }
+
+    if (props.sparkTargets.Race.includes(target)) {
+        return 'Race';
     }
 
     return 'Skill';
@@ -352,7 +356,7 @@ const blueSparkCount = computed((): number =>
 /*
  * The two tiles that are NOT the projection.
  *
- * `UMAMUSUME_REFERENCE.md:656` gives the aptitude grade ladder as "1 star = +1 grade, 4 = +2, 7 = +3,
+ * `UMAMUSUME_REFERENCE.md:1073` gives the aptitude grade ladder as "1 star = +1 grade, 4 = +2, 7 = +3,
  * 10 to 18 = +4" and does not settle whether those numbers count one factor or the ancestry in total,
  * so no summed grade shift is printed: the recorded Pinks are, and the mapping is a named absence.
  * Green and White are mid-run events (`:645`), so they are shown as recorded with their timing
@@ -862,7 +866,7 @@ const hasAnyNode = computed(() =>
                     </div>
                 </div>
 
-                <!-- The sourced half of the old note survives (`UMAMUSUME_REFERENCE.md:692`: a run yields
+                <!-- The sourced half of the old note survives (`UMAMUSUME_REFERENCE.md:1142`: a run yields
                      exactly one Blue and one Pink); the unsourced "Choosing Memory instead of a spark"
                      clause is deleted under R4. -->
                 <p class="note mt-3 text-xs text-ink-muted">

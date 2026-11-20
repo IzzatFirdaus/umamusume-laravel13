@@ -17,7 +17,6 @@ import AbsenceValue from '../../components/AbsenceValue.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
 import StatusPill from '../../components/StatusPill.vue';
-import SuggestionHint from '../../components/review/SuggestionHint.vue';
 import { LinkButton } from '../../components/Form';
 import { Head, router } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
@@ -26,9 +25,11 @@ interface Candidate {
     id: number;
     proposed_name: string;
     proposed_name_ja: string | null;
+    entity: string;
     match_tier: string;
     match_tier_label: string;
     source_key: string;
+    external_ref: string | null;
     created_at: string;
     suggestion: string | null;
     suggested_umamusume_id: number | null;
@@ -41,6 +42,9 @@ const props = defineProps<{
     otherForms: OtherForm[];
     hasAlias: boolean;
     aliasLanguages: { value: string; label: string }[];
+    queueUrl: string;
+    resolveUrl: string;
+    reopenUrl: string;
 }>();
 
 /*
@@ -51,7 +55,7 @@ const props = defineProps<{
 const candidateForm = ref<{ chooseRecord: (id: number) => void } | null>(null);
 
 const reopen = (): void => {
-    router.post(`/review/${props.candidate.id}/reopen`);
+    router.post(props.reopenUrl);
 };
 
 
@@ -61,6 +65,8 @@ interface BestMatch {
     name: string;
     name_ja: string | null;
     costume: string | null;
+    catalog_url: string;
+    aliases: { id: number; name: string; language: string }[];
     aptitudes: { key: string; label: string; letter: string | null }[];
     /**
      * The rarity mark the HFW draws on this card (`review-detail.html:90`). Derived server-side from
@@ -89,7 +95,7 @@ const heading = computed<string>(() => `Is this the right trainee?`);
  * page - it is a wrong trainee on four.
  */
 const consequence =
-    'The row you pick becomes the trainee every downstream screen names: the career, its veteran record and the Legacy Lab all read it from here. A wrong answer is not a wrong word on this page.';
+    'Careers, Veteran records and the Legacy Lab use the catalog entry you confirm.';
 
 /** The queue's own pill mapping, kept in step with it by a spec rather than by an import. */
 function pillFor(tier: string): { label: string; variant: 'warning' | 'neutral' } {
@@ -123,7 +129,7 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
         <template #head>
             <PageHeader eyebrow="Review" :title="heading">
                 <template #actions>
-                    <LinkButton href="/review" variant="secondary">Back to the queue</LinkButton>
+                    <LinkButton :href="props.queueUrl" variant="secondary">Back to the queue</LinkButton>
                 </template>
             </PageHeader>
         </template>
@@ -153,8 +159,12 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                         <span v-if="props.candidate.proposed_name_ja" lang="ja" class="text-ink-muted">
                             {{ props.candidate.proposed_name_ja }}
                         </span>
-                        <p class="mt-1 font-mono text-xs text-ink-muted">
-                            {{ props.candidate.source_key }} · {{ props.candidate.created_at }}
+                        <p class="mt-1 break-words font-mono text-xs text-ink-muted">
+                            {{ props.candidate.source_key }} ·
+                            <time :datetime="props.candidate.created_at">{{ props.candidate.created_at }}</time>
+                        </p>
+                        <p v-if="props.candidate.external_ref" class="mt-1 break-words text-xs text-ink-muted">
+                            Source ID <span class="font-mono">{{ props.candidate.external_ref }}</span>
                         </p>
                     </div>
 
@@ -186,7 +196,9 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
 
                     <template v-if="props.bestMatch">
                         <p class="mt-2 text-base font-semibold text-ink-strong">
-                            {{ props.bestMatch.name }}
+                            <LinkButton :href="props.bestMatch.catalog_url" variant="secondary">
+                                {{ props.bestMatch.name }}
+                            </LinkButton>
                             <span v-if="props.bestMatch.name_ja" lang="ja" class="text-sm font-medium text-ink-muted">
                                 {{ props.bestMatch.name_ja }}
                             </span>
@@ -239,20 +251,33 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th scope="row" class="py-1.5 text-left font-normal text-ink-muted">Slug</th>
-                                    <td class="py-1.5 font-mono text-xs">{{ props.bestMatch.slug }}</td>
+                                    <th scope="row" class="py-1.5 text-left font-normal text-ink-muted">Catalog ID</th>
+                                    <td class="py-1.5 break-words font-mono text-xs">
+                                        {{ props.bestMatch.id }} · {{ props.bestMatch.slug }}
+                                    </td>
                                 </tr>
                                 <tr>
                                     <th scope="row" class="py-1.5 text-left font-normal text-ink-muted">Matched on</th>
                                     <td class="py-1.5">{{ props.candidate.match_tier_label }}</td>
+                                </tr>
+                                <tr>
+                                    <th scope="row" class="py-1.5 text-left font-normal text-ink-muted">Known aliases</th>
+                                    <td class="py-1.5">
+                                        <ul v-if="props.bestMatch.aliases.length" class="list-none space-y-1">
+                                            <li v-for="alias in props.bestMatch.aliases" :key="alias.id">
+                                                <span :lang="alias.language === 'Japanese' ? 'ja' : undefined">{{ alias.name }}</span>
+                                                <span class="ml-1 text-xs text-ink-muted">{{ alias.language }}</span>
+                                            </li>
+                                        </ul>
+                                        <AbsenceValue v-else compact reason="No aliases are recorded for this catalog entry." />
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>
                     </template>
 
                     <p v-else class="mt-2 text-sm text-ink-muted">
-                        No catalog row is close enough to propose. Nothing is written until you answer
-                        this page, so the record is unchanged.
+                        The importer did not find a close enough catalog name to suggest a match.
                     </p>
                 </section>
             </div>
@@ -276,9 +301,9 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-rule">
-                        <tr>
+                        <tr v-if="props.bestMatch">
                             <td class="py-2">
-                                {{ props.candidate.proposed_name }}
+                                {{ props.bestMatch.name }}
                                 <span v-if="props.bestMatch?.costume" class="text-ink-muted">
                                     · [{{ props.bestMatch.costume }}]
                                 </span>
@@ -295,8 +320,7 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                             <td class="py-2">{{ form.name }}</td>
                             <td class="py-2">Same trainee</td>
                             <td class="py-2 text-ink-muted">
-                                A different form{{ form.costume ? ` ([${form.costume}])` : '' }}; growth row
-                                and rarity differ.
+                                A different catalog form{{ form.costume ? ` ([${form.costume}])` : '' }}.
                             </td>
                             <td class="py-2 text-right">
                                 <!-- "Use this" is a real action, not a state label: the HFW makes
@@ -305,11 +329,12 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                                      the submit contract (`CandidateForm`'s exposed `chooseRecord`). -->
                                 <button
                                     type="button"
-                                    :aria-label="`Use ${form.name} as the match`"
+                                    v-if="props.candidate.status === 'Pending'"
+                                    :aria-label="`Confirm form ${form.name} as the match`"
                                     class="inline-flex min-h-11 items-center justify-center rounded-full border border-rule bg-raised px-3 text-sm font-semibold text-ink-strong transition-colors duration-150 ease-out hover:bg-panel"
                                     @click="candidateForm?.chooseRecord(form.id)"
                                 >
-                                    Use this
+                                    Confirm form
                                 </button>
                             </td>
                         </tr>
@@ -352,29 +377,15 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                     <h2 id="review-detail-heading" class="text-lg font-semibold text-ink-strong">
                         Your verdict
                     </h2>
-                    <div class="flex items-center gap-2">
-                        <ProvenanceBadge
-                            :state="badgeFor(props.candidate.match_tier, props.candidate.source_key).state"
-                            :title="badgeFor(props.candidate.match_tier, props.candidate.source_key).title"
-                        />
-                        <time class="text-xs text-ink-muted" :datetime="props.candidate.created_at">
-                            {{ props.candidate.created_at }}
-                        </time>
-                    </div>
                 </div>
-
-                <SuggestionHint
-                    v-if="props.candidate.suggestion"
-                    :suggestion="props.candidate.suggestion"
-                    :umamusume-id="props.candidate.suggested_umamusume_id"
-                    :source-key="props.candidate.source_key"
-                />
 
                 <CandidateForm
                     v-if="props.candidate.status === 'Pending'"
+                    :key="props.candidate.id"
                     ref="candidateForm"
                     :candidate="props.candidate"
                     :alias-languages="props.aliasLanguages"
+                    :resolve-url="props.resolveUrl"
                 />
 
                 <div v-else class="mt-4">

@@ -314,7 +314,7 @@ test('the Database Skills area mounts the same catalogue table as the Library UR
     const region = page.getByRole('region', { name: 'Skill catalog, scrollable' });
     await expect(region).toBeVisible();
     await expect(region.getByRole('columnheader')).toHaveText([
-        'Skill', 'Type', 'Condition (engine)', 'Base cost', 'Open the skill',
+        'Skill', 'Type', 'Effect', 'Base cost', 'Technical details',
     ]);
     await expect(page.locator('#skill-results tr').first()).toBeVisible();
 });
@@ -357,6 +357,7 @@ test('the race database renders whichever state the catalogue is in', async ({ p
     expect(await cells.count(), 'a populated catalogue states at least one unrecorded value')
         .toBeGreaterThan(0);
 
+    await page.getByText('Race reference', { exact: true }).click();
     await expect(page.getByText(/N\/A marks a field the source records nothing for/)).toBeVisible();
 
     // No prediction lives in a reference table: win probability and readiness are held (ADR-0016).
@@ -399,9 +400,9 @@ test('the race catalogue mounts the wireframe table when rows exist', async ({ p
         // The wireframe's answerable column set, and only that set. Course is omitted (the catalogue
         // stores a numeric track_id with no name mapping), and Year/Turn/obligation fold into the Race
         // cell rather than spending columns on a row that already carries its own title.
-        await expect(table.getByRole('columnheader')).toHaveText([
-            'Race', 'Grade', 'Surface', 'Distance', 'Band', 'Fans',
-        ]);
+        for (const name of ['Race', 'Grade', 'Surface', 'Distance', 'Band', 'Fans']) {
+            await expect(table.getByRole('columnheader', { name, exact: true })).toBeVisible();
+        }
 
         // The fold line keeps the calendar position beside the name, which is what distinguishes the
         // 106 duplicate titles the calendar carries.
@@ -717,4 +718,41 @@ test('the area strip is the HFW subnav with one current area', async ({ page }) 
         () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     expect(overflow).toBeLessThanOrEqual(1);
+});
+
+test('sorts filtered races before pagination and exposes the active direction', async ({ page }) => {
+    const seeded = seedRaceSlots();
+
+    try {
+        await page.goto('/database/races?q=Fixture&pageSize=1&page=2');
+        const table = page.getByRole('region', { name: 'Race slots, scrollable' });
+        const name = table.getByRole('button', { name: 'Race', exact: true });
+        const heading = table.getByRole('columnheader', { name: 'Race', exact: true });
+
+        await name.focus();
+        await page.keyboard.press('Enter');
+        await expect(page).toHaveURL(url =>
+            url.pathname === '/database/races'
+            && url.searchParams.get('sort') === 'name'
+            && url.searchParams.get('direction') === 'asc'
+            && !url.searchParams.has('page'));
+        await expect(name).toBeFocused();
+        await expect(heading).toHaveAttribute('aria-sort', 'ascending');
+        await expect(table.locator('th[aria-sort]')).toHaveCount(1);
+        await expect(table.getByRole('rowheader')).toContainText('Fixture Debut');
+
+        await page.keyboard.press('Enter');
+        await expect(page).toHaveURL(url => url.searchParams.get('direction') === 'desc');
+        await expect(heading).toHaveAttribute('aria-sort', 'descending');
+        await expect(table.getByRole('rowheader')).toContainText('Fixture Stakes');
+        await page.getByRole('button', { name: 'Next' }).click();
+        await expect(page).toHaveURL(url => url.searchParams.get('page') === '2' && url.searchParams.get('q') === 'Fixture');
+        await expect(table.getByRole('rowheader')).toContainText('Fixture Sprint');
+
+        await table.getByRole('link', { name: 'Source conflict' }).click();
+        await expect(page).toHaveURL(/#race-reference$/);
+        await expect(page.getByText('The catalog cutoff places it in Sprint.', { exact: false })).toBeVisible();
+    } finally {
+        removeRaceSlots(seeded);
+    }
 });

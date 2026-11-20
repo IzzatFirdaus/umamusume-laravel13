@@ -288,50 +288,41 @@ test.describe('Veteran rows', () => {
      */
     const trackedNote = (clause: string): string => `${clause} ${VETERAN_ANCESTRY_NOTE}`;
 
-    test('states the shared ancestry sentence once above the list, not once per row', async ({ page }) => {
-        await openLibraryRow(page, 'Agnes Digital', 'Speed', trackedNote('Career finished, Vodka 1st place.'));
-        await openLibraryRow(page, 'Eishin Flash', null, trackedNote('Career ended, URA Finale Finals won 1st.'));
+    test('keeps long notes in the Veteran detail', async ({ page }) => {
+        const note = trackedNote('Career completed with a recorded result.');
+        const row = await openLibraryRow(page, 'Agnes Digital', 'Speed', note);
 
-        const ancestry = page.getByText(/Legacy ancestry unrecorded:/);
-
-        // One statement for the whole list (Phase 8.1), and it sits outside every row: the sentence is
-        // about what the tracker did not record, which is the same for every row here.
-        await expect(ancestry).toHaveCount(1);
-        expect(await ancestry.evaluate((element) => element.closest('tr') !== null)).toBe(false);
-
-        // Each row keeps only the clause that is its own, and none of them repeats the sentence the list
-        // just stated. A row printing the stored note verbatim would fail this twice over.
-        await expect(page.locator('[data-veteran-row]').filter({ hasText: 'Career finished, Vodka 1st place.' })).toHaveCount(1);
-        await expect(page.locator('[data-veteran-row]').filter({ hasText: 'Career ended, URA Finale Finals won 1st.' })).toHaveCount(1);
-        expect(
-            await page.locator('[data-veteran-row]').evaluateAll((rows) =>
-                rows.filter((row) => row.textContent?.includes('Legacy ancestry unrecorded:') ?? false).length,
-            ),
-            'a row still repeats the sentence the list states once',
-        ).toBe(0);
+        await expect(row).not.toContainText('Career completed with a recorded result.');
+        await row.getByRole('link', { name: /^Open Agnes Digital/ }).click();
+        await expect(page).toHaveURL(/\/veterans\/\d+$/);
+        await expect(page.getByText(note, { exact: true })).toBeVisible();
     });
 
-    test('says why there are no tags instead of printing a bare N/A', async ({ page }) => {
+    test('uses a named absence for unrecorded Sparks on a compact row', async ({ page }) => {
         const row = await openLibraryRow(page, 'Agnes Digital', null);
 
-        // The plan's reason channel: the absence states itself, and carries a channel for why.
-        await expect(row.getByText('No tags recorded')).toBeVisible();
-        await expect(row.getByText(/^N\/A/)).toHaveCount(0);
-
-        // And it disappears on a career that does carry one, so it is a state rather than a caption.
-        await expect(page.getByText('No tags recorded')).toHaveCount(1);
+        await expect(row.locator('summary').filter({ hasText: 'No blue, pink or unique Sparks are recorded' })).toBeVisible();
+        await expect(row.getByRole('link', { name: /^Open Agnes Digital/ })).toBeVisible();
+        await expect(page.getByRole('navigation', { name: 'Pagination' })).not.toBeVisible();
     });
 
-    test('keeps the compare door in the row it belongs to, exactly once', async ({ page }) => {
-        const row = await openLibraryRow(page, 'Agnes Digital', 'Speed');
+    test('groups comparison controls above the list and keeps Open on each row', async ({ page }) => {
+        await openLibraryRow(page, 'Agnes Digital', 'Speed');
+        const row = await openLibraryRow(page, 'Eishin Flash', null);
 
-        // Proximity (Law 6): the comparison door is read as belonging to the row the Trainer is looking
-        // at rather than as a footnote under the table.
-        await expect(row.getByRole('link', { name: 'Compare', exact: true })).toHaveCount(1);
+        await expect(page.getByRole('button', { name: 'Compare', exact: true })).toHaveCount(1);
+        await expect(page.getByRole('button', { name: 'Clear selection' })).toBeVisible();
+        await expect(page.getByRole('link', { name: /^Open (Agnes Digital|Eishin Flash)/ })).toHaveCount(2);
 
-        // One per row, not one per page: a second filed career must carry its own.
-        await openLibraryRow(page, 'Eishin Flash', null);
-        await expect(page.getByRole('link', { name: 'Compare', exact: true })).toHaveCount(2);
+        const dialogShown = page.waitForEvent('dialog');
+        const clicked = row.getByRole('button', { name: 'Offer for Transfer' }).click();
+        const dialog = await dialogShown;
+        const message = dialog.message();
+        await dialog.dismiss();
+        await clicked;
+
+        expect(message).toContain('This creates a transfer request');
+        await expect(row.getByRole('link', { name: /^Open Eishin Flash/ })).toBeVisible();
     });
 
     test('renders a portrait or the reserved absence cell on every veteran row', async ({ page }) => {
@@ -361,22 +352,17 @@ test.describe('Veteran rows', () => {
         }
     });
 
-    test('states the spark tallies as counts under their own unit', async ({ page }) => {
+    test('keeps team eligibility visible and makes the Spark grades available on demand', async ({ page }) => {
         await openLibraryRow(page, 'Agnes Digital', 'Speed');
 
-        // The count-for-grade substitution (HFW-OVERRIDE (columns: spark counts, not grades)) is only
-        // honest while the unit is printed: three headers say what the numbers are, and every cell is one
-        // bare integer - never a star, never a compound, never a dash (ADR-0020 §3).
-        await expect(page.getByRole('columnheader', { name: 'Blue sparks' })).toBeVisible();
-        await expect(page.getByRole('columnheader', { name: 'Pink sparks' })).toBeVisible();
-        await expect(page.getByRole('columnheader', { name: 'Unique sparks' })).toBeVisible();
+        await expect(page.getByRole('heading', { name: 'Team eligibility' })).toBeVisible();
+        await expect(page.getByRole('columnheader', { name: 'Recorded Sparks' })).toBeVisible();
 
-        const counts = page.locator('[data-veteran-row]').first().locator('td[data-spark]');
-        await expect(counts).toHaveCount(3);
-
-        for (const cell of await counts.all()) {
-            await expect(cell).toHaveText(/^\d+$/);
-        }
+        const grades = page.getByRole('region', { name: 'Spark grades, scrollable' });
+        await expect(grades).not.toBeVisible();
+        await page.getByText('How Sparks work', { exact: true }).click();
+        await expect(grades).toBeVisible();
+        await expect(grades.getByRole('rowheader', { name: 'Blue · stat' })).toBeVisible();
     });
 
     test('collapses the notes that are not in this build by default', async ({ page }) => {

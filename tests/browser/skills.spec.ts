@@ -58,17 +58,26 @@ test('prints a Japanese name in its own language on the index row', async ({ pag
     await expect(page.locator('#skill-results [lang="ja"]', { hasText: '十万バリキ' })).toBeVisible();
 });
 
-test('renders the condition column and states that the cost is the base cost', async ({ page }) => {
+test('puts effect and base cost before on-demand engine details', async ({ page }) => {
     await page.goto('/skills?search=lookatcurren');
-    await page.locator('#app > *').first().waitFor();
+    const row = page.locator('#skill-results tr').first();
+    await expect(row).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Effect' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Base cost' })).toBeVisible();
+    await expect(page.getByRole('columnheader', { name: 'Condition (engine)' })).toHaveCount(0);
+    await expect(page.getByTestId('result-summary')).toContainText(/1 matching of \d+ in Global only/);
+    await expect(page.getByText('Active filters')).toBeVisible();
 
-    // The engine condition has its own column, in monospace beside the readable name.
-    await expect(page.getByRole('columnheader', { name: 'Condition (engine)' })).toBeVisible();
-    await expect(page.locator('#skill-results tr').first().locator('td.font-mono')).toHaveCount(2);
-
-    // The hint discount is a per-run fact, so the library states the base cost and says so.
-    await expect(page.getByText(/Cost is the base cost only/)).toBeVisible();
-    await expect(page.getByText(/Search matches the skill's name/)).toBeVisible();
+    const details = row.locator('details').filter({ has: page.locator('summary', { hasText: 'Technical details' }) });
+    const code = details.locator('code').first();
+    await expect(code).not.toBeVisible();
+    await details.locator('summary').press('Enter');
+    await expect(code).toBeVisible();
+    await expect(code).toHaveClass(/font-mono/);
+    await expect(code).toHaveText(/\S/);
+    await details.getByRole('link', { name: 'View mechanics and sources' }).click();
+    await expect(page).toHaveURL(/\/skills\/\d+\?.*search=lookatcurren/);
+    await expect(page.getByRole('heading', { name: "The source's own engine data" })).toBeVisible();
 });
 
 test('follows a search row to the detail page and states the absences there', async ({ page }) => {
@@ -234,7 +243,7 @@ test('the skill detail passes an axe scan at WCAG A and AA', async ({ page }) =>
  * sentinel wording (SHR-1). The Scope facet is this slice's own addition and has no HFW counterpart,
  * so it leads the row (`R1`: the scope narrows what the other four facets narrow).
  */
-test('orders the filters as the HFW draws them and keeps the condition note inside the table card', async ({ page }) => {
+test('groups the filters in order and keeps pagination outside the scroll region', async ({ page }) => {
     await page.goto('/skills');
     await page.locator('#app > *').first().waitFor();
 
@@ -261,25 +270,12 @@ test('orders the filters as the HFW draws them and keeps the condition note insi
     await expect(distance.locator('option')).toHaveText(['Any', 'Sprint', 'Mile', 'Medium', 'Long', 'Unspecified']);
     await expect(distance.locator('option[value="0"]')).toHaveText('Unspecified');
 
-    // The table scrolls inside its own labelled, focusable region; the condition note and pager stay
-    // in the card outside it, so neither scrolls sideways with the columns. The card now holds two
-    // `p.note` blocks (the provenance footnote above the region, the condition note below it), so the
-    // locator names the condition note by its own text rather than taking the first one.
     const card = page.locator('div.card').filter({ has: page.locator('#skill-results') });
     const region = card.locator('div[role="region"]');
     await expect(region).toHaveAttribute('aria-label', 'Skill catalog, scrollable');
     await expect(region).toHaveAttribute('tabindex', '0');
-
-    const note = card.locator('p.note').filter({ hasText: "The condition column prints the export's own tokens" });
-    await expect(note).toContainText("The condition column prints the export's own tokens");
-    expect(
-        await note.evaluate((node) => node.closest('[role="region"]') === null),
-        'the note sits in the card, not in the scroll region',
-    ).toBe(true);
-
-    const noteBottom = await note.evaluate((node) => node.getBoundingClientRect().bottom);
-    const pagerTop = await card.locator('nav[aria-label="Pagination"]').evaluate((node) => node.getBoundingClientRect().top);
-    expect(noteBottom, 'the note sits above the pager').toBeLessThanOrEqual(pagerTop);
+    await expect(card.locator('nav[aria-label="Pagination"]')).toBeVisible();
+    await expect(region.locator('nav[aria-label="Pagination"]')).toHaveCount(0);
 
     // At 320 the table overflows inside the region and the document does not (the region's own
     // scrollWidth/clientWidth pair is the layout-compositions assertion; this proves it here too).
@@ -296,11 +292,11 @@ test('shows the invitation only before a search is made', async ({ page }) => {
     // It belongs to the state where nobody has asked yet (D-65).
     await page.goto('/skills');
     await page.locator('#app > *').first().waitFor();
-    await expect(page.getByText(/Type part of a skill name to narrow the catalog/)).toBeVisible();
+    await expect(page.getByText(/Type part of a skill name or effect to narrow the catalog/)).toBeVisible();
 
     await page.goto('/skills?search=lookatcurren');
     await page.locator('#app > *').first().waitFor();
-    await expect(page.getByText(/Type part of a skill name to narrow the catalog/)).toHaveCount(0);
+    await expect(page.getByText(/Type part of a skill name or effect to narrow the catalog/)).toHaveCount(0);
 });
 
 test('shows absence disclosures only for missing skill values', async ({ page }) => {
@@ -311,7 +307,7 @@ test('shows absence disclosures only for missing skill values', async ({ page })
     const populated = page.locator('#skill-results tr');
     let populatedCells = 0;
     for (const row of await populated.all()) {
-        // The name cell is a row header, so the value cells are td indices 0..2 (type, condition, cost).
+        // The name cell is a row header, so the value cells are td indices 0..2 (type, effect, cost).
         for (const column of [0, 1, 2]) {
             const cell = row.locator('td').nth(column);
             const summaries = cell.locator('summary');
@@ -701,6 +697,7 @@ test('the header states the full-table provenance counts, unchanged by scope', a
     expect(expected.japan_only, 'the scratch catalogue holds JapanOnly rows').toBeGreaterThan(0);
 
     const readHeader = async (): Promise<{ global: string; japan_only: string; other: string }> => {
+        await page.getByText('Release counts and sources', { exact: true }).click();
         const header = page.getByTestId('provenance-counts');
         await expect(header).toBeVisible();
 
@@ -770,10 +767,6 @@ test('the header states the full-table provenance counts, unchanged by scope', a
  *    here and pass a null-description test.
  */
 test('Japan-only rows never show client prose on the catalogue, in any scope', async ({ page }) => {
-    // The Effect column is the second value cell: the row header holds the name, then type, effect,
-    // condition, cost, open.
-    const effectCells = (): ReturnType<typeof page.locator> => page.locator('#skill-results tr').locator('td').nth(1);
-
     // Every row at `japan_only`, page 1 (25 rows).
     await page.goto('/skills?scope=japan_only');
     await page.locator('#app > *').first().waitFor();
@@ -784,15 +777,8 @@ test('Japan-only rows never show client prose on the catalogue, in any scope', a
 
     for (let index = 0; index < rowCount; index++) {
         const cell = japanOnlyRows.nth(index).locator('td').nth(1);
-        // Byte-for-byte: no localization variant, no trailing space, no substituted sentence.
-        expect(await cell.innerText(), `row ${index} at scope=japan_only`).toBe('No client string.');
-    }
-
-    // The prose-terminator guard, kept separate from the exact-text one: a cell that showed
-    // "No client string. Recover stamina." would satisfy neither a `toContainText` nor this.
-    for (let index = 0; index < rowCount; index++) {
-        const text = await japanOnlyRows.nth(index).locator('td').nth(1).innerText();
-        expect(text, `row ${index} carries no prose terminator`).not.toMatch(/[.!?]\s/);
+        await expect(cell.locator('summary')).toHaveText(/^N\/A, No client string\./);
+        await expect(cell.locator(':scope > *')).toHaveCount(1);
     }
 
     seedScopeFixtures();
@@ -808,7 +794,7 @@ test('Japan-only rows never show client prose on the catalogue, in any scope', a
 
         const jpRow = page.locator('#skill-results tr').filter({ hasText: '掲げよ、己が魂の剣譜！' });
         await expect(jpRow).toBeVisible();
-        await expect(jpRow.locator('td').nth(1)).toHaveText('No client string.');
+        await expect(jpRow.locator('td').nth(1).locator('summary')).toHaveText(/^N\/A, No client string\./);
         // The stored sentence exists and is refused, which is what makes the assertion above a refusal
         // rather than an absence.
         await expect(page.locator('#skill-results')).not.toContainText('The source states an English sentence');
@@ -822,7 +808,7 @@ test('Japan-only rows never show client prose on the catalogue, in any scope', a
 
         const jpRowNarrow = page.locator('#skill-results tr').filter({ hasText: '掲げよ、己が魂の剣譜！' });
         await expect(jpRowNarrow).toBeVisible();
-        await expect(jpRowNarrow.locator('td').nth(1)).toHaveText('No client string.');
+        await expect(jpRowNarrow.locator('td').nth(1).locator('summary')).toHaveText(/^N\/A, No client string\./);
 
         // The Global fixture in the same table: a row whose description IS client copy prints it.
         // Without this the case would pass on a page that printed the absence for everything.

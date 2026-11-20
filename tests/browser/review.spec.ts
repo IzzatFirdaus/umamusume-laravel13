@@ -70,7 +70,7 @@ test('populated review cells remain readable at 320px without page overflow', as
     await expect(page).toHaveURL(/\/review\/\d+$/);
 });
 
-test('each row explains itself: confidence, source, match and the door to the decision', async ({ page }) => {
+test('each row explains itself: source, match evidence and the door to the decision', async ({ page }) => {
     seedPendingCandidates(2, { suggested: true });
     seedPendingCandidates(2);
     await page.goto('/review');
@@ -89,7 +89,7 @@ test('each row explains itself: confidence, source, match and the door to the de
     await expect(row.locator('time')).toBeVisible();
     await expect(row.locator('button[interestfor]').first()).toBeVisible();
     await expect(row.locator('button[interestfor]').first()).toHaveAttribute('aria-label', /^(Unknown|Estimated|Calculated)/);
-    await expect(row.getByText(/Why this name is here|No suggestion:|Suggested id:/)).toBeVisible();
+    await expect(row.getByRole('cell', { name: /Fuzzy/ }).first()).toBeVisible();
     await expect(row.getByTestId('review-detail-link')).toBeVisible();
 });
 
@@ -105,7 +105,7 @@ test('keeps the engine\'s suggestion-first order in the table', async ({ page })
     }
 
     // 6A.1's suggestion-first order is what puts the click-decidable row where the Trainer meets it.
-    await expect(page.locator('#review-results tr').first()).toContainText('Suggested id:');
+    await expect(page.locator('#review-results tr').first()).toContainText('Fuzzy');
 });
 
 // MOVED (FQ-10): "gates Resolve on a chosen verdict" now asserts on the detail page, where the verdict
@@ -127,7 +127,7 @@ test('holds both halves of the queue in one table, suggested rows first', async 
     const total = await rows.count();
     expect(total, 'the table holds the whole page of candidates').toBe(5);
 
-    const suggested = await page.getByText('Suggested id:').count();
+    const suggested = await rows.getByRole('button', { name: /^Estimated/ }).count();
     // One provenance word per fact: the badge owns it. The old second "No match" pill was
     // A-96's duplicate-label defect, removed in DESIGN.md §5(b).
     const unknown = await page.locator('#review-results').getByText('Unknown', { exact: true }).count();
@@ -139,7 +139,7 @@ test('holds both halves of the queue in one table, suggested rows first', async 
     for (let index = 0; index < total; index += 1) {
         const row = rows.nth(index);
         if (index < suggested) {
-            await expect(row, `row ${index} should carry a suggestion`).toContainText('Suggested id:');
+            await expect(row, `row ${index} should carry a suggestion`).toContainText('Fuzzy');
         } else {
             await expect(row, `row ${index} should carry one provenance word`).toContainText('Unknown');
         }
@@ -155,7 +155,7 @@ test('shows review progress and keeps the pager reachable', async ({ page }) => 
     await page.locator('#app > *').first().waitFor();
 
     // The bar carries the queue's numbers as a value a screen reader can read, not only as a width.
-    const bar = page.getByRole('progressbar', { name: 'Review progress' });
+    const bar = page.getByRole('progressbar', { name: 'All-time review progress' });
     await expect(bar).toBeVisible();
     await expect(bar).toHaveAttribute('aria-valuemin', '0');
 
@@ -166,7 +166,7 @@ test('shows review progress and keeps the pager reachable', async ({ page }) => 
 
     // The sentence the bar replaced is gone; the same two numbers are still stated beside it.
     await expect(page.getByText(/\d+ of \d+ items to resolve\./)).toHaveCount(0);
-    await expect(page.getByText(`${now} of ${total} resolved`)).toBeVisible();
+    await expect(page.getByText(`${now} of ${total} resolved, all time`)).toBeVisible();
 
     // The pager is the last thing in the queue and stays in DOM order after the table, so reaching the
     // bottom of the content reaches it. This is measured, not asserted as a class.
@@ -243,7 +243,7 @@ test('summarises a no-match row on one line and links to the page that decides',
 
     // The last row is a no-match row (the controller orders suggestions first).
     const row = page.locator('#review-results tr').last();
-    await expect(row).toContainText('No catalog record carries this name.');
+    await expect(row).toContainText('No suggestion');
 
     // The row is a summary and a door: a candidate cell of name, Japanese name and source, and one
     // 44px Review control. No form, no verdict controls (`FQ-10` moved those to the detail page).
@@ -427,4 +427,32 @@ test('renders the wireframe regions in the wireframe order at 1280', async ({ pa
     });
 
     assertStructurallyEqual(app, { ...hfw, regions: demanded }, { regions: 'subset', grid: false });
+});
+
+test('leaves a decision unsaved, then resolves one case and continues on the same queue page', async ({ page }) => {
+    seedPendingCandidates(28);
+    await page.goto('/review?page=2');
+
+    const rows = page.locator('#review-results tr');
+    await expect(rows).toHaveCount(3);
+    const original = await rows.first().getByTestId('review-detail-link').getAttribute('href');
+    const next = await rows.nth(1).getByTestId('review-detail-link').getAttribute('href');
+
+    await rows.first().getByTestId('review-detail-link').click();
+    await expect(page).toHaveURL(/\/review\/\d+\?page=2$/);
+    await page.getByRole('link', { name: 'Back to the queue' }).click();
+    await expect(page).toHaveURL(/\/review\?page=2$/);
+    await expect(rows.first().getByTestId('review-detail-link')).toHaveAttribute('href', original!);
+
+    await rows.first().getByTestId('review-detail-link').click();
+    await expect(page).toHaveURL(/\/review\/\d+\?page=2$/);
+    await page.getByRole('button', { name: /Reject this match/ }).click();
+    await expect(page).toHaveURL(/\/review\?page=2$/);
+    await expect(page.getByRole('status').filter({ hasText: 'Candidate resolved.' })).toBeVisible();
+    await expect(rows).toHaveCount(2);
+
+    const continuation = page.getByRole('link', { name: 'Review next pending case' });
+    await expect(continuation).toHaveAttribute('href', next!);
+    await continuation.click();
+    await expect(page).toHaveURL(url => url.pathname + url.search === next);
 });

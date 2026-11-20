@@ -105,7 +105,7 @@ const props = defineProps<{
     /** The rank letters the client prints, for the rank-letter field's spelling aid. */
     rankLetters: string[];
     /** The targets each Spark category offers, from the same lists the write validates against. */
-    sparkTargets: { Stat: string[]; Aptitude: string[]; Skill: { name: string; name_ja: string | null }[] };
+    sparkTargets: { Stat: string[]; Aptitude: string[]; Race: string[]; Skill: { name: string; name_ja: string | null }[] };
     notice: string;
     /** `route('career.legacy.store')`, supplied by the server so the page never hard-codes the URL. */
     action: string;
@@ -284,7 +284,8 @@ function clearParent(index: number): void {
 /**
  * The category a stored target belongs to, recovered for the transient form field. The payload keeps
  * only the target string (ADR-0010), so the editor re-derives what it already knew from the list the
- * server validated against.
+ * server validated against. Race is checked before the Skill fallback: a race name is not a skill, and
+ * falling through would open the Skill picker over a target its list does not hold.
  */
 function sparkCategoryFor(target: string | null): string {
     if (target === null || target === '') {
@@ -297,6 +298,10 @@ function sparkCategoryFor(target: string | null): string {
 
     if (props.sparkTargets.Aptitude.includes(target)) {
         return 'Aptitude';
+    }
+
+    if (props.sparkTargets.Race.includes(target)) {
+        return 'Race';
     }
 
     return 'Skill';
@@ -605,7 +610,7 @@ const pickOptions = (): { value: string; label: string }[] => [
                                         :id="`legacy-spark-category-${index}-${sparkIndex}`"
                                         v-model="spark.category"
                                         label="Category"
-                                        :options="['Stat', 'Aptitude', 'Skill'].map((category) => ({ value: category, label: category }))"
+                                        :options="['Stat', 'Aptitude', 'Skill', 'Race'].map((category) => ({ value: category, label: category }))"
                                         @change="spark.target = ''"
                                     />
                                     <SparkTargetPicker

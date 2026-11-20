@@ -198,7 +198,7 @@ function handleClickOutside(event: MouseEvent): void {
                 @blur="onBlur"
                 @keydown="onKeydown"
                 :aria-autocomplete="'list'"
-                :aria-controls="isOpen ? listId : undefined"
+                :aria-controls="isOpen && filteredOptions.length > 0 ? listId : undefined"
                 :aria-expanded="isOpen"
                 :aria-activedescendant="highlightedIndex >= 0 ? `${listId}-option-${highlightedIndex}` : undefined"
                 :aria-describedby="describedBy"

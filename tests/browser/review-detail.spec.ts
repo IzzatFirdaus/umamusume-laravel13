@@ -148,7 +148,7 @@ test('commits the record its other-form action names, in one press', async ({ pa
         await page.goto(`/review/${candidate.id}`);
         await page.locator('#app > *').first().waitFor();
 
-        const useThis = page.getByRole('button', { name: `Use ${other.name} as the match` });
+        const useThis = page.getByRole('button', { name: `Confirm form ${other.name} as the match` });
         await expect(useThis).toBeVisible();
 
         // The house 44px bar applies to it: the press writes.
@@ -235,4 +235,21 @@ test('passes an axe scan at WCAG A and AA on the literal detail URL', async ({ p
     const results = await buildAxe(page).analyze();
 
     expect(results.violations, JSON.stringify(results.violations, null, 2)).toEqual([]);
+});
+
+test('offers a manual alias verdict when the required language is set', async ({ page }) => {
+    const [candidate] = seedPendingCandidates(1, { suggested: true });
+    await page.goto('/review');
+    await page.getByTestId('review-detail-link').click();
+    await expect(page).toHaveURL(new RegExp(`/review/${candidate.id}$`));
+
+    await page.getByLabel(`Verdict for ${candidate.proposedName}`).selectOption('Aliased');
+    const record = page.getByRole('button', { name: 'Record alias' });
+    await expect(record).toBeDisabled();
+    await page.getByLabel(`Alias language for ${candidate.proposedName}`).selectOption('English');
+    await expect(record).toBeEnabled();
+
+    await record.click();
+    await expect(page).toHaveURL(/\/review$/);
+    await expect(page.getByRole('status').filter({ hasText: 'Candidate resolved.' })).toBeVisible();
 });

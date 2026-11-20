@@ -2,7 +2,6 @@
 import AppLayout from '../../layouts/AppLayout.vue';
 // FQ-10: `CandidateForm` renders on `Review/Detail.vue`; the queue links to it instead.
 import ProvenanceBadge from '../../components/ProvenanceBadge.vue';
-import SuggestionHint from '../../components/review/SuggestionHint.vue';
 import Pagination from '../../components/ui/Pagination.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
 import { computed } from 'vue';
@@ -16,7 +15,7 @@ interface Candidate {
     source_key: string;
     created_at: string;
     suggestion: string | null;
-    suggested_umamusume_id: number | null;
+    review_url: string;
 }
 
 interface Paginator<T> {
@@ -31,25 +30,17 @@ interface Paginator<T> {
 const props = defineProps<{
     candidates: Paginator<Candidate>;
     neverFetched: boolean;
+    queueUrl: string;
+    databaseUrl: string;
+    nextReviewUrl: string | null;
     /** Candidates whose verdict landed today (`status` left `Pending`, counted on `updated_at`). */
     resolvedToday: number;
     /** Total candidates resolved (all-time, non-Pending). */
     resolvedCount: number;
 }>();
 
-/**
- * The canonical pager owns the range, so the page owns the request. The pager it replaces was a set
- * of Inertia links built from the server's own paginator, and those links carried the query string
- * with them, so this rebuilds the same query with the new page number rather than replacing it.
- */
 function goToPage(page: number): void {
-    const query = new URLSearchParams(window.location.search);
-    query.set('page', String(page));
-
-    router.get(`${window.location.pathname}?${query.toString()}`, {}, {
-        preserveState: true,
-        preserveScroll: true,
-    });
+    router.get(props.queueUrl, { page }, { preserveState: true, preserveScroll: true });
 }
 
 /*
@@ -67,7 +58,6 @@ const progressPercent = computed<number>(() => (totalCount.value === 0 ? 0 : Mat
 const th = 'border-b border-rule px-2 py-2 text-left text-xs font-semibold text-ink-strong';
 const thNum = 'border-b border-rule px-2 py-2 text-right text-xs font-semibold text-ink-strong';
 const td = 'border-b border-rule px-2 py-3 align-top text-sm text-ink';
-const tdNum = 'border-b border-rule px-2 py-3 text-right align-top text-sm text-ink';
 
 function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unknown'; title: string } {
     return tier === 'Fuzzy'
@@ -83,10 +73,31 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
         <template #title>Confirm or reject matches</template>
 
         <p class="mt-1 max-w-3xl text-sm text-ink-muted">
-            When the importer is unsure which catalog record a line refers to, it asks. Nothing is
-            written until you answer. Fuzzy and unmatched fetch results land here, and the engine never
-            merges them without your decision.
+            Compare the imported name with the catalog and record a verdict for each case.
+            If the importer cannot fuzzy-match any trainee, the row has no suggestion.
         </p>
+        <dl class="mt-4 grid grid-cols-3 gap-2 rounded-md border border-rule-soft bg-panel p-3">
+            <div>
+                <dt class="text-xs text-ink-muted">Pending</dt>
+                <dd class="font-mono text-lg font-semibold tabular-nums text-ink-strong">{{ candidates.total }}</dd>
+            </div>
+            <div>
+                <dt class="text-xs text-ink-muted">Resolved today</dt>
+                <dd class="font-mono text-lg font-semibold tabular-nums text-ink-strong">{{ resolvedToday }}</dd>
+            </div>
+            <div>
+                <dt class="text-xs text-ink-muted">Rows shown</dt>
+                <dd class="font-mono text-lg font-semibold tabular-nums text-ink-strong">{{ candidates.data.length }}</dd>
+            </div>
+        </dl>
+
+        <Link
+            v-if="nextReviewUrl"
+            :href="nextReviewUrl"
+            class="mt-3 inline-flex min-h-11 items-center rounded-md border border-rule bg-raised px-3 text-sm font-semibold text-ink-strong hover:bg-sunken"
+        >
+            Review next pending case
+        </Link>
 
         <!-- Two different absences. A queue someone has worked through is empty for a reason, and a
              database nobody has ever fetched has never had anything to review; telling a Trainer to run
@@ -103,127 +114,71 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
              class="mt-8 rounded-md border border-dashed border-rule bg-panel p-6 text-sm text-ink-muted"
          >
             Nothing pending. Every match the engine could not decide has had your verdict. The rows it
-            promoted are on the <Link href="/database">Database screens</Link>.
+            promoted are on the <Link :href="databaseUrl" class="inline-flex min-h-11 items-center underline">Database screens</Link>.
         </p>
 
         <template v-else>
-            <p class="mt-2 text-xs text-ink-muted">
-                No suggestion means the source name does not fuzzy-match any trainee.
-            </p>
-            <!-- The verdict gate's reason, once. Every card's Resolve stays disabled until its own
-                 verdict is set; a copy of this sentence on each of twenty-five rows said it
-                 twenty-five times and buried the buttons it was about. -->
-            <p class="mt-1 text-xs text-ink-muted">
-                Open a row to set its verdict and resolve it.
-            </p>
-
-            <template v-if="candidates.data.length > 0">
-                <!-- PROGRESS: a bar and a number. "N of M items to resolve" was a sentence a reader
-                     had to parse; the bar answers "how far through am I" at a glance, and the
-                     number beside it keeps the exact figure for anyone who needs it. The fill is
-                     the chrome role, not the action role: `bg-primary-action` is this screen's one
-                     accented commit button and the spec pins that count at one. -->
-                <div class="mt-4 flex items-center gap-3">
+            <div class="mt-4 flex flex-wrap items-center gap-x-3 gap-y-1">
+                <div
+                    class="h-2 min-w-16 flex-1 overflow-hidden rounded-full bg-sunken"
+                    role="progressbar"
+                    aria-label="All-time review progress"
+                    :aria-valuenow="resolvedCount"
+                    :aria-valuemin="0"
+                    :aria-valuemax="totalCount"
+                >
                     <div
-                        class="h-2 flex-1 overflow-hidden rounded-full bg-sunken"
-                        role="progressbar"
-                        aria-label="Review progress"
-                        :aria-valuenow="resolvedCount"
-                        aria-valuemin="0"
-                        :aria-valuemax="totalCount"
-                    >
-                        <div
-                            class="h-full rounded-full bg-green transition-[width] duration-150 ease-out motion-reduce:transition-none"
-                            :style="{ width: `${progressPercent}%` }"
-                        />
-                    </div>
-                    <p class="shrink-0 text-xs text-ink-muted">
-                        {{ resolvedCount }} of {{ totalCount }} resolved, all time
-                        <span v-if="props.resolvedToday > 0"> · {{ props.resolvedToday }} resolved today</span>
-                        <!-- The three scopes the plan asks to see apart: the queue still waiting, and
-                             the slice of it this page prints. "N of M resolved" alone mixed the
-                             all-time total with today's work and said nothing about how many rows were
-                             on screen, so a Trainer reading "0 of 304" beside "8 today" could not tell
-                             which scope either number belonged to. Each is now named. -->
-                        · {{ props.candidates.total }} pending
-                        · {{ props.candidates.data.length }} shown
-                    </p>
+                        class="h-full rounded-full bg-green-deep transition-[width] duration-150 ease-out motion-reduce:transition-none"
+                        :style="{ width: `${progressPercent}%` }"
+                    />
                 </div>
-                <!-- One Pending table, in the wireframe's columns (`review.html:69-101`). Both
-                     halves of the queue are rows: a candidate with a proposal is answered by comparing
-                     it, and a candidate without one is a question with no answer to compare.
-                     HFW-OVERRIDE (structure): `review.html:67` wraps this table in a `.card` and
-                     titles it. The title is taken; the wrapper is not, because `review.spec.ts:198`
-                     measures the first row against the shell's content edge and pins the page to add
-                     no inset of its own, and a card's `p-4` plus its border is 17px of inset. The
-                     parity comparison does not need the wrapper: its leading `card` marker already
-                     resolves to the reference cards below. -->
-                <!-- Keep narrow-screen columns readable inside the keyboard-scrollable region. -->
-                <div class="mt-3 min-w-0 overflow-x-auto rounded-md border border-rule bg-raised" role="region" tabindex="0" aria-label="Pending match candidates, scrollable">
-                    <h2 id="review-queue-heading" class="text-lg font-semibold text-ink-strong">Pending</h2>
-                    <table class="w-full min-w-2xl border-collapse md:min-w-0">
-                        <caption class="sr-only">Pending match candidates, with the question each answers and the best match found</caption>
-                        <thead>
-                            <tr>
-                                <th scope="col" :class="th">Candidate</th>
-                                <th scope="col" :class="th">Question</th>
-                                <th scope="col" :class="th">Best match</th>
-                                <th scope="col" :class="thNum">Confidence</th>
-                                <th scope="col" :class="thNum"><span class="sr-only">Review</span></th>
-                            </tr>
-                        </thead>
-                        <tbody id="review-results">
-                            <tr v-for="candidate in props.candidates.data" :key="candidate.id">
-                                <td :class="td">
-                                    <b class="text-ink-strong">{{ candidate.proposed_name }}</b>
-                                    <span v-if="candidate.proposed_name_ja" lang="ja" class="block text-xs text-ink-muted">
-                                        {{ candidate.proposed_name_ja }}
-                                    </span>
-                                    <span class="mt-0.5 block text-xs text-ink-muted">
-                                        from {{ candidate.source_key }}
-                                        <time :datetime="candidate.created_at"> · {{ candidate.created_at }}</time>
-                                    </span>
-                                </td>
-                                <td :class="td">
-                                    <template v-if="candidate.suggested_umamusume_id !== null">Which trainee is this?</template>
-                                    <template v-else>No catalog record carries this name.</template>
-                                </td>
-                                <td :class="td">
-                                    <template v-if="candidate.suggested_umamusume_id !== null">
-                                        {{ candidate.suggestion }}
-                                        <SuggestionHint
-                                            v-if="candidate.suggestion"
-                                            :suggestion="candidate.suggestion"
-                                            :umamusume-id="candidate.suggested_umamusume_id"
-                                            :source-key="candidate.source_key"
-                                        />
-                                    </template>
-                                    <!-- DESIGN.md §5(b): the badge owns the one provenance word. A
-                                         second "No match" pill for a non-Fuzzy row stated the same
-                                         tier fact twice (A-96), so it is dropped here. -->
-                                    <span v-else-if="candidate.match_tier === 'Fuzzy'" class="pill pill-neutral">No match</span>
-                                </td>
-                                <td :class="[tdNum, 'text-right']">
-                                    <!-- `ProvenanceBadge` is the single owner of the state word
-                                         (DESIGN.md §5(b), 2026-10-17 amendment). -->
-                                    <ProvenanceBadge
-                                        :state="badgeFor(candidate.match_tier, candidate.source_key).state"
-                                        :title="badgeFor(candidate.match_tier, candidate.source_key).title"
-                                    />
-                                </td>
-                                <td :class="[td, 'text-right']">
-                                    <Link
-                                        :href="`/review/${candidate.id}`"
-                                        :aria-label="`Review ${candidate.proposed_name}`"
-                                        data-testid="review-detail-link"
-                                        class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm font-medium text-ink hover:text-ink-strong transition-colors duration-150 ease-out"
-                                    >Review</Link>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </template>
+                <p class="text-xs text-ink-muted">{{ resolvedCount }} of {{ totalCount }} resolved, all time</p>
+            </div>
+
+            <h2 class="mt-5 text-lg font-semibold text-ink-strong">Pending cases</h2>
+            <div class="mt-3 min-w-0 overflow-x-auto scroll-p-2 rounded-md border border-rule bg-raised" role="region" tabindex="0" aria-label="Pending match candidates, scrollable">
+                <table class="w-full min-w-2xl border-collapse md:min-w-0">
+                    <caption class="sr-only">Pending candidates and their match evidence</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col" :class="th">Imported record</th>
+                            <th scope="col" :class="th">Suggested match</th>
+                            <th scope="col" :class="th">Evidence</th>
+                            <th scope="col" :class="thNum"><span class="sr-only">Review</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="review-results">
+                        <tr v-for="candidate in props.candidates.data" :key="candidate.id">
+                            <td :class="td">
+                                <b class="text-ink-strong">{{ candidate.proposed_name }}</b>
+                                <span v-if="candidate.proposed_name_ja" lang="ja" class="block text-xs text-ink-muted">
+                                    {{ candidate.proposed_name_ja }}
+                                </span>
+                                <span class="mt-0.5 block text-xs text-ink-muted">
+                                    from {{ candidate.source_key }}
+                                    <time :datetime="candidate.created_at"> · {{ candidate.created_at }}</time>
+                                </span>
+                            </td>
+                            <td :class="td">{{ candidate.suggestion ?? 'No suggestion' }}</td>
+                            <td :class="td">
+                                <span class="mr-1">{{ candidate.match_tier_label }}</span>
+                                <ProvenanceBadge
+                                    :state="badgeFor(candidate.match_tier, candidate.source_key).state"
+                                    :title="badgeFor(candidate.match_tier, candidate.source_key).title"
+                                />
+                            </td>
+                            <td :class="[td, 'text-right']">
+                                <Link
+                                    :href="candidate.review_url"
+                                    :aria-label="`Review ${candidate.proposed_name}`"
+                                    data-testid="review-detail-link"
+                                    class="inline-flex min-h-11 items-center rounded-md border border-rule px-3 text-sm font-medium text-ink hover:text-ink-strong transition-colors duration-150 ease-out"
+                                >Review</Link>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
 
             <!-- The wireframe's two reference cards, side by side (`review.html:103-135`). They
                  are open on the page: the table above is shorter than the cards it replaced, so the
@@ -244,7 +199,7 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                         <tbody class="divide-y divide-rule">
                             <tr>
                                 <td class="py-2">Exact name match</td>
-                                <td class="py-2 text-ink-muted">Decisive, offered as the default</td>
+                                <td class="py-2 text-ink-muted">Eligible for automatic matching</td>
                             </tr>
                             <tr>
                                 <td class="py-2">Japanese name match</td>
@@ -252,11 +207,11 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                             </tr>
                             <tr>
                                 <td class="py-2">Known alias</td>
-                                <td class="py-2 text-ink-muted">Strong, shown as a separate candidate</td>
+                                <td class="py-2 text-ink-muted">Eligible for automatic matching</td>
                             </tr>
                             <tr>
                                 <td class="py-2">Fuzzy spelling</td>
-                                <td class="py-2 text-ink-muted">Suggested only, never pre-selected</td>
+                                <td class="py-2 text-ink-muted">Suggested for manual review</td>
                             </tr>
                         </tbody>
                     </table>
@@ -272,21 +227,10 @@ function badgeFor(tier: string, sourceKey: string): { state: 'estimated' | 'unkn
                     <h2 id="review-why-heading">Why this exists</h2>
 
                     <p class="mt-2 text-sm text-ink-muted">
-                        A wrong match silently poisons every downstream screen: a run attributed to
-                        the wrong trainee gets the wrong aptitudes, growth row and unique skill. The
-                        queue exists so a guess becomes a question.
+                        Careers and Veterans use the matched catalog record for the trainee's aptitudes,
+                        growth rates and unique skill. Check the specific form before you confirm.
                     </p>
 
-                    <div class="mt-3 grid grid-cols-2 gap-2">
-                        <div class="tile">
-                            <div class="k">Pending</div>
-                            <div class="v font-mono text-sm">{{ props.candidates.total }}</div>
-                        </div>
-                        <div class="tile">
-                            <div class="k">Resolved today</div>
-                            <div class="v font-mono text-sm">{{ props.resolvedToday }}</div>
-                        </div>
-                    </div>
                 </section>
             </div>
 

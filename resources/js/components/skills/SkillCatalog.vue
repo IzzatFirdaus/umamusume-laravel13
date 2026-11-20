@@ -1,22 +1,5 @@
 <script setup lang="ts">
-/*
- * The skill catalogue's table body. One body, two URLs: the Library's skill search (`/skills`) and the
- * Database hub's Skills area (`/database/skills`, SCREEN-023, plan §8 D17). The host owns the shell and
- * the head band; `filterPath` is the address the filter form, the Clear link and the pager write back to,
- * so a Trainer filtering from the Database URL stays on it.
- *
- * The table is the wireframe's own grammar (`skills.html`): the engine condition in monospace beside the
- * readable name, the base cost right-aligned, and an Open column. The cost is the base cost only: a hint
- * discount is a per-run fact, so the run planner owns it (UMAMUSUME_REFERENCE.md §1.1.4).
- *
- * HFW-OVERRIDE (filters: Distance) - `skills.html:76-77` draws a Distance facet. This catalogue stores
- * no distance column: distance exists only inside the condition tokens (`distance_type==2` and friends),
- * so a picker over it would be a control the server cannot answer. The footer states the absence.
- *
- * HFW-OVERRIDE (search: effect text) - `skills.html:73` promises "Skill name or effect text". No readable
- * effect text is stored (G-SK-20), so the field matches the normalized name key only and its placeholder
- * says "Part of a skill name"; the footer states that too.
- */
+/* Shared by the Library and Database skill catalogs. The host supplies its filter URL. */
 import { Link, router, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import AbsenceValue from '../AbsenceValue.vue';
@@ -34,6 +17,7 @@ export interface Skill {
     name_ja: string | null;
     is_unique: boolean;
     type: string | null;
+    type_withheld: boolean;
     sp_cost: number | null;
     description: string | null;
     /** The row's availability, so the description gate is the shared predicate rather than a second rule. */
@@ -115,9 +99,36 @@ const errors = computed(() => (page.props.errors as Record<string, string | unde
 const search = ref(props.search ?? '');
 const type = ref(props.type ?? '');
 const unique = ref(props.unique ? '1' : '');
-const distance = ref(props.distance ?? '');
+const distance = ref(props.distance === null ? '' : String(props.distance));
 const scope = ref(props.scope);
 const loading = ref(false);
+
+const distanceOptions = [
+    { value: '', label: 'Any' },
+    { value: '1', label: 'Sprint' },
+    { value: '2', label: 'Mile' },
+    { value: '3', label: 'Medium' },
+    { value: '4', label: 'Long' },
+    { value: '0', label: 'Unspecified' },
+];
+
+const appliedFilters = computed(() => {
+    const distanceLabel = distanceOptions.find(option => option.value === String(props.distance))?.label;
+
+    return [
+        props.search === null ? null : `Search “${props.search}”`,
+        props.unique ? 'Unique only' : null,
+        props.type === null ? null : `Type ${props.type}`,
+        distanceLabel === undefined ? null : `Distance ${distanceLabel}`,
+    ].filter((label): label is string => label !== null);
+});
+
+const clearHref = computed(() => props.scope === 'global'
+    ? props.filterPath
+    : `${props.filterPath}?${new URLSearchParams({ scope: props.scope })}`);
+
+const effectText = (skill: Skill): string =>
+    displayDescription({ description: skill.description, releaseStatus: skill.release_status });
 
 /**
  * `BaseSelect` answers the empty choice with `null`, which a native select paints as no selection at all.
@@ -128,6 +139,7 @@ const facet = (value: string | number | null): string => (value === null ? '' : 
 function params(): Record<string, string | number | undefined> {
     return {
         search: search.value || undefined,
+        pageSize: new URLSearchParams(querySuffix.value).get('pageSize') ?? undefined,
         type: type.value || undefined,
         unique: unique.value === '1' ? 1 : undefined,
         distance: distance.value || undefined,
@@ -151,14 +163,16 @@ function applyFilters(): void {
 }
 
 function goToPage(page: number): void {
-    router.get(props.filterPath, { ...params(), page }, {
+    const applied = new URLSearchParams(querySuffix.value);
+    applied.set('page', String(page));
+    router.get(props.filterPath, Object.fromEntries(applied), {
         preserveState: true,
         preserveScroll: true,
     });
 }
 
-const engineCondition = (skill: Skill): string =>
-    skill.conditions.filter((condition): condition is string => condition !== null && condition !== '').join(' · ');
+const engineConditions = (skill: Skill): string[] =>
+    skill.conditions.filter((condition): condition is string => condition !== null && condition !== '');
 
 /**
  * The name a row prints, and the language it prints it in.
@@ -182,7 +196,7 @@ const secondaryName = (skill: Skill): string | null =>
 
         <form
             data-region="filters"
-            class="flex flex-wrap items-end gap-3"
+            class="flex flex-wrap items-end gap-3 rounded-md border border-rule-soft bg-panel p-3"
             :class="props.heading ? 'mt-3' : ''"
             :aria-busy="loading"
             @submit.prevent="applyFilters"
@@ -241,14 +255,7 @@ const secondaryName = (skill: Skill): string | null =>
                     id="skill-distance"
                     :model-value="distance"
                     name="distance"
-                    :options="[
-                        { value: '', label: 'Any' },
-                        { value: '1', label: 'Sprint' },
-                        { value: '2', label: 'Mile' },
-                        { value: '3', label: 'Medium' },
-                        { value: '4', label: 'Long' },
-                        { value: '0', label: 'Unspecified' }
-                    ]"
+                    :options="distanceOptions"
                     :error="errors.distance"
                     @update:model-value="distance = facet($event)"
                 />
@@ -257,34 +264,26 @@ const secondaryName = (skill: Skill): string | null =>
                 Filter
             </BaseButton>
             <a
-                :href="props.filterPath"
+                :href="clearHref"
                 class="inline-flex min-h-11 items-center px-2 text-sm text-ink-muted hover:underline transition-colors duration-150 ease-out"
             >Clear</a>
         </form>
 
-        <!-- D-65: the invitation belongs to the state where nobody has asked yet. -->
-        <p v-if="props.search === null" class="mt-2 text-sm text-ink-muted">
-            Type part of a skill name to narrow the catalog. The search reads the same normalized key the
-            import writes, so capital letters and spacing are not part of the question.
+        <p v-if="appliedFilters.length === 0" class="mt-2 text-sm text-ink-muted">
+            Type part of a skill name or effect to narrow the catalog.
         </p>
-
-        <p v-if="loading" role="status" class="mt-3 text-sm text-ink-muted">Loading results…</p>
-
-        <!-- Matching results against the scope's own total, which is the pair the plan asks to see
-             apart. `skills.total` is how many rows the facets answered; `totalCount` is every skill
-             the scope holds. The paginator below states which slice of the matching set is on screen,
-             so the three figures a Trainer needs are: this scope, this answer, this page. Gated on a
-             search so the line does not restate the whole catalogue when nobody has asked anything. -->
-        <p
-            v-if="props.skills.data.length > 0 && props.search !== null"
-            class="mt-3 text-sm text-ink-muted"
-            role="status"
-            data-testid="result-summary"
-        >
-            <span class="font-mono tabular-nums text-ink-strong">{{ props.skills.total }}</span>
-            matching of
-            <span class="font-mono tabular-nums text-ink-strong">{{ props.totalCount }}</span>
-            in {{ props.scopes[props.scope] ?? props.scope }}
+        <p v-else class="mt-2 text-sm text-ink-muted">
+            <span class="font-semibold text-ink-strong">Active filters</span>
+            {{ appliedFilters.join(' · ') }}
+        </p>
+        <p class="mt-2 text-sm text-ink-muted" role="status" aria-atomic="true" data-testid="result-summary">
+            <template v-if="loading">Loading results…</template>
+            <template v-else>
+                <span class="font-mono tabular-nums text-ink-strong">{{ props.skills.total }}</span>
+                matching of
+                <span class="font-mono tabular-nums text-ink-strong">{{ props.totalCount }}</span>
+                in {{ props.scopes[props.scope] ?? props.scope }}
+            </template>
         </p>
 
         <!-- Two absences, named apart: an empty catalogue is a fetch nobody has run, and an empty result
@@ -294,8 +293,8 @@ const secondaryName = (skill: Skill): string | null =>
             <p v-if="props.totalCount === 0" class="text-sm font-semibold text-ink-strong">
                 The skill catalog holds no rows yet
             </p>
-            <p v-else role="status" class="text-sm font-semibold text-ink-strong">
-                Nothing matches {{ props.askedFor }}. Clear returns the full catalog.
+            <p v-else class="text-sm font-semibold text-ink-strong">
+                Nothing matches {{ props.askedFor }}. Clear returns the full catalog for this scope.
             </p>
             <p class="mt-1 text-sm text-ink-muted">
                 <template v-if="props.totalCount === 0">
@@ -313,47 +312,44 @@ const secondaryName = (skill: Skill): string | null =>
         </div>
 
         <template v-else>
-            <!-- The provenance counts describe the WHOLE table, at every scope (B1). The current
-                 scope's own row count is the paginator's "N of M" line below, so a Trainer can tell
-                 "Japan-only is empty" from "Japan-only is filtered out" without leaving the page.
-                 They live inside the card rather than in the empty state: with no rows there is no
-                 table for a header to head, and the full-table figures are still true but unread. -->
             <div class="card mt-4">
+                <details class="border-b border-rule-soft">
+                    <summary class="min-h-11 cursor-pointer py-3 text-sm font-semibold text-ink-strong">
+                        Release counts and sources
+                    </summary>
+                    <div
+                        class="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-rule px-3 py-2 text-sm"
+                        data-testid="provenance-counts"
+                    >
+                        <!-- `Calculated` follows DESIGN.md §provenance. The description states the arithmetic. -->
+                        <span
+                            class="pill pill-neutral text-xs"
+                            data-footnote-id="provenance-source"
+                            aria-describedby="provenance-source"
+                        >Calculated</span>
+                        <span class="text-ink-muted">
+                            Global <span data-count-kind="global" class="font-mono tabular-nums text-ink-strong">{{ props.release_status_counts.global }}</span>
+                        </span>
+                        <span class="text-ink-muted">
+                            Japan only <span data-count-kind="japan_only" class="font-mono tabular-nums text-ink-strong">{{ props.release_status_counts.japan_only }}</span>
+                        </span>
+                        <span class="text-ink-muted">
+                            Other <span data-count-kind="other" class="font-mono tabular-nums text-ink-strong">{{ props.release_status_counts.other }}</span>
+                        </span>
+                    </div>
+                    <p id="provenance-source" class="note m-3">
+                        <span class="g" aria-hidden="true">○</span>
+                        <span class="flex-1">
+                            Source: the <code class="font-mono">release_status</code> column from the client
+                            export, counted over the whole table. These figures do not change with the scope
+                            filter: the scope narrows the rows below, and the paginator states how many of
+                            them it is showing. A row the client has not shipped is counted under Japan only
+                            and is never reachable at the default scope.
+                        </span>
+                    </p>
+                </details>
                 <div
-                    class="flex flex-wrap items-center gap-x-4 gap-y-1 border-b border-rule px-3 py-2 text-sm"
-                    data-testid="provenance-counts"
-                >
-                    <!-- `Calculated` is the established label for this tool's own arithmetic over the
-                         source's readings (DESIGN.md §provenance; the pill form used at
-                         `CardPicker.vue:212`). `aria-describedby` points at the footnote stating the
-                         arithmetic, so the label is not a bare word to a screen reader. -->
-                    <span
-                        class="pill pill-neutral text-xs"
-                        data-footnote-id="provenance-source"
-                        aria-describedby="provenance-source"
-                    >Calculated</span>
-                    <span class="text-ink-muted">
-                        Global <span data-count-kind="global" class="font-mono tabular-nums text-ink-strong">{{ props.release_status_counts.global }}</span>
-                    </span>
-                    <span class="text-ink-muted">
-                        Japan only <span data-count-kind="japan_only" class="font-mono tabular-nums text-ink-strong">{{ props.release_status_counts.japan_only }}</span>
-                    </span>
-                    <span class="text-ink-muted">
-                        Other <span data-count-kind="other" class="font-mono tabular-nums text-ink-strong">{{ props.release_status_counts.other }}</span>
-                    </span>
-                </div>
-                <p id="provenance-source" class="note m-3">
-                    <span class="g" aria-hidden="true">○</span>
-                    <span class="flex-1">
-                        Source: the <code class="font-mono">release_status</code> column from the client
-                        export, counted over the whole table. These figures do not change with the scope
-                        filter: the scope narrows the rows below, and the paginator states how many of
-                        them it is showing. A row the client has not shipped is counted under Japan only
-                        and is never reachable at the default scope.
-                    </span>
-                </p>
-                <div
-                    class="relative overflow-x-auto"
+                    class="relative overflow-x-auto scroll-p-2"
                     role="region"
                     tabindex="0"
                     aria-label="Skill catalog, scrollable"
@@ -362,16 +358,15 @@ const secondaryName = (skill: Skill): string | null =>
                          do not simplify it to w-full. `relative` is what contains AbsenceValue's sr-only. -->
                     <table class="t min-w-2xl">
                         <caption class="sr-only">
-                            Skill catalog: name, type, engine condition, base SP cost and a link to the detail
+                            Skills, effects, base SP costs and technical details
                         </caption>
                         <thead>
                             <tr>
                                 <th scope="col" class="w-1/3">Skill</th>
                                 <th scope="col">Type</th>
                                 <th scope="col">Effect</th>
-                                <th scope="col">Condition (engine)</th>
                                 <th scope="col" class="n whitespace-nowrap">Base cost</th>
-                                <th scope="col" class="n"><span class="sr-only">Open the skill</span></th>
+                                <th scope="col"><span class="sr-only">Technical details</span></th>
                             </tr>
                         </thead>
                         <tbody id="skill-results">
@@ -406,51 +401,46 @@ const secondaryName = (skill: Skill): string | null =>
                                 </th>
                                 <td>
                                     <span v-if="skill.type" class="pill pill-outline">{{ skill.type }}</span>
-                                    <AbsenceValue v-else compact reason="The source's effect codes give this skill no type word." />
+                                    <AbsenceValue
+                                        v-else
+                                        compact
+                                        :reason="skill.type_withheld
+                                            ? 'Untyped by design. The effects are non-positive or span more than one supported type.'
+                                            : 'Type unknown. The recorded effects do not establish a supported classification.'"
+                                    />
                                 </td>
-                                <!-- Ruling 1 (symmetric): `desc_en` on a JapanOnly row is third-party on the
-                                     same test that bars `name_en`, so this cell prints the named absence for
-                                     every such row rather than the source's English sentence. The row carries
-                                     its own `release_status` so this surface and `Show.vue` reach the rule
-                                     through the same predicate rather than each deciding for itself. -->
                                 <td class="max-w-prose text-sm">
-                                    <span
-                                        v-if="displayDescription({ description: skill.description, releaseStatus: skill.release_status }) === NO_CLIENT_STRING"
-                                        class="text-ink-muted"
-                                    >{{ NO_CLIENT_STRING }}</span>
-                                    <span v-else class="text-ink">{{ skill.description }}</span>
-                                </td>
-                                <!-- Engine tokens have no break opportunities, so a long predicate would
-                                     otherwise set the whole table's min-content width and scroll it at
-                                     desktop. Breaking anywhere is honest for a machine string. -->
-                                <td class="font-mono break-all">
-                                    <span v-if="engineCondition(skill) !== ''">{{ engineCondition(skill) }}</span>
-                                    <AbsenceValue v-else compact reason="The source states no activation condition for this skill." />
+                                    <AbsenceValue
+                                        v-if="effectText(skill) === NO_CLIENT_STRING"
+                                        compact
+                                        reason="No client string. A verified readable effect is unavailable for this skill."
+                                    />
+                                    <span v-else>{{ effectText(skill) }}</span>
                                 </td>
                                 <td class="n font-mono tabular-nums whitespace-nowrap">
                                     <span v-if="skill.sp_cost !== null">{{ skill.sp_cost }} SP</span>
                                     <AbsenceValue v-else compact reason="The source states no SP cost for this class of skill." />
                                 </td>
-                                <td class="n">
-                                    <LinkButton :href="detailHref(skill.id)" variant="secondary" size="sm">
-                                        Open
-                                    </LinkButton>
+                                <td>
+                                    <details>
+                                        <summary class="min-h-11 cursor-pointer py-3 text-sm font-medium text-ink-strong">
+                                            Technical details<span class="sr-only"> for {{ displayName(skill) }}</span>
+                                        </summary>
+                                        <ul v-if="engineConditions(skill).length" class="mt-1 list-none space-y-1">
+                                            <li v-for="(condition, index) in engineConditions(skill)" :key="index">
+                                                <code class="select-text break-all font-mono text-xs">{{ condition }}</code>
+                                            </li>
+                                        </ul>
+                                        <AbsenceValue v-else compact reason="The source states no activation predicate for this skill." />
+                                        <LinkButton :href="detailHref(skill.id)" variant="secondary" size="sm" class="mt-2">
+                                            View mechanics and sources
+                                        </LinkButton>
+                                    </details>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
                 </div>
-                <p class="note mt-3">
-                    <span class="g" aria-hidden="true">○</span>
-                    <span class="flex-1">
-                        The condition column prints the export's own tokens. A race is simulated in phases and
-                        the skill layer keys on phase flags rather than stat comparisons: the export carries
-                        <code class="font-mono">phase&gt;=2</code>, <code class="font-mono">phase_random</code>,
-                        <code class="font-mono">is_lastspurt==1</code> and
-                        <code class="font-mono">is_last_straight==1</code> across its entries. A cell reading
-                        N/A opens to the reason the source records nothing for it; it is not a zero.
-                    </span>
-                </p>
                 <Pagination
                     :page="props.skills.current_page"
                     :pages="props.skills.last_page"
@@ -464,19 +454,13 @@ const secondaryName = (skill: Skill): string | null =>
         </template>
 
         <p class="mt-6 max-w-3xl text-xs text-ink-muted" data-testid="catalogue-footer">
-            <span v-if="props.scope === 'japan_only'">The Global client has not received these skills. Each name shown is
-            the source's own string; no client-copy English name exists for this row, so none is printed.
+            <span v-if="props.scope === 'japan_only'">The Global client has not received these skills. Their source names are shown.</span>
+            Type is derived from the source effect codes. Unspecified includes both untyped and unknown skills.
+            Cost is the base SP before hint discounts. Distance matches the recorded distance filter.
+            <span data-testid="range-op-sentence">
+                <template v-if="rangeOpCount > 0">{{ rangeOpCount }} skills have distance ranges this filter cannot match.</template>
+                <template v-else>No skill in this scope has a recorded distance range.</template>
             </span>
-            The type word is this tool's reading of the source's effect codes, not a client label. The
-            reading refuses a negative value and refuses a skill carrying two kinds of effect, so some
-            rows show no word at all; the Type filter's “{{ props.unspecifiedType }}” choice finds those
-            rows. The ✦ mark beside a name is the pipeline's derivation from the source's class code, not
-            a card's own list. Cost is the base cost only: the skill page prices each hint level against
-            it, and the run planner owns the level a run actually holds. Search matches the skill's name
-            <strong>or the stored effect text</strong> (both case- and spacing-insensitive via the same
-            normalized key). The Distance filter matches the parsed <code>distance_type</code> column
-(1=Sprint..4=Long, plus Unspecified for not-recorded); <span data-testid="range-op-sentence"><strong v-if="rangeOpCount > 0">{{ rangeOpCount }} skills have
-range operators on distance that cannot be filtered</strong><span v-else>no skill in the current catalog uses a range operator on distance</span>.</span>
         </p>
     </div>
 </template>

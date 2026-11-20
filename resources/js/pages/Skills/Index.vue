@@ -1,9 +1,5 @@
 <script setup lang="ts">
-/*
- * Skill search (Screen D, PRD FR-D-2). The page owns the head band and mounts the catalogue body that
- * `/database/skills` also renders; see `components/skills/SkillCatalog.vue` for the table's rules and the
- * two HFW overrides (no Distance facet, name-only search).
- */
+/* Library entry point for the shared skill catalog. */
 import AppLayout from '../../layouts/AppLayout.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
 import DatabaseNav from '../../components/database/DatabaseNav.vue';
@@ -36,7 +32,7 @@ const props = defineProps<{
             <PageHeader
                 eyebrow="Skills"
                 title="Skill search"
-                :description="`${props.totalCount} skills available on Global. The condition column is the source's own engine data, not a client paraphrase.`"
+                description="Find skills by name, effect, type or distance."
             />
         </template>
 

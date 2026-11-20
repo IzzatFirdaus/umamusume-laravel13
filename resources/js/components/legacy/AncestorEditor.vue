@@ -51,7 +51,7 @@ const props = defineProps<{
     /** `config/uma.php`'s spark kind vocabulary, keyed by the stored value. */
     sparkKinds: Record<string, string>;
     /** The targets each category offers, from the same config the server validates against. */
-    sparkTargets: { Stat: string[]; Aptitude: string[]; Skill: { name: string; name_ja: string | null }[] };
+    sparkTargets: { Stat: string[]; Aptitude: string[]; Race: string[]; Skill: { name: string; name_ja: string | null }[] };
     /** The server's message for this node's name, when it refused one. */
     error?: string;
     /** The sentence the server supplies for a node that records no Sparks yet. */
@@ -64,7 +64,7 @@ const props = defineProps<{
  * Spark whose target does not belong to its category
  * (`StoreLegacySelectionRequest::assertTargetMatchesCategory`).
  */
-const SPARK_CATEGORIES = ['Stat', 'Aptitude', 'Skill'];
+const SPARK_CATEGORIES = ['Stat', 'Aptitude', 'Skill', 'Race'];
 
 const id = (field: string): string => `${field}-${props.slot}-${props.ancestorIndex}`;
 const sparkId = (field: string, sparkIndex: number): string =>
