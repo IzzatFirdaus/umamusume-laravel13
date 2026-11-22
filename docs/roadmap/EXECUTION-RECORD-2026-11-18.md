@@ -370,3 +370,34 @@ session. At HEAD `8482c112` the citation repoints are committed: `python tools/d
 assertions. The 708 baseline was not raised. "Nothing is committed" is likewise a snapshot of that
 session: the current tree is committed and pushed with divergence `0 0`. This erratum changes no
 earlier row; it records what supersedes them.
+
+## Dated closeout 2026-11-22 (N0.1) - committed batches and D-5 approval
+
+Owner instruction: "resolve N0.1 blocking. approved by owner". The original batches were already
+reachable from `master` at `1b987cec`; the current worktree is not the old batch inventory. This
+closeout supersedes the S0.1/S0.3 landing blockers above without restaging later work.
+
+| Batch | Committed evidence |
+|---|---|
+| Plan19 data integrity | `4a257e66` (review verdict guards), `f7c7c5c5` (legacy spark targets, request guards, gate exit case), `97e53da9` (career transactions), `423f578a` (fetch dispatch and manual-row guard), `ba2282a0` (seed bodies). |
+| Review, Skills, Veterans, and Races | `ac65bbe9` (four-screen rollout and browser specs) and `41bc48e8` (race calendar sort). |
+| S0.1 accessibility and specs | `137c4eba` (navigation focus, turn log, Dashboard, Tile, and the two walk specs), `c31ddc16` (Transfer Requests title), `36a761ba` (keyboard reachability), and `ac65bbe9` (Review queue presentation). |
+| S0.3 ADRs, audit, and documents | `90384973` (ADR drafts), `dba86362` (ADR decisions), `f850e1f9` (audit and sitreps), `859249b8` and `dc9a60ef` (index fold), `e1c43ae1` (plan and document batch). All 33 headings from the retired index are present in the replacement. |
+
+D-5 owner approval: "approved", in response to the explicit request to approve the tier assertions
+in `tests/browser/page-header.spec.ts` and authorize this execution-record-only commit. `137c4eba`
+changed the assertions to require `text-3xl font-semibold text-ink-strong` and reject the retired
+tier, as recorded under S2.1 above. The original commit covered other walk changes and did not
+quote the approval. This follow-up records the later approval without rewriting that commit or
+changing the spec.
+
+Verification at `1b987cec`: focused in-memory PHP checks for the data and four-screen batches
+reported 109 passed (1,302 assertions); `DatabaseRacesSortTest` reported 6 passed (158 assertions).
+Explicit-path Pint passed on the sampled, unchanged PHP paths. The committed-tree citation count
+was 546 against the unchanged baseline of 708. The audit's BO-001 and BO-002 verification rows
+record the passing navigation-focus and follow-up cases; S2.1 records the earlier page-header run.
+Those are historical browser results, not a fresh browser or release baseline.
+
+N0.1 is closed for the original batches. Later Review, Career, Source Ledger, telemetry, and other
+worktree changes were not part of this landing. The audit index and screenshots were not changed.
+N0.2 (push) and the full verification gates remain separate.
