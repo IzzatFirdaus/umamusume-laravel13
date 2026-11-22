@@ -332,6 +332,10 @@ points at this paragraph.
 
 - NFR-1 **Locality**: runs fully on the Trainer's machine. SQLite is the only production driver. No account, no
   auth surface, no telemetry, no outbound calls except declared fetch sources.
+  *Amendment 2026-11-21 (owner):* Langfuse and Latitude telemetry are permitted, using the Trainer's personal
+  Langfuse/Latitude accounts (GitHub: IzzatFirdaus). Outbound calls to `cloud.langfuse.com` and
+  `ingest.latitude.so` are exceptions to the declared-fetch-sources rule. Both are opt-in — `LANGFUSE_ENABLED`
+  and `LATITUDE_TRACING_ENABLED` default to `false` — and carry only LLM call traces, no Trainer data.
 - NFR-2 **Offline resilience**: after any successful fetch, the catalog and all Trainer data work with zero
   connectivity. A failed fetch degrades to a log entry plus retained previous data; it never blanks or corrupts
   the catalog.
@@ -393,6 +397,8 @@ points at this paragraph.
 - NFR-19 **Local observability**: a development-only diagnostic mode can report the current route, the Inertia
   component, request duration, query count and payload size. No telemetry, analytics or user data leaves the
   machine.
+  *Amendment 2026-11-21 (owner):* Same exception as NFR-1 — Langfuse and Latitude telemetry using the
+  Trainer's personal accounts (GitHub: IzzatFirdaus) is permitted, opt-in, default off.
 - NFR-20 **Regression protection**: the failure modes above are covered by automated tests. The list
   below is numbered so that every other document can cite a gap by its number and by its words,
   and both are stable:
