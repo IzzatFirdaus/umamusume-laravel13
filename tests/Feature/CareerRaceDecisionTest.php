@@ -10,6 +10,7 @@ use App\Models\RaceEntry;
 use App\Models\ScenarioSlot;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use App\Models\TurnEvent;
 use App\Models\Umamusume;
 use Inertia\Testing\AssertableInertia as Assert;
 
@@ -704,4 +705,55 @@ it('defaults the off-calendar form status to Entered, because the form records a
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->where('manual_defaults.status', 'Entered'));
+});
+
+it('carries the recorded consecutive-race reading, nullable, with its turn and source (N3.7)', function (): void {
+    // The Race Decision screen had no fatigue reading: the chain the Trainer entered on a turn
+    // event lived only in the Cockpit's Trackblazer panel. The section here reads the same owner
+    // (latestFatigue()) so two screens cannot disagree, and prints the turn the reading came from.
+    $run = raceRun(turns: 12);
+
+    TurnEvent::factory()->create([
+        'training_run_id' => $run->id,
+        'turn' => 10,
+        'deltas' => ['consecutive_races' => 3],
+    ]);
+    // An older reading must not shadow the newest one.
+    TurnEvent::factory()->create([
+        'training_run_id' => $run->id,
+        'turn' => 7,
+        'deltas' => ['consecutive_races' => 2],
+    ]);
+
+    $this->get(route('runs.races.decision', $run))
+        ->assertOk()
+        ->assertInertia(function (Assert $page): void {
+            $page->component('Career/RaceDecision');
+
+            $fatigue = $page->toArray()['props']['raceFatigue'];
+
+            expect($fatigue['chain'])->toBe(3)
+                ->and($fatigue['turn'])->toBe(10)
+                ->and($fatigue['source'])->toContain('recorded on turn 10')
+                ->and($fatigue['source'])->toContain('Nothing derives it');
+        });
+});
+
+it('leaves the recorded consecutive-race reading null when no turn ever carried one (N3.7)', function (): void {
+    // D-270's line: a run whose turns never carried the payload has no chain. The absence is
+    // printed as the refusal sentence, never as a count derived from rest turns.
+    $run = raceRun(turns: 5);
+
+    $this->get(route('runs.races.decision', $run))
+        ->assertOk()
+        ->assertInertia(function (Assert $page): void {
+            $page->component('Career/RaceDecision');
+
+            $fatigue = $page->toArray()['props']['raceFatigue'];
+
+            expect($fatigue['chain'])->toBeNull()
+                ->and($fatigue['turn'])->toBeNull()
+                ->and($fatigue['source'])->toContain('records on a turn event')
+                ->and($fatigue['source'])->toContain('Nothing derives it');
+        });
 });

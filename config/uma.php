@@ -118,6 +118,10 @@ return [
          * as silently old data.
          */
         'gametora-characters' => [
+            // Tier B per the corpus's own source list (UMAMUSUME_REFERENCE.md, 'GameTora data export';
+            // per-source tier owner-approved 2026-11-22, ND-14(b)): a data export or guide read, one
+            // weight class below a maintained wiki.
+            'tier' => 'B',
             'url' => 'https://gametora.com/data/umamusume/character-cards.897e63ea.json',
             'parser' => GametoraCharacterParser::class,
             'entity' => 'umamusume',
@@ -155,6 +159,10 @@ return [
          * notes in this file claim.
          */
         'gametora-character-cards' => [
+            // Tier B per the corpus's own source list (UMAMUSUME_REFERENCE.md, 'GameTora data export';
+            // per-source tier owner-approved 2026-11-22, ND-14(b)): a data export or guide read, one
+            // weight class below a maintained wiki.
+            'tier' => 'B',
             'url' => 'https://gametora.com/data/umamusume/character-cards.897e63ea.json',
             'parser' => GametoraCharacterCardParser::class,
             'entity' => 'umamusume',
@@ -189,6 +197,10 @@ return [
          * this dataset that was checked against [Global] client captures.
          */
         'gametora-race-catalog' => [
+            // Tier B per the corpus's own source list (UMAMUSUME_REFERENCE.md, 'GameTora data export';
+            // per-source tier owner-approved 2026-11-22, ND-14(b)): a data export or guide read, one
+            // weight class below a maintained wiki.
+            'tier' => 'B',
             'url' => 'https://gametora.com/data/umamusume/race_instances.294424fc.json',
             /*
              * KI-67. The pin above matched the manifest when this entry was reviewed and was
@@ -240,6 +252,10 @@ return [
          * for a resolved URL exactly as it does for a pinned one.
          */
         'gametora-skills' => [
+            // Tier B per the corpus's own source list (UMAMUSUME_REFERENCE.md, 'GameTora data export';
+            // per-source tier owner-approved 2026-11-22, ND-14(b)): a data export or guide read, one
+            // weight class below a maintained wiki.
+            'tier' => 'B',
             'url' => 'https://gametora.com/data/umamusume/skills.609afe88.json',
             'manifest' => [
                 'url' => 'https://gametora.com/data/manifests/umamusume.json',
@@ -297,6 +313,10 @@ return [
          * through `umamusume.external_ref` and needs her to exist first.
          */
         'gametora-character-profiles' => [
+            // Tier B per the corpus's own source list (UMAMUSUME_REFERENCE.md, 'GameTora data export';
+            // per-source tier owner-approved 2026-11-22, ND-14(b)): a data export or guide read, one
+            // weight class below a maintained wiki.
+            'tier' => 'B',
             'url' => 'https://gametora.com/data/umamusume/characters.c6676539.json',
             'manifest' => [
                 'url' => 'https://gametora.com/data/manifests/umamusume.json',
@@ -351,6 +371,10 @@ return [
          * document carries, so the parser passes the dates through and no zone is applied to them.
          */
         'gametora-support-cards' => [
+            // Tier B per the corpus's own source list (UMAMUSUME_REFERENCE.md, 'GameTora data export';
+            // per-source tier owner-approved 2026-11-22, ND-14(b)): a data export or guide read, one
+            // weight class below a maintained wiki.
+            'tier' => 'B',
             'url' => 'https://gametora.com/data/umamusume/support-cards.88dea522.json',
             'manifest' => [
                 'url' => 'https://gametora.com/data/manifests/umamusume.json',
@@ -375,6 +399,10 @@ return [
          * wrong in one.
          */
         'gametora-support-effects' => [
+            // Tier B per the corpus's own source list (UMAMUSUME_REFERENCE.md, 'GameTora data export';
+            // per-source tier owner-approved 2026-11-22, ND-14(b)): a data export or guide read, one
+            // weight class below a maintained wiki.
+            'tier' => 'B',
             'url' => 'https://gametora.com/data/umamusume/support_effects.ca447e53.json',
             'manifest' => [
                 'url' => 'https://gametora.com/data/manifests/umamusume.json',
@@ -417,6 +445,10 @@ return [
          * non-empty body as success.
          */
         'gametora-artwork' => [
+            // Tier B per the corpus's own source list (UMAMUSUME_REFERENCE.md, 'GameTora data export';
+            // per-source tier owner-approved 2026-11-22, ND-14(b)): a data export or guide read, one
+            // weight class below a maintained wiki.
+            'tier' => 'B',
             'url' => 'https://media.gametora.com/umamusume/',
             'delay_ms' => 1000,
             'timeout_s' => 20,
@@ -460,6 +492,10 @@ return [
          * already the Global-vetted client string, and not from this file. True as of 2026-10-13.
          */
         'gametora-racetracks' => [
+            // Tier B per the corpus's own source list (UMAMUSUME_REFERENCE.md, 'GameTora data export';
+            // per-source tier owner-approved 2026-11-22, ND-14(b)): a data export or guide read, one
+            // weight class below a maintained wiki.
+            'tier' => 'B',
             'url' => 'https://gametora.com/data/umamusume/racetracks_extended.effe0119.json',
             'manifest' => [
                 'url' => 'https://gametora.com/data/manifests/umamusume.json',
@@ -477,6 +513,10 @@ return [
         ],
 
         'gametora-race-fans' => [
+            // Tier B per the corpus's own source list (UMAMUSUME_REFERENCE.md, 'GameTora data export';
+            // per-source tier owner-approved 2026-11-22, ND-14(b)): a data export or guide read, one
+            // weight class below a maintained wiki.
+            'tier' => 'B',
             'url' => 'https://gametora.com/data/umamusume/race-fans.82ab7152.json',
             'manifest' => [
                 'url' => 'https://gametora.com/data/manifests/umamusume.json',
@@ -494,6 +534,10 @@ return [
         ],
 
         'gametora-races' => [
+            // Tier B per the corpus's own source list (UMAMUSUME_REFERENCE.md, 'GameTora data export';
+            // per-source tier owner-approved 2026-11-22, ND-14(b)): a data export or guide read, one
+            // weight class below a maintained wiki.
+            'tier' => 'B',
             'url' => 'https://gametora.com/data/umamusume/races.51478888.json',
             'manifest' => [
                 'url' => 'https://gametora.com/data/manifests/umamusume.json',
@@ -511,6 +555,10 @@ return [
         ],
 
         'gametora-race-rewards' => [
+            // Tier B per the corpus's own source list (UMAMUSUME_REFERENCE.md, 'GameTora data export';
+            // per-source tier owner-approved 2026-11-22, ND-14(b)): a data export or guide read, one
+            // weight class below a maintained wiki.
+            'tier' => 'B',
             'url' => 'https://gametora.com/data/umamusume/race-rewards.d95f3aa1.json',
             'manifest' => [
                 'url' => 'https://gametora.com/data/manifests/umamusume.json',
@@ -528,6 +576,10 @@ return [
         ],
 
         'gametora-ura-objectives' => [
+            // Tier B per the corpus's own source list (UMAMUSUME_REFERENCE.md, 'GameTora data export';
+            // per-source tier owner-approved 2026-11-22, ND-14(b)): a data export or guide read, one
+            // weight class below a maintained wiki.
+            'tier' => 'B',
             'url' => 'https://gametora.com/data/umamusume/ura-objectives.ead4bbfe.json',
             'manifest' => [
                 'url' => 'https://gametora.com/data/manifests/umamusume.json',

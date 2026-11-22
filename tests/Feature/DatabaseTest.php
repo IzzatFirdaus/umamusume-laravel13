@@ -121,8 +121,20 @@ it('renders the Races table with N/A for unrecorded values when populated', func
             ->has('slots.data.0.distance_band')
             ->has('slots.data.0.surface')
             ->has('slots.data.0.fans_needed')
+            ->has('slots.data.0.distance_band_conflict')
             ->has('slots.data.0.is_mandatory')
             ->has('slots.data.0.is_special_race'));
+});
+
+it('flags the 1,400 m band conflict server-side and not otherwise', function (): void {
+    RaceCatalogSlot::factory()->create(['distance' => 1400, 'distance_band' => 'Sprint', 'scenario_key' => 'test-sprint', 'turn' => 91, 'slot_label' => 'Conflict Test Sprint']);
+    RaceCatalogSlot::factory()->create(['distance' => 1600, 'distance_band' => 'Mile', 'scenario_key' => 'test-mile', 'turn' => 92, 'slot_label' => 'Conflict Test Mile']);
+
+    $this->get('/database/races')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('slots.data.0.distance_band_conflict', true)
+            ->where('slots.data.1.distance_band_conflict', false));
 });
 
 it('narrows the race calendar by the facets its own filter row offers', function (): void {
@@ -221,6 +233,33 @@ it('renders the Events reference view with the ten recurring types', function ()
             ->where('totalCount', 10));
 });
 
+it('ships the short cadence summary beside the observation, and null where no pattern was observed (S2.5)', function (): void {
+    // The reference doc gives seven of the ten rows a one-word cadence summary. The payload carries it
+    // through so the table can lead with the pattern and keep the long observation as the detail — but
+    // only where the doc states one. The three rows whose evidence is a single window or no export at
+    // all (Champions Meeting, Story event, the special event) must arrive as null rather than as an
+    // invented pattern: a summary nobody transcribed is not a schedule.
+    $this->get('/database/events')
+        ->assertOk()
+        ->assertInertia(function (Assert $page): void {
+            $rows = $page->toArray()['props']['rows'];
+            $byName = collect($rows)->keyBy('name');
+
+            // Transcribed summaries match the doc's own words.
+            expect($byName['Legend Race']['cadence_summary'])->toBe('Monthly')
+                ->and($byName['Masters Challenge']['cadence_summary'])->toBe('At least five weeks (observed)')
+                ->and($byName['Story-unlock campaign']['cadence_summary'])->toBe('As long as paired debut Scout window');
+
+            // And the honest absence: single-observation or exportless rows carry null, with the long
+            // cadence text still present as the detail.
+            expect($byName['Champions Meeting']['cadence_summary'])->toBeNull()
+                ->and($byName['Story event']['cadence_summary'])->toBeNull()
+                ->and($byName['Special event (Spark and item research)']['cadence_summary'])->toBeNull()
+                ->and($byName['Special event (Spark and item research)']['cadence'])
+                ->toContain('One observed window');
+        });
+});
+
 it('renders the Shop Items view and reuses the scenario Pro Shop block rather than retyping it', function (): void {
     $this->get('/database/shop-items')
         ->assertOk()
@@ -299,6 +338,68 @@ it('renders the Data sources page with one row per dataset', function (): void {
 
                 return true;
             }));
+});
+
+it('ships the open conflict records with the shape bidirectional navigation needs (S2.1)', function (): void {
+    // N6.3: the four conflicts travel as payload rows, not a Vue const, so the ledger's count tile and
+    // any per-route link derive from the same list the backend owns. Every record carries a stable id
+    // (the join key for a per-conflict deep link), the question, the competing claims, the open state,
+    // and the routes the disagreement shows on. All four stay open by ruling: nothing here resolves one.
+    $this->get('/database/sources')
+        ->assertOk()
+        ->assertInertia(function (Assert $page): void {
+            $conflicts = $page->toArray()['props']['conflicts'];
+
+            expect($conflicts)->toHaveCount(4);
+
+            foreach ($conflicts as $conflict) {
+                expect($conflict['id'])->toStartWith('conflict-')
+                    ->and($conflict['question'])->toBeString()
+                    ->and($conflict['claims'])->toBeArray()
+                    ->and(count($conflict['claims']))->toBeGreaterThanOrEqual(2)
+                    ->and($conflict['state'])->toBe('open')
+                    ->and($conflict['affected_routes'])->toBeArray();
+            }
+
+            // The two conflicts the ledger names as route-reaching carry the exact frontend paths.
+            $byId = collect($conflicts)->keyBy('id');
+            expect($byId['conflict-distance-band-1400m']['affected_routes'])->toContain('/database/races')
+                ->and($byId['conflict-artisan-cleat-hammer-price']['affected_routes'])->toContain('/database/shop-items')
+                // And no record claims a resolution the ruling has not made.
+                ->and($byId['conflict-wit-training-failure']['state'])->toBe('open');
+        });
+});
+
+it('carries each source\'s tier from the corpus\'s own classification (N6.5, ND-14(b))', function (): void {
+    // The per-source tier owner ruling landed 2026-11-22: the weight class is the corpus's own
+    // answer (UMAMUSUME_REFERENCE.md source list), recorded per config entry — GameTora data
+    // export is Tier B, the official news index Tier S, the Game8 wikis Tier A. The conflict log
+    // carries NO tier on purpose: its rows aggregate claims from sources of different weights, so
+    // one tier on the record would misattribute them.
+    $this->get('/database/sources')
+        ->assertOk()
+        ->assertInertia(function (Assert $page): void {
+            $page->component('Database/Sources');
+
+            $props = $page->toArray()['props'];
+
+            // Every fetched source is the GameTora export the corpus classes as Tier B.
+            foreach ((array) $props['fetched'] as $row) {
+                expect($row['tier'])->toBe('B');
+            }
+
+            // Transcribed datasets name their own recheck source's class.
+            $transcribed = collect($props['transcribed'])->keyBy('name');
+            expect($transcribed['Recurring event types']['tier'])->toBe('S')
+                ->and($transcribed['Consumables, and where each is actually spent']['tier'])->toBe('A')
+                ->and($transcribed['Spark categories']['tier'])->toBe('A')
+                ->and($transcribed['Race payouts by grade']['tier'])->toBe('A');
+
+            // The conflict log aggregates mixed-weight claims and ships no tier of its own.
+            foreach ((array) $props['conflicts'] as $row) {
+                expect($row)->not->toHaveKey('tier');
+            }
+        });
 });
 
 it('keeps the guide path off every reference view it used to ship on', function (): void {

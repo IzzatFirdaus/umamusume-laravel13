@@ -347,3 +347,83 @@ it('carries the scenario full label where a source states one (U-01/R7-63)', fun
                 ->and($byKey['our_grand_concert']['full_label'])->toBe('Brighter Together: Our Grand Concert');
         });
 });
+
+it('names the stale build target in the flash when the scenario changes under one (N3.27)', function (): void {
+    // The wizard keeps the downstream steps' answers on a scenario change (`write()` merges,
+    // D2 contract), so a target entered against the first scenario's caps rides along silently.
+    // The flash is the one channel this screen owns; the notice names what went stale and the
+    // step that owns it, instead of pretending the stored target still matches the new caps.
+    SetupDraft::write(['scenario' => 'ura_finale']);
+    SetupDraft::write(['build_target' => [
+        'purpose' => 'StoryClear',
+        'distance' => 'Medium',
+        'surface' => 'Turf',
+        'style' => 'Pace Chaser',
+        'targets' => [],
+        'skill_priorities' => [],
+    ]]);
+
+    $this->put('/career/setup/scenario', ['scenario' => 'unity_cup'])
+        ->assertRedirect(route('career.scenario'))
+        ->assertSessionHas('status', 'Scenario changed. The build target you entered was read against the previous scenario, so review it at step 3.');
+
+    // The draft contract is untouched: the changed scenario AND the target both survive.
+    expect(SetupDraft::read()['scenario'])->toBe('unity_cup')
+        ->and(SetupDraft::buildTarget())->not->toBeNull();
+});
+
+it('keeps the plain confirmation when the scenario changes with no build target stored (N3.27)', function (): void {
+    // Nothing downstream exists to go stale, so the change is just a set.
+    SetupDraft::write(['scenario' => 'ura_finale']);
+
+    $this->put('/career/setup/scenario', ['scenario' => 'unity_cup'])
+        ->assertRedirect(route('career.scenario'))
+        ->assertSessionHas('status', 'Scenario set.');
+});
+
+it('does not flag a re-post of the same scenario as a change (N3.27)', function (): void {
+    SetupDraft::write(['scenario' => 'unity_cup']);
+    SetupDraft::write(['build_target' => [
+        'purpose' => 'StoryClear',
+        'distance' => 'Medium',
+        'surface' => 'Turf',
+        'style' => 'Pace Chaser',
+        'targets' => [],
+        'skill_priorities' => [],
+    ]]);
+
+    $this->put('/career/setup/scenario', ['scenario' => 'unity_cup'])
+        ->assertRedirect(route('career.scenario'))
+        ->assertSessionHas('status', 'Scenario set.');
+});
+
+it('exposes the flashed status as a statusNotice prop the step renders itself (N3.27)', function (): void {
+    // The wizard layout ships no flash banner, so the upstream-change notice travels as a
+    // first-class prop: show() reads the session's status flash and hands it to the page,
+    // which can print it beside the card without SetupLayout gaining flash plumbing.
+    SetupDraft::write(['scenario' => 'ura_finale']);
+    SetupDraft::write(['build_target' => [
+        'purpose' => 'StoryClear',
+        'distance' => 'Medium',
+        'surface' => 'Turf',
+        'style' => 'Pace Chaser',
+        'targets' => [],
+        'skill_priorities' => [],
+    ]]);
+
+    $this->put('/career/setup/scenario', ['scenario' => 'unity_cup'])->assertRedirect(route('career.scenario'));
+
+    $this->get('/career/setup/scenario')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/ScenarioSelect')
+            ->where('statusNotice', 'Scenario changed. The build target you entered was read against the previous scenario, so review it at step 3.'));
+});
+
+it('ships statusNotice as null on a plain render with no flashed status (N3.27)', function (): void {
+    $this->get('/career/setup/scenario')
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('Career/ScenarioSelect')
+            ->where('statusNotice', null));
+});

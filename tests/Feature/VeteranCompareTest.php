@@ -150,3 +150,50 @@ it('offers no picker list, because the library owns the selection now', function
 
     expect($unfiled->veteran)->toBeNull();
 });
+
+it('accepts every query wire form the compare picker can emit (BENO-VET-001)', function (): void {
+    // The library's picker serializes an array through Inertia as indexed brackets
+    // (veterans[0]=..&veterans[1]=..). The audit's P0 finding hypothesised a refusal; the
+    // backend contract accepts every standard PHP array encoding, and this pins them so the
+    // frontend's fix cannot land against a format the server refuses.
+    $first = compareVeteran('Beno Wire One', ['Speed']);
+    $second = compareVeteran('Beno Wire Two', ['Stamina']);
+
+    // Indexed brackets — what Inertia's router.get({veterans: [...]}) emits.
+    $this->get('/veterans/compare?veterans[0]='.$second->id.'&veterans[1]='.$first->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('columns', 2)
+            ->where('columns.0.trainee', 'Beno Wire Two'));
+
+    // Empty-bracket convention — the other standard array encoding.
+    $this->get('/veterans/compare?veterans[]='.$first->id.'&veterans[]='.$second->id)
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->has('columns', 2)
+            ->where('columns.0.trainee', 'Beno Wire One'));
+});
+
+it('refuses a bare veterans parameter that is not an array (BENO-VET-001)', function (): void {
+    // PHP's query parser only builds an array from bracketed keys: a bare key (repeated or not)
+    // arrives as a scalar string, the array rule refuses it, and the Trainer returns to the
+    // library. This is the refusal shape the audit's P0 saw — the picker must emit the indexed
+    // bracket form the accepted case above pins, never a bare scalar.
+    $veteran = compareVeteran('Beno Wire Solo', ['Speed']);
+
+    $this->get('/veterans/compare?veterans='.$veteran->id)
+        ->assertSessionHasErrors('veterans');
+
+    // Repeated bare keys parse to the last value, still a scalar: refused the same way.
+    $other = compareVeteran('Beno Wire Solo Two', ['Stamina']);
+
+    $this->get('/veterans/compare?veterans='.$veteran->id.'&veterans='.$other->id)
+        ->assertSessionHasErrors('veterans');
+});
+
+it('refuses duplicate selections rather than comparing one career twice (BENO-VET-001)', function (): void {
+    $veteran = compareVeteran('Beno Wire Dup', ['Speed']);
+
+    $this->get('/veterans/compare?veterans[0]='.$veteran->id.'&veterans[1]='.$veteran->id)
+        ->assertSessionHasErrors('veterans.1');
+});

@@ -49,6 +49,10 @@ class ScenarioSelectController extends Controller
         $draft = SetupDraft::read();
 
         return Inertia::render('Career/ScenarioSelect', [
+            // N3.27: the store()'s flash travels as a first-class prop, so the step renders its own
+            // notice without SetupLayout gaining flash plumbing. Null when no status is flashed,
+            // which is the normal render; the page prints it beside the card and nothing else moves.
+            'statusNotice' => session('status') !== null ? (string) session('status') : null,
             'visited' => SetupDraft::visited(),
             'choices' => SetupDraft::summary(),
             'saved' => SetupDraft::saved(),
@@ -90,6 +94,17 @@ class ScenarioSelectController extends Controller
     public function store(StoreScenarioRequest $request): RedirectResponse
     {
         $scenario = $request->validated('scenario');
+        // N3.27: whether this write CHANGES a recorded scenario rather than setting or
+        // clearing the first one. A different key while a build target is stored means
+        // the target's figures were read against the previous scenario's caps; the draft
+        // keeps them (`write()`'s merge, D2 wizard contract), so the notice names what
+        // went stale instead of silently keeping or discarding it.
+        $previous = SetupDraft::read()['scenario'];
+        $changed = $scenario !== null
+            && $previous !== null
+            && $previous !== $scenario
+            && SetupDraft::buildTarget() !== null;
+
         SetupDraft::write(['scenario' => $scenario]);
 
         // Back to this step, deliberately: the choice is read from the session on the next render, so
@@ -98,7 +113,11 @@ class ScenarioSelectController extends Controller
         // null write is the clear of it, and it is stored as null rather than as an empty string so
         // `SetupDraft::saved()` stops counting step 1 as saved.
         return redirect()->route('career.scenario')
-            ->with('status', $scenario === null ? 'Scenario cleared.' : 'Scenario set.');
+            ->with('status', $scenario === null
+                ? 'Scenario cleared.'
+                : ($changed
+                    ? 'Scenario changed. The build target you entered was read against the previous scenario, so review it at step 3.'
+                    : 'Scenario set.'));
     }
 
     /**

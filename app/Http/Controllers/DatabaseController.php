@@ -176,6 +176,11 @@ class DatabaseController extends Controller
                 'tier' => $slot->tier,
                 'distance' => $slot->distance,
                 'distance_band' => $slot->distance_band,
+                // N6.4: the 1,400 m band disagreement is a server flag, not a frontend hardcode. The
+                // corpus itself disputes this line (Game8 Sprint vs export Mile), so the presence of
+                // the conflict travels with the row rather than being re-derived from a metre count
+                // inside the component.
+                'distance_band_conflict' => $slot->distance === 1400,
                 'surface' => $slot->surface,
                 'fans_needed' => $slot->fans_needed,
                 'is_mandatory' => $slot->is_mandatory,
@@ -309,6 +314,13 @@ class DatabaseController extends Controller
                 'name' => (string) $row['name'],
                 'servers' => array_values((array) $row['servers']),
                 'cadence' => (string) $row['cadence'],
+                // S2.5: the short cadence the reference doc states beside the long observation. Nullable
+                // on purpose: one row (the special event) carries a single-window observation with no
+                // pattern to summarise, and inventing a word there would upgrade one observation into a
+                // schedule. The frontend prints the long text when this is null.
+                'cadence_summary' => isset($row['cadence_summary']) && is_string($row['cadence_summary'])
+                    ? $row['cadence_summary']
+                    : null,
                 'mechanics' => (string) $row['mechanics'],
                 'state' => self::referenceState($row['state'] ?? null),
                 'source_title' => (string) $row['source_title'],
@@ -492,6 +504,11 @@ class DatabaseController extends Controller
                 'name' => (string) $key,
                 'url' => (string) $source['url'],
                 'fetched_at' => $at === null ? null : (string) $at,
+                // N6.5 (ND-14(b), owner-approved 2026-11-22): the corpus's own weight class for the
+                // source, read from the config entry rather than typed here. A dataset without a
+                // recorded tier would be a fabricated classification, so the key is trusted to
+                // config and nothing else.
+                'tier' => isset($source['tier']) && is_string($source['tier']) ? $source['tier'] : null,
                 'note' => 'Fetched by the ingest pipeline from the publisher\'s own document. The date '
                     .'beside this row is this source\'s own newest recorded fetch, not the newest fetch '
                     .'across every dataset.',
@@ -514,6 +531,13 @@ class DatabaseController extends Controller
                 'name' => $name === '' ? (string) $key : $name,
                 'url' => (string) ($dataset['recheck']['url'] ?? ''),
                 'anchored_at' => (string) $dataset['source']['anchor'],
+                // N6.5 (ND-14(b), owner-approved 2026-11-22): the dataset's own tier, recorded in
+                // the config beside its section and anchor from the corpus's source list. The
+                // conflict log carries none on purpose: its rows aggregate claims from sources of
+                // different weights, so one tier on the record would misattribute them.
+                'tier' => isset($dataset['source']['tier']) && is_string($dataset['source']['tier'])
+                    ? $dataset['source']['tier']
+                    : null,
                 'note' => (string) ($dataset['recheck']['text'] ?? ''),
             ];
         }
@@ -522,6 +546,9 @@ class DatabaseController extends Controller
             'docName' => 'the reference guide',
             'fetched' => $fetched,
             'transcribed' => $transcribed,
+            // N6.3: conflicts as server payload records, not a Vue const. The count tile derives
+            // from this list; all four stay open by ruling (no resolution is recorded here).
+            'conflicts' => (array) config('reference.conflicts.rows', []),
             // The wireframe states the matrix's verification date beside this ledger
             // (`database-sources.html:74`), and it is the same recorded value the Scenarios page
             // prints, read from the one place it is written so two screens cannot disagree.

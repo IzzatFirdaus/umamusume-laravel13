@@ -51,6 +51,9 @@ return [
         'source' => [
             'section' => 'Recurring event types',
             'anchor' => '2026-10-02',
+            // Tier S per the corpus's own source list: official publisher (umamusume.jp news index; corpus source list 'Umamusume JP official site, news' = Tier S).
+            // Per-source tier owner-approved 2026-11-22 (ND-14(b)).
+            'tier' => 'S',
         ],
         'recheck' => [
             'text' => 'Official news index for each server, then diff the date columns of the local event exports. The full procedure is the reference guide\'s own how-to-recheck line.',
@@ -77,6 +80,7 @@ return [
                 'name' => 'Legend Race',
                 'servers' => ['JP', 'Global'],
                 'cadence' => 'Monthly, each edition running about six days.',
+                'cadence_summary' => 'Monthly',
                 'mechanics' => 'Two back-to-back limited stages, each against its own preset rival line-up.',
                 'state' => 'confirmed',
                 'source_title' => 'Official JP notice; the Global schedule is corroborated by the local export and a lower-tier listing.',
@@ -93,6 +97,7 @@ return [
                 'name' => 'Masters Challenge',
                 'servers' => ['JP'],
                 'cadence' => 'A long window; the observed edition ran at least five weeks.',
+                'cadence_summary' => 'At least five weeks (observed)',
                 'mechanics' => 'Replayable limited-time courses paying Carats and Crystal Shards, with expired races due for the Archives.',
                 'state' => 'confirmed',
                 'source_title' => 'Official JP notice; the difficulty tiers and payouts are from a guide.',
@@ -101,6 +106,7 @@ return [
                 'name' => 'Season pass',
                 'servers' => ['JP'],
                 'cadence' => 'Periodic; the cycle boundaries are not in any data export.',
+                'cadence_summary' => 'Periodic',
                 'mechanics' => 'A reward track fed by training activity, with a free tier and a once-per-period paid tier.',
                 'state' => 'unknown',
                 'source_title' => 'The doc marks the structure, tiers and rewards unverified; they are published in-app only, and the web notice states only that the pass was updated.',
@@ -109,6 +115,7 @@ return [
                 'name' => 'Real-world race campaign',
                 'servers' => ['JP'],
                 'cadence' => 'Follows the Japanese G1 calendar; five mission windows plus five mail gifts in phase one alone.',
+                'cadence_summary' => 'Follows G1 calendar',
                 'mechanics' => 'Home-screen limited missions and mail gifts tied to the real-world G1 calendar, plus a commemorative Scout and store campaign.',
                 'state' => 'confirmed',
                 'source_title' => 'Official JP notices for the campaign phases and the partner commemoration.',
@@ -117,6 +124,7 @@ return [
                 'name' => 'Anniversary campaign ladder',
                 'servers' => ['JP'],
                 'cadence' => 'Numbered phases per anniversary; the 5.5th ran its third phase from 2026-09-11.',
+                'cadence_summary' => 'Numbered phases per anniversary',
                 'mechanics' => 'Numbered phases with daily access gifts, a select Scout and pass content.',
                 'state' => 'confirmed',
                 'source_title' => 'Official JP notice; the phase numbering is the client notice\'s own.',
@@ -125,6 +133,7 @@ return [
                 'name' => 'Versus race schedule notice',
                 'servers' => ['JP'],
                 'cadence' => 'Seasonal; the observed notice covered September to February.',
+                'cadence_summary' => 'Seasonal',
                 'mechanics' => 'A notice listing the upcoming versus-race calendar; the contents were not read.',
                 'state' => 'estimated',
                 'source_title' => 'The doc confirms the publication type but states the contents were not read.',
@@ -133,6 +142,7 @@ return [
                 'name' => 'Story-unlock campaign',
                 'servers' => ['JP', 'Global'],
                 'cadence' => 'Runs exactly as long as the paired debut Scout window.',
+                'cadence_summary' => 'As long as paired debut Scout window',
                 'mechanics' => 'Episodes 1 to 4 unlocked without the normal conditions; unwatched episodes re-lock.',
                 'state' => 'confirmed',
                 'source_title' => 'Official notices for both servers, paired with each debut Scout.',
@@ -149,6 +159,9 @@ return [
         'source' => [
             'section' => 'Consumables, and where each is actually spent',
             'anchor' => '2026-09-27',
+            // Tier A per the corpus's own source list: maintained strategy wiki (Game8 EN; corpus source list 'Game8 EN' = Tier A).
+            // Per-source tier owner-approved 2026-11-22 (ND-14(b)).
+            'tier' => 'A',
         ],
         'recheck' => [
             'text' => 'Names are the guide\'s. Checked against the local item export on 2026-10-08: four of the ten match a client name there exactly, the other six are the guide\'s grouped labels.',
@@ -261,6 +274,9 @@ return [
         'source' => [
             'section' => 'Spark categories',
             'anchor' => '2026-09-27',
+            // Tier A per the corpus's own source list: maintained strategy wiki (Game8 EN; corpus source list 'Game8 EN' = Tier A).
+            // Per-source tier owner-approved 2026-11-22 (ND-14(b)).
+            'tier' => 'A',
         ],
         'recheck' => [
             'text' => 'Counts are the guide\'s. Checked against the local Spark export on 2026-10-08: five of the six match it cell for cell, 806 is the described total and the export holds 874.',
@@ -359,10 +375,66 @@ return [
         'source' => [
             'section' => 'Race payouts by grade',
             'anchor' => '2026-10-15',
+            // Tier A per the corpus's own source list: maintained strategy wiki (Game8 EN; corpus source list 'Game8 EN' = Tier A).
+            // Per-source tier owner-approved 2026-11-22 (ND-14(b)).
+            'tier' => 'A',
         ],
         'recheck' => [
             'text' => 'Re-read the publisher\'s Race Bonus page and compare its 0% base row and its 34% breakpoint against the package the client prints after a first-place finish.',
             'url' => 'https://game8.co/games/Umamusume-Pretty-Derby/archives/572831',
+        ],
+    ],
+
+    'conflicts' => [
+        'source' => [
+            'section' => 'Source Conflict Log',
+            'anchor' => '2026-11-12',
+        ],
+        'rows' => [
+            // Source: docs/UMAMUSUME_REFERENCE.md §7 row 7
+            [
+                'id' => 'conflict-distance-band-1400m',
+                'question' => 'Is 1400 m Sprint or Mile?',
+                'claims' => [
+                    'Game8 says Sprint.',
+                    'The data export files every 1400 m course under Mile.',
+                ],
+                'state' => 'open',
+                'affected_routes' => ['/database/races'],
+            ],
+            // Source: docs/UMAMUSUME_REFERENCE.md §7 row 2
+            [
+                'id' => 'conflict-wit-training-failure',
+                'question' => 'Can Wit training fail?',
+                'claims' => [
+                    'One guide lists a Wit failure branch.',
+                    'One argues the risk driver is absent.',
+                ],
+                'state' => 'open',
+                'affected_routes' => [],
+            ],
+            // Source: docs/UMAMUSUME_REFERENCE.md §7 row 10
+            [
+                'id' => 'conflict-open-league-rank-ceiling',
+                'question' => 'Open League rank ceiling',
+                'claims' => [
+                    'Global notices exclude S and above.',
+                    'The JP notice excludes UC1 and above.',
+                ],
+                'state' => 'open',
+                'affected_routes' => [],
+            ],
+            // Source: docs/UMAMUSUME_REFERENCE.md §1.6.10
+            [
+                'id' => 'conflict-artisan-cleat-hammer-price',
+                'question' => 'Artisan Cleat Hammer price',
+                'claims' => [
+                    '20 coins (a second source corroborates).',
+                    '25 coins (the catalogue prints this figure).',
+                ],
+                'state' => 'open',
+                'affected_routes' => ['/database/shop-items'],
+            ],
         ],
     ],
 

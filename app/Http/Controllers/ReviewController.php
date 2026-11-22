@@ -42,8 +42,23 @@ class ReviewController extends Controller
         ];
         $candidates = self::pendingCandidates()
             ->when($filters['entity'] !== '', function (Builder $q) use ($filters): void {
-                // ADR-0037: entity lives in the candidate payload; there is no schema column.
-                $q->whereJsonContains('payload->entity', $filters['entity']);
+                // ADR-0037: the source key IS the entity discriminator, and config('uma.sources')
+                // is the one place a key's entity kind is declared. Filtering on the JSON payload
+                // misses every historical row the runner wrote before the field existed, so the
+                // filter selects the source keys that classify as the asked-for entity and matches
+                // source_key against them.
+                $keys = self::sourceKeysForEntity($filters['entity']);
+
+                if ($keys === []) {
+                    // A kind no source declares cannot have candidates: return none rather than
+                    // every row (an empty IN list would be a WHERE that matches nothing anyway,
+                    // but the explicit 0=1 keeps the intent readable).
+                    $q->whereRaw('0 = 1');
+
+                    return;
+                }
+
+                $q->whereIn('source_key', $keys);
             })
             ->when($filters['match_tier'] !== '', function (Builder $q) use ($filters): void {
                 $q->where('match_tier', $filters['match_tier']);
@@ -67,11 +82,12 @@ class ReviewController extends Controller
                 'id' => $candidate->id,
                 'proposed_name' => $candidate->proposed_name,
                 'proposed_name_ja' => $candidate->proposed_name_ja,
-                // The entity this row belongs to, from the payload the runner wrote (S1.1). A race
-                // candidate can only be rejected: the trainee promotion path would write a race into
-                // the trainee table. The page uses this to withhold the verdict rather than offer a
-                // button that refuses.
-                'entity' => (string) ($candidate->payload['entity'] ?? 'umamusume'),
+                // The entity this row belongs to, classified by its source key (ADR-0037): the
+                // config's own per-key entity declaration, not a payload field historical rows
+                // predate. A race candidate can only be rejected: the trainee promotion path would
+                // write a race into the trainee table. The page uses this to withhold the verdict
+                // rather than offer a button that refuses.
+                'entity' => self::entityOf($candidate),
                 'match_tier' => $candidate->match_tier->value,
                 'match_tier_label' => $candidate->match_tier->label(),
                 'source_key' => $candidate->source_key,
@@ -145,11 +161,12 @@ class ReviewController extends Controller
                 'id' => $candidate->id,
                 'proposed_name' => $candidate->proposed_name,
                 'proposed_name_ja' => $candidate->proposed_name_ja,
-                // The entity this row belongs to, from the payload the runner wrote (S1.1). A race
-                // candidate can only be rejected: the trainee promotion path would write a race into
-                // the trainee table. The page uses this to withhold the verdict rather than offer a
-                // button that refuses.
-                'entity' => (string) ($candidate->payload['entity'] ?? 'umamusume'),
+                // The entity this row belongs to, classified by its source key (ADR-0037): the
+                // config's own per-key entity declaration, not a payload field historical rows
+                // predate. A race candidate can only be rejected: the trainee promotion path would
+                // write a race into the trainee table. The page uses this to withhold the verdict
+                // rather than offer a button that refuses.
+                'entity' => self::entityOf($candidate),
                 'match_tier' => $candidate->match_tier->value,
                 'match_tier_label' => $candidate->match_tier->label(),
                 'source_key' => $candidate->source_key,
@@ -310,6 +327,44 @@ class ReviewController extends Controller
             ->orderByRaw('suggested_umamusume_id IS NULL')
             ->latest('created_by_fetch_at')
             ->orderByDesc('id');
+    }
+
+    /**
+     * The entity kind a candidate belongs to, from its source key (ADR-0037): the key is the
+     * discriminator the accepted decision names, and `config('uma.sources')` is the one place a
+     * key's kind is declared. The payload's own `entity` field is not read: historical rows were
+     * written before the runner recorded it, and reading a field some rows lack would classify by
+     * whichever rows are newest rather than by what the row actually is.
+     *
+     * A key the config does not declare (none today) classifies as `unknown`, which the frontend
+     * treats as no-verdict rather than defaulting the row onto the trainee promotion path — the
+     * old `?? 'umamusume'` fallback was the defect: it offered a race row to the one action that
+     * would misfile it.
+     */
+    private static function entityOf(MatchCandidate $candidate): string
+    {
+        $entity = config('uma.sources.'.$candidate->source_key.'.entity');
+
+        return is_string($entity) && $entity !== '' ? $entity : 'unknown';
+    }
+
+    /**
+     * The source keys whose config entity declaration matches the asked-for kind — the set a
+     * filtered queue may draw from.
+     *
+     * @return list<string>
+     */
+    private static function sourceKeysForEntity(string $entity): array
+    {
+        $keys = [];
+
+        foreach ((array) config('uma.sources', []) as $key => $source) {
+            if (is_array($source) && ($source['entity'] ?? null) === $entity) {
+                $keys[] = (string) $key;
+            }
+        }
+
+        return $keys;
     }
 
     /**

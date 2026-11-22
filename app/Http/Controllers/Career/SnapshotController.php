@@ -11,6 +11,7 @@ use App\Enums\SnapshotFieldState;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\SnapshotReviewRequest;
 use App\Http\Requests\StoreSnapshotRequest;
+use App\Models\CharacterCard;
 use App\Models\Umamusume;
 use App\Services\Career\CareerPositionLabel;
 use App\Services\CareerCalendar;
@@ -67,6 +68,17 @@ class SnapshotController extends Controller
     {
         return Inertia::render('Career/Snapshot/Setup', [
             'trainees' => Umamusume::query()->orderBy('name')->get(['id', 'name'])->values()->all(),
+            // N3.31: the trainee picker's combobox roster, in the exact `TraineeRow` shape
+            // `TrainingRunController::create()` feeds `TraineeCombobox.vue` — one query with the
+            // costume cards eager-loaded, so the swap at the boundary needs no second endpoint and
+            // no shape adaptation. Cards gate `unconfirmed = false` the same way the run-create
+            // roster does: a form no source confirmed stays out of the payload, and a trainee with
+            // no confirmed form ships `cards: []` which the combobox paints as its own
+            // "No costume card confirmed yet" row. Scope stays DB-wide (not GlobalReleased-only)
+            // because a snapshot records an existing career and `StoreSnapshotRequest` accepts any
+            // stored `umamusume.id`; the stored identity stays `umamusume_id`, and a card row's
+            // `selectionId` is the local `character_cards.id` the run's foreign key reads.
+            'roster' => $this->comboboxRoster(),
             'scenarios' => array_map(
                 static fn (array $def): string => (string) $def['label'],
                 (array) config('scenarios.scenarios'),
@@ -87,6 +99,12 @@ class SnapshotController extends Controller
             // form having just confirmed their entries. `review()` parks the validated payload in the
             // session for exactly this read; a first visit has none and the form opens empty.
             'draft' => $request->session()->get('career.snapshot.draft'),
+            // N3.32: the readable position for every year/month/half the three selects can produce,
+            // derived here by the same owners (`CareerCalendar::turnIndexFor` +
+            // `CareerPositionLabel::forTurn`) that label the review, the race header and the
+            // Dashboard. A keyed table rather than a turn formula in the page: the frontend looks up
+            // the label the Trainer's own selection earns and never does calendar arithmetic.
+            'position_labels' => $this->positionLabels(),
         ]);
     }
 
@@ -180,6 +198,74 @@ class SnapshotController extends Controller
         return (string) CareerPositionLabel::forTurn($turn);
     }
 
+    /**
+     * The combobox roster `TraineeCombobox.vue` reads: trainees with their confirmed costume
+     * cards eager-loaded into the component's own row shape. One query and one lazy load for the
+     * whole roster, mirroring `TrainingRunController::create()`'s read so two screens cannot drift
+     * into two lists (ADR-0020 §1's one-picker rule). Card fields are the component's contract:
+     * `selectionId` is the local `character_cards.id` the write validates against, `sourceCardId`
+     * is the source's own id for display only, `titleKey` is bracket-stripped so prefix matching
+     * works on the verbatim `[Brackets]` title, and `releaseDate` stays an empty string where the
+     * source carries no date rather than claiming one.
+     *
+     * @return list<array{umamusumeId: int, trainee: string, traineeJa: string|null, cards: list<array{selectionId: int, sourceCardId: int, title: string, titleKey: string, releaseDate: string, debut: bool}>}>
+     */
+    private function comboboxRoster(): array
+    {
+        $trainees = Umamusume::query()
+            ->with(['cards' => fn ($query) => $query
+                ->where('unconfirmed', false)
+                ->orderBy('global_release_date')
+                ->orderBy('card_id')])
+            ->orderBy('name')
+            ->orderBy('id')
+            ->get();
+
+        return $trainees
+            ->map(fn (Umamusume $u): array => [
+                'umamusumeId' => $u->id,
+                'trainee' => $u->name,
+                'traineeJa' => $u->name_ja,
+                'cards' => $u->cards->map(fn (CharacterCard $c): array => [
+                    'selectionId' => $c->id,
+                    'sourceCardId' => $c->card_id,
+                    'title' => $c->title,
+                    'titleKey' => preg_replace('/^\\[|\\]$/', '', $c->title) ?? $c->title,
+                    'releaseDate' => $c->global_release_date?->toDateString() ?? '',
+                    'debut' => $c->is_debut_form,
+                ])->all(),
+            ])
+            ->all();
+    }
+
+    /**
+     * Every position the setup form's three selects can name, keyed `<year>:<month>:<phase>`.
+     *
+     * The setup screen prints the same sentence the review prints for the same selection, so the
+     * Trainer sees where the run will stand before reading it back. One server-side table keeps the
+     * calendar arithmetic in `CareerCalendar`/`CareerPositionLabel` where the rest of the app already
+     * reads it; the key is the page's own form values joined, not a derived turn. Colons rather than
+     * dots, because Inertia reads a dot in a prop key as a nested path.
+     *
+     * @return array<string, string>
+     */
+    private function positionLabels(): array
+    {
+        $labels = [];
+
+        foreach (CareerYear::cases() as $year) {
+            for ($month = 1; $month <= 12; $month++) {
+                foreach (CareerPhase::cases() as $phase) {
+                    $turn = CareerCalendar::turnIndexFor($year, $month, $phase);
+
+                    $labels[$year->value.':'.$month.':'.$phase->value] = (string) CareerPositionLabel::forTurn($turn);
+                }
+            }
+        }
+
+        return $labels;
+    }
+
     public function store(StoreSnapshotRequest $request): RedirectResponse
     {
         $run = (new CreateSnapshotRun)->handle($request->validated());
@@ -259,7 +345,13 @@ class SnapshotController extends Controller
                     ? SnapshotFieldState::NotProvided
                     : SnapshotFieldState::Known);
 
-            $value = $state === SnapshotFieldState::Known ? (int) $data[$field] : null;
+            // S1.1: a state can claim `known` while the value is absent — the payload arrives from a
+            // form, and a form can carry a flag without its number (a truncated submission, a crafted
+            // POST, a draft parked by an older revision). The cast must not fatal on that; a claimed
+            // Known with no figure reads as no value recorded.
+            $value = $state === SnapshotFieldState::Known && isset($data[$field]) && $data[$field] !== ''
+                ? (int) $data[$field]
+                : null;
 
             $rows[] = [
                 'key' => $field,

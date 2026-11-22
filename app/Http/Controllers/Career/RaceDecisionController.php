@@ -13,6 +13,7 @@ use App\Models\ScenarioSlot;
 use App\Models\TraineeGoal;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
+use App\Models\TurnEvent;
 use App\Services\Career\CareerPositionLabel;
 use App\Services\RaceFacts;
 use Inertia\Inertia;
@@ -58,7 +59,11 @@ class RaceDecisionController extends Controller
     public function show(TrainingRun $run): Response
     {
         // Three queries: the run with its trainee, its race entries with their slots, and its turns.
-        $run->load(['umamusume', 'raceEntries.raceCatalogSlot', 'turnEntries']);
+        // `turnEvents` joins for the recorded race-fatigue reading (N3.7): the chain the Trainer
+        // reported on a turn event, nullable, never derived here — the same owner the Cockpit's
+        // fatigue panel reads (`TrainingRun::latestFatigue()`), so two screens cannot disagree
+        // about one chain.
+        $run->load(['umamusume', 'raceEntries.raceCatalogSlot', 'turnEntries', 'turnEvents']);
 
         $next = $run->decisionTurn();
         $races = $this->raceRows($run, $next);
@@ -81,6 +86,12 @@ class RaceDecisionController extends Controller
             // only by URL is a defect (D14's finding on `runs.timeline`), and this is the screen whose
             // action grid entry the planner extends, so the link belongs here.
             'planner_url' => route('runs.races.planner', $run),
+            // N3.7: the recorded consecutive-race reading, nullable, with its turn and source.
+            // Server-owned (TrainingRun::latestFatigue() over the run's own turn events), never
+            // derived in Vue: a chain the Trainer never entered stays null and the frontend prints
+            // the absence rather than counting rest turns, which is D-270's line the Cockpit's
+            // fatigue panel already holds.
+            'raceFatigue' => $this->raceFatigueSection($run),
             'empty' => $this->emptyState($run, $next, count($races)),
             'entry_mode' => $entryMode,
             'manual_slots' => $this->manualSlotRows($run),
@@ -109,6 +120,45 @@ class RaceDecisionController extends Controller
             // R7-28: the off-calendar form's month and half come off this, so the position the page
             // states and the defaults the form carries are one value rather than two derivations.
             'career_position' => $run->careerPosition()?->toArray(),
+        ];
+    }
+
+    /**
+     * The recorded race-fatigue reading (N3.7): the consecutive-race chain the Trainer entered on
+     * a turn event, nullable, with the turn it was recorded on.
+     *
+     * The count is entered, never derived: `TrainingRun::latestFatigue()` reads the run's own
+     * `turn_events` payload and answers null when no turn ever carried one, which is the absence
+     * the frontend prints rather than a count read off rest turns (D-270). `consecutiveRaceCount()`
+     * stays the null-by-design owner of the derivation refusal; this section only reports what a
+     * turn actually recorded, exactly as the Cockpit's fatigue panel does.
+     *
+     * @return array{chain: int|null, turn: int|null, source: string}
+     */
+    private function raceFatigueSection(TrainingRun $run): array
+    {
+        $reported = $run->latestFatigue();
+
+        if ($reported === null) {
+            return [
+                'chain' => null,
+                'turn' => null,
+                'source' => 'The consecutive-race count the Trainer records on a turn event of this run. '
+                    .'Nothing derives it: a turn with no race logged is not a rest turn this tool was told about.',
+            ];
+        }
+
+        // The turn that carries the reading, read off the loaded collection rather than re-queried.
+        $turnEvent = $run->turnEvents
+            ->sortByDesc('turn')
+            ->first(fn (TurnEvent $event): bool => $event->fatiguePayload() !== null);
+
+        return [
+            'chain' => $reported->consecutiveRaces,
+            'turn' => $turnEvent === null ? null : (int) $turnEvent->turn,
+            'source' => 'The consecutive-race count the Trainer recorded on turn '.(string) $turnEvent->turn
+                .' of this run. Nothing derives it: a turn with no race logged is not a rest turn this tool '
+                .'was told about.',
         ];
     }
 

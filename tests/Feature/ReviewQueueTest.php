@@ -201,11 +201,14 @@ it('continues at the next pending case on the page of the manual verdict', funct
 });
 
 it('names the entity kind on each queue row', function (): void {
-    // ADR-0037: entity lives in the payload, never a schema column. The Index renders a kind word
-    // from it so a race candidate cannot be mistaken for a trainee whose Confirm would 500.
+    // ADR-0037: the source key IS the entity discriminator, and config('uma.sources') declares
+    // each key's kind. The Index renders a kind word from it so a race candidate cannot be
+    // mistaken for a trainee whose Confirm would 500. (Amended 2026-11-22, owner-approved: the
+    // assertion previously read payload.entity, which historical rows predate.)
     $candidate = MatchCandidate::factory()->create([
         'status' => CandidateStatus::Pending,
-        'payload' => ['name_en' => 'February Stakes', 'entity' => 'race'],
+        'source_key' => 'gametora-races',
+        'payload' => ['name_en' => 'February Stakes'],
     ]);
 
     test()->get(route('review.index'))
@@ -213,4 +216,61 @@ it('names the entity kind on each queue row', function (): void {
         ->assertInertia(fn (Assert $page) => $page
             ->where('candidates.data.0.id', $candidate->id)
             ->where('candidates.data.0.entity', 'race'));
+});
+
+it('classifies historical rows by source key when the payload predates the entity field (TR-01)', function (): void {
+    // The 304 live candidates are gametora-races rows whose payload carries no entity: the
+    // runner began writing that field after they landed. The payload fallback classified them
+    // all as trainees — the Race filter (payload.entity = race) returned zero, and the queue
+    // offered the one verdict that would misfile a race. Classification now reads source_key.
+    $historicalRace = MatchCandidate::factory()->create([
+        'status' => CandidateStatus::Pending,
+        'source_key' => 'gametora-races',
+        'proposed_name' => 'February Stakes',
+        'payload' => ['name_en' => 'February Stakes'],
+    ]);
+    $historicalTrainee = MatchCandidate::factory()->create([
+        'status' => CandidateStatus::Pending,
+        'source_key' => 'gametora-characters',
+        'proposed_name' => 'Rice Shower',
+        'payload' => ['name' => 'Rice Shower'],
+    ]);
+
+    // The Race filter now returns the actual race candidates.
+    test()->get(route('review.index', ['entity' => 'race']))
+        ->assertOk()
+        ->assertInertia(function (Assert $page) use ($historicalRace, $historicalTrainee): void {
+            $page->component('Review/Index');
+
+            $ids = collect($page->toArray()['props']['candidates']['data'])->pluck('id');
+
+            expect($ids)->toContain($historicalRace->id)
+                ->and($ids)->not->toContain($historicalTrainee->id);
+        });
+
+    // And the trainee filter still finds the trainee, not the race.
+    test()->get(route('review.index', ['entity' => 'umamusume']))
+        ->assertOk()
+        ->assertInertia(function (Assert $page) use ($historicalRace, $historicalTrainee): void {
+            $ids = collect($page->toArray()['props']['candidates']['data'])->pluck('id');
+
+            expect($ids)->toContain($historicalTrainee->id)
+                ->and($ids)->not->toContain($historicalRace->id);
+        });
+});
+
+it('withholds the trainee verdict from a historical race row on the detail page (TR-01, ND-2)', function (): void {
+    // The classification fix must hold on the detail surface too: a race candidate whose payload
+    // predates the entity field still cannot reach the trainee promotion path (ND-2's prohibition
+    // on unauthorized Race confirmation).
+    $candidate = MatchCandidate::factory()->create([
+        'status' => CandidateStatus::Pending,
+        'source_key' => 'gametora-races',
+        'payload' => ['name_en' => 'February Stakes'],
+    ]);
+
+    test()->get(route('review.detail', $candidate))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('candidate.entity', 'race'));
 });
