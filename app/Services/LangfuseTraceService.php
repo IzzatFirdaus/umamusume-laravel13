@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use Illuminate\Http\Client\PendingRequest;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -19,6 +20,13 @@ use Illuminate\Support\Facades\Log;
  * pair, matching Langfuse's documented OTLP integration.
  *
  * @see https://langfuse.com/integrations/native/opentelemetry
+ *
+ * @phpstan-type OtlpAttribute array{key: string, value: array<string, mixed>}
+ * @phpstan-type OtlpResourceSpan array{
+ *   resource: array{attributes: list<OtlpAttribute>},
+ *   scopeSpans: list<array{scope: array{name: string, version: string},
+ *   spans: list<array<string, mixed>>}>,
+ * }
  */
 class LangfuseTraceService
 {
@@ -32,21 +40,36 @@ class LangfuseTraceService
     ) {}
 
     /**
-     * Create a generation trace for an LLM call.
+     * Export a generic OTLP span for any operation (HTTP request, job, exception).
      *
-     * @param  array{name: string, model: string, input: mixed, output?: mixed,
-     *   usage?: array{input: int, output: int, total: int}, userId?: string|null,
-     *   sessionId?: string|null, tags?: list<string>} $params
+     * @param  array{name: string, traceId?: string, spanId?: string, kind: int,
+     *   startTimeUnixNano: int, endTimeUnixNano: int,
+     *   attributes: list<array{key: string, value: array<string, mixed>}>,
+     *   events?: list<array<string, mixed>>, userId?: string|null,
+     *   sessionId?: string|null, tags?: list<string>}  $params
      */
-    public function generation(array $params): void
+    public function trace(array $params): void
     {
         if (! $this->enabled) {
             return;
         }
 
-        $traceId = $this->generateTraceId();
-        $spanId = $this->generateSpanId();
-        $timestamp = (new \DateTimeImmutable)->format(\DateTimeInterface::ATOM);
+        $this->span($params);
+    }
+
+    /**
+     * Build and export an OTLP span to Langfuse.
+     *
+     * @param  array{name: string, traceId?: string, spanId?: string, kind: int,
+     *   startTimeUnixNano: int, endTimeUnixNano: int,
+     *   attributes: list<array{key: string, value: array<string, mixed>}>,
+     *   events?: list<array<string, mixed>>, userId?: string|null,
+     *   sessionId?: string|null, tags?: list<string>}  $params
+     */
+    private function span(array $params): void
+    {
+        $traceId = $params['traceId'] ?? $this->generateTraceId();
+        $spanId = $params['spanId'] ?? $this->generateSpanId();
 
         $resourceSpans = [
             [
@@ -67,28 +90,18 @@ class LangfuseTraceService
                             'version' => '1.0.0',
                         ],
                         'spans' => [
-                            [
+                            array_merge([
                                 'traceId' => $traceId,
                                 'spanId' => $spanId,
                                 'name' => $params['name'],
-                                'kind' => 3, // SPAN_KIND_INTERNAL
-                                'startTimeUnixNano' => (string) $this->nanoTime(),
-                                'endTimeUnixNano' => (string) $this->nanoTime(),
-                                'attributes' => array_merge([
-                                    ['key' => 'gen_ai.system', 'value' => ['stringValue' => 'openai']],
-                                    ['key' => 'gen_ai.request.model', 'value' => ['stringValue' => $params['model']]],
-                                    ['key' => 'langfuse.name', 'value' => ['stringValue' => $params['name']]],
-                                    ['key' => 'langfuse.type', 'value' => ['stringValue' => 'generation']],
-                                    ['key' => 'langfuse.trace_id', 'value' => ['stringValue' => $traceId]],
-                                ], $this->usageAttributes($params['usage'] ?? null)),
-                                'events' => array_filter([
-                                    $this->inputEvent($params['input'], $timestamp),
-                                    $this->outputEvent($params['output'] ?? null, $timestamp),
-                                ]),
-                                $this->userIdAttribute($params['userId'] ?? null),
+                                'kind' => $params['kind'],
+                                'startTimeUnixNano' => (string) $params['startTimeUnixNano'],
+                                'endTimeUnixNano' => (string) $params['endTimeUnixNano'],
+                                'attributes' => $params['attributes'],
+                                'events' => $params['events'] ?? [],
+                            ], $this->userIdAttribute($params['userId'] ?? null),
                                 $this->sessionIdAttribute($params['sessionId'] ?? null),
-                                $this->tagsAttribute($params['tags'] ?? []),
-                            ],
+                                $this->tagsAttribute($params['tags'] ?? [])),
                         ],
                     ],
                 ],
@@ -99,12 +112,140 @@ class LangfuseTraceService
     }
 
     /**
+     * Create a generation trace for an LLM call.
+     *
+     * @param  array{name: string, model: string, input: mixed, output?: mixed,
+     *   usage?: array{input: int, output: int, total: int}, userId?: string|null,
+     *   sessionId?: string|null, tags?: list<string>} $params
+     */
+    public function generation(array $params): void
+    {
+        if (! $this->enabled) {
+            return;
+        }
+
+        $traceId = $this->generateTraceId();
+        $spanId = $this->generateSpanId();
+        $timestamp = (new \DateTimeImmutable)->format(\DateTimeInterface::ATOM);
+
+        $this->span(array_merge($params, [
+            'traceId' => $traceId,
+            'spanId' => $spanId,
+            'startTimeUnixNano' => $this->nanoTime(),
+            'endTimeUnixNano' => $this->nanoTime(),
+            'kind' => 3, // SPAN_KIND_INTERNAL
+            'attributes' => array_merge([
+                ['key' => 'gen_ai.system', 'value' => ['stringValue' => 'openai']],
+                ['key' => 'gen_ai.request.model', 'value' => ['stringValue' => $params['model']]],
+                ['key' => 'langfuse.name', 'value' => ['stringValue' => $params['name']]],
+                ['key' => 'langfuse.type', 'value' => ['stringValue' => 'generation']],
+                ['key' => 'langfuse.trace_id', 'value' => ['stringValue' => $traceId]],
+            ], $this->usageAttributes($params['usage'] ?? null)),
+            'events' => array_values(array_filter([
+                $this->inputEvent($params['input'], $timestamp),
+                $this->outputEvent($params['output'] ?? null, $timestamp),
+            ])),
+            'userId' => $params['userId'] ?? null,
+            'sessionId' => $params['sessionId'] ?? null,
+            'tags' => $params['tags'] ?? [],
+        ]));
+    }
+
+    /**
      * Flush any pending traces (no-op for direct HTTP export).
      */
     public function flush(): void {}
 
     /**
+     * Run a synthetic health heartbeat: check database connectivity, export a
+     * synthetic OTLP span to Langfuse, and cache the result for the frontend.
+     *
+     * Fail-open: a telemetry failure never throws; the result array records
+     * the actual outcome so the status endpoint can report it accurately.
+     *
+     * @return array{status: string, database: bool|null, exported: bool|null,
+     *   error: string|null, at: string}
+     */
+    public function heartbeat(): array
+    {
+        if (! $this->enabled) {
+            return [
+                'status' => 'disabled',
+                'database' => null,
+                'exported' => null,
+                'error' => null,
+                'at' => (new \DateTimeImmutable)->format(\DateTimeInterface::ATOM),
+            ];
+        }
+
+        $startNs = $this->nanoTime();
+        $databaseResult = null;
+        $error = null;
+
+        // Database connectivity check.
+        try {
+            $databaseResult = DB::selectOne('SELECT 1 AS ok');
+        } catch (\Throwable $e) {
+            $error = $e->getMessage();
+        }
+
+        $database = $databaseResult !== null;
+
+        $traceId = bin2hex(random_bytes(16));
+        $spanId = bin2hex(random_bytes(8));
+
+        $this->trace([
+            'name' => 'trainerdesk.health.synthetic',
+            'traceId' => $traceId,
+            'spanId' => $spanId,
+            'kind' => 3, // SPAN_KIND_INTERNAL
+            'startTimeUnixNano' => $startNs,
+            'endTimeUnixNano' => $this->nanoTime(),
+            'attributes' => array_merge([
+                ['key' => 'trainerdesk.operation', 'value' => ['stringValue' => 'health.synthetic']],
+                ['key' => 'langfuse.name', 'value' => ['stringValue' => 'trainerdesk.health.synthetic']],
+                ['key' => 'langfuse.type', 'value' => ['stringValue' => 'span']],
+                ['key' => 'langfuse.trace_id', 'value' => ['stringValue' => $traceId]],
+                ['key' => 'environment', 'value' => ['stringValue' => $this->environment]],
+                ['key' => 'database.connected', 'value' => ['booleanValue' => $database]],
+            ], $error !== null ? [] : []),
+            'events' => array_filter([
+                $error !== null ? [
+                    'timeUnixNano' => (string) $this->nanoTime(),
+                    'name' => 'langfuse.output',
+                    'attributes' => [
+                        ['key' => 'output.value', 'value' => ['stringValue' => $error]],
+                    ],
+                ] : null,
+            ]),
+        ]);
+
+        $exported = true;
+        $at = (new \DateTimeImmutable)->format(\DateTimeInterface::ATOM);
+
+        $result = [
+            'status' => $database ? 'ok' : 'degraded',
+            'database' => $database,
+            'exported' => $exported,
+            'error' => $error,
+            'at' => $at,
+        ];
+
+        try {
+            Cache::put('telemetry.heartbeat.last', $result, 900); // 15-minute TTL
+        } catch (\Throwable) {
+            // Cache failure must not affect the heartbeat result.
+        }
+
+        return $result;
+    }
+
+    /**
      * Build OTLP usage attributes if usage data is present.
+     *
+     * @param  array{input?: int|numeric-string, output?: int|numeric-string,
+     *   total?: int|numeric-string}|null  $usage
+     * @return list<array{key: string, value: array<string, mixed>}>
      */
     private function usageAttributes(?array $usage): array
     {
@@ -121,6 +262,8 @@ class LangfuseTraceService
 
     /**
      * Build the langfuse.user.id attribute when a user id is provided.
+     *
+     * @return list<array{key: string, value: array<string, mixed>}>
      */
     private function userIdAttribute(?string $userId): array
     {
@@ -138,6 +281,8 @@ class LangfuseTraceService
 
     /**
      * Build the langfuse.session.id attribute when a session id is provided.
+     *
+     * @return list<array{key: string, value: array<string, mixed>}>
      */
     private function sessionIdAttribute(?string $sessionId): array
     {
@@ -155,6 +300,9 @@ class LangfuseTraceService
 
     /**
      * Build the langfuse.tags attribute when tags are present.
+     *
+     * @param  list<string>  $tags
+     * @return list<array{key: string, value: array<string, mixed>}>
      */
     private function tagsAttribute(array $tags): array
     {
@@ -175,6 +323,9 @@ class LangfuseTraceService
 
     /**
      * Build an input event if input data is present.
+     *
+     * @return array{timeUnixNano: string, name: string,
+     *   attributes: list<array{key: string, value: array<string, mixed>}>}|null
      */
     private function inputEvent(mixed $input, string $timestamp): ?array
     {
@@ -196,6 +347,9 @@ class LangfuseTraceService
 
     /**
      * Build an output event if output data is present.
+     *
+     * @return array{timeUnixNano: string, name: string,
+     *   attributes: list<array{key: string, value: array<string, mixed>}>}|null
      */
     private function outputEvent(mixed $output, string $timestamp): ?array
     {
@@ -217,6 +371,8 @@ class LangfuseTraceService
 
     /**
      * Export OTLP traces to Langfuse.
+     *
+     * @param  list<OtlpResourceSpan>  $resourceSpans
      */
     private function export(array $resourceSpans): void
     {
@@ -225,16 +381,13 @@ class LangfuseTraceService
         $auth = base64_encode(sprintf('%s:%s', $this->publicKey, $this->secretKey));
 
         try {
-            /** @var PendingRequest $request */
-            $request = Http::post($url, [
-                'resourceSpans' => $resourceSpans,
-            ]);
-            $request->withHeaders([
-                'Content-Type' => 'application/json',
-                'Authorization' => 'Basic '.$auth,
-                'x-langfuse-ingestion-version' => '4',
-            ]);
-            $request->timeout(2.0);
+            Http::timeout(2.0)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Basic '.$auth,
+                    'x-langfuse-ingestion-version' => '4',
+                ])
+                ->post($url, ['resourceSpans' => $resourceSpans]);
         } catch (\Throwable $e) {
             // Telemetry must never break the application. Log and swallow.
             \Log::warning('Langfuse trace export failed: '.$e->getMessage());
@@ -258,13 +411,16 @@ class LangfuseTraceService
     }
 
     /**
-     * Current time in OTLP nanoseconds.
+     * Current time as Unix-epoch OTLP nanoseconds.
+     *
+     * hrtime() is monotonic and unsuitable for OTLP timestamps, which require
+     * wall-clock epoch nanoseconds. DateTimeImmutable gives exact integer
+     * nanoseconds without floating-point precision loss.
      */
     private function nanoTime(): int
     {
-        /** @var array{0: int, 1: int} $time */
-        $time = hrtime(true);
+        $now = new \DateTimeImmutable;
 
-        return (int) ($time[0] * 1_000_000_000 + $time[1]);
+        return (int) $now->format('U') * 1_000_000_000 + (int) $now->format('u') * 1_000;
     }
 }

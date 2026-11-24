@@ -37,16 +37,18 @@ class LatitudeTraceMiddleware
         }
 
         /** @var array{0: int, 1: int} $start */
-        $start = hrtime(true);
+        $start = hrtime(false);
 
         /** @var Response $response */
         $response = $next($request);
 
         /** @var array{0: int, 1: int} $end */
-        $end = hrtime(true);
+        $end = hrtime(false);
         $durationNs = (int) ($end[0] * 1_000_000_000 + $end[1]) - (int) ($start[0] * 1_000_000_000 + $start[1]);
 
-        $this->exportTrace($request, $response, $durationNs);
+        $traceId = $request->attributes->get('telemetry.trace_id') ?? $this->generateTraceId();
+
+        $this->exportTrace($request, $response, $durationNs, $traceId);
 
         return $response;
     }
@@ -54,9 +56,8 @@ class LatitudeTraceMiddleware
     /**
      * Export an OTLP span to Latitude.
      */
-    private function exportTrace(Request $request, Response $response, int $durationNs): void
+    private function exportTrace(Request $request, Response $response, int $durationNs, string $traceId): void
     {
-        $traceId = $this->generateTraceId();
         $spanId = $this->generateSpanId();
 
         $resourceSpans = [
@@ -78,7 +79,7 @@ class LatitudeTraceMiddleware
                                 'traceId' => $traceId,
                                 'spanId' => $spanId,
                                 'name' => sprintf('%s %s', $request->method(), $request->path()),
-                                'kind' => 1, // SPAN_KIND_SERVER
+                                'kind' => 2, // SPAN_KIND_SERVER
                                 'startTimeUnixNano' => (string) ($this->nanoTime() - $durationNs),
                                 'endTimeUnixNano' => (string) $this->nanoTime(),
                                 'attributes' => [
@@ -129,13 +130,12 @@ class LatitudeTraceMiddleware
     }
 
     /**
-     * Current time in OTLP nanoseconds.
+     * Current time as Unix-epoch OTLP nanoseconds.
      */
     private function nanoTime(): int
     {
-        /** @var array{0: int, 1: int} $time */
-        $time = hrtime(true);
+        $now = new \DateTimeImmutable;
 
-        return (int) ($time[0] * 1_000_000_000 + $time[1]);
+        return (int) $now->format('U') * 1_000_000_000 + (int) $now->format('u') * 1_000;
     }
 }

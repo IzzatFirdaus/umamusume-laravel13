@@ -3,11 +3,13 @@
 use App\Http\Controllers\ArtworkAssetController;
 use App\Http\Middleware\EnforceNativePHPSecret;
 use App\Http\Middleware\HandleInertiaRequests;
+use App\Services\LangfuseTraceService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
@@ -52,6 +54,24 @@ return Application::configure(basePath: dirname(__DIR__))
         // actor that closes a session whose 50-minute window has passed. The unique index stops two
         // overlay rows; the overlap guard stops two command invocations fighting over the same one.
         $schedule->command('independent-training:complete')->everyMinute()->withoutOverlapping();
+
+        // Synthetic health heartbeat runs every five minutes regardless of browser state.
+        // Exports a synthetic span to Langfuse and caches the result for the telemetry status
+        // endpoint. Fail-open: never throws, never blocks other schedules.
+        $schedule->call(function () {
+            try {
+                $exported = app(LangfuseTraceService::class)->heartbeat();
+                Cache::put('telemetry.heartbeat.last', $exported, 900);
+            } catch (Throwable $e) {
+                Cache::put('telemetry.heartbeat.last', [
+                    'status' => 'error',
+                    'database' => null,
+                    'exported' => false,
+                    'error' => $e->getMessage(),
+                    'at' => (new DateTimeImmutable)->format(DateTimeInterface::ATOM),
+                ], 900);
+            }
+        })->everyFiveMinutes()->name('trainerdesk.health.synthetic')->withoutOverlapping();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         // Unified API error shape (ARCHITECTURE §4): { "error": { "code", "message" } }
