@@ -381,7 +381,7 @@ class LangfuseTraceService
         $auth = base64_encode(sprintf('%s:%s', $this->publicKey, $this->secretKey));
 
         try {
-            Http::timeout(2.0)
+            Http::timeout(5.0)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
                     'Authorization' => 'Basic '.$auth,

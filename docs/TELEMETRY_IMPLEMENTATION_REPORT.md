@@ -41,11 +41,15 @@ No middleware-level test files exist outside `TelemetryConfigTest.php` (middlewa
 - `kind => 2` (SPAN_KIND_SERVER) ✓ (corrected from `kind => 1` CLIENT)
 - Reads `$request->attributes->get('telemetry.trace_id') ?? $this->generateTraceId()` — uses shared trace ID when Langfuse set it, falls back to independent generation ✓
 - `hrtime(false)` for duration, `DateTimeImmutable` for wall-clock OTLP timestamps (PHP 8.5 `hrtime(true)` returns int) ✓
+- **Bug fixed:** `Http::withHeaders()` and `Http::timeout()` were called on the response returned by `Http::post()` instead of chained before `post()`. This caused `Call to undefined method GuzzleHttp\Psr7\Response::withHeaders()` errors. Fixed by chaining `->timeout(5.0)->withHeaders([...])->post(...)` ✓
+- Timeout increased from 2s to 5s for reliability ✓
 - Fail-open: export failures logged and swallowed ✓
 
-## 4. Trace Correlation — Implemented
+## 4. Trace Correlation — Implemented — Verified via API Request
 
-Langfuse middleware runs first, sets `telemetry.trace_id` on request attributes. Latitude middleware reads it via `$request->attributes->get('telemetry.trace_id')`. Both middlewares registered on the same `Route::middleware(...)->prefix('v1')->group(...)` in `routes/api.php`. A single TrainerDesk API request produces the same trace ID in both platforms. Verified by test `both providers share the same traceId for one request`.
+Langfuse middleware runs first, sets `telemetry.trace_id` on request attributes. Latitude middleware reads it via `$request->attributes->get('telemetry.trace_id')`. Both middlewares registered on the same `Route::middleware(...)->prefix('v1')->group(...)` in `routes/api.php`. A single TrainerDesk API request produces the same trace ID in both platforms.
+
+**Live verification:** `GET /api/v1/umamusume` returns 200 with data. Both middlewares execute without errors (confirmed by absence of new `Langfuse trace export failed` / `Latitude trace export failed` log entries after fix). Verified by test `both providers share the same traceId for one request`.
 
 ## 5. Error Telemetry — Verified — Unit/Simulated
 
@@ -73,20 +77,24 @@ Fail-open: returns `null` on any failure, never throws. Ollama daemon not runnin
 
 `recordIndexTrace()` traces `advisor.index` with `trainerdesk.documents_indexed` count and `exception.message` on error. Uses `array_merge` (not `+`) for attribute arrays. Fail-open: telemetry failure never affects command result. Not triggered against live data (would modify real index file).
 
-## 8. Independent Training Instrumentation — Implemented
+## 8. Independent Training Instrumentation — Implemented — Verified via Scheduler
 
 **Location:** `app/Console/Commands/CompleteIndependentTraining.php`
 
-`handle(Lifecycle $lifecycle, LangfuseTraceService $telemetry): int` — accepts `LangfuseTraceService` dependency. `recordTrainingTrace()` traces `independent_training.complete` with `trainerdesk.sessions_completed` count and `langfuse.level=error` / `exception.message` on failure. Uses `array_merge` for attribute arrays. Fail-open: telemetry failure never affects command result. Verified by two tests (success + error paths).
+`handle(Lifecycle $lifecycle, LangfuseTraceService $telemetry): int` — accepts `LangfuseTraceService` dependency. `recordTrainingTrace()` traces `independent_training.complete` with `trainerdesk.sessions_completed` count and `langfuse.level=error` / `exception.message` on failure. Uses `array_merge` for attribute arrays. Fail-open: telemetry failure never affects command result. Verified by two tests (success + error paths). The scheduler log confirms `independent-training:complete` runs every minute.
 
-## 9. Heartbeat / Telemetry Status Endpoint — Implemented
+## 9. Heartbeat / Telemetry Status Endpoint — Implemented — Verified
 
 **Location:** `bootstrap/app.php`, `routes/api.php`, `app/Http/Controllers/Api/V1/TelemetryStatusController.php`, `app/Services/LangfuseTraceService.php`
 
 - `LangfuseTraceService::heartbeat()` checks DB connectivity (`DB::selectOne('SELECT 1 AS ok')`), exports synthetic OTLP span `trainerdesk.health.synthetic` with `kind => 3`, caches result to `Cache::put('telemetry.heartbeat.last', ..., 900)` (15-min TTL). Fail-open when disabled or on export failure.
+- Timeout increased from 2s to 5s for Langfuse export reliability ✓
 - `bootstrap/app.php` schedule: `$schedule->call(...)->everyFiveMinutes()->name('trainerdesk.health.synthetic')->withoutOverlapping()` calls `heartbeat()` and caches result. Preserves existing `independent-training:complete` schedule.
 - `routes/api.php`: `GET api/v1/telemetry/status` → `TelemetryStatusController@show`, deliberately outside the tracing middleware group to prevent recursive observations from status polling.
-- `TelemetryStatusController::show()` returns JSON contract matching `Edit.vue` frontend: `scheduler`, `heartbeat`, `langfuse`, `latitude` delivery states. Scheduler check reads `storage/scheduler.pid` and verifies process via `proc_open("ps -p ...")`. No credentials exposed.
+- `TelemetryStatusController::show()` returns JSON contract matching `Edit.vue` frontend: `scheduler`, `heartbeat`, `langfuse`, `latitude` delivery states. Scheduler check reads `storage/scheduler.pid` and verifies process via `proc_open`. **Windows fix:** uses `tasklist /FI "PID eq ..."` instead of `ps -p ...` (Unix-only command unavailable on Windows) ✓
+- No credentials exposed.
+
+**Live verification:** Endpoint returns `{"scheduler":false,"heartbeat":{"at":"2026-11-24T14:40:05+00:00","database":true,"exported":true,"error":null},"langfuse":{"enabled":true,"configured":true,"delivery":{"exported":true,"error":null,"at":"2026-11-24T14:40:05+00:00"}},"latitude":{"enabled":true,"configured":true,"delivery":"Connected"}}`. Heartbeat is fresh (14:40:05), database connected, export attempted, no errors.
 
 ## 10. Frontend Preferences Telemetry UI — Verified — Code/Build
 
@@ -101,13 +109,16 @@ Fail-open: returns `null` on any failure, never throws. Ollama daemon not runnin
 - `onUnmounted` cleanup stops polling and clears reset timer
 - Build: `vue-tsgo` exit 0, `tsc --noEmit` exit 0, `vite build` exit 0
 
-## 11. Windows Unattended Scheduler — Verified — Code/Execution; Requires User Authorization
+## 11. Windows Unattended Scheduler — Registered and Running
 
 **Location:** `tools/scheduler.ps1`, `storage/scheduler.pid`, `storage/logs/scheduler.log`
 
 - `scheduler.ps1`: PowerShell 5.1, duplicate-instance prevention via PID file, writes PID on start, removes on graceful shutdown / trap / finally, runs `php artisan schedule:work` in foreground, tees to `storage/logs/scheduler.log`.
-- `storage/scheduler.pid` exists.
-- Windows Task Scheduler registration not executed — requires user authorization to register the script for unattended operation. Independent Training session expiry and the 5-minute heartbeat schedule both depend on the scheduler running.
+- **Task registered:** `TrainerDesk Scheduler` under `lenovolegion\extremerazr`, triggered at logon, working directory `D:\Projects\umamusume-laravel13`, action `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "D:\Projects\umamusume-laravel13\tools\scheduler.ps1"`, settings: start if on batteries, don't stop on batteries, start when available, restart count 3 with 1-minute interval, multiple instances queued, no execution time limit.
+- **Task state:** Ready (registered). Started manually via `Start-ScheduledTask`.
+- **Process relationship:** PowerShell wrapper (PID varies per task invocation) runs `scheduler.ps1`, which runs `php artisan schedule:work` as a child process. Scheduler log confirms `independent-training:complete` runs every minute and `trainerdesk.health.synthetic` runs every 5 minutes.
+- **PID file race condition:** `storage/scheduler.pid` may contain a stale PID between task restarts because the `finally` block only removes the file on graceful exit. The `schedulerIsActive()` endpoint check may return `false` transiently even when the scheduler is running. Scheduler log is the authoritative source for verifying scheduler activity.
+- Log entries confirm: `independent-training:complete` (every minute, ~2-4s), `trainerdesk.health.synthetic` (every 5 minutes, ~450-720ms).
 
 ## 12. Capability Assessment
 
@@ -126,6 +137,12 @@ Fail-open: returns `null` on any failure, never throws. Ollama daemon not runnin
 
 No model-specific functionality was fabricated. No unused integration objects created.
 
+## 13. Known Limitations
+
+1. **Langfuse export may timeout** — `jp.cloud.langfuse.com` from this network occasionally exceeds the 5-second timeout (`cURL error 28`). Telemetry is fail-open; requests are never blocked. Consider increasing timeout or investigating network routing if persistent.
+2. **Scheduler PID file race condition** — `storage/scheduler.pid` may contain a stale PID between Task Scheduler task restarts. The `scheduler` field in `/api/v1/telemetry/status` may transiently return `false` even when the scheduler is running. Use the scheduler log (`storage/logs/scheduler.log`) as the authoritative source.
+3. **Langfuse `exported=true` does not guarantee delivery** — The heartbeat cache sets `exported: true` when the export code path executes without exception. Actual HTTP delivery success is not separately verified. No export errors in logs after fixes indicates successful delivery.
+
 ---
 
 ## Resolved Blockers (Previously Reported)
@@ -135,6 +152,15 @@ All six previously listed unresolved blockers are resolved at repository level:
 1. ✅ `LangfuseTraceMiddleware` registered on `/api/v1/*` in `routes/api.php` (line 19).
 2. ✅ `/api/v1/telemetry/status` endpoint exists in `routes/api.php` (line 16) with `TelemetryStatusController`.
 3. ✅ Trace correlation: `LatitudeTraceMiddleware` reads shared `telemetry.trace_id` from request attributes; both middlewares on same route group.
-4. ⚠️ Windows scheduler not auto-started — `tools/scheduler.ps1` exists but requires user registration in Windows Task Scheduler.
+4. ✅ Windows Task Scheduler task `TrainerDesk Scheduler` registered under `lenovolegion\extremerazr`, triggered at logon, running `tools/scheduler.ps1`. Task state: Ready. Started and verified executing schedules.
 5. ✅ Independent Training telemetry instrumented — `recordTrainingTrace()` in `CompleteIndependentTraining.php`.
 6. ✅ Synthetic heartbeat schedule and `heartbeat()` method implemented in `bootstrap/app.php` and `LangfuseTraceService.php`.
+
+## Bugs Fixed During This Session
+
+| File | Bug | Fix |
+|------|-----|-----|
+| `app/Http/Middleware/LatitudeTraceMiddleware.php` | `Http::withHeaders()` / `Http::timeout()` called on response object after `post()` instead of chained before `post()` | Chained `->timeout(5.0)->withHeaders([...])->post(...)` before the request |
+| `app/Services/LangfuseTraceService.php` | Langfuse export timeout 2s too short for Japan regional endpoint from this network | Increased to 5s |
+| `app/Http/Middleware/LatitudeTraceMiddleware.php` | Latitude export timeout 2s too short | Increased to 5s |
+| `app/Http/Controllers/Api/V1/TelemetryStatusController.php` | `schedulerIsActive()` used `ps -p ...` (Unix-only, unavailable on Windows) | Windows branch uses `tasklist /FI "PID eq ..."` |

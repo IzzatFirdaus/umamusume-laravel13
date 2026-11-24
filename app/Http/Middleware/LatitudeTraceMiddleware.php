@@ -99,15 +99,15 @@ class LatitudeTraceMiddleware
 
         try {
             /** @var PendingRequest $http */
-            $http = Http::post(config('latitude.endpoint'), [
-                'resourceSpans' => $resourceSpans,
-            ]);
-            $http->withHeaders([
-                'Content-Type' => 'application/json',
-                'Authorization' => 'Bearer '.config('latitude.api_key'),
-                'X-Latitude-Project' => config('latitude.project_slug'),
-            ]);
-            $http->timeout(2.0);
+            $http = Http::timeout(5.0)
+                ->withHeaders([
+                    'Content-Type' => 'application/json',
+                    'Authorization' => 'Bearer '.config('latitude.api_key'),
+                    'X-Latitude-Project' => config('latitude.project_slug'),
+                ])
+                ->post(config('latitude.endpoint'), [
+                    'resourceSpans' => $resourceSpans,
+                ]);
         } catch (\Throwable $e) {
             Log::warning('Latitude trace export failed: '.$e->getMessage());
         }

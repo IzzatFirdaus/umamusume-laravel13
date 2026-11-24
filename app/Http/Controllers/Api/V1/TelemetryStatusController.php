@@ -86,6 +86,26 @@ class TelemetryStatusController extends Controller
         }
 
         try {
+            if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+                // Windows: tasklist lists matching processes; PID appears in output if alive.
+                $descriptors = [
+                    0 => ['pipe', 'r'],
+                    1 => ['pipe', 'w'],
+                    2 => ['pipe', 'w'],
+                ];
+                $process = proc_open("tasklist /FI \"PID eq {$pid}\"", $descriptors, $pipes);
+
+                if ($process === false) {
+                    return false;
+                }
+
+                $output = stream_get_contents($pipes[1]);
+                proc_close($process);
+
+                return str_contains($output, $pid);
+            }
+
+            // Unix: ps -o pid= prints only the PID when the process exists.
             $descriptors = [
                 0 => ['pipe', 'r'],
                 1 => ['pipe', 'w'],
