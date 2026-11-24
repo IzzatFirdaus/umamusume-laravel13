@@ -477,3 +477,59 @@ it('both providers share the same traceId for one request', function (): void {
     expect($langfuseSpan['traceId'])->toBe($sharedTraceId);
     expect($latitudeSpan['traceId'])->toBe($sharedTraceId);
 });
+
+it('LangfuseTraceService heartbeat records real acceptance on 200', function (): void {
+    Config::set('langfuse.enabled', true);
+    Config::set('langfuse.public_key', 'pk-test');
+    Config::set('langfuse.secret_key', 'sk-test');
+
+    Http::fake();
+
+    $service = new LangfuseTraceService(
+        true, 'https://jp.cloud.langfuse.com', 'pk-test', 'sk-test', 'Trainer Desk', 'local'
+    );
+
+    DB::shouldReceive('selectOne')->once()->andReturn((object) ['ok' => 1]);
+
+    $result = $service->heartbeat();
+
+    expect($result['exported'])->toBeTrue();
+    expect($result['export']['status'])->toBe('accepted');
+    expect($result['export']['http_status'])->toBe(200);
+    expect($result['error'])->toBeNull();
+});
+
+it('LangfuseTraceService heartbeat records real rejection on non-2xx', function (): void {
+    Config::set('langfuse.enabled', true);
+    Config::set('langfuse.public_key', 'pk-test');
+    Config::set('langfuse.secret_key', 'sk-test');
+
+    Http::fake([
+        'jp.cloud.langfuse.com/api/public/otel/v1/traces' => Http::response([], 500),
+    ]);
+
+    $service = new LangfuseTraceService(
+        true, 'https://jp.cloud.langfuse.com', 'pk-test', 'sk-test', 'Trainer Desk', 'local'
+    );
+
+    DB::shouldReceive('selectOne')->once()->andReturn((object) ['ok' => 1]);
+
+    $result = $service->heartbeat();
+
+    expect($result['exported'])->toBeFalse();
+    expect($result['export']['status'])->toBe('transient_error');
+    expect($result['export']['http_status'])->toBe(500);
+    expect($result['status'])->toBe('ok'); // database fine; only delivery degraded
+});
+
+it('LangfuseTraceService heartbeat is disabled when opt-in is off', function (): void {
+    $service = new LangfuseTraceService(
+        false, 'https://jp.cloud.langfuse.com', 'pk-test', 'sk-test', 'Trainer Desk', 'local'
+    );
+
+    $result = $service->heartbeat();
+
+    expect($result['status'])->toBe('disabled');
+    expect($result['export']['status'])->toBe('disabled');
+    expect($result['export']['http_status'])->toBeNull();
+});

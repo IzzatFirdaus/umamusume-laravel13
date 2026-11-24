@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
+use App\Support\TelemetryExportResult;
 use Closure;
-use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -54,9 +55,9 @@ class LatitudeTraceMiddleware
     }
 
     /**
-     * Export an OTLP span to Latitude.
+     * Export an OTLP span to Latitude and classify the delivery outcome.
      */
-    private function exportTrace(Request $request, Response $response, int $durationNs, string $traceId): void
+    private function exportTrace(Request $request, Response $response, int $durationNs, string $traceId): TelemetryExportResult
     {
         $spanId = $this->generateSpanId();
 
@@ -97,8 +98,9 @@ class LatitudeTraceMiddleware
             ],
         ];
 
+        $start = microtime(true);
+
         try {
-            /** @var PendingRequest $http */
             $http = Http::timeout(5.0)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
@@ -108,9 +110,34 @@ class LatitudeTraceMiddleware
                 ->post(config('latitude.endpoint'), [
                     'resourceSpans' => $resourceSpans,
                 ]);
+
+            $elapsedMs = (int) round((microtime(true) - $start) * 1000);
+
+            $result = TelemetryExportResult::fromHttp(
+                $http->status(),
+                (string) $http->body(),
+                $elapsedMs
+            );
         } catch (\Throwable $e) {
-            Log::warning('Latitude trace export failed: '.$e->getMessage());
+            $elapsedMs = (int) round((microtime(true) - $start) * 1000);
+
+            $result = TelemetryExportResult::fromThrowable($e, $elapsedMs);
+            Log::warning('Latitude trace export failed: '.$e->getMessage(), [
+                'status' => $result->status,
+                'http_status' => $result->httpStatus,
+                'elapsed_ms' => $result->elapsedMs,
+                'error' => $result->error,
+            ]);
         }
+
+        // Persist the last delivery outcome so the status endpoint can report it.
+        try {
+            Cache::put('telemetry.latitude.last', $result->toArray(), 900); // 15-minute TTL
+        } catch (\Throwable) {
+            // Cache failure must not affect the middleware.
+        }
+
+        return $result;
     }
 
     /**

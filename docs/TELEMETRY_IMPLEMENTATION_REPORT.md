@@ -141,7 +141,7 @@ No model-specific functionality was fabricated. No unused integration objects cr
 
 1. **Langfuse export may timeout** — `jp.cloud.langfuse.com` from this network occasionally exceeds the 5-second timeout (`cURL error 28`). Telemetry is fail-open; requests are never blocked. Consider increasing timeout or investigating network routing if persistent.
 2. **Scheduler PID file race condition** — `storage/scheduler.pid` may contain a stale PID between Task Scheduler task restarts. The `scheduler` field in `/api/v1/telemetry/status` may transiently return `false` even when the scheduler is running. Use the scheduler log (`storage/logs/scheduler.log`) as the authoritative source.
-3. **Langfuse `exported=true` does not guarantee delivery** — The heartbeat cache sets `exported: true` when the export code path executes without exception. Actual HTTP delivery success is not separately verified. No export errors in logs after fixes indicates successful delivery.
+3. **Langfuse `exported=true` now reflects real delivery** — `LangfuseTraceService::export()` inspects the HTTP response status and classifies the outcome via `TelemetryExportResult` (accepted / rejected / auth_failure / connection_failure / timeout). The heartbeat cache stores the full result under the `export` key, so `exported` is true only on 2xx. Resolved as part of Task #42 (see §14).
 
 ---
 
@@ -164,3 +164,16 @@ All six previously listed unresolved blockers are resolved at repository level:
 | `app/Services/LangfuseTraceService.php` | Langfuse export timeout 2s too short for Japan regional endpoint from this network | Increased to 5s |
 | `app/Http/Middleware/LatitudeTraceMiddleware.php` | Latitude export timeout 2s too short | Increased to 5s |
 | `app/Http/Controllers/Api/V1/TelemetryStatusController.php` | `schedulerIsActive()` used `ps -p ...` (Unix-only, unavailable on Windows) | Windows branch uses `tasklist /FI "PID eq ..."` |
+
+## 14. Exporter Result Semantics — Task #42 — Implemented
+
+**New file:** `app/Support/TelemetryExportResult.php` — immutable value object recording the outcome of a single provider export attempt. Status categories: `disabled`, `skipped`, `attempted`, `accepted`, `partially_rejected`, `rejected`, `auth_failure`, `connection_failure`, `timeout`, `independently_verified`. Factories: `disabled()`, `skipped()`, `attempted()`, `accepted()`, `partiallyRejected()`, `rejected()`, `authFailure()`, `connectionFailure()`, `timeout()`, `independentlyVerified()`, plus `fromHttp()` (2xx → accepted, 207 → partially_rejected, 401/403 → auth_failure, else rejected) and `fromThrowable()` (connect/TLS → connection_failure, timeout → timeout, else rejected). Helpers: `isAccepted()`, `isFailure()`, `toArray()`.
+
+**Changes:**
+- `LangfuseTraceService::export()` now returns `TelemetryExportResult` after inspecting the HTTP response; `span()` and `trace()` propagate it; `trace()` returns `TelemetryExportResult::disabled()` when opt-in is off.
+- `LangfuseTraceService::heartbeat()` records the real export outcome: `exported` is true only on acceptance, and the cache payload gains an `export` sub-array (`status`, `http_status`, `elapsed_ms`, `error`).
+- `LatitudeTraceMiddleware::exportTrace()` returns `TelemetryExportResult`, classifies the HTTP response/transport error, and caches the last outcome to `telemetry.latitude.last` (15-min TTL).
+- `TelemetryStatusController`: langfuse `delivery` now includes `http_status` and `status` from the heartbeat export detail; latitude `delivery` derives from `telemetry.latitude.last`, falling back to the enabled/configured string contract.
+- `telemetry:diagnose` probes return a `TelemetryExportResult`; success is determined by `isAccepted()`; the old ad-hoc `classifyHttp()` was removed.
+
+**Tests:** `tests/Unit/TelemetryExportResultTest.php` (10 tests); heartbeat acceptance/rejection/disabled cases added to `TelemetryConfigTest.php`. Full telemetry suite: 46 tests, 141 assertions, pass. Pint clean.

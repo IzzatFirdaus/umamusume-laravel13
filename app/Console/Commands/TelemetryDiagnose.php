@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Console\Commands;
 
+use App\Support\TelemetryExportResult;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 
@@ -144,7 +145,7 @@ class TelemetryDiagnose extends Command
 
         $this->reportProbe($auth);
 
-        $authOk = $auth['status'] !== null && $auth['status'] >= 200 && $auth['status'] < 300;
+        $authOk = $auth['result']->isAccepted();
 
         if (! $authOk) {
             $this->line('Result: authentication failed — cannot proceed to ingestion test.');
@@ -175,7 +176,7 @@ class TelemetryDiagnose extends Command
 
         $this->reportProbe($ingest);
 
-        $ingestOk = $ingest['status'] !== null && $ingest['status'] >= 200 && $ingest['status'] < 300;
+        $ingestOk = $ingest['result']->isAccepted();
 
         if ($ingestOk) {
             $this->line('Result: ingestion accepted (trace id: '.substr($traceId, 0, 8).'…).');
@@ -232,7 +233,7 @@ class TelemetryDiagnose extends Command
 
         $this->reportProbe($probe);
 
-        $ok = $probe['status'] !== null && $probe['status'] >= 200 && $probe['status'] < 300;
+        $ok = $probe['result']->isAccepted();
 
         if ($ok) {
             $this->line('Result: authenticated and ingestion accepted (trace id: '.substr($traceId, 0, 8).'…).');
@@ -249,7 +250,7 @@ class TelemetryDiagnose extends Command
      * @param  string  $method  GET or POST
      * @param  array<string, string>  $headers
      * @param  array<string, mixed>  $body
-     * @return array{label: string, method: string, url: string, status: int|null, elapsed_ms: int, body: string, ok: bool, category: string, exception?: string}
+     * @return array{label: string, method: string, url: string, status: int|null, elapsed_ms: int, body: string, ok: bool, category: string, result: TelemetryExportResult, exception?: string}
      */
     private function probe(string $label, string $method, string $url, array $headers, array $body): array
     {
@@ -265,6 +266,7 @@ class TelemetryDiagnose extends Command
             $elapsed = (int) round((microtime(true) - $start) * 1000);
             $status = $response->status();
             $bodyStr = (string) $response->body();
+            $result = TelemetryExportResult::fromHttp($status, $bodyStr, $elapsed);
 
             return [
                 'label' => $label,
@@ -273,11 +275,13 @@ class TelemetryDiagnose extends Command
                 'status' => $status,
                 'elapsed_ms' => $elapsed,
                 'body' => substr($bodyStr, 0, 300),
-                'ok' => $response->successful(),
-                'category' => $this->classifyHttp($status, null),
+                'ok' => $result->isAccepted(),
+                'category' => $result->status,
+                'result' => $result,
             ];
         } catch (\Throwable $e) {
             $elapsed = (int) round((microtime(true) - $start) * 1000);
+            $result = TelemetryExportResult::fromThrowable($e, $elapsed);
 
             return [
                 'label' => $label,
@@ -287,7 +291,8 @@ class TelemetryDiagnose extends Command
                 'elapsed_ms' => $elapsed,
                 'body' => 'EXCEPTION: '.$e->getMessage(),
                 'ok' => false,
-                'category' => $this->classifyHttp(null, $e),
+                'category' => $result->status,
+                'result' => $result,
                 'exception' => get_class($e),
             ];
         }
@@ -344,52 +349,6 @@ class TelemetryDiagnose extends Command
     private function sanitizeUrl(string $url): string
     {
         return preg_replace('/^[^:]+:\/\/[^@]+@/', '***:***@', $url);
-    }
-
-    /**
-     * Classify an HTTP status code or exception into a failure category.
-     *
-     * @return string One of: dns, connection, tls, timeout, authentication,
-     *                authorization, payload_rejection, ingestion_failure, success, unknown
-     */
-    private function classifyHttp(?int $status, ?\Throwable $exception): string
-    {
-        if ($exception !== null) {
-            $message = $e = $exception->getMessage();
-            $class = get_class($exception);
-
-            if (str_contains($class, 'ConnectionException') || str_contains($message, 'Connection refused') || str_contains($message, 'connect')) {
-                return 'connection';
-            }
-            if (str_contains($class, 'SslException') || str_contains($message, 'SSL') || str_contains($message, 'TLS')) {
-                return 'tls';
-            }
-            if (str_contains($class, 'ConnectException') || str_contains($message, 'DNS') || str_contains($message, 'could not resolve') || str_contains($message, 'name resolution')) {
-                return 'dns';
-            }
-            if (str_contains($message, 'timed out') || str_contains($message, 'timeout')) {
-                return 'timeout';
-            }
-
-            return 'unknown';
-        }
-
-        if ($status === null) {
-            return 'unknown';
-        }
-
-        if ($status >= 200 && $status < 300) {
-            return 'success';
-        }
-
-        return match ($status) {
-            401, 403 => 'authentication',
-            400, 422 => 'payload_rejection',
-            404 => 'payload_rejection',
-            429 => 'ingestion_failure',
-            500, 502, 503, 504 => 'ingestion_failure',
-            default => 'unknown',
-        };
     }
 
     /**

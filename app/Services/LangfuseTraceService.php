@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\Support\TelemetryExportResult;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -48,13 +49,13 @@ class LangfuseTraceService
      *   events?: list<array<string, mixed>>, userId?: string|null,
      *   sessionId?: string|null, tags?: list<string>}  $params
      */
-    public function trace(array $params): void
+    public function trace(array $params): TelemetryExportResult
     {
         if (! $this->enabled) {
-            return;
+            return TelemetryExportResult::disabled();
         }
 
-        $this->span($params);
+        return $this->span($params);
     }
 
     /**
@@ -66,7 +67,7 @@ class LangfuseTraceService
      *   events?: list<array<string, mixed>>, userId?: string|null,
      *   sessionId?: string|null, tags?: list<string>}  $params
      */
-    private function span(array $params): void
+    private function span(array $params): TelemetryExportResult
     {
         $traceId = $params['traceId'] ?? $this->generateTraceId();
         $spanId = $params['spanId'] ?? $this->generateSpanId();
@@ -108,7 +109,7 @@ class LangfuseTraceService
             ],
         ];
 
-        $this->export($resourceSpans);
+        return $this->export($resourceSpans);
     }
 
     /**
@@ -164,7 +165,8 @@ class LangfuseTraceService
      * the actual outcome so the status endpoint can report it accurately.
      *
      * @return array{status: string, database: bool|null, exported: bool|null,
-     *   error: string|null, at: string}
+     *   error: string|null, at: string,
+     *   export: array{status: string, http_status: int|null, elapsed_ms: int|null, error: string|null}}
      */
     public function heartbeat(): array
     {
@@ -175,6 +177,7 @@ class LangfuseTraceService
                 'exported' => null,
                 'error' => null,
                 'at' => (new \DateTimeImmutable)->format(\DateTimeInterface::ATOM),
+                'export' => TelemetryExportResult::disabled()->toArray(),
             ];
         }
 
@@ -194,7 +197,7 @@ class LangfuseTraceService
         $traceId = bin2hex(random_bytes(16));
         $spanId = bin2hex(random_bytes(8));
 
-        $this->trace([
+        $traceResult = $this->trace([
             'name' => 'trainerdesk.health.synthetic',
             'traceId' => $traceId,
             'spanId' => $spanId,
@@ -220,15 +223,16 @@ class LangfuseTraceService
             ]),
         ]);
 
-        $exported = true;
+        $exported = $traceResult->isAccepted();
         $at = (new \DateTimeImmutable)->format(\DateTimeInterface::ATOM);
 
         $result = [
             'status' => $database ? 'ok' : 'degraded',
             'database' => $database,
             'exported' => $exported,
-            'error' => $error,
+            'error' => $error ?? $traceResult->error,
             'at' => $at,
+            'export' => $traceResult->toArray(),
         ];
 
         try {
@@ -374,23 +378,48 @@ class LangfuseTraceService
      *
      * @param  list<OtlpResourceSpan>  $resourceSpans
      */
-    private function export(array $resourceSpans): void
+    /**
+     * Export OTLP traces to Langfuse and classify the delivery outcome.
+     *
+     * @param  list<OtlpResourceSpan>  $resourceSpans
+     */
+    private function export(array $resourceSpans): TelemetryExportResult
     {
         $url = rtrim($this->baseUrl, '/').'/api/public/otel/v1/traces';
 
         $auth = base64_encode(sprintf('%s:%s', $this->publicKey, $this->secretKey));
 
+        $start = microtime(true);
+
         try {
-            Http::timeout(5.0)
+            $response = Http::timeout(5.0)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
                     'Authorization' => 'Basic '.$auth,
                     'x-langfuse-ingestion-version' => '4',
                 ])
                 ->post($url, ['resourceSpans' => $resourceSpans]);
+
+            $elapsedMs = (int) round((microtime(true) - $start) * 1000);
+
+            return TelemetryExportResult::fromHttp(
+                $response->status(),
+                (string) $response->body(),
+                $elapsedMs
+            );
         } catch (\Throwable $e) {
             // Telemetry must never break the application. Log and swallow.
-            \Log::warning('Langfuse trace export failed: '.$e->getMessage());
+            $elapsedMs = (int) round((microtime(true) - $start) * 1000);
+            $result = TelemetryExportResult::fromThrowable($e, $elapsedMs);
+
+            \Log::warning('Langfuse trace export failed: '.$e->getMessage(), [
+                'status' => $result->status,
+                'http_status' => $result->httpStatus,
+                'elapsed_ms' => $result->elapsedMs,
+                'error' => $result->error,
+            ]);
+
+            return $result;
         }
     }
 

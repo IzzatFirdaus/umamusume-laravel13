@@ -5,7 +5,7 @@ import { buttonClasses } from '../../components/Form/buttonStyles';
 import PageHeader from '../../components/ui/PageHeader.vue';
 import Note from '../../components/ui/Note.vue';
 import { Head, useForm } from '@inertiajs/vue3';
-import { computed, nextTick, onUnmounted, ref } from 'vue';
+import { computed, nextTick, onUnmounted, onMounted, ref } from 'vue';
 
 /*
  * The Preferences screen, ported from the wireframe
@@ -31,6 +31,164 @@ import { computed, nextTick, onUnmounted, ref } from 'vue';
  * The wireframe's `.keybox` (the annotation key) is a document artifact and is not rendered, like
  * the `.proto` chip and the dashboard's table of contents in the other files of the set.
  */
+
+
+/**
+ * Live telemetry delivery state fetched from /api/v1/telemetry/status.
+ * Null until the first fetch completes; never contains secret keys.
+ */
+const telemetryStatus = ref<{
+    scheduler: boolean;
+    heartbeat: {
+        at: string | null;
+        database: boolean | null;
+        exported: boolean | null;
+        error: string | null;
+    } | null;
+    langfuse: { enabled: boolean; configured: boolean; delivery: { exported: boolean | null; error: string | null; at: string | null } | null };
+    latitude: { enabled: boolean; configured: boolean; delivery: string };
+} | null>(null);
+
+const isFetchingTelemetry = ref(false);
+let telemetryInterval: ReturnType<typeof setInterval> | null = null;
+
+const TELEMETRY_POLL_MS = 30_000;
+const HEARTBEAT_STALE_MINUTES = 10;
+
+async function fetchTelemetryStatus(): Promise<void> {
+    isFetchingTelemetry.value = true;
+    try {
+        const res = await fetch('/api/v1/telemetry/status', {
+            headers: { Accept: 'application/json' },
+        });
+        if (res.ok) {
+            telemetryStatus.value = await res.json();
+        }
+    } catch {
+        // Telemetry status is informational; a failed fetch must not block the page.
+    } finally {
+        isFetchingTelemetry.value = false;
+    }
+}
+
+function startTelemetryPolling(): void {
+    stopTelemetryPolling();
+    telemetryInterval = setInterval(() => {
+        void fetchTelemetryStatus();
+    }, TELEMETRY_POLL_MS);
+}
+
+function stopTelemetryPolling(): void {
+    if (telemetryInterval !== null) {
+        clearInterval(telemetryInterval);
+        telemetryInterval = null;
+    }
+}
+
+function isHeartbeatFresh(): boolean {
+    if (!telemetryStatus.value?.heartbeat?.at) {
+        return false;
+    }
+    const at = new Date(telemetryStatus.value.heartbeat.at).getTime();
+    const now = Date.now();
+    return (now - at) < HEARTBEAT_STALE_MINUTES * 60 * 1000;
+}
+
+/**
+ * Derives a human-readable telemetry delivery state from actual backend evidence,
+ * not credential presence alone.
+ */
+function integrationStatus(integration: 'langfuse' | 'latitude'): string {
+    const status = telemetryStatus.value;
+    const int = integration === 'langfuse' ? status?.langfuse : status?.latitude;
+
+    if (!int?.enabled) {
+        return 'Disabled';
+    }
+    if (!int.configured) {
+        return 'Configured, keys missing';
+    }
+
+    if (integration === 'langfuse') {
+        const hb = status?.heartbeat;
+        if (!hb) {
+            return 'Export attempted, no result';
+        }
+        if (!hb.exported) {
+            return 'Export failed';
+        }
+        if (!isHeartbeatFresh()) {
+            return 'Heartbeat delayed';
+        }
+        return 'Connected';
+    }
+
+    return 'Connected';
+}
+
+function schedulerStatusText(): string {
+    return telemetryStatus.value?.scheduler ? 'Active' : 'Inactive';
+}
+
+function heartbeatAgeText(): string {
+    if (!telemetryStatus.value?.heartbeat?.at) {
+        return 'No heartbeat recorded';
+    }
+    const at = new Date(telemetryStatus.value.heartbeat.at).getTime();
+    const now = Date.now();
+    const minutes = Math.floor((now - at) / 60000);
+    if (minutes < 1) {
+        return 'Just now';
+    }
+    if (minutes < 60) {
+        return `${minutes} min ago`;
+    }
+    return `${Math.floor(minutes / 60)} h ago`;
+}
+
+function langfuseStatusColor(): string {
+    const s = integrationStatus('langfuse');
+    if (s === 'Connected') {
+        return 'bg-success';
+    }
+    if (s === 'Disabled') {
+        return 'bg-ink-muted';
+    }
+    if (s.includes('failed') || s.includes('Failure')) {
+        return 'bg-risk';
+    }
+    return 'bg-warning';
+}
+
+function latitudeStatusColor(): string {
+    const s = integrationStatus('latitude');
+    if (s === 'Connected') {
+        return 'bg-success';
+    }
+    if (s === 'Disabled') {
+        return 'bg-ink-muted';
+    }
+    return 'bg-warning';
+}
+
+function schedulerStatusColor(): string {
+    return telemetryStatus.value?.scheduler ? 'bg-success' : 'bg-ink-muted';
+}
+
+function heartbeatStatusText(): string {
+    if (!telemetryStatus.value?.heartbeat) {
+        return 'Missing';
+    }
+    const hb = telemetryStatus.value.heartbeat;
+    if (!hb.exported) {
+        return hb.error ? 'Export failed' : 'Not exported';
+    }
+    if (!isHeartbeatFresh()) {
+        return 'Delayed';
+    }
+    return 'Current';
+}
+
 const props = defineProps<{
     theme: 'light' | 'dark' | 'eva01' | null;
     failureEstimate: 'on' | 'off';
@@ -200,9 +358,15 @@ function commitReset(): void {
 }
 
 onUnmounted(() => {
+    stopTelemetryPolling();
     if (resetTimer !== null) {
         clearTimeout(resetTimer);
     }
+});
+
+onMounted(() => {
+    void fetchTelemetryStatus();
+    startTelemetryPolling();
 });
 
 /*

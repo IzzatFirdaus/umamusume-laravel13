@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Api\V1;
 
 use App\Http\Controllers\Controller;
+use App\Support\TelemetryExportResult;
 use Illuminate\Config\Repository as ConfigRepository;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Cache;
@@ -42,10 +43,13 @@ class TelemetryStatusController extends Controller
 
         $langfuseDelivery = null;
         if ($langfuseEnabled && $langfuseConfigured && is_array($heartbeat)) {
+            $export = $heartbeat['export'] ?? null;
             $langfuseDelivery = [
                 'exported' => $heartbeat['exported'] ?? null,
                 'error' => $heartbeat['error'] ?? null,
                 'at' => $heartbeat['at'] ?? null,
+                'http_status' => is_array($export) ? $export['http_status'] ?? null : null,
+                'status' => is_array($export) ? $export['status'] ?? null : null,
             ];
         }
 
@@ -128,6 +132,18 @@ class TelemetryStatusController extends Controller
 
     private function latitudeDeliveryState(bool $enabled, bool $configured): string
     {
+        $last = Cache::get('telemetry.latitude.last');
+
+        if (is_array($last) && isset($last['status'])) {
+            return match ($last['status']) {
+                TelemetryExportResult::ACCEPTED, TelemetryExportResult::INDEPENDENTLY_VERIFIED => 'Connected',
+                TelemetryExportResult::DISABLED => 'Disabled',
+                TelemetryExportResult::SKIPPED => 'Configured, keys missing',
+                TelemetryExportResult::ATTEMPTED => 'Export attempted, no result',
+                default => 'Export failed',
+            };
+        }
+
         if (! $enabled) {
             return 'Disabled';
         }
