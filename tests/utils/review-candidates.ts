@@ -32,9 +32,18 @@ function firstTraineeId(db: DatabaseSync): number | null {
  *
  * `suggested` puts the row in the fuzzy half (a suggestion the Trainer can accept in one click);
  * otherwise the row is the no-match half (the engine found nothing to propose).
+ *
+ * `sourceKey` names the ledger key the row claims. It matters because ADR-0037 makes that key the
+ * entity discriminator — `ReviewController::entityOf()` reads `config('uma.sources.<key>.entity')`,
+ * not a payload field — so a row seeded under `fixture` is `unknown` and can never exercise the
+ * race-origin label. Callers that assert on that label pass a real source key; the default keeps
+ * every other caller's rows in the neutral bucket, exactly as before.
  */
-export function seedPendingCandidates(count: number, options: { suggested?: boolean; prefix?: string } = {}): SeededCandidate[] {
-    const { suggested = false, prefix = 'Fixture' } = options;
+export function seedPendingCandidates(
+    count: number,
+    options: { suggested?: boolean; prefix?: string; sourceKey?: string } = {},
+): SeededCandidate[] {
+    const { suggested = false, prefix = 'Fixture', sourceKey = 'fixture' } = options;
     const db = new DatabaseSync(resolvedScratchDatabase());
     const traineeId = suggested ? firstTraineeId(db) : null;
     const now = new Date().toISOString().replace('T', ' ').slice(0, 19);
@@ -51,7 +60,7 @@ export function seedPendingCandidates(count: number, options: { suggested?: bool
                      VALUES (?, NULL, ?, ?, NULL, ?, ?, 'Pending', ?, ?, ?, ?)`,
                 )
                 .run(
-                    'fixture',
+                    sourceKey,
                     name,
                     suggested ? `${name} JP` : null,
                     suggested ? traineeId : null,

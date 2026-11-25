@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/base-test';
 
 /*
  * S12 — the annotation sweep.

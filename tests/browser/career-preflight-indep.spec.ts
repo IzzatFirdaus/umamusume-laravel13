@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 /*
  * Rendered-copy evidence for the Preflight step's Independent Training state.

@@ -114,7 +114,24 @@ agent_compatibility:
   - "Any LLM agent reading .agentrules"
 
 override_commands:
-  - "Don't use skills for this task" → Bypass automation for that task
+  - "Don't use skills for this task" → Bypass automation for this task
   - "Use only [skill_name]" → Restrict to specific skill
   - "Show me the skill [skill_name]" → Display skill definition
   - "Disable skill automation" → Turn off for current session only
+
+# Single-active-writer model (Expert operating model)
+single_active_writer:
+  enabled: true
+  description: "Only one agent session may write to the repository at a time."
+  rules:
+    - "Never write to retired workspaces or stale branches."
+    - "Never switch branches without owner authorisation."
+    - "Never perform cross-domain writes (frontend agent must not touch backend files)."
+    - "All writes must be scoped to the current specialist assignment."
+    - "Use .scratch-uma/<session>/ for temporary investigation files."
+  specialist_assignments:
+    fullstack: "Senior Developer"
+    frontend: "Frontend Developer"
+    backend: "Backend Architect"
+    docs: "Technical Documentation Engineer"
+    master: "Authoritative integration baseline"

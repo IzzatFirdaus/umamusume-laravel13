@@ -54,6 +54,17 @@ if (! is_dir($scratchDir)) {
 }
 
 $scratch = $scratchDir.'/session-'.$sessionKey.'.sqlite';
+// Strip any operator-authorisation variables the agent process may have
+// inherited from its parent shell. An agent child carrying UMA_OPERATOR_ACKNOWLEDGED=yes
+// and UMA_ALLOW_CANONICAL_DESTRUCTIVE=true must not gain canonical write or
+// destructive access merely by inheritance (FS-INT-3 Check #4). Only the Trainer's
+// own interactive process (no agent marker) may set these.
+foreach (['UMA_OPERATOR_ACKNOWLEDGED', 'UMA_ALLOW_CANONICAL_DESTRUCTIVE'] as $var) {
+    unset($_SERVER[$var]);
+    unset($_ENV[$var]);
+    putenv($var);
+}
+
 putenv('UMA_DATABASE_ROLE=test');
 putenv('DB_DATABASE='.$scratch);
 putenv('UMA_EXPECTED_DATABASE='.$scratch);

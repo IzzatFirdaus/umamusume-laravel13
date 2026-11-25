@@ -11,7 +11,7 @@
  * that a change breaks fails loudly; a ceiling nobody re-measures is decoration.
  */
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/base-test';
 
 test.describe('Screen load speed', () => {
     test('re-downloads no artwork bytes on a second visit to the same screen', async ({ page }) => {

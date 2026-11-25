@@ -5,7 +5,7 @@
  *
  * The page used to be one permanently expanded seven-field form, so the answer to "what is this
  * team" was a column of inputs and the counters read as fields rather than as a record. This is the
- * read; `UnityCupEditor` stays the one write, behind the disclosure this component owns.
+ * read half; the page mounts the one `UnityCupEditor` write behind its own disclosure.
  *
  * **Every figure is the run's own recorded value, or a named absence.** Null is "not stated" and
  * never a zero (`D-220`), so a blank stays blank with its reason rather than printing 0. The tiles
@@ -22,7 +22,6 @@
  * is no figure to compute from the calendar and this component computes none.
  */
 import AbsenceValue from '../AbsenceValue.vue';
-import UnityCupEditor from './UnityCupEditor.vue';
 import { computed } from 'vue';
 
 const props = defineProps<{
@@ -63,10 +62,14 @@ const props = defineProps<{
         /** The five per-stat grades the editor's selects bind to, in the config's stat order. */
         stat_grades: { key: string; label: string; grade: string | null }[];
     };
-    /** `route('runs.update', $run)`, the single write door for these columns. */
-    action: string;
-    umamusumeId: number;
-    status: string;
+    /**
+     * `route('runs.update', $run)`, `umamusumeId` and `status` travel from the page so the counters
+     * block can name what an edit writes. Kept optional: the overview itself never writes, and a
+     * caller that only wants the read passes none of them.
+     */
+    action?: string;
+    umamusumeId?: number;
+    status?: string;
 }>();
 
 const shown = (value: string | null): string | null => (value === null || value.trim() === '' ? null : value);
@@ -270,26 +273,9 @@ const hasPreseasonRows = computed(() => (props.team.preseason_rounds?.length ?? 
             </template>
         </p>
 
-        <!-- The one write. A disclosure rather than a permanent form, so the page reads before it
-             edits; the editor itself is unchanged, which is what keeps `runs.update` the single door
-             and the blank-posts-null rule (`D-220`) intact. -->
-        <details id="team-state-editor" class="mt-4 rounded-md border border-rule bg-raised">
-            <summary class="flex min-h-11 cursor-pointer list-item items-center px-3 text-sm font-semibold text-ink-strong">
-                Edit team state
-            </summary>
-            <div class="border-t border-rule p-3">
-                <p class="text-xs text-ink-muted">
-                    An edit here writes through the run's own update route, so it is the same write the
-                    Cockpit makes. A blank field posts nothing rather than a zero.
-                </p>
-                <UnityCupEditor
-                    class="mt-3"
-                    :action="props.action"
-                    :umamusume-id="props.umamusumeId"
-                    :status="props.status"
-                    :team="props.team"
-                />
-            </div>
-        </details>
+        <!-- No write here. The overview is the read half of the bento; the page mounts the one
+             `UnityCupEditor` behind its own disclosure. Duplicating the editor put two elements with
+             `#preseason_round_1`..`_4` and the seven `#team_*` ids on the page, so every label pointed
+             at two controls and a `getByRole` handle resolved to both. -->
     </section>
 </template>

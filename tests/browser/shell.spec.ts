@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 /*
  * The shell (HFW `index.html` + `assets/shell.css`). Rendered evidence, so it reads the built bundle

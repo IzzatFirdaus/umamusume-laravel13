@@ -389,7 +389,7 @@ final class TrackblazerPanelBuilder
         // KI-173: a `Scheduled` row only restates the calendar, so it neither settles an
         // obligation nor removes a race from the still-ahead window.
         $enteredIds = $run->raceEntries
-            ->filter(fn (RaceEntry $entry): bool => $entry->status?->recordsEntry() === true)
+            ->filter(fn (RaceEntry $entry): bool => $entry->status->recordsEntry())
             ->pluck('race_catalog_slot_id')
             ->filter();
 

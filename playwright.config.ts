@@ -1,23 +1,56 @@
 import { defineConfig, devices } from '@playwright/test';
-import { SCRATCH_DATABASE, DEVTOOLS_ENV } from './tests/browser/global-setup';
+import { DEVTOOLS_ENV, resolvedScratchDatabase } from './tests/browser/global-setup';
+import {
+    IDENTITY_ENV_TOKEN,
+    assertHarnessBaseUrl,
+    assertPortAvailable,
+    browserRunToken,
+    defaultSessionDatabase,
+    publishHarnessManifest,
+} from './tests/browser/support/server-identity';
 
 // Rendered-copy evidence for the ported Vue screens (ADR-0020 §1): once a screen renders
 // client-side, the server response no longer carries its markup, so the copy and
 // accessibility the repo asserts on are checked in a real browser here. Runs against a scratch
-// database the harness builds (`tests/browser/global-setup.ts`, KI-69) via `php artisan serve`;
-// run with `npm run test:browser`.
+// database the harness builds (`tests/browser/global-setup.ts`, KI-69) through a harness-owned
+// PHP server that also answers an identity probe; run with `npm run test:browser`.
 //
-// Fixed default port; two concurrent invocations share 8123 by design and one wins
-// the bind while the other fails fast — that is the intended serial contract
-// (workers: 1, retries: 0). `PLAYWRIGHT_PORT` still wins when a session names its own.
+// Fixed default port; a second invocation on the same port refuses at setup rather than
+// sharing a server — that is the intended serial contract (workers: 1, retries: 0).
+// `PLAYWRIGHT_PORT` still wins when a session names its own.
 const port = Number(process.env.PLAYWRIGHT_PORT ?? 8123);
 const baseURL = process.env.PLAYWRIGHT_BASE_URL ?? `http://127.0.0.1:${port}`;
 
+// Playwright starts webServer before globalSetup, so the port must be proven free here, while
+// the config is evaluated in the runner and before this run binds anything. Workers re-import
+// the config after the server is listening, so they must not repeat the bind check.
+// `TEST_WORKER_INDEX` is set by Playwright only in worker processes.
+if (process.env.TEST_WORKER_INDEX === undefined) {
+    await assertPortAvailable(port);
+}
+
+// An unqualified run used to compute a pid-stamped scratch path here and a different one in
+// globalSetup, so the server could open an unmigrated file while setup migrated another. Bind
+// the default to the session port; every process then reads the same absolute path.
+if (process.env.PLAYWRIGHT_SCRATCH_DB === undefined || process.env.PLAYWRIGHT_SCRATCH_DB === '') {
+    process.env.PLAYWRIGHT_SCRATCH_DB = defaultSessionDatabase(port);
+}
+
+const scratchDatabase = resolvedScratchDatabase();
+
+// Refuse a base URL that points at an application this run did not start, before a server is
+// launched or a test is collected. A harness session must never send a write to the owner's app.
+assertHarnessBaseUrl(baseURL, port);
+
+const runToken = browserRunToken();
+publishHarnessManifest({ port, baseURL, scratchDatabase, runToken });
+
 const webServerEnv = {
     ...DEVTOOLS_ENV,
-    DB_DATABASE: SCRATCH_DATABASE,
+    DB_DATABASE: scratchDatabase,
     UMA_DATABASE_ROLE: 'browser',
-    UMA_EXPECTED_DATABASE: SCRATCH_DATABASE,
+    UMA_EXPECTED_DATABASE: scratchDatabase,
+    [IDENTITY_ENV_TOKEN]: runToken,
 };
 
 export default defineConfig({
@@ -29,6 +62,12 @@ export default defineConfig({
     // The suite owns its data: five cases assert empty-state surfaces and the rest read the seeded
     // reference data, so the database is built from nothing before the first test (KI-69).
     globalSetup: './tests/browser/global-setup.ts',
+    globalTeardown: './tests/browser/global-teardown.ts',
+    // The mandatory identity preflight is an `auto: true` fixture in
+    // `tests/browser/support/base-test.ts`. Playwright 1.63 has no `setupFiles` option (verified
+    // against the installed `@playwright/test` types), so a file exporting a `beforeEach` protects
+    // only the specs that import it; the fixture is requested for every test in a file that imports
+    // that `test`, and `mandatory-preflight-coverage.spec.ts` fails the run if a spec bypasses it.
     // Serial: the dev server compiles modules on first request, so parallel workers
     // contend on a cold cache and hydrate slowly. One worker keeps the runs honest.
     fullyParallel: false,
@@ -53,7 +92,13 @@ export default defineConfig({
     },
     projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
     webServer: {
-        command: `php artisan serve --port=${port}`,
+        // Direct `php -S`, not `php artisan serve`. On Windows ServeCommand rebuilds the child
+        // process environment from `$_ENV` through a whitelist that excludes DB_DATABASE and the
+        // UMA_* identity variables; this host only escapes that because variables_order=GPCS.
+        // A php.ini change would silently point the serving process at the canonical database.
+        // The harness router adds a loopback-only identity probe without adding any route to the
+        // application itself, and `php -S` does not silently retry another port.
+        command: `php -S 127.0.0.1:${port} -t public tests/browser/server-router.php`,
         // The server the harness starts must serve the database the setup step just built.
         // `reuseExistingServer: false` is mandatory — a reused server would carry whatever database
         // it was started with (usually the shared dev file), which defeats the KI-69 contract that

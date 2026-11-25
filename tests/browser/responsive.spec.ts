@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 /*
  * The responsive sweep (plan slice 8.4), rendered-copy evidence for the link hit areas.

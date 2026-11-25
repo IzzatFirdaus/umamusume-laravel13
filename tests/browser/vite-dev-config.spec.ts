@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/base-test';
 import { resolveConfig } from 'vite';
 
 test('Vite keeps frontend hot updates without broadcasting reloads for server-side edits', async () => {

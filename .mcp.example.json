@@ -27,6 +27,7 @@
                 "npx",
                 "-y",
                 "@modelcontextprotocol/server-filesystem",
+                "--read-only",
                 "D:\\\\Projects\\\\umamusume-laravel13"
             ],
             "tools": [

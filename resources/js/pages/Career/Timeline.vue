@@ -19,6 +19,7 @@ import { computed, ref } from 'vue';
 import { useVisitState } from '../../composables/useVisitState';
 import { latestLoggedTurn } from '../../lib/career/turnDisplay';
 import Sparkline from '../../components/ui/Sparkline.vue';
+import CareerReferencePanel, { type CareerReferencePayload } from '../../components/career/CareerReferencePanel.vue';
 
 const props = defineProps<{
     run: {
@@ -75,6 +76,14 @@ const props = defineProps<{
     total_turns: number;
     /** The scenario's finale as `FinaleReader::forRun()` carries it, or null when the calendar has no row. */
     finale: { reached: boolean; outcome: string | null; placement: string | null; turn: number | null; label: string } | null;
+    /**
+     * `CareerReference::forRun()` as the controller passes it (ADR-0038's optional-interface rule:
+     * the page renders what it is given and states the absence otherwise, rather than requiring a
+     * key a controller on this branch does not yet ship). `CareerReferencePanel` owns the fallback
+     * sentence, so an absent prop and a null payload both read as "no published reference", which
+     * is the same fact.
+     */
+    reference?: CareerReferencePayload | null;
 }>();
 
 const { visiting, visitFailed } = useVisitState();
@@ -260,6 +269,10 @@ const finaleText = computed(() => {
         <p v-if="visitFailed" role="alert" class="mb-3 rounded-md border border-risk bg-raised px-3 py-2 text-sm text-risk">
             That screen did not load. Nothing was saved; try again.
         </p>
+
+        <!-- Published reference sits above the rail: it is background the Trainer reads before the
+             career's own record, and it never claims the career did any of it. -->
+        <CareerReferencePanel :reference="props.reference ?? null" />
 
         <div class="grid gap-3 g-4">
             <div class="card"><div class="text-xs font-extrabold uppercase tracking-[0.06em] text-ink-muted">Turns recorded</div><div class="font-mono text-kpi font-extrabold text-ink-strong">{{ recordedTurns }}</div></div>

@@ -1,7 +1,7 @@
 {
     "mcpServers": {
         "laravel-boost": {
-            "command": "C:\\Users\\exatf\\AppData\\Local\\Programs\\PHP\\current\\php.exe",
+            "command": "php",
             "args": [
                 "artisan",
                 "boost:mcp"
@@ -27,6 +27,7 @@
                 "npx",
                 "-y",
                 "@modelcontextprotocol/server-filesystem",
+                "--read-only",
                 "D:\\\\Projects\\\\umamusume-laravel13"
             ],
             "tools": [

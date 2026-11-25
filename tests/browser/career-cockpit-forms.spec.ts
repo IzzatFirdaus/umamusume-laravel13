@@ -1,5 +1,5 @@
 import { backToCockpit, openScenarioDetail, openTeamEdit } from '../utils/scenario-detail';
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';

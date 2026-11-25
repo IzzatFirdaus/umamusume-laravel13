@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 /*
  * S9.3 — the six reference sub-pages share one pattern, and this file is the pattern's pin.

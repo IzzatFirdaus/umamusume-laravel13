@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 import { buildAxe, openAllDisclosures } from '../utils/accessibility';
 
 // Rendered-copy evidence for the ported Catalog detail page (SCR-CAT-002, ADR-0020 §1).
