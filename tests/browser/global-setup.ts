@@ -265,10 +265,53 @@ export default async function globalSetup(): Promise<void> {
     });
 
     // Prove the application will open the scratch database with the harness environment.
-    // `uma:db-guard` returns non-zero if the resolved identity is unsafe for the declared role.
-    execSync('php artisan uma:db-guard', {
+    // A zero exit alone is not enough: it also has to report the browser role, this run's
+    // path as both the resolved and expected database, and a non-canonical target.
+    const guardOutput = execSync('php artisan uma:db-guard', {
         cwd: repoRoot,
         env: harnessEnv,
-        stdio: 'inherit',
+        encoding: 'utf8',
     });
+
+    process.stdout.write(guardOutput);
+
+    const guardLine = (label: string): string => guardOutput
+        .split(/\r?\n/)
+        .find((line) => line.trimStart().startsWith(label))?.trim() ?? '';
+    const comparable = (value: string): string => value.replace(/\\/g, '/').toLowerCase();
+    const guardChecks: Array<[string, boolean]> = [
+        ['browser role', guardLine('role').includes('browser')],
+        ['resolved scratch database', comparable(guardLine('resolved')).includes(comparable(SCRATCH_DATABASE))],
+        ['expected scratch database', comparable(guardLine('expected')).includes(comparable(SCRATCH_DATABASE))],
+        ['non-canonical target', guardLine('targets canonical').endsWith('no')],
+        ['safe identity verdict', guardOutput.includes('Database identity is safe.')],
+    ];
+    const failedGuardChecks = guardChecks.filter(([, passed]) => !passed).map(([name]) => name);
+
+    if (failedGuardChecks.length > 0) {
+        throw new Error(
+            `browser identity: uma:db-guard did not confirm ${failedGuardChecks.join(', ')} `
+            + 'for the scratch database this setup just migrated.',
+        );
+    }
+}
+
+/**
+ * Removes the scratch pointer file created by the browser test harness.
+ */
+export function removeScratchPointer(): void {
+    // Remove only the pointer this run published. A peer session's pointer stays in place, and a
+    // pointer that names a different database is never touched even if it uses this key.
+    try {
+        const path = pointerPath();
+        const published = readFileSync(path, 'utf8').trim();
+        const own = resolvedScratchDatabase();
+        const comparable = (value: string): string => value.replace(/\\/g, '/').toLowerCase();
+
+        if (published !== '' && comparable(published) === comparable(own)) {
+            rmSync(path, { force: true });
+        }
+    } catch {
+        // No pointer, or a transient lock: leaving it behind is safer than deleting a peer's.
+    }
 }

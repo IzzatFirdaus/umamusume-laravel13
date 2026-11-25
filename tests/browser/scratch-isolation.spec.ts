@@ -3,6 +3,7 @@ import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { removeScratchDatabase, scratchDatabasePath } from './global-setup';
+import { browserRunToken, defaultSessionDatabase, expectedDatabaseDigest } from './support/server-identity';
 
 /**
  * KI-80's two properties, checked without touching a database.
@@ -31,6 +32,21 @@ test('with no variable set, the default carries this process id so two runs diff
 
     expect(path).toMatch(new RegExp(`browser-scratch-${process.pid}-\\d+\\.sqlite$`));
     expect(path).not.toContain('database/browser-scratch.sqlite');
+});
+
+test('the unqualified default binds scratch path and identity token to the session port', () => {
+    const first = defaultSessionDatabase(8123);
+    const second = defaultSessionDatabase(8124);
+
+    expect(first).not.toBe(second);
+    expect(first.endsWith(join('sqlite', 'browser-8123.sqlite'))).toBe(true);
+    expect(second.endsWith(join('sqlite', 'browser-8124.sqlite'))).toBe(true);
+
+    const firstToken = browserRunToken({ PLAYWRIGHT_PORT: '8123', PLAYWRIGHT_SCRATCH_DB: first });
+    const secondToken = browserRunToken({ PLAYWRIGHT_PORT: '8124', PLAYWRIGHT_SCRATCH_DB: second });
+
+    expect(firstToken).not.toBe(secondToken);
+    expect(expectedDatabaseDigest(first)).not.toBe(expectedDatabaseDigest(second));
 });
 
 test('the sweep deletes the file it owns and leaves a peer run untouched', () => {
