@@ -1,4 +1,12 @@
 # TrainerDesk — Documentation Integrity and Release-Candidate Integration Plan
+<!-- PLAN-CONTRACT
+plan: trainerdesk-integration-plan-2026-11-24
+status: in-progress
+slices: —
+superseded-by: —
+amended-by: —
+open: no staging, no committing; owner review required before any integration
+-->
 
 **Repository:** `D:\Projects\umamusume-laravel13`
 **HEAD:** `3600741e3a67f06e542337de4ad7a517a7ffa188` (master, `0 3` ahead of `origin/master`)
@@ -252,7 +260,7 @@
 | U124 | `tests/browser/career-scheduled-race.spec.ts` | tests/browser/races | OWNER_DECISION_REQUIRED | Tied to D-8 team-race slots (BLOCKED). |
 | U125 | `tests/browser/cockpit-deferred-props.spec.ts` | tests/browser/cockpit | INCLUDE_AFTER_OWNER_REVIEW | Cockpit deferred props browser spec. |
 | U126 | `tests/browser/database-sources-filters.spec.ts` | tests/browser/database | INCLUDE_AFTER_OWNER_REVIEW | N6.5 tier filter browser spec (ND-14(b) owner-approved). |
-| U127 | `tests/browser/database-theme-matrix.spec.ts` | tests/browser | REQUIRES_ADDITIONAL_VERIFICATION | 3-theme × 2-width matrix; N6.17 PARTIAL (missing). |
+| U127 | `tests/browser/database-theme-matrix.spec.ts` | tests/browser | REQUIRES_ADDITIONAL_VERIFICATION | 3-theme — 2-width matrix; N6.17 PARTIAL (missing). |
 | U128 | `tests/browser/dialog-light-dismiss.spec.ts` | tests/browser/ui | INCLUDE_AFTER_OWNER_REVIEW | Dialog light-dismiss browser spec. |
 | U129 | `tests/browser/error-summary.spec.ts` | tests/browser/ui | INCLUDE_AFTER_OWNER_REVIEW | Error summary browser spec (N3.35). |
 | U130-U131 | `tests/browser/fixtures/ime-enter.html`, `tests/browser/fixtures/ime-enter.ts` | tests/browser/fixtures | INCLUDE_AFTER_OWNER_REVIEW | IME enter fixtures. |
@@ -348,7 +356,7 @@ Gate: C-1 Pest, C-9 `tsc --noEmit`, C-7 UI states (empty/loading/error).
 
 1. `tests/Feature/DatabaseSourceProvenanceTest.php`
 2. `tests/browser/database-sources-filters.spec.ts`
-3. `tests/browser/database-theme-matrix.spec.ts` — REQUIRES_ADDITIONAL_VERIFICATION (N6.17 PARTIAL, 3-theme × 2-width matrix missing)
+3. `tests/browser/database-theme-matrix.spec.ts` — REQUIRES_ADDITIONAL_VERIFICATION (N6.17 PARTIAL, 3-theme — 2-width matrix missing)
 
 Gate: C-1 Pest, C-7 UI states.
 
