@@ -1,0 +1,163 @@
+{
+  "route_found": true,
+  "contract": {
+    "uri": "/training-runs/{run}/advisor-analysis",
+    "name": "runs.advisor-analysis",
+    "method": "GET",
+    "middleware": ["web"],
+    "authorization": "None by design (PRD.md NFR-1, ARCHITECTURE.md section 8). The endpoint is session-cookie reachable like every page of the loopback-only tool; there is no ownership policy and no authorization layer to test against",
+    "parameters": {
+      "run": {
+        "type": "TrainingRun model binding",
+        "required": true,
+        "description": "The career run ID from the URL"
+      }
+    },
+    "response": {
+      "success_200": {
+        "contract_version": "string (e.g. '1')",
+        "career_id": "integer",
+        "career_revision": "string (16-char SHA256 fingerprint)",
+        "turn": "integer (next turn number)",
+        "scenario": "string (scenario DISPLAY LABEL, e.g. 'Unity Cup' — the snapshot ships scenarioLabel under this key; the scenario key itself is not a response field)",
+        "recommended_action": {
+          "nullable": true,
+          "structure": {
+            "id": "string (lowercase underscore, e.g. 'speed', 'rest')",
+            "label": "string (human-readable, e.g. 'Speed', 'Rest')",
+            "kind": "string ('training' | 'recovery')",
+            "eligibility": "string (always 'eligible')"
+          }
+        },
+        "deterministic_action": {
+          "nullable": true,
+          "structure": {
+            "id": "string",
+            "label": "string"
+          }
+        },
+        "decision": {
+          "provider": "string ('deterministic' | 'clef')",
+          "model": "nullable string — the decision provider model name (config default 'clef'); 'unknown' when a provider response omits its model; null when deterministic",
+          "status": "string ('fallback' | 'validated' | 'abstained')",
+          "fallback_used": "boolean",
+          "preference": "object<string, float> (provider probabilities, empty when deterministic)",
+          "confidence": "nullable float (provider confidence score, null when deterministic)"
+        },
+        "explanation": "string (one-sentence rationale)",
+        "explanation_source": "string ('deterministic' | 'logfare') — 'logfare' only when the explanation sentence itself came from the provider; a Clef-validated decision can still carry the deterministic explanation when the explanation step degraded",
+        "evidence": [
+          {
+            "id": "string (doc identifier)",
+            "path": "string (e.g. 'docs/UMAMUSUME_REFERENCE.md')",
+            "heading": "string (section heading)",
+            "line": "integer (line number in source)",
+            "servers": "array<string> (subset of ['Global', 'JP'])",
+            "citation": "string (formatted 'path § heading [server]')"
+          }
+        ],
+        "retrieval": {
+          "degraded": "boolean",
+          "lexical_count": "integer",
+          "semantic_count": "integer"
+        },
+        "unknowns": "array<string> (human-readable names of missing facts, e.g. ['Energy', 'Speed'])",
+        "conflicts": "array (always empty, reserved for future)",
+        "obligation": "nullable string (mandatory race deadline text)",
+        "alternatives": [
+          {
+            "id": "string",
+            "label": "string",
+            "reason": "string (engine's reason line)",
+            "engine_choice": "boolean"
+          }
+        ],
+        "blocked": [
+          {
+            "id": "string",
+            "label": "string",
+            "blocker": "string (reason engine withheld this action)"
+          }
+        ],
+        "generated_at": "string (ISO 8601 UTC, e.g. '2026-11-22T12:34:56+00:00')"
+      },
+      "error_404": {
+        "condition": "advisor_ai.enabled === false",
+        "body": "Laravel default 404 page (the Inertia httpException view), not JSON — the frontend branches on the status code, not the body",
+        "rationale": "\"Feature is not enabled\" and \"career has no recommendation\" are different statements"
+      },
+      "error_503": {
+        "code": "advisor_analysis_unavailable",
+        "message": "The analysis could not be produced. The recommendation on the cockpit is unaffected.",
+        "condition": "Any exception in AdvisorAnalysis::analyze()"
+      }
+    },
+    "provider_states": {
+      "deterministic": {
+        "when": "no candidates to rank OR exactly one candidate (Clef skipped) OR total_timeout exhausted OR Clef unavailable, refused or invalid. (advisor_ai.enabled === false cannot appear in a 200 payload: the endpoint aborts 404 first.)",
+        "decision.provider": "deterministic",
+        "decision.status": "fallback",
+        "decision.fallback_used": true,
+        "explanation_source": "deterministic",
+        "explanation": "Template: '{label} is recommended.' or engine's absence sentence"
+      },
+      "clef_validated": {
+        "when": "Clef returned valid choice within selectableIds AND revision matches",
+        "decision.provider": "clef",
+        "decision.status": "validated",
+        "decision.fallback_used": false,
+        "explanation_source": "logfare when the explanation sentence came from the provider; deterministic when the explanation step degraded even though the decision did not"
+      },
+      "clef_abstained": {
+        "when": "Clef returned 'insufficient_evidence'",
+        "decision.provider": "clef",
+        "decision.status": "abstained",
+        "decision.fallback_used": true,
+        "explanation_source": "deterministic OR logfare — the explanation step is independent of the decision status, so an abstained decision can carry either"
+      }
+    },
+    "fallback_behavior": {
+      "cache": {
+        "key": "advisor-ai:{contract_version}:{career_id}:{revision}",
+        "ttl": "advisor_ai.cache.ttl (default 900s)",
+        "invalidation": "By revision fingerprint — logging/editing a turn changes revision, creating new cache entry"
+      },
+      "total_timeout": "advisor_ai.total_timeout (default 12s) — outer budget; explanation skipped when exhausted",
+      "clef_timeout": "advisor_ai.decision.timeout (default 20s) — per-attempt",
+      "clef_retries": "advisor_ai.decision.retries (default 1) — only on 5xx/timeout",
+      "degradation_order": [
+        "AI switch off → deterministic only",
+        "No API key → deterministic",
+        "Clef 401/403/429 → deterministic",
+        "Clef 5xx after retries → deterministic",
+        "Clef connection timeout → deterministic",
+        "Total timeout exhausted → deterministic explanation",
+        "Clef returns invalid choice → deterministic",
+        "Clef returns insufficient_evidence → deterministic with abstained status"
+      ]
+    },
+    "missing_data_representation": {
+      "energy": "null + energyState='unknown' + 'Energy' in unknowns",
+      "mood": "null + 'Mood' in unknowns",
+      "stats": "null per stat + stat name in unknowns",
+      "build_target": "null → no ranking, absence sentence explains",
+      "no_turns": "energy=null, energyState='unknown', all stats null, unknowns includes 'every turn reading'"
+    },
+    "stale_result_behavior": "Cache: impossible by design — the cache key includes the revision fingerprint, so a new turn creates a new entry and an old entry is never served for a new state. In flight: the frontend compares both `turn` and `career_revision` against the values it requested for. Since 2026-11-23 the Cockpit also carries `advisor_revision` as a sibling prop of `advisor` (never inside it), computed by `AdvisorSnapshot::revision()` — the same function the analysis fingerprints with — so a same-turn decision-relevant edit (a corrected reading, a build-target change) is detectable client-side. A response whose revision differs from the page's is dropped. Cross-tab freshness is NOT claimed: the prop reaches an open page only on a visit or reload.",
+    "security": {
+      "auth": "None. There is no authentication layer (PRD.md NFR-1, ARCHITECTURE.md §8); the request is session-cookie reachable like every page of the loopback-only tool",
+      "authorization": "None by design. Route-model binding to TrainingRun only resolves the id; no ownership policy exists or is implied",
+      "rate_limit": "Not explicitly configured on this route",
+      "csrf": "Not applicable (GET read endpoint)"
+    }
+  },
+  "gaps": [
+    "No authorization layer exists by design (PRD.md NFR-1), so no ownership policy is missing or testable — earlier wording of this gap was wrong",
+    "Rate limiting not configured on this specific route",
+    "No OpenAPI/Swagger schema generated",
+    "The `conflicts` array is always empty — reserved for future source conflict detection",
+    "The 503 error path is regression-tested since this revision: AdvisorAnalysisRouteTest 'answers 503 with a stable code when the analysis throws, without leaking the failure' pins the status, the code, the fixed message, the absence of exception text in the body, and that the analysed career is untouched",
+    "The career revision fingerprint is defined in code (AdvisorSnapshot::fingerprint(): SHA256 over run id, scenario key, next turn, status, build target and the latest turn's readings, truncated to 16 hex chars) and recorded in ADR-0038; a note edit on the run deliberately does not change it"
+  ],
+  "dsh_handoff": "GET /training-runs/{run}/advisor-analysis (named runs.advisor-analysis) returns JSON with contract_version '1'; the parameter is the route-model-bound run and the query string is ignored. 200 = full payload (any provider state, including full fallback); 404 = layer disabled (Laravel default 404 page, not JSON — branch on the status code, show a quiet off state, never retry); 503 = {error:{code:'advisor_analysis_unavailable', message}} on any pipeline failure — show a dismissible inline error, the deterministic rail is untouched. decision.provider is 'deterministic' or 'clef' (consulted); decision.status is 'fallback'|'abstained'|'validated' with fallback_used true for abstain and every fallback; preference values are diagnostic provider figures, never win probabilities. explanation_source is 'deterministic'|'logfare' and can differ from the decision state. career_revision is a 16-char fingerprint; the cache is keyed on it, and the Cockpit now carries the same value as an `advisor_revision` prop (a sibling of `advisor`, never a key inside it) so the panel can reject a response for a career state the page no longer shows — including a same-turn reading or build-target edit, which moves the revision without moving the turn. Cross-tab freshness is not claimed: the prop reaches an open page only on a visit or reload. There is no authentication or authorization layer by design (PRD.md NFR-1). No writes from the endpoint. The cockpit advisor prop stays exactly decision+finale on /cockpit; consume this full response only on the advisor-analysis route. Canonical spec: advisor-api-contract.json and docs/audits/2026-11-22-advisor-ai-audit/14-api-contract.md; boundary record ADR-0038 (proposed)."
+}

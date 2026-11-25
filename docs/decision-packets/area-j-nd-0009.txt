@@ -1,0 +1,73 @@
+# Decision Packet — Area J: ND-9: Wizard Rulings Review
+
+## Decision Identifier and Title
+**Identifier**: ND-9
+**Title**: Wizard rulings the review flags — catalogue-card density, form-gated Continue, single-page pager, form+rarity lede, BuildTarget shape/summary/warn, Legacy summary+Edit/conditional manual/hidden grandparents/graph/picker filtering, 3x2 grid, borrowed-only slot 6, Change-link-per-section, checkbox beside Create
+**Status**: OWNER-GATED — keep rulings for 3.0.0, ship clean defects N3.19-N3.27 only; full wizard redesign is (c)
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/adr/0020-trainer-desk-2-program.md`; `SCREEN_SPEC.md` §7-21, :1927; `docs/plan/implementation-plan-2026-11-20.md` §§W3.19-W3.29; `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5`
+
+## Authority
+**Recorded rulings**: The review flags structural reversals that contradict recorded rulings (R7-36/R7-68, Slice 10.1 at SCREEN_SPEC.md:1927, Phase D, HFW parity, spec pins). Each reversal contradicts a recorded ruling and the review is screenshot-based.
+
+**Architecture fences**: ADR-0020 §3 record-only and ADR-0014 slot contract are architecture fences, not presentation rulings - they do not move even under a redesign without an ADR erratum.
+
+## Original Requirement
+From `flows-career-creation.md` and the 2026-11-20 new-career-wizard review:
+- **ND-9**: Reverse the wizard rulings the review flags (catalogue-card density, form-gated Continue, single-page pager, form+rarity lede, BuildTarget shape/summary/warn, Legacy summary+Edit/conditional manual/hidden grandparents/graph/picker filtering, 3x2 grid, borrowed-only slot 6, Change-link-per-section, checkbox beside Create)
+- (a) keep rulings for 3.0.0, ship clean defects N3.19-N3.27 only
+- (b) reverse selectively after a live walk
+- (c) full wizard redesign
+
+**Related**: N3.28
+
+## Current Implementation Status
+- **Recorded rulings maintained**: All wizard rulings kept for 3.0.0; no reversals performed
+- **Clean defects shipped**: N3.19-N3.27 shipped as clean defects; structural reversals parked under ND-9
+- **Structural reversals parked**: Summary-plus-Edit parents, hidden grandparents, wizard ancestry graph, 3x2 grid, borrowed-only slot 6, form-gated Continue, Change-link-per-section, checkbox beside Create — all parked under ND-9
+
+## Owner Question (Exact)
+**Should the owner keep the wizard rulings for 3.0.0 (Option A), reverse selectively (Option B), or undertake a full wizard redesign (Option C)?**
+
+**Option A**: Keep rulings for 3.0.0, ship clean defects N3.19-N3.27 only
+- **Evidence required**: Each reversal contradicts a recorded ruling (R7-36/R7-68, Slice 10.1 at SCREEN_SPEC.md:1927, Phase D, HFW parity, spec pins); review is screenshot-based
+- **Development blocked**: None — maintaining rulings is recording action
+- **Release relevance**: Ships for 3.0.0; no new functionality
+
+**Option B**: Reverse selectively after a live walk
+- **Evidence required**: Live walk documentation; selective reversal ruling
+- **Development blocked**: Each reversal contradicts a recorded ruling; requires ADR erratum; not recommended without full review
+- **Release relevance**: Would require tag increment; ADR erratum owed
+
+**Option C**: Full wizard redesign
+- **Evidence required**: Full redesign specification; owner ruling with ADR erratum
+- **Development blocked**: Major scope; not for 3.0.0; would require separate roadmap entry
+- **Release relevance**: Separate roadmap entry; not 3.0.0
+
+## Recommended Ruling
+**Keep rulings for 3.0.0, ship clean defects N3.19-N3.27 only (Option A)**: Each structural reversal contradicts a recorded ruling (R7-36/R7-68, Slice 10.1 at SCREEN_SPEC.md:1927, Phase D, HFW parity, spec pins). The review is screenshot-based. ADR-0020 §3 record-only and ADR-0014 slot contract are architecture fences, not presentation rulings - they do not move even under a redesign without an ADR erratum. Ship clean defects N3.19-N3.27 only; park structural reversals under ND-9.
+
+**Supporting evidence**:
+- `docs/plan/implementation-plan-2026-11-20.md:392` — wizard workstream notes
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5` — ND-1..ND-16 source
+- `docs/plan/implementation-plan-2026-11-20.md:640` — ND-9 ruling source
+- `SCREEN_SPEC.md:1927` — Slice 10.1 reference
+- `AGENTS.md:§2` — ADR-0020 §3 record-only and ADR-0014 slot contract are architecture fences
+
+**Development blocked**: None — maintaining rulings is recording action
+
+**Unaffected work**: All existing wizard functionality; no implementation change needed; clean defects N3.19-N3.27 shipped
+
+**Release relevance**: Ships for 3.0.0; no new functionality
+
+**Responsible Expert**: None (rulings maintained; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future roadmap updates would challenge the recorded rulings; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (rulings maintained; no owner action needed beyond recording)
+
+---
+
+**Key Principle**: Each structural reversal contradicts a recorded ruling; ADR-0020 §3 and ADR-0014 are architecture fences; rulings maintained for 3.0.0; structural reversals parked under ND-9.

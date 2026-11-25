@@ -363,6 +363,20 @@ class TrainingRun extends Model
     }
 
     /**
+     * The four Unity Cup preseason rounds this run recorded (D-10), oldest round first.
+     *
+     * One row per round, and a round with no row is a round never opened — a different fact from a row
+     * whose `outcome` is null, which the Trainer opened and left blank. Readers keep the two apart
+     * (D-220): neither is a loss.
+     *
+     * @return HasMany<PreseasonRound, $this>
+     */
+    public function preseasonRounds(): HasMany
+    {
+        return $this->hasMany(PreseasonRound::class)->orderBy('round');
+    }
+
+    /**
      * The Veteran-library row built from this run, or null when the Trainer never saved one.
      *
      * A `HasOne` rather than the reverse of `Veteran::trainingRun()` because the read side is what

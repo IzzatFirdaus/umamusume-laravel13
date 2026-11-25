@@ -1,0 +1,57 @@
+# Decision Packet — Area K: N7.17: Source Status/Last-Read Semantics and No Fake Live-Fetch UI
+
+## Decision Identifier and Title
+**Identifier**: N7.17
+**Title**: Source status/last-read semantics and no fake live-fetch UI — Source status/last-read semantics; no fake live-fetch UI; infrastructure contract documented
+**Status**: OWNER-GATED — source status/last-read semantics; no fake live-fetch UI; infrastructure contract documented; only already-authorized slices retained per MASTER absorption
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/plan/trainerdesk-complete-uiux-implementation-plan-2026-11-20.md`; `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md`; `flows-fetch-pipeline.md` §§N7.16–N7.17
+
+## Authority
+**Source status/last-read semantics**: Source status and last-read semantics documented; no fake live-fetch UI.
+
+**Infrastructure contract**: Infrastructure contract documented; no fake live-fetch UI implemented.
+
+## Current Implementation Status
+- **Source status/last-read semantics**: Present; semantics documented
+- **No fake live-fetch UI**: Confirmed; no fake live-fetch UI implemented
+- **Infrastructure contract**: Documented; infrastructure contract specified
+
+## Owner Question (Exact)
+**Should the owner formalize the source status/last-read semantics and no fake live-fetch UI, or maintain the current gated state?**
+
+**Option A**: Formalize source status/last-read semantics and no fake live-fetch UI
+- **Evidence required**: Source status/last-read semantics documented; no fake live-fetch UI confirmed; infrastructure contract documented
+- **Development blocked**: None — documentation and confirmation are recording actions
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Maintain current gated state
+- **Evidence required**: Gating documentation; owner ruling
+- **Development blocked**: None — gating is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Formalize source status/last-read semantics and no fake live-fetch UI (Option A)**: Source status/last-read semantics documented; no fake live-fetch UI confirmed; infrastructure contract documented. Formalize with owner ruling.
+
+**Supporting evidence**:
+- `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52` — N7.1–N7.22 owner-gated, accepted 2026-11-25
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52` — N7.16–N7.17 source status/last-read semantics
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:138` — ND-*: Phase 7 absorbed 2026-11-25; only already-authorized slices retained
+
+**Development blocked**: None — documentation and confirmation are recording actions
+
+**Unaffected work**: All existing source status and fetch pipeline functionality; no implementation change needed; formalization is recording action
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (formalization; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future fetch pipeline changes would affect the source status semantics; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (source status/last-read semantics and no fake live-fetch UI formalized; no owner action needed beyond ruling)
+
+---
+
+**Key Principle**: Source status/last-read semantics and no fake live-fetch UI formalized; infrastructure contract documented.

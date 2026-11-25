@@ -193,7 +193,7 @@ class CockpitController extends Controller
                 ->with('status', 'Team state is only available for a scenario that records a team.');
         }
 
-        $run->loadMissing('umamusume');
+        $run->loadMissing(['umamusume', 'preseasonRounds']);
 
         return Inertia::render('Career/TeamEdit', [
             'run' => $this->runSection($run),
@@ -215,7 +215,7 @@ class CockpitController extends Controller
      */
     public function scenarioDetail(TrainingRun $run): Response
     {
-        $run->loadMissing(['umamusume', 'turnEntries', 'turnEvents']);
+        $run->loadMissing(['umamusume', 'turnEntries', 'turnEvents', 'preseasonRounds']);
 
         $latest = $run->turnEntries->sortByDesc('turn')->first();
         $advice = app(TrainerAdvisor::class)->advise($latest, $run->buildTarget(), $run);
@@ -248,7 +248,7 @@ class CockpitController extends Controller
             || $run->acceptsPerformanceObservations()
             || in_array('spirit_bursts', (array) config('scenarios.scenarios.'.$run->scenarioKey().'.widgets', []), true);
 
-        $run->load(['umamusume', 'characterCard', 'turnEntries', 'raceEntries.raceCatalogSlot', 'raceEntries.scenarioSlot', 'raceEntries.turnEntry', 'deckSlots.supportCard']);
+        $run->load(['umamusume', 'characterCard', 'turnEntries', 'raceEntries.raceCatalogSlot', 'raceEntries.scenarioSlot', 'raceEntries.turnEntry', 'deckSlots.supportCard', 'preseasonRounds']);
 
         if ($needsEvents) {
             $run->load('turnEvents');

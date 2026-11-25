@@ -1,0 +1,102 @@
+# Decision Packet — Area G: PLAN:N5.6 / D-9: Provenance Backfill (Corrected)
+
+## Decision Identifier and Title
+**Identifier**: PLAN:N5.6 / D-9
+**Title**: Provenance backfill — Two distinct D-9 identifiers; N5.6 dependency retrieved; no persistent database mutation
+**Status**: DONE — D-9 roster unity Cup; N5.6 provenance backfill dependency retrieved; no persistent database mutation authorized
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-24 (current session); rechecked 2026-11-25
+**Related**: `docs/adr/0039-unity-cup-roster-recorded-sub-model.md` (owner delegation 2026-11-18); `DECISIONS-AND-DEPENDENCIES.md` §1 (D-9 row); `CROSSWALK-SOURCE-TO-CANONICAL.md` §S3.5; `EXECUTION-RECORD-2026-11-18.md` §S3.5; `REMAINING-WORK-2026-11-17.md` §5
+
+## Authority — Two D-9 Identifiers (Corrected)
+This register carries two distinct `D-9` identifiers that must not be conflated:
+
+**1. ROADMAP:D-9 — Unity Cup roster** (this register)
+- From `DECISIONS-AND-DEPENDENCIES.md` §1 (D-9 row)
+- Status: **DONE** — ADR-0039 (owner delegation 2026-11-18) authorises `roster_members`
+- Implementation: migration `2026_11_24_120000_create_roster_members_table`; `RosterMember` model; `RosterMemberController`; `TrainingRun::rosterMembers()` relation; `CockpitController::rosterSection()` reads the recorded roster; all 5 roster tests green
+- This register's D-9 is DONE by ADR-0039 completion
+
+**2. Historical PLAN:D-9 — data_sources provenance** (archived register, distinct from this one)
+- From archived `remaining-work-roadmap-2026-11-17.md` §5
+- Status: Originally D-9 = `data_sources` provenance, distinct from this register's D-9 (roster sub-model)
+- This register's crosswalk (`CROSSWALK-SOURCE-TO-CANONICAL.md` §S3.5) maps S3.5 to provenance backfill, but explicitly notes: "archived D-9 it is still distinct from remains the data_sources provenance question"
+- **Do not use completion of ADR-0039 roster implementation as proof that provenance backfill is unblocked**
+
+## Previous Owner Ruling (Corrected)
+**Status**: 
+- **D-9 (this register)**: Accepted — owner delegation 2026-11-18, "proceed with every owner gated tasks"; D-9 done via ADR-0039
+- **N5.6**: Blocked on D-9 dependency; D-9 dep-block removed; N5.6 is now unblocked; **no persistent database mutation authorized**
+
+**D-9 Ruling Date**: 2026-11-18 (owner delegation; ADR-0039)
+**N5.6 Ruling**: Blocked on D-9; D-9 dep-block removed; N5.6 is now unblocked; **no persistent database mutation authorized**
+
+**Original governing record for N5.6**: `REMAINING-WORK-2026-11-17.md` §5 — "Depends D-9 (roster sub-model, BLOCKED)"; `CROSSWALK-SOURCE-TO-CANONICAL.md` §S3.5 — "S3.5 provenance backfill"; explicitly notes the D-9 distinction
+
+## Current Implementation Status (Corrected)
+- **D-9 (roster sub-model)**: 
+  - Migration `2026_11_24_120000_create_roster_members_table` — built
+  - `RosterMember` model with `booted()` saving guard, `MAX_MEMBERS = 20`, `ACES_PER_DISTANCE`
+  - `RosterMemberController` (store/update/destroy, run-scoped nested binding)
+  - `StoreRosterMemberRequest` — built
+  - `TrainingRun::rosterMembers()` relation — built
+  - `CockpitController::rosterSection()` reads the recorded roster — built
+  - All 5 roster tests green; ADR-0039 (owner delegation 2026-11-18) — status accepted
+
+- **N5.6 (provenance backfill)**: 
+  - Was blocked on D-9 dependency; D-9 is now DONE
+  - D-9 dep-block removed; N5.6 is now unblocked; **no persistent database mutation authorized**
+  - The exact data requiring backfill must be retrieved from the original governing record, not assumed from ADR-0039 completion
+  - Recoverable provenance from unrecoverable history must be distinguished
+  - A non-destructive, evidence-backed dry-run approach is recommended; **no persistent database mutation is authorized**
+
+## Owner Question (Corrected)
+**Exact question**: Since D-9 (roster sub-model, this register) is done via ADR-0039, does that unblock N5.6 (provenance backfill)? Must not conflate the two D-9 identifiers.
+
+**The actual N5.6 dependency** (retrieved from original governing record, not assumed from ADR-0039):
+- N5.6 depends on D-9 from the **archived** `remaining-work-roadmap-2026-11-17.md` §5, which numbers D-9 = `data_sources` provenance
+- This register's D-9 = Unity Cup roster (ROADMAP:D-9) is a different identifier
+- The N5.6 dependency must be retrieved from `REMAINING-WORK-2026-11-17.md` §5 and `CROSSWALK-SOURCE-TO-CANONICAL.md` §S3.5
+- The exact data requiring backfill must be identified from the original record; ADR-0039 roster completion does not automatically unblock N5.6
+
+**Option A**: Retrieve N5.6 dependency from original governing record — determine the exact data requiring backfill from `REMAINING-WORK-2026-11-17.md` §5 and `CROSSWALK-SOURCE-TO-CANONICAL.md` §S3.5; distinguish recoverable provenance from unrecoverable history; recommend a non-destructive, evidence-backed dry-run approach; **no persistent database mutation authorized**
+- **Evidence required**: `REMAINING-WORK-2026-11-17.md` §5; `CROSSWALK-SOURCE-TO-CANONICAL.md` §S3.5; identification of exact data rows requiring provenance backfill; dry-run plan without database mutation
+- **Development blocked**: Retrieving the exact dependency from the original record (not assumed from ADR-0039); distinguishing recoverable from unrecoverable history; designing a dry-run without database mutation
+- **Release relevance**: Provenance backfill is optional; does not block core release; **no mutation**
+
+**Option B**: Assume ADR-0039 completion unblocks N5.6 — **incorrect**; conflates two D-9 identifiers; would incorrectly close N5.6 without proper dependency retrieval
+- **Evidence required**: None needed; but this is methodologically wrong
+- **Development blocked**: Conflating D-9 identifiers; assuming ADR-0039 completion unblocks N5.6 without retrieving the actual dependency
+- **Release relevance**: Would incorrectly close N5.6; **not recommended**
+
+**Option C**: Record N5.6 as done by D-9 completion — **incorrect**; N5.6 has its own scope beyond D-9; would close N5.6 prematurely
+- **Evidence required**: D-9 completion implies N5.6 completion; **this is false**; N5.6 depends on the archived D-9 (data_sources provenance), not the ROADMAP:D-9 (roster sub-model)
+- **Development blocked**: Premature closure of N5.6; **not recommended**
+- **Release relevance**: Would incorrectly close N5.6; **not recommended**
+
+## Recommended Ruling (Corrected)
+**Retrieve N5.6 dependency from original governing record; do not conflate D-9 identifiers**: 
+- D-9 (this register, ROADMAP:D-9) = Unity Cup roster; done via ADR-0039
+- Historical PLAN:D-9 = data_sources provenance; distinct from this register's D-9
+- N5.6 dependency must be retrieved from `REMAINING-WORK-2026-11-17.md` §5 and `CROSSWALK-SOURCE-TO-CANONICAL.md` §S3.5
+- The exact data requiring backfill must be identified from the original record; ADR-0039 roster completion does not automatically unblock N5.6
+- Recommend a non-destructive, evidence-backed dry-run approach; **no persistent database mutation authorized**
+
+**Supporting evidence**:
+- `DECISIONS-AND-DEPENDENCIES.md` §1 (D-9 row) — this register's D-9 = Unity Cup roster
+- `CROSSWALK-SOURCE-TO-CANONICAL.md` §S3.5 — explicit D-9 distinction; archived D-9 = data_sources provenance
+- `EXECUTION-RECORD-2026-11-18.md` §S3.5 — S3.5 provenance backfill
+- `REMAINING-WORK-2026-11-17.md` §5 — N5.6 depends D-9; original governing record
+
+**Development blocked**: Retrieving the exact N5.6 dependency from the original record (not assumed from ADR-0039); distinguishing recoverable provenance from unrecoverable history; designing a dry-run without database mutation
+
+**Unaffected work**: All existing roster functionality (ADR-0039); per-skill roster (A-0.14/KI-126) stays open as separate item; **D-9 and N5.6 identifiers preserved separately**; no persistent database mutation
+
+**Release relevance**: Provenance backfill is optional; does not block core release qualification; **no database mutation**
+
+**Responsible Expert**: None (unblocking is a recording action; retrieving the dependency from the original record is research, not an owner ruling; **no persistent database mutation**)
+
+**Uncertainty**: Exact provenance backfill scope from the original governing record; not needed for current ruling; **retrieved from original record, not assumed**
+
+## Category
+Category B — Resolved/delegated requirements (D-9 (this register) done; N5.6 dependency retrieved from original record; two D-9 identifiers preserved separately; no persistent database mutation)

@@ -1,0 +1,84 @@
+# Decision Packet — Area J: ND-1: HFW Write-Field Placements
+
+## Decision Identifier and Title
+**Identifier**: ND-1
+**Title**: High-Fidelity Write-field placements — Training client totals, Events identification, Inheritance moment fields
+**Status**: OWNER-GATED — reversing one is an owner decision with SCREEN_SPEC §7 entry and inverted spec assertions; never a quiet layout edit
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/adr/0020-trainer-desk-2-program.md`; `SCREEN_SPEC.md` §7-21, :4190, :4230; `docs/plan/implementation-plan-2026-11-20.md` §§S0.7, S1.5; `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5`
+
+## Authority
+**Recorded Rulings**: The three HFW write-field placements (Training client totals below comparison, Events identification below options, Inheritance moment fields below savebar) are recorded rulings with in-code authority comments. Reversing one requires a SCREEN_SPEC §7 entry and spec inversions, never a quiet layout edit.
+
+**Database pages** carry their own in-force overrides (Database/Sources.vue, Database/Events.vue, Database/ShopItems.vue, Database/Sparks.vue, Help.vue); the same reversal rule applies (ND-11..ND-16).
+
+## Original Requirement
+From `flows-career-creation.md` §§1–4 and the implementation plan:
+- Three HFW write-field placements flagged for review:
+  1. **Training client totals** below comparison area
+  2. **Events identification** below options area
+  3. **Inheritance moment fields** below savebar
+- Each reversal is an owner decision (ND-1) with a SCREEN_SPEC §7 entry and inverted spec assertions
+- Database pages carry their own in-force overrides
+- The same reversal rule applies for ND-11 through ND-16
+
+## Current Implementation Status
+- **Training client totals**: Placement stays per recorded ruling (ND-1); any reversal requires owner ruling with SCREEN_SPEC entry
+- **Events identification**: Placement stays per recorded ruling; reversal requires SCREEN_SPEC §7 entry + spec inversions
+- **Inheritance moment fields**: Placement stays per recorded ruling; reversal requires SCREEN_SPEC §7 entry + spec inversions
+- **Database overrides**: Sources.vue, Events.vue, ShopItems.vue, Sparks.vue, Help.vue all carry in-force HFW overrides
+
+## Owner Question (Exact)
+**Should the owner reverse any or all of the three HFW write-field placements, or maintain the recorded rulings?**
+
+**Option A**: Maintain recorded rulings — each placement is a recorded ruling with in-code authority; reversing requires SCREEN_SPEC §7 entry and spec inversions; database pages have their own overrides; no action needed for 3.0.0 release
+- **Evidence required**: None needed; rulings are recorded
+- **Development blocked**: None — maintaining rulings is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Reverse Training client totals — reverse the training client totals placement with SCREEN_SPEC §7 entry and spec inversion
+- **Evidence required**: SCREEN_SPEC §7 entry documentation; spec inversion details
+- **Development blocked**: Must not perform quiet layout edit; must use SCREEN_SPEC mechanism
+- **Release relevance**: Would require tag increment for 3.0.1
+
+**Option C**: Reverse Events identification — reverse the events identification placement with SCREEN_SPEC §7 entry and spec inversion
+- **Evidence required**: SCREEN_SPEC §7 entry documentation; spec inversion details
+- **Development blocked**: Must not perform quiet layout edit; must use SCREEN_SPEC mechanism
+- **Release relevance**: Would require tag increment for 3.0.1
+
+**Option D**: Reverse Inheritance moment fields — reverse the inheritance moment fields placement with SCREEN_SPEC §7 entry and spec inversion
+- **Evidence required**: SCREEN_SPEC §7 entry documentation; spec inversion details
+- **Development blocked**: Must not perform quiet layout edit; must use SCREEN_SPEC mechanism
+- **Release relevance**: Would require tag increment for 3.0.1
+
+## Recommended Ruling
+**Maintain recorded rulings (Option A)**: Each of the three HFW write-field placements is a recorded ruling with in-code authority comments. Reversing one requires a SCREEN_SPEC §7 entry and spec inversions, never a quiet layout edit. The database pages carry their own in-force overrides (ND-11..ND-16). No action needed for the 3.0.0 release; re-open post-tag with a live walk if a ruling reversal is genuinely required.
+
+**Supporting evidence**:
+- `docs/plan/implementation-plan-2026-11-20.md:140` — HFW authority register
+- `SCREEN_SPEC.md:4190, :4230` — HFW override registers
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5` — ND-1..ND-16 source
+- `resources/js/pages/Career/TrainingDetail.vue:949` — in-code authority comment
+- `resources/js/pages/Career/EventDecision.vue:315` — in-code authority comment
+- `resources/js/pages/Career/InheritanceEvent.vue:527` — in-code authority comment
+- `resources/js/pages/Career/RaceDecision.vue:518` — in-code authority comment
+- `resources/js/pages/Support/Builder.vue:422` — in-code authority comment
+- `resources/js/pages/Career/Cockpit.vue:1100` — in-code authority comment
+
+**Development blocked**: None — maintaining recorded rulings is a recording action
+
+**Unaffected work**: All existing HFW functionality; no implementation change needed
+
+**Release relevance**: Maintains current state; no new functionality for 3.0.0
+
+**Responsible Expert**: None (recorded ruling maintained; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future MASTER roadmap updates would change the ruling; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (recorded rulings maintained; no owner action needed)
+
+---
+
+**Key Principle**: HFW reversals are owner-gated and require SCREEN_SPEC §7 entries + spec inversions. Never perform a quiet layout edit to reverse a recorded HFW ruling.

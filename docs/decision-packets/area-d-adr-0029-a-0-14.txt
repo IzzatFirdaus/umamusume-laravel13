@@ -1,0 +1,74 @@
+# Decision Packet — Area D: ADR-0029 A-0.14: Individual Roster-Member Skills (Preserved Decline)
+
+## Decision Identifier and Title
+**Identifier**: ADR-0029 A-0.14
+**Title**: Individual roster-member skills — Declined per R8 (preserved)
+**Status**: DECLINED — R8 decline remains operative; no renewed owner approval required
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-10-25 (R8 landed at `c734a280`); preserved 2026-11-25
+**Related**: ADR-0029 (accepted 2026-10-25, owner ruling R4); KI-126; ADR-0039 (owner delegation 2026-11-18); ADR-0014
+
+## Authority
+**R8 at `c734a280`** — "A-0.13/A-0.14 are declined, KI-130 retire"; decline is preserved; no new owner direction
+
+## Original Requirement
+From `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md` §1.9 and the Group A/B audit addendum of 2026-10-24:
+- Store each roster member's skill list
+- The derived deck roster carries each member's name and state only — no skill list
+- KI-126 finding: "The `A-0.6` derived roster carries each member's name and state only — no skill list"
+
+## Previous Owner Ruling (Preserved)
+**Status**: DECLINED — per R8 (ADR-0014 owner ruling); preserved 2026-11-25; decline is operative
+**Ruling Date**: 2026-10-25 (R8 landed at `c734a280`)
+**Ruling Text**: "A-0.13/A-0.14 are declined, KI-130 retire"
+**Amendment record**: 2026-11-18 — roadmap slice 3.10 measured at `cfd8bd78`; A-0.14 status confirmed declined; **preserved 2026-11-25**: R8 decline remains operative, no renewed owner approval required
+
+**Why declined**: ADR-0014's `UserSupportCard` row stands: no `user_support_cards`, no level, no limit break, no Unique Perk state. The per-run level is in scope (authorized by A-0.5), but the skill list is outside the per-run half and declines with the collection half. The owner either adds the PRD citation or refuses the item; A-0.14 was refused per R8. **This decline is preserved; no renewed owner approval is required.**
+
+## Current Implementation Status
+- **Schema**: `team_roster_member_skill` table is NOT built; A-0.14 declined (preserved)
+- **Data access**: Skill list per roster member — outside per-run scope (declined)
+- **PRD anchor**: No PRD home for roster member skills; `FR-C` has no roster object (marked `needs-PRD-citation` in ADR-0029); **decline preserved, no new PRD citation needed**
+- **Status**: A-0.13/A-0.14 declined, KI-130 retired; **decline preserved**; nothing built
+
+**Important**: Do not reopen this feature without new owner direction. The recorded R8 decline remains operative. No contradictory statement should imply that roster-member skills are simultaneously declined and open.
+
+## Owner Question (Corrected)
+**Exact question**: Since A-0.14 was declined per R8, does the owner need to re-affirm the decline, or is there a new request to revisit?
+
+**Option A**: Re-affirm the decline — record that A-0.14 remains declined per R8, KI-130 retired, no further action needed; **decline is preserved; no renewed owner approval required**
+- **Evidence required**: R8 commit hash `c734a280`, ADR-0029 ledger entry, KI-130 retirement record; **decline preserved 2026-11-25**
+- **Development blocked**: None — decline is already recorded and preserved
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Revisit and authorize A-0.14 with a PRD citation
+- **Evidence required**: PRD section authorizing roster member skills, citation text, migration script; **would require new owner direction**
+- **Development blocked**: No PRD home exists for this item; adding one is out of scope for this ruling; **requires new owner direction**
+- **Release relevance**: Would add skill-tracking feature; optional enhancement; **requires new owner direction**
+
+**Option C**: Partially authorize — store only certain skill categories (e.g., main skill, not sub-skills)
+- **Evidence required**: PRD citation for the subset, migration script; **would require new owner direction**
+- **Development blocked**: Arbitrary subset without PRD justification; **requires new owner direction**
+- **Release relevance**: Partial feature; may create inconsistency; **requires new owner direction**
+
+## Recommended Ruling (Corrected)
+**Preserve the decline (Option A)**: A-0.14 remains declined per R8, KI-130 retired, no further action needed; **decline is preserved; no renewed owner approval required**.
+
+**Supporting evidence**:
+- `docs/adr/0029-per-run-measurement-columns.md` — ADR-0029 ledger: "A-0.13/A-0.14 declined per R8"; **decline preserved 2026-11-25**
+- `docs/research-scratch/AUDIT-AND-VERIFICATION.md` — A-0.14 audit classification; **decline preserved**
+- `KNOWN-ISSUES.md` KI-126, KI-130 — defect register entries; **decline preserved**
+- `docs/adr/README.md:104` — ADR-0029 index row: "three declined (A-0.13/A-0.14 per R8)"; **decline preserved**
+
+**Development blocked**: None — decline is already recorded and preserved; **do not reopen without new owner direction**
+
+**Unaffected work**: ADR-0039 (roster sub-model, D-9 done); per-skill roster remains open as separate item; **decline preserved**; A-0.5 (card level) already built; **decline preserved**
+
+**Release relevance**: Maintains current state; no new functionality; **decline preserved**
+
+**Responsible Expert**: None (decline is already recorded and preserved; no expert needed beyond what's recorded; **decline preserved**)
+
+**Uncertainty**: None — decline is explicit, recorded, and preserved; **decline preserved**
+
+## Category
+Category B — Resolved/delegated requirements (declined per established ruling; decline preserved; no owner action needed; do not reopen without new owner direction)

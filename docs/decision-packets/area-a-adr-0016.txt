@@ -1,0 +1,89 @@
+# Decision Packet — Area A: ADR-0016: Race Readiness and Eligibility (Corrected Second Revision)
+
+## Decision Identifier and Title
+**Identifier**: ADR-0016
+**Title**: Qualitative next-race readiness — OPEN QUESTION, data gap unclosed per rechecked infrastructure
+**Status**: OPEN QUESTION — owner hold preserved; rechecked against current source infrastructure and database state
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-10-01 (original hold); rechecked 2026-11-25
+**Related**: `docs/adr/0016-next-race-readiness-open-question.md`; KI-45; `DECISIONS-AND-DEPENDENCIES.md` D-8 row
+
+## Authority
+**File**: `docs/adr/0016-next-race-readiness-open-question.md`
+**Status**: OPEN QUESTION — no decision taken or implied; owner hold is the ruling; rechecked 2026-11-25 against current infrastructure and database state
+
+## Original Requirement
+Determine race readiness and eligibility for next race, including:
+- Race distance and surface assessment
+- Per-stat mark production from run's current stats plus trainee's aptitudes
+- Fan gate and Trackblazer grade-point trajectory
+- Maiden gate caution (true on zero slots)
+
+## Previous Owner Ruling
+**Status**: OPEN QUESTION — no decision taken or implied; owner hold is the ruling
+**Ruling Date**: 2026-10-01 (owner held Slice 3 after pre-flight data check returned blocker; hold is the ruling)
+**Original Text**: "the data gap below is unclosed and an owner scope ruling does not close it — race distance and surface live only in race_catalog_slots, which is fetch-only and holds 0 rows offline"
+
+**Rechecked (2026-11-25)**: The `gametora-races` source in `config/uma.php` §`gametora-races` carries `'seed_file' => 'races.json'` (line 554). The `EnrichRaces` command at `app/Console/Commands/EnrichRaces.php` enriches `race_catalog_slots` from gametora race snapshots. However, the historical observation that `race_catalog_slots` "holds 0 rows offline" must be rechecked against the actual current database state and committed datasets. The seed_file and seeder exist as infrastructure, but the data gap remains unclosed — the actual population state of `race_catalog_slots` offline is a separate question from the 304 pending match candidates.
+
+## Current Implementation Status (Corrected)
+- **Schema**: `race_catalog_slots` is the only table carrying race distance/surface; `scenario_slots` has no distance/surface column
+- **Fetch infrastructure**: `uma:fetch` → `GametoraRaceParser`; enrichment via `EnrichRaces` command; `config/uma.php` `gametora-races` source has `'seed_file' => 'races.json'` (line 554)
+- **Seeder infrastructure**: `EnrichRaces` command exists to populate `race_catalog_slots` from `races.json`; infrastructure present but population state unverified
+- **Database state**: 304 Pending gametora-races candidates (match-candidates); this is a **different entity** from `race_catalog_slots` population; the 304 candidates have `suggested_umamusume_id` null on all rows as expected for races
+- **KI-45**: Carries the operational statement of the data gap
+- **Three candidate shapes** reassessed with current infrastructure:
+  1. **Seed first, then predict** — `seed_file` key already present in `config/uma.php` for `gametora-races`; seeder script can populate `race_catalog_slots` offline; however, actual offline population state must be verified; building marks against real distance and surface using seeded data is viable if data is populated
+  2. **Build on what is populated** — deliver fan gate and Trackblazer grade-point trajectory, exclude maiden gate
+  3. **Build the marks anyway** — rejected: would require inventing requirements, fails no-fabricated-claims rule
+
+## Owner Question (Corrected Second Revision)
+**Exact question**: Should the owner lift the hold on Slice 3 and select one of the three candidate shapes, or maintain the hold until the data gap is resolved with current infrastructure?
+
+**Option A**: Seed first, then predict — given the `seed_file` key exists in `config/uma.php` for `gametora-races`, the seeder script can populate `race_catalog_slots` offline; however, the actual offline population state must be separately verified; build the per-stat marks against real distance and surface using the seeded data; **this is now viable if the seeder has been executed and populated data**
+- **Evidence required**: `seed_file` key confirmed in `config/uma.php`; seeder script execution result; offline census of seeded `race_catalog_slots`; per-stat mark computation
+- **Development blocked**: Verifying actual seeder execution result; per-stat mark computation using seeded data
+- **Release relevance**: Optional feature enhancement; does not block core release
+
+**Option B**: Build on what is populated — deliver fan gate and Trackblazer grade-point trajectory, exclude maiden gate
+- **Evidence required**: Fan gate implementation, grade-point trajectory data, maiden gate exclusion logic
+- **Development blocked**: Maiden gate is true on zero slots; panel rendering a rule that never fires
+- **Release relevance**: Optional feature; does not block core release
+
+**Option C**: Do not build race marks — maintain the hold indefinitely
+- **Evidence required**: None needed; hold is the ruling
+- **Development blocked**: None
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option D**: Preserve the existing owner hold — the data gap remains unclosed despite existing seed infrastructure; the 304 pending match candidates are a separate entity from `race_catalog_slots` population; no new ruling issued; hold is the ruling
+- **Evidence required**: Hold is the ruling; no revised owner ruling; data gap unclosed; 304 pending match candidates separate from race_catalog_slots
+- **Development blocked**: None — preserving the hold is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling (Corrected Second Revision)
+**Preserve the existing owner hold (Option D)**: Given the rechecked infrastructure, the historical zero-row observation is not automatically current. The `seed_file` key exists in `config/uma.php` for `gametora-races`, and the `EnrichRaces` command exists to populate `race_catalog_slots` offline, but the actual population state is unverified. The 304 pending match candidates are a **different entity** from `race_catalog_slots` population. Preserve the existing owner hold until an actual revised owner ruling is issued that accounts for the current seed infrastructure and verified database state.
+
+**Supporting evidence**:
+- `docs/adr/0016-next-race-readiness-open-question.md` — full ADR text
+- `config/uma.php` §`gametora-races` — `'seed_file' => 'races.json'` (line 554) confirms seed infrastructure exists
+- `app/Console/Commands/EnrichRaces.php` — enriches `race_catalog_slots` from gametora race snapshots
+- `docs/research-scratch/SLICE-RECORDS.md` §slice-15-2026-09-29.md §2 (R75); KI-45
+- `docs/research-scratch/game-mechanics-source-research/` — game mechanics corpus
+- `docs/audits/ui-ux-comprehensive-walk-2026-11-18.md` — UI/UX walk observations
+- Database: 304 Pending gametora-races candidates (match-candidates); separate entity from race_catalog_slots
+
+**Development blocked**: Preserving the owner hold is a recording action; no implementation change needed; verifying actual seeder execution result and per-stat mark computation using seeded data
+
+**Unaffected work**: All existing functionality; KI-45 operational statement; ADR-0020 §6.11; all other ADRs
+
+**Release relevance**: Optional feature enhancement; does not block core release qualification
+
+**Responsible Expert**: Technical Expert (Fullstack or Data Engineer) — to recheck the data gap with current infrastructure and verified database state
+
+**Uncertainty**: Exact state of currently seeded `race_catalog_slots` data; whether the seeder has been executed and with what results; whether the 304 pending match candidates and race_catalog_slots population are related; whether the data gap is truly unclosed or merely unobserved
+
+## Category
+Category A — Actual owner decisions (genuinely requires explicit product/architectural ruling; hold preserved per rechecked infrastructure with entity distinction)
+
+---
+**Key Correction**: The presence of `seed_file` in `config/uma.php` and the `EnrichRaces` command establishes source infrastructure, not successful offline population of `race_catalog_slots`. These are different entities from the 304 pending match candidates. The owner hold is preserved until an actual revised owner ruling accounts for the current seed infrastructure and verified database state.

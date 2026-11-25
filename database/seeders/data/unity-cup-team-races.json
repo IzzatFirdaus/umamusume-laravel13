@@ -1,0 +1,78 @@
+{
+  "fetched_at": "2026-11-25T00:00:00Z",
+  "scenario_key": "unity_cup",
+  "server": "[Global]",
+  "kind": "team_race",
+  "source_url": "https://gametora.com/umamusume/unity-cup",
+  "corroborating_source_urls": [
+    "https://game8.co/games/Umamusume-Pretty-Derby/archives/563657",
+    "https://game8.co/games/Umamusume-Pretty-Derby/archives/545572",
+    "https://game8.co/games/Umamusume-Pretty-Derby/archives/563652"
+  ],
+  "snapshot_path": "database/seeders/data/unity-cup-team-races.json",
+  "source_timezone": "Asia/Tokyo",
+  "calendar_contract": {
+    "basis": "month+half anchors, not career turn numbers",
+    "reason": "No source publishes the career turn a Unity Cup team race falls on (SCENARIO-PUBLISHER-REFERENCES.md:1186 records that as UNVERIFIED). scenario_slots stores month+half, so the anchors are the only citable position. Turn mapping is left to the established career calendar (09-global-race-calendar.md: (month-1)*2+half within a 24-turn year).",
+    "anchors": ["Late June", "Late December"],
+    "occurs_every_months": 6
+  },
+  "evidence_limitations": [
+    "Each team race is a set of 5 races drawn at random from a fixed pool; the courses, distances, surfaces and opponents for a given set are per-run values only the client shows. No per-leg detail is stored here.",
+    "The five categories are Sprint, Mile, Medium, Long, Dirt (docs/scenarios/02-unity-cup.md:149).",
+    "Opponent team names other than the scripted Team Zenith finals opponent are not published per round and are not stored.",
+    "No historical per-round outcome is stored here; outcomes are per-run Trainer observations (see D-10)."
+  ],
+  "rows": [
+    {
+      "source_key": "round_1",
+      "slot_label": "Round 1",
+      "title": "Team Race Round 1",
+      "description": "First team race, held after Junior Year Late December. A set of five races, one per category (Sprint, Mile, Medium, Long, Dirt).",
+      "month": 12,
+      "half": "Late",
+      "after_year": "Junior",
+      "sort_order": 0
+    },
+    {
+      "source_key": "round_2",
+      "slot_label": "Round 2",
+      "title": "Team Race Round 2",
+      "description": "Second team race, held after Classic Year Late June. A set of five races, one per category.",
+      "month": 6,
+      "half": "Late",
+      "after_year": "Classic",
+      "sort_order": 1
+    },
+    {
+      "source_key": "round_3",
+      "slot_label": "Round 3",
+      "title": "Team Race Round 3",
+      "description": "Third team race, held after Classic Year Late December. A set of five races, one per category.",
+      "month": 12,
+      "half": "Late",
+      "after_year": "Classic",
+      "sort_order": 2
+    },
+    {
+      "source_key": "round_4",
+      "slot_label": "Round 4",
+      "title": "Team Race Round 4",
+      "description": "Fourth team race, held after Senior Year Late June. A set of five races, one per category. An Elite Team can appear here under the rework conditions.",
+      "month": 6,
+      "half": "Late",
+      "after_year": "Senior",
+      "sort_order": 3
+    },
+    {
+      "source_key": "finals",
+      "slot_label": "Finals",
+      "title": "Unity Cup Finals",
+      "description": "The finals, held after Senior Year Late December. A set of five races, one per category, against the scripted Team Zenith (or a strengthened variant if unlocked).",
+      "month": 12,
+      "half": "Late",
+      "after_year": "Senior",
+      "sort_order": 4
+    }
+  ]
+}

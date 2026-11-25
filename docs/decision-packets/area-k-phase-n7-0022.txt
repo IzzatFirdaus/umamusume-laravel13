@@ -1,0 +1,54 @@
+# Decision Packet — Area K: N7.22: Task-Journey and State Audits
+
+## Decision Identifier and Title
+**Identifier**: N7.22
+**Title**: Task-journey and state audits — Task-journey and state audits; audit constraints documented; only already-authorized slices retained per MASTER absorption
+**Status**: OWNER-GATED — task-journey and state audits; audit constraints documented; only already-authorized slices retained per MASTER absorption
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/plan/trainerdesk-complete-uiux-implementation-plan-2026-11-20.md`; `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md`; `CONSOLIDATION-REPORT-2026-11-23.md` §§N7.22
+
+## Authority
+**Task-journey and state audits**: Audit constraints documented; task-journey and state audits specified.
+
+## Current Implementation Status
+- **Task-journey and state audits**: Present; audit constraints documented
+- **Audit constraints**: Documented for task-journey and state audits
+
+## Owner Question (Exact)
+**Should the owner formalize the task-journey and state audits, or maintain the current gated state?**
+
+**Option A**: Formalize task-journey and state audits
+- **Evidence required**: Audit constraints documented; task-journey and state audits specified
+- **Development blocked**: None — documentation is recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Maintain current gated state
+- **Evidence required**: Gating documentation; owner ruling
+- **Development blocked**: None — gating is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Formalize task-journey and state audits (Option A)**: Audit constraints documented; task-journey and state audits specified. Formalize with owner ruling.
+
+**Supporting evidence**:
+- `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52` — N7.1–N7.22 owner-gated, accepted 2026-11-25
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:233` — Phase 7 (N7.1–N7.22) not in MASTER roadmap; owner must rule
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:138` — ND-*: Phase 7 absorbed 2026-11-25; only already-authorized slices retained
+
+**Development blocked**: None — documentation is recording action
+
+**Unaffected work**: All existing task-journey and state audit functionality; no implementation change needed; formalization is recording action
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (formalization; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future audit changes would affect the task-journey and state audits; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (task-journey and state audits formalized; no owner action needed beyond ruling)
+
+---
+
+**Key Principle**: Task-journey and state audits formalized; audit constraints documented.

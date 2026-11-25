@@ -52,6 +52,18 @@ const props = defineProps<{
         result: string;
         corrected: boolean;
         correction_id: string | null;
+        /**
+         * `ADR-0027` D-1c: the rows this turn's live row supersedes, when the correction was appended
+         * rather than written in place. Empty for an in-place edit, which keeps no prior values: the
+         * tool never held them, so the disclosure has nothing honest to print.
+         */
+        revisions?: {
+            id: number;
+            stats: Record<string, number | null>;
+            energy_reading: { kind: 'exact' | 'band' | 'none'; value: number | null; band: string | null; text: string | null };
+            mood: string | null;
+            recorded_at: string | null;
+        }[];
         decision_url: string;
         /** `C6b.2`: the turn-correction door. Turn rows carry it; race and event rows do not. */
         edit_url?: string;
@@ -146,6 +158,29 @@ const energySeries = computed(() =>
         .map((entry) => entry.energy_reading?.value)
         .filter((value): value is number => value !== null),
 );
+
+/**
+ * `ADR-0027` D-1c. One row per turn, so a correction is a mark on the row it replaced, never a second
+ * turn. The title says which shape of correction this is: an appended pair discloses its prior reading
+ * below, an in-place edit keeps none because the tool never held it.
+ */
+const revisionTitle = (entry: { revisions?: unknown[] }): string =>
+    entry.revisions !== undefined && entry.revisions.length > 0
+        ? 'Corrected. The reading it replaced is listed beneath.'
+        : 'Corrected in place. The tool kept no record of the reading it replaced.';
+
+/** The prior reading's own date, so the disclosure is anchored to a time rather than a turn number. */
+const revisionDate = (revision: { recorded_at: string | null }): string => {
+    if (revision.recorded_at === null) {
+        return '';
+    }
+
+    const recorded = new Date(revision.recorded_at);
+
+    return Number.isNaN(recorded.getTime())
+        ? ''
+        : ` on ${recorded.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}`;
+};
 
 // The turn an undo would remove: the run's latest logged turn, from the same derivation the Events
 // and Inheritance forms prefill with. The rail used to take its own maximum across every entry, so
@@ -262,10 +297,21 @@ const finaleText = computed(() => {
                             <tr><th class="text-right">Turn</th><th class="text-left">Position</th><th class="text-left">Kind</th><th class="text-left">What happened</th><th class="text-right">Energy</th><th class="text-right">SP</th><th class="text-right">Momentum</th></tr>
                         </thead>
                         <tbody>
-                            <tr v-for="entry in visibleEntries" :key="entry.key" :class="entry.corrected ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft">
+                            <template v-for="entry in visibleEntries" :key="entry.key">
+                            <tr :class="entry.corrected ? 'is-current bg-green-tint' : ''" class="border-b border-rule-soft">
                                 <td class="py-2 pr-3 text-right font-mono">{{ entry.turn }}</td>
                                 <td class="py-2 pr-3">{{ entry.position }}</td>
-                                <td class="py-2 pr-3">{{ entry.kind_label }}</td>
+                                <td class="py-2 pr-3">
+                                    {{ entry.kind_label }}
+                                    <!-- `ADR-0027` D-1c: the correction marks the row it replaced, and
+                                         names how many prior readings the history still holds. -->
+                                    <span
+                                        v-if="entry.corrected"
+                                        class="ml-1.5 inline-flex items-center rounded-full border border-rule px-1.5 text-xs font-extrabold text-ink-strong"
+                                        :title="revisionTitle(entry)"
+                                        data-corrected="true"
+                                    >Updated</span>
+                                </td>
                                 <td class="py-2 pr-3">
                                     <b>{{ entry.action_label }}</b> <span class="text-ink-muted">· {{ entry.result }}</span>
                                     <!-- `C6b.2`: the turn-correction door, reached from the row it corrects.
@@ -290,6 +336,25 @@ const finaleText = computed(() => {
                                     <Sparkline :values="energySeries" :width="64" :height="16" />
                                 </td>
                             </tr>
+                            <!-- The superseded reading, disclosed under the row that replaced it rather
+                                 than printed as a turn of its own: one turn is one row (ADR-0027). -->
+                            <tr
+                                v-for="revision in entry.revisions ?? []"
+                                :key="`${entry.key}-rev-${revision.id}`"
+                                class="border-b border-rule-soft bg-raised/60 text-ink-muted"
+                                :data-revision-of="entry.turn"
+                            >
+                                <td class="py-1.5 pr-3 text-right font-mono">{{ entry.turn }}</td>
+                                <td class="py-1.5 pr-3">{{ entry.position }}</td>
+                                <td class="py-1.5 pr-3">Superseded</td>
+                                <td class="py-1.5 pr-3">
+                                    Earlier reading, kept as recorded{{ revisionDate(revision) }}.
+                                </td>
+                                <td class="py-1.5 pr-3 text-right font-mono">{{ revision.energy_reading?.text ?? 'N/A' }}</td>
+                                <td class="py-1.5 pr-3 text-right font-mono">{{ revision.stats.sp ?? 'N/A' }}</td>
+                                <td class="py-1.5 pr-3"></td>
+                            </tr>
+                            </template>
                         </tbody>
                     </table>
                 </div>

@@ -1,0 +1,54 @@
+# Decision Packet — Area K: N7.12: Warning That Reopening Does Not Reverse a Promotion
+
+## Decision Identifier and Title
+**Identifier**: N7.12
+**Title**: Warning that reopening does not reverse a promotion — Reopening does not reverse a promotion; detail evidence parity
+**Status**: OWNER-GATED — warning documented; re-open semantics documented; detail evidence parity check; only already-authorized slices retained per MASTER absorption
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/plan/trainerdesk-complete-uiux-implementation-plan-2026-11-20.md`; `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md`; `flows-review.md` §§N7.12
+
+## Authority
+**Reopening does not reverse a promotion**: Reopening a completed promotion does not reverse it; detail evidence parity check required.
+
+## Current Implementation Status
+- **Warning documented**: Warning that reopening does not reverse a promotion is recorded
+- **Re-open semantics documented**: Re-open semantics documented; detail evidence parity check specified
+
+## Owner Question (Exact)
+**Should the owner formalize the warning that reopening does not reverse a promotion and re-open semantics, or maintain the current gated state?**
+
+**Option A**: Formalize warning and re-open semantics
+- **Evidence required**: Warning documented; re-open semantics documented; detail evidence parity check specified
+- **Development blocked**: None — documentation and evidence parity check are recording actions
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Maintain current gated state
+- **Evidence required**: Gating documentation; owner ruling
+- **Development blocked**: None — gating is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Formalize warning that reopening does not reverse a promotion and re-open semantics (Option A)**: Warning documented that reopening does not reverse a promotion. Re-open semantics documented. Detail evidence parity check specified. Formalize with owner ruling.
+
+**Supporting evidence**:
+- `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52` — N7.1–N7.22 owner-gated, accepted 2026-11-25
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:50` — N7.12 warning and re-open semantics
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:138` — ND-*: Phase 7 absorbed 2026-11-25; only already-authorized slices retained
+
+**Development blocked**: None — documentation and evidence parity check are recording actions
+
+**Unaffected work**: All existing review/re-open functionality; no implementation change needed; formalization is recording action
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (formalization; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future re-open changes would affect the ruling; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (warning and re-open semantics formalized; no owner action needed beyond ruling)
+
+---
+
+**Key Principle**: Warning that reopening does not reverse a promotion formalized; re-open semantics and detail evidence parity check documented.

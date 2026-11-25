@@ -22,6 +22,7 @@ Central index for all audit artifacts in this repository. Organized by audit typ
 | **Scenario Detail** | [`RS-UC-SCENARIO-DETAIL-2026-11-09/`](RS-UC-SCENARIO-DETAIL-2026-11-09/) | Scenario detail audit — 2026-11-09 |
 | **Trainer Desk v3 UX** | [`trainer-desk-v3-ux/`](trainer-desk-v3-ux/) | Trainer Desk v3 UX audit with scenario research |
 | | [`trainer-desk-v3-ux-retest/`](trainer-desk-v3-ux-retest/) | Retest screenshots for v3 UX |
+| **Advisor AI** | [`2026-11-22-advisor-ai-audit/`](2026-11-22-advisor-ai-audit/) | Advisor integration audit and [JSON response contract](2026-11-22-advisor-ai-audit/advisor-api-contract.json) |
 
 ## Navigation
 

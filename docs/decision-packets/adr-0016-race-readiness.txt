@@ -1,0 +1,78 @@
+# Decision Packet — ADR-0016: Race Readiness and Eligibility
+
+## Decision Identifier and Title
+**Identifier**: ADR-0016
+**Title**: Qualitative next-race readiness — OPEN QUESTION, blocked on race requirement data
+
+## Authority
+**File**: `docs/adr/0016-next-race-readiness-open-question.md`
+**Status**: OPEN QUESTION — no decision taken or implied
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date Original**: 2026-10-01 (owner held Slice 3; hold is the ruling)
+**Amendment**: 0020 (Decision 4 reaffirms the hold; §6.11 stays unchanged for race outcomes)
+
+## Original Requirement
+Determine race readiness and eligibility for next race, including:
+- Race distance and surface assessment
+- Per-stat mark production from run's current stats plus trainee's aptitudes
+- Fan gate and Trackblazer grade-point trajectory
+- Maiden gate caution (true on zero slots)
+
+## Previous Owner Ruling
+**Status**: OPEN QUESTION — no decision taken or implied
+**Ruling Date**: 2026-10-01 (owner held Slice 3 after pre-flight data check returned blocker; hold is the ruling)
+**Original Text**: "the data gap below is unclosed and an owner scope ruling does not close it — race distance and surface live only in race_catalog_slots, which is fetch-only and holds 0 rows offline"
+
+## Current Implementation Status
+- **Schema**: `race_catalog_slots` is the only table carrying race distance/surface; `scenario_slots` has no distance/surface column
+- **Data access**: Fetch-only, no offline path (no seed_file, no seeder, `migrate --seed` cannot reproduce)
+- **KI-45**: Carries the operational statement of the gap
+- **Three candidate shapes** recorded without choosing:
+  1. Seed first, then predict (add seed_file and seeder to race_catalog_slots, then build marks)
+  2. Build on what is populated (deliver fan gate and Trackblazer grade-point trajectory, exclude maiden gate)
+  3. Build the marks anyway (rejected: would require inventing requirements, fails no-fabricated-claims rule)
+
+## Owner Question
+**Exact question**: Should the owner lift the hold on Slice 3 and select one of the three candidate shapes, or maintain the hold until the data gap is resolved?
+
+**Option A**: Seed first, then predict — give race-catalog source a `seed_file` and seeder so `race_catalog_slots` exists offline, then build marks against real distance and surface
+- **Evidence required**: `seed_file` key in source, seeder script, offline census of race_catalog_slots
+- **Development blocked**: None if seed_file added; otherwise adding seeder to existing schema
+- **Release relevance**: Optional feature; does not block core release
+
+**Option B**: Build on what is populated — deliver fan gate and Trackblazer grade-point trajectory, exclude maiden gate
+- **Evidence required**: Fan gate implementation, grade-point trajectory data, maiden gate exclusion logic
+- **Development blocked**: Maiden gate is true on zero slots; panel rendering a rule that never fires
+- **Release relevance**: Optional feature; does not block core release
+
+**Option C**: Do not build race marks — maintain the hold indefinitely
+- **Evidence required**: None needed; hold is the ruling
+- **Development blocked**: None
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Lift the hold and select Option A (Seed first, then predict)** with the following conditions:
+- Add `seed_file` key to the race-catalog source configuration
+- Implement a seeder script that populates `race_catalog_slots` offline
+- Build the per-stat marks against real distance and surface using the seeded data
+- Maintain the maiden gate exclusion (do not fire on zero-slot slots)
+- Document the data gap resolution in KI-45 and the decision register
+
+**Supporting evidence**:
+- `docs/adr/0016-next-race-readiness-open-question.md` — full ADR text
+- `docs/research-scratch/SLICE-RECORDS.md` §slice-15-2026-09-29.md §2 (R75); KI-45
+- `docs/research-scratch/game-mechanics-source-research/` — game mechanics corpus
+- `docs/audits/ui-ux-comprehensive-walk-2026-11-18.md` — UI/UX walk observations
+
+**Development blocked**: Adding `seed_file` key and seeder script to race-catalog source; implementing per-stat mark computation
+
+**Unaffected work**: All existing functionality; KI-45 operational statement; ADR-0020 §6.11; all other ADRs
+
+**Release relevance**: Optional feature enhancement; does not block core release qualification
+
+**Responsible Expert**: Technical Expert (Fullstack or Data Engineer)
+
+**Uncertainty**: Exact seeder script implementation; offline census methodology for race_catalog_slots
+
+## Category
+Category A — Actual owner decisions (genuinely requires explicit product/architectural ruling)

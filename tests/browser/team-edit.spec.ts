@@ -45,3 +45,35 @@ test('walks from the cockpit door to the team page and back', async ({ page }) =
     await expect(page).toHaveURL(/\/cockpit$/);
     await expect(page.getByRole('heading', { name: 'Where to go' })).toBeVisible();
 });
+
+test('records one preseason round without touching its siblings, and a blank round is never a loss (D-10)', async ({ page }) => {
+    // `D-10`: the four preseason rounds are separate records, so entering one round's result must not
+    // write the other three. The fixture opens on a run with no round recorded at all, which is the
+    // state where a write-everything form would fabricate three losses in one save.
+    const runUrl = await startCareer(page, 'unity_cup');
+    createdRunUrls.push(runUrl);
+
+    await page.getByRole('link', { name: 'Team setup' }).click();
+    await expect(page).toHaveURL(/\/training-runs\/\d+\/team$/);
+
+    for (const round of [1, 2, 3, 4]) {
+        const select = page.locator(`#preseason_round_${round}`);
+        await expect(select, `round ${round} has no select`).toBeVisible();
+        // Every round starts unrecorded: a fresh run records nothing, and a default of "Loss" would
+        // be the fabricated reading this case exists to catch.
+        await expect(select).toHaveValue('');
+    }
+
+    await page.selectOption('#preseason_round_2', { label: 'Win' });
+    await page.getByRole('button', { name: 'Save team state' }).click();
+    await expect(page.getByText('Saved.')).toBeVisible();
+
+    await page.reload({ waitUntil: 'domcontentloaded' });
+    await page.locator('#app > *').first().waitFor();
+
+    // Round 2 kept its win; rounds 1, 3 and 4 are still unrecorded, never losses.
+    await expect(page.locator('#preseason_round_2')).toHaveValue('WIN');
+    for (const round of [1, 3, 4]) {
+        await expect(page.locator(`#preseason_round_${round}`)).toHaveValue('');
+    }
+});

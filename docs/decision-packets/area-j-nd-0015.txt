@@ -1,0 +1,66 @@
+# Decision Packet — Area J: ND-15: Help Rules Quick-Reference Links
+
+## Decision Identifier and Title
+**Identifier**: ND-15
+**Title**: Help rules quick-reference links (db-review §3.9(9))
+**Status**: OWNER-GATED — keep text rows per the recorded inert-link rationale; link only targets that now exist with the rationale updated
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/adr/0020-trainer-desk-2-program.md`; `SCREEN_SPEC.md` §7-21, :3.9(9); `docs/plan/implementation-plan-2026-11-20.md` §§S6.9; `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5`
+
+## Authority
+**Current arrangement**: Text rows per the recorded inert-link rationale; some Help deep links are a separate slice (N6.16).
+
+**Two options documented**:
+- (a) keep text rows per the recorded inert-link rationale; (b) link only targets that now exist with the rationale updated
+
+## Original Requirement
+From `flows-career-creation.md` and the database review:
+- **ND-15**: Help rules quick-reference links (db-review §3.9(9))
+- (a) keep text rows per the recorded inert-link rationale; (b) link only targets that now exist with the rationale updated
+
+**N6.16's inbound Help deep links are a separate slice.**
+
+## Current Implementation Status
+- **Text rows**: Maintained per the recorded inert-link rationale
+- **Some targets now exist**: A few Help deep link targets now exist at HEAD; the rationale's premise is partly stale
+- **Inert links**: Remain inert per the recorded rationale
+
+## Owner Question (Exact)
+**Should the owner keep the text rows per the recorded inert-link rationale (Option A), or link only targets that now exist with the rationale updated (Option B)?**
+
+**Option A**: Keep text rows per the recorded inert-link rationale
+- **Evidence required**: Recorded inert-link rationale; some targets now exist but rationale partly stale
+- **Development blocked**: None — maintaining text rows is recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Link only targets that now exist with the rationale updated
+- **Evidence required**: Updated rationale; new link targets; some now-exist targets linked
+- **Development blocked**: Reverses a recorded decision; some targets now exist but the rationale's premise is partly stale; not a simple toggle
+- **Release relevance**: Would tag to 3.0.1 or later; rationale update owed
+
+## Recommended Ruling
+**Keep text rows per the recorded inert-link rationale (Option A)**: The text rows per the recorded inert-link rationale are maintained. Some targets now exist at HEAD, but the rationale's premise is partly stale. Linking only new targets would reverse a recorded decision. Maintain the recorded rationale; update rationale if premises change.
+
+**Supporting evidence**:
+- `docs/plan/implementation-plan-2026-11-20.md:184` — ND-15 source
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5` — ND-1..ND-16 source
+- `resources/js/pages/Help.vue:188-197` — inert links and rationales
+- `N6.16's inbound Help deep links are a separate slice`
+
+**Development blocked**: None — maintaining text rows is recording action
+
+**Unaffected work**: All existing Help functionality; no implementation change needed
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (text rows maintained; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future target additions would change the ruling; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (text rows maintained; no owner action needed)
+
+---
+
+**Key Principle**: Text rows per recorded inert-link rationale maintained; some targets now exist but rationale partly stale; linking only new targets reverses recorded decision.

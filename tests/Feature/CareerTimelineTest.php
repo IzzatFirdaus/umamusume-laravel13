@@ -121,6 +121,108 @@ it('flags a corrected turn with corrected: true and a deterministic correction_i
         );
 });
 
+it('prints one row per turn when a correction was appended, and discloses the reading it superseded (ADR-0027)', function (): void {
+    // ADR-0027 D-1b permits a second row at the same turn, linked by `corrected_from` / `superseded_by`
+    // (D-1c). The rail walked `turnEntries` — the append-only history — so a corrected turn printed
+    // twice and the career read one turn longer than it was. The load-bearing facts asserted here are
+    // the two a count-based repair would pass and a history-based rail would fail: the turn count stays
+    // at two, and the superseded figures are printed under the row that replaced them rather than as a
+    // turn of their own.
+    $run = timelineRun(['scenario' => 'ura_finale'], turns: 2);
+
+    $original = TurnEntry::query()->where('training_run_id', $run->id)->where('turn', 1)->firstOrFail();
+
+    $correction = TurnEntry::factory()->create([
+        'training_run_id' => $run->id,
+        'turn' => 1,
+        'corrected_from' => $original->id,
+        'speed' => $original->speed === null ? 1 : $original->speed + 11,
+    ]);
+
+    $original->update(['superseded_by' => $correction->id]);
+
+    $this->get(route('runs.timeline', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            // Two turns, two rows: the correction is not a third turn.
+            ->has('entries', 2)
+            ->where('entries.0.kind', 'turn')
+            ->where('entries.0.turn', 1)
+            ->where('entries.1.turn', 2)
+            // The live row prints the corrected figure.
+            ->where('entries.0.actual.speed', $correction->speed)
+            ->where('entries.0.corrected', true)
+            ->where('entries.0.correction_id', 'turn-1')
+            // The prior reading is disclosed on the row it belongs to, not silently dropped.
+            ->has('entries.0.revisions', 1)
+            ->where('entries.0.revisions.0.id', $original->id)
+            ->where('entries.0.revisions.0.stats.speed', $original->speed)
+            // The untouched turn keeps its own reading and carries no revision.
+            ->where('entries.1.actual.speed', fn (?int $speed): bool => $speed !== null)
+            ->has('entries.1.revisions', 0)
+            ->where('entries.1.corrected', false)
+        );
+});
+
+it('keeps a race attached to the row a correction superseded (ADR-0027)', function (): void {
+    // A race links by `turn_entry_id`, an id the live row does not hold once a correction appends.
+    // Collecting races by the live id alone dropped the race off the rail the moment its turn was
+    // corrected, which is the opposite of an auditable record: the race did happen.
+    $run = timelineRun(['scenario' => 'trackblazer'], turns: 1);
+
+    $original = TurnEntry::query()->where('training_run_id', $run->id)->where('turn', 1)->firstOrFail();
+
+    RaceEntry::factory()->create([
+        'training_run_id' => $run->id,
+        'turn_entry_id' => $original->id,
+        'status' => 'Completed',
+        'fans_gain' => 1200,
+    ]);
+
+    $correction = TurnEntry::factory()->create([
+        'training_run_id' => $run->id,
+        'turn' => 1,
+        'corrected_from' => $original->id,
+    ]);
+
+    $original->update(['superseded_by' => $correction->id]);
+
+    $this->get(route('runs.timeline', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            // Turn row + the race: still two entries, and the race still reads under turn 1.
+            ->has('entries', 2)
+            ->where('entries.1.kind', 'race')
+            ->where('entries.1.turn', 1)
+        );
+});
+
+it('opens the rail at the first live turn, not at a superseded row', function (): void {
+    // `firstLoggedPosition()` read the head of the append-only history. It answers the same turn
+    // number today, because a correction keeps its turn; the read is pinned so the origin cannot
+    // start reporting a row the rail does not print.
+    $run = timelineRun(turns: 2);
+
+    $original = TurnEntry::query()->where('training_run_id', $run->id)->where('turn', 1)->firstOrFail();
+
+    $correction = TurnEntry::factory()->create([
+        'training_run_id' => $run->id,
+        'turn' => 1,
+        'corrected_from' => $original->id,
+    ]);
+
+    $original->update(['superseded_by' => $correction->id]);
+
+    $this->get(route('runs.timeline', $run))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->where('origin.turn', 1)
+            ->where('origin.imported', false)
+            ->has('entries', 2)
+        );
+});
+
+
 it('interleaves race, event and purchase rows under their own turns', function (): void {
     $run = timelineRun(['scenario' => 'trackblazer'], turns: 2);
 

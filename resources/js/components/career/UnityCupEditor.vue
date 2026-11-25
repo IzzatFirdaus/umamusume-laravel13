@@ -28,6 +28,16 @@ const GRADE_OPTIONS = [
     { value: 'S', label: 'S' },
 ];
 
+/**
+ * `D-10`'s two recorded outcomes. Null is not a third outcome: a round left blank stays `''` in the
+ * form and posts null, which the server stores as an explicit unknown, never as a loss.
+ */
+const OUTCOME_OPTIONS = [
+    { value: '', label: 'Not recorded' },
+    { value: 'WIN', label: 'Win' },
+    { value: 'LOSS', label: 'Loss' },
+];
+
 /*
  * ADR-0034's vocabulary, mirrored here so the select states the whole set: `S+` is a letter the
  * client's board shows and the ladder deliberately gives no facility level, so its label says so
@@ -60,6 +70,13 @@ const props = defineProps<{
         team_motto: string | null;
         team_league_placement: number | null;
         team_preseason_wins: number | null;
+        /**
+         * `D-10`'s per-round outcomes: one entry per stored row. A round with no entry was never
+         * opened; an entry whose `outcome` is null was opened and left blank. The two are different
+         * records and neither is a loss (D-220), so the select keeps `Not recorded` as its own value
+         * and never falls back to a loss.
+         */
+        preseason_rounds?: { round: number; outcome: string | null }[];
         unity_trainings_count: number | null;
         spirit_bursts_count: number | null;
         extreme_bursts_count: number | null;
@@ -74,6 +91,14 @@ const props = defineProps<{
 
 const text = (value: string | null): string => value ?? '';
 const numeric = (value: number | null): string => (value === null ? '' : String(value));
+
+/**
+ * The outcome the run stored for a round, as the select's own value. No row and a null outcome both
+ * read `Not recorded` on screen, but only the stored value is what "unchanged" is measured against,
+ * so a round the Trainer never opened never travels as a write (D-10).
+ */
+const seededRound = (round: number): string =>
+    (props.team.preseason_rounds ?? []).find((entry) => entry.round === round)?.outcome ?? '';
 
 const form = useForm({
     umamusume_id: String(props.umamusumeId),
@@ -90,6 +115,14 @@ const form = useForm({
     team_stat_grades: Object.fromEntries(
         props.team.stat_grades.map((grade) => [grade.key, grade.grade ?? '']),
     ) as Record<string, string>,
+    // `D-10`: one select per round, seeded from the run's own rows. A round with no row seeds
+    // `Not recorded`, which is exactly what "no row" means, so opening the form changes nothing.
+    preseason_rounds: Object.fromEntries(
+        [1, 2, 3, 4].map((round) => [
+            round,
+            (props.team.preseason_rounds ?? []).find((entry) => entry.round === round)?.outcome ?? '',
+        ]),
+    ) as Record<number, string>,
 });
 
 const save = (): void => {
@@ -115,6 +148,14 @@ const save = (): void => {
                 // A blank select is "not recorded"; a letter is the Trainer's reading (D-220).
                 team_stat_grades: Object.fromEntries(
                     Object.entries(data.team_stat_grades).map(([stat, grade]) => [stat, grade === '' ? null : grade]),
+                ),
+                // `D-10`: only the rounds the Trainer moved travel, so a save that touched one round
+                // cannot rewrite its three siblings. A blank posts null — a round opened and left
+                // blank is an explicit unknown, never a loss (D-220), and never a deletion.
+                preseason_rounds: Object.fromEntries(
+                    Object.entries(data.preseason_rounds ?? {})
+                        .filter(([round, outcome]) => outcome !== seededRound(Number(round)))
+                        .map(([round, outcome]) => [round, outcome === '' ? null : outcome]),
                 ),
             };
         })
@@ -237,6 +278,35 @@ const save = (): void => {
                 <p class="text-xs text-ink-muted">
                     Per-stat grades are G to S. S+ is the overall Team Rank field above, never a
                     per-stat value.
+                </p>
+            </fieldset>
+
+            <!-- `D-10`: the four preseason rounds, each its own record, so one round's result can be
+                 entered or cleared without touching its siblings. `Not recorded` is a value, not an
+                 empty option: a round never opened and a round opened and left blank are different
+                 records, and neither is a loss (D-220). -->
+            <fieldset class="flex flex-col gap-2 @3xl:col-span-2">
+                <legend class="text-ink-muted">Preseason rounds</legend>
+                <div class="grid grid-cols-1 gap-3 @3xl:grid-cols-4">
+                    <label
+                        v-for="round in [1, 2, 3, 4]"
+                        :key="round"
+                        :for="`preseason_round_${round}`"
+                        class="flex flex-col gap-1"
+                    >
+                        <span class="text-ink-muted">Round {{ round }}</span>
+                        <BaseSelect
+                            :id="`preseason_round_${round}`"
+                            v-model="form.preseason_rounds[round]"
+                            :name="`preseason_rounds[${round}]`"
+                            :options="OUTCOME_OPTIONS"
+                        />
+                    </label>
+                </div>
+                <p class="text-xs text-ink-muted">
+                    A round left at <em>Not recorded</em> was not recorded; it is never counted as a
+                    loss. Preseason wins above is the tally you read off the client, not a count of
+                    these rounds.
                 </p>
             </fieldset>
 

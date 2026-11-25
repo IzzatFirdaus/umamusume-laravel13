@@ -1,0 +1,40 @@
+# DSH Session Telemetry OTel Plugin Configuration — Langfuse Cloud
+#
+# Apply this to: C:\Users\exatf\.dsh\profiles\desktop\cordis.patch.yml
+#
+# This configures the native @deepseek-ai/dsh-session-telemetry-otel plugin
+# to export DSH session telemetry to Langfuse Cloud via OTLP.
+#
+# Prerequisites:
+# 1. Install the plugin bundle: dsh plugin --profile desktop add @deepseek-ai/dsh-session-telemetry-otel
+# 2. Set environment variables: LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY
+# 3. Restart DSH for the plugin to load
+#
+# NOTE: This plugin emits OTLP log records. Langfuse ingests OTLP traces at
+# /api/public/otel/v1/traces. A collector or custom exporter may be needed
+# to convert log records to trace format for full LLM generation visibility.
+
+- id: session-telemetry-otel
+  name: '@deepseek-ai/dsh-session-telemetry-otel'
+  config:
+    mode: FEEDBACK_ONLY
+    shutdownTimeoutMillis: 3000
+    maxRequestBytes: 4000000
+    exporter:
+      url: https://cloud.langfuse.com/api/public/otel/v1/traces
+      headers:
+        authorization: !!js `Basic ${Buffer.from((process.env.LANGFUSE_PUBLIC_KEY||'') + ':' + (process.env.LANGFUSE_SECRET_KEY||'')).toString('base64')}`
+        x-langfuse-ingestion-version: '4'
+
+# Alternative: Latitude Cloud (uncomment if Latitude is preferred)
+# - id: session-telemetry-otel
+#   name: '@deepseek-ai/dsh-session-telemetry-otel'
+#   config:
+#     mode: FEEDBACK_ONLY
+#     shutdownTimeoutMillis: 3000
+#     maxRequestBytes: 4000000
+#     exporter:
+#       url: https://ingest.latitude.so/v1/traces
+#       headers:
+#         Authorization: !!js `Bearer ${process.env.LATITUDE_API_KEY||''}`
+#         X-Latitude-Project: !!js process.env.LATITUDE_PROJECT_SLUG||''

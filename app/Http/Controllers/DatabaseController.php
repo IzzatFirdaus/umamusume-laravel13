@@ -751,8 +751,8 @@ class DatabaseController extends Controller
         bool $evidenceUnavailable,
     ): array {
         $name = (string) $row['name'];
-        $open = array_values($openBySource[$name] ?? []);
-        $resolved = array_values($resolvedBySource[$name] ?? []);
+        $open = $openBySource[$name] ?? [];
+        $resolved = $resolvedBySource[$name] ?? [];
 
         $state = match (true) {
             $open !== [] && $resolved !== [] => 'mixed',
