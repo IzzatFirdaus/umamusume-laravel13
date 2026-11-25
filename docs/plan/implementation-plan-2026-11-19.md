@@ -1,4 +1,12 @@
 # Implementation plan - outstanding work at HEAD `fec658f8`
+<!-- PLAN-CONTRACT
+plan: implementation-plan-2026-11-19
+status: superseded
+slices: —
+superseded-by: implementation-plan-2026-11-20
+amended-by: —
+open: nothing implemented time writing
+-->
 
 Status: executable plan. Nothing in this file has been implemented; no `app/`, `database/`,
 `resources/`, `tools/` or `config/` file was modified to produce it.

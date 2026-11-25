@@ -1,4 +1,12 @@
 # Trainer Desk — Scenario-Flow Surface Implementation Plan (2026-11-17, session S18)
+<!-- PLAN-CONTRACT
+plan: implementation-plan-2026-11-17-s18
+status: landed
+slices: S18-01..S18-10
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 Sibling roadmap: `docs/roadmap/implementation-roadmap-2026-11-17-s18.md` (states **what** and **why**).
 This plan states **how**, per slice: exact files, probe-first step, failing-first assertion, the concrete

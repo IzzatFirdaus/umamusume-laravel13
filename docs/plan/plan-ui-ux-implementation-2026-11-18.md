@@ -1,4 +1,12 @@
 # Implementation plan — UI/UX outcome from AUD-20261118-001
+<!-- PLAN-CONTRACT
+plan: plan-ui-ux-implementation-2026-11-18
+status: landed
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 **Plan id:** PLAN-UIUX-20261118-001
 **Date:** 2026-11-18
@@ -15,7 +23,7 @@
 | Dimension | Current (measured) | Intended final |
 |---|---|---|
 | Audit findings | F-01/F-02/F-03 all fixed in source; audit text still says otherwise | Audit corrected by dated erratum; no false open item remains |
-| Race Decision reflow | 59 px document overflow at 320×900 (KI-166 OPEN); no spec case | ≤ 1 px at 320×900 and 640×512, with a red/green regression case |
+| Race Decision reflow | 59 px document overflow at 320—900 (KI-166 OPEN); no spec case | ≤ 1 px at 320—900 and 640—512, with a red/green regression case |
 | Other page reflow | Unmeasured at this HEAD | Measured table for all page-rendering routes; every overflow either fixed or a named row in the defect register |
 | Reduced motion | Global rule present at `app.css:943`; no emulated run | One emulated-`reduce` browser assertion proving no transition |
 | Framework instrument | 5 `SHR-8` references plus other non-existent IDs | Every cited ID resolves; two typos corrected |
@@ -79,7 +87,7 @@ No slice starts before S1 has named its offenders. S3 never precedes S2: the KI-
 
 **Objective.** Establish a measured baseline at this HEAD rather than inheriting audit claims.
 
-**Deliverables.** A session-private probe spec under `tests/browser/` (temporary diagnostic, removed before hand-off unless it becomes coverage) that, for each page-rendering route: sets 320×900 and 390×844, waits for `#app > *`, reports `document.documentElement.scrollWidth - clientWidth`, and for any overflow prints the box-tree walk-up (element, `clientWidth`, `scrollWidth`, computed `overflow-x`, nearest `[data-region]`). An axe scan on the same set using `buildAxe` from `tests/utils/accessibility.ts`.
+**Deliverables.** A session-private probe spec under `tests/browser/` (temporary diagnostic, removed before hand-off unless it becomes coverage) that, for each page-rendering route: sets 320—900 and 390—844, waits for `#app > *`, reports `document.documentElement.scrollWidth - clientWidth`, and for any overflow prints the box-tree walk-up (element, `clientWidth`, `scrollWidth`, computed `overflow-x`, nearest `[data-region]`). An axe scan on the same set using `buildAxe` from `tests/utils/accessibility.ts`.
 
 **Dependencies.** `npm run build` first; global setup rejects stale `public/build` at `global-setup.ts:203`.
 
@@ -101,7 +109,7 @@ PLAYWRIGHT_PORT=$PORT PLAYWRIGHT_SCRATCH_DB=$DB \
 
 **Objective.** Find the deepest element whose overflow is not clipped, using the walk-up method the owner prescribed at `KNOWN-ISSUES.md:5392-5395`. Do **not** repeat the refuted filter that exempted a scroller from its own 379 px border-box.
 
-**Deliverables.** A quoted probe result for `/training-runs/{id}/races` at 320×900 using the existing `openDecision` fixture pattern (`tests/browser/career-race-decision.spec.ts:21-38`, `recordTurns` helper). The result names the widener.
+**Deliverables.** A quoted probe result for `/training-runs/{id}/races` at 320—900 using the existing `openDecision` fixture pattern (`tests/browser/career-race-decision.spec.ts:21-38`, `recordTurns` helper). The result names the widener.
 
 **Dependencies.** S1 harness; the fixture's 11-turn run.
 
@@ -117,7 +125,7 @@ PLAYWRIGHT_PORT=$PORT PLAYWRIGHT_SCRATCH_DB=$DB \
 
 **Dependencies.** S2's named offender.
 
-**Acceptance.** At 320×900 and 640×512, `document.documentElement.scrollWidth - clientWidth ≤ 1` on Race Decision. At 768 and 1280 no layout change in the compared readings. The candidate race table remains reachable and selectable; its scroller, if any, still has a keyboard path.
+**Acceptance.** At 320—900 and 640—512, `document.documentElement.scrollWidth - clientWidth ≤ 1` on Race Decision. At 768 and 1280 no layout change in the compared readings. The candidate race table remains reachable and selectable; its scroller, if any, still has a keyboard path.
 
 **Verification.**
 ```bash
@@ -134,7 +142,7 @@ PLAYWRIGHT_PORT=$PORT PLAYWRIGHT_SCRATCH_DB=$DB \
 
 **Objective.** Make KI-166 fail its own spec if it returns.
 
-**Deliverables.** A new case in `tests/browser/career-race-decision.spec.ts` measuring document overflow at 320×900 after `openDecision(page)`, asserting `≤ 1`, and asserting the available-races table is still visible. Comment names KI-166 and WCAG 1.4.10.
+**Deliverables.** A new case in `tests/browser/career-race-decision.spec.ts` measuring document overflow at 320—900 after `openDecision(page)`, asserting `≤ 1`, and asserting the available-races table is still visible. Comment names KI-166 and WCAG 1.4.10.
 
 **Dependencies.** S3.
 

@@ -1,4 +1,12 @@
 # Hermes execution plan — Trainer Desk remaining work (2026-11-17, pass 2)
+<!-- PLAN-CONTRACT
+plan: hermes-execution-plan-2026-11-17
+status: in-progress
+slices: —
+superseded-by: —
+amended-by: —
+open: counts re-derived tree moved; supersedes ordering in remaining-work-roadmap-2026-11-17.md
+-->
 
 **Status:** active execution plan. Supersedes the *ordering and counts* in
 `docs/roadmap/remaining-work-roadmap-2026-11-17.md` where this file disagrees; that roadmap's phase map
