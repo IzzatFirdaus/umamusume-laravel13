@@ -208,7 +208,16 @@ Commit `4802a3cf` includes `tools/scheduler.ps1`.
 - delivery visibility unchanged (`telemetry.heartbeat.last` cache, `/api/v1/telemetry/status`);
 - Windows unattended operation unaffected — `terminate()` runs in the same PHP request lifecycle `schedule:work` already uses.
 
-**After:** handle latency returns to the no-exporter baseline in every timeout scenario (both-disabled, Langfuse-only, Latitude-only, both, Langfuse timeout, Latitude timeout, simultaneous failure). The export still runs, still reports its own outcome, and still writes the heartbeat cache. No improvement is claimed beyond these comparative measurements; the benchmark scripts and raw samples are under `.scratch-uma/8964979d/`.
+**After:** handle latency returns to the no-exporter baseline in every timeout scenario. Re-run against a black-hole collector (`http://192.0.2.1`, 3 samples per scenario, `telemetry-bench-timeout.php`):
+
+| Scenario | Baseline handle median | Handle median | Handle overhead | Terminate median | Status |
+|---|---|---|---|---|---|
+| both disabled | 11.6 ms | 11.6 ms | 0 ms | 0.6 ms | 200 |
+| Langfuse timeout | 11.6 ms | 13.4 ms | +1.8 ms | 5023 ms | 200 |
+| Latitude timeout | 11.6 ms | 12.5 ms | +0.9 ms | 5156 ms | 200 |
+| both timeout | 11.6 ms | 15.3 ms | +3.7 ms | 10093 ms | 200 |
+
+The 5s per-provider timeout still bounds the export, but it is now spent in `terminate()` — after the response is sent — so the caller sees baseline latency plus ~1–4 ms of stashing cost. Both-timeout terminate is the sum of the two sequential exports (2 × 5s), which is background time only. No improvement is claimed beyond these comparative measurements; raw samples are under `.scratch-uma/8964979d/`.
 
 ## 17. Task #56 — Final Live Acceptance and Preservation — Complete
 
