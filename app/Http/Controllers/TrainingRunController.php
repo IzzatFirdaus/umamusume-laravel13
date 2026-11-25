@@ -1194,6 +1194,17 @@ class TrainingRunController extends Controller
             // the stored one.
             $entry = $run->turnEntries()->create($attributes + ['corrected_from' => $turn->id]);
 
+            // ADR-0027 D-1a: choice and decision_snapshot are written once at action time and never
+            // updated. A correction revises the observation, not the decision, so the revision row
+            // carries forward the corrected row's choice and snapshot. recordedAction() reads only live
+            // rows (`superseded_by IS NULL`) that carry both fields, so without this inheritance a pure
+            // observation correction would make the recorded decision inaccessible. Inheriting here
+            // (never touching the original row) keeps the revision chain readable end to end, including
+            // a correction of an already-superseded row.
+            $entry->choice = $turn->choice;
+            $entry->decision_snapshot = $turn->decision_snapshot;
+            $entry->save();
+
             $turn->update(['superseded_by' => $entry->id]);
 
             // The row and its Failure event are one write (NFR-4): a correction that turns a failure
