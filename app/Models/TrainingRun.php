@@ -310,6 +310,35 @@ class TrainingRun extends Model
     }
 
     /**
+     * The run's live turn rows — the ones a correction has not superseded (ADR-0027).
+     *
+     * A correction appends a new row and points the old one at it through `corrected_from` /
+     * `superseded_by`. The live row is therefore the one nothing supersedes, and every reader that
+     * means "what the Trainer has now" must come through here rather than through `turnEntries`,
+     * which is the append-only history and still holds every superseded row.
+     *
+     * @return HasMany<TurnEntry, $this>
+     */
+    public function liveTurnEntries(): HasMany
+    {
+        return $this->hasMany(TurnEntry::class)
+            ->whereNull('superseded_by')
+            ->orderBy('turn');
+    }
+
+    /**
+     * The newest live turn row, or null when the Trainer has logged none.
+     *
+     * `reorder`, not `latest`: the relation already carries an ascending `turn` order, and appending
+     * `latest` yields `turn asc, turn desc`, which puts the *first* turn first and silently reports
+     * a stale Energy and Fans.
+     */
+    public function latestLiveTurn(): ?TurnEntry
+    {
+        return $this->liveTurnEntries()->reorder('turn', 'desc')->first();
+    }
+
+    /**
      * @return HasMany<TurnEvent, $this>
      */
     public function turnEvents(): HasMany
@@ -323,6 +352,14 @@ class TrainingRun extends Model
     public function raceEntries(): HasMany
     {
         return $this->hasMany(RaceEntry::class);
+    }
+
+    /**
+     * @return HasMany<RosterMember, $this>
+     */
+    public function rosterMembers(): HasMany
+    {
+        return $this->hasMany(RosterMember::class);
     }
 
     /**
@@ -474,25 +511,23 @@ class TrainingRun extends Model
         // `turnEntries` in their eager load). The two queries this used to issue unconditionally — one for
         // the count, one for the last turn — are the N+1 shape `ARCHITECTURE-ESSENTIALS.md` §6 tells the
         // codebase to load against.
-        if ($this->relationLoaded('turnEntries')) {
-            // `sortByDesc`, not `last()`: the loaded collection's order is the relation's own, and an
-            // assumption about it is exactly the kind of thing that silently reports a stale Energy.
-            $latest = $this->turnEntries->sortByDesc('turn')->first();
-
-            return [
-                'turn' => $this->turnEntries->count(),
-                'energy' => $latest?->energy,
-                'fans' => $latest?->fans,
-            ];
+        //
+        // ADR-0027: both arms read *live* rows only. A superseded row is history, and reporting its
+        // Energy as the Trainer's current one is the stale reading the correction exists to stop.
+        if ($this->relationLoaded('liveTurnEntries')) {
+            $live = $this->liveTurnEntries;
+        } elseif ($this->relationLoaded('turnEntries')) {
+            $live = $this->turnEntries->whereNull('superseded_by');
+        } else {
+            $live = $this->liveTurnEntries()->get();
         }
 
-        // `reorder`, not `latest`: the relation already carries an ascending `turn`
-        // order, and appending `latest` yields `turn asc, turn desc`, which puts the
-        // *first* turn first and silently reports a stale Energy and Fans.
-        $latest = $this->turnEntries()->reorder('turn', 'desc')->first();
+        // `sortByDesc`, not `last()`: the loaded collection's order is the relation's own, and an
+        // assumption about it is exactly the kind of thing that silently reports a stale Energy.
+        $latest = $live->sortByDesc('turn')->first();
 
         return [
-            'turn' => $this->turnEntries()->count(),
+            'turn' => $live->count(),
             'energy' => $latest?->energy,
             'fans' => $latest?->fans,
         ];

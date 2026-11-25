@@ -72,7 +72,7 @@ final class FinaleReader
         // that has logged every turn has arrived. A career with nothing logged has no position at all,
         // and neither case may be folded into the other: only the first has reached anything.
         $next = $run->nextTurnToPlay();
-        $position = $next ?? ($run->turnEntries->isNotEmpty()
+        $position = $next ?? ($run->liveTurnEntries()->exists()
             ? ['year' => RaceCatalogSlot::YEAR_SENIOR, 'turn' => TrainingRun::TURNS_PER_YEAR]
             : null);
 
