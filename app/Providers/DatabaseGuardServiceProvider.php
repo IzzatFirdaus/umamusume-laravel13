@@ -5,9 +5,11 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Database\SafeDatabaseManager;
+use App\Services\DatabaseSafety\AgentSessionGuard;
 use App\Services\DatabaseSafety\DatabaseGuard;
 use Illuminate\Console\Events\CommandStarting;
 use Illuminate\Database\Connectors\ConnectionFactory;
+use Illuminate\Database\Events\ConnectionEstablished;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -37,6 +39,7 @@ class DatabaseGuardServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(DatabaseGuard::class);
+        $this->app->singleton(AgentSessionGuard::class);
 
         // SafeDatabaseManager never leaves a refused connection in the cache.
         // Bound as the container's `db` service so no framework (vendor) edit
@@ -52,9 +55,18 @@ class DatabaseGuardServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $guard = $this->app->make(DatabaseGuard::class);
+        $this->app->make(AgentSessionGuard::class);
 
         Event::listen(CommandStarting::class, function (CommandStarting $event) use ($guard): void {
             $guard->assertCommandSafe($event->command, $event->input);
+        });
+
+        // Fail-safe boundary for agent-looking processes: a session marker in the
+        // environment with a canonical target is refused before the first
+        // statement. Without this registration the guard exists only as a class
+        // the tests call directly; a real agent process would not be intercepted.
+        Event::listen(ConnectionEstablished::class, function (ConnectionEstablished $event): void {
+            $this->app->make(AgentSessionGuard::class)->onConnectionEstablished($event);
         });
     }
 }

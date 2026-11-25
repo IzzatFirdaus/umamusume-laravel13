@@ -171,3 +171,51 @@ Version-specific facts that WILL drift (re-derive, don't trust):
 - Kilo CLI path: the Antigravity extensions dir `<hash>\bin\kilo.exe`
 - DSH profile path: `~/.dsh/profiles/desktop/`
 - Hermes MCP counts (8 registered / 4 enabled / 18 tools as of 2026-11-19) and the server list in the active profile's config.yaml; repo `.mcp.json` declares `laravel-boost`, `filesystem`, `playwright`
+
+---
+
+## 6. Hook recovery (2026-11-26)
+
+### Root causes found
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `MODULE_NOT_FOUND` for every `.claude/hooks/*.mjs` | `.claude/settings.json` registered `node "${CLAUDE_PROJECT_DIR}/.claude/hooks/x.mjs"`. The Copilot harness does not set `CLAUDE_PROJECT_DIR`; the unexpanded/empty value resolved to `D:/.claude/hooks/`. | Commands are now repository-relative (`node .claude/hooks/x.mjs`). Scripts resolve their own resources with `fileURLToPath(new URL('../..', import.meta.url))`, never an env var. |
+| Every Read/Edit denied under the DSH bridge | `claude-pretooluse.mjs` failed closed on any payload without a command field, and the DSH bridge registers it with matcher `.*`. | The adapter exits 0 for non-shell tools before the fail-closed path. Shell-ish names are matched separator-anchored so `execution_subagent` is not read as `exec`. |
+| `rtk hook claude` intermittent timeout | RTK reads the hook payload from stdin. Invoked without stdin it blocks until the hook timeout. | Not a config defect. RTK is a user-level hook; it must be invoked with the event JSON on stdin. Verified: 120-260ms with stdin, hangs without. |
+| GStack timeline hook timeout | `timeline-stop-hook` shells out to `bun`, which is not installed on this host. | Fail-open by design (the shim exits 0). Install `bun` to enable telemetry; no repo change needed. |
+| Impeccable hooks `MODULE_NOT_FOUND` | Hardcoded `C:/Users/exatf/.agents/...` path, and `bash` was used to launch a Windows binary. | Repo copy first (`.agents/skills/impeccable/scripts/bin/windows-x64/impeccable.exe`), home-relative fallback, executed directly. |
+| Impeccable ran on every edit | No file filter; the check costs ~3.7s under PowerShell. | `impeccable-post.mjs` now runs only for `.vue/.tsx/.jsx/.css/.scss/.sass/.less/.html/.blade.php`. Non-UI edits exit in ~140ms. |
+| Delegation state corruption risk | Read-modify-write of `subagent-depth.json` with no atomicity. | Temp file + `renameSync` in both `delegate-cap` and `delegate-release`. |
+| Duplicate MCP registration | `.vscode/mcp.json` and `.mcp.json` both declared `laravel-boost`. | `.vscode/mcp.json` removed; `.mcp.json` is the single authority. |
+
+### Verification
+
+```powershell
+node .tooling/hooks-preflight.mjs   # 22 checks, exit 0
+node .tooling/hooks.test.mjs        # regression suite, exit 0
+```
+
+The preflight now also asserts payload compatibility (Claude `tool_name/tool_input` and
+Copilot `toolName/toolArgs`), fail-closed behaviour on malformed input, and a 500ms
+latency ceiling for the classifier path.
+
+### Measured latency (2026-11-26, this host)
+
+| Path | Before | After |
+|---|---|---|
+| `claude-pretooluse.mjs` (allow) | 195-276ms | 89-158ms |
+| `impeccable-post.mjs` on a PHP edit | ~3.7s | ~140ms |
+| `impeccable-post.mjs` on a Vue edit | ~3.7s | ~180ms |
+| `rtk hook claude` (with stdin) | 120-260ms | unchanged (not a repo hook) |
+
+### Harness notes
+
+- The Copilot harness reads `.claude/settings.json` and `.claude/settings.local.json`
+  directly, so no `.github/hooks/` copy is registered — a second copy would run every
+  hook twice.
+- PascalCase event names (`PreToolUse`) select the snake_case payload; camelCase names
+  (`preToolUse`) select `toolName/toolArgs`. The adapters accept both.
+- Copilot `preToolUse` command hooks are fail-closed on exit 2 and on crashes, but
+  **timeouts are fail-open**. A hook that hangs therefore silently stops enforcing.
+  Keep the classifier path well under its timeout; the preflight enforces 500ms.

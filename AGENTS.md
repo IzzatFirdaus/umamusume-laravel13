@@ -383,6 +383,28 @@ Browser serving: `.env` sets SESSION_DRIVER=database/CACHE_STORE=database, so pa
 DB. For a browser pass use `composer serve:browser` (or `SESSION_DRIVER=file CACHE_STORE=file php artisan serve`).
 Use `file`, not `array` (array driver breaks CSRF between GET render and POST submit).
 
+## 10a. Tool selection
+Use the narrowest tool that answers the question. Do not call a tool to "check" when the
+answer is already in context.
+- **Laravel Boost** (`php artisan boost:mcp`): framework-specific verification — routes,
+  config, model/schema facts, version-correct Laravel docs. Prefer over guessing or web search
+  for anything Laravel/PHP-specific.
+- **Firecrawl**: external technical research only (upstream docs, issue threads, release notes).
+  Requires `FIRECRAWL_API_KEY` in the environment; when unset the server is unavailable, not broken.
+- **Playwright MCP**: exploratory browser inspection. Repository acceptance tests stay in
+  `playwright.config.ts` / `tests/` — do not replace them with ad-hoc MCP calls.
+- **Filesystem MCP**: read-only, scoped to this repository. Prefer native Read/Grep/Glob; use it
+  only when a tool needs an MCP-shaped file interface.
+- **RTK**: rewrites shell commands for compact output. Registered as a user-level PreToolUse hook;
+  it must receive stdin (a hook invoked without stdin blocks until timeout).
+- **Impeccable**: frontend design checks. The post-edit shim runs only for
+  `.vue/.tsx/.jsx/.css/.scss/.sass/.less/.html/.blade.php`; the Stop hook runs the full pass.
+- **GStack**: session timeline telemetry. Requires `bun` on PATH; without it the hook is a no-op.
+
+Hook and MCP health: `node .tooling/hooks-preflight.mjs` (22 checks) and
+`node .tooling/hooks.test.mjs` (regression suite). Run both after changing any hook,
+`.claude/settings.json`, or MCP configuration.
+
 ## 11. Change-safety
 
 - **Schema.** Migration travels with updated `ARCHITECTURE-ESSENTIALS.md` digest, PRD citation

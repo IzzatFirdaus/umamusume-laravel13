@@ -15,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 beforeEach(function () {
     Config::set('database.connections.sqlite.database', 'database/database.sqlite');
-    Config::set('database-safety.canonical', 'D:/Projects/trainerdesk-backend/database/database.sqlite');
+    Config::set('database-safety.canonical', 'D:/Projects/umamusume-laravel13/database/database.sqlite');
     Config::set('database-safety.isolated_roles', ['isolated', 'test', 'browser', 'scratch', 'e2']);
     Config::set('database-safety.destructive_commands', ['migrate:fresh', 'migrate:refresh', 'migrate:reset', 'migrate:rollback', 'db:wipe']);
 
@@ -44,6 +44,30 @@ function guardEnv(string $name, ?string $value): void
     $_ENV[$name] = $value;
     $_SERVER[$name] = $value;
 }
+
+/*
+ * These tests point the `sqlite` connection at the canonical file to prove the
+ * guard refuses it. RefreshDatabase's `beforeApplicationDestroyed` hook then
+ * re-resolves `connection('sqlite')` to roll back — and it resolves the config
+ * left behind by the last test, so it would open the real canonical file, find
+ * no open transaction, and set `RefreshDatabaseState::$migrated = false`. The
+ * next test in the shared process then re-runs `migrate:fresh` against the
+ * restored in-memory PDO, which is what produced "cannot VACUUM from within a
+ * transaction" and "table migrations already exists" for whichever suite ran
+ * second.
+ *
+ * Restoring the in-memory config here means the teardown hook resolves the
+ * same PDO the test began with, so the shared lifecycle is left exactly as it
+ * was found and no test ever opens the owner's file for a rollback.
+ */
+afterEach(function () {
+    Config::set('database.connections.sqlite.database', ':memory:');
+
+    foreach (['UMA_DATABASE_ROLE', 'UMA_ALLOW_CANONICAL_DESTRUCTIVE', 'UMA_OPERATOR_ACKNOWLEDGED', 'UMA_EXPECTED_DATABASE'] as $name) {
+        putenv($name);
+        unset($_ENV[$name], $_SERVER[$name]);
+    }
+});
 
 it('refuses destructive command when no role declared and DB targets canonical', function () {
     Config::set('database.connections.sqlite.database', 'database/database.sqlite');
@@ -590,6 +614,17 @@ it('does not cache a connection refused by a ConnectionEstablished listener', fu
         // returns false and the guard returns early.
         guardEnv('UMA_DATABASE_ROLE', 'test');
         Config::set('database.connections.sqlite.database', ':memory:');
+
+        // `$db->purge()` above discarded the shared connection, but
+        // RefreshDatabaseState still holds the *old* PDO — the one whose test
+        // transaction was never rolled back (teardown rolled back the purged
+        // connection, not this PDO). The next suite would restore that PDO and
+        // run `migrate:fresh` on it, which is exactly "cannot VACUUM from within
+        // a transaction". Drop the stale PDO and mark the database unmigrated so
+        // the next test migrates a fresh :memory: database (the config is
+        // restored to :memory: by the afterEach hook above).
+        Illuminate\Foundation\Testing\RefreshDatabaseState::$inMemoryConnections = [];
+        Illuminate\Foundation\Testing\RefreshDatabaseState::$migrated = false;
 
         $events->listen(ConnectionEstablished::class, function ($event) use ($guard): void {
             $guard->onConnectionEstablished($event);
