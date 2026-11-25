@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "skills": [
+    {
+      "id": "migration_create",
+      "name": "Migration Creator",
+      "description": "Create a new Laravel database migration for a table or schema change",
+      "triggers": {
+        "keywords": ["migration", "create table", "schema", "database column", "add column"],
+        "file_types": [".php"],
+        "task_categories": ["database", "schema"],
+        "patterns": ["create.*table", "migration.*create", "add.*column"]
+      },
+      "input": {
+        "table_name": { "type": "string", "required": true },
+        "action": { "type": "string", "enum": ["create", "update", "drop"], "default": "create" }
+      },
+      "output": { "file_path": "string", "migration_name": "string" },
+      "dependencies": [],
+      "enabled": true,
+      "command": "make:migration {action}_{table_name}_table --create={table_name}"
+    },
+    {
+      "id": "model_create",
+      "name": "Model Creator",
+      "description": "Create a new Eloquent model with optional factory, seeder, and migration",
+      "triggers": {
+        "keywords": ["model", "create model", "new model", "eloquent"],
+        "file_types": [".php"],
+        "task_categories": ["model", "eloquent"],
+        "patterns": ["create.*model", "make.*model"]
+      },
+      "input": { "model_name": { "type": "string", "required": true } },
+      "output": { "files_created": "array" },
+      "dependencies": [],
+      "enabled": true,
+      "command": "make:model {model_name}",
+      "command_options": ["model_name", "factory", "migration", "seed", "policy", "all", "force", "pivot", "resource", "api"]
+    }
+  ],
+  "note": "Template only. Copy to .agents/skills.json and populate from .agents/skills-lock.json. .agents/ is gitignored (personal config)."
+}
