@@ -84,7 +84,11 @@ class TelemetryStatusController extends Controller
             return false;
         }
 
-        $pid = trim((string) file_get_contents($pidFile));
+        // The PID file contract (tools/scheduler.ps1) is "<PID>|<StartTime>"; the
+        // start time is what guards against PID reuse. Only the PID segment decides
+        // liveness here.
+        $raw = trim((string) file_get_contents($pidFile));
+        $pid = trim(explode('|', $raw)[0]);
         if ($pid === '' || ! ctype_digit($pid)) {
             return false;
         }
