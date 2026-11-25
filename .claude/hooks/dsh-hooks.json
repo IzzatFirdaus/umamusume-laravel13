@@ -6,7 +6,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/claude-pretooluse.mjs\"",
+            "command": "node .claude/hooks/claude-pretooluse.mjs",
             "timeout": 15
           }
         ]
@@ -18,7 +18,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/delegation-log.mjs\"",
+            "command": "node .claude/hooks/delegation-log.mjs",
             "timeout": 10
           }
         ]

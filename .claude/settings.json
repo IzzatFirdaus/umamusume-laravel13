@@ -16,21 +16,21 @@
   "hooks": {
     "PreToolUse": [
       {
-        "matcher": "Bash|PowerShell",
+        "matcher": "Bash|PowerShell|bash|powershell|run_in_terminal|terminal|shell",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/claude-pretooluse.mjs\"",
+            "command": "node .claude/hooks/claude-pretooluse.mjs",
             "timeout": 15
           }
         ]
       },
       {
-        "matcher": "Task|Agent",
+        "matcher": "Task|Agent|task|runSubagent|execution_subagent",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/delegate-cap.mjs\"",
+            "command": "node .claude/hooks/delegate-cap.mjs",
             "timeout": 10
           }
         ]
@@ -38,21 +38,21 @@
     ],
     "PostToolUse": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "Edit|Write|edit|write|create_file|replace_string_in_file|insert_edit_into_file|apply_patch",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/impeccable-post.mjs\"",
+            "command": "node .claude/hooks/impeccable-post.mjs",
             "timeout": 15
           }
         ]
       },
       {
-        "matcher": "Task|Agent",
+        "matcher": "Task|Agent|task|runSubagent|execution_subagent",
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/delegate-release.mjs\"",
+            "command": "node .claude/hooks/delegate-release.mjs",
             "timeout": 10
           }
         ]
@@ -63,7 +63,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/impeccable-stop.mjs\"",
+            "command": "node .claude/hooks/impeccable-stop.mjs",
             "timeout": 30
           }
         ]
@@ -75,7 +75,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/headroom-session.mjs\"",
+            "command": "node .claude/hooks/headroom-session.mjs",
             "timeout": 60
           }
         ]
@@ -87,7 +87,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PROJECT_DIR}/.claude/hooks/delegation-log.mjs\"",
+            "command": "node .claude/hooks/delegation-log.mjs",
             "timeout": 10
           }
         ]
