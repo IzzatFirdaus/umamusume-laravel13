@@ -27,6 +27,24 @@ beforeEach(function () {
     Config::set('database-safety.isolated_roles', ['isolated', 'test', 'browser', 'scratch', 'e2']);
 });
 
+/*
+ * Every test here repoints the `sqlite` connection at the canonical file and
+ * declares a role (including the misleading `development` label). The guard
+ * reads `$_SERVER` before `putenv`, so a leftover `$_SERVER['UMA_DATABASE_ROLE']`
+ * shadows whatever a later suite declares with `putenv` alone — which is how
+ * `MigrationReversibilityTest` failed its `isIsolatedRole()` gate when this file
+ * ran first. Restore the in-memory config and clear the environment on the way
+ * out, so the shared process is left exactly as it was found.
+ */
+afterEach(function () {
+    Config::set('database.connections.sqlite.database', ':memory:');
+
+    foreach (['UMA_DATABASE_ROLE', 'UMA_OPERATOR_ACKNOWLEDGED', 'UMA_EXPECTED_DATABASE'] as $name) {
+        putenv($name);
+        unset($_ENV[$name], $_SERVER[$name]);
+    }
+});
+
 function setAgentMarkers(bool $present): void
 {
     foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
@@ -74,7 +92,12 @@ it('treats a misleading role as no isolation when the resolved path is canonical
     expect(fn () => $agentGuard->onConnectionEstablished($event))->toThrow(DatabaseSafetyViolation::class);
 });
 
-it('allows the connection when the operator explicitly acknowledges', function () {
+it('refuses the connection when the operator explicitly acknowledges', function () {
+    // FS-INT-3 hardened model: an agent session can never self-authorise a
+    // canonical write. UMA_OPERATOR_ACKNOWLEDGED=yes set inside an agent process
+    // (or inherited from a parent operator shell) grants nothing — only the
+    // Trainer's own interactive process (no agent marker) may use the escape
+    // hatch. The agent-marker fail-safe therefore still refuses.
     setAgentMarkers(true);
     putenv('UMA_OPERATOR_ACKNOWLEDGED=yes');
     Config::set('database.connections.sqlite.database', 'database/database.sqlite');
@@ -82,8 +105,7 @@ it('allows the connection when the operator explicitly acknowledges', function (
     $agentGuard = app(AgentSessionGuard::class);
     $event = new ConnectionEstablished(DB::connection());
 
-    $agentGuard->onConnectionEstablished($event);
-    expect(true)->toBeTrue();
+    expect(fn () => $agentGuard->onConnectionEstablished($event))->toThrow(DatabaseSafetyViolation::class);
 });
 
 it('never refuses the Trainer path when no agent marker is present', function () {
@@ -162,19 +184,26 @@ PHP);
 
 it('canonical inventory is stable across the whole boundary suite', function () {
     // Read-only reconciliation: the owner's file ends this suite with the same
-    // row counts it started with. Runs through the operator-acknowledged path
-    // because the PHPUnit process itself is an agent session. The probe is a
-    // fresh subprocess whose env inherits phpunit.xml's forced DB_DATABASE;
-    // rather than relying on unsetting inherited vars, the probe FORCES the
-    // canonical path directly (absolute, read-only usage below) before boot.
+    // row counts it started with. Runs through the Trainer path: a marker-free
+    // subprocess reads the canonical file, because under the hardened model an
+    // agent session (which the PHPUnit process is) can never receive a canonical
+    // read that an operator-ack can authorise — marker-free is the only identity
+    // that may touch the real file. The probe is a fresh subprocess whose env
+    // inherits phpunit.xml's forced DB_DATABASE; rather than relying on unsetting
+    // inherited vars, the probe FORCES the canonical path directly (absolute,
+    // read-only usage below) before boot, and strips every agent marker.
     $repo = 'D:/Projects/umamusume-laravel13';
     $canonical = $repo.'/database/database.sqlite';
 
     $script = sys_get_temp_dir().'/guard-inventory-probe-'.uniqid().'.php';
     file_put_contents($script, <<<PHP
 <?php
-putenv('UMA_OPERATOR_ACKNOWLEDGED=yes');
-\$_SERVER['UMA_OPERATOR_ACKNOWLEDGED'] = 'yes';
+foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as \$m) {
+    putenv(\$m);
+    unset(\$_SERVER[\$m], \$_ENV[\$m]);
+}
+putenv('UMA_OPERATOR_ACKNOWLEDGED');
+unset(\$_SERVER['UMA_OPERATOR_ACKNOWLEDGED'], \$_ENV['UMA_OPERATOR_ACKNOWLEDGED']);
 // Force the canonical identity directly; robust against any inherited env.
 putenv('DB_DATABASE={$canonical}');
 \$_SERVER['DB_DATABASE'] = '{$canonical}';
