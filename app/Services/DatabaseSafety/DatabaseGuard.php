@@ -235,6 +235,27 @@ class DatabaseGuard
     }
 
     /**
+     * Refuse any write when an isolated role targets the canonical file.
+     *
+     * This is the last check before a mutation lands — the factory path, the
+     * seeder path, Query Builder and Eloquent mass operations all funnel
+     * through it. A process that declared an isolated role (and so claimed it is
+     * not the interactive app) may not write real data, full stop.
+     */
+    public function assertWriteSafe(string $context): void
+    {
+        if (! $this->isIsolatedRole() || ! $this->targetsCanonical()) {
+            return;
+        }
+
+        throw new DatabaseSafetyViolation(
+            "{$context}: UMA_DATABASE_ROLE={$this->role()} but DB_DATABASE resolves the canonical "
+            ."development database {$this->canonicalPath()}. An isolated role may not write real "
+            .'data; point DB_DATABASE at an absolute scratch path.'
+        );
+    }
+
+    /**
      * A cached config freezes the database path that was resolved when it was
      * written, so a harness override passed as an environment variable would be
      * ignored and the process would silently open the canonical file.
