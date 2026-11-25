@@ -393,9 +393,18 @@ it('keeps a stored choice when a correction writes without one', function (): vo
         'energy' => 60, 'fans' => 1000, 'sp' => 120,
     ])->assertSessionHasNoErrors();
 
+    // ADR-0027: the correction appends a revision row; the committed row keeps its choice, its
+    // snapshot, and its values untouched, and is marked superseded by the revision.
     expect($entry->fresh()->choice)->toBe($value)
         ->and($entry->fresh()->decision_snapshot)->toBe($snapshot)
-        ->and($entry->fresh()->energy)->toBe(60);
+        ->and($entry->fresh()->energy)->toBe(80)
+        ->and($entry->fresh()->superseded_by)->not()->toBeNull();
+
+    $revision = TurnEntry::query()->where('training_run_id', $run->id)->where('turn', 1)
+        ->whereNull('superseded_by')->sole();
+
+    expect($revision->energy)->toBe(60)
+        ->and($revision->corrected_from)->toBe($entry->id);
 });
 
 it('exposes the eighth contract key and keeps the seven it had', function (): void {

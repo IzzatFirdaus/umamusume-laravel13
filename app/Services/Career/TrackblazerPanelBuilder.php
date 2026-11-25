@@ -386,7 +386,12 @@ final class TrackblazerPanelBuilder
         $window = (int) ($planning['calendar_window'] ?? 0);
 
         $next = $run->nextTurnToPlay();
-        $enteredIds = $run->raceEntries->pluck('race_catalog_slot_id')->filter();
+        // KI-173: a `Scheduled` row only restates the calendar, so it neither settles an
+        // obligation nor removes a race from the still-ahead window.
+        $enteredIds = $run->raceEntries
+            ->filter(fn (RaceEntry $entry): bool => $entry->status?->recordsEntry() === true)
+            ->pluck('race_catalog_slot_id')
+            ->filter();
 
         /** @var Collection<int, RaceCatalogSlot> $ahead */
         $ahead = RaceCatalogSlot::query()

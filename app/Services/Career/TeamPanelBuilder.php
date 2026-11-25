@@ -113,7 +113,12 @@ final class TeamPanelBuilder
         // A hand-entered race has no slot id, so it cannot settle a mandatory row. Reading the
         // foreign key rather than the relation is the same choice the race strip makes, for the same
         // reason: a deleted turn must not delete its race, so the column is the fact that survives.
-        $entered = $run->raceEntries->pluck('race_catalog_slot_id')->filter();
+        // KI-173: `Scheduled` is the imported calendar slot, not an observed entry decision, so it
+        // settles no mandatory row. Counting it would print `completed` for a race nobody ran.
+        $entered = $run->raceEntries
+            ->filter(fn (RaceEntry $entry): bool => $entry->status?->recordsEntry() === true)
+            ->pluck('race_catalog_slot_id')
+            ->filter();
 
         $rows = [];
         $alerts = [];
