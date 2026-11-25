@@ -213,7 +213,7 @@ Commit `4802a3cf` includes `tools/scheduler.ps1`.
 ## 17. Task #56 — Final Live Acceptance and Preservation — Complete
 
 - **Live provider acceptance:** end-to-end request produced trace `8c13a02d8f3d1b9675a0a198f08a50df`, independently retrieved from **both** platforms — Langfuse `GET /api/public/v2/observations` (1 observation, `GET api/v1/umamusume`) and Latitude (HTTP 200, `spanCount 1`, `errorCount 0`) — with the same trace id on both sides.
-- **Heartbeat:** four consecutive scheduled heartbeats observed in Langfuse at 03:25:22, 03:30:44, 03:35:30, 03:40:16 UTC, each `trainerdesk.health.synthetic`.
+- **Heartbeat:** four consecutive scheduled heartbeats observed in Langfuse, each `trainerdesk.health.synthetic` — 03:25:22.830Z (`f1fdf630c1e0062df10573acdf2f2dc0`), 03:30:44.709Z (`55c388156c51bbf305ce4b9444b6a893`), 03:35:30.646Z (`a561b8f2b4e0a2195eee42915a4622d8`), 03:40:16.784Z (`0518d1c0d45e63dd5902b051d5efd2ad`). A manual heartbeat at 04:55:33Z returned `accepted` / HTTP 200 and appeared in the status endpoint immediately.
 - **Scheduler liveness (runtime, not just code):** live PID → `scheduler: true`; stale PID → `false`; absent PID file → `false`.
 - **Classification:** accepted / rejected / partial / failed are derived from the exporter result, not from HTTP 200 alone; a cached `exported=true` is never treated as proof of retrieval.
 - **Regression tests:** 27 Feature telemetry tests + 14 Unit export-result tests pass (145 assertions).
