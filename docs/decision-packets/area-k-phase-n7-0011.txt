@@ -1,0 +1,59 @@
+# Decision Packet — Area K: N7.11: Skills Global/JP Scope and Filter State (Duplicate Entry)
+
+## Decision Identifier and Title
+**Identifier**: N7.11
+**Title**: Skills Global/JP scope and filter state — Skills Global/JP scope and filter state; largely covered; focused completion
+**Status**: OWNER-GATED — skills Global/JP scope and filter state; largely covered; focused completion; only already-authorized slices retained per MASTER absorption
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/plan/trainerdesk-complete-uiux-implementation-plan-2026-11-20.md`; `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md`; `flows-catalogs.md` §§N7.9–N7.11
+
+## Authority
+**Skills Global/JP scope**: Skills Global/JP scope documented.
+
+**Filter state**: Filter state documented.
+
+**Largely covered; focused completion**: Largely covered from N7.9; focused completion required.
+
+## Current Implementation Status
+- **Skills Global/JP scope**: Present; Global/JP scope documented from N7.9
+- **Filter state**: Documented from N7.9
+- **Largely covered; focused completion**: Largely covered from N7.9; focused completion on any remaining distinctions
+
+## Owner Question (Exact)
+**Should the owner formalize the skills Global/JP scope and filter state (focused completion), or maintain the current gated state?**
+
+**Option A**: Formalize skills Global/JP scope and filter state (focused completion)
+- **Evidence required**: Global/JP scope and filter state documented; focused completion on remaining distinctions
+- **Development blocked**: None — documentation and focused completion are recording actions
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Maintain current gated state
+- **Evidence required**: Gating documentation; owner ruling
+- **Development blocked**: None — gating is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Formalize skills Global/JP scope and filter state (focused completion) (Option A)**: Skills Global/JP scope and filter state documented from N7.9. Focused completion on any remaining distinctions. Formalize with owner ruling.
+
+**Supporting evidence**:
+- `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52` — N7.1–N7.22 owner-gated, accepted 2026-11-25
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:138` — ND-*: Phase 7 absorbed 2026-11-25; only already-authorized slices retained
+- `flows-catalogs.md` §§N7.9–N7.11 — Global/JP scope and filter state documentation
+
+**Development blocked**: None — documentation and focused completion are recording actions
+
+**Unaffected work**: All existing skills functionality; no implementation change needed; formalization is recording action
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (formalization; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future scope changes would affect the Global/JP distinction; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (skills Global/JP scope and filter state formalized; no owner action needed beyond ruling)
+
+---
+
+**Key Principle**: Skills Global/JP scope and filter state formalized; focused completion on remaining distinctions.

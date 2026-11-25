@@ -1,0 +1,57 @@
+# Decision Packet — Area K: N7.18: Human-Readable API Reference / Contract Examples
+
+## Decision Identifier and Title
+**Identifier**: N7.18
+**Title**: Human-readable API reference / contract examples — Human-readable API reference and contract examples; major documentation-UX omission; only already-authorized slices retained per MASTER absorption
+**Status**: OWNER-GATED — human-readable API reference / contract examples; major documentation-UX omission; only already-authorized slices retained per MASTER absorption
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/plan/trainerdesk-complete-uiux-implementation-plan-2026-11-20.md`; `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md`; `flows-api.md` §§N7.18
+
+## Authority
+**Human-readable API reference**: API reference human-readable; contract examples documented.
+
+**Major documentation-UX omission**: Human-readable API reference and contract examples documented as major omission; not yet implemented.
+
+## Current Implementation Status
+- **Human-readable API reference**: Present; API reference human-readable
+- **Contract examples**: Documented; contract examples specified
+- **Major documentation-UX omission**: Documented as major omission; not yet implemented
+
+## Owner Question (Exact)
+**Should the owner formalize the human-readable API reference / contract examples, or maintain the current gated state?**
+
+**Option A**: Formalize human-readable API reference / contract examples
+- **Evidence required**: Human-readable API reference documented; contract examples documented; major omission resolved
+- **Development blocked**: None — documentation is recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Maintain current gated state
+- **Evidence required**: Gating documentation; owner ruling
+- **Development blocked**: None — gating is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Formalize human-readable API reference / contract examples (Option A)**: Human-readable API reference documented; contract examples documented; major omission resolved. Formalize with owner ruling.
+
+**Supporting evidence**:
+- `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52` — N7.1–N7.22 owner-gated, accepted 2026-11-25
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:53` — N7.18 human-readable API reference / contract examples
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:138` — ND-*: Phase 7 absorbed 2026-11-25; only already-authorized slices retained
+
+**Development blocked**: None — documentation is recording action
+
+**Unaffected work**: All existing API reference functionality; no implementation change needed; formalization is recording action
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (formalization; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future API changes would affect the human-readable reference; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (human-readable API reference / contract examples formalized; no owner action needed beyond ruling)
+
+---
+
+**Key Principle**: Human-readable API reference / contract examples formalized; major omission resolved.

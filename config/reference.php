@@ -401,6 +401,11 @@ return [
                 ],
                 'state' => 'open',
                 'affected_routes' => ['/database/races'],
+                // TD-08 (AUDIT:D-2): the datasets this row's claims are about, named by the key the
+                // Data sources ledger prints. §7 row 7's Source A is the data export, so the dispute
+                // reaches every row that export feeds. Evidence exists — the export is in hand.
+                'affected_sources' => ['gametora-race-catalog', 'gametora-racetracks', 'gametora-skills'],
+                'evidence_available' => true,
             ],
             // Source: docs/UMAMUSUME_REFERENCE.md §7 row 2
             [
@@ -412,6 +417,11 @@ return [
                 ],
                 'state' => 'open',
                 'affected_routes' => [],
+                // No dataset was established for this row: the two guides disagree and neither side
+                // is a document this build holds. `[]` says "none established", and the flag below
+                // is what stops that reading as "no source is involved".
+                'affected_sources' => [],
+                'evidence_available' => false,
             ],
             // Source: docs/UMAMUSUME_REFERENCE.md §7 row 10
             [
@@ -423,6 +433,9 @@ return [
                 ],
                 'state' => 'open',
                 'affected_routes' => [],
+                // Same shape as the Wit row: two notices, neither held here.
+                'affected_sources' => [],
+                'evidence_available' => false,
             ],
             // Source: docs/UMAMUSUME_REFERENCE.md §1.6.10
             [
@@ -434,6 +447,11 @@ return [
                 ],
                 'state' => 'open',
                 'affected_routes' => ['/database/shop-items'],
+                // The item is a Trackblazer Pro-Shop entry (`config/scenarios.php:893`), not a
+                // support card, so no held dataset is named. The shop-items route stays on the row
+                // because that screen is where a Trainer would look for the figure.
+                'affected_sources' => [],
+                'evidence_available' => false,
             ],
         ],
     ],

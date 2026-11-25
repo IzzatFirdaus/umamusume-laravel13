@@ -1,0 +1,66 @@
+# Decision Packet — Area J: ND-13: Spark Family Color Identities
+
+## Decision Identifier and Title
+**Identifier**: ND-13
+**Title**: Color identities for spark families and event server badges
+**Status**: OWNER-GATED — keep neutral chips pending the DESIGN.md §2 palette ruling; rule the palette now
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/adr/0020-trainer-desk-2-program.md`; `SCREEN_SPEC.md` §7-21, :3.5, :3.7; `docs/plan/implementation-plan-2026-11-20.md` §§S6.5(5), S6.7(2); `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5`
+
+## Authority
+**Current arrangement**: Neutral `SparkChip` renders neutral; `bg-sunken` is the theme's own gated token, not hardcoded black.
+
+**Two options documented**:
+- (a) keep neutral chips pending the parked DESIGN.md §2 palette ruling; (b) rule the palette now
+
+**SparkChip.vue:10-19 records the park**: bg-sunken is the theme's own gated token, not hardcoded black.
+
+## Original Requirement
+From `flows-career-creation.md` and the database review:
+- **ND-13**: Color identities for spark families and event server badges (db-review §3.5(5), §3.7(2))
+- (a) keep neutral chips pending the parked DESIGN.md §2 palette ruling; (b) rule the palette now
+
+## Current Implementation Status
+- **Neutral SparkChip**: Renders neutral; bg-sunken is the theme's own gated token
+- **Design system ownership**: SparkChip.vue:10-19 records the park; bg-sunken is the theme's own gated token, not hardcoded black
+- **No color identities assigned**: No color distinctions introduced; neutral chips maintained
+
+## Owner Question (Exact)
+**Should the owner keep neutral chips pending the DESIGN.md §2 palette ruling (Option A), or rule the palette now with color identities (Option B)?**
+
+**Option A**: Keep neutral chips pending DESIGN.md §2 palette ruling
+- **Evidence required**: DESIGN.md §2 palette ruling pending; SparkChip.vue:10-19 records the park
+- **Development blocked**: None — maintaining neutral chips is recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Rule the palette now with color identities
+- **Evidence required**: Color identity assignments; design system update; palette ruling
+- **Development blocked**: Requires palette ruling; color identity assignments; design system update; not shipped at HEAD
+- **Release relevance**: Would tag to 3.0.1 or later; ADR erratum owed
+
+## Recommended Ruling
+**Keep neutral chips pending DESIGN.md §2 palette ruling (Option A)**: The neutral `SparkChip` renders neutral; `bg-sunken` is the theme's own gated token, not hardcoded black. SparkChip.vue:10-19 records the park. No color identities assigned; neutral chips maintained pending the DESIGN.md §2 palette ruling.
+
+**Supporting evidence**:
+- `docs/plan/implementation-plan-2026-11-20.md:182` — ND-13 source
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5` — ND-1..ND-16 source
+- `SparkChip.vue:10-19` — records the park; bg-sunken is theme's gated token
+- `DESIGN.md:§2` — palette ruling pending
+
+**Development blocked**: None — maintaining neutral chips is recording action
+
+**Unaffected work**: All existing spark color functionality; no implementation change needed
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (neutral chips maintained; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future DESIGN.md §2 palette ruling would change the neutral chips; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (neutral chips maintained; no owner action needed)
+
+---
+
+**Key Principle**: Neutral SparkChip renders neutral; bg-sunken is theme's gated token; no color identities assigned; pending DESIGN.md §2 palette ruling.

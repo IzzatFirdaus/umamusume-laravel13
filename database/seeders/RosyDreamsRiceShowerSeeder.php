@@ -10,11 +10,13 @@ use App\Enums\CareerPhase;
 use App\Enums\CareerYear;
 use App\Enums\MoodTier;
 use App\Enums\RaceEntryStatus;
+use App\Enums\RosterDistance;
 use App\Enums\RunMode;
 use App\Enums\RunStatus;
 use App\Enums\SkillAcquisition;
 use App\Enums\TurnEventType;
 use App\Models\Legacy\LegacySelectionPayload;
+use App\Models\RosterMember;
 use App\Models\TrainingRun;
 use App\Services\CareerCalendar;
 use Illuminate\Database\Seeder;
@@ -324,6 +326,229 @@ class RosyDreamsRiceShowerSeeder extends Seeder
         ['slot' => self::ARIMA_KINEN_SLOT, 'status' => RaceEntryStatus::Entered, 'placement' => null],
     ];
 
+    /**
+     * The eighteen members §1.9 records, in the report's own reading order — position 1 is Haru
+     * Urara, the section's first line. The six deck characters join as themselves, so their rows
+     * carry the `support_cards.id` §1.4 lists (`origin` support); the trainee is one of the twenty
+     * (`origin` trainee); the rest arrive as Guest R cards tagged `[Tracen Academy]` and have no
+     * catalogue row here (`origin` guest). Stats, caps and grade are the client readings §1.9
+     * prints verbatim; aptitudes are the partial "Aptitudes of note" lines and not all ten axes.
+     * The five ACE rows follow §1.8's reading: one per distance column, crowned off the tags.
+     *
+     * @var list<array{
+     *     name: string,
+     *     origin: string,
+     *     support_card_id: int|null,
+     *     grade: string|null,
+     *     speed: int, stamina: int, power: int, guts: int, wit: int,
+     *     speed_cap: int, stamina_cap: int, power_cap: int, guts_cap: int, wit_cap: int,
+     *     aptitudes: array<string, string>,
+     *     umamusume_id?: int,
+     *     distance?: RosterDistance,
+     *     is_ace?: bool,
+     *     is_trainee?: bool,
+     * }>
+     */
+    private const array ROSTER = [
+        [
+            'name' => 'Haru Urara',
+            'origin' => 'support',
+            'support_card_id' => 266, // [Urara's Day Off!] (deck slot 6)
+            'grade' => 'A',
+            'speed' => 733, 'stamina' => 572, 'power' => 728, 'guts' => 1068, 'wit' => 621,
+            'speed_cap' => 900, 'stamina_cap' => 860, 'power_cap' => 900, 'guts_cap' => 1140, 'wit_cap' => 850,
+            'aptitudes' => ['aptitude_turf' => 'G', 'aptitude_dirt' => 'A', 'aptitude_sprint' => 'A', 'aptitude_late_surger' => 'A'],
+            'distance' => RosterDistance::Dirt,
+            'is_ace' => true,
+        ],
+        [
+            'name' => 'Tokai Teio',
+            'origin' => 'support',
+            'support_card_id' => 250, // [Dream Big!] (deck slot 1)
+            'grade' => 'B',
+            'speed' => 885, 'stamina' => 571, 'power' => 702, 'guts' => 754, 'wit' => 597,
+            'speed_cap' => 1080, 'stamina_cap' => 860, 'power_cap' => 960, 'guts_cap' => 880, 'wit_cap' => 850,
+            'aptitudes' => ['aptitude_turf' => 'A', 'aptitude_medium' => 'A', 'aptitude_pace_chaser' => 'A'],
+            'distance' => RosterDistance::Medium,
+            'is_ace' => true,
+        ],
+        [
+            'name' => 'Nishino Flower',
+            'origin' => 'support',
+            'support_card_id' => 265, // [Even the Littlest Bud] (deck slot 2)
+            'grade' => 'B',
+            'speed' => 806, 'stamina' => 591, 'power' => 680, 'guts' => 625, 'wit' => 610,
+            'speed_cap' => 1080, 'stamina_cap' => 860, 'power_cap' => 960, 'guts_cap' => 880, 'wit_cap' => 850,
+            'aptitudes' => [
+                'aptitude_turf' => 'A', 'aptitude_sprint' => 'A', 'aptitude_mile' => 'A',
+                'aptitude_pace_chaser' => 'A', 'aptitude_late_surger' => 'A',
+            ],
+            'distance' => RosterDistance::Mile,
+            'is_ace' => true,
+        ],
+        [
+            'name' => 'Super Creek',
+            'origin' => 'support',
+            'support_card_id' => 263, // [Piece of Mind] (deck slot 4, the Friends slot)
+            'grade' => 'B',
+            'speed' => 563, 'stamina' => 888, 'power' => 527, 'guts' => 764, 'wit' => 633,
+            'speed_cap' => 860, 'stamina_cap' => 1100, 'power_cap' => 860, 'guts_cap' => 1000, 'wit_cap' => 850,
+            'aptitudes' => [
+                'aptitude_turf' => 'A', 'aptitude_medium' => 'A', 'aptitude_long' => 'A', 'aptitude_pace_chaser' => 'A',
+            ],
+        ],
+        [
+            'name' => 'Biko Pegasus',
+            'origin' => 'support',
+            'support_card_id' => 267, // [Double Carrot Punch!] (deck slot 3)
+            'grade' => 'C',
+            'speed' => 776, 'stamina' => 534, 'power' => 660, 'guts' => 593, 'wit' => 534,
+            'speed_cap' => 1080, 'stamina_cap' => 860, 'power_cap' => 960, 'guts_cap' => 880, 'wit_cap' => 850,
+            'aptitudes' => ['aptitude_turf' => 'A', 'aptitude_sprint' => 'A', 'aptitude_late_surger' => 'A'],
+        ],
+        [
+            'name' => 'Matikanetannhauser',
+            'origin' => 'support',
+            'support_card_id' => 277, // [Just Keep Going] (deck slot 5)
+            'grade' => 'C',
+            'speed' => 431, 'stamina' => 418, 'power' => 423, 'guts' => 509, 'wit' => 377,
+            'speed_cap' => 710, 'stamina_cap' => 700, 'power_cap' => 710, 'guts_cap' => 750, 'wit_cap' => 700,
+            'aptitudes' => [
+                'aptitude_turf' => 'A', 'aptitude_medium' => 'A', 'aptitude_long' => 'A',
+                'aptitude_pace_chaser' => 'A', 'aptitude_late_surger' => 'A',
+            ],
+        ],
+        [
+            'name' => 'Fine Motion',
+            'origin' => 'guest',
+            'support_card_id' => null,
+            'grade' => 'B',
+            'speed' => 643, 'stamina' => 599, 'power' => 620, 'guts' => 664, 'wit' => 549,
+            'speed_cap' => 770, 'stamina_cap' => 750, 'power_cap' => 750, 'guts_cap' => 750, 'wit_cap' => 750,
+            'aptitudes' => ['aptitude_turf' => 'A', 'aptitude_mile' => 'A', 'aptitude_medium' => 'A', 'aptitude_pace_chaser' => 'A'],
+        ],
+        [
+            'name' => 'King Halo',
+            'origin' => 'guest',
+            'support_card_id' => null,
+            'grade' => 'B',
+            'speed' => 603, 'stamina' => 556, 'power' => 633, 'guts' => 725, 'wit' => 526,
+            'speed_cap' => 800, 'stamina_cap' => 750, 'power_cap' => 770, 'guts_cap' => 750, 'wit_cap' => 700,
+            'aptitudes' => ['aptitude_turf' => 'A', 'aptitude_sprint' => 'A', 'aptitude_late_surger' => 'A'],
+        ],
+        [
+            'name' => 'Seeking the Pearl',
+            'origin' => 'guest',
+            'support_card_id' => null,
+            'grade' => 'C',
+            'speed' => 655, 'stamina' => 560, 'power' => 600, 'guts' => 581, 'wit' => 533,
+            'speed_cap' => 710, 'stamina_cap' => 700, 'power_cap' => 710, 'guts_cap' => 750, 'wit_cap' => 700,
+            'aptitudes' => ['aptitude_turf' => 'A', 'aptitude_sprint' => 'A', 'aptitude_mile' => 'A', 'aptitude_late_surger' => 'A'],
+            'distance' => RosterDistance::Sprint,
+            'is_ace' => true,
+        ],
+        [
+            'name' => 'Shinko Windy',
+            'origin' => 'guest',
+            'support_card_id' => null,
+            'grade' => 'C',
+            'speed' => 566, 'stamina' => 544, 'power' => 566, 'guts' => 556, 'wit' => 528,
+            'speed_cap' => 750, 'stamina_cap' => 700, 'power_cap' => 720, 'guts_cap' => 700, 'wit_cap' => 700,
+            'aptitudes' => ['aptitude_dirt' => 'A', 'aptitude_mile' => 'A', 'aptitude_pace_chaser' => 'A'],
+        ],
+        [
+            'name' => 'Inari One',
+            'origin' => 'guest',
+            'support_card_id' => null,
+            'grade' => 'C',
+            'speed' => 576, 'stamina' => 597, 'power' => 616, 'guts' => 556, 'wit' => 569,
+            'speed_cap' => 700, 'stamina_cap' => 720, 'power_cap' => 750, 'guts_cap' => 700, 'wit_cap' => 700,
+            'aptitudes' => [
+                'aptitude_turf' => 'A', 'aptitude_dirt' => 'A', 'aptitude_medium' => 'A',
+                'aptitude_long' => 'A', 'aptitude_end_closer' => 'A',
+            ],
+        ],
+        [
+            'name' => 'Nakayama Festa',
+            'origin' => 'guest',
+            'support_card_id' => null,
+            'grade' => 'C',
+            'speed' => 533, 'stamina' => 475, 'power' => 504, 'guts' => 666, 'wit' => 502,
+            'speed_cap' => 700, 'stamina_cap' => 750, 'power_cap' => 700, 'guts_cap' => 720, 'wit_cap' => 700,
+            'aptitudes' => ['aptitude_turf' => 'A', 'aptitude_medium' => 'A', 'aptitude_late_surger' => 'A'],
+        ],
+        [
+            'name' => 'Agnes Digital',
+            'origin' => 'guest',
+            'support_card_id' => null,
+            'grade' => 'C',
+            'speed' => 504, 'stamina' => 493, 'power' => 552, 'guts' => 650, 'wit' => 494,
+            'speed_cap' => 700, 'stamina_cap' => 720, 'power_cap' => 750, 'guts_cap' => 700, 'wit_cap' => 700,
+            'aptitudes' => [
+                'aptitude_turf' => 'A', 'aptitude_dirt' => 'A', 'aptitude_mile' => 'A', 'aptitude_medium' => 'A',
+                'aptitude_pace_chaser' => 'A', 'aptitude_late_surger' => 'A',
+            ],
+        ],
+        [
+            'name' => 'Eishin Flash',
+            'origin' => 'guest',
+            'support_card_id' => null,
+            'grade' => 'C',
+            'speed' => 540, 'stamina' => 501, 'power' => 497, 'guts' => 568, 'wit' => 542,
+            'speed_cap' => 750, 'stamina_cap' => 700, 'power_cap' => 720, 'guts_cap' => 700, 'wit_cap' => 700,
+            'aptitudes' => [
+                'aptitude_turf' => 'A', 'aptitude_medium' => 'A', 'aptitude_long' => 'A', 'aptitude_late_surger' => 'A',
+            ],
+        ],
+        [
+            'name' => 'Matikanefukukitaru',
+            'origin' => 'guest',
+            'support_card_id' => null,
+            'grade' => 'C',
+            'speed' => 501, 'stamina' => 483, 'power' => 513, 'guts' => 532, 'wit' => 543,
+            'speed_cap' => 830, 'stamina_cap' => 780, 'power_cap' => 780, 'guts_cap' => 790, 'wit_cap' => 900,
+            'aptitudes' => [
+                'aptitude_turf' => 'A', 'aptitude_medium' => 'A', 'aptitude_long' => 'A', 'aptitude_late_surger' => 'A',
+            ],
+        ],
+        [
+            'name' => 'Taiki Shuttle',
+            'origin' => 'guest',
+            'support_card_id' => null,
+            'grade' => 'C',
+            'speed' => 411, 'stamina' => 411, 'power' => 467, 'guts' => 398, 'wit' => 375,
+            'speed_cap' => 750, 'stamina_cap' => 700, 'power_cap' => 720, 'guts_cap' => 700, 'wit_cap' => 700,
+            'aptitudes' => ['aptitude_turf' => 'A', 'aptitude_sprint' => 'A', 'aptitude_mile' => 'A', 'aptitude_pace_chaser' => 'A'],
+        ],
+        [
+            'name' => 'Gold Ship',
+            'origin' => 'guest',
+            'support_card_id' => null,
+            'grade' => 'C',
+            'speed' => 475, 'stamina' => 426, 'power' => 455, 'guts' => 403, 'wit' => 389,
+            'speed_cap' => 700, 'stamina_cap' => 750, 'power_cap' => 700, 'guts_cap' => 720, 'wit_cap' => 700,
+            'aptitudes' => [
+                'aptitude_turf' => 'A', 'aptitude_medium' => 'A', 'aptitude_long' => 'A', 'aptitude_end_closer' => 'A',
+            ],
+        ],
+        [
+            'name' => 'Rice Shower',
+            'origin' => 'trainee',
+            'support_card_id' => null,
+            'grade' => null,
+            // Her own live stat line, §1.2. The caps are the five the §1.2 panels print; the Wit
+            // ceiling (1800) sits on the roster row even though `training_runs` holds no column
+            // for it (the seeder's own docblock records the omission).
+            'speed' => 607, 'stamina' => 577, 'power' => 549, 'guts' => 736, 'wit' => 397,
+            'speed_cap' => 1325, 'stamina_cap' => 1322, 'power_cap' => 1368, 'guts_cap' => 1308, 'wit_cap' => 1800,
+            'aptitudes' => [],
+            'umamusume_id' => self::UMAMUSUME_ID,
+            'distance' => RosterDistance::Long,
+            'is_ace' => true,
+            'is_trainee' => true,
+        ],
+    ];
+
     public function run(): void
     {
         $source = self::SOURCE_FILE.' (Run '.self::RUN_LABEL.')';
@@ -453,6 +678,36 @@ class RosyDreamsRiceShowerSeeder extends Seeder
                     'status' => $skillStatus->value,
                     'turn_acquired' => null,
                 ],
+            ]);
+        }
+
+        // §1.9's recorded roster, written here because `ImportHistoricalRun` writes no roster rows
+        // (the same omission as the deck). `position` is the report's own reading order, one-based —
+        // §1.9's first line is Haru Urara and the Team tab's first column reads her off position 1.
+        // The members' support links point at the exact `support_cards.id` values §1.4 lists, and the
+        // RosterMember `saving` guard counts against the 20/20 ceiling before each insert.
+        foreach (self::ROSTER as $idx => $member) {
+            $model->rosterMembers()->create([
+                'umamusume_id' => $member['umamusume_id'] ?? null,
+                'support_card_id' => $member['support_card_id'],
+                'name' => $member['name'],
+                'origin' => $member['origin'],
+                'grade' => $member['grade'],
+                'speed' => $member['speed'],
+                'stamina' => $member['stamina'],
+                'power' => $member['power'],
+                'guts' => $member['guts'],
+                'wit' => $member['wit'],
+                'speed_cap' => $member['speed_cap'],
+                'stamina_cap' => $member['stamina_cap'],
+                'power_cap' => $member['power_cap'],
+                'guts_cap' => $member['guts_cap'],
+                'wit_cap' => $member['wit_cap'],
+                ...$member['aptitudes'],
+                'distance_assignment' => $member['distance'] ?? null,
+                'is_ace' => $member['is_ace'] ?? false,
+                'is_trainee' => $member['is_trainee'] ?? false,
+                'position' => $idx + 1,
             ]);
         }
 

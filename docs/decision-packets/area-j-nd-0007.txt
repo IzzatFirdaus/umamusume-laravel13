@@ -1,0 +1,64 @@
+# Decision Packet — Area J: ND-7: Deck Slot 5 Review Claims
+
+## Decision Identifier and Title
+**Identifier**: ND-7
+**Title**: Deck slot 5 — review claims scenario-linked card; code type-matches intelligence only
+**Status**: OWNER-GATED — keep type-match, correct the review's claim; scenario-link slot 5 via config; no fabricated client rule
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/adr/0026-per-trainee-career-objectives.md`; `SCREEN_SPEC.md` §7-21; `docs/plan/implementation-plan-2026-11-20.md` §§S3.18; `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5`
+
+## Authority
+**Review claim**: The review claims a scenario-linked card for deck slot 5; code type-matches intelligence only at `app/Http/Controllers/Career/DeckSelectController.php:85,321-328`.
+
+**Two options documented**:
+- (a) Keep type-match, correct the review's claim; no scenario-link via config
+- (b) Scenario-link slot 5 via config; is a config-driven feature
+
+## Original Requirement
+From `flows-career-creation.md` and the review findings:
+- **ND-7**: Deck slot 5: review claims scenario-linked card; code type-matches intelligence only
+- (a) keep type-match, correct the review's claim; (b) scenario-link slot 5 via config
+
+## Current Implementation Status
+- **Type-match**: Code at `DeckSelectController.php:85,321-328` type-matches intelligence only
+- **Review claim**: Claim of scenario-linked card is refuted; no scenario-link via config
+- **No fabricated client rule**: Client rule not invented; type-match corrected in review
+
+## Owner Question (Exact)
+**Should the owner keep the type-match and correct the review's claim (Option A), or scenario-link slot 5 via config (Option B)?**
+
+**Option A**: Keep type-match, correct the review's claim
+- **Evidence required**: Review claim refuted; type-match corrected; no scenario-link
+- **Development blocked**: None — type-match corrected; review claim refuted
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Scenario-link slot 5 via config
+- **Evidence required**: Config-driven scenario-link; feature test; SCREEN_SPEC deck state update
+- **Development blocked**: Requires config change; feature test; SCREEN_SPEC update; not shipped at HEAD
+- **Release relevance**: Would tag to 3.0.1 or later
+
+## Recommended Ruling
+**Keep type-match, correct the review's claim (Option A)**: The review claim of a scenario-linked card for deck slot 5 is refuted. Code type-matches intelligence only at `DeckSelectController.php:85,321-328`. No scenario-link via config; no fabricated client rule.
+
+**Supporting evidence**:
+- `docs/plan/implementation-plan-2026-11-20.md:550` — per ND-7 action
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5` — ND-1..ND-16 source
+- `app/Http/Controllers/Career/DeckSelectController.php:85,321-328` — code type-matches intelligence
+
+**Development blocked**: None — type-match corrected; review claim refuted
+
+**Unaffected work**: All existing deck slot 5 functionality; no implementation change needed
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (type-match corrected; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future config changes would scenario-link slot 5; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (type-match corrected; review claim refuted; no owner action needed)
+
+---
+
+**Key Principle**: Review claim of scenario-linked card for deck slot 5 is refuted; code type-matches intelligence only; no scenario-link via config.

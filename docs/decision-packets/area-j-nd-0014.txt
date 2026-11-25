@@ -1,0 +1,68 @@
+# Decision Packet — Area J: ND-14: Per-Row Evidence Tier in the Ledger
+
+## Decision Identifier and Title
+**Identifier**: ND-14
+**Title**: Per-row evidence tier in the ledger (db-review §3.8(3) Evidence column)
+**Status**: OWNER-GATED — keep the page-level tier card; assign per-row tiers (data model + ruling) — inventing tiers is a fabricated classification
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/adr/0024-energy-state-exact-band-unknown.md`; `SCREEN_SPEC.md` §7-21, :3.8(3); `docs/plan/implementation-plan-2026-11-20.md` §§S6.18, S6.5 tier half; `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5`
+
+## Authority
+**Current arrangement**: Page-level tier card only; no per-row tier exists in any payload.
+
+**Two options documented**:
+- (a) keep the page-level tier card; (b) assign per-row tiers (data model + ruling)
+
+**Recorded override**: `resources/js/pages/Database/Sources.vue:151-154` — no per-row tier exists in any payload; inventing tiers is a fabricated classification.
+
+## Original Requirement
+From `flows-career-creation.md` and the database review:
+- **ND-14**: Per-row evidence tier in the ledger (db-review §3.8(3) Evidence column)
+- (a) keep the page-level tier card; (b) assign per-row tiers (data model + ruling)
+
+**N6.5 tier half**: Per-row tier proposal remains ND-14; no per-row tier exists in any payload.
+
+## Current Implementation Status
+- **Page-level tier card**: Maintained; no per-row tier exists in any payload
+- **No per-row tier**: Inventing tiers is a fabricated classification; no payload supports it
+- **Database/Sources.vue:151-154**: No per-row tier exists; page-level tier card only
+
+## Owner Question (Exact)
+**Should the owner keep the page-level tier card (Option A), or assign per-row tiers (Option B)?**
+
+**Option A**: Keep the page-level tier card
+- **Evidence required**: No per-row tier exists in any payload; inventing tiers is fabricated
+- **Development blocked**: None — maintaining page-level tier is recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Assign per-row tiers
+- **Evidence required**: Data model + ruling; per-row tier assignment
+- **Development blocked**: No payload supports per-row tier; inventing tiers is fabricated classification; would require data model change
+- **Release relevance**: Would require data model change; not for 3.0.0
+
+## Recommended Ruling
+**Keep the page-level tier card (Option A)**: No per-row tier exists in any payload. Inventing tiers is a fabricated classification. The page-level tier card at `resources/js/pages/Database/Sources.vue:151-154` remains. No per-row tier assignment.
+
+**Supporting evidence**:
+- `docs/plan/implementation-plan-2026-11-20.md:183` — ND-14 source
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5` — ND-1..ND-16 source
+- `resources/js/pages/Database/Sources.vue:151-154` — no per-row tier exists
+- `SCREEN_SPEC.md:3.8(3)` — Evidence column
+
+**Development blocked**: None — maintaining page-level tier is recording action
+
+**Unaffected work**: All existing ledger functionality; no implementation change needed
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (page-level tier maintained; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future data model changes would support per-row tiers; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (page-level tier card maintained; no owner action needed)
+
+---
+
+**Key Principle**: No per-row tier exists in any payload; inventing tiers is a fabricated classification; page-level tier card only.

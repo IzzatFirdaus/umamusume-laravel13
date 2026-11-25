@@ -1,0 +1,68 @@
+# Decision Packet — Area J: ND-16: Scenario Column Identities + Column-Max Cap Highlight + Optional Chart
+
+## Decision Identifier and Title
+**Identifier**: ND-16
+**Title**: Scenario column identities + column-max cap highlight + optional chart (db-review §3.4(2)(3))
+**Status**: OWNER-GATED — keep outlier bolding and plain headers; design ruling + config key for identities, override for max-highlight, chart as new scope
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/adr/0020-trainer-desk-2-program.md`; `SCREEN_SPEC.md` §7-21, :3.4(2)(3); `docs/plan/implementation-plan-2026-11-20.md` §§S6.4(2)(3); `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5`
+
+## Authority
+**Current arrangement**: Outlier bolding and plain headers shipped bold is the recorded wireframe reading ("Bold marks the outlier, not the maximum", resources/js/pages/Database/Scenarios.vue:100-113,190-192). G-33 bans scenario-name branching without a config key.
+
+**Two options documented**:
+- (a) keep outlier bolding and plain headers; design ruling + config key for identities, override for max-highlight, chart as new scope
+- (b) design ruling + config key for identities, override for max-highlight, chart as new scope
+
+**Shipped bold reading**: "Bold marks the outlier, not the maximum"; G-33 bans scenario-name branching without a config key.
+
+## Original Requirement
+From `flows-career-creation.md` and the database review:
+- **ND-16**: Scenario column identities + column-max cap highlight + optional chart (db-review §3.4(2)(3))
+- (a) keep outlier bolding and plain headers; (b) design ruling + config key for identities, override for max-highlight, chart as new scope
+
+## Current Implementation Status
+- **Outlier bolding**: Maintained; bold marks the outlier, not the maximum per wireframe reading
+- **Plain headers**: Maintained; G-33 bans scenario-name branching without a config key
+- **No chart**: No optional chart implemented; new scope would require design ruling
+- **Config key**: Not yet configured for max-highlight or identities
+
+## Owner Question (Exact)
+**Should the owner keep the outlier bolding and plain headers (Option A), or implement a design ruling + config key for identities, override for max-highlight, and chart (Option B)?**
+
+**Option A**: Keep outlier bolding and plain headers
+- **Evidence required**: Shipped bold reading "Bold marks the outlier, not the maximum"; G-33 bans scenario-name branching without config key
+- **Development blocked**: None — maintaining bolding and headers is recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Design ruling + config key for identities, override for max-highlight, chart as new scope
+- **Evidence required**: Design ruling; config key for identities; override for max-highlight; chart implementation
+- **Development blocked**: Requires design ruling; config key; override; chart; not shipped at HEAD; new scope
+- **Release relevance**: Would tag to 3.0.1 or later; new scope
+
+## Recommended Ruling
+**Keep outlier bolding and plain headers (Option A)**: The shipped bold reading states "Bold marks the outlier, not the maximum". G-33 bans scenario-name branching without a config key. Maintain outlier bolding and plain headers; no chart implemented; config key not configured.
+
+**Supporting evidence**:
+- `docs/plan/implementation-plan-2026-11-20.md:185` — ND-16 source
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5` — ND-1..ND-16 source
+- `resources/js/pages/Database/Scenarios.vue:100-113,190-192` — shipped bold reading
+- `G-33 bans scenario-name branching without a config key`
+
+**Development blocked**: None — maintaining bolding and headers is recording action
+
+**Unaffected work**: All existing scenario functionality; no implementation change needed
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (bolding and headers maintained; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future design ruling would add config key, override, or chart; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (outlier bolding and plain headers maintained; no owner action needed)
+
+---
+
+**Key Principle**: Shipped bold reading "Bold marks the outlier, not the maximum"; G-33 bans scenario-name branching without config key; no chart; no config key for identities or max-highlight.

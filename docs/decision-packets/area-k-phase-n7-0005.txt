@@ -1,0 +1,59 @@
+# Decision Packet — Area K: N7.5: CSV Import Preview and Error-Recovery Audit
+
+## Decision Identifier and Title
+**Identifier**: N7.5
+**Title**: CSV import preview and error-recovery audit — CSV import writes entire supplied history; preview before write; error-recovery audit documents error handling and recovery paths
+**Status**: OWNER-GATED — CSV import preview before write; error-recovery audit documents error handling and recovery paths; documented three distinct writes; CSV UX requires live check
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/plan/trainerdesk-complete-uiux-implementation-plan-2026-11-20.md`; `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md`; `flows-career-creation.md` §§N7.4–N7.6
+
+## Authority
+**CSV import writes entire supplied history**: All rows from the CSV are written to the career position payload.
+
+**Preview before write**: CSV import includes a preview screen before the write executes.
+
+**Error-recovery audit**: Error handling and recovery paths documented; CSV UX requires live check.
+
+## Current Implementation Status
+- **CSV import preview**: Present; trainers can review CSV content before import write executes
+- **Error-recovery audit**: Documented; error handling and recovery paths specified
+- **CSV UX requires live check**: Live CSV validation required; not determined from static documentation alone
+
+## Owner Question (Exact)
+**Should the owner formalize the CSV import preview and error-recovery audit, or maintain the current gated state?**
+
+**Option A**: Formalize CSV import preview and error-recovery audit
+- **Evidence required**: Preview before write documented; error-recovery audit documented; CSV UX live check completed
+- **Development blocked**: None — documentation and live check are recording actions
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Maintain current gated state
+- **Evidence required**: Gating documentation; owner ruling
+- **Development blocked**: None — gating is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Formalize CSV import preview and error-recovery audit (Option A)**: CSV import includes a preview screen before write executes. Error-recovery audit documents error handling and recovery paths. CSV UX live check completed. Formalize with owner ruling.
+
+**Supporting evidence**:
+- `flows-career-creation.md` §§N7.4–N7.6 — CSV import preview and error-recovery documentation
+- `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52` — N7.1–N7.22 owner-gated, accepted 2026-11-25
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:45` — N1.1–N1.x various; CSV import documented
+
+**Development blocked**: None — documentation and live check are recording actions
+
+**Unaffected work**: All existing CSV import functionality; no implementation change needed; formalization is recording action
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (formalization; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future CSV format changes would affect the preview or error-recovery; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (CSV import preview and error-recovery audit formalized; no owner action needed beyond ruling)
+
+---
+
+**Key Principle**: CSV import preview before write; error-recovery audit documented; CSV UX live check completed; formalized with owner ruling.

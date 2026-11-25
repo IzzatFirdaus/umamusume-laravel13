@@ -1,0 +1,64 @@
+# Decision Packet — Area J: ND-5: Abandon-Independent-Training Copy
+
+## Decision Identifier and Title
+**Identifier**: ND-5
+**Title**: Abandon-Independent-Training copy — native confirm() shipped without written ruling
+**Status**: OWNER-GATED — ratify confirm() + flash or move to runs.confirm-delete-style page; owner ruling required
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/adr/0025-per-run-ceilings-entered-not-derived.md`; `SCREEN_SPEC.md` §7-21; `docs/plan/implementation-plan-2026-11-20.md` §§S1.6, S1.17; `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5`
+
+## Authority
+**Shipped behavior**: `confirm()` native JavaScript shipped without written ruling; behavior landed, test-pinned; the abandon-confirm door is a refinement ask, not greenfield.
+
+**Two options documented**:
+- (a) Ratify `confirm()` + flash; behavior landed, test-pinned; for 3.0.0
+- (b) Move to `runs.confirm-delete-style` page; post-tag polish; not for 3.0.0
+
+## Original Requirement
+From `flows-career-creation.md` and the review findings:
+- **ND-5**: Abandon-Independent-Training copy: native confirm() shipped without written ruling
+- (a) ratify confirm() + flash; (b) move to runs.confirm-delete-style page
+
+## Current Implementation Status
+- **Abandon confirm()**: Native `confirm()` shipped; behavior landed, test-pinned
+- **Test status**: Test-pinned; behavior is shipped and functional
+- **Alternative**: `runs.confirm-delete-style` page exists as alternative design
+
+## Owner Question (Exact)
+**Should the owner ratify the shipped `confirm()` + flash behavior, or move to the `runs.confirm-delete-style` page?**
+
+**Option A**: Ratify shipped `confirm()` + flash
+- **Evidence required**: Behavior landed, test-pinned; for 3.0.0 release
+- **Development blocked**: None — behavior is shipped
+- **Release relevance**: Shipped as-is for 3.0.0
+
+**Option B**: Move to `runs.confirm-delete-style` page
+- **Evidence required**: New page design; post-tag polish; not for 3.0.0
+- **Development blocked**: Requires post-tag work; not part of 3.0.0 scope
+- **Release relevance**: Would tag to 3.0.1 or later
+
+## Recommended Ruling
+**Ratify shipped `confirm()` + flash (Option A)**: The native `confirm()` behavior has landed and is test-pinned; it ships for 3.0.0. No action needed to move to the alternative page.
+
+**Supporting evidence**:
+- `docs/plan/implementation-plan-2026-11-20.md:174` — ND-5 source
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5` — ND-1..ND-16 source
+- Test-pinned behavior at HEAD 37320f35
+
+**Development blocked**: None — behavior is shipped and test-pinned
+
+**Unaffected work**: All existing abandon-training functionality; no implementation change needed
+
+**Release relevance**: Shipped as-is for 3.0.0
+
+**Responsible Expert**: None (behavior shipped; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future MASTER roadmap updates would change the ruling; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (behavior shipped; no owner action needed)
+
+---
+
+**Key Principle**: Shipped `confirm()` behavior is test-pinned for 3.0.0; no ruling reversal needed.

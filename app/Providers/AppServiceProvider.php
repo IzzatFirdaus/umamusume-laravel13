@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Models\Preference;
+use App\Services\Advisor\AdvisorIndex;
 use App\Services\LangfuseTraceService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
@@ -16,8 +17,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // LangfuseTraceService takes scalar configuration, so the container cannot
-        // autowire it; without this binding every telemetry consumer fails with a
+        // Both services take scalar configuration, so the container cannot autowire
+        // them; without these bindings every consumer fails with a
         // BindingResolutionException at resolve time.
         $this->app->singleton(LangfuseTraceService::class, fn ($app): LangfuseTraceService => new LangfuseTraceService(
             (bool) config('langfuse.enabled', false),
@@ -26,6 +27,15 @@ class AppServiceProvider extends ServiceProvider
             (string) config('langfuse.secret_key', ''),
             (string) config('langfuse.service_name', 'trainerdesk'),
             (string) config('langfuse.environment', 'local'),
+        ));
+
+        // The index path is config, and the config value is relative to `storage_path()` — the
+        // command that builds the index resolves it that way, so a binding that passed the raw
+        // relative string pointed the app at the process CWD instead (`app/private/...` while the
+        // builder wrote `storage/app/private/...`). Two paths for one index is the split the
+        // provenance tests caught.
+        $this->app->singleton(AdvisorIndex::class, fn ($app): AdvisorIndex => new AdvisorIndex(
+            storage_path((string) config('advisor_ai.retrieval.index_path', 'app/private/advisor-index/advisor.sqlite')),
         ));
     }
 

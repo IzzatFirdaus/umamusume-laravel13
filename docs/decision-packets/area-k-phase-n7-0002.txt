@@ -1,0 +1,59 @@
+# Decision Packet — Area K: N7.2: Active-Career Switching and Two-Position Vocabulary
+
+## Decision Identifier and Title
+**Identifier**: N7.2
+**Title**: Active-career switching and two-position vocabulary — Switch between active careers; vocabulary distinguishes Position A and Position B
+**Status**: OWNER-GATED — vocabulary distinction documented; active-switching flow requires explicit ruling; only already-authorized slices retained per MASTER absorption
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/plan/trainerdesk-complete-uiux-implementation-plan-2026-11-20.md`; `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md`; `flows-career-workspace.md` §§N7.2–N7.3
+
+## Authority
+**Two-position vocabulary**: Position A and Position B distinguish active careers. The vocabulary must be explicit and not conflated with dashboard terminology.
+
+**Active-career switching**: Switching between active careers requires explicit owner ruling. The flow is gated under N7.2 until a ruling is issued.
+
+**Related plan decisions**: N3.30–N3.32 (Snapshot entry), N3.33–N3.34 (Career switching)
+
+## Current Implementation Status
+- **Position vocabulary**: Position A and Position B documented in flows-career-workspace.md
+- **Active-switching flow**: Present at HEAD but gated under owner ruling N7.2
+- **No conflation with dashboard**: Dashboard terminology distinguished from career-position vocabulary
+
+## Owner Question (Exact)
+**Should the owner formalize the two-position vocabulary (Position A / Position B) and active-career switching flow, or maintain the current gated state?**
+
+**Option A**: Formalize two-position vocabulary and active-switching flow
+- **Evidence required**: Vocabulary documentation; switching flow documentation; owner ruling
+- **Development blocked**: None — documentation and ruling are recording actions
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Maintain current gated state
+- **Evidence required**: Gating documentation; owner ruling
+- **Development blocked**: None — gating is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Formalize two-position vocabulary and active-switching flow (Option A)**: The two-position vocabulary (Position A / Position B) is documented in flows-career-workspace.md. Active-career switching flow is present at HEAD but gated under owner ruling N7.2. Formalize the vocabulary and flow with owner ruling.
+
+**Supporting evidence**:
+- `flows-career-workspace.md` §§N7.2–N7.3 — vocabulary and switching flow documentation
+- `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52` — N7.1–N7.22 owner-gated, accepted 2026-11-25
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:138` — ND-*: Phase 7 absorbed 2026-11-25; only already-authorized slices retained
+
+**Development blocked**: None — documentation and ruling are recording actions
+
+**Unaffected work**: All existing career-switching functionality; no implementation change needed; formalization is recording action
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (formalization; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future roadmap updates would change the vocabulary or switching flow; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (vocabulary formalized; active-switching flow documented; no owner action needed beyond ruling)
+
+---
+
+**Key Principle**: Two-position vocabulary (Position A / Position B) formalized; active-career switching flow documented under owner ruling N7.2.

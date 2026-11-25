@@ -7,6 +7,7 @@ namespace App\Services\Career;
 use App\Enums\RaceEntryStatus;
 use App\Enums\RunStatus;
 use App\Enums\TraineeGoalType;
+use App\Models\PreseasonRound;
 use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
 use App\Models\TraineeGoal;
@@ -53,6 +54,7 @@ use Illuminate\Support\Collection;
  *     team_motto: string|null,
  *     team_league_placement: int|null,
  *     team_preseason_wins: int|null,
+ *     preseason_rounds: list<array{round: int, outcome: string|null}>,
  *     unity_trainings_count: int|null,
  *     spirit_bursts_count: int|null,
  *     extreme_bursts_count: int|null,
@@ -113,7 +115,12 @@ final class TeamPanelBuilder
         // A hand-entered race has no slot id, so it cannot settle a mandatory row. Reading the
         // foreign key rather than the relation is the same choice the race strip makes, for the same
         // reason: a deleted turn must not delete its race, so the column is the fact that survives.
-        $entered = $run->raceEntries->pluck('race_catalog_slot_id')->filter();
+        // KI-173: `Scheduled` is the imported calendar slot, not an observed entry decision, so it
+        // settles no mandatory row. Counting it would print `completed` for a race nobody ran.
+        $entered = $run->raceEntries
+            ->filter(fn (RaceEntry $entry): bool => $entry->status->recordsEntry())
+            ->pluck('race_catalog_slot_id')
+            ->filter();
 
         $rows = [];
         $alerts = [];
@@ -691,6 +698,22 @@ final class TeamPanelBuilder
             // it pays cannot come from different bands; null when no band names the standing.
             'league_bonus' => $this->leaguePlacementBonus($run->team_league_placement, $def),
             'team_preseason_wins' => $run->team_preseason_wins,
+            /*
+             * D-10's per-round outcomes, oldest round first. A round with no row is absent from the
+             * list rather than listed with a null outcome: "never opened" and "opened and left blank"
+             * are different records, and the panel prints them as different sentences (D-220). Shipped
+             * only for a scenario whose matrix turns the team layer on, so the three scenarios without
+             * one keep a single key set (gate G-33).
+             */
+            'preseason_rounds' => $run->composesPanel('team_rank_ladder')
+                ? $run->preseasonRounds
+                    ->map(static fn (PreseasonRound $round): array => [
+                        'round' => $round->round,
+                        'outcome' => $round->outcome,
+                    ])
+                    ->values()
+                    ->all()
+                : [],
             'unity_trainings_count' => $run->unity_trainings_count,
             'spirit_bursts_count' => $run->spirit_bursts_count,
             'extreme_bursts_count' => $run->extreme_bursts_count,

@@ -1,0 +1,59 @@
+# Decision Packet — Area K: N7.10: Support-Card Calculated Ownership and Three-Card Comparison
+
+## Decision Identifier and Title
+**Identifier**: N7.10
+**Title**: Support-card calculated ownership and three-card comparison — Support cards with calculated ownership; three-card comparison documented; data contract documented; not yet explicit UX slices
+**Status**: OWNER-GATED — support cards with calculated ownership; three-card comparison documented; data contract documented; not yet explicit UX slices; only already-authorized slices retained per MASTER absorption
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/plan/trainerdesk-complete-uiux-implementation-plan-2026-11-20.md`; `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md`; `flows-catalogs.md` §§N7.10–N7.11
+
+## Authority
+**Support cards with calculated ownership**: Support cards calculate ownership; ownership documented.
+
+**Three-card comparison**: Three-card comparison documented; data contract documented.
+
+**Not yet explicit UX slices**: Not yet implemented as explicit UX slices; documentation only.
+
+## Current Implementation Status
+- **Support cards with calculated ownership**: Present; ownership calculated and documented
+- **Three-card comparison**: Documented; three-card comparison data contract specified
+- **Not yet explicit UX slices**: Documentation only; not yet implemented as explicit UI slices
+
+## Owner Question (Exact)
+**Should the owner formalize the support-card calculated ownership and three-card comparison, or maintain the current gated state?**
+
+**Option A**: Formalize support-card calculated ownership and three-card comparison
+- **Evidence required**: Support cards with calculated ownership documented; three-card comparison documented; data contract documented
+- **Development blocked**: None — documentation is recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Maintain current gated state
+- **Evidence required**: Gating documentation; owner ruling
+- **Development blocked**: None — gating is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Formalize support-card calculated ownership and three-card comparison (Option A)**: Support cards with calculated ownership documented. Three-card comparison documented. Data contract documented. Formalize with owner ruling.
+
+**Supporting evidence**:
+- `flows-catalogs.md` §§N7.10–N7.11 — support-card calculated ownership and three-card compare documentation
+- `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52` — N7.1–N7.22 owner-gated, accepted 2026-11-25
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:138` — ND-*: Phase 7 absorbed 2026-11-25; only already-authorized slices retained
+
+**Development blocked**: None — documentation is recording action
+
+**Unaffected work**: All existing support-card functionality; no implementation change needed; formalization is recording action
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (formalization; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future support-card changes would affect the calculated ownership; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (support-card calculated ownership and three-card comparison formalized; no owner action needed beyond ruling)
+
+---
+
+**Key Principle**: Support cards with calculated ownership formalized; three-card comparison documented; data contract documented.

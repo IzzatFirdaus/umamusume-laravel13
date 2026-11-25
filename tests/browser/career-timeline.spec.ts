@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';
@@ -105,6 +105,12 @@ test('prints each row its own Energy band and its own SP, and a correction moves
     expect(corrected.energy, 'the corrected row prints its new band').toBe('High band');
     expect(untouched.energy, 'the neighbour row is unchanged').toBe('Mid band');
     expect(untouched.sp, 'the neighbour row is unchanged').toBe('0');
+
+    // `ADR-0027` D-1c: the correction is a mark on the row it replaced, never a second turn. The two
+    // assertions that catch the two ways this regresses -- the mark missing, and the row counted twice.
+    await expect(page.locator('[data-corrected="true"]')).toHaveCount(1);
+    await expect(page.locator('[data-revision-of]')).toHaveCount(0);
+    await expect(page.locator('main table tbody tr').filter({ hasText: 'Turn' })).toHaveCount(2);
 });
 
 test('renders the empty state when no turns have been logged', async ({ page }) => {

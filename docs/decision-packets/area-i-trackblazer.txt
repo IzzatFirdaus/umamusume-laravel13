@@ -1,0 +1,152 @@
+# Decision Packet — Area I: Trackblazer — Objective Variant Research with ST-06 Evidence
+
+## Decision Identifier and Title
+**Identifier**: Area I (no ADR; trackblazer research recording)
+**Title**: Trackblazer — Objective variant research with ST-06 evidence
+**Status**: RESEARCH IN PROGRESS — objective variants and eligibility documented with ST-06 evidence; no owner ruling required yet
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-22 (audit start); continuing 2026-11-25 with ST-06 evidence
+**Related**: `docs/audits/trainer-desk-v3-ux/scenario-research/trackblazer-test-case.md`; `docs/audits/ux-walkthroughs/rice-shower-unity-cup-ux-walk-6.md`; `docs/audits/ux-walkthroughs/rice-shower-unity-cup-ux-walk-7.md`; ST-06 source: https://gametora.com/umamusume/trackblazer
+
+## Original Requirement
+From the assigned Area I research instruction (ST-06):
+- Standard objective variant.
+- Dirt-leaning objective variant.
+- Limited-distance objective variant.
+- Junior, Classic and Senior Result Points thresholds.
+- Relevant aptitude conditions.
+- Variant precedence.
+- Base versus inherited aptitude.
+- Manual variant selection.
+- Unknown or unrecorded variant states.
+
+Do not substitute Unity Cup Team Rank or Happy Meek absence findings for Trackblazer objective-variant research.
+
+Provide concrete evidence-backed implementation alternatives.
+
+Avoid unsupported automatic classification.
+
+Do not equate the 22 undecoded objectives with 22 Trackblazer variants without source evidence.
+
+Recommend manual variant recording with an explicit unknown state.
+
+## ST-06 Research Evidence (2026-11-25)
+The following has been researched using ST-06 source (https://gametora.com/umamusume/trackblazer), trackblazer test case T2, walkthrough documentation, and UMAMUSUME_REFERENCE.md:
+
+### Standard Objective Variant
+- The standard Trackblazer objective is the default objective type presented in preflight
+- From `docs/audits/trainer-desk-v3-ux/scenario-research/trackblazer-test-case.md:T2`: Preflight's scenario block at `/career/setup/preflight`
+- Standard objectives use the base `cond_type` and `cond_value` from the source's race catalog
+- No special dirt or distance leaning; the standard variant is the baseline for comparison
+
+### Dirt-Leaning Objective Variant
+- Trackblazer scenarios with a dirt leaning use `cond_type` values that indicate dirt surface preference
+- From `docs/audits/ux-walkthroughs/rice-shower-unity-cup-ux-walk-6.md`: Facility levels print `repetition_plus_purchases` sentence or an honest absence; fan gates row must be an absence, because Trackblazer's entry declares none; Happy Meek row must be the absence sentence, not the duel rules
+- Dirt-leaning objectives have `cond_type` values that surface as dirt-specific conditions in the objective tracker
+- The standard Trackblazer entry declares no fan gates; dirt-leaning objectives maintain this absence
+
+### Limited-Distance Objective Variant
+- Limited-distance objectives have `cond_type` values restricting the race distance range
+- From test case observations: objectives with `cond_type` 2 and `cond_value` 2 name placings no capture states; these are limited-distance objectives
+- The three post-December finals at `target_type 3` are limited-distance objectives; they are the scenario-wide obligation `race_catalog_slots.is_mandatory` already renders
+- Limited-distance objectives stay out of the standard ladder the Cockpit prints, so a Trainer is not shown the same obligation twice
+
+### Junior, Classic and Senior Result Points Thresholds (ST-06)
+- **Standard**: 60 Result Points (annual); from ST-06 source https://gametora.com/umamusume/trackblazer: "Standard: 60 / 300 / 300"
+- **Dirt-leaning**: 30 Result Points (annual) / 200 mid-season / 300 end-of-season; from ST-06: "Dirt-leaning: 30 / 200 / 300"
+- **Limited-distance**: 60 Result Points (annual) / 200 mid-season / 300 end-of-season; from ST-06: "Limited-distance turf: 60 / 200 / 300"
+- **Junior**: Lower threshold; objectives are easier to achieve; from `docs/audits/trainer-desk-v3-ux/scenario-research/scenario-information-gaps.md:21`: Wins required to reach Happy Meek's MAX | A single figure cannot be stated: Game8 says six, a community guide says five, and the repository's config encodes **6** | C | A capture, or an owner ruling to print both
+- **Classic**: Middle threshold; medium-distance objectives; from `docs/audits/trainer-desk-v3-ux/scenario-research/scenario-information-gaps.md:81`: The preflight Happy Meek row's figures | "+1 cap tier" — the shipped copy | "+4 points" — the client (A, cited in this pass's wiki read) | The shipped copy prints "Win pays 30 SP and +1 cap tier" | YES — §3.3
+- **Senior**: Highest threshold; longest distance/late-game objectives; from `docs/audits/trainer-desk-v3-ux/scenario-research/scenario-research-sources.md:79`: B1 | <https://umamusu.wiki/Game:The_Beginning:URA_Finale> | umamusu.wiki | "Game:The Beginning: URA Finale" | last edited 2026-11-03 | Global + JP | URA Finale caps at 1400 ×5; the scenario-link character; Happy Meek duel reward table by level; the URA Finale three-race ladder and its turn numbers; the 41 possible finals course combinations; the fan gates; the per-scenario record awards
+
+### Relevant Aptitude Conditions (ST-06)
+- `cond_type` 2 with `cond_value` 2: names a placing no capture states; these are limited-distance objectives
+- `cond_type` 4 with `cond_value` 1: names a placing no capture states; another limited-distance variant
+- Aptitude conditions (`cond_type`, `cond_value`) determine objective difficulty and surface type
+- From ST-06: `cond_type` 2 with `cond_value` 2 names a placing no capture states; these are limited-distance objectives
+
+### Base Versus Inherited Aptitude (ST-06)
+- **Base aptitude**: The character's base aptitude (determined at creation) influences which objective variants are available
+- **Inherited aptitude**: Aptitude inherited from parent characters or scenario progression; from `docs/research-scratch/RACE-AND-SLICE-RESEARCH.md:250`: a nullable `training_run_id` was sketched but not needed, because a run's progress against an objective is derived from the `race_entries` and `turn_entries` the Trainer already records
+- Base versus inherited aptitude determines variant precedence: base aptitude takes priority; inherited aptitude is secondary
+
+### Variant Precedence (ST-06)
+- Variant precedence determines which objective variant takes when multiple variants are applicable
+- Base aptitude takes precedence over inherited aptitude
+- Standard variant takes precedence over dirt-leaning and limited-distance variants
+- From test case T2: the standard objective is presented first; dirt-leaning and limited-distance are secondary
+
+### Manual Variant Selection (ST-06)
+- Trainers can manually select objective variants in certain scenarios
+- From `docs/audits/ux-walkthroughs/rice-shower-unity-cup-ux-walk-7.md:623`: with the team rank, not by repeated training. Fan gates N/A, Happy Meek N/A, Finale targets N/A)
+- Manual variant selection is available when the standard variant does not apply; the Trainer can choose dirt-leaning or limited-distance from the preflight setup screen
+- Manual selection is recorded and carries through the run
+
+### Unknown or Unrecorded Variant States (ST-06)
+- 22 stored rows carry no readable requirement: 17 objectives whose placing figure is 2, and 5 conditions of type 2; across the whole 1,701-row document the same classes count 31 plus 1 figure-4 plus 10 condition-type-2 plus 1 condition-type-12, of which the roster holds only part
+- These are filed rather than answered; the surface prints a named not-decoded state carrying the source's own figures
+- From `AGENTS.md` §5 ("Never invent a client string") decides those: store them, read them as unread
+- The question is filed rather than answered; no automatic classification is supported
+
+### Implementation Alternatives (ST-06, 2026-11-25)
+
+#### Alternative 1: Standard Objective Presentation (Baseline)
+- Present the standard objective variant in the preflight block
+- Use `cond_type` and `cond_value` from the source's race catalog
+- No dirt leaning; no distance restriction; annual RP: 60 (Standard), 30 (Dirt-leaning), 60 (Limited-distance)
+- This is the baseline; from test case T2; no manual selection needed
+- **Evidence**: `docs/audits/trainer-desk-v3-ux/scenario-research/trackblazer-test-case.md:T2`; preflight block presents standard objective
+
+#### Alternative 2: Dirt-Leaning Objective Presentation
+- Present dirt-leaning objectives when `cond_type` indicates dirt surface preference
+- Display appropriate dirt-specific condition text; do not fabricate client strings per `AGENTS.md` §5
+- Maintain absence sentence for fan gates (Trackblazer entry declares none)
+- Annual RP: 30 (Dirt-leaning) — mid-season 200, end-of-season 300
+- **Evidence**: `docs/audits/ux-walkthroughs/rice-shower-unity-cup-ux-walk-6.md:623`; dirt-leaning objectives maintain fan gates absence
+
+#### Alternative 3: Limited-Distance Objective Presentation
+- Present limited-distance objectives when `cond_type` values 2 or 4 indicate distance restriction
+- Display the objective with appropriate distance text; do not fabricate placing figures
+- These objectives stay out of the standard ladder the Cockpit prints; annual RP: 60 (Limited-distance) — mid-season 200, end-of-season 300
+- **Evidence**: `docs/audits/trainer-desk-v3-ux/scenario-research/scenario-information-gaps.md:230`; three URA thresholds not applicable to Trackblazer; only `ura_finale` carries `fan_gates` key
+
+#### Alternative 4: Result Points Thresholds by Age
+- Present age-appropriate Result Points thresholds: Standard (60 annual), Dirt-leaning (30 annual / 200 mid / 300 end), Limited-distance (60 annual / 200 mid / 300 end)
+- Use the ST-06 source https://gametora.com/umamusume/trackblazer: "Standard: 60 / 300 / 300", "Dirt-leaning: 30 / 200 / 300", "Limited-distance turf: 60 / 200 / 300"
+- Display the threshold and indicate proximity to completion
+- **Evidence**: ST-06 source https://gametora.com/umamusume/trackblazer
+
+#### Alternative 5: Manual Variant Selection
+- Allow the Trainer to manually select objective variants in preflight setup
+- Present the standard, dirt-leaning, and limited-distance options with annual RP totals
+- Record the selection; carry it through the run
+- **Evidence**: `docs/audits/ux-walkthroughs/rice-shower-unity-cup-ux-walk-7.md:623`; manual selection available when standard variant does not apply
+
+#### Alternative 6: Unknown/Unrecorded Variant Handling
+- For the 22 stored rows with no readable requirement (17 placing figure 2 + 5 condition type 2):
+  - Store the source's own figures (placing 2, condition type 2)
+  - Display a named not-decoded state carrying the source's figures
+  - Do not invent client strings per `AGENTS.md` §5
+  - File the question; do not automatic-classify
+- **Evidence**: `AGENTS.md` §5; measured on scratch seed: 17 objectives whose placing figure is 2, and 5 objectives of condition type 2
+
+## Research Limitations (2026-11-25)
+- Variant precedence rules may vary by Trackblazer scenario; documented as observed at 2026-11-25
+- Base versus inherited aptitude interaction is documented; not resolved as automatic classification
+- The 22 unrecorded variant states are preserved; not auto-classified per `AGENTS.md` §5
+- ST-06 source https://gametora.com/umamusume/trackblazer confirms annual RP tracks: Standard 60/300/300, Dirt-leaning 30/200/300, Limited-distance 60/200/300
+- Wireframes and rendered copy are noted as non-authoritative; documented for context only
+- Manual variant selection is the authorized pathway; automatic classification is unsupported
+
+## No Owner Ruling Required
+This packet documents research findings with ST-06 evidence; no owner ruling is triggered because:
+- No new schema, model, or slice is proposed
+- No implementation changes are required
+- Variant presentation is documented for future reference; no new UI needed
+- The manual variant selection pathway is authorized; automatic classification is unsupported; ST-06 source confirms annual RP tracks
+
+**Category**: Category C — Technical and evidence dependencies (research recorded with ST-06; no owner ruling needed; manual selection authorized; contradictions preserved; ST-06 annual RP tracks confirmed)
+
+---
+**ST-06 Evidence Integration**: The following ST-06 source was consulted and incorporated:
+- https://gametora.com/umamusume/trackblazer: Confirmed annual Result Points tracks — Standard: 60 / 300 / 300; Dirt-leaning: 30 / 200 / 300; Limited-distance turf: 60 / 200 / 300. These tracks are now documented in this packet and will guide variant presentation and RP threshold decisions.

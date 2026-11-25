@@ -7,6 +7,7 @@ namespace App\Http\Requests;
 use App\Enums\RunMode;
 use App\Enums\RunStatus;
 use App\Http\Requests\Concerns\ValidatesEnteredCaps;
+use App\Models\PreseasonRound;
 use App\Models\RaceEntry;
 use App\Models\TrainingRun;
 use App\Models\TurnEvents\TeamRankPayload;
@@ -95,6 +96,35 @@ class StoreTrainingRunRequest extends FormRequest
             'team_league_placement' => ['nullable', 'integer', 'min:1', 'max:99'],
             // The four preseason rounds; the tally the Trainer reports, not a round modelled here.
             'team_preseason_wins' => ['nullable', 'integer', 'between:0,4'],
+            /*
+             * D-10's per-round outcomes, keyed by round number (1..4). A round's value is its outcome
+             * (`WIN`/`LOSS`) or null for a round the Trainer opened and left blank; a round absent from
+             * the map keeps whatever it stored, so a partial map moves only the rounds it names.
+             *
+             * The key bound is validated rather than trusted: `PreseasonRound`'s own saving guard
+             * refuses a round outside 1..4, and a form post that reaches it would be a 500 where a
+             * field error belongs. The `array:` list keeps an unknown key out at the boundary, and the
+             * scenario gate below refuses the whole map on a run with no team layer: a scenario with no
+             * preseason rounds has nothing for these rows to describe.
+             */
+            'preseason_rounds' => [
+                'nullable',
+                'array:'.implode(',', PreseasonRound::ROUNDS),
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if ($value === null) {
+                        return;
+                    }
+
+                    $run = $this->route('run');
+                    $scenario = $this->input('scenario', $run instanceof TrainingRun ? $run->scenario : null);
+
+                    if ($scenario === null || $scenario === ''
+                        || config('scenarios.scenarios.'.$scenario.'.panels.team_rank_ladder') !== true) {
+                        $fail('This scenario has no Unity Cup team, so there are no preseason rounds to record.');
+                    }
+                },
+            ],
+            'preseason_rounds.*' => ['nullable', Rule::in(PreseasonRound::OUTCOMES)],
             /*
              * Per-stat team ranks, read off the client's Team Info panel. The key set is the stat
              * matrix's own; each value is one of G..S. `S+` is the *overall* team rank added by the

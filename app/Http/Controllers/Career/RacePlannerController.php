@@ -93,7 +93,7 @@ class RacePlannerController extends Controller
         // The run with its trainee, its race entries with their slots, and its turns; then one read of
         // the whole calendar, because the screen's job is the shape of the year rather than one turn of
         // it, and both regions below partition that same read.
-        $run->load(['umamusume', 'raceEntries.raceCatalogSlot', 'turnEntries']);
+        $run->load(['umamusume', 'raceEntries.raceCatalogSlot', 'liveTurnEntries']);
 
         $next = $run->decisionTurn();
         $empty = $this->calendarAbsence($run);
@@ -334,8 +334,10 @@ class RacePlannerController extends Controller
             'detail_recorded' => RaceFacts::describesRace($slot),
             'track_name' => $slot->track_name,
             'entries' => $slot->entries,
-            'status' => $entry?->status->value,
-            'placement' => $entry?->placementOrdinal(),
+            'status' => $entry?->status?->recordsEntry() ? $entry->status->value : null,
+            // KI-173: a `Scheduled` row records no decision, so it has no finish to print either —
+            // `placementOrdinal()` would answer "no placement", which reads as a recorded outcome.
+            'placement' => $entry?->status?->recordsEntry() ? $entry->placementOrdinal() : null,
             'fans_gain' => $entry?->fans_gain,
             'grade_points' => $entry?->grade_points_earned,
             'comparison' => $this->comparisonCells($run, $slot),
@@ -589,7 +591,7 @@ class RacePlannerController extends Controller
 
             $entry = $entries->get($slot->id);
 
-            if ($entry?->status === RaceEntryStatus::Completed) {
+            if ($entry?->status === RaceEntryStatus::Completed && $entry->status->recordsEntry()) {
                 continue;
             }
 
@@ -633,6 +635,8 @@ class RacePlannerController extends Controller
             RaceEntryStatus::Entered => 'Entered',
             RaceEntryStatus::Skipped => 'Skipped',
             RaceEntryStatus::NotOffered => 'Not offered',
+            // KI-171: read-side provenance keeps its own word rather than reading as an outcome.
+            RaceEntryStatus::Scheduled => 'Scheduled',
             null => 'Not recorded yet',
         };
     }
@@ -648,7 +652,7 @@ class RacePlannerController extends Controller
     {
         return [
             'action' => route('runs.races.store', $run),
-            'turns' => $run->turnEntries
+            'turns' => $run->liveTurnEntries
                 ->sortBy('turn')
                 ->map(static fn (TurnEntry $turn): array => ['id' => $turn->id, 'turn' => $turn->turn])
                 ->values()

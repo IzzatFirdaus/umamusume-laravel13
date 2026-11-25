@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 import { buildAxe, openAllDisclosures } from '../utils/accessibility';
 import { removeRaceSlots, seedRaceSlots } from '../utils/race-slots';
 
@@ -166,14 +166,17 @@ test('the Data sources page lists every dataset and names no repository path', a
     await expect(page.getByRole('heading', { name: 'Sources', level: 2 })).toBeVisible();
     const ledger = page.getByRole('table', { name: /Every source this tool reads/ });
     await expect(ledger).toBeVisible();
-    // One header row over thirteen fetched datasets and four transcribed ones. The four race
-    // enrichment sources (racetracks, race fans, races, race rewards) joined the fetched set with
-    // the 2026-11-02 enrichment landing; the Races payout card joined the transcribed set with
-    // `config/reference.php`'s `race_payouts` entry. One publisher link per dataset.
-    await expect(ledger.getByRole('row')).toHaveCount(18);
+    // One header row over thirteen fetched datasets and five transcribed ones (seventeen data rows).
+    // The four race enrichment sources (racetracks, race fans, races, race rewards) joined the fetched
+    // set with the 2026-11-02 enrichment landing; the Races payout card joined the transcribed set with
+    // `config/reference.php`'s `race_payouts` entry. The Source Conflict Log joined it later (`anchor`
+    // 2026-11-12, backend commit 3600741e) and carries no `recheck.url` — the log is the corpus's own
+    // aggregation, not a document to reopen — which is why links stay at seventeen while rows reach
+    // eighteen. One publisher link per dataset that has a document to open.
+    await expect(ledger.getByRole('row')).toHaveCount(19);
     await expect(ledger.getByRole('link', { name: 'Open source' })).toHaveCount(17);
     await expect(ledger.getByText('Fetched', { exact: true })).toHaveCount(13);
-    await expect(ledger.getByText('Transcribed', { exact: true })).toHaveCount(4);
+    await expect(ledger.getByText('Transcribed', { exact: true })).toHaveCount(5);
     await expect(page.locator('body')).not.toContainText('https://');
 
     // The wireframe's two closing sections: a live disagreement is printed as one, and the page says

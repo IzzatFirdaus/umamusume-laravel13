@@ -1,0 +1,75 @@
+# Decision Packet — Area C: ADR-0029 A-0.12: Facility Banners and Training Participant Observations (Corrected)
+
+## Decision Identifier and Title
+**Identifier**: ADR-0029 A-0.12
+**Title**: Facility banner and training participant observations — Bounded owner question with delegated schema
+**Status**: PROPOSED — owner ruling requested with schema delegation to Backend
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-10-24 (Group A/B audit addendum filed this item as `needs-schema`); rechecked 2026-11-25
+**Related**: ADR-0029 (accepted 2026-10-25, owner ruling R4); KI-124; FR-C-2
+
+## Authority
+**Status**: PROPOSED — awaiting owner ruling with bounded question and schema delegation; rechecked 2026-11-25
+**Ruling Date**: 2026-10-24 (audit addendum; filed as `needs-schema` pending owner decision); rechecked: travel note requirement preserved; schema delegation to Backend
+
+**Rechecked (2026-11-25)**: Backend owns schema, validation and persistence. Frontend owns recording and presentation. Fullstack owns integrated acceptance. The observations must be bounded to a specific training tile, a particular preview, a recorded turn, or another existing observation model. Do not assume every tile contains exactly three participants merely because one captured tile did. Schema selection (json column vs join table) is delegated to Backend; owner does not need to choose unless a genuinely consequential architecture decision exceeds existing delegation.
+
+## Original Requirement
+From `docs/[Rosy_Dreams]Rice_Shower_Unity-Cup.md` §1.3 and the Group A/B audit addendum of 2026-10-24:
+- Record the facility banner name the training tile showed on a given turn
+- Record the list (or join table) of support-card avatars the tile displayed
+- Both are entered facts in the grain of `failure_rate` and `preview_gains`
+
+**KI-124 finding**: "There is no column for the facility banner name and no column for the three support cards whose avatars the tile showed"
+
+## Previous Owner Ruling
+**Status**: PROPOSED — awaiting owner ruling (travel note on FR-C-2 or decline); rechecked 2026-11-25
+**Ruling Date**: 2026-10-24 (audit addendum; filed as `needs-schema` pending owner decision); rechecked: travel note requirement preserved; schema delegation to Backend
+
+**Rechecked (2026-11-25)**: Backend owns schema, validation and persistence. Frontend owns recording and presentation. Fullstack owns integrated acceptance. The two facts would be stored as:
+- `turn_entries.facility_banner` (string, nullable) — if the model stores per-turn facility banner
+- `turn_entries.training_card_ids` (list or join table, nullable) — if the model stores per-turn card IDs
+- PRD anchor: FR-C-2, US-3 (travel note needed)
+- Four other A items (A-0.4, A-0.5, B-0.5, B-0.7) are built; A-0.12 remains pending
+
+## Owner Question (Corrected)
+**Exact question**: Should the owner add bounded observation fields for facility banner and training participant identities, with scope bounded to a selected training tile, a particular preview, or a recorded turn, and delegate schema selection (json column vs join table) to Backend without requiring the owner to choose unless a genuinely consequential architecture decision exceeds existing delegation?
+
+**Option A**: Add bounded observation fields with schema delegation (Option A): Add `facility_banner` and `training_card_ids` (or equivalent model fields) to `turn_entries`, with scope bounded to a selected training tile, a particular preview, or a recorded turn — do not assume every tile contains exactly three participants. Backend determines the persistence architecture (json column vs join table); frontend populates the fields from the training tile UI; fullstack verifies integrated acceptance. Record the owner ruling with a dated travel note on FR-C-2 narrowing US-12's scope to the bounded observation model.
+
+- **Evidence required**: Migration script (architecture: json column or join table per backend decision); model updates (backend); Cockpit read path update (frontend); test coverage; FR-C-2 travel note documenting the bounded scope
+- **Development blocked**: Backend schema decision (json column vs join table); frontend UI recording; fullstack integrated acceptance test
+- **Release relevance**: Optional per-turn detail; does not block core release
+
+**Option B**: Decline A-0.12 — record as "will not add", keep the two facts unrecorded
+- **Evidence required**: None needed; decline is the ruling
+- **Development blocked**: None
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option C**: Add only `facility_banner` and omit `training_card_ids` (or vice versa)
+- **Evidence required**: PRD citation for the omitted item; backend decision on which field is essential
+- **Development blocked**: Incomplete data capture; surface may need both fields; PRD citation required
+- **Release relevance**: Partial feature; may create inconsistency
+
+## Recommended Ruling (Corrected)
+**Add bounded observation fields with schema delegation to Backend (Option A)**: Add `facility_banner` and `training_card_ids` (or equivalent model fields) to `turn_entries`, with scope bounded to a selected training tile, a particular preview, or a recorded turn — do not assume every tile contains exactly three participants. Backend determines the persistence architecture (json column vs join table); frontend populates the fields from the training tile UI; fullstack verifies integrated acceptance. Record the owner ruling with a dated travel note on FR-C-2 narrowing US-12's scope to the bounded observation model.
+
+**Supporting evidence**:
+- `docs/adr/0029-per-run-measurement-columns.md` — full ADR-0029 text, A-0.12 authorisation table row
+- `docs/research-scratch/AUDIT-AND-VERIFICATION.md` section `## group-ab-audit-2026-10-24.md` — A-0.12 audit classification
+- `docs/research-scratch/SLICE-RECORDS.md` — slice tracking for A-0.12
+- `KNOWN-ISSUES.md` KI-124 — defect register entry
+- FR-C-2 travel-note requirement preserved
+
+**Development blocked**: Backend schema decision (json column vs join table); frontend UI recording; fullstack integrated acceptance test
+
+**Unaffected work**: All existing functionality; A-0.4, A-0.5, B-0.5, B-0.7 already built; A-0.13/A-0.14 declined per R8
+
+**Release relevance**: Optional per-turn detail; does not block core release qualification
+
+**Responsible Expert**: Fullstack Owner (backend schema, frontend presentation, integrated acceptance)
+
+**Uncertainty**: Exact data type for `training_card_ids` (json column vs join table) — to be decided by backend; PRD citation scope for FR-C-2 travel note — to be documented in the travel note
+
+## Category
+Category A — Actual owner decisions (requires explicit ruling on schema addition with bounded architecture; backend/fullstack/frontend ownership delegation)

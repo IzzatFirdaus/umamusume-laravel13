@@ -748,7 +748,26 @@ class TrainingRunController extends Controller
 
     public function update(StoreTrainingRunRequest $request, TrainingRun $run): RedirectResponse
     {
-        $run->update($request->validated());
+        // D-10's per-round map is not a run column: it is one row per named round, and it leaves the
+        // validated set before the run write or `update()` would be handed a key no column holds.
+        $validated = $request->validated();
+        $rounds = array_key_exists('preseason_rounds', $validated) ? $validated['preseason_rounds'] : null;
+        unset($validated['preseason_rounds']);
+
+        DB::transaction(function () use ($run, $validated, $rounds): void {
+            $run->update($validated);
+
+            // Only the rounds the map names move; a round it omits keeps what it stored, so a partial
+            // form post never clears a sibling. A null value is an explicit unknown and writes a row
+            // with a null outcome rather than deleting it: "opened and left blank" is a record, and
+            // the two states the reader keeps apart (D-220) would collapse if the row went away.
+            foreach ($rounds ?? [] as $round => $outcome) {
+                $run->preseasonRounds()->updateOrCreate(
+                    ['round' => (int) $round],
+                    ['outcome' => $outcome],
+                );
+            }
+        });
 
         // `back(fallback:)` rather than a fixed cockpit redirect: the identity fields are edited from
         // two doors since `C6b.1` — the Cockpit's `Career tools` disclosure and `/settings` — and a

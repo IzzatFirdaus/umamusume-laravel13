@@ -1,0 +1,53 @@
+# Decision Packet — Area K: N7.21: WCAG 2.2 Focus Visibility, Reflow, Target Size, and Errors (final)
+
+## Decision Identifier and Title
+**Identifier**: N7.21
+**Title**: WCAG 2.2 focus visibility, reflow, target size, and errors (final) — WCAG 2.2 inheritance from N5.1/N5.4; focus visibility, reflow, target size, errors (including SC 3.3.7); final documentation
+**Status**: OWNER-GATED — WCAG 2.2 inheritance from N5.1/N5.4; focus visibility, reflow, target size, errors (including SC 3.3.7); final documentation; only already-authorized slices retained per MASTER absorption
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/plan/trainerdesk-complete-uiux-implementation-plan-2026-11-20.md`; `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md`; `flows-preferences.md` §§N7.20–N7.21
+
+## Authority
+**WCAG 2.2 inheritance (final)**: Final documentation from N7.20; focus visibility, reflow, target size, errors (including SC 3.3.7) inherited from N5.1/N5.4.
+
+## Current Implementation Status
+- **WCAG 2.2 inheritance (final)**: Final documentation; focus visibility, reflow, target size, errors (including SC 3.3.7) inherited from N5.1/N5.4.
+
+## Owner Question (Exact)
+**Should the owner formalize the WCAG 2.2 inheritance (final), or maintain the current gated state?**
+
+**Option A**: Formalize WCAG 2.2 inheritance (final)
+- **Evidence required**: Final documentation from N7.20–N7.21; WCAG 2.2 inheritance from N5.1/N5.4 documented; major omission resolved
+- **Development blocked**: None — documentation is recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Maintain current gated state
+- **Evidence required**: Gating documentation; owner ruling
+- **Development blocked**: None — gating is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Formalize WCAG 2.2 inheritance (final) (Option A)**: Final documentation from N7.20–N7.21; WCAG 2.2 inheritance from N5.1/N5.4 documented; major omission resolved. Formalize with owner ruling.
+
+**Supporting evidence**:
+- `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52` — N7.1–N7.22 owner-gated, accepted 2026-11-25
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:72` — WCAG 2.2 inheritance from N5.1/N5.4
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:75` — N7.10 regression documentation; related WCAG coverage
+
+**Development blocked**: None — documentation is recording action
+
+**Unaffected work**: All existing WCAG 2.2 compliance functionality; no implementation change needed; formalization is recording action
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (formalization; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future WCAG updates would affect the inheritance; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (WCAG 2.2 inheritance (final) formalized; no owner action needed beyond ruling)
+
+---
+
+**Key Principle**: WCAG 2.2 inheritance (final) formalized; focus visibility, reflow, target size, errors (including SC 3.3.7) documented.

@@ -1,0 +1,54 @@
+# Decision Packet — Area K: N7.16: Provenance Vocabulary Applied Outside Ledger
+
+## Decision Identifier and Title
+**Identifier**: N7.16
+**Title**: Provenance vocabulary applied outside ledger — Provenance vocabulary applied outside ledger; well covered; provenance vocabulary applied outside ledger
+**Status**: OWNER-GATED — provenance vocabulary applied outside ledger; well covered; only already-authorized slices retained per MASTER absorption
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/plan/trainerdesk-complete-uiux-implementation-plan-2026-11-20.md`; `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md`; `flows-fetch-pipeline.md` §§N7.16–N7.17
+
+## Authority
+**Provenance vocabulary applied outside ledger**: Provenance vocabulary used outside the ledger context; well covered.
+
+## Current Implementation Status
+- **Provenance vocabulary applied outside ledger**: Present; provenance vocabulary used outside ledger context
+- **Well covered**: Documentation indicates well-covered scope
+
+## Owner Question (Exact)
+**Should the owner formalize the provenance vocabulary applied outside ledger, or maintain the current gated state?**
+
+**Option A**: Formalize provenance vocabulary applied outside ledger
+- **Evidence required**: Provenance vocabulary applied outside ledger documented; well covered documented
+- **Development blocked**: None — documentation is recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Maintain current gated state
+- **Evidence required**: Gating documentation; owner ruling
+- **Development blocked**: None — gating is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Formalize provenance vocabulary applied outside ledger (Option A)**: Provenance vocabulary applied outside ledger documented; well covered. Formalize with owner ruling.
+
+**Supporting evidence**:
+- `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52` — N7.1–N7.22 owner-gated, accepted 2026-11-25
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:138` — ND-*: Phase 7 absorbed 2026-11-25; only already-authorized slices retained
+- `flows-fetch-pipeline.md` §§N7.16–N7.17 — provenance vocabulary documentation
+
+**Development blocked**: None — documentation is recording action
+
+**Unaffected work**: All existing provenance vocabulary functionality; no implementation change needed; formalization is recording action
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (formalization; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future provenance changes would affect the vocabulary applied outside ledger; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (provenance vocabulary applied outside ledger formalized; no owner action needed beyond ruling)
+
+---
+
+**Key Principle**: Provenance vocabulary applied outside ledger formalized; well covered documented.

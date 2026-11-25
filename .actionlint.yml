@@ -1,0 +1,7 @@
+ignore:
+  - check: schema
+    path: .github/workflows/release.yml
+    line: 22
+  - check: schema
+    path: .github/workflows/release.yml
+    line: 38

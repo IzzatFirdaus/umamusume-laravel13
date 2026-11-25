@@ -1,0 +1,69 @@
+# Decision Packet — Area J: ND-2: Race-Candidate Confirm Semantics
+
+## Decision Identifier and Title
+**Identifier**: ND-2
+**Title**: Race-candidate Confirm semantics under ADR-0037 (entity=source_key, no column)
+**Status**: OWNER-GATED — Confirm behavior for a race row is parked until a race-promotion action exists; what does Confirm do for a race row?
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/adr/0037-match-candidate-entity-is-source-key.md`; `SCREEN_SPEC.md` §7-21; `docs/plan/implementation-plan-2026-11-20.md` §§S2.1, S2.9; `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5`
+
+## Authority
+**ADR-0037 settled**: `source_key` is the entity discriminator on `match_candidates`; `NOT NULL` on every row; 304 rows, all `gametora-races`; no second entity kind co-inhabits table today.
+
+**Confirm semantics**: What does Confirm do for a race row? No decision has been taken. The behavior is parked under ND-2 until a race-promotion action exists that would make Confirm meaningful.
+
+## Original Requirement
+From `flows-career-creation.md` and the review findings:
+- **ND-2**: Race-candidate Confirm semantics under ADR-0037 (entity=source_key, no column): what does Confirm do for a race row?
+- Two options documented:
+  - (a) Keep Confirm withheld (422), Reject-only until a race-promotion action exists
+  - (b) Authorize StoreRaceCatalogSlots promotion path — is a Phase-5 capability with its own slice
+
+**Related plan decisions**: N2.1, N2.9
+
+## Current Implementation Status
+- **Confirm behavior**: Withheld (returns 422); Reject-only until a race-promotion action exists
+- **Race queue**: Renders in `Review/Index` and `Review/Detail` via existing race queue
+- **Entity discriminator**: `source_key` partitions `match_candidates` table perfectly; no schema change needed
+- **KI-45**: Carries the operational statement of the data gap
+
+## Owner Question (Exact)
+**Should the owner authorize a StoreRaceCatalogSlots promotion path (Option B), or maintain the withheld Confirm semantics (Option A)?**
+
+**Option A**: Maintain Confirm withheld (422), Reject-only until a race-promotion action exists
+- **Evidence required**: ADR-0037 entity=source_key architecture; 304 pending match candidates; KI-45 data gap
+- **Development blocked**: Confirm remains withheld; no race-promotion action implemented
+- **Release relevance**: Optional feature enhancement; does not block core release
+
+**Option B**: Authorize StoreRaceCatalogSlots promotion path
+- **Evidence required**: Race promotion semantics; catalogue slot population mechanism; per-stat mark computation
+- **Development blocked**: Would require implementing race catalog slot enrichment; building marks against real distance and surface using seeded data; verifying actual seeder execution result
+- **Release relevance**: Phase-5 capability; does not block core release
+
+## Recommended Ruling
+**Maintain Confirm withheld (Option A)**: Given the rechecked ADR-0037 infrastructure, `source_key` entity-discriminator architecture is operative; the resolution lifecycle is a separate unresolved design question. The 304 pending match candidates are a different entity from `race_catalog_slots` population. Maintain Confirm withheld (422, Reject-only) until a race-promotion action exists that would make Confirm meaningful.
+
+**Supporting evidence**:
+- `docs/adr/0037-match-candidate-entity-is-source-key.md` — full ADR text
+- `config/uma.php` §`gametora-races` — `'seed_file' => 'races.json'` (line 554)
+- `app/Console/Commands/EnrichRaces.php` — enriches `race_catalog_slots` from gametora race snapshots
+- `docs/research-scratch/SLICE-RECORDS.md` §slice-15-2026-09-29.md §2 (R75); KI-45
+- Database: 304 Pending gametora-races candidates (match-candidates); separate entity from race_catalog_slots
+
+**Development blocked**: Preserving the owner hold is a recording action; no implementation change needed; verifying actual seeder execution result and per-stat mark computation using seeded data
+
+**Unaffected work**: All existing functionality; KI-45 operational statement; ADR-0020 §6.11; all other ADRs
+
+**Release relevance**: Optional feature enhancement; does not block core release qualification
+
+**Responsible Expert**: Technical Expert (Fullstack or Data Engineer) — to recheck the data gap with current infrastructure and verified database state
+
+**Uncertainty**: Exact state of currently seeded `race_catalog_slots` data; whether the seeder has been executed and with what results; whether the 304 pending match candidates and race_catalog_slots population are related; whether the data gap is truly unclosed or merely unobserved
+
+## Category
+Category A — Actual owner decisions (genuinely requires explicit product/architectural ruling; hold preserved per rechecked infrastructure with entity distinction)
+
+---
+
+**Key Distinction**: `source_key` entity-discriminator architecture operative (ADR-0037); resolution lifecycle separate unresolved design question. Do not conflate with race catalogue population mechanism.

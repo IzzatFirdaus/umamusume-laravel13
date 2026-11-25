@@ -1,0 +1,64 @@
+# Decision Packet — Area J: ND-6: Cockpit Mandatory-Race Obligations
+
+## Decision Identifier and Title
+**Identifier**: ND-6
+**Title**: Cockpit mandatory-race obligations — distinguish missed vs unrecorded-historical-gap
+**Status**: OWNER-GATED — keep not_reached vocabulary, add disclosure that absence is not proof of failure; no schema-backed derivation
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/adr/0026-per-trainee-career-objectives.md`; `SCREEN_SPEC.md` §7-21; `docs/plan/implementation-plan-2026-11-20.md` §§S3.5; `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5`
+
+## Authority
+**Vocabulary**: `not_reached` vocabulary exists for mandatory obligations past their window.
+
+**Two options documented**:
+- (a) Keep `not_reached` vocabulary, add disclosure that absence is not proof of failure; no new state derivation
+- (b) Derive `missed` from recorded position; is a derivation the schema does not support today
+
+## Original Requirement
+From `flows-career-creation.md` and the review findings:
+- **ND-6**: Cockpit mandatory-race obligations: distinguish missed vs unrecorded-historical-gap
+- (a) keep not_reached vocabulary, add disclosure that absence is not proof of failure; (b) derive missed from recorded position
+
+## Current Implementation Status
+- **not_reached vocabulary**: Shipped; displays "Not recorded. This tool cannot tell a missed race from an unrecorded one."
+- **Disclosure sentence**: Added where a mandatory obligation is not_reached past its window
+- **No schema derivation**: No new state derivation attempted; schema does not support it today
+
+## Owner Question (Exact)
+**Should the owner keep the `not_reached` vocabulary with disclosure (Option A), or attempt to derive `missed` from recorded position (Option B)?**
+
+**Option A**: Keep `not_reached` vocabulary with disclosure
+- **Evidence required**: Review claim refuted per ND-6(a); no new state derivation
+- **Development blocked**: None — vocabulary and disclosure shipped
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Derive `missed` from recorded position
+- **Evidence required**: Schema-backed slice; derivation the schema does not support
+- **Development blocked**: Schema does not support missed/unrecorded derivation today; would require schema change
+- **Release relevance**: Would require schema change; not for 3.0.0
+
+## Recommended Ruling
+**Keep `not_reached` vocabulary with disclosure (Option A)**: The `not_reached` vocabulary ships with a disclosure sentence: "Not recorded. This tool cannot tell a missed race from an unrecorded one." No schema-backed derivation attempted; the schema does not support it today.
+
+**Supporting evidence**:
+- `docs/plan/implementation-plan-2026-11-20.md:436` — per ND-6(a) action
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5` — ND-1..ND-16 source
+- `docs/plan/implementation-plan-2026-11-20.md:694` — per ND-6 ruling
+
+**Development blocked**: None — vocabulary and disclosure shipped
+
+**Unaffected work**: All existing cockpit mandatory-race functionality; no implementation change needed
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (vocabulary shipped; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future schema changes would support missed derivation; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (vocabulary shipped with disclosure; no owner action needed)
+
+---
+
+**Key Principle**: `not_reached` vocabulary ships with disclosure; no schema derivation attempted; schema does not support missed/unrecorded derivation today.
