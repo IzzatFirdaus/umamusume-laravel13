@@ -393,9 +393,78 @@ it('keeps a stored choice when a correction writes without one', function (): vo
         'energy' => 60, 'fans' => 1000, 'sp' => 120,
     ])->assertSessionHasNoErrors();
 
+    // ADR-0027: the correction appends a revision row; the committed row keeps its choice, its
+    // snapshot, and its values untouched, and is marked superseded by the revision.
     expect($entry->fresh()->choice)->toBe($value)
         ->and($entry->fresh()->decision_snapshot)->toBe($snapshot)
-        ->and($entry->fresh()->energy)->toBe(60);
+        ->and($entry->fresh()->energy)->toBe(80)
+        ->and($entry->fresh()->superseded_by)->not()->toBeNull();
+
+    $revision = TurnEntry::query()->where('training_run_id', $run->id)->where('turn', 1)
+        ->whereNull('superseded_by')->sole();
+
+    expect($revision->energy)->toBe(60)
+        ->and($revision->corrected_from)->toBe($entry->id);
+
+    // 5. The recorded decision remains available through the actual Cockpit reader even though the
+    // original row is superseded: the revision carries the inherited choice and snapshot, so
+    // recordedAction() still returns the decision the turn was recorded with.
+    $decision = $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->inertiaProps('advisor.decision');
+
+    expect($decision['recorded_action'])->not->toBeNull()
+        ->and($decision['recorded_action']['choice'])->toBe($value)
+        ->and($decision['recorded_action']['decision'])->toBe($snapshot);
+});
+
+it('keeps the recorded decision across a second correction of the same turn', function (): void {
+    // 6. A subsequent correction of an already-superseded row must not break the revision chain:
+    // each correction inherits the decision from the row it corrects, so the live row always carries
+    // the original recorded decision and `recordedAction()` keeps returning it.
+    $run = fd4Run();
+    $value = TurnChoice::cases()[0]->value;
+
+    $this->post(route('runs.turns.store', $run), [
+        'turn' => 1,
+        'speed' => 600, 'stamina' => 600, 'power' => 600, 'guts' => 600, 'wit' => 600,
+        'energy' => 80, 'fans' => 1000, 'sp' => 120,
+        'choice' => $value,
+    ])->assertSessionHasNoErrors();
+
+    $original = TurnEntry::query()->where('training_run_id', $run->id)->where('turn', 1)->sole();
+    $snapshot = $original->decision_snapshot;
+
+    $this->put(route('runs.turns.update', [$run, $original]), [
+        'turn' => 1, 'speed' => 610, 'stamina' => 600, 'power' => 600, 'guts' => 600, 'wit' => 600,
+        'energy' => 60, 'fans' => 1000, 'sp' => 120,
+    ])->assertSessionHasNoErrors();
+
+    $first = TurnEntry::query()->where('training_run_id', $run->id)->where('turn', 1)
+        ->whereNull('superseded_by')->sole();
+
+    $this->put(route('runs.turns.update', [$run, $first]), [
+        'turn' => 1, 'speed' => 620, 'stamina' => 600, 'power' => 600, 'guts' => 600, 'wit' => 600,
+        'energy' => 55, 'fans' => 1000, 'sp' => 120,
+    ])->assertSessionHasNoErrors();
+
+    // Exactly one live row per turn through both corrections; the chain links back to the original.
+    $live = TurnEntry::query()->where('training_run_id', $run->id)->where('turn', 1)
+        ->whereNull('superseded_by')->get();
+    expect($live)->toHaveCount(1)
+        ->and($live->sole()->energy)->toBe(55)
+        ->and($live->sole()->corrected_from)->toBe($first->id)
+        ->and($first->fresh()->superseded_by)->toBe($live->sole()->id)
+        ->and($original->fresh()->superseded_by)->toBe($first->id);
+
+    // The recorded decision survives both corrections through the Cockpit reader.
+    $decision = $this->get(route('runs.cockpit', $run))
+        ->assertOk()
+        ->inertiaProps('advisor.decision');
+
+    expect($decision['recorded_action'])->not->toBeNull()
+        ->and($decision['recorded_action']['choice'])->toBe($value)
+        ->and($decision['recorded_action']['decision'])->toBe($snapshot);
 });
 
 it('exposes the eighth contract key and keeps the seven it had', function (): void {

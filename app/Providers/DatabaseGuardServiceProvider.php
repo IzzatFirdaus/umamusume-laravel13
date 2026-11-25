@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Database\SafeDatabaseManager;
 use App\Services\DatabaseSafety\DatabaseGuard;
 use Illuminate\Console\Events\CommandStarting;
+use Illuminate\Database\Connectors\ConnectionFactory;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\ServiceProvider;
 
@@ -35,13 +37,21 @@ class DatabaseGuardServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(DatabaseGuard::class);
+
+        // SafeDatabaseManager never leaves a refused connection in the cache.
+        // Bound as the container's `db` service so no framework (vendor) edit
+        // is required for the cache-reuse fix.
+        $this->app->singleton('db', function ($app) {
+            return new SafeDatabaseManager(
+                $app,
+                $app->make(ConnectionFactory::class)
+            );
+        });
     }
 
     public function boot(): void
     {
         $guard = $this->app->make(DatabaseGuard::class);
-
-        $guard->assertIsolatedContext('Application boot');
 
         Event::listen(CommandStarting::class, function (CommandStarting $event) use ($guard): void {
             $guard->assertCommandSafe($event->command, $event->input);
