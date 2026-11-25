@@ -12,6 +12,7 @@ use App\Http\Controllers\Career\PreflightController;
 use App\Http\Controllers\Career\RaceDecisionController;
 use App\Http\Controllers\Career\RacePlannerController;
 use App\Http\Controllers\Career\ResultController;
+use App\Http\Controllers\Career\RosterMemberController;
 use App\Http\Controllers\Career\SaveVeteranController;
 use App\Http\Controllers\Career\ScenarioSelectController;
 use App\Http\Controllers\Career\SkillsPlannerController;
@@ -158,6 +159,13 @@ Route::get('/training-runs/{run}/settings', [CockpitController::class, 'settings
  * before the block is deleted rather than after.
  */
 Route::get('/training-runs/{run}/team', [CockpitController::class, 'teamEdit'])->name('runs.team');
+/*
+ * The Unity Cup roster write doors (D01): create, edit, remove one member.
+ * Each nests under `{run}` so a member posted to another run's roster 404s first.
+ */
+Route::post('/training-runs/{run}/roster', [RosterMemberController::class, 'store'])->name('runs.roster.store');
+Route::put('/training-runs/{run}/roster/{member}', [RosterMemberController::class, 'update'])->name('runs.roster.update');
+Route::delete('/training-runs/{run}/roster/{member}', [RosterMemberController::class, 'destroy'])->name('runs.roster.destroy');
 /*
  * The scenario's own board suite, on a page of its own (`v3.0.0`). The cockpit's `Scenario detail`
  * disclosure retires and the door of the same name in `Where to go` leads here, so the panels — and

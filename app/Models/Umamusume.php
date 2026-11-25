@@ -29,6 +29,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $jp_debut_date
  * @property Carbon|null $global_debut_date
  * @property bool $is_manual
+ * @property bool $is_fixture
  * @property string|null $aptitude_turf
  * @property string|null $aptitude_dirt
  * @property string|null $aptitude_sprint
@@ -47,7 +48,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection<int, TrainingRun> $trainingRuns
  */
 #[Table('umamusume')]
-#[Fillable(['slug', 'name', 'name_ja', 'match_key', 'release_status', 'jp_debut_date', 'global_debut_date', 'is_manual', 'aptitude_turf', 'aptitude_dirt', 'aptitude_sprint', 'aptitude_mile', 'aptitude_medium', 'aptitude_long', 'aptitude_front_runner', 'aptitude_pace_chaser', 'aptitude_late_surger', 'aptitude_end_closer', 'external_ref'])]
+#[Fillable(['slug', 'name', 'name_ja', 'match_key', 'release_status', 'jp_debut_date', 'global_debut_date', 'is_manual', 'is_fixture', 'aptitude_turf', 'aptitude_dirt', 'aptitude_sprint', 'aptitude_mile', 'aptitude_medium', 'aptitude_long', 'aptitude_front_runner', 'aptitude_pace_chaser', 'aptitude_late_surger', 'aptitude_end_closer', 'external_ref'])]
 class Umamusume extends Model
 {
     /** @use HasFactory<UmamusumeFactory> */

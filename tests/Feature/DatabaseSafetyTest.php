@@ -15,7 +15,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 beforeEach(function () {
     Config::set('database.connections.sqlite.database', 'database/database.sqlite');
-    Config::set('database-safety.canonical', 'D:/Projects/umamusume-laravel13/database/database.sqlite');
+    Config::set('database-safety.canonical', 'D:/Projects/trainerdesk-backend/database/database.sqlite');
     Config::set('database-safety.isolated_roles', ['isolated', 'test', 'browser', 'scratch', 'e2']);
     Config::set('database-safety.destructive_commands', ['migrate:fresh', 'migrate:refresh', 'migrate:reset', 'migrate:rollback', 'db:wipe']);
 
@@ -103,7 +103,7 @@ it('refuses isolated role targeting canonical even with override env vars', func
     guardEnv('UMA_DATABASE_ROLE', 'test');
     guardEnv('UMA_ALLOW_CANONICAL_DESTRUCTIVE', 'true');
     guardEnv('UMA_OPERATOR_ACKNOWLEDGED', 'yes');
-    Config::set('database.connections.sqlite.database', 'D:/Projects/umamusume-laravel13/database/database.sqlite');
+    Config::set('database.connections.sqlite.database', 'D:/Projects/trainerdesk-backend/database/database.sqlite');
 
     $guard = app(DatabaseGuard::class);
 
@@ -121,7 +121,7 @@ it('refuses browser role targeting canonical even with override env vars', funct
     guardEnv('UMA_DATABASE_ROLE', 'browser');
     guardEnv('UMA_ALLOW_CANONICAL_DESTRUCTIVE', 'true');
     guardEnv('UMA_OPERATOR_ACKNOWLEDGED', 'yes');
-    Config::set('database.connections.sqlite.database', 'D:/Projects/umamusume-laravel13/database/database.sqlite');
+    Config::set('database.connections.sqlite.database', 'D:/Projects/trainerdesk-backend/database/database.sqlite');
 
     $guard = app(DatabaseGuard::class);
 
@@ -164,6 +164,38 @@ it('simulates LLM bypass attempt and remains blocked', function () {
     $event = new CommandStarting('migrate:fresh', $input, $output);
 
     expect(fn () => $guard->assertCommandSafe($event->command, $event->input))->toThrow(DatabaseSafetyViolation::class);
+});
+
+it('refuses canonical destructive when an agent session inherits both override vars', function () {
+    // FS-INT-3: an agent child inheriting UMA_ALLOW_CANONICAL_DESTRUCTIVE=true and
+    // UMA_OPERATOR_ACKNOWLEDGED=yes from a parent operator shell must NOT authorise
+    // canonical destructive commands, even if the shell is interactive.
+    foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
+        putenv("{$marker}=test-session-01234567");
+        $_ENV[$marker] = 'test-session-01234567';
+        $_SERVER[$marker] = 'test-session-01234567';
+    }
+    putenv('UMA_ALLOW_CANONICAL_DESTRUCTIVE=true');
+    $_ENV['UMA_ALLOW_CANONICAL_DESTRUCTIVE'] = 'true';
+    $_SERVER['UMA_ALLOW_CANONICAL_DESTRUCTIVE'] = 'true';
+    putenv('UMA_OPERATOR_ACKNOWLEDGED=yes');
+    $_ENV['UMA_OPERATOR_ACKNOWLEDGED'] = 'yes';
+    $_SERVER['UMA_OPERATOR_ACKNOWLEDGED'] = 'yes';
+    Config::set('database.connections.sqlite.database', 'database/database.sqlite');
+
+    $guard = app(DatabaseGuard::class);
+
+    expect($guard->allowsCanonicalDestructive())->toBeFalse();
+
+    // Clean up markers so other tests in this shared process are unaffected
+    foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
+        putenv($marker);
+        unset($_ENV[$marker], $_SERVER[$marker]);
+    }
+    putenv('UMA_ALLOW_CANONICAL_DESTRUCTIVE');
+    unset($_ENV['UMA_ALLOW_CANONICAL_DESTRUCTIVE'], $_SERVER['UMA_ALLOW_CANONICAL_DESTRUCTIVE']);
+    putenv('UMA_OPERATOR_ACKNOWLEDGED');
+    unset($_ENV['UMA_OPERATOR_ACKNOWLEDGED'], $_SERVER['UMA_OPERATOR_ACKNOWLEDGED']);
 });
 
 it('allows intentional operator workflow with both override vars and interactive shell', function () {
@@ -460,7 +492,7 @@ it('genuine Trainer operations and approved historical imports remain functional
     // canonical database. The identity is forced explicitly rather than
     // unset-inherited, because phpunit's forced env does not survive every
     // channel a child process consults.
-    $repo = 'D:/Projects/umamusume-laravel13';
+    $repo = 'D:/Projects/trainerdesk-backend';
     $canonical = $repo.'/database/database.sqlite';
 
     $script = sys_get_temp_dir().'/guard-trainer-path-'.uniqid().'.php';

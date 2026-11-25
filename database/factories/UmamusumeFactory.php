@@ -34,6 +34,7 @@ class UmamusumeFactory extends Factory
             'jp_debut_date' => null,
             'global_debut_date' => null,
             'is_manual' => false,
+            'is_fixture' => true,
             // Aptitudes are recorded per trainee by the roster import. Null means the
             // source did not publish that aptitude, not a default grade.
             'aptitude_turf' => null,
@@ -58,5 +59,10 @@ class UmamusumeFactory extends Factory
     public function manual(): static
     {
         return $this->state(fn (): array => ['is_manual' => true]);
+    }
+
+    public function catalogue(): static
+    {
+        return $this->state(fn (): array => ['is_fixture' => false]);
     }
 }
