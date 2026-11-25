@@ -20,8 +20,10 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
  * Opt-in per PRD NFR-1 amendment (2026-11-21): `config('langfuse.enabled')`
  * defaults to false. When disabled, this middleware passes straight through.
  *
- * Telemetry never blocks the request: export failures are logged and
- * swallowed, and the response is always returned unchanged.
+ * Delivery is deferred to `terminate()`: the span is exported after the
+ * response has been sent, so a slow or unreachable collector costs the caller
+ * nothing. The 5s export timeout therefore bounds background work only, and
+ * failures are still logged and swallowed without touching the response.
  *
  * @see https://langfuse.com/docs/opentelemetry/get-started
  */
@@ -48,57 +50,71 @@ class LangfuseTraceMiddleware
             /** @var Response $response */
             $response = $next($request);
         } catch (\Throwable $e) {
-            $statusCode = $e instanceof HttpExceptionInterface
-                ? $e->getStatusCode()
-                : 500;
-
-            $this->langfuse->trace([
-                'name' => sprintf('%s %s', $request->method(), $request->path()),
-                'traceId' => $traceId,
-                'spanId' => bin2hex(random_bytes(8)),
-                'kind' => 2, // SPAN_KIND_SERVER
-                'startTimeUnixNano' => $start,
-                'endTimeUnixNano' => $this->nanoTime(),
-                'attributes' => [
-                    ['key' => 'http.method', 'value' => ['stringValue' => $request->method()]],
-                    ['key' => 'http.url', 'value' => ['stringValue' => $request->fullUrl()]],
-                    ['key' => 'http.route', 'value' => ['stringValue' => $request->route()?->getName() ?? $request->path()]],
-                    ['key' => 'http.status_code', 'value' => ['intValue' => (string) $statusCode]],
-                    ['key' => 'http.target', 'value' => ['stringValue' => $request->path()]],
-                    ['key' => 'network.peer.ip', 'value' => ['stringValue' => $request->getClientIp() ?? '']],
-                    ['key' => 'langfuse.name', 'value' => ['stringValue' => sprintf('%s %s', $request->method(), $request->path())]],
-                    ['key' => 'langfuse.type', 'value' => ['stringValue' => 'span']],
-                    ['key' => 'langfuse.level', 'value' => ['stringValue' => 'error']],
-                    ['key' => 'exception.type', 'value' => ['stringValue' => get_class($e)]],
-                    ['key' => 'exception.message', 'value' => ['stringValue' => $e->getMessage()]],
-                ],
+            // Stash the failure for terminate(); re-throwing keeps the normal
+            // exception handling (and status code) intact.
+            $request->attributes->set('telemetry.langfuse.context', [
+                'trace_id' => $traceId,
+                'start_ns' => $start,
+                'status_code' => $e instanceof HttpExceptionInterface ? $e->getStatusCode() : 500,
+                'exception' => $e,
             ]);
 
             throw $e;
         }
 
-        $durationNs = $this->nanoTime() - $start;
-
-        $this->langfuse->trace([
-            'name' => sprintf('%s %s', $request->method(), $request->path()),
-            'traceId' => $traceId,
-            'spanId' => bin2hex(random_bytes(8)),
-            'kind' => 2, // SPAN_KIND_SERVER
-            'startTimeUnixNano' => $start,
-            'endTimeUnixNano' => $this->nanoTime(),
-            'attributes' => [
-                ['key' => 'http.method', 'value' => ['stringValue' => $request->method()]],
-                ['key' => 'http.url', 'value' => ['stringValue' => $request->fullUrl()]],
-                ['key' => 'http.route', 'value' => ['stringValue' => $request->route()?->getName() ?? $request->path()]],
-                ['key' => 'http.status_code', 'value' => ['intValue' => (string) $response->getStatusCode()]],
-                ['key' => 'http.target', 'value' => ['stringValue' => $request->path()]],
-                ['key' => 'network.peer.ip', 'value' => ['stringValue' => $request->getClientIp() ?? '']],
-                ['key' => 'langfuse.name', 'value' => ['stringValue' => sprintf('%s %s', $request->method(), $request->path())]],
-                ['key' => 'langfuse.type', 'value' => ['stringValue' => 'span']],
-            ],
+        $request->attributes->set('telemetry.langfuse.context', [
+            'trace_id' => $traceId,
+            'start_ns' => $start,
+            'status_code' => $response->getStatusCode(),
+            'exception' => null,
         ]);
 
         return $response;
+    }
+
+    /**
+     * Export after the response is sent. Laravel calls this only when the
+     * request is handled by the HTTP kernel (not in tests that call handle()
+     * directly), which is exactly the production path we want to keep fast.
+     */
+    public function terminate(Request $request, Response $response): void
+    {
+        if (! config('langfuse.enabled')) {
+            return;
+        }
+
+        $context = $request->attributes->get('telemetry.langfuse.context');
+        if (! is_array($context)) {
+            return;
+        }
+
+        $exception = $context['exception'];
+        $attributes = [
+            ['key' => 'http.method', 'value' => ['stringValue' => $request->method()]],
+            ['key' => 'http.url', 'value' => ['stringValue' => $request->fullUrl()]],
+            ['key' => 'http.route', 'value' => ['stringValue' => $request->route()?->getName() ?? $request->path()]],
+            ['key' => 'http.status_code', 'value' => ['intValue' => (string) $context['status_code']]],
+            ['key' => 'http.target', 'value' => ['stringValue' => $request->path()]],
+            ['key' => 'network.peer.ip', 'value' => ['stringValue' => $request->getClientIp() ?? '']],
+            ['key' => 'langfuse.name', 'value' => ['stringValue' => sprintf('%s %s', $request->method(), $request->path())]],
+            ['key' => 'langfuse.type', 'value' => ['stringValue' => 'span']],
+        ];
+
+        if ($exception instanceof \Throwable) {
+            $attributes[] = ['key' => 'langfuse.level', 'value' => ['stringValue' => 'error']];
+            $attributes[] = ['key' => 'exception.type', 'value' => ['stringValue' => get_class($exception)]];
+            $attributes[] = ['key' => 'exception.message', 'value' => ['stringValue' => $exception->getMessage()]];
+        }
+
+        $this->langfuse->trace([
+            'name' => sprintf('%s %s', $request->method(), $request->path()),
+            'traceId' => $context['trace_id'],
+            'spanId' => bin2hex(random_bytes(8)),
+            'kind' => 2, // SPAN_KIND_SERVER
+            'startTimeUnixNano' => $context['start_ns'],
+            'endTimeUnixNano' => $this->nanoTime(),
+            'attributes' => $attributes,
+        ]);
     }
 
     private function nanoTime(): int

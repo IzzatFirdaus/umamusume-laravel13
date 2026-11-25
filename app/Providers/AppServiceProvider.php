@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Providers;
 
 use App\Models\Preference;
+use App\Services\LangfuseTraceService;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -15,7 +16,17 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // LangfuseTraceService takes scalar configuration, so the container cannot
+        // autowire it; without this binding every telemetry consumer fails with a
+        // BindingResolutionException at resolve time.
+        $this->app->singleton(LangfuseTraceService::class, fn ($app): LangfuseTraceService => new LangfuseTraceService(
+            (bool) config('langfuse.enabled', false),
+            (string) config('langfuse.base_url', ''),
+            (string) config('langfuse.public_key', ''),
+            (string) config('langfuse.secret_key', ''),
+            (string) config('langfuse.service_name', 'trainerdesk'),
+            (string) config('langfuse.environment', 'local'),
+        ));
     }
 
     /**

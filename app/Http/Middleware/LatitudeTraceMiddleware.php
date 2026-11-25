@@ -24,8 +24,9 @@ use Symfony\Component\HttpFoundation\Response;
  * Opt-in per PRD NFR-1 amendment (2026-11-21): `config('latitude.enabled')`
  * defaults to false. When disabled, this middleware passes straight through.
  *
- * Telemetry never blocks the request: export failures are logged and
- * swallowed, and the response is always returned unchanged.
+ * Delivery is deferred to `terminate()`, so the collector's 5s timeout bounds
+ * background work only and never the caller's response. Failures are logged
+ * and swallowed without touching the response.
  *
  * @see https://github.com/latitude-dev/latitude-llm/blob/development/docs/telemetry/otel-exporter.md
  */
@@ -37,21 +38,31 @@ class LatitudeTraceMiddleware
             return $next($request);
         }
 
-        /** @var array{0: int, 1: int} $start */
-        $start = hrtime(false);
+        // Stash what terminate() needs; the export itself happens after the
+        // response is sent.
+        $request->attributes->set('telemetry.latitude.context', [
+            'trace_id' => $request->attributes->get('telemetry.trace_id') ?? $this->generateTraceId(),
+            'started_ns' => $this->nanoTime(),
+        ]);
 
-        /** @var Response $response */
-        $response = $next($request);
+        return $next($request);
+    }
 
-        /** @var array{0: int, 1: int} $end */
-        $end = hrtime(false);
-        $durationNs = (int) ($end[0] * 1_000_000_000 + $end[1]) - (int) ($start[0] * 1_000_000_000 + $start[1]);
+    /**
+     * Export after the response is sent.
+     */
+    public function terminate(Request $request, Response $response): void
+    {
+        if (! config('latitude.enabled')) {
+            return;
+        }
 
-        $traceId = $request->attributes->get('telemetry.trace_id') ?? $this->generateTraceId();
+        $context = $request->attributes->get('telemetry.latitude.context');
+        if (! is_array($context)) {
+            return;
+        }
 
-        $this->exportTrace($request, $response, $durationNs, $traceId);
-
-        return $response;
+        $this->exportTrace($request, $response, $this->nanoTime() - (int) $context['started_ns'], (string) $context['trace_id']);
     }
 
     /**
