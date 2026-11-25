@@ -905,7 +905,7 @@ class CockpitController extends Controller
         // KI-173: a `Scheduled` row is the calendar slot, not an observed entry decision, so it
         // settles no obligation. Counting it would print `completed` for a race nobody has run.
         $entered = $run->raceEntries
-            ->filter(fn (RaceEntry $entry): bool => $entry->status?->recordsEntry() === true)
+            ->filter(fn (RaceEntry $entry): bool => $entry->status->recordsEntry())
             ->pluck('race_catalog_slot_id')
             ->filter()
             ->all();
