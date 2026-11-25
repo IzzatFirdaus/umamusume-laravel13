@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/base-test';
 import { buildAxe, openAllDisclosures } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';

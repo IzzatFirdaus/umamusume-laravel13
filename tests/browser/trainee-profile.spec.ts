@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 test.describe('Trainee profile', () => {
     test('renders the profile without a 500 when a form has no recorded release date', async ({ page }) => {

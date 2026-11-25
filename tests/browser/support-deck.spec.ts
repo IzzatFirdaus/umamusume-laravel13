@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 import { deleteRun } from '../utils/delete-run';
 
 // Rendered-DOM evidence for the deck builder (SCREEN-007, `SCR-CAR-007`). The server-side

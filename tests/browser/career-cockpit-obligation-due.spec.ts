@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 import { startCareer } from '../utils/start-career';
 import { recordTurns } from '../utils/record-turns';
 import { deleteRun } from '../utils/delete-run';

@@ -1,4 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from './support/base-test';
+import type { Page } from '@playwright/test';
 
 /*
  * `C6b.3` (KI-144) — the delete-run confirmation door at `/training-runs/{run}/delete`.

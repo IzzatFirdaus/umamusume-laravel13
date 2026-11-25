@@ -1,4 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from './support/base-test';
+import type { Page } from '@playwright/test';
 import { deleteRun } from '../utils/delete-run';
 import { openTeamEdit } from '../utils/scenario-detail';
 import { startCareer } from '../utils/start-career';

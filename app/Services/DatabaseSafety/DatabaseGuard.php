@@ -141,6 +141,17 @@ class DatabaseGuard
 
     public function allowsCanonicalDestructive(): bool
     {
+        // An agent session never inherits operator authority from its parent
+        // process, so an agent child carrying UMA_OPERATOR_ACKNOWLEDGED=yes and
+        // UMA_ALLOW_CANONICAL_DESTRUCTIVE=true from an operator shell cannot
+        // authorise canonical destructive commands. Only the Trainer's own
+        // interactive process (no agent marker) may use this escape hatch.
+        foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
+            if ($_SERVER[$marker] ?? $_ENV[$marker] ?? getenv($marker) !== null) {
+                return false;
+            }
+        }
+
         $override = $this->environment('UMA_ALLOW_CANONICAL_DESTRUCTIVE');
 
         if (! is_string($override) || ! in_array(strtolower($override), ['1', 'true', 'yes', 'on'], true)) {

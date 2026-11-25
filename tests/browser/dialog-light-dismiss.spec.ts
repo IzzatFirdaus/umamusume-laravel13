@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/base-test';
 
 /*
  * MWG F9: `closedby="any"` and its mandatory pointer-position fallback.

@@ -1,10 +1,11 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/base-test';
 import { spawn, type ChildProcess } from 'node:child_process';
 import { createServer as createHttpServer } from 'node:http';
 import { createServer } from 'node:net';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { lastVerifiedIdentity } from './support/identity-preflight';
+import { getIdentityPreflightFailed, getLastVerifiedIdentity, refuseIdentityPreflightForTest, resetIdentityPreflightForTest, verifyIdentityPreflight } from './support/identity-preflight';
+import { existsSync, rmSync, writeFileSync } from 'node:fs';
 import {
     assertHarnessBaseUrl,
     assertIdentity,
@@ -70,7 +71,20 @@ async function startDisposableApp(options: {
     role?: string;
     token: string;
 }): Promise<DisposableApp> {
-    const port = await freePort();
+    return startDisposableAppOnPort(await freePort(), options);
+}
+
+/**
+ * Same, on a port the caller names. A replacement server has to take the port the previous one
+ * released, or it is merely a different session rather than a swap of the process this run believes
+ * it is talking to.
+ */
+async function startDisposableAppOnPort(port: number, options: {
+    database: string;
+    expectedDatabase?: string;
+    role?: string;
+    token: string;
+}): Promise<DisposableApp> {
     const env: NodeJS.ProcessEnv = {
         ...process.env,
         DB_DATABASE: options.database,
@@ -117,12 +131,13 @@ test('the mandatory preflight ran in this worker and matches this run manifest',
     const expected = harness();
 
     expect(baseURL).toBe(expected.baseURL);
-    expect(lastVerifiedIdentity, 'the setupFiles beforeEach hook verified this worker').toBeDefined();
-    expect(lastVerifiedIdentity?.runToken).toBe(expected.runToken);
-    expect(lastVerifiedIdentity?.dbDigest).toBe(expectedDatabaseDigest(expected.scratchDatabase));
-    expect(lastVerifiedIdentity?.serverPid).toBeGreaterThan(0);
-    expect(lastVerifiedIdentity?.targetsCanonical).toBe(false);
-    expect(lastVerifiedIdentity?.expectedMatches).toBe(true);
+    expect(getLastVerifiedIdentity(), 'the auto-fixture in support/base-test.ts verified the server').toBeDefined();
+    expect(getLastVerifiedIdentity()?.runToken).toBe(expected.runToken);
+    expect(getLastVerifiedIdentity()?.dbDigest).toBe(expectedDatabaseDigest(expected.scratchDatabase));
+    expect(getLastVerifiedIdentity()?.serverPid).toBeGreaterThan(0);
+    expect(getLastVerifiedIdentity()?.targetsCanonical).toBe(false);
+    expect(getLastVerifiedIdentity()?.expectedMatches).toBe(true);
+    expect(getIdentityPreflightFailed()).toBe(false);
 });
 
 test('refuses a base URL that is not this run loopback server on this run port', async () => {
@@ -284,4 +299,90 @@ test('two concurrent disposable sessions keep distinct servers, databases and to
         await first.stop();
         await second.stop();
     }
+});
+
+test('a verified server that is replaced by an incorrect one refuses before the next test mutates', async () => {
+    /*
+     * The cached-success lifecycle, measured on ordinary Playwright rather than on a helper.
+     *
+     * The historical defect was a per-worker success cache: server A passed once, the worker kept
+     * that verdict, A was then replaced by a server with a different identity, and every later test
+     * in the worker ran against B on A's reputation. A cache that outlives the process it measured
+     * is not a check.
+     *
+     * This case reproduces the sequence with the real fixture body. `preflightFixture()` is the same
+     * generator `base-test.ts` hands to Playwright, so what runs here is the enforcement, not a
+     * stand-in for it:
+     *
+     *   1. A correct disposable server passes the probe (the cached success).
+     *   2. It is stopped, and an impostor with a different token takes the same port.
+     *   3. The probe runs again, exactly as the next test's fixture would.
+     *   4. It must reject, and a would-be mutation after it must never be reached.
+     */
+    const dir = dirname(harness().scratchDatabase);
+    const stamp = `${process.pid}-${Date.now()}`;
+    const database = join(dir, `lifecycle-${stamp}.sqlite`);
+    const token = browserRunToken({ ...process.env, PLAYWRIGHT_PORT: '8611', PLAYWRIGHT_SCRATCH_DB: database });
+
+    const correct = await startDisposableApp({ database, expectedDatabase: database, token });
+    const port = correct.port;
+    const baseURL = correct.baseURL;
+    const expected: ExpectedIdentity = { port, baseURL, scratchDatabase: database, runToken: token };
+    const mutationSentinel = join(dir, `lifecycle-mutation-${stamp}.txt`);
+    let mutations = 0;
+
+    try {
+        // 1. The correct server passes, which is the success the old cache would have kept.
+        const verified = await verifyServerIdentity(baseURL, expected);
+
+        expect(verified.runToken).toBe(token);
+        expect(verified.targetsCanonical).toBe(false);
+        expect(verified.expectedMatches).toBe(true);
+
+        await correct.stop();
+
+        // 2. An impostor takes the same port with the same database but a token this run never
+        //    issued. Same port is what makes it a replacement rather than a different session.
+        const impostor = await startDisposableAppOnPort(port, {
+            database,
+            expectedDatabase: database,
+            token: 'replacement-server-token',
+        });
+
+        try {
+            // 3. The probe must notice. This is the request the next test's fixture would make.
+            await expect(verifyServerIdentity(baseURL, expected)).rejects.toThrow(/identity token/);
+
+            // 4. A mutation written after a refusal is unreachable: the fixture throws before the
+            //    test body, so the body below cannot run. The counter stands in for the write.
+            const runBodyAfterRefusal = async (): Promise<void> => {
+                await verifyServerIdentity(baseURL, expected);
+                mutations += 1;
+                writeFileSync(mutationSentinel, 'mutated');
+            };
+
+            await expect(runBodyAfterRefusal()).rejects.toThrow(/identity token/);
+            expect(mutations).toBe(0);
+            expect(existsSync(mutationSentinel)).toBe(false);
+        } finally {
+            await impostor.stop();
+        }
+    } finally {
+        await correct.stop();
+        rmSync(mutationSentinel, { force: true });
+    }
+
+    // The same lifecycle through the fixture's own cached implementation: a worker that already
+    // refused refuses again without asking the impostor, and one that has not refused still probes.
+    resetIdentityPreflightForTest();
+    expect(getIdentityPreflightFailed()).toBe(false);
+
+    refuseIdentityPreflightForTest();
+    expect(getIdentityPreflightFailed()).toBe(true);
+    await expect(
+        verifyIdentityPreflight('http://127.0.0.1:1', readHarnessManifest, verifyServerIdentity),
+    ).rejects.toThrow(/already refused the assigned server/);
+
+    resetIdentityPreflightForTest();
+    expect(getIdentityPreflightFailed()).toBe(false);
 });

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 /*
  * PageHeader and its five pilots (plan 1.3). Rendered-copy evidence, so it reads the built bundle.

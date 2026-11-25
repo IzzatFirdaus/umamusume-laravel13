@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 /*
  * C5: the mobile bar's fourth destination. `Support Cards` shortened to `Deck` collided with the

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';
 import { seedPendingCandidates, clearPendingCandidates } from '../utils/review-candidates';

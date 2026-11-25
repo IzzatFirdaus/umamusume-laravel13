@@ -1,4 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from './support/base-test';
+import type { Page } from '@playwright/test';
 
 /**
  * Sweep over the seven setup steps: the shape every page owes the wireframe regardless of what it

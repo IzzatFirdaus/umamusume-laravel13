@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 import { seedRaceEnrichment, clearRaceEnrichment, type EnrichedRaceIds } from '../utils/race-slots';
 
 /*

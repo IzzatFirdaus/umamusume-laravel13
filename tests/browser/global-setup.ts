@@ -1,6 +1,6 @@
 import { execSync } from 'node:child_process';
 import { createHash } from 'node:crypto';
-import { readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync, readdirSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -113,6 +113,125 @@ export function resolvedScratchDatabase(env: NodeJS.ProcessEnv = process.env): s
     }
 
     return scratchDatabasePath(env);
+}
+
+/**
+ * The build directory this run measures, and where its snapshot id is recorded.
+ *
+ * `PLAYWRIGHT_BUILD_DIR` and `PLAYWRIGHT_ARTIFACT_DIR` exist so the build-snapshot regression case
+ * can point at a temp fixture instead of the real `public/build`; an ordinary run leaves them unset
+ * and gets the checked-out bundle plus the OS temp directory.
+ */
+function buildDirectory(env: NodeJS.ProcessEnv): string {
+    const named = env.PLAYWRIGHT_BUILD_DIR;
+
+    return named !== undefined && named !== '' ? (isAbsolute(named) ? named : resolve(repoRoot, named)) : resolve(repoRoot, 'public/build');
+}
+
+function buildSnapshotPath(env: NodeJS.ProcessEnv): string {
+    const named = env.PLAYWRIGHT_ARTIFACT_DIR;
+    const dir = named !== undefined && named !== '' ? (isAbsolute(named) ? named : resolve(repoRoot, named)) : tmpdir();
+    const runId = env.PLAYWRIGHT_RUN_ID ?? 'run';
+
+    return join(dir, `trainer-desk-build-snapshot-${runId}.json`);
+}
+
+/**
+ * Name the exact bytes `public/build` holds at setup time, and publish that id.
+ *
+ * A concurrent `npm run build` can replace the assets between setup and the last spec, so a green
+ * report could describe a bundle nobody tested (KI-101). Global setup calls this once and teardown
+ * calls `assertBuildSnapshot()` once; a swap in between fails the run instead of passing quietly.
+ * The id is a hash of the manifest plus every asset it names, so an edit to any shipped file changes
+ * it, and only 12 hex characters are kept because the value is an identity, not a signature.
+ */
+export function captureBuildSnapshot(env: NodeJS.ProcessEnv = process.env): { id: string } {
+    const buildDir = buildDirectory(env);
+    const manifestPath = join(buildDir, 'manifest.json');
+    const hash = createHash('sha256').update(readFileSync(manifestPath));
+
+    let manifest: Record<string, { file?: string }>;
+
+    try {
+        manifest = JSON.parse(readFileSync(manifestPath, 'utf8')) as Record<string, { file?: string }>;
+    } catch {
+        throw new Error(`assertBuildSnapshot: ${manifestPath} is not readable JSON.`);
+    }
+
+    // Asset order must not depend on JSON key order: sort the files so two runs of the same bundle
+    // agree on the id regardless of how Vite happened to emit the manifest.
+    const files = Object.values(manifest)
+        .map((entry) => entry.file)
+        .filter((file): file is string => typeof file === 'string' && file !== '')
+        .sort();
+
+    for (const file of files) {
+        hash.update(file).update(readFileSync(join(buildDir, file)));
+    }
+
+    const id = hash.digest('hex').slice(0, 12);
+
+    mkdirSync(dirname(buildSnapshotPath(env)), { recursive: true });
+    writeFileSync(buildSnapshotPath(env), JSON.stringify({ id }), 'utf8');
+    env.PLAYWRIGHT_BUILD_ID = id;
+
+    return { id };
+}
+
+/**
+ * Re-read the build and fail if the bytes changed during this run.
+ *
+ * A missing snapshot is not a failure: the setup step may not have run (a unit test importing this
+ * module, or a spec run through another config), and a teardown that aborted on that would report a
+ * harness fault for a condition no bundle caused.
+ */
+export function assertBuildSnapshot(env: NodeJS.ProcessEnv = process.env): void {
+    const recorded = env.PLAYWRIGHT_BUILD_ID;
+
+    if (recorded === undefined || recorded === '') {
+        return;
+    }
+
+    const buildDir = buildDirectory(env);
+    const hash = createHash('sha256').update(readFileSync(join(buildDir, 'manifest.json')));
+    const manifest = JSON.parse(readFileSync(join(buildDir, 'manifest.json'), 'utf8')) as Record<string, { file?: string }>;
+    const files = Object.values(manifest)
+        .map((entry) => entry.file)
+        .filter((file): file is string => typeof file === 'string' && file !== '')
+        .sort();
+
+    for (const file of files) {
+        hash.update(file).update(readFileSync(join(buildDir, file)));
+    }
+
+    const actual = hash.digest('hex').slice(0, 12);
+
+    if (actual !== recorded) {
+        throw new Error(
+            `assertBuildSnapshot: build snapshot changed during this Playwright run `
+            + `(setup ${recorded}, now ${actual}). Re-run the suite against one bundle.`,
+        );
+    }
+}
+
+/**
+ * Removes the scratch pointer file created by the browser test harness.
+ */
+export function removeScratchPointer(): void {
+    // Remove only the pointer this run published. A peer session's pointer stays in place, and a
+    // pointer that names a different database is never touched even if it uses this key.
+    try {
+        const path = pointerPath();
+        const published = readFileSync(path, 'utf8').trim();
+        const own = resolvedScratchDatabase();
+        const comparable = (value: string): string => value.replace(/\\/g, '/').toLowerCase();
+
+        if (published !== '' && comparable(published) === comparable(own)) {
+            rmSync(path, { force: true });
+        }
+    } catch {
+        // No pointer, or a transient lock: leaving it behind is safer than deleting a peer's.
+    }
 }
 
 /**
@@ -265,10 +384,37 @@ export default async function globalSetup(): Promise<void> {
     });
 
     // Prove the application will open the scratch database with the harness environment.
-    // `uma:db-guard` returns non-zero if the resolved identity is unsafe for the declared role.
-    execSync('php artisan uma:db-guard', {
+    // A zero exit alone is not enough: it also has to report the browser role, this run's path as
+    // both the resolved and the expected database, and a non-canonical target.
+    const guardOutput = execSync('php artisan uma:db-guard', {
         cwd: repoRoot,
         env: harnessEnv,
-        stdio: 'inherit',
+        encoding: 'utf8',
     });
+
+    process.stdout.write(guardOutput);
+
+    const guardLine = (label: string): string => guardOutput
+        .split(/\r?\n/)
+        .find((line) => line.trimStart().startsWith(label))?.trim() ?? '';
+    const comparable = (value: string): string => value.replace(/\\/g, '/').toLowerCase();
+    const guardChecks: Array<[string, boolean]> = [
+        ['browser role', guardLine('role').includes('browser')],
+        ['resolved scratch database', comparable(guardLine('resolved')).includes(comparable(SCRATCH_DATABASE))],
+        ['expected scratch database', comparable(guardLine('expected')).includes(comparable(SCRATCH_DATABASE))],
+        ['non-canonical target', guardLine('targets canonical').endsWith('no')],
+        ['safe identity verdict', guardOutput.includes('Database identity is safe.')],
+    ];
+    const failedGuardChecks = guardChecks.filter(([, passed]) => !passed).map(([name]) => name);
+
+    if (failedGuardChecks.length > 0) {
+        throw new Error(
+            `browser identity: uma:db-guard did not confirm ${failedGuardChecks.join(', ')} `
+            + 'for the scratch database this setup just migrated.',
+        );
+    }
+
+    // Name the bundle this run is about to measure. `global-teardown.ts` re-reads it and fails the
+    // run if a concurrent build swapped the assets mid-way.
+    process.env.PLAYWRIGHT_BUILD_ID = captureBuildSnapshot().id;
 }

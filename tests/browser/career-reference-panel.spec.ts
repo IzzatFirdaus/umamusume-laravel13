@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 import { execFileSync } from 'node:child_process';
 import { buildAxe, openAllDisclosures } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';

@@ -1,36 +1,22 @@
-import { test } from '@playwright/test';
-import { readHarnessManifest, verifyServerIdentity, type IdentityResponse } from './server-identity';
-
 /*
- * Mandatory gate for EVERY browser test, including the ones that write data.
+ * The mandatory browser-identity preflight — historical location, single implementation.
  *
- * A config value alone only describes what the harness intended. This hook
- * asks the process that is actually serving the page to prove three things
- * before a test body runs: it is this run's loopback server (token + base URL),
- * it declared the browser role, and the database it resolved is this run's
- * scratch file rather than the canonical development database.
+ * This module used to register its own `test.beforeEach`, which only protected the specs that
+ * imported it. One spec out of 137 did, so 136 ran unprotected while the docblock claimed a
+ * mandatory gate. The enforcement now lives in `base-test.ts` as an `auto: true` fixture, because
+ * Playwright requests a fixture for every test in a file that imports that `test` whether or not
+ * the spec names it, and a rejected fixture fails the test before its body.
  *
- * The promise is cached per worker: one read-only probe per worker, not one
- * per test. If it rejects, every test in that worker refuses to start, which
- * is the intended fail-closed behaviour.
+ * The named re-exports stay so existing imports keep working, and so a reader arriving at the old
+ * path is sent to the mechanism that actually holds.
  */
-
-let verified: Promise<IdentityResponse> | undefined;
-
-/** Set only after a successful probe; the contract spec asserts the hook actually ran. */
-export let lastVerifiedIdentity: IdentityResponse | undefined;
-
-test.beforeEach(async ({ baseURL }) => {
-    if (verified === undefined) {
-        const port = Number(process.env.PLAYWRIGHT_PORT ?? 8123);
-        const expected = readHarnessManifest(port);
-
-        verified = verifyServerIdentity(baseURL ?? expected.baseURL, expected).then((identity) => {
-            lastVerifiedIdentity = identity;
-
-            return identity;
-        });
-    }
-
-    await verified;
-});
+export {
+    getIdentityPreflightFailed,
+    getLastVerifiedIdentity,
+    identityPreflightFailed,
+    lastVerifiedIdentity,
+    refuseIdentityPreflightForTest,
+    resetIdentityPreflightForTest,
+    test,
+    verifyIdentityPreflight,
+} from './base-test';
