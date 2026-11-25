@@ -1,4 +1,5 @@
-import { test, expect, type Locator, type Page } from '@playwright/test';
+import { test, expect } from './support/base-test';
+import type { Locator, Page } from '@playwright/test';
 import { deleteRun } from '../utils/delete-run';
 
 /*

@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 /*
  * AUD-20261118-001 browser walk, 2026-11-18. The wizard focuses the heading of the step it

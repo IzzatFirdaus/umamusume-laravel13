@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 import { resetLayout, setLayout } from './support/layout';
 
 /*

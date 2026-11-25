@@ -1,5 +1,5 @@
 import { openScenarioDetail } from '../utils/scenario-detail';
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { expectTapTargets } from '../utils/tap-targets';

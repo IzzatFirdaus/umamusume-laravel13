@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/base-test';
 
 /**
  * `/veterans/transfers` (route `veterans.transfers`, `routes/web.php:298`) is a routable page no

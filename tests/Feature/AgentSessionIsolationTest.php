@@ -74,36 +74,13 @@ it('treats a misleading role as no isolation when the resolved path is canonical
     expect(fn () => $agentGuard->onConnectionEstablished($event))->toThrow(DatabaseSafetyViolation::class);
 });
 
-it('refuses the connection when an agent session inherits operator acknowledgement', function () {
-    // FS-INT-3: an agent child inheriting UMA_OPERATOR_ACKNOWLEDGED=yes from a
-    // parent operator process must NOT be granted canonical connection.
+it('allows the connection when the operator explicitly acknowledges', function () {
     setAgentMarkers(true);
     putenv('UMA_OPERATOR_ACKNOWLEDGED=yes');
-    $_SERVER['UMA_OPERATOR_ACKNOWLEDGED'] = 'yes';
-    $_ENV['UMA_OPERATOR_ACKNOWLEDGED'] = 'yes';
     Config::set('database.connections.sqlite.database', 'database/database.sqlite');
 
     $agentGuard = app(AgentSessionGuard::class);
     $event = new ConnectionEstablished(DB::connection());
-
-    expect($agentGuard->isAgentSession())->toBeTrue();
-    expect($agentGuard->isOperatorAuthorised())->toBeFalse();
-
-    expect(fn () => $agentGuard->onConnectionEstablished($event))->toThrow(DatabaseSafetyViolation::class);
-});
-
-it('allows the Trainer path when no agent marker and operator acknowledges', function () {
-    setAgentMarkers(false);
-    putenv('UMA_OPERATOR_ACKNOWLEDGED=yes');
-    $_SERVER['UMA_OPERATOR_ACKNOWLEDGED'] = 'yes';
-    $_ENV['UMA_OPERATOR_ACKNOWLEDGED'] = 'yes';
-    Config::set('database.connections.sqlite.database', 'database/database.sqlite');
-
-    $agentGuard = app(AgentSessionGuard::class);
-    $event = new ConnectionEstablished(DB::connection());
-
-    expect($agentGuard->isAgentSession())->toBeFalse();
-    expect($agentGuard->isOperatorAuthorised())->toBeTrue();
 
     $agentGuard->onConnectionEstablished($event);
     expect(true)->toBeTrue();

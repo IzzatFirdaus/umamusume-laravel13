@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 /*
  * Help (help.html, plan Slice 11.2). Rendered-copy evidence for the four questions the page answers

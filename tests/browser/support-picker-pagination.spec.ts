@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 /*
  * R6-24: the deck step's support-card picker returned every Global-released card in one payload

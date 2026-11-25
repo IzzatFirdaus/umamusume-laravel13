@@ -1,4 +1,5 @@
-import { test, expect, type Page, type Route } from '@playwright/test';
+import { test, expect } from './support/base-test';
+import type { Page, Route } from '@playwright/test';
 import { deleteRun } from '../utils/delete-run';
 
 /*

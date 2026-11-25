@@ -1,4 +1,5 @@
-import { test, expect, type Locator } from '@playwright/test';
+import { test, expect } from './support/base-test';
+import type { Locator } from '@playwright/test';
 import { buildAxe } from '../utils/accessibility';
 import { deleteRun } from '../utils/delete-run';
 import { recordTurns } from '../utils/record-turns';

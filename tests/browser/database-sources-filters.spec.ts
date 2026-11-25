@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/base-test';
 
 /*
  * N6.5 / TD-08: the Source Ledger narrows in place.

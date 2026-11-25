@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 /*
  * The setup shell's focus and document title (slice 3.1). Rendered evidence, so it reads the bundle.

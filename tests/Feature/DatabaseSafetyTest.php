@@ -103,7 +103,7 @@ it('refuses isolated role targeting canonical even with override env vars', func
     guardEnv('UMA_DATABASE_ROLE', 'test');
     guardEnv('UMA_ALLOW_CANONICAL_DESTRUCTIVE', 'true');
     guardEnv('UMA_OPERATOR_ACKNOWLEDGED', 'yes');
-    Config::set('database.connections.sqlite.database', 'D:/Projects/trainerdesk-backend/database/database.sqlite');
+    Config::set('database.connections.sqlite.database', 'D:/Projects/umamusume-laravel13/database/database.sqlite');
 
     $guard = app(DatabaseGuard::class);
 
@@ -121,7 +121,7 @@ it('refuses browser role targeting canonical even with override env vars', funct
     guardEnv('UMA_DATABASE_ROLE', 'browser');
     guardEnv('UMA_ALLOW_CANONICAL_DESTRUCTIVE', 'true');
     guardEnv('UMA_OPERATOR_ACKNOWLEDGED', 'yes');
-    Config::set('database.connections.sqlite.database', 'D:/Projects/trainerdesk-backend/database/database.sqlite');
+    Config::set('database.connections.sqlite.database', 'D:/Projects/umamusume-laravel13/database/database.sqlite');
 
     $guard = app(DatabaseGuard::class);
 
@@ -492,7 +492,7 @@ it('genuine Trainer operations and approved historical imports remain functional
     // canonical database. The identity is forced explicitly rather than
     // unset-inherited, because phpunit's forced env does not survive every
     // channel a child process consults.
-    $repo = 'D:/Projects/trainerdesk-backend';
+    $repo = 'D:/Projects/umamusume-laravel13';
     $canonical = $repo.'/database/database.sqlite';
 
     $script = sys_get_temp_dir().'/guard-trainer-path-'.uniqid().'.php';

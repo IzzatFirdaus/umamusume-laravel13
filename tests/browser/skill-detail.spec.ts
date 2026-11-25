@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 import { removeScopeFixtures, seedScopeFixtures } from '../utils/seed-range-operator';
 
 /*

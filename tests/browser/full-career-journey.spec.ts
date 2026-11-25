@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 import { DatabaseSync } from 'node:sqlite';
 import path from 'node:path';
 import { deleteRun } from '../utils/delete-run';

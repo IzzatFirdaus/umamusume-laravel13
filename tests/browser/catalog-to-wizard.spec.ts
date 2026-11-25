@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 /*
  * Slice 4.3: the catalog detail's "New run" action carries the selected trainee into `SetupDraft`

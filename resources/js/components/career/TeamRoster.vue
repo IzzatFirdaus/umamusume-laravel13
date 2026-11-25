@@ -181,6 +181,19 @@ const newMember = useForm({
     distance_assignment: '',
     is_ace: false,
     is_trainee: false,
+    // UC3.4's ten observed aptitudes. `submitAdd` posts all ten, so the form has to carry them or
+    // the request sends `undefined` for every axis — and a blank here is an unobserved axis, not a
+    // missing key (D-220). The editor's `draft` declares the same set; both must stay in step.
+    aptitude_turf: '',
+    aptitude_dirt: '',
+    aptitude_sprint: '',
+    aptitude_mile: '',
+    aptitude_medium: '',
+    aptitude_long: '',
+    aptitude_front_runner: '',
+    aptitude_pace_chaser: '',
+    aptitude_late_surger: '',
+    aptitude_end_closer: '',
 });
 
 const rosterFull = computed((): boolean => (props.roster?.members.length ?? 0) >= MAX_MEMBERS.value);
@@ -291,6 +304,18 @@ const openEditor = async (member: RosterMemberRow): Promise<void> => {
         distance_assignment: member.distance_assignment ?? '',
         is_ace: member.is_ace,
         is_trainee: member.is_trainee,
+        // UC3.4: seed all ten from the stored row. Without these the editor opens with every axis
+        // blank and writes the blanks back, erasing observations the run recorded.
+        aptitude_turf: member.aptitude_turf ?? '',
+        aptitude_dirt: member.aptitude_dirt ?? '',
+        aptitude_sprint: member.aptitude_sprint ?? '',
+        aptitude_mile: member.aptitude_mile ?? '',
+        aptitude_medium: member.aptitude_medium ?? '',
+        aptitude_long: member.aptitude_long ?? '',
+        aptitude_front_runner: member.aptitude_front_runner ?? '',
+        aptitude_pace_chaser: member.aptitude_pace_chaser ?? '',
+        aptitude_late_surger: member.aptitude_late_surger ?? '',
+        aptitude_end_closer: member.aptitude_end_closer ?? '',
     };
 
     await nextTick();

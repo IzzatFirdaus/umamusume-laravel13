@@ -182,3 +182,15 @@ and priority-skill picker (`resources/js/pages/Career/Preflight.vue:217,:247,:49
 pin the door. The row is preserved verbatim as history; this erratum is the current reading. The
 remaining open item is the PRD requirement line (D-2), owner territory — `ADR-0032` is accepted and
 its authorisation stands regardless of that line.
+
+## 12. AI Advisor layer and Unity Cup roster sub-model (2026-11-25)
+
+Two ADRs code shipped before index entries did. Each accepted on 2026-11-25;
+dates in `decision` ruling's date.
+
+| Fact | Value | decision | code | owner |
+|---|---|---|---|---|
+| AI Advisor optional read-only layer over deterministic engine | `advisor_ai.enabled` defaults `false`; off means no cloud inference; deterministic `TrainerAdvisor` remains decision-safety floor; cockpit `advisor.decision` contract unchanged | 0038 | `config/advisor_ai.php`; `GET /training-runs/{run}/advisor-analysis` (`runs.advisor-analysis`); `tests/Feature/AdvisorAnalysisRouteTest.php`, `AdvisorAiPipelineTest.php`, `AdvisorProvenanceTest.php`, `AdvisorRevisionTest.php` | 0038 §Decision |
+| **Do not** activate live provider in regression suites | no paid inference by design; `Http::fake()` verification boundary | 0038 | regression suites use `Http::fake()`; 104 tests / 466 assertions; 83 tests / 482 assertions (post-formatting) | 0038 §What does not license |
+| Unity Cup team roster recorded sub-model, never six-card deck | `roster_members` (one row per member per run, MAX_MEMBERS=20, ACES_PER_DISTANCE=1); six `deck_slots` stay support-card deck (ADR-0014); two never merged | 0039 | migration `2026_11_24_120000_create_roster_members_table` (with `down()`); `App\Models\RosterMember`, `App\Enums\RosterDistance`, `RosterMemberController`, `TrainingRun::rosterMembers()`; `CockpitController::rosterSection()` | 0039 §Decision |
+| **Do not** record per-skill table roster members | A-0.14 / KI-126 stays open; this ADR stores roster and five columns, not skill table | 0039 | `open:` field in ADR contract block | 0039 §What does not license |

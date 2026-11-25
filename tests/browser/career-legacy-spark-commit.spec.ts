@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 /*
  * F-03 — the spark `Target` combobox must not display a value it has not stored, and typed text
