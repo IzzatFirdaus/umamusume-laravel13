@@ -37,6 +37,25 @@ class DatabaseController extends Controller
     ];
 
     /**
+     * Tables carrying their own per-row provenance stamp (N2.11).
+     *
+     * Each is a reference table whose rows record `source_url` + `fetched_at` (ADR-0003 Amendment
+     * R3). The Data sources ledger only knows requests this tool made, so a dataset committed with
+     * its own stamp has a real date the ledger never recorded. Listed once here rather than queried
+     * per row, so the union arm costs one pass per table.
+     *
+     * @var list<string>
+     */
+    private const INLINE_STAMP_TABLES = [
+        'race_catalog_slots',
+        'skills',
+        'character_cards',
+        'umamusume_profiles',
+        'support_cards',
+        'support_effects',
+    ];
+
+    /**
      * The hub: the eight areas the Database screen lists, all read-only.
      *
      * *Dated correction 2026-10-22 (UX audit F-14): the number above was already off by one when it was
@@ -479,6 +498,36 @@ class DatabaseController extends Controller
      * than showing a zero or an empty date, because "no fetch recorded" and "fetched long ago" are
      * different facts and only one of them is a problem.
      */
+    /**
+     * The per-source Supplies phrase (N6.2).
+     *
+     * The column used to repeat one generic pipeline sentence on every row, which told a Trainer
+     * nothing about which document a dataset comes from. Each phrase below is lifted from the named
+     * parser's own docblock, so the column states what the ingest actually reads rather than what a
+     * screen wishes it read. A source with no entry here falls back to the generic sentence rather
+     * than claiming a capability this build cannot cite.
+     *
+     * @return array<string, string>
+     */
+    private static function suppliesPhrases(): array
+    {
+        return [
+            'gametora-characters' => 'Character catalogue',
+            'gametora-character-cards' => 'Character-card',
+            'gametora-character-profiles' => 'Trainee profile',
+            'gametora-race-catalog' => 'race catalogue',
+            'gametora-racetracks' => 'racetrack',
+            'gametora-races' => 'race',
+            'gametora-race-fans' => 'race-fan',
+            'gametora-race-rewards' => 'race-reward',
+            'gametora-skills' => 'skill catalogue',
+            'gametora-support-cards' => 'Support-card',
+            'gametora-support-effects' => 'Support-effect',
+            'gametora-artwork' => 'artwork',
+            'gametora-ura-objectives' => 'URA objective',
+        ];
+    }
+
     public function sources(): Response
     {
         // Each source's own newest recorded fetch, keyed by the config key the provenance rows are written
@@ -491,6 +540,80 @@ class DatabaseController extends Controller
             ->groupBy('source_key')
             ->pluck('fetched_at', 'source_key');
 
+        // N2.11: the second arm. Most reference tables carry their own per-row stamp
+        // (`source_url` + `fetched_at`, ADR-0003 Amendment R3), and the ledger above only knows about
+        // requests this tool made. A dataset whose rows were committed with their own stamp therefore
+        // has a real date the ledger never recorded. One enriched row may name several documents as a
+        // comma-separated list, so each URL is split out and takes the row's stamp — keeping the list
+        // whole would produce a key no source could ever match.
+        $inlineStamp = [];
+
+        foreach (self::INLINE_STAMP_TABLES as $table) {
+            foreach (DB::table($table)->select('source_url', 'fetched_at')->get() as $row) {
+                if ($row->source_url === null || $row->fetched_at === null) {
+                    continue;
+                }
+
+                foreach (explode(',', (string) $row->source_url) as $url) {
+                    $url = trim($url);
+
+                    if ($url === '') {
+                        continue;
+                    }
+
+                    $at = (string) $row->fetched_at;
+
+                    if (! isset($inlineStamp[$url]) || $at > $inlineStamp[$url]) {
+                        $inlineStamp[$url] = $at;
+                    }
+                }
+            }
+        }
+
+        // TD-08: the two directions of the source↔conflict association, derived once from the one
+        // config list so the row stamps and the payload cannot disagree. Only rows the ledger actually
+        // prints are kept — a filter option matching nothing is worse than no option — and the
+        // `evidence_available: false` rows are what make an unnamed source `unknown` rather than `none`.
+        $conflictRows = (array) config('reference.conflicts.rows', []);
+        $evidenceUnavailable = false;
+        $openConflicts = [];
+        $resolvedConflicts = [];
+        $openBySource = [];
+        $resolvedBySource = [];
+
+        foreach ($conflictRows as $conflict) {
+            if (! is_array($conflict) || ! isset($conflict['id'])) {
+                continue;
+            }
+
+            if (($conflict['evidence_available'] ?? true) === false) {
+                $evidenceUnavailable = true;
+            }
+
+            $id = (string) $conflict['id'];
+            $named = (array) ($conflict['affected_sources'] ?? []);
+            $state = (string) ($conflict['state'] ?? 'open');
+
+            if ($state === 'resolved') {
+                $resolvedConflicts[] = $conflict;
+            } else {
+                $openConflicts[] = $conflict;
+            }
+
+            foreach ($named as $name) {
+                if ($state === 'resolved') {
+                    $resolvedBySource[(string) $name][] = $id;
+                } else {
+                    $openBySource[(string) $name][] = $id;
+                }
+            }
+        }
+
+        $supplies = self::suppliesPhrases();
+        $generic = 'Fetched by the ingest pipeline from the publisher\'s own document. The date '
+            .'beside this row is this source\'s own newest recorded fetch, not the newest fetch '
+            .'across every dataset.';
+
         $fetched = [];
 
         foreach ((array) config('uma.sources', []) as $key => $source) {
@@ -498,21 +621,37 @@ class DatabaseController extends Controller
                 continue;
             }
 
-            $at = $fetchedAt[$key] ?? null;
+            $url = (string) $source['url'];
+            $ledgerAt = $fetchedAt[$key] ?? null;
+            $inlineAt = $inlineStamp[$url] ?? null;
 
-            $fetched[] = [
+            // The newer arm wins and names itself, so a Trainer can tell a request this tool made
+            // from a stamp the committed rows carried. Neither arm is an absence borrowed from the other.
+            if ($ledgerAt !== null && ($inlineAt === null || (string) $ledgerAt >= $inlineAt)) {
+                $at = (string) $ledgerAt;
+                $channel = 'data_sources';
+            } elseif ($inlineAt !== null) {
+                $at = $inlineAt;
+                $channel = 'inline';
+            } else {
+                $at = null;
+                $channel = null;
+            }
+
+            $fetched[] = self::withInvolvement([
                 'name' => (string) $key,
-                'url' => (string) $source['url'],
-                'fetched_at' => $at === null ? null : (string) $at,
+                'url' => $url,
+                'fetched_at' => $at,
+                'channel' => $channel,
                 // N6.5 (ND-14(b), owner-approved 2026-11-22): the corpus's own weight class for the
                 // source, read from the config entry rather than typed here. A dataset without a
                 // recorded tier would be a fabricated classification, so the key is trusted to
                 // config and nothing else.
                 'tier' => isset($source['tier']) && is_string($source['tier']) ? $source['tier'] : null,
-                'note' => 'Fetched by the ingest pipeline from the publisher\'s own document. The date '
-                    .'beside this row is this source\'s own newest recorded fetch, not the newest fetch '
-                    .'across every dataset.',
-            ];
+                'note' => isset($supplies[(string) $key])
+                    ? $supplies[(string) $key].' — '.$generic
+                    : $generic,
+            ], $openBySource, $resolvedBySource, $evidenceUnavailable);
         }
 
         $transcribed = [];
@@ -527,7 +666,7 @@ class DatabaseController extends Controller
             $section = (string) ($dataset['source']['section'] ?? '');
             $name = preg_replace('/^§[\d.]+\s*/u', '', $section) ?? $section;
 
-            $transcribed[] = [
+            $transcribed[] = self::withInvolvement([
                 'name' => $name === '' ? (string) $key : $name,
                 'url' => (string) ($dataset['recheck']['url'] ?? ''),
                 'anchored_at' => (string) $dataset['source']['anchor'],
@@ -539,21 +678,109 @@ class DatabaseController extends Controller
                     ? $dataset['source']['tier']
                     : null,
                 'note' => (string) ($dataset['recheck']['text'] ?? ''),
-            ];
+            ], $openBySource, $resolvedBySource, $evidenceUnavailable);
         }
+
+        // A name no arm printed is dropped from both directions, so no conflict can name a row the
+        // screen does not hold. The row set is the union of both arms, keyed by the name each prints.
+        $held = array_fill_keys(
+            array_merge(array_column($fetched, 'name'), array_column($transcribed, 'name')),
+            true,
+        );
+
+        $openConflicts = self::narrowSources($openConflicts, $held);
+        $resolvedConflicts = self::narrowSources($resolvedConflicts, $held);
 
         return Inertia::render('Database/Sources', [
             'docName' => 'the reference guide',
-            'fetched' => $fetched,
-            'transcribed' => $transcribed,
+            'fetched' => collect($fetched),
+            'transcribed' => collect($transcribed),
             // N6.3: conflicts as server payload records, not a Vue const. The count tile derives
             // from this list; all four stay open by ruling (no resolution is recorded here).
-            'conflicts' => (array) config('reference.conflicts.rows', []),
+            'conflicts' => $openConflicts,
+            // TD-08: the settled rows, shipped as their own history. The open panel's semantics are
+            // unchanged — it still carries the open record only — but "we settled this" must not be
+            // indistinguishable from "we never looked".
+            'conflict_history' => $resolvedConflicts,
+            // The gap is disclosed on its own, independently of any known involvement: a source can be
+            // named by an open conflict as fact while two other records could not establish their
+            // sources at all. Never silently treated as exhaustive.
+            'conflict_evidence_unavailable' => $evidenceUnavailable,
             // The wireframe states the matrix's verification date beside this ledger
             // (`database-sources.html:74`), and it is the same recorded value the Scenarios page
             // prints, read from the one place it is written so two screens cannot disagree.
             'matrixVerifiedAt' => (string) config('scenarios.verified_at'),
         ]);
+    }
+
+    /**
+     * Drop the config-named sources no arm actually holds.
+     *
+     * @param  array<int, array<string, mixed>>  $conflicts
+     * @param  array<string, true>  $held
+     * @return array<int, array<string, mixed>>
+     */
+    private static function narrowSources(array $conflicts, array $held): array
+    {
+        foreach ($conflicts as $i => $conflict) {
+            $conflicts[$i]['affected_sources'] = array_values(array_filter(
+                (array) ($conflict['affected_sources'] ?? []),
+                fn (mixed $name): bool => isset($held[(string) $name]),
+            ));
+        }
+
+        return $conflicts;
+    }
+
+    /**
+     * Stamp one ledger row with its open and historical conflict involvement (TD-08).
+     *
+     * The five states exist because a two-state boolean cannot make the distinction that matters: a
+     * source named only by settled rows is NOT in a live dispute but is also not untouched, and a
+     * source the records could not place is not a clean one. `unknown` therefore outranks `none`.
+     *
+     * @param  array<string, mixed>  $row
+     * @param  array<string, list<string>>  $openBySource
+     * @param  array<string, list<string>>  $resolvedBySource
+     * @return array<string, mixed>
+     */
+    private static function withInvolvement(
+        array $row,
+        array $openBySource,
+        array $resolvedBySource,
+        bool $evidenceUnavailable,
+    ): array {
+        $name = (string) $row['name'];
+        $open = array_values($openBySource[$name] ?? []);
+        $resolved = array_values($resolvedBySource[$name] ?? []);
+
+        $state = match (true) {
+            $open !== [] && $resolved !== [] => 'mixed',
+            $open !== [] => 'open',
+            $resolved !== [] => 'resolved',
+            $evidenceUnavailable => 'unknown',
+            default => 'none',
+        };
+
+        $note = match ($state) {
+            'mixed' => 'Named by an open conflict ('.count($open).') and by '.count($resolved)
+                .' resolved conflict(s) as history.',
+            'open' => 'Named by an open conflict.',
+            'resolved' => 'Named only by resolved conflicts, as history.',
+            'unknown' => 'No conflict record establishes this source\'s involvement: missing evidence, '
+                .'not a clean bill of health.',
+            default => 'No conflict record names this source.',
+        };
+
+        return [
+            ...$row,
+            'conflicts' => $open,
+            'open_conflict_count' => count($open),
+            'in_open_conflict' => $open !== [],
+            'history_involvement' => $state,
+            'resolved_conflicts' => $resolved,
+            'history_involvement_note' => $note,
+        ];
     }
 
     /**
