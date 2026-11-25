@@ -96,7 +96,12 @@ class RaceDecisionController extends Controller
             'entry_mode' => $entryMode,
             'manual_slots' => $this->manualSlotRows($run),
             'manual_defaults' => $this->manualDefaults($run),
-            'race_statuses' => array_map(static fn (RaceEntryStatus $status): string => $status->value, RaceEntryStatus::cases()),
+            // KI-171: `writable()`, not every case. `Scheduled` is read-side provenance — a form that
+            // could post it would be a hand-entered row claiming imported provenance.
+            'race_statuses' => array_map(
+                static fn (RaceEntryStatus $status): string => $status->value,
+                RaceEntryStatus::writable(),
+            ),
         ]);
     }
 
@@ -394,7 +399,8 @@ class RaceDecisionController extends Controller
 
         foreach ($slots as $slot) {
             $entry = $entries->get($slot->id);
-            $cleared = $entry?->status === RaceEntryStatus::Completed;
+            $cleared = $entry?->status?->recordsEntry() === true
+                && $entry->status === RaceEntryStatus::Completed;
 
             $rows[] = [
                 'id' => $slot->id,
@@ -421,6 +427,8 @@ class RaceDecisionController extends Controller
             RaceEntryStatus::Entered => 'Entered',
             RaceEntryStatus::Skipped => 'Skipped',
             RaceEntryStatus::NotOffered => 'Not offered',
+            // KI-171: read-side provenance keeps its own word rather than reading as an outcome.
+            RaceEntryStatus::Scheduled => 'Scheduled',
             null => 'Not recorded yet',
         };
     }
@@ -457,7 +465,7 @@ class RaceDecisionController extends Controller
             // `entry_mode=manual` to `runs.races.store`. The same action URL handles both the
             // calendar and the manual branch; the form selects which.
             'action' => route('runs.races.store', $run),
-            'turns' => $run->turnEntries
+            'turns' => $run->liveTurnEntries
                 ->sortBy('turn')
                 ->map(static fn (TurnEntry $turn): array => ['id' => $turn->id, 'turn' => $turn->turn])
                 ->values()
@@ -537,7 +545,7 @@ class RaceDecisionController extends Controller
         }
 
         if ($next === null) {
-            return $run->turnEntries->isEmpty()
+            return $run->liveTurnEntries->isEmpty()
                 ? 'No turn has been logged yet, so there is no turn to decide about. Record the first turn through Training, then this screen opens on the next one.'
                 : 'Every turn of this career has been played, so there is no next race to decide about. The Career Timeline at the bottom of the Cockpit has the full history.';
         }

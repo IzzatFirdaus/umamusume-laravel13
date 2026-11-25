@@ -33,6 +33,8 @@ return [
         'Skipped' => 'Skipped',
         'Entered' => 'Entered',
         'Completed' => 'Completed',
+        // KI-171: read-side provenance, so the label says what it is rather than reading as an outcome.
+        'Scheduled' => 'Scheduled (entry unrecorded)',
     ],
 
     'skill_acquisition' => [

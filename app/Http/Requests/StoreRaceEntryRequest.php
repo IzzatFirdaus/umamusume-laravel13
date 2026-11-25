@@ -43,7 +43,9 @@ class StoreRaceEntryRequest extends FormRequest
 
         $rules = [
             'entry_mode' => ['required', Rule::in(['calendar', 'manual'])],
-            'status' => ['required', Rule::enum(RaceEntryStatus::class)],
+            // KI-171: `writable()` rather than every case. `Scheduled` records imported provenance,
+            // so accepting it here would let a hand-entered row claim a source it does not have.
+            'status' => ['required', Rule::enum(RaceEntryStatus::class)->only(RaceEntryStatus::writable())],
             'placement' => ['nullable', 'integer', 'min:1', 'max:99'],
             'fans_gain' => ['nullable', 'integer', 'min:0'],
             // B1. Circles are a team race read, so the value belongs to a `team_race` slot and to
@@ -67,7 +69,20 @@ class StoreRaceEntryRequest extends FormRequest
                     $fail('Circles can only be read against a team race.');
                 }
             }],
-            'objective_index' => ['nullable', 'integer', Rule::in(range(1, RaceEntry::MAX_OBJECTIVE_INDEX))],
+            // An objective line only means anything on a run that composes grade objectives, so the
+            // range is gated on the run rather than offered unconditionally: a run with no objectives
+            // would otherwise accept an index that names nothing.
+            'objective_index' => ['nullable', 'integer', function (string $attribute, mixed $value, Closure $fail): void {
+                if ($value === null) {
+                    return;
+                }
+
+                $run = $this->route('run');
+
+                if (! $run instanceof TrainingRun || ! $run->composesGradeObjectives()) {
+                    $fail('This run has no grade objectives to record against.');
+                }
+            }],
             // KI-17: the turn this race was run on, named by the Trainer. A turn logged on another
             // run is not a turn of this run, and the dropdown cannot be trusted to have kept them
             // apart — a stale tab or a hand-edited post reaches this validator either way.
