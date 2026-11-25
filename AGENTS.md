@@ -63,6 +63,7 @@ No new markdown in repo root; new docs go into `docs/research-scratch/` masters 
 | `DESIGN.md` | visual system |
 | `SCREEN_SPEC.md` | screen inventory, states, workflows, §8 authority |
 | `CHANGELOG.md` | notable changes, Keep a Changelog |
+| `EXPERT-OPERATING-MODEL.md` | operating model, branch assignments, single-active-writer |
 | `docs/research-scratch/GOVERNANCE.md` | quality bar C-1..C-9, gate registry, risk record |
 | `KNOWN-ISSUES.md` | live defect register `KI-nn` |
 | `README.md` | onboarding, commands, routes, docs |
