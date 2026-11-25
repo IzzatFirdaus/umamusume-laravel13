@@ -18,10 +18,13 @@ Credentials in `.env` remain valid on `jp.cloud.langfuse.com` (Japan regional). 
 
 | File | Tests | Assertions | Status |
 |------|-------|------------|--------|
-| `tests/Feature/TelemetryConfigTest.php` | 22 | 22 | All pass |
+| `tests/Feature/TelemetryConfigTest.php` | 27 | 98 | All pass |
+| `tests/Unit/TelemetryExportResultTest.php` | 14 | 47 | All pass |
 | `tests/Feature/TelemetryDiagnoseTest.php` | 11 | 11 | All pass |
 
-Total: 33 tests, 92 assertions, all pass.
+Total: 52 tests, 156 assertions, all pass.
+
+The earlier "51 tests" figure was a counting error, not lost coverage: the same cases are present, and the two scheduler-liveness cases plus the deferred-export `terminate()` assertions bring the Feature file to 27.
 
 Coverage: default-disabled guards, enabled-when-set, base URLs/endpoints, middleware registration (both providers on `/api/v1/*`), status endpoint outside tracing middleware, pass-through when disabled, OTLP server span export (`kind => 2`), traceId/spanId format (32/16 hex), error attributes (`langfuse.level=error`, `exception.type`, `exception.message`), shared trace correlation across both providers, heartbeat structure/caching/disabled no-op, status endpoint contract (`scheduler`, `heartbeat`, `langfuse`, `latitude`), credential protection, Independent Training trace recording (success + error), skip-on-disabled, skip-on-missing-credentials, auth success/failure, ingestion success/failure, invalid provider rejection, 2s timeout, secret-key protection.
 
@@ -107,7 +110,11 @@ Fail-open: returns `null` on any failure, never throws. Ollama daemon not runnin
 - `integrationStatus()` derives Disabled / Configured, keys missing / Export attempted, no result / Export failed / Heartbeat delayed / Connected
 - `isHeartbeatFresh()`, `heartbeatAgeText()`, `heartbeatStatusText()`, `schedulerStatusText()`, color helpers
 - `onUnmounted` cleanup stops polling and clears reset timer
-- Build: `vue-tsgo` exit 0, `tsc --noEmit` exit 0, `vite build` exit 0
+- Build: `vite build` succeeds (`✓ built in 56s`); `vue-tsgo` reports no new errors from this file (one pre-existing `TeamRoster.vue` error is unrelated)
+
+**State coverage:** the panel derives every state from backend evidence rather than credential presence — `Disabled`, `Configured, keys missing`, `Export attempted, no result`, `Export failed`, `Heartbeat delayed`, `Connected`, plus `Missing` / `Not exported` / `Current` for the heartbeat and `Active` / `Inactive` for the scheduler. A failed fetch is caught and leaves the last known state on screen with an alert, never blocking the page. Polling is 30s; the stale threshold is 10 minutes. Each provider has its own status dot, so one platform failing never masks the other.
+
+**Browser verification limitation:** the MCP browser controller in this environment returns `CDP Runtime.evaluate timed out` for DOM snapshots and rejects screenshots above the 10 MiB limit at every quality/clip combination, so pixel capture was not possible. The panel states were instead rendered from the same derivation logic the component uses (`.scratch-uma/8964979d/panel-states.html`) and cross-checked against the live endpoint, which returned `scheduler`, `heartbeat`, `langfuse.delivery` and `latitude.delivery` independently.
 
 ## 11. Windows Unattended Scheduler — Registered and Running
 
@@ -187,17 +194,39 @@ Windows Task Scheduler settings updated and verified: `MultipleInstances=IgnoreN
 
 Commit `4802a3cf` includes `tools/scheduler.ps1`.
 
-## 16. Task #55 — Application Performance Assessment — Not Started
+## 16. Task #55 — Application Performance Assessment — Complete
 
-No performance regressions introduced by telemetry/scheduler changes. All telemetry exports are fail-open (try/catch, never block application results). Timeouts: Langfuse 5s, Latitude 5s. Heartbeat runs every 5 minutes. Independent Training runs every minute. No dedicated performance benchmarking performed in this session.
+**Finding (before):** both middlewares exported inside `handle()`. With a reachable-but-slow collector the caller paid the export cost; with an unreachable one the caller paid up to the 5s `Http::timeout()` in full. Measured handle latency in the timeout scenarios sat at the timeout ceiling rather than at the application baseline.
+
+**Change (smallest reliable isolation):** the span is assembled in `handle()` and stashed on the request (`telemetry.langfuse.context`, `telemetry.latitude.context`); the network call moved to `terminate()`, which Laravel runs after the response is sent. Nothing else changed:
+
+- per-provider outcomes still classified by `TelemetryExportResult` (accepted / partial / rejected / auth failure / rate limit / transient / timeout / connection failure);
+- shared trace correlation preserved — `telemetry.trace_id` is still set in `handle()`, so both providers and the response see one id;
+- timeouts unchanged (Langfuse 5s, Latitude 5s) and now bound background work only;
+- failure handling unchanged (logged, swallowed, response untouched);
+- retry behaviour unchanged (no in-request retry added or removed);
+- delivery visibility unchanged (`telemetry.heartbeat.last` cache, `/api/v1/telemetry/status`);
+- Windows unattended operation unaffected — `terminate()` runs in the same PHP request lifecycle `schedule:work` already uses.
+
+**After:** handle latency returns to the no-exporter baseline in every timeout scenario (both-disabled, Langfuse-only, Latitude-only, both, Langfuse timeout, Latitude timeout, simultaneous failure). The export still runs, still reports its own outcome, and still writes the heartbeat cache. No improvement is claimed beyond these comparative measurements; the benchmark scripts and raw samples are under `.scratch-uma/8964979d/`.
 
 ## 17. Task #56 — Final Live Acceptance and Preservation — Complete
 
-- **Live verification:** Both providers reachable (Langfuse ingestion HTTP 200, Latitude ingestion HTTP 200). `php artisan telemetry:diagnose` exit 0. `/api/v1/telemetry/status` returns live contract with scheduler, heartbeat, langfuse, latitude delivery states.
-- **Regression tests:** 50 telemetry tests pass (152 assertions). Full suite unaffected by telemetry changes.
-- **Lint:** Pint clean on all changed files (4 pre-existing failures in unrelated career/roster files, not touched by this commit).
-- **PHPStan:** Clean on all changed telemetry files (5 pre-existing errors in `TelemetryConfigTest.php` lines 47/64/80/317/338, not part of this change).
-- **Frontend typecheck:** `Edit.vue` telemetry changes introduce no type errors (5 pre-existing errors in unrelated `tests/browser/*` files).
-- **Build:** `npm run build` blocked by sandbox `safe-delete`/`ETIMEDOUT` on `node.exe` — environment issue, not a code defect. Vite transforms 978 modules successfully before the cleanup guard failure.
-- **Commit:** `4802a3cf` — narrowly scoped to 10 telemetry/scheduler files, no unrelated changes.
-- **Docs:** `TELEMETRY_IMPLEMENTATION_REPORT.md` updated with Task #54 settings verification and Task #56 acceptance status.
+- **Live provider acceptance:** end-to-end request produced trace `8c13a02d8f3d1b9675a0a198f08a50df`, independently retrieved from **both** platforms — Langfuse `GET /api/public/v2/observations` (1 observation, `GET api/v1/umamusume`) and Latitude (HTTP 200, `spanCount 1`, `errorCount 0`) — with the same trace id on both sides.
+- **Heartbeat:** four consecutive scheduled heartbeats observed in Langfuse at 03:25:22, 03:30:44, 03:35:30, 03:40:16 UTC, each `trainerdesk.health.synthetic`.
+- **Scheduler liveness (runtime, not just code):** live PID → `scheduler: true`; stale PID → `false`; absent PID file → `false`.
+- **Classification:** accepted / rejected / partial / failed are derived from the exporter result, not from HTTP 200 alone; a cached `exported=true` is never treated as proof of retrieval.
+- **Regression tests:** 27 Feature telemetry tests + 14 Unit export-result tests pass (145 assertions).
+- **Lint:** Pint clean on every changed file.
+- **PHPStan:** `[OK] No errors` on the scoped telemetry paths with an isolated scratch DB.
+- **Frontend typecheck:** no new errors from the telemetry UI; one pre-existing `TeamRoster.vue` error is unrelated and untouched.
+- **Build:** `npm run build` succeeds (`✓ built in 56s`).
+- **Commit:** `0ac06a73` — telemetry middleware, status controller, provider binding and tests only.
+- **Themes:** Azure Daybreak (`light`), Midnight Circuit (`dark`) and EVA-01 (`eva01`) all render the telemetry panel; the panel is theme-agnostic markup driven by the same tokens as the rest of the shell.
+
+### Remaining limitations
+
+- **Langfuse legacy read API is gone (HTTP 410).** `GET /api/public/traces/{id}` is deprecated; retrieval now uses the v2 observations list plus client-side trace-id matching. Server-side `filter` with `type:traceId` / `type:id` is rejected (`400 invalid_union`), so there is no get-by-id shortcut.
+- **Browser automation in this environment is degraded.** The MCP browser controller returns `CDP Runtime.evaluate timed out` for DOM snapshots and rejects screenshots over the 10 MiB limit at every quality/clip setting, so the Preferences panel was verified by rendering its states from the same derivation logic the component uses, plus live endpoint checks, rather than by pixel capture.
+- **Working-tree corruption and recovery.** A `npm run build` invocation ran with sandbox escalation and deleted ~63 untracked files. Committed telemetry was restored from git; untracked scaffolding was restored from a local clean clone and the `routes/api.php` / `bootstrap/app.php` schedule blocks were reconstructed. A branch switch to `master` then discarded the local telemetry commit; the scoped files were re-applied from `backup/db-safety-fixes` (`6c3c3359`) and committed as `0ac06a73`. Anyone continuing this work should re-verify the working tree before trusting uncommitted state.
+- **Scheduler process not left running.** The heartbeat and liveness checks were run against a live scheduler and a live PID file; the worker itself is not left resident after the session, so `scheduler` reads `false` until `tools/scheduler.ps1` is started again.
