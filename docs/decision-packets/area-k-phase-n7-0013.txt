@@ -1,0 +1,62 @@
+# Decision Packet — Area K: N7.13: Themes, Save Timing, and Export vs Backup
+
+## Decision Identifier and Title
+**Identifier**: N7.13
+**Title**: Themes, save timing, and export vs backup — Themes, save timing, export vs backup; major omission; GOV.UK patterns referenced
+**Status**: OWNER-GATED — themes, save timing, and export vs backup; major omission; GOV.UK patterns referenced; only already-authorized slices retained per MASTER absorption
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/plan/trainerdesk-complete-uiux-implementation-plan-2026-11-20.md`; `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md`; `flows-preferences.md` §§N7.13–N7.15
+
+## Authority
+**Themes**: GOV.UK Check Answers pattern for confirmation summary and prefilled corrections.
+
+**Save timing**: GOV.UK Recover from Validation Errors pattern for errors by field, summary, recovery without loss.
+
+**Export vs backup**: GOV.UK Summary List pattern for readable record details and check-before-submit.
+
+**Major omission**: Themes, save timing, and export vs backup documented as major omission; not yet implemented.
+
+## Current Implementation Status
+- **Themes**: GOV.UK Check Answers pattern referenced; not yet implemented
+- **Save timing**: GOV.UK Recover from Validation Errors pattern referenced; not yet implemented
+- **Export vs backup**: GOV.UK Summary List pattern referenced; not yet implemented
+- **Major omission**: Themes, save timing, and export vs backup documented as major omission; not yet implemented
+
+## Owner Question (Exact)
+**Should the owner formalize the themes, save timing, and export vs backup, or maintain the current gated state?**
+
+**Option A**: Formalize themes, save timing, and export vs backup
+- **Evidence required**: Themes documented with GOV.UK Check Answers pattern; save timing documented with GOV.UK Recover from Validation Errors pattern; export vs backup documented with GOV.UK Summary List pattern
+- **Development blocked**: None — documentation is recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Maintain current gated state
+- **Evidence required**: Gating documentation; owner ruling
+- **Development blocked**: None — gating is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Formalize themes, save timing, and export vs backup (Option A)**: Themes documented with GOV.UK Check Answers pattern; save timing documented with GOV.UK Recover from Validation Errors pattern; export vs backup documented with GOV.UK Summary List pattern. Formalize with owner ruling.
+
+**Supporting evidence**:
+- `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52` — N7.1–N7.22 owner-gated, accepted 2026-11-25
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:51` — N7.13–N7.15 themes, save timing, export vs backup
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:138` — ND-*: Phase 7 absorbed 2026-11-25; only already-authorized slices retained
+
+**Development blocked**: None — documentation is recording action
+
+**Unaffected work**: All existing preferences functionality; no implementation change needed; formalization is recording action
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (formalization; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future preferences changes would affect the themes, save timing, or export vs backup; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (themes, save timing, and export vs backup formalized; no owner action needed beyond ruling)
+
+---
+
+**Key Principle**: Themes documented with GOV.UK Check Answers pattern; save timing documented with GOV.UK Recover from Validation Errors pattern; export vs backup documented with GOV.UK Summary List pattern.

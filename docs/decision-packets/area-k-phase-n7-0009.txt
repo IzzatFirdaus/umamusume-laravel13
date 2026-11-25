@@ -1,0 +1,59 @@
+# Decision Packet — Area K: N7.9: Skills Catalogue Global/JP Scope and Filter State
+
+## Decision Identifier and Title
+**Identifier**: N7.9
+**Title**: Skills catalogue Global/JP scope and filter state — Skills catalogue with Global/JP scope distinction; filter state documented; three-card compare documented
+**Status**: OWNER-GATED — Global/JP scope distinction documented; filter state documented; three-card compare documented; only already-authorized slices retained per MASTER absorption
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/plan/trainerdesk-complete-uiux-implementation-plan-2026-11-20.md`; `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md`; `flows-catalogs.md` §§N7.9–N7.11
+
+## Authority
+**Global/JP scope distinction**: Skills catalogue distinguishes Global and JP scope.
+
+**Filter state**: Filter state documented for skills catalogue.
+
+**Three-card compare**: Three-card compare documented for skills catalogue.
+
+## Current Implementation Status
+- **Global/JP scope distinction**: Present; skills catalogue distinguishes Global and JP scope
+- **Filter state**: Documented; filter state for skills catalogue specified
+- **Three-card compare**: Documented; three-card compare for skills catalogue specified
+
+## Owner Question (Exact)
+**Should the owner formalize the Global/JP scope distinction, filter state, and three-card compare, or maintain the current gated state?**
+
+**Option A**: Formalize Global/JP scope distinction, filter state, and three-card compare
+- **Evidence required**: Global/JP scope distinction documented; filter state documented; three-card compare documented
+- **Development blocked**: None — documentation is recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Maintain current gated state
+- **Evidence required**: Gating documentation; owner ruling
+- **Development blocked**: None — gating is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Formalize Global/JP scope distinction, filter state, and three-card compare (Option A)**: Skills catalogue Global/JP scope distinction documented. Filter state documented. Three-card compare documented. Formalize with owner ruling.
+
+**Supporting evidence**:
+- `flows-catalogs.md` §§N7.9–N7.11 — Global/JP scope, filter state, three-card compare documentation
+- `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52` — N7.1–N7.22 owner-gated, accepted 2026-11-25
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:138` — ND-*: Phase 7 absorbed 2026-11-25; only already-authorized slices retained
+
+**Development blocked**: None — documentation is recording action
+
+**Unaffected work**: All existing skills catalogue functionality; no implementation change needed; formalization is recording action
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (formalization; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future scope changes would affect the Global/JP distinction; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (Global/JP scope distinction, filter state, and three-card compare formalized; no owner action needed beyond ruling)
+
+---
+
+**Key Principle**: Skills catalogue Global/JP scope distinction, filter state, and three-card compare formalized.

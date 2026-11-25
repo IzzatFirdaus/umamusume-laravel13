@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 import { buildAxe } from '../utils/accessibility';
 
 // Rendered-copy evidence for the Preferences screen (SCR-SYS-002), rewritten against the HFW

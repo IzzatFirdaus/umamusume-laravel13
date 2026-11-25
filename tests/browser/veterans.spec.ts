@@ -18,7 +18,7 @@
  * an empty table whenever it runs. This spec's writes are all cleaned up before the next test starts.
  */
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/base-test';
 import { deleteRun } from '../utils/delete-run';
 import { fileCareer } from '../utils/file-career';
 import { VETERAN_ANCESTRY_NOTE } from '../../resources/js/domain/veteranNote';

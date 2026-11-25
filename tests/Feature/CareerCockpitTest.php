@@ -777,9 +777,20 @@ it('saves a corrected turn through the correction form', function (): void {
         ->assertRedirect(route('runs.cockpit', $run))
         ->assertSessionHas('status', 'Turn 1 updated.');
 
-    expect($entry->refresh()->speed)->toBe(140)
-        ->and($entry->condition)->toBe('NORMAL')
-        ->and(TurnEntry::where('training_run_id', $run->id)->count())->toBe(1);
+    // ADR-0027: the correction appends a revision row; the committed row keeps its values and is
+    // marked superseded instead of being rewritten.
+    expect($entry->refresh()->speed)->toBe(600)
+        ->and($entry->superseded_by)->not()->toBeNull();
+
+    $revision = $run->turnEntries()->where('corrected_from', $entry->id)->sole();
+    expect($revision->speed)->toBe(140)
+        ->and($revision->condition)->toBe('NORMAL')
+        ->and($revision->turn)->toBe(1);
+
+    // One effective row per turn: readers see the latest revision; the history row remains.
+    expect($run->turnEntries()->whereNull('superseded_by')->count())->toBe(1)
+        ->and($run->turnEntries()->whereNull('superseded_by')->sole()->speed)->toBe(140)
+        ->and(TurnEntry::where('training_run_id', $run->id)->count())->toBe(2);
 });
 
 it('deletes a turn through the correction form', function (): void {

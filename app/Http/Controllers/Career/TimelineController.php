@@ -29,11 +29,16 @@ use Inertia\Response;
  * logged turn (null on turn 1). There is no separate EXPECTED block, because the schema stores the
  * actual; the audit's prose is "Recorded as entered", never a fabricated projection.
  *
- * **Corrections are a flag, not a separate row.** `runs.turns.update` mutates `updated_at` but
- * the model has no edit log column, so a corrected row carries `corrected: true` and a deterministic
- * `correction_id` ("turn-N") the page reads as an "Updated" indicator. A separate corrections
- * log is the destination; this slice ships the smallest honest version, acknowledges it in the
- * row, and the limit becomes its own future task.
+ * **Corrections are a flag and, where the history holds a pair, a disclosure (ADR-0027 D-1b, D-1c).**
+ * Two shapes exist and both must read as one turn, never as two gameplay turns:
+ *
+ * - An in-place edit (`runs.turns.update` today) mutates `updated_at` and leaves no prior values, so
+ *   the row carries `corrected: true` and a deterministic `correction_id` ("turn-N").
+ * - An appended correction writes a second row at the same turn pointed at by `corrected_from` /
+ *   `superseded_by` (D-1b's partial unique index permits it). The rail must walk the *live* rows —
+ *   the ones nothing supersedes — or a corrected turn prints twice and the career reads one turn
+ *   longer than it was. Each superseded row travels beside its live row in `revisions`, so the prior
+ *   reading is disclosed on the row it belongs to rather than as a turn of its own.
  *
  * **No `×` glyph comes from missed deadlines today.** The matrix's deadlines (Phase E) are not
  * in this slice's data layer, so the only rows with `×` are `Failure` events the Trainer
@@ -46,6 +51,10 @@ class TimelineController extends Controller
     {
         // Two collections the controller maps over, with the per-row BEFORE read off the previous
         // row's stat block in the same map so the audit never re-queries the run.
+        //
+        // `turnEntries` is loaded whole on purpose: the rail walks the live rows (ADR-0027), but a
+        // correction's superseded row is still needed to disclose what it replaced. One load serves
+        // both, partitioned in `buildEntries()`, so the revision list costs no second query.
         $run->load([
             'umamusume',
             'turnEntries',
@@ -105,7 +114,13 @@ class TimelineController extends Controller
 
     private function firstLoggedPosition(TrainingRun $run): ?CareerPosition
     {
-        $first = $run->turnEntries->sortBy('turn')->first();
+        // The head of the rail is the first *live* turn (ADR-0027). A run whose turn 1 was corrected
+        // by append still opens at turn 1 either way, because a correction keeps its turn number; the
+        // live read is used so this answer cannot drift from the rows the rail prints.
+        $first = $run->turnEntries
+            ->whereNull('superseded_by')
+            ->sortBy('turn')
+            ->first();
 
         if ($first === null) {
             return null;
@@ -161,15 +176,31 @@ class TimelineController extends Controller
     }
 
     /**
-     * The flat list the page renders: one row per TurnEntry, plus a row per RaceEntry and per
+     * The flat list the page renders: one row per live TurnEntry, plus a row per RaceEntry and per
      * TurnEvent that point at the same turn. Oldest turn first; within a turn, the turn row
      * leads and its events follow in storage order.
+     *
+     * Walks the live rows only (ADR-0027 D-1b/D-1c). `$run->turnEntries` is the append-only history and
+     * still holds every superseded row; folding those into the rail would print one corrected turn as
+     * two gameplay turns and stretch a 72-turn career past its own grid. Superseded rows are collected
+     * per turn into `revisions` instead, so the prior reading stays reachable from the row that replaced
+     * it.
      *
      * @return list<array<string, mixed>>
      */
     private function buildEntries(TrainingRun $run): array
     {
-        $turns = $run->turnEntries->sortBy('turn')->values();
+        $history = $run->turnEntries->sortBy('turn')->values();
+        $turns = $history->whereNull('superseded_by')->values();
+
+        // Superseded rows grouped by the turn they held, oldest first, so a turn corrected twice
+        // discloses both prior readings in the order they were recorded.
+        /** @var array<int, list<TurnEntry>> $revisionsByTurn */
+        $revisionsByTurn = [];
+
+        foreach ($history->whereNotNull('superseded_by') as $superseded) {
+            $revisionsByTurn[(int) $superseded->turn][] = $superseded;
+        }
 
         /** @var array<int, TurnEntry|null> $byTurn */
         $byTurn = [];
@@ -182,9 +213,19 @@ class TimelineController extends Controller
 
         foreach ($turns as $turn) {
             $previous = $byTurn[$turn->turn] ?? null;
-            $entries[] = $this->turnRow($run, $turn, $previous);
+            $revisions = $revisionsByTurn[(int) $turn->turn] ?? [];
+            $entries[] = $this->turnRow($run, $turn, $previous, $revisions);
 
-            foreach ($run->raceEntries->where('turn_entry_id', $turn->id) as $race) {
+            // A race is linked by `turn_entry_id`, and a correction appends a *new* row, so a race
+            // recorded against the row a correction replaced points at an id the live row does not
+            // hold. Collected by turn, over the live row and the rows it supersedes, or the race
+            // quietly drops off the rail when its turn is corrected.
+            $rowIds = array_merge(
+                [$turn->id],
+                array_map(static fn (TurnEntry $revision): int => $revision->id, $revisions),
+            );
+
+            foreach ($run->raceEntries->whereIn('turn_entry_id', $rowIds) as $race) {
                 $entries[] = $this->raceRow($run, $turn->turn, $race);
             }
 
@@ -198,6 +239,9 @@ class TimelineController extends Controller
         // `turn_entry_id` could never appear — the Races screen's manual form allows exactly that link
         // to be left null. These land after the last turn, at the run's own latest position, rather than
         // claiming a turn the run never held.
+        //
+        // The latest *live* turn, not the latest row in the history: a superseded row is not where the
+        // run stands (ADR-0027).
         $latestTurn = $turns->isEmpty() ? 1 : (int) $turns->last()->turn;
 
         foreach ($run->raceEntries->whereNull('turn_entry_id') as $race) {
@@ -235,13 +279,21 @@ class TimelineController extends Controller
      * values. One block, not an EXPECTED/ACTUAL pair: `ADR-0003` stores the absolute end-of-turn reading,
      * so the two were always the same numbers printed twice.
      *
+     * `revisions` is the ADR-0027 D-1c disclosure: the rows this turn's live row supersedes, if the
+     * correction was appended rather than written in place. Empty in the common case, which is the
+     * honest answer — an in-place edit keeps no prior values, and inventing a "before" for it would
+     * print a reading the tool never held.
+     *
+     * @param  list<TurnEntry>  $revisions
      * @return array<string, mixed>
      */
-    private function turnRow(TrainingRun $run, TurnEntry $turn, ?TurnEntry $previous): array
+    private function turnRow(TrainingRun $run, TurnEntry $turn, ?TurnEntry $previous, array $revisions = []): array
     {
-        $corrected = $turn->updated_at !== null
+        $corrected = $revisions !== [] || (
+            $turn->updated_at !== null
             && $turn->created_at !== null
-            && $turn->updated_at->gt($turn->created_at);
+            && $turn->updated_at->gt($turn->created_at)
+        );
 
         return [
             'key' => 'turn-'.$turn->id,
@@ -265,6 +317,16 @@ class TimelineController extends Controller
             'result' => 'Recorded as entered',
             'corrected' => $corrected,
             'correction_id' => $corrected ? 'turn-'.$turn->turn : null,
+            // ADR-0027 D-1c: what this turn replaced, newest-correction-last. Each revision carries
+            // its own stat block so the page can print the prior reading without a second request,
+            // and its own id so the disclosure is one row per superseded entry rather than a count.
+            'revisions' => array_map(fn (TurnEntry $revision): array => [
+                'id' => $revision->id,
+                'stats' => $this->stats($revision),
+                'energy_reading' => $revision->energyReading(),
+                'mood' => $revision->mood?->value,
+                'recorded_at' => $revision->created_at?->toIso8601String(),
+            ], $revisions),
             // `C6b.2`: the turn-correction door, so the Timeline row reaches the same write the
             // Cockpit's `Career tools` disclosure used to host. The cockpit query link stays for the
             // screens that still read `?edit_turn=`.

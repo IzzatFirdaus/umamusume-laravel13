@@ -1,0 +1,91 @@
+# Decision Packet — Area J: ND-10: Snapshot/Veteran Rulings Review
+
+## Decision Identifier and Title
+**Identifier**: ND-10
+**Title**: Snapshot/veteran rulings the review flags — G1 bottom primary vs one-accent, G2 identity-panel merge, G3 disabled-door hint removal, G4 final-stat tiles, G5 portrait in PageHeader, G6 sticky summary/bar, G7 Energy Band persistence, G8 form widening/two-column
+**Status**: OWNER-GATED — keep rulings for 3.0.0, ship clean slices N3.30-N3.38; reverse selectively with HFW-OVERRIDE records + spec/test travel; full redesign
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/adr/0020-trainer-desk-2-program.md`; `SCREEN_SPEC.md` §7-22; `docs/plan/implementation-plan-2026-11-20.md` §§W3.30-W3.40; `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5`
+
+## Authority
+**Review flags**: The 2026-11-20 snapshot-and-veteran review was claim-tested at 37320f35 (41 claims: 6 EXISTS-already, 18 PARTIAL, 15 MISSING, 2 WRONG). Eight recommendations collide with recorded rulings or test pins.
+
+**Eight specific G-point rulings**:
+- G1: Bottom primary vs one-accent — G1 is a wireframe-vs-DESIGN.md conflict: DESIGN.md owns the visual system (AGENTS.md §2 precedence), so one-accent stands unless the owner rules otherwise
+- G2: Identity-panel merge — owner ruling required
+- G3: Disabled-door hint removal — audit-ruled disabled-door hint
+- G4: Final-stat tiles — owner ruling
+- G5: Portrait in PageHeader — owner ruling
+- G6: Sticky summary/bar — owner ruling
+- G7: Energy Band persistence — persistence change, not presentation; G7 stands unless owner rules otherwise
+- G8: Form widening/two-column — soft gate: widening may proceed with a recorded HFW-OVERRIDE entry (IA-4), never quietly
+
+**Eight recommendations collide with recorded rulings or test pins (ND-10)**:
+1. Bottom primary vs DESIGN.md one-accent
+2. Six-section heading pin
+3. Audit-ruled disabled-door hint
+4. Stat-tile wireframe parity
+5. PageHeader slot contract
+6. Shell sticky containment
+7. Energy Band persistence
+8. Form widening
+
+## Original Requirement
+From `flows-career-creation.md` and the 2026-11-20 snapshot-and-veteran review:
+- **ND-10**: Reverse the snapshot/veteran rulings the review flags (G1..G8)
+- (a) keep rulings for 3.0.0, ship clean slices N3.30-N3.38
+- (b) reverse selectively with HFW-OVERRIDE records + spec/test travel
+- (c) full redesign
+
+**Related**: N3.30-N3.40
+
+## Current Implementation Status
+- **Recorded rulings maintained**: G1..G8 rulings kept for 3.0.0; no reversals performed
+- **Clean slices shipped**: N3.30-N3.38 shipped as clean slices; eight G-point recommendations parked under ND-10
+- **Specific rulings**: G1 stands (DESIGN.md owns visual system); G7 is persistence change not presentation; G8 is soft gate with HFW-OVERRIDE entry
+
+## Owner Question (Exact)
+**Should the owner keep the snapshot/veteran rulings for 3.0.0 (Option A), reverse selectively with HFW-OVERRIDE records (Option B), or undertake a full redesign (Option C)?**
+
+**Option A**: Keep rulings for 3.0.0, ship clean slices N3.30-N3.38
+- **Evidence required**: 41 claims at 37320f35 (6 EXISTS / 18 PARTIAL / 15 MISSING / 2 WRONG); eight recommendations collide with recorded rulings or test pins
+- **Development blocked**: None — maintaining rulings is recording action
+- **Release relevance**: Ships for 3.0.0; no new functionality
+
+**Option B**: Reverse selectively with HFW-OVERRIDE records + spec/test travel
+- **Evidence required**: HFW-OVERRIDE records; spec travel; test travel documentation
+- **Development blocked**: G1 conflicts with DESIGN.md ownership (AGENTS.md §2); G7 is persistence change not presentation; G8 is soft gate with HFW-OVERRIDE entry — may proceed with recorded entry, never quietly
+- **Release relevance**: Would require tag increment; ADR errata owed
+
+**Option C**: Full redesign
+- **Evidence required**: Full redesign specification; owner ruling with ADR erratum
+- **Development blocked**: Major scope; not for 3.0.0; separate roadmap entry
+- **Release relevance**: Separate roadmap entry; not 3.0.0
+
+## Recommended Ruling
+**Keep rulings for 3.0.0, ship clean slices N3.30-N3.38 (Option A)**: The 2026-11-20 snapshot-and-veteran review had 41 claims at 37320f35 (6 EXISTS / 18 PARTIAL / 15 MISSING / 2 WRONG). Eight recommendations collide with recorded rulings or test pins. G1 conflicts with DESIGN.md ownership (AGENTS.md §2 precedence — DESIGN.md owns the visual system, so one-accent stands unless the owner rules otherwise). G7 is a persistence change, not presentation. G8 is a soft gate: widening may proceed with a recorded HFW-OVERRIDE entry (IA-4), never quietly. Ship clean slices N3.30-N3.38 only; eight G-point recommendations parked under ND-10.
+
+**Supporting evidence**:
+- `docs/plan/implementation-plan-2026-11-20.md:392` — snapshot/veteran workstream notes
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5` — ND-1..ND-16 source
+- `docs/plan/implementation-plan-2026-11-20.md:651` — files and actions list
+- `AGENTS.md:§2` — DESIGN.md owns the visual system precedence
+- `SCREEN_SPEC.md` §7-22 — snapshot/veteran review section
+
+**Development blocked**: None — maintaining rulings is recording action
+
+**Unaffected work**: All existing snapshot/veteran functionality; no implementation change needed; clean slices N3.30-N3.38 shipped
+
+**Release relevance**: Ships for 3.0.0; no new functionality
+
+**Responsible Expert**: None (rulings maintained; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future roadmap updates would challenge the recorded rulings; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (rulings maintained; no owner action needed beyond recording)
+
+---
+
+**Key Principle**: G1 stands (DESIGN.md owns visual system); G7 is persistence change not presentation; G8 is soft gate with HFW-OVERRIDE entry; eight G-point recommendations parked under ND-10; clean slices N3.30-N3.38 shipped.

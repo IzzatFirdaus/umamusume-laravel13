@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 // Rendered-copy and behaviour evidence for the ported import screens (SCR-RUN-004/005, ADR-0020 §1).
 // `HistoricalRunImportTest` and `ImportErrorCopyTest` assert the parse, the round trip and the MessageBag;

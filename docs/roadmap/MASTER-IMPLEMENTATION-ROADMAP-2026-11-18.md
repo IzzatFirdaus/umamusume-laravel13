@@ -599,10 +599,14 @@ python tools/adr-check.py docs/adr
 
 ### S3.5 - Owner-gated capability register (no agent code until ruled)
 
+
+**D-number erratum (2026-11-25).** This table cites archived
+emaining-work-roadmap-2026-11-17.md §5 D-numbers, not MASTER's §14 D-numbers. canonical register is DECISIONS-AND-DEPENDENCIES.md §1. Cross-reference: archived D-8 = match_candidates discriminator (resolved by ADR-0037, measured); archived D-9 = data_sources backfill (still open); archived D-11 = team-race slots (canonical D-8, **ACCEPTED** 2026-11-25); archived D-12 = roster+preseason (canonical D-9 **ACCEPTED (architectural)** via ADR-0039, D-10 **ACCEPTED** 2026-11-25). No D ID renumbered; note records register each row belongs to.
+
 | Capability | What exists | What unblocks it | Deliverable when ruled |
 |---|---|---|---|
-| Team-race slots | No source package | D-11: source or terminal | Migration + parser + test, or a dated terminal note |
-| Roster sub-model / preseason rounds | Deferred per R8 | D-12 + ADR | Migration with `down()`, seeder, screen, or a dated note |
+| Team-race slots | **ACCEPTED** unity-cup-team-races.json (5 seeded slots) | D-8 (canonical) — ruling recorded 2026-11-25 | Migration + parser + test landed; focused verification 5/5 green |
+| Roster sub-model / preseason rounds | **ACCEPTED / ACCEPTED** — roster via ADR-0039; preseason accepted 2026-11-25 | D-9 (ACCEPTED - architectural), D-10 (ACCEPTED) | oster_members migration + tests green; preseason_rounds design delegated Backend |
 | Per-ancestor sparks / guest fields | Single affinity grade in `legacy_selection` | ADR acceptance | Typed payload, accessors, form, round-trip test |
 | Independent Training completion maths | Calibrated approximation | Evidence ruling | Source-cited calibration brief, then code |
 | Grand Concert packages (S9-S18) | Blocked, not partial | Owner accepts evidence | One code slice per accepted package |

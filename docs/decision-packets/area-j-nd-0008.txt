@@ -1,0 +1,68 @@
+# Decision Packet — Area J: ND-8: Orphan Components and Dead Props
+
+## Decision Identifier and Title
+**Identifier**: ND-8
+**Title**: Orphan components (9 files, 0 importers) and dead props: delete or keep?
+**Status**: OWNER-GATED — delete with owner approval per file; keep as reference; 9 orphans deleted once grep re-confirms zero importers
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/adr/0023-deck-slot-ownership.md`; `SCREEN_SPEC.md` §7-21; `docs/plan/implementation-plan-2026-11-20.md` §§S3.17; `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5`
+
+## Authority
+**Orphan definition**: 9 files with zero importers; dead props with no active usage.
+
+**Two options documented**:
+- (a) Delete with owner approval per file; dead props deleted with their slices
+- (b) Keep as reference; delete once a grep re-confirms zero importers
+
+**Wizard orphans**: FormDetail.vue/FormTabs.vue added by N3.29; routed to ND-8 list.
+
+## Original Requirement
+From `flows-career-creation.md` and the review findings:
+- **ND-8**: Orphan components (9 files, 0 importers) and dead props: delete or keep?
+- (a) delete with owner approval per file; (b) keep as reference
+
+**Related**: N3.17
+
+## Current Implementation Status
+- **Orphan components**: 9 files identified with zero importers
+- **Dead props**: Identified and documented
+- **Wizard orphans**: FormDetail.vue/FormTabs.vue; added to ND-8 list; 0 imports confirmed
+
+## Owner Question (Exact)
+**Should the owner delete the 9 orphan components and dead props with approval, or keep them as reference?**
+
+**Option A**: Delete with owner approval per file
+- **Evidence required**: grep re-confirms zero importers for each file
+- **Development blocked**: None — deletion with approval is recording action
+- **Release relevance**: Maintains current state; no new functionality; cleanup
+
+**Option B**: Keep as reference
+- **Evidence required**: Maintain as reference only; no implementation change
+- **Development blocked**: None — recording is documentation action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Delete with owner approval per file (Option A)**: The 9 orphan components and dead props should be deleted with owner approval per file, once a grep re-confirms zero importers. Wizard orphans FormDetail.vue/FormTabs.vue (0 imports) are added to the ND-8 list for tracking.
+
+**Supporting evidence**:
+- `docs/plan/implementation-plan-2026-11-20.md:392` — wizard workstream notes
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5` — ND-1..ND-16 source
+- `AGENTS.md:§11` — grep re-confirms before deletion
+
+**Development blocked**: None — deletion with approval is recording action
+
+**Unaffected work**: All existing orphan component functionality; no implementation change needed; cleanup
+
+**Release relevance**: Maintains current state; no new functionality; cleanup for 3.0.0
+
+**Responsible Expert**: None (deletion with approval; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future importer additions would change the deletion decision; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (deletion with approval; no owner action needed beyond approval)
+
+---
+
+**Key Principle**: 9 orphan components and dead props deleted with owner approval; grep re-confirms zero importers; wizard orphans tracked under ND-8.

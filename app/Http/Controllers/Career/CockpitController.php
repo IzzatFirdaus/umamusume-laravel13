@@ -10,8 +10,10 @@ use App\Enums\RunStatus;
 use App\Enums\TurnChoice;
 use App\Http\Controllers\Controller;
 use App\Models\RaceCatalogSlot;
+use App\Models\RaceEntry;
 use App\Models\Skill;
 use App\Models\TrainingRun;
+use App\Models\RosterMember;
 use App\Models\TurnEntry;
 use App\Services\Advisor\Advice;
 use App\Services\Advisor\NextDecision;
@@ -192,11 +194,12 @@ class CockpitController extends Controller
                 ->with('status', 'Team state is only available for a scenario that records a team.');
         }
 
-        $run->loadMissing('umamusume');
+        $run->loadMissing(['umamusume', 'preseasonRounds', 'rosterMembers.umamusume', 'rosterMembers.supportCard']);
 
         return Inertia::render('Career/TeamEdit', [
             'run' => $this->runSection($run),
             'team' => $this->team->teamSection($run),
+            'roster' => $this->rosterSection($run),
             'backUrl' => route('runs.cockpit', $run),
             'scenarioDetailUrl' => route('runs.scenario-detail', $run),
         ]);
@@ -214,7 +217,7 @@ class CockpitController extends Controller
      */
     public function scenarioDetail(TrainingRun $run): Response
     {
-        $run->loadMissing(['umamusume', 'turnEntries', 'turnEvents']);
+        $run->loadMissing(['umamusume', 'turnEntries', 'turnEvents', 'preseasonRounds']);
 
         $latest = $run->turnEntries->sortByDesc('turn')->first();
         $advice = app(TrainerAdvisor::class)->advise($latest, $run->buildTarget(), $run);
@@ -247,7 +250,7 @@ class CockpitController extends Controller
             || $run->acceptsPerformanceObservations()
             || in_array('spirit_bursts', (array) config('scenarios.scenarios.'.$run->scenarioKey().'.widgets', []), true);
 
-        $run->load(['umamusume', 'characterCard', 'turnEntries', 'raceEntries.raceCatalogSlot', 'raceEntries.scenarioSlot', 'raceEntries.turnEntry', 'deckSlots.supportCard']);
+        $run->load(['umamusume', 'characterCard', 'turnEntries', 'raceEntries.raceCatalogSlot', 'raceEntries.scenarioSlot', 'raceEntries.turnEntry', 'deckSlots.supportCard', 'rosterMembers.umamusume', 'rosterMembers.supportCard', 'preseasonRounds']);
 
         if ($needsEvents) {
             $run->load('turnEvents');
@@ -672,33 +675,65 @@ class CockpitController extends Controller
     }
 
     /**
-     * A-0.6: the derived team roster — the six deck cards' characters, read off the run's own
-     * `deck_slots` (`characters` + deck cards, per the ruling), with no stored roster and no column.
+     * A-0.6 (restored D01): the canonical recorded roster — `RosterMember` rows for this run,
+     * never derived from `deckSlots`. The deck is six support cards the Trainer equipped; the
+     * roster is up to twenty members who train alongside the trainee. The two are not merged.
      *
-     * A slot the Trainer equipped but never classified keeps `ownership` null, which the row renders
-     * as an absence rather than as owned (D-220). An empty deck names the absence instead of drawing
-     * six empty rows (C-7).
+     * Returns the `RosterPayload` shape consumed by `RosterTableRows.ts`: every recorded field,
+     * nullable where unobserved, plus the write URLs the roster editor needs.
      *
-     * @return array{rows: list<array{slot: int, name: string|null, friend: bool, ownership: string|null}>, empty: string|null}
+     * @return array{members: list<array{id: int, name: string, grade: string|null, speed: int|null, stamina: int|null, power: int|null, guts: int|null, wit: int|null, speed_cap: int|null, stamina_cap: int|null, power_cap: int|null, guts_cap: int|null, wit_cap: int|null, origin: string|null, support_card_id: int|null, aptitude_turf: string|null, aptitude_dirt: string|null, aptitude_sprint: string|null, aptitude_mile: string|null, aptitude_medium: string|null, aptitude_long: string|null, aptitude_front_runner: string|null, aptitude_pace_chaser: string|null, aptitude_late_surger: string|null, aptitude_end_closer: string|null, distance_assignment: string|null, is_ace: bool, is_trainee: bool, umamusume_id: int|null, position: int, update_url: string, destroy_url: string}>, empty: string|null, unrecorded: bool, store_url: string, max_members: int}
      */
     private function rosterSection(TrainingRun $run): array
     {
-        $rows = [];
+        $members = $run->rosterMembers()
+            ->with('umamusume', 'supportCard')
+            ->orderBy('position')
+            ->get();
 
-        foreach ($run->deckSlots->sortBy('slot_position') as $slot) {
-            $rows[] = [
-                'slot' => $slot->slot_position,
-                'name' => $slot->supportCard->displayName(),
-                'friend' => $slot->isFriendSlot(),
-                'ownership' => $slot->ownership,
-            ];
-        }
+        $rows = $members->map(fn (RosterMember $member): array => [
+            'id' => $member->id,
+            'name' => $member->name,
+            'grade' => $member->grade,
+            'speed' => $member->speed,
+            'stamina' => $member->stamina,
+            'power' => $member->power,
+            'guts' => $member->guts,
+            'wit' => $member->wit,
+            'speed_cap' => $member->speed_cap,
+            'stamina_cap' => $member->stamina_cap,
+            'power_cap' => $member->power_cap,
+            'guts_cap' => $member->guts_cap,
+            'wit_cap' => $member->wit_cap,
+            'origin' => $member->origin,
+            'support_card_id' => $member->support_card_id,
+            'aptitude_turf' => $member->aptitude_turf,
+            'aptitude_dirt' => $member->aptitude_dirt,
+            'aptitude_sprint' => $member->aptitude_sprint,
+            'aptitude_mile' => $member->aptitude_mile,
+            'aptitude_medium' => $member->aptitude_medium,
+            'aptitude_long' => $member->aptitude_long,
+            'aptitude_front_runner' => $member->aptitude_front_runner,
+            'aptitude_pace_chaser' => $member->aptitude_pace_chaser,
+            'aptitude_late_surger' => $member->aptitude_late_surger,
+            'aptitude_end_closer' => $member->aptitude_end_closer,
+            'distance_assignment' => $member->distance_assignment?->value,
+            'is_ace' => (bool) $member->is_ace,
+            'is_trainee' => (bool) $member->is_trainee,
+            'umamusume_id' => $member->umamusume_id,
+            'position' => (int) $member->position,
+            'update_url' => route('runs.roster.update', ['run' => $run->id, 'member' => $member->id]),
+            'destroy_url' => route('runs.roster.destroy', ['run' => $run->id, 'member' => $member->id]),
+        ])->all();
 
         return [
-            'rows' => $rows,
+            'members' => $rows,
             'empty' => $rows === []
-                ? 'No deck card is equipped on this run, so no team roster is derived.'
+                ? 'No roster member is recorded for this run. The team roster is recorded per run through the Team screen; deck cards are not roster members.'
                 : null,
+            'unrecorded' => $rows === [],
+            'store_url' => route('runs.roster.store', $run),
+            'max_members' => RosterMember::MAX_MEMBERS,
         ];
     }
 
@@ -901,7 +936,13 @@ class CockpitController extends Controller
 
         $rows = [];
         $next = $run->nextTurnToPlay();
-        $entered = $run->raceEntries->pluck('race_catalog_slot_id')->filter()->all();
+        // KI-173: a `Scheduled` row is the calendar slot, not an observed entry decision, so it
+        // settles no obligation. Counting it would print `completed` for a race nobody has run.
+        $entered = $run->raceEntries
+            ->filter(fn (RaceEntry $entry): bool => $entry->status?->recordsEntry() === true)
+            ->pluck('race_catalog_slot_id')
+            ->filter()
+            ->all();
 
         foreach ($this->obligationSlots($run) as $slot) {
             $class = $this->obligationClass($slot);

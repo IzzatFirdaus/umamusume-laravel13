@@ -321,3 +321,157 @@ defects and one missing evidence package remain (FS-INT-1 … FS-INT-6).
 12. **Files changed by each agent:** Fullstack — `docs/sitrep/DB-SAFETY-ACCEPTANCE-2026-11-25.md`, `docs/sitrep/INDEX.md`, `tests/Feature/AgentSessionIsolationTest.php`, removal of `tools/debug-events.php`, scratch probes under `.scratch-uma/`. Docs — `docs/sitrep/DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md` and tracker updates. Frontend — browser harness/spec/global-setup files (in progress). Backend — no new guard source landed during this review window.
 13. **Authorization requirements / blockers:** owner has not authorized Windows account or ACL changes; Backend must own FS-INT-1…4, Frontend must attach #3 run evidence, Docs must fix §13.5. No commit/push/deploy performed.
 14. **Application vs OS enforcement:** application refuses agent-shaped processes at connection resolution and guards destructive commands/writes; raw `new PDO`, external `sqlite3`, and direct file access are outside that boundary. All agents, `php artisan serve`, and the owner share `LENOVOLEGION\extremerazr` with Modify access to `database/`; no per-process filesystem separation exists without an owner-created account and ACL change.
+
+---
+
+## Repository recovery audit record (Fullstack Senior Developer, 2026-11-25 15:2x +08:00)
+
+Read-only audit. No branch switch, reset, restore, clean, stash mutation, rebase, merge, cherry-pick,
+stage, commit or push was performed. No recovery reference was deleted, rewritten or overwritten.
+
+### R.1 Current authoritative state (verified)
+
+| Item | Observed |
+|---|---|
+| Root / worktree | `D:/Projects/umamusume-laravel13` (main), plus `C:/Users/exatf/AppData/Local/Temp/td-head-check` (detached at `3600741e`, 1 untracked file) |
+| Branch / HEAD | `master` / `320421e7` ("feat: add rosterMembers() relationship to TrainingRun model") |
+| `origin/master` | `320421e7` (in sync) |
+| Unfinished Git operations | **None** — no `MERGE_HEAD`, `REBASE_HEAD`, `CHERRY_PICK_HEAD`, `REVERT_HEAD`, `rebase-merge`, `rebase-apply`, `sequencer` |
+| Staged (shared index) | **31 files** (Backend reported 29; the two staged additions `app/Database/SafeDatabaseManager.php`, `app/Services/DatabaseSafety/AgentSessionGuard.php` account for the difference) |
+| Unstaged modified | 17 files |
+| Untracked | 427 paths (incl. `.headroom/*.db`, `app/private/advisor-index/*.sqlite`, scratch files) |
+| Stashes | 8 entries (`stash@{0}`…`stash@{7}`), all preserved |
+| Leftover artifacts | `.indexcommit` (1-entry index), `.scratch-be-index2` (2199-entry index copy), `.scratch-be-new.txt` = `3f720e04…`, `.scratch-be-approved.txt` |
+
+### R.2 Recovery reference inventory (ancestry verified)
+
+Every reference below is a descendant of `11207c42` and **none** descends `master` (`320421e7`); `master`
+carries six telemetry commits absent from all of them. No reference was modified.
+
+| Reference | Head | Delta vs `11207c42` | Contents relevant to recovery |
+|---|---|---|---|
+| `origin/backend` | `3f720e04` 13:49 | 36 files, +5913/−124 | `SafeDatabaseManager`, `AgentSessionGuard`, `DatabaseGuard`, provider, `config/database-safety.php`, `DatabaseSafetyTest` (28 tests) |
+| `backup/db-safety-fixes` = `backup/backend/20261125T132500-…` | `6c3c3359` 13:17 | same 36-file delta | identical safety set to `origin/backend` |
+| `backup/backend/20261125T123228-…` = `preserve/corrupt-head-2026-11-25` | `c1e18366` 12:08 | 1 file | **partial** snapshot: only `tests/browser/global-setup.ts` (131 lines) |
+| `backup/backend/20261125T125700-…` | `11207c42` 01:28 | 0 | pre-recovery baseline (no safety implementation) |
+| `origin/fullstack` = `recover/fullstack-20261125T123228` | `1d85c86c` 11:34 | 3 files | tracker + `AgentSessionIsolationTest` + 28-test `DatabaseSafetyTest`; **no** `SafeDatabaseManager`/`AgentSessionGuard` (dependency-incomplete) |
+| `origin/frontend` | `3e154920` 11:39 | 7 files, +723/−12 | complete browser isolation set (7/7 files present) |
+| `origin/docs` | `927c3be3` 11:33 | 3 files | tracker + reconciliation report |
+
+**Authorship clarification.** Git metadata records author *and* committer `Hermes Agent <hermes@local>` for
+`3f720e04`, `6c3c3359`, `c1e18366`, `1d85c86c`, `3e154920`. All agents in this repository commit under that
+single identity, so the metadata proves *that* a commit exists and *when*, but **cannot** attribute it to a
+named agent. The Backend statement "made no commit" and the existence of `origin/backend` are therefore not
+contradictory: the ref exists, its authorship is unresolvable from Git data, and no authorization is implied.
+
+### R.3 Backend implementation recovery completeness
+
+| Component | State | Authoritative source | Complete? |
+|---|---|---|---|
+| `app/Database/SafeDatabaseManager.php` | staged addition, md5 `0ba91035…` | identical in index, worktree, `origin/backend` | yes |
+| `app/Services/DatabaseSafety/AgentSessionGuard.php` | staged addition, md5 `3ca2b524…` | identical in index, worktree, `origin/backend`, `6c3c3359` | yes |
+| `app/Services/DatabaseSafety/DatabaseGuard.php` | **reverted** — md5 `52ce4b42…` = `master` = `11207c42` = `origin/backend`; **no `assertWriteSafe()` in any ref** | `stash@{1}` (WIP on `3b2a6e5a`) is the only object containing `assertWriteSafe()` | **NO — blocking** |
+| `app/Providers/DatabaseGuardServiceProvider.php` | **reverted** — 50 lines, only `DatabaseGuard` singleton + `CommandStarting` | `stash@{1}` has the full wiring (`SafeDatabaseManager` as `db`, `AgentSessionGuard` singleton, `ConnectionEstablished` listener) | **NO — blocking** |
+| `app/Exceptions/DatabaseSafetyViolation.php` | present, tracked, unchanged | `master` | yes |
+| `config/database-safety.php` | present, md5 `136f3a1e…` = `origin/backend`; 4 keys verified via `config()` | `master` | yes |
+| `tools/agent-run.php` | present, **untracked** | worktree only (no ref) | yes, but unpushed |
+| `bootstrap/providers.php` | md5 `710adc49…` = `master`; registers `DatabaseGuardServiceProvider` | `master` | yes |
+
+Consequence, executed: `DatabaseSafetyTest` = **13 failed / 15 passed** — `Error: Call to undefined method
+App\Services\DatabaseSafety\DatabaseGuard::assertWriteSafe()` and `app('db')` is `Illuminate\Database\DatabaseManager`,
+not `SafeDatabaseManager`. Model-event (`creating`/`updating`) enforcement exists in **no** ref; the write
+boundary is asserted only through `assertWriteSafe()` plus the `ConnectionEstablished` listener.
+
+### R.4 Regression coverage preservation
+
+| File | Observed | Verdict |
+|---|---|---|
+| `tests/Feature/DatabaseSafetyTest.php` | 566 lines, **28** `it()` tests, 30 `guardEnv` occurrences, md5 `c14598778334b81524db5490d8023871` — exact match to Backend's reported MD5 | preserved; the stronger environment-sensitive suite is intact |
+| 13-test version | `11207c42:tests/Feature/DatabaseSafetyTest.php` — 207 lines, 13 tests, no `guardEnv` | superseded, not restored |
+| `tests/Feature/AgentSessionIsolationTest.php` | 212 lines, 7 tests / 16 assertions, untracked; `toBeGreaterThan` structural invariants, zero pinned counts | preserved; **7 passed (16 assertions)** executed |
+| `tests/TestCase.php` | md5 `ef8a3cf0…` = `master` | restored, clean |
+
+Backend's "29 tests" is a count discrepancy only (28 `it()` blocks measured); the file bytes are the reported ones.
+
+### R.5 Vendor restoration evidence
+
+`vendor/laravel/framework/src/Illuminate/Database/DatabaseManager.php` md5 `782eff55714d98c65f550f7078e14351`
+(matches Backend's figure). `connection()` is the plain cache-then-dispatch form — no `try`/`catch`, no
+`purge()`; the only `purge()` occurrences are the unrelated `purge($name)` at line 155 and its definition at 307.
+`composer.lock` pins `laravel/framework` **v13.42.0**, source reference `f5c01f6b63803f16f38ebb31622c4fea412bd022`
+— the expected version/reference. The clean-clone comparison source is **not** present in the inspected
+worktree (no `vendor/`), so the clone hash is accepted as reported evidence only; the active file is
+independently confirmed pristine and version-matched. No vendor patch remains.
+
+### R.6 Frontend implementation recovery completeness
+
+`origin/frontend` (`3e154920`) holds all seven files: `playwright.config.ts`, `tests/browser/global-setup.ts`,
+`scratch-isolation.spec.ts`, `server-router.php`, `support/server-identity.ts`, `support/identity-preflight.ts`,
+`browser-isolation-contract.spec.ts` — dependency-closed (7/7).
+
+Locally: `playwright.config.ts` is `master`'s version (md5 `f785d5d1…`, `php artisan serve`, **no**
+`setupFiles`), `global-setup.ts` = `master`, and `identity-preflight.ts` / `server-identity.ts` /
+`server-router.php` / `browser-isolation-contract.spec.ts` are untracked and **not registered**. The complete
+harness is preserved in `origin/frontend`; the tracked local config is the regressed variant. No redesign
+performed; Frontend retains preflight registration, identity-cache lifecycle and final verification.
+
+### R.7 Peer-owned changes requiring preservation
+
+Staged (31): 9 `app/Services/Advisor/*`, 6 `tests/Feature/*` (Advisor, provenance, conflict, scheduled-race),
+3 `app/Services/Career/*`, 3 `app/Http/Controllers/Career/*`, plus `DatabaseController`, `AppServiceProvider`,
+`RaceEntryStatus`, `StoreRaceEntryRequest`, `FinaleReader`, `config/reference.php`, `lang/en/uma.php`,
+`docs/handoffs/frontend-database-sources-contract.md`, and the two safety additions. Unstaged (17) span
+career/timeline, training-run, seeder, docs and browser specs. Untracked includes `.headroom/` DBs,
+`app/private/advisor-index/*.sqlite` (test litter), `tools/agent-run.php`, migrations/factories for roster work.
+Two files are simultaneously staged and unstaged (`CockpitController`, `DatabaseController`,
+`TeamPanelBuilder`, `TrackblazerPanelBuilder`) — mixed versions; **incompatible-version risk is confined to
+ those four plus `playwright.config.ts`**.
+
+### R.8 Safe recovery procedure (proposed, not executed)
+
+1. Freeze: no agent runs Git write commands in the shared checkout until step 4 completes.
+2. Preserve the index: `cp .git/index .git/index.preserved-20261125T1530` (backup, no mutation).
+3. Recover the two missing implementations **from `stash@{1}` only** (the sole object holding them):
+   `git show 'stash@{1}:app/Services/DatabaseSafety/DatabaseGuard.php' > app/Services/DatabaseSafety/DatabaseGuard.php`
+   and the same for `app/Providers/DatabaseGuardServiceProvider.php`; then re-run
+   `vendor/bin/pest tests/Feature/DatabaseSafetyTest.php` (expect 28/28) and `AgentSessionIsolationTest` (7/7).
+   `stash@{1}` is left untouched (read-only `git show`, no `stash pop`/`apply`).
+4. Only after green: commit the recovered pair with an isolated `GIT_INDEX_FILE` (no shared-index advance),
+   then push an explicit refspec to a **new** branch (`recover/db-safety-20261125T1530`), fast-forward only.
+5. Frontend recovery is a merge of `origin/frontend`'s `playwright.config.ts` + preflight registration by the
+   Frontend owner — not by this session.
+
+Guarantees: no reset/clean/checkout, no shared-branch advance, no force push, no reference deleted, canonical
+database untouched (all probes `PRAGMA query_only=1`).
+
+### R.9 Proposed worktree isolation (not created)
+
+| Worktree | Branch | Index | DB / port |
+|---|---|---|---|
+| `D:/Projects/umamusume-laravel13` (main) | `master` (integration only) | shared | canonical `database/database.sqlite`, explicit `DB_DATABASE` absolute |
+| `../td-backend` | `worktree/backend` | own | session-private scratch, `UMA_DATABASE_ROLE=test`, `UMA_EXPECTED_DATABASE` absolute |
+| `../td-frontend` | `worktree/frontend` | own | scratch DB, dedicated Playwright port, own `public/build` |
+| `../td-docs` | `worktree/docs` | own | no DB writes |
+| `../td-fullstack` | `worktree/fullstack` | own | scratch DB, own port |
+
+Rules: each worktree gets its own `GIT_INDEX_FILE` by construction; generated assets and `public/build` stay
+per-worktree; the canonical database is never copied into a worktree as a fixture; integration happens only in
+`master` by explicit fast-forward merge after the owning agent reports green. **Not created** — requires owner
+authorization (step 11 of the recovery report).
+
+### R.10 Refreshed eight-check status (recovery view)
+
+| Check | Status | Change |
+|---|---|---|
+| #1 | FAIL | vendor pristine ✔, but `assertWriteSafe` + `SafeDatabaseManager` binding absent from every ref → 13/28 fail (FS-INT-1 narrowed to FS-INT-1b) |
+| #2 | PARTIAL | unchanged |
+| #3 | BLOCKED | complete harness exists in `origin/frontend`; local tracked config regressed; no executed run |
+| #4 | FAIL | unchanged (FS-INT-3) |
+| #5 | PARTIAL | unchanged (FS-INT-4) |
+| #6 | PARTIAL | unchanged |
+| #7 | PARTIAL | tracker preserved and extended; peer reports still pending |
+| #8 | PASS (refreshed) | `integrity_check=ok`, `foreign_key_check=0`, umamusume 135, runs 18, veterans 8, cards 263, aliases 2, profiles 96; #141–145 and #49–51 absent; `roster_members=0` (baseline 18) and the Unity Cup run is now **id 54** (uma 30, `unity_cup`, Active) rather than the historical #48 — owner activity, not contamination; both backups `ok` |
+
+**Recovery blockers:** FS-INT-1b (write-boundary implementation absent from all refs; only `stash@{1}` holds it),
+FS-INT-2, FS-INT-3, FS-INT-4, FS-INT-5, Check #6, Check #3 preflight registration, Check #2 final integration,
+Check #7 peer reports.

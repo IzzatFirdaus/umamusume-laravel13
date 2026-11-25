@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 // Rendered-copy and behaviour evidence for the ported run screens (SCR-RUN-001/002, ADR-0020 §1).
 // The server-side tests (RunsIndexTest, TraineeSelectorTest, RunCreateSurfaceTest) assert the resolved

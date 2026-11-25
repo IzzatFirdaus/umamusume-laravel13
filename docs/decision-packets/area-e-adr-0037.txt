@@ -1,0 +1,87 @@
+# Decision Packet — Area E: ADR-0037: Race-Candidate Resolution Lifecycle (Corrected)
+
+## Decision Identifier and Title
+**Identifier**: ADR-0037
+**Title**: Match-candidate entity is its `source_key`, and the queue resolves by entity kind
+**Status**: ACCEPTED — source_key entity-discriminator architecture remains operative; resolution lifecycle separate
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-18 (owner delegation); rechecked 2026-11-25
+**Related**: D-8 (Trackblazer/Unity Cup structure, from `S18-08` adjacent decision); `docs/proposals/consolidated-ui-ux-and-remaining-work-2026-11-18.md` Phase E (D-8 row); `config/uma.php` fetch keys; `ADR-0010` (the payload shape); KI-45
+
+## Authority
+**Accepted 2026-11-18** by owner delegation; the source_key entity-discriminator architecture remains operative; the resolution lifecycle is a separate unresolved design question not addressed by this ADR; rechecked 2026-11-25: acceptance preserved
+
+**Previous Ruling (2026-11-18)**: "the owner's instruction to proceed with every owner-gated task is the recorded ruling; the measurement that changed the decision's shape is quoted above"; rechecked: acceptance preserved; my previous recommendation to defer it is not an existing owner ruling
+
+**OQ-6 (rechecked 2026-11-25)**: Which screens carry a frame? The pre-run pick screen still carries no frame; the reason in ADR-0021 open: is stale (TraineeCombobox not native select); skill icons have no stored column; both stay open under `PRD.md` OQ-6.
+
+## Original Requirement
+From `docs/proposals/consolidated-ui-ux-and-remaining-work-2026-11-18.md` Phase E (D-8 row):
+- Add an entity discriminator to `match_candidates` (schema plus ADR), then a race queue
+- The D-8 framing assumed the table mixes entity kinds with no way to tell them apart, and that race candidates therefore could not be reviewed separately
+
+## Previous Owner Ruling
+**Status**: ACCEPTED — owner delegation 2026-11-18, "proceed with every owner gated tasks"; **rechecked 2026-11-25**: the acceptance is preserved; the resolution lifecycle deferral is not an existing owner ruling
+**Ruling Date**: 2026-11-18
+**Ruling Text**: "the owner's instruction to proceed with every owner-gated task is the recorded ruling; the measurement that changed the decision's shape is quoted above"
+**Amendment**: The acceptance is preserved; the resolution lifecycle is a separate design question not addressed by this ADR; my previous recommendation to defer it is not an existing owner ruling
+
+**Measurement (2026-11-18, dev DB)**:
+- `select source_key, count(*) from match_candidates group by source_key` → `[('gametora-races', 304)]`. Every row is a race candidate. No second entity co-inhabits the table.
+- `suggested_umamusume_id` is null on all 304 — as expected for races.
+- `Review/Index` (`app/Http/Controllers/ReviewController.php::index`) already lists Pending rows with `source_key` and `proposed_name` printed, paginated 25 — the race queue's door is the existing screen.
+- Each row's `payload` carries the full `gametora-races` record (id, name_en, course, direction, season, entries, factor effects, track bias), so promotion never re-fetches — the contract the model's docblock already states.
+
+## Current Implementation Status
+- **Schema**: `source_key` is the entity discriminator on `match_candidates`; `NOT NULL` on every row; **architecture remains operative**; unchanged
+- **Data**: 304 rows, all `gametora-races`; no second entity kind co-inhabits the table today; **unchanged**
+- **Review surfaces**: Race candidates render in `Review/Index` and `Review/Detail` today via the existing race queue; **surfaces unchanged**
+- **No schema change**: `entity`/`kind` columns are refused while `source_key` partitions the table perfectly; **unchanged**
+- **What is not built**: A resolve path with race semantics — "resolving" a race candidate means deciding whether the payload becomes a `race_catalog_slots` row, attaches to an existing slot, or is discarded; each with different catalogue consequences the current `ResolveMatchCandidate` (which writes trainee aliases) cannot express; **this is the separate unresolved design question**, not addressed by this ADR
+
+## Owner Question (Corrected)
+**Exact question**: Since ADR-0037 is accepted with `source_key` as the entity discriminator and the review surfaces (race queue) already exist, does the owner need to address the unresolved "resolve path with race semantics" gap, or is the gap intentionally left for future design — and crucially, is my previous recommendation to defer it an existing owner ruling?
+
+**Important**: My previous recommendation to defer the resolution lifecycle is **not** an existing owner ruling. The acceptance decision stands independently.
+
+**Option A**: Accept the gap as intentionally future work — ADR-0037 is accepted with `source_key` as the entity discriminator; the review surfaces (race queue) already exist; the "resolve path with race semantics" gap is intentionally left for future design and is not addressed by this ADR; **the resolution lifecycle deferral is not an owner ruling**
+- **Evidence required**: ADR-0037 `open:` field ("what 'resolving' a race candidate means..."); the promotion semantics design decision is future work; **the deferral is not an owner ruling**
+- **Development blocked**: None — the gap is explicitly acknowledged as future work; **the deferral does not create a new ruling**
+- **Release relevance**: Optional feature; does not block core release
+
+**Option B**: Design and implement a resolve path for race candidates now — add the design work needed to express "resolving" a race candidate with proper catalogue consequences
+- **Evidence required**: Resolve design document, migration, model updates, `ResolveMatchCandidate` extension
+- **Development blocked**: Requires new design decisions about catalogue writes; **not in scope of ADR-0037**; would add new implementation
+- **Release relevance**: Would add resolve functionality; optional enhancement; **new implementation, not a ruling**
+
+**Option C**: Split the entity kinds — if two entity kinds ever appear under one `source_key`, split the source key rather than add a parallel column
+- **Evidence required**: Future source key change; not needed today
+- **Development blocked**: None needed today; this is a defensive design note; **no ruling needed**
+- **Release relevance**: Defensive design; no immediate release impact; **no ruling needed**
+
+## Recommended Ruling (Corrected)
+**Accept the gap as intentionally future work (Option A)**: ADR-0037 is accepted with `source_key` as the entity discriminator; the review surfaces (race queue) already exist; the "resolve path with race semantics" gap is intentionally left for future design and is not addressed by this ADR; **the resolution lifecycle deferral is not an existing owner ruling**.
+
+**Concrete alternatives for the resolution lifecycle (for future design, not current ruling)**:
+
+1. **Match to an existing record** — when a Trainer reviews a race candidate, the system can match the payload to an existing `race_catalog_slots` row by `source_key` + race parameters; if a match exists, the candidate is recorded as resolved against that slot; if no match exists, the candidate remains unresolved and is presented for manual creation; **affected implementation**: `app/Http/Controllers/ReviewController.php` (review queue); `app/Models/MatchCandidate.php` (candidate model); **responsible expert**: Fullstack Expert
+
+2. **Create a verified catalogue record** — a new resolve screen can create a fresh `race_catalog_slots` row with verified provenance: the payload's `source_key`, `proposed_name`, `course`, `direction`, `season`, `entries`, `factor effects`, and `track bias` are stored; the turn and placement are recorded from the candidate's data; **this requires a new migration, model, and controller, but is a well-scoped design question for a future ADR**; **affected implementation**: new migration/model/controller; **responsible expert**: Fullstack Expert (future ADR)
+
+3. **Dismiss an unsupported candidate** — if the candidate cannot be matched to an existing slot and the Trainer chooses to dismiss it, the candidate row in `match_candidates` is simply marked as dismissed; **no new catalogue record is created**; the dismissal is recorded with a timestamp and the reviewer's ID; **this preserves resolution history without adding unsupported data**; **affected implementation**: `app/Models/MatchCandidate.php`; **responsible expert**: Fullstack Expert
+
+4. **Preserve resolution history and provenance** — a future ADR can author a resolution lifecycle that records which candidates were matched, which were created, which were dismissed, and by whom; **provenance data** (source_url, snapshot_path, fetched_at, source_timezone) is already captured on `match_candidates` payload and can be leveraged; **the review queue already prints `source_key` and `proposed_name`** — a future design can build on this existing foundation; **affected implementation**: future ADR; **responsible expert**: Future Fullstack Expert
+
+5. **Maintain review-only functionality** — the existing review queue renders race candidates with `source_key` and `proposed_name`; **this functionality is preserved and extended**: candidates can be matched to existing slots, dismissed, or flagged for future create; **no new catalogue write is required for the review-only path**; **affected implementation**: `app/Http/Controllers/ReviewController.php`; `app/Models/MatchCandidate.php`; **responsible expert**: Fullstack Expert
+
+**Affected implementation**: `app/Http/Controllers/ReviewController.php` (review queue); `app/Models/MatchCandidate.php` (candidate model); `app/Http/Controllers/ResolveMatchCandidate.php` (resolve path, currently limited); `database/migrations/` (any new schema for resolution lifecycle)
+
+**Responsible Backend Expert**: Fullstack Expert — the resolution lifecycle is a future design question for the Fullstack team; the accepted ADR-0037 does not close this gap; the source_key entity-discriminator architecture remains operative regardless
+
+**Uncertainty**: Exact design of the resolve path; not needed for current ruling; the deferral is not an owner ruling
+
+## Category
+Category A — Actual owner decisions (accepted with explicit future-gap documentation; resolution lifecycle deferral is not an owner ruling; source_key architecture preserved)
+
+---
+**Correction**: The accepted source_key entity-discriminator architecture remains operative. The race-candidate resolution lifecycle is a separate unresolved design question. My previous recommendation to defer it is not an existing owner ruling. Present concrete alternatives (match existing record, create verified catalogue record, dismiss unsupported candidate, preserve resolution history, maintain review-only functionality) for future design, not current ruling. Identify the affected implementation and responsible Backend Expert (Fullstack). Do not mark the lifecycle closed merely because the review queue renders.

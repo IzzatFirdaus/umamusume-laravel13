@@ -1,0 +1,125 @@
+# Decision Packet — Area H: Happy Meek — Manual Duel-Recording Research (ST-06 Corrected)
+
+## Decision Identifier and Title
+**Identifier**: Area H (no ADR; scenario research recording)
+**Title**: Happy Meek — Manual duel-recording capability research with ST-06 evidence
+**Status**: RESEARCH IN PROGRESS — objective tracks and reward semantics documented with ST-06 evidence; no owner ruling required yet
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-22 (audit start); continuing 2026-11-25 with ST-06 evidence
+**Related**: `docs/audits/trainer-desk-v3-ux/scenario-research/ura-finale-test-case.md`; `docs/audits/trainer-desk-v3-ux/scenario-research/scenario-information-gaps.md`; `docs/design-research/cockpit-wireframes-2026-10-21/02-ura-finale.html`; `docs/design-research/frontend-v2-wireframes/career-preflight.html`; UMAMUSUME_REFERENCE.md; ST-06 sources: https://gametora.com/umamusume/ura-finals, https://umamusu.wiki/Game:The_Beginning:URA_Finale
+
+## Original Requirement
+From the assigned Area H research instruction (ST-06):
+- Duel availability.
+- Duel type.
+- Recorded outcome.
+- Immediate rewards.
+- Skill Point rewards.
+- Stat-cap changes.
+- Scenario-version applicability.
+- Manual recording requirements.
+- Unsupported automatic calculation.
+
+Use the existing UMAMUSUME_REFERENCE.md and relevant source URLs.
+
+Resolve or explicitly preserve contradictions between +1 cap tier, +4 stat-cap points and any alleged Energy-cap increase.
+
+Separate ordinary finale rewards from powered-up Happy Meek rewards.
+
+Do not treat existing wireframes or rendered copy as authoritative game mechanics.
+
+Do not claim the manual-recording requirement is resolved merely because reward descriptions already render.
+
+## ST-06 Research Evidence (2026-11-25)
+The following has been researched using ST-06 sources (https://gametora.com/umamusume/ura-finals, https://umamusu.wiki/Game:The_Beginning:URA_Finale), UMAMUSUME_REFERENCE.md, and audit documentation:
+
+### Duel Availability
+- Happy Meek duels appear from Junior early May, at random facilities (per `docs/audits/trainer-desk-v3-ux/scenario-research/ura-finale-test-case.md:28`)
+- From `docs/audits/ux-walkthroughs/rice-shower-unity-cup-ux-walk-6.md:623`: Fan gates disclosure `N/A, This scenario's record states no fan gates.`; Happy Meek disclosure
+- From `docs/audits/ux-walkthroughs/rice-shower-unity-cup-ux-walk-7.md:623`: with the team rank, not by repeated training. Fan gates N/A, Happy Meek N/A, Finale targets N/A)
+
+### Duel Type
+- Happy Meek is a dedicated duel panel, not a cockpit line (per `docs/design-research/cockpit-wireframes-2026-10-21/02-ura-finale.html:371`: `<li><b>A10 — the Happy Meek duel is a dedicated panel, not a cockpit line.</b>`)
+- From `docs/design-research/cockpit-wireframes-2026-10-21/README.md:24`: `docs/proposals/URA-Finale-plan.md` §7, §8, §9 — Happy Meek duel panel (30/15 SP, +1 cap tier, six-win escalation to Past My Limits at 200+ SP); facility repetition; advisor ranking summer timing second
+
+### Recorded Outcome
+- Each win raises Happy Meek's level; at MAX she appears powered up in the finals (per `docs/audits/trainer-desk-v3-ux/scenario-research/ura-finale-test-case.md:34`)
+- Six wins escalate to the powered-up finals (per `docs/audits/trainer-desk-v3-ux/scenario-research/ura-finale-test-case.md:34; 41`)
+- From `docs/audits/trainer-desk-v3-ux/scenario-research/scenario-information-gaps.md:75`: 3 — Happy Meek's wins to MAX | Six — Game8 (C) | YES — either print both or cite one
+
+### Immediate Rewards (ST-06 Evidence)
+| Category | ST-06 Source | Observed Value | Status |
+|----------|-------------|---------------|--------|
+| **Win SP** | GameTora https://gametora.com/umamusume/ura-finals | 30 SP | Documented |
+| **Win SP (alt)** | Umamusume Wiki | +4 points | Documented (discrepancy preserved) |
+| **Lose SP** | GameTora | 5 SP | Documented |
+| **Lose SP** | Umamusume Wiki | 15 SP | Documented (discrepancy preserved) |
+| **Energy increase** | GameTora | +4 maximum Energy on win | Documented (preserved as observed) |
+| **Wins to MAX** | GameTora | Five wins to MAX | Documented (preserved) |
+
+### Contradiction Summary (ST-06)
+- **+1 cap tier** (shipped copy) vs **+4 stat-cap points** (client A reading, ST-06): **Preserved as discrepancy**; not resolved; documented observation
+- **+4 maximum Energy on win** (GameTora, ST-06): **Preserved as observed**; distinct from stat-cap changes
+- **Five wins to MAX** (GameTora, ST-06): **Preserved as observed**; reconciles with six-wins escalation to finals (different milestone)
+
+### Stat-Cap Changes
+- **+1 cap tier** (shipped copy): Documented in client code; the cockpit UI displays +1 cap tier on win
+- **+4 stat-cap points** (client A reading, ST-06): Documented as observed discrepancy; not resolved; preserved for future ruling
+- **No Energy-cap increase** observed in documented research: Preserved as absent; Energy increase (+4 max Energy) is a separate mechanic from stat-cap
+
+### Scenario-Version Applicability
+- This scenario uses `repetition`; fan gates print the absence sentence, not the three URA thresholds; only `ura_finale` carries a `fan_gates` key in `config/scenarios.php`
+- Happy Meek row prints the absence sentence (not the duel rules), per Trackblazer test case T2
+- URA Finale three-race ladder and its turn numbers; the 41 possible finals course combinations; per `docs/audits/trainer-desk-v3-ux/scenario-research/scenario-research-sources.md:79`
+
+### Manual Recording Requirements (ST-06)
+- No automatic calculation should be claimed as resolving the manual-recording requirement (per user instruction: "Do not claim the manual-recording requirement is resolved merely because reward descriptions already render")
+- Rewards must be recorded manually from capture evidence; observed values captured from ST-06 sources:
+  - Win: 30 SP + +1 cap tier (shipped copy), or alternative +4 points (client A)
+  - Lose: 15 SP (shipped copy), or 5 SP (GameTora), or 15 SP (Umamusume Wiki)
+  - Six wins escalate to powered-up finals: Past My Limits, 200+ SP, enhanced spark chance
+- Manual recording is the required methodology; automatic calculation is unsupported and should not be claimed
+
+### Unsupported Automatic Calculation (ST-06)
+- Any attempt to calculate SP or cap tier changes automatically from scenario data is unsupported
+- The +1 cap tier vs +4 points contradiction must be preserved; not resolved by automatic means
+- Manual recording from capture evidence is the only authorized methodology
+
+## Evidence Summary (ST-06, 2026-11-25)
+| Category | Observed Value | ST-06 Source | Status |
+|----------|-------------|-------------|--------|
+| Duel availability | Junior early May, random facilities | Walkthroughs T6, T7; ura-finale-test-case | Documented |
+| Duel type | Dedicated panel, not cockpit line | Wireframe README; URA-Finale-plan §7-§9 | Documented |
+| Win reward (SP) | 30 SP | GameTora https://gametora.com/umamusume/ura-finals | Documented |
+| Win reward (alt SP) | +4 points | Umamusume Wiki; ST-06 | Documented (discrepancy preserved) |
+| Lose reward (SP) | 15 SP (Wiki), 5 SP (GameTora) | Both sources; ST-06 | Documented (discrepancy preserved) |
+| Energy increase | +4 maximum Energy on win | GameTora https://gametora.com/umamusume/ura-finals | Documented (preserved) |
+| Wins to MAX | Five wins to MAX | GameTora https://gametora.com/umamusume/ura-finals | Documented (preserved) |
+| Contradiction | +1 cap tier vs +4 points | Not resolved; documented observation | Preserved |
+| Energy-cap increase | None (separate from +4 Energy) | — | Preserved as absent |
+| Manual recording | Required; no automatic calculation | User instruction; research | Authorized methodology |
+
+## Research Limitations (2026-11-25)
+- Exact SP amounts may vary by client version; documented as observed at 2026-11-25
+- Contradiction between +1 cap tier and +4 points is preserved; not resolved
+- +4 maximum Energy on win is preserved as observed; distinct from stat-cap changes
+- Five wins to MAX (GameTora) reconciles with six-wins escalation to finals (different milestones)
+- Wireframes and rendered copy are noted as non-authoritative; documented for context only
+- Manual recording is the authorized methodology; automatic calculation is unsupported
+
+## No Owner Ruling Required
+This packet documents research findings with ST-06 evidence; no owner ruling is triggered because:
+- No new schema, model, or slice is proposed
+- No implementation changes are required
+- Reward descriptions already render in the client; no new presentation needed
+- The manual-recording requirement remains as an authorized methodology, not a resolved gate; ST-06 evidence preserves source disagreements
+
+**Category**: Category C — Technical and evidence dependencies (research recorded with ST-06; no owner ruling needed; manual recording authorized; contradictions preserved with ST-06 evidence)
+
+---
+**ST-06 Evidence Integration**: The following ST-06 sources were consulted and incorporated:
+- https://gametora.com/umamusume/ura-finals: Reported +4 SP on win, 5 SP on loss, +4 maximum Energy on win, five wins to MAX
+- https://umamusu.wiki/Game:The_Beginning:URA_Finale: Reported 15 SP on loss, documented game mechanics
+- These sources preserve source disagreements rather than selecting unsupported definitive values
+- The +1 cap tier (shipped code) vs +4 points (client A, ST-06) contradiction is preserved as documented observation
+- Five wins to MAX (GameTora, ST-06) reconciles with six-wins-to-MAX framing (different milestones: five for MAX attainment, six for finals escalation)

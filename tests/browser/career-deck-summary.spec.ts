@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 /*
  * Rendered-copy and behaviour evidence for the deck step's summary section (`SCR-CAR-009`,

@@ -1,0 +1,66 @@
+# Decision Packet — Area J: ND-12: Demote Catalog Card Release Badge
+
+## Decision Identifier and Title
+**Identifier**: ND-12
+**Title**: Demote the catalog card release badge below the name
+**Status**: OWNER-GATED — keep the filled pill; demote with an HFW override record
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/adr/0020-trainer-desk-2-program.md`; `SCREEN_SPEC.md` §7-21, :225; `docs/plan/implementation-plan-2026-11-20.md` §§S6.18; `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5`
+
+## Authority
+**Current arrangement**: Filled pill for release status above the name, per HFW catalog.html:225 annotation 6: "Release status is a word. 'Global' is a pill with text".
+
+**Two options documented**:
+- (a) keep the filled pill; (b) demote with an HFW override record
+
+## Original Requirement
+From `flows-career-creation.md` and the database review:
+- **ND-12**: Demote the catalog card release badge below the name (db-review §3.2(1))
+- (a) keep the filled pill; (b) demote with an HFW override record
+
+**HFW catalog.html:225 annotation 6**: "Release status is a word. 'Global' is a pill with text"; portrait+name hierarchy already ships.
+
+## Current Implementation Status
+- **Filled pill**: Maintained above the name per recorded ruling
+- **Portrait+name hierarchy**: Ships as-is; release status remains a word pill
+- **No demotion**: No per-row tier or badge demotion performed
+
+## Owner Question (Exact)
+**Should the owner keep the filled pill above the name (Option A), or demote it below the name with an HFW override record (Option B)?**
+
+**Option A**: Keep the filled pill above the name
+- **Evidence required**: HFW catalog.html:225 annotation 6; portrait+name hierarchy already ships
+- **Development blocked**: None — maintaining pill position is recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Demote below the name with HFW override record
+- **Evidence required**: HFW override record; new tile copy; below-name positioning
+- **Development blocked**: Requires HFW override entry; new tile copy; below-name positioning; not shipped at HEAD
+- **Release relevance**: Would tag to 3.0.1 or later
+
+## Recommended Ruling
+**Keep the filled pill above the name (Option A)**: The filled pill for release status stays above the name per the recorded ruling. HFW catalog.html:225 annotation 6 rules "Release status is a word. 'Global' is a pill with text." The portrait+name hierarchy already ships. No demotion needed.
+
+**Supporting evidence**:
+- `docs/plan/implementation-plan-2026-11-20.md:181` — ND-12 source
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5` — ND-1..ND-16 source
+- `HFW catalog.html:225 annotation 6` — release status ruling
+- `SCREEN_SPEC.md:225` — tile copy and spec pin
+
+**Development blocked**: None — maintaining pill position is recording action
+
+**Unaffected work**: All existing catalog card functionality; no implementation change needed
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (pill position maintained; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future MASTER roadmap updates would change the pill position; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (filled pill position maintained; no owner action needed)
+
+---
+
+**Key Principle**: Filled pill for release status stays above the name; HFW catalog.html:225 annotation 6 rules; portrait+name hierarchy already ships; no demotion needed.

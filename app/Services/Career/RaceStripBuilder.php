@@ -147,7 +147,13 @@ final class RaceStripBuilder
                 ->all()),
         ];
 
-        $enteredIds = $run->raceEntries->pluck('race_catalog_slot_id')->filter();
+        // KI-173: only a row that records a decision takes its slot out of the still-to-come strip. A
+        // `Scheduled` row is imported provenance, so counting it here hid a race the Trainer has not
+        // been asked about yet.
+        $enteredIds = $run->raceEntries
+            ->filter(fn (RaceEntry $entry): bool => $entry->status->recordsEntry())
+            ->pluck('race_catalog_slot_id')
+            ->filter();
 
         /** @var list<array<string, mixed>> $ahead */
         $ahead = $next === null ? [] : $obligationSlots

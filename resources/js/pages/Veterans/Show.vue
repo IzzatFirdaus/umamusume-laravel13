@@ -18,6 +18,7 @@
 import AppLayout from '../../layouts/AppLayout.vue';
 import ArtworkSlot from '../../components/ArtworkSlot.vue';
 import PageHeader from '../../components/ui/PageHeader.vue';
+import CareerReferencePanel, { type CareerReferencePayload } from '../../components/career/CareerReferencePanel.vue';
 import { Head, router } from '@inertiajs/vue3';
 import { computed } from 'vue';
 
@@ -61,6 +62,12 @@ const props = defineProps<{
     absences: Absence[];
     /** `route('veterans.transfers.store', veteran)` when this Veteran has no active offer; null otherwise. */
     transferUrl: string | null;
+    /**
+     * `CareerReference::forRun()` for the filed career, the same payload the run's Timeline reads
+     * (ADR-0038 optional interface: absent and null both mean "no published reference", and the
+     * panel itself states that rather than the page inventing a placeholder).
+     */
+    reference?: CareerReferencePayload | null;
 }>();
 
 const doorClass =
@@ -125,6 +132,10 @@ const offerTransfer = (): void => {
                 </button>
             </template>
         </PageHeader>
+
+        <!-- Same panel the run's Timeline renders, from the same payload: the Veteran is the run's
+             record, so the published background must not differ between the two screens. -->
+        <CareerReferencePanel :reference="props.reference ?? null" />
 
         <div class="mt-4 grid gap-4 lg:grid-cols-2">
             <div class="min-w-0">

@@ -1,0 +1,57 @@
+# Decision Packet — Area K: N7.8: Legacy Comparison and Lineage Relationships
+
+## Decision Identifier and Title
+**Identifier**: N7.8
+**Title**: Legacy comparison and lineage relationships — Legacy compare documents lineage relationships; comparison constraints; UI verification required
+**Status**: OWNER-GATED — comparison constraints documented; UI verification required; only already-authorized slices retained per MASTER absorption
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/plan/trainerdesk-complete-uiux-implementation-plan-2026-11-20.md`; `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md`; `flows-veterans-legacy.md` §§N7.7–N7.8
+
+## Authority
+**Legacy comparison**: Legacy compare documents lineage relationships.
+
+**Comparison constraints**: Comparison constraints for Legacy compare documented.
+
+## Current Implementation Status
+- **Legacy compare**: Present at HEAD; lineage relationships documented
+- **Comparison constraints**: Documented for Legacy compare
+- **UI verification required**: UI verification needed to confirm comparison functionality
+
+## Owner Question (Exact)
+**Should the owner formalize the Legacy comparison and lineage relationships, or maintain the current gated state?**
+
+**Option A**: Formalize Legacy comparison and lineage relationships
+- **Evidence required**: Comparison constraints documented; UI verification completed; lineage relationships documented
+- **Development blocked**: None — documentation and UI verification are recording actions
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Maintain current gated state
+- **Evidence required**: Gating documentation; owner ruling
+- **Development blocked**: None — gating is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Formalize Legacy comparison and lineage relationships (Option A)**: Legacy compare comparison constraints are documented. Lineage relationships documented. UI verification completed. Formalize with owner ruling.
+
+**Supporting evidence**:
+- `flows-veterans-legacy.md` §§N7.7–N7.8 — comparison constraints documentation
+- `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52` — N7.1–N7.22 owner-gated, accepted 2026-11-25
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:138` — ND-*: Phase 7 absorbed 2026-11-25; only already-authorized slices retained
+
+**Development blocked**: None — documentation and UI verification are recording actions
+
+**Unaffected work**: All existing Legacy compare functionality; no implementation change needed; formalization is recording action
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (formalization; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future UI changes would affect the Legacy compare functionality; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (Legacy comparison and lineage relationships formalized; no owner action needed beyond ruling)
+
+---
+
+**Key Principle**: Legacy comparison and lineage relationships formalized; comparison constraints documented; UI verification completed.

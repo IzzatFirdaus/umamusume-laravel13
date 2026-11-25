@@ -73,10 +73,16 @@ it('records a band through the correction and reads it back', function (): void 
         ]))
         ->assertSessionHasNoErrors();
 
-    $fresh = $turn->fresh();
+    // ADR-0027: the committed row keeps its values and is marked superseded; the correction lands
+    // on a new revision row that readers see as the current one.
+    expect($turn->fresh()->energy_state)->toBeNull()
+        ->and($turn->fresh()->energy_band)->toBeNull()
+        ->and($turn->fresh()->superseded_by)->not()->toBeNull();
 
-    expect($fresh->energy_state)->toBe(EnergyState::Band)
-        ->and($fresh->energy_band)->toBe('high');
+    $revision = $run->turnEntries()->where('corrected_from', $turn->id)->firstOrFail();
+
+    expect($revision->energy_state)->toBe(EnergyState::Band)
+        ->and($revision->energy_band)->toBe('high');
 });
 
 it('stores the band the guided form posts when the turn is first recorded', function (): void {
@@ -118,7 +124,12 @@ it('sends the band for prefill and changes it through the Cockpit correction', f
         ]))
         ->assertSessionHasNoErrors();
 
-    expect($turn->fresh()->energy_band)->toBe('mid');
+    // The committed row keeps the band it was read with; the correction is a new revision row.
+    expect($turn->fresh()->energy_band)->toBe('low')
+        ->and($turn->fresh()->superseded_by)->not()->toBeNull();
+
+    $revision = $run->turnEntries()->where('corrected_from', $turn->id)->firstOrFail();
+    expect($revision->energy_band)->toBe('mid');
 });
 
 it('leaves the band in place when only the numeric energy is corrected', function (): void {
@@ -135,11 +146,16 @@ it('leaves the band in place when only the numeric energy is corrected', functio
         ]))
         ->assertSessionHasNoErrors();
 
-    $fresh = $turn->fresh();
+    // The committed row keeps its values; the correction is a new revision row.
+    expect($turn->fresh()->energy)->toBe(60)
+        ->and($turn->fresh()->energy_band)->toBe('high')
+        ->and($turn->fresh()->superseded_by)->not()->toBeNull();
 
-    expect($fresh->energy)->toBe(72)
-        ->and($fresh->energy_state)->toBe(EnergyState::Band)
-        ->and($fresh->energy_band)->toBe('high');
+    $revision = $run->turnEntries()->where('corrected_from', $turn->id)->firstOrFail();
+
+    expect($revision->energy)->toBe(72)
+        ->and($revision->energy_state)->toBe(EnergyState::Band)
+        ->and($revision->energy_band)->toBe('high');
 });
 
 it('clears the previous band when the state becomes not recorded', function (): void {
@@ -156,10 +172,15 @@ it('clears the previous band when the state becomes not recorded', function (): 
         ]))
         ->assertSessionHasNoErrors();
 
-    $fresh = $turn->fresh();
+    // The committed row keeps its band; the cleared state lives on the new revision row.
+    expect($turn->fresh()->energy_state)->toBe(EnergyState::Band)
+        ->and($turn->fresh()->energy_band)->toBe('high')
+        ->and($turn->fresh()->superseded_by)->not()->toBeNull();
 
-    expect($fresh->energy_state)->toBe(EnergyState::Unknown)
-        ->and($fresh->energy_band)->toBeNull();
+    $revision = $run->turnEntries()->where('corrected_from', $turn->id)->firstOrFail();
+
+    expect($revision->energy_state)->toBe(EnergyState::Unknown)
+        ->and($revision->energy_band)->toBeNull();
 });
 
 /*
@@ -214,4 +235,38 @@ it('refuses a correction that carries a key the correction path cannot store', f
     // No `Scenario` event was invented, and the row itself is untouched.
     expect($run->turnEvents()->where('event_type', TurnEventType::Scenario)->count())->toBe(0)
         ->and($turn->fresh()->speed)->toBe(600);
+});
+
+/*
+ * ADR-0027 D-1c: a correction appends a revision row instead of rewriting the committed row,
+ * so `corrected_from` links the new row to the old one, `superseded_by` marks the old row, and
+ * the turn number stays the same for both.
+ */
+it('writes a correction as a new revision row instead of updating in place', function (): void {
+    $run = energyCorrectionRun();
+    $turn = $run->turnEntries()->firstOrFail();
+
+    $this->from(route('runs.cockpit', $run))
+        ->put(route('runs.turns.update', [$run, $turn]), correctionPayload([
+            'speed' => 720,
+            'energy_state' => 'band',
+            'energy_band' => 'mid',
+        ]))
+        ->assertSessionHasNoErrors();
+
+    // The original row keeps its values and is marked superseded by the new row.
+    expect($turn->fresh()->speed)->toBe(600)
+        ->and($turn->fresh()->superseded_by)->not()->toBeNull();
+
+    // The new row carries the correction, links back to the original, and keeps the turn number.
+    $revision = $run->turnEntries()->where('corrected_from', $turn->id)->firstOrFail();
+
+    expect($revision->speed)->toBe(720)
+        ->and($revision->corrected_from)->toBe($turn->id)
+        ->and($revision->turn)->toBe(1)
+        ->and($revision->superseded_by)->toBeNull();
+
+    // Readers filter `superseded_by IS NULL`: one effective row per turn, holding the latest values.
+    expect($run->turnEntries()->whereNull('superseded_by')->count())->toBe(1)
+        ->and($run->turnEntries()->whereNull('superseded_by')->first()->speed)->toBe(720);
 });

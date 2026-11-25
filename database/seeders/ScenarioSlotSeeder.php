@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Log;
  * Tier-1: URA Finale goal_race rows from ura-races + race_instances + races.
  * Tier-2: rows that carry a per-row server qualifier and date (none yet).
  * Trackblazer: zero rows (D-220 disclosure at render time).
- * Unity Cup: zero rows (no citable source yet).
+ * Unity Cup: five team_race rows from unity-cup-team-races.json at the month+half anchors.
  *
  * Provenance: every row carries source_url, snapshot_path, fetched_at.
  * Tier: read per race from the dated two-publisher extraction, never derived from the export's
@@ -47,10 +47,12 @@ class ScenarioSlotSeeder extends Seeder
     private const string SNAPSHOT_PATH = 'database/seeders/data';
 
     private const string SOURCE_TIMEZONE = 'Asia/Tokyo';
+    private const string UNITY_CUP_FILE = 'unity-cup-team-races.json';
 
     public function run(): void
     {
         $this->seedUraFinale();
+        $this->seedUnityCup();
     }
 
     /**
@@ -185,6 +187,45 @@ class ScenarioSlotSeeder extends Seeder
                     'snapshot_path' => self::SNAPSHOT_PATH.'/'.($tier === null ? 'races.json' : self::TIER_LABELS_FILE),
                     'fetched_at' => $tierFetchedAt,
                     'source_timezone' => self::SOURCE_TIMEZONE,
+                    'is_manual' => false,
+                ],
+            );
+        }
+    }
+
+    private function seedUnityCup(): void
+    {
+        $doc = $this->loadJson(self::UNITY_CUP_FILE);
+        if ($doc === []) {
+            Log::warning('Unity Cup extract '.self::UNITY_CUP_FILE.' is missing or unreadable; no team-race slots seeded.');
+            return;
+        }
+
+        $fetchedAt = isset($doc['fetched_at'])
+            ? Carbon::parse((string) $doc['fetched_at'])
+            : now();
+
+        foreach ($doc['rows'] ?? [] as $row) {
+            ScenarioSlot::updateOrCreate(
+                [
+                    'scenario_key' => $doc['scenario_key'] ?? 'unity_cup',
+                    'month' => (int) $row['month'],
+                    'half' => (string) $row['half'],
+                    'kind' => $doc['kind'] ?? 'team_race',
+                    'source_key' => (string) $row['source_key'],
+                ],
+                [
+                    'slot_label' => (string) ($row['slot_label'] ?? ''),
+                    'title' => (string) ($row['title'] ?? ''),
+                    'description' => (string) ($row['description'] ?? ''),
+                    'tier' => null,
+                    'fans_needed' => null,
+                    'is_mandatory' => false,
+                    'sort_order' => (int) ($row['sort_order'] ?? 0),
+                    'source_url' => (string) ($doc['source_url'] ?? ''),
+                    'snapshot_path' => (string) ($doc['snapshot_path'] ?? self::SNAPSHOT_PATH.'/'.self::UNITY_CUP_FILE),
+                    'fetched_at' => $fetchedAt,
+                    'source_timezone' => (string) ($doc['source_timezone'] ?? self::SOURCE_TIMEZONE),
                     'is_manual' => false,
                 ],
             );

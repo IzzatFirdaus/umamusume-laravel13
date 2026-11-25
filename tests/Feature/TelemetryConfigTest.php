@@ -127,7 +127,8 @@ it('LangfuseTraceMiddleware exports OTLP server span when enabled', function ():
     $request = Request::create('/api/v1/test', 'GET');
     $next = fn () => new Response('OK', 200);
 
-    $middleware->handle($request, $next);
+    $response = $middleware->handle($request, $next);
+    $middleware->terminate($request, $response);
 
     Http::assertSent(function ($request) {
         $body = json_decode((string) $request->body(), true);
@@ -165,8 +166,11 @@ it('LangfuseTraceMiddleware emits error attributes on exception', function (): v
     try {
         $middleware->handle($request, $next);
     } catch (RuntimeException) {
-        // Expected
+        // Expected: handle() re-throws so normal exception handling still applies.
     }
+
+    // The export is deferred to terminate(); a direct handle() call never reaches it.
+    $middleware->terminate($request, new Response('Error', 500));
 
     Http::assertSent(function ($request) {
         $body = json_decode((string) $request->body(), true);
@@ -204,7 +208,8 @@ it('LatitudeTraceMiddleware uses shared telemetry.trace_id when present', functi
         return $response;
     };
 
-    $middleware->handle($request, $next);
+    $response = $middleware->handle($request, $next);
+    $middleware->terminate($request, $response);
 
     Http::assertSent(function ($request) {
         $body = json_decode((string) $request->body(), true);
@@ -233,7 +238,8 @@ it('LatitudeTraceMiddleware generates independent traceId when shared absent', f
         return $response;
     };
 
-    $middleware->handle($request, $next);
+    $response = $middleware->handle($request, $next);
+    $middleware->terminate($request, $response);
 
     Http::assertSent(function ($request) {
         $body = json_decode((string) $request->body(), true);
@@ -452,14 +458,16 @@ it('both providers share the same traceId for one request', function (): void {
     // Langfuse runs first, sets traceId (already set)
     $langfuseNext = function ($req) use ($latitude, $response) {
         // Latitude reads the traceId set by Langfuse
-        $latitude->handle($req, function () use ($response) {
+        $latitudeResponse = $latitude->handle($req, function () use ($response) {
             return $response;
         });
+        $latitude->terminate($req, $latitudeResponse);
 
         return $response;
     };
 
-    $langfuse->handle($request, $langfuseNext);
+    $langfuseResponse = $langfuse->handle($request, $langfuseNext);
+    $langfuse->terminate($request, $langfuseResponse);
 
     // Both providers should have exported with the same traceId
     $sentRequests = [];
@@ -532,4 +540,42 @@ it('LangfuseTraceService heartbeat is disabled when opt-in is off', function ():
     expect($result['status'])->toBe('disabled');
     expect($result['export']['status'])->toBe('disabled');
     expect($result['export']['http_status'])->toBeNull();
+});
+
+it('status endpoint reports scheduler active for a live <PID>|<StartTime> pid file', function (): void {
+    $dir = storage_path('framework/testing/scheduler-'.uniqid('', true));
+    @mkdir($dir, 0777, true);
+    $pidFile = $dir.'/scheduler.pid';
+    file_put_contents($pidFile, getmypid().'|'.date('Y-m-d H:i:s'));
+    app()->useStoragePath($dir);
+
+    try {
+        $response = $this->getJson('/api/v1/telemetry/status');
+
+        $response->assertOk();
+        expect($response->json('scheduler'))->toBeTrue();
+    } finally {
+        app()->useStoragePath(base_path('storage'));
+        @unlink($pidFile);
+        @rmdir($dir);
+    }
+});
+
+it('status endpoint reports scheduler inactive for a stale <PID>|<StartTime> pid file', function (): void {
+    $dir = storage_path('framework/testing/scheduler-'.uniqid('', true));
+    @mkdir($dir, 0777, true);
+    // 999999 is above the normal Windows PID ceiling, so it cannot be live.
+    file_put_contents($dir.'/scheduler.pid', '999999|'.date('Y-m-d H:i:s'));
+    app()->useStoragePath($dir);
+
+    try {
+        $response = $this->getJson('/api/v1/telemetry/status');
+
+        $response->assertOk();
+        expect($response->json('scheduler'))->toBeFalse();
+    } finally {
+        app()->useStoragePath(base_path('storage'));
+        @unlink($dir.'/scheduler.pid');
+        @rmdir($dir);
+    }
 });

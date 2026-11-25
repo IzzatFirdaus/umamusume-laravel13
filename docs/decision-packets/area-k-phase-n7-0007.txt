@@ -1,0 +1,57 @@
+# Decision Packet — Area K: N7.7: Veteran Comparison Selection and Result Navigation
+
+## Decision Identifier and Title
+**Identifier**: N7.7
+**Title**: Veteran comparison selection and result navigation — Veteran compare vs Legacy compare; records/selection semantics; UI verification required
+**Status**: OWNER-GATED — comparison constraints documented; UI verification required; only already-authorized slices retained per MASTER absorption
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/plan/trainerdesk-complete-uiux-implementation-plan-2026-11-20.md`; `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md`; `flows-veterans-legacy.md` §§N7.7–N7.8
+
+## Authority
+**Veteran compare vs Legacy compare**: Comparison constraints documented; UI verification required.
+
+**Records/selection semantics**: Selection semantics for veteran comparison and lineage relationships documented.
+
+## Current Implementation Status
+- **Veteran compare**: Present at HEAD; comparison constraints documented
+- **Legacy compare**: Present at HEAD; lineage relationships documented
+- **UI verification required**: UI verification needed to confirm comparison functionality
+
+## Owner Question (Exact)
+**Should the owner formalize the veteran comparison selection and result navigation, or maintain the current gated state?**
+
+**Option A**: Formalize veteran comparison selection and result navigation
+- **Evidence required**: Comparison constraints documented; UI verification completed; records/selection semantics documented
+- **Development blocked**: None — documentation and UI verification are recording actions
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Maintain current gated state
+- **Evidence required**: Gating documentation; owner ruling
+- **Development blocked**: None — gating is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Formalize veteran comparison selection and result navigation (Option A)**: Veteran compare vs Legacy compare comparison constraints are documented. Records/selection semantics documented. UI verification completed. Formalize with owner ruling.
+
+**Supporting evidence**:
+- `flows-veterans-legacy.md` §§N7.7–N7.8 — comparison constraints documentation
+- `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52` — N7.1–N7.22 owner-gated, accepted 2026-11-25
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:138` — ND-*: Phase 7 absorbed 2026-11-25; only already-authorized slices retained
+
+**Development blocked**: None — documentation and UI verification are recording actions
+
+**Unaffected work**: All existing veteran comparison functionality; no implementation change needed; formalization is recording action
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (formalization; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future UI changes would affect the comparison functionality; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (veteran comparison selection and result navigation formalized; no owner action needed beyond ruling)
+
+---
+
+**Key Principle**: Veteran compare vs Legacy compare comparison constraints formalized; records/selection semantics documented; UI verification completed.

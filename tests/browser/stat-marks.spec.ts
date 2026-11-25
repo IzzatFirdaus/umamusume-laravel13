@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 
 /*
  * The `.stat-*` colour classes and the tokens they claim to resolve (D3 wiring, `52625c8a`).

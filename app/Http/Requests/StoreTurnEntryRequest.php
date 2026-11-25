@@ -118,9 +118,9 @@ class StoreTurnEntryRequest extends FormRequest
                 'required',
                 'integer',
                 'min:1',
-                Rule::unique('turn_entries', 'turn')
-                    ->where(fn ($q) => $q->where('training_run_id', $runModel?->id))
-                    ->ignore($turn),
+            Rule::unique('turn_entries', 'turn')
+                ->where(fn ($q) => $q->where('training_run_id', $runModel?->id)->whereNull('superseded_by'))
+                ->ignore($turn),
                 // A correction cannot renumber its row. `turn` is the number `turn_events` and
                 // `race_entries` address a turn by, and neither carries a `turn_entry_id` for the
                 // event side, so a renumber would have to re-key both tables in the same write. The

@@ -17,7 +17,7 @@ and no path was specified, use the table below; it is the default, not a suggest
 | `docs/research-scratch-source/` | Umamusume game knowledge ONLY: `data/html`, `data/json`, `scripts/`, manifests. | Repository process docs never go here. |
 | `docs/roadmap/` | Live roadmaps and verifications: `MASTER-IMPLEMENTATION-ROADMAP-2026-11-18.md`, `INDEX.md`. | Ordering authority; plans cite its slices; sitreps update slice acceptance status |
 | `docs/scenarios/01`-`09` | Per-scenario guides (`08` is JP-only, don't import). | Hardcoded scenario names in code are a defect; use `config/scenarios.php` labels. |
-| `docs/sitrep/` | Session reports and handoffs. | Reports progress on plan slices and roadmap status; feeds remaining work back to roadmap |
+| `docs/sitrep/` | Session reports and handoffs. DB-safety acceptance record: `DB-SAFETY-ACCEPTANCE-2026-11-25.md` (eight-check tracker); reconciliation evidence: `DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md`; verification-failure record: `sitrep-2026-11-25-verification-failure.md` (1,973-failure comprehensive run at HEAD `11207c42`; preserves the historical failure count; current candidate NOT release-qualified). | Reports progress on plan slices and roadmap status; feeds remaining work back to roadmap |
 | `docs/UMAMUSUME_REFERENCE.md` | Source-cited mechanics corpus. | Single tracked file at docs root. |
 
 ## Default placement (no path specified)

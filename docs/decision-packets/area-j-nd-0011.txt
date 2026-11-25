@@ -1,0 +1,67 @@
+# Decision Packet — Area J: ND-11: Hub Grouping by Question + Source Ledger Doors
+
+## Decision Identifier and Title
+**Identifier**: ND-11
+**Title**: Hub grouping by question + consolidate the two Source Ledger doors (db-review §3.1(4)(5))
+**Status**: OWNER-GATED — keep the flat nine-tile grid and both doors; group/restructure with SCREEN_SPEC §7 entries
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/adr/0020-trainer-desk-2-program.md`; `SCREEN_SPEC.md` §7-21, :151-155; `docs/plan/implementation-plan-2026-11-20.md` §§S6.1-S6.5; `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5`
+
+## Authority
+**Current arrangement**: Flat nine-tile grid and both Source Ledger doors (db-review §3.1(4)(5))
+
+**Two options documented**:
+- (a) keep the flat nine-tile grid and both doors; group/restructure with SCREEN_SPEC §7 entries
+- (b) group/restructure with new layout; requires SCREEN_SPEC entries and consolidation
+
+**HFW database.html:151,153,155** draws exactly this launcher ("Nine areas, one grid, no nesting"); the pick-border already differentiates the ledger tile, and specs pin 9 listitems.
+
+## Original Requirement
+From `flows-career-creation.md` and the database review:
+- **ND-11**: Hub grouping by question + consolidate the two Source Ledger doors (db-review §3.1(4)(5))
+- (a) keep the flat nine-tile grid and both doors; (b) group/restructure with SCREEN_SPEC entries
+
+## Current Implementation Status
+- **Flat nine-tile grid**: Maintained; both Source Ledger doors preserved
+- **Pick-border**: Differentiates the ledger tile under the current wireframe ruling
+- **Nine listitems**: Specs pin exactly this launcher ("Nine areas, one grid, no nesting")
+
+## Owner Question (Exact)
+**Should the owner keep the flat nine-tile grid and both Source Ledger doors (Option A), or group/restructure with SCREEN_SPEC entries (Option B)?**
+
+**Option A**: Keep the flat nine-tile grid and both doors
+- **Evidence required**: HFW database.html:151,153,155 draws exactly this launcher; pick-border differentiates; specs pin 9 listitems
+- **Development blocked**: None — maintaining grid is recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Group/restructure with SCREEN_SPEC entries
+- **Evidence required**: SCREEN_SPEC entries documentation; consolidation ruling
+- **Development blocked**: Requires SCREEN_SPEC §7 entries; grid restructuring; not shipped at HEAD
+- **Release relevance**: Would tag to 3.0.1 or later
+
+## Recommended Ruling
+**Keep the flat nine-tile grid and both Source Ledger doors (Option A)**: The flat nine-tile grid and both doors are maintained per the wireframe ruling. HFW database.html:151,153,155 draws exactly this launcher ("Nine areas, one grid, no nesting"). The pick-border differentiates the ledger tile, and specs pin 9 listitems. No restructuring needed.
+
+**Supporting evidence**:
+- `docs/plan/implementation-plan-2026-11-20.md:180` — ND-11 source
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5` — ND-1..ND-16 source
+- `HFW database.html:151,153,155` — launcher documentation
+- `SCREEN_SPEC.md:151-155` — tile copy and spec pin
+
+**Development blocked**: None — maintaining grid is recording action
+
+**Unaffected work**: All existing hub grouping functionality; no implementation change needed
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (grid maintained; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future MASTER roadmap updates would change the grid structure; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (grid maintained; no owner action needed)
+
+---
+
+**Key Principle**: Flat nine-tile grid and both doors maintained; HFW documentation confirms this launcher; pick-border differentiates ledger tile; specs pin 9 listitems.

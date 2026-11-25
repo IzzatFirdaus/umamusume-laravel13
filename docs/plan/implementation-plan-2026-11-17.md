@@ -1,4 +1,12 @@
 # Trainer Desk — Implementation Plan (2026-11-17)
+<!-- PLAN-CONTRACT
+plan: implementation-plan-2026-11-17
+status: landed
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 Paired with `docs/roadmap/implementation-roadmap-2026-11-17.md` (what/why). This file is **how**, with exact
 commands, per slice. Measured at HEAD `248e1cbb`, migrations 0 pending.

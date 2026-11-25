@@ -19,7 +19,7 @@
  * wireframe draws exists, in order" without pretending the two documents were the same file.
  */
 
-import { expect, test } from '@playwright/test';
+import { expect, test } from './support/base-test';
 import { resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { PAGE_MARKERS, assertStructurallyEqual, capture } from './fixtures/hfw-structure';

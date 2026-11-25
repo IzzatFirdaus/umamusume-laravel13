@@ -58,7 +58,32 @@ final class CockpitTeamPanelTest extends TestCase
                 ->where('scenario.team.team_name', null)
                 ->where('scenario.team.team_motto', null)
                 ->where('scenario.team.team_league_placement', null)
-                ->where('scenario.team.team_preseason_wins', null));
+                ->where('scenario.team.team_preseason_wins', null)
+                // D-10: a run that opened no round ships an empty list, never four fabricated rounds.
+                // The panel draws all four as `Not recorded`, which is the truth for this run.
+                ->has('scenario.team.preseason_rounds', 0));
+    }
+
+    public function test_ships_the_per_round_preseason_outcomes_with_a_blank_round_still_present(): void
+    {
+        // D-10: a round with a stored row and a null outcome is a round the Trainer opened and left
+        // blank. It travels as `{round: 2, outcome: null}` rather than being dropped, because dropping
+        // it would make it indistinguishable from a round never opened — and the panel prints the two
+        // with different sentences.
+        $run = $this->unityCupRun(['team_preseason_wins' => 1]);
+
+        $run->preseasonRounds()->create(['round' => 1, 'outcome' => 'WIN']);
+        $run->preseasonRounds()->create(['round' => 2, 'outcome' => null]);
+
+        $this->get(route('runs.cockpit', $run))
+            ->assertOk()
+            ->assertInertia(fn (Assert $page) => $page
+                ->where('scenario.team.team_preseason_wins', 1)
+                ->has('scenario.team.preseason_rounds', 2)
+                ->where('scenario.team.preseason_rounds.0.round', 1)
+                ->where('scenario.team.preseason_rounds.0.outcome', 'WIN')
+                ->where('scenario.team.preseason_rounds.1.round', 2)
+                ->where('scenario.team.preseason_rounds.1.outcome', null));
     }
 
     public function test_reads_a_partial_team_identity_without_inventing_the_missing_fields(): void

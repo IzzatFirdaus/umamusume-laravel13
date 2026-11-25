@@ -1,0 +1,67 @@
+# Decision Packet — Area J: ND-3: KI-104 Duplicate Block Renumbering
+
+## Decision Identifier and Title
+**Identifier**: ND-3
+**Title**: KI-104 duplicate block — plan19 renumber to KI-169; register's 2026-11-10 correction rules no renumbering
+**Status**: OWNER-GATED — register's own ruling wins over plan19; no renumbering
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-10
+**Related**: `docs/adr/0003-ki-104-duplicate-block.md` (if exists); `KNOWN-ISSUES.md:229,:243`; `docs/plan/implementation-plan-2026-11-20.md` §§S0.5; `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5`
+
+## Authority
+**Register's ruling**: The register's 2026-11-10 correction (KNOWN-ISSUES.md:229,:243) rules no renumbering. AGENTS.md §11 never renumber; the register's own ruling wins over plan19.
+
+**plan19 suggestion**: plan19 orders renumber to KI-169, but this conflicts with the register's declared ruling.
+
+## Original Requirement
+From the plan19 drift and KI register maintenance:
+- **ND-3**: KI-104 duplicate block: plan19 orders renumber to KI-169; register's 2026-11-10 correction (KNOWN-ISSUES.md:229,:243) rules no renumbering
+- Two options:
+  - (a) Keep both blocks, merge subjects by dated note; (b) renumber
+- The register's own declaration wins over plan19's suggestion
+
+**Related**: N0.5
+
+## Current Implementation Status
+- **Duplicate blocks**: Both KI-104 blocks retained, merged by dated note
+- **No renumbering**: AGENTS.md §11 never renumber; the register's ruling wins
+- **Dated note**: Subjects merged by dated note reflecting the register's 2026-11-10 correction
+
+## Owner Question (Exact)
+**Should the owner act on plan19's renumbering suggestion, or maintain the register's ruling with no renumbering?**
+
+**Option A**: Maintain register's ruling — no renumbering; keep both blocks, merge subjects by dated note
+- **Evidence required**: KNOWN-ISSUES.md:229,:243; AGENTS.md §11 never renumber
+- **Development blocked**: None — maintaining register ruling is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Follow plan19 renumbering — renumber KI-104 to KI-169
+- **Evidence required**: plan19 directive; renumbering rationale
+- **Development blocked**: Conflicts with AGENTS.md §11 and register's own ruling; would require erratum
+- **Release relevance**: Would require ADR erratum; not recommended
+
+## Recommended Ruling
+**Maintain register's ruling — no renumbering (Option A)**: The register's 2026-11-10 correction rules no renumbering. AGENTS.md §11 never renumber; the register's own ruling wins over plan19. Keep both KI-104 blocks, merge subjects by dated note reflecting the register's correction.
+
+**Supporting evidence**:
+- `KNOWN-ISSUES.md:229,:243` — register's 2026-11-10 correction
+- `AGENTS.md:§11` — never renumber
+- `docs/plan/implementation-plan-2026-11-20.md:172` — ND-3 source
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:5` — ND-1..ND-16 source
+
+**Development blocked**: None — maintaining register ruling is a recording action
+
+**Unaffected work**: All existing KI register functionality; no implementation change needed
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (register ruling maintained; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future plan19 updates would challenge the register's ruling; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (register ruling maintained; no owner action needed)
+
+---
+
+**Key Principle**: The register's own ruling always wins over plan19 suggestions. AGENTS.md §11 never renumber. No renumbering of KI-104 block.

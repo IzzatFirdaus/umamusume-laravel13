@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from './support/base-test';
 import type { Page } from '@playwright/test';
 import { deleteRun } from '../utils/delete-run';
 import { openIdentitySettings } from '../utils/identity-disclosure';

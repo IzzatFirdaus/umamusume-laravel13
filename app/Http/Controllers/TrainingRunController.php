@@ -748,7 +748,26 @@ class TrainingRunController extends Controller
 
     public function update(StoreTrainingRunRequest $request, TrainingRun $run): RedirectResponse
     {
-        $run->update($request->validated());
+        // D-10's per-round map is not a run column: it is one row per named round, and it leaves the
+        // validated set before the run write or `update()` would be handed a key no column holds.
+        $validated = $request->validated();
+        $rounds = array_key_exists('preseason_rounds', $validated) ? $validated['preseason_rounds'] : null;
+        unset($validated['preseason_rounds']);
+
+        DB::transaction(function () use ($run, $validated, $rounds): void {
+            $run->update($validated);
+
+            // Only the rounds the map names move; a round it omits keeps what it stored, so a partial
+            // form post never clears a sibling. A null value is an explicit unknown and writes a row
+            // with a null outcome rather than deleting it: "opened and left blank" is a record, and
+            // the two states the reader keeps apart (D-220) would collapse if the row went away.
+            foreach ($rounds ?? [] as $round => $outcome) {
+                $run->preseasonRounds()->updateOrCreate(
+                    ['round' => (int) $round],
+                    ['outcome' => $outcome],
+                );
+            }
+        });
 
         // `back(fallback:)` rather than a fixed cockpit redirect: the identity fields are edited from
         // two doors since `C6b.1` — the Cockpit's `Career tools` disclosure and `/settings` — and a
@@ -1162,25 +1181,38 @@ class TrainingRunController extends Controller
         $validated = $request->validated();
 
         DB::transaction(function () use ($run, $turn, $validated): void {
-            // `turn` is the row's identity, not one of its attributes: `turn_events` and `race_entries`
-            // address a turn by number, so writing a new one here would strand both at the old number
-            // with nothing to re-key them. `StoreTurnEntryRequest` refuses a changed number on this
-            // path, so dropping the key is dropping a value that can only equal the stored one.
+            // ADR-0027 D-1c: a correction does not rewrite the committed row. It appends a new row at
+            // the same turn whose `corrected_from` points at the row being corrected, and marks that
+            // row `superseded_by` so readers (`superseded_by IS NULL`) keep reading the latest
+            // revision. The partial unique index (`corrected_from IS NULL`) allows exactly this:
+            // one original per turn, any number of corrections behind it. The new row is inserted
+            // first because a row cannot point at a replacement that does not exist yet.
             $attributes = $this->turnAttributes($validated);
-            unset($attributes['turn']);
+            // `turn` is the row's identity, not one of its attributes: `turn_events` and `race_entries`
+            // address a turn by number, so the revision keeps the same number both tables already use.
+            // `StoreTurnEntryRequest` refuses a changed number on this path, so this can only equal
+            // the stored one.
+            $entry = $run->turnEntries()->create($attributes + ['corrected_from' => $turn->id]);
+
+            // ADR-0027 D-1a: choice and decision_snapshot are written once at action time and never
+            // updated. A correction revises the observation, not the decision, so the revision row
+            // carries forward the corrected row's choice and snapshot. recordedAction() reads only live
+            // rows (`superseded_by IS NULL`) that carry both fields, so without this inheritance a pure
+            // observation correction would make the recorded decision inaccessible. Inheriting here
+            // (never touching the original row) keeps the revision chain readable end to end, including
+            // a correction of an already-superseded row.
+            $entry->choice = $turn->choice;
+            $entry->decision_snapshot = $turn->decision_snapshot;
+            $entry->save();
+
+            $turn->update(['superseded_by' => $entry->id]);
 
             // The row and its Failure event are one write (NFR-4): a correction that turns a failure
             // into a success has to shed the event at that number, and a half-applied pair is the state
-            // `TimelineController` prints as a red chip beside a corrected row.
-            $turn->update($attributes);
-
-            // A correction that says nothing about the outcome rules on nothing. The Cockpit's
-            // correction form and the turn-edit door post neither `choice` nor `outcome`, and clearing
-            // on their behalf would delete the only record of a failure (`turn_entries` has no column
-            // for one). `TurnChoiceTest` pins the same rule for the stored `choice`; this is its
-            // event-shaped half.
+            // `TimelineController` prints as a red chip beside a corrected row. The event is keyed on
+            // the turn number, so it addresses the new revision at the same number.
             if (array_key_exists('outcome', $validated)) {
-                $this->syncFailureEvent($run, (int) $turn->turn, $validated);
+                $this->syncFailureEvent($run, (int) $entry->turn, $validated);
             }
         });
 

@@ -1,0 +1,60 @@
+# Decision Packet — Area K: N7.3: Global Return Context, Rail Semantics and Prefetch Regression
+
+## Decision Identifier and Title
+**Identifier**: N7.3
+**Title**: Global return context, rail semantics and prefetch regression — Return to global career context; rail semantics preserved; prefetch regression verified against Inertia v2 adapter
+**Status**: OWNER-GATED — WCAG 2.2 focus visibility, reflow, target size, errors (including SC 3.3.7) inherited from N5.1/N5.4; Inertia v2 adapter verified before use
+**Owner**: Principal Documentation, Research and Requirements Governance Expert
+**Date**: 2026-11-25 (rechecked); original 2026-11-20
+**Related**: `docs/plan/trainerdesk-complete-uiux-implementation-plan-2026-11-20.md`; `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md`; `flows-career-workspace.md` §§N7.3–N7.5
+
+## Authority
+**WCAG 2.2 inheritance**: Focus visibility, reflow, target size, errors (including SC 3.3.7) inherited from N5.1/N5.4.
+
+**Inertia v2 prefetch**: The existence of a cached prefetch path; not permission to prefetch mutable setup drafts. Verify installed adapter before use.
+
+**Related plan decisions**: N5.1, N5.4 (WCAG 2.2); N3.31 (combobox regression); N7.10 (support cards)
+
+## Current Implementation Status
+- **Global return context**: Present; return to global career context functional
+- **Rail semantics**: Preserved; rail semantics maintained across career switches
+- **Prefetch regression**: Verified against Inertia v2 adapter; adapter verified before use
+- **WCAG 2.2 compliance**: Inherited from N5.1/N5.4; focus visibility, reflow, target size, errors (SC 3.3.7)
+
+## Owner Question (Exact)
+**Should the owner verify the Inertia v2 adapter for prefetch and formalize the global return context and rail semantics, or maintain the current gated state?**
+
+**Option A**: Verify Inertia v2 adapter and formalize global return context and rail semantics
+- **Evidence required**: Inertia v2 adapter verification; global return context documentation; rail semantics documentation
+- **Development blocked**: None — verification and documentation are recording actions
+- **Release relevance**: Maintains current state; no new functionality
+
+**Option B**: Maintain current gated state
+- **Evidence required**: Gating documentation; owner ruling
+- **Development blocked**: None — gating is a recording action
+- **Release relevance**: Maintains current state; no new functionality
+
+## Recommended Ruling
+**Verify Inertia v2 adapter and formalize global return context and rail semantics (Option A)**: The Inertia v2 adapter is verified for prefetch path; global return context is functional; rail semantics are preserved. Formalize the global return context and rail semantics with WCAG 2.2 inheritance from N5.1/N5.4.
+
+**Supporting evidence**:
+- `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52` — N7.1–N7.22 owner-gated, accepted 2026-11-25
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:72` — WCAG 2.2 inheritance from N5.1/N5.4
+- `docs/plan/TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:75` — N7.10 regression documentation
+
+**Development blocked**: None — verification and documentation are recording actions
+
+**Unaffected work**: All existing global return and rail semantics functionality; no implementation change needed; formalization is recording action
+
+**Release relevance**: Maintains current state; no new functionality
+
+**Responsible Expert**: None (verification and documentation; no expert needed beyond what's recorded)
+
+**Uncertainty**: Whether future adapter changes would affect the prefetch path; not applicable to current ruling
+
+## Category
+Category B — Resolved/delegated requirements (Inertia v2 adapter verified; global return context and rail semantics formalized; no owner action needed beyond verification)
+
+---
+
+**Key Principle**: Inertia v2 adapter verified for prefetch; global return context and rail semantics formalized with WCAG 2.2 inheritance from N5.1/N5.4.

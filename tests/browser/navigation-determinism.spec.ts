@@ -1,4 +1,5 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from './support/base-test';
+import type { Page } from '@playwright/test';
 
 /*
  * Runtime determinism for the global navigation and the page-level visit state (PRD NFR-8).
