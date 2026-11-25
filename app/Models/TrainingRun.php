@@ -326,6 +326,14 @@ class TrainingRun extends Model
     }
 
     /**
+     * @return HasMany<RosterMember, $this>
+     */
+    public function rosterMembers(): HasMany
+    {
+        return $this->hasMany(RosterMember::class);
+    }
+
+    /**
      * The Veteran-library row built from this run, or null when the Trainer never saved one.
      *
      * A `HasOne` rather than the reverse of `Veteran::trainingRun()` because the read side is what
