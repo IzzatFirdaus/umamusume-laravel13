@@ -25,17 +25,6 @@
 - Previous focused passing evidence preserved separately: 104 tests / 466 assertions (ADR-0038 verification); 83 tests / 482 assertions (post-formatting); PHPStan and targeted Pint passing.
 - **Do not classify failures as expected environmental failures** unless subsequent evidence establishes this.
 - **Do not classify current candidate as release-qualified**.
-
-- **Environmental failures**: Not yet classified; supporting evidence required
-- **Application regressions**: Under investigation by Fullstack Agent
-- **Unresolved causes**: 65 unstaged modified files contributing to failure spectrum
-
-## Key Observations
-- 65 unstaged modified files identified; exact contribution to failure spectrum under investigation
-- Previous focused passing evidence (104 tests / 466 assertions for ADR-0038; 83 tests / 482 assertions post-formatting; PHPStan and targeted Pint) preserved separately
-- **Do not classify failures as expected environmental failures** unless subsequent evidence establishes this
-- **Do not classify current candidate as release-qualified**
-
 ## Status of Owner Decisions (Preserved)
 All previously accepted owner rulings remain authorized and unchanged:
 - **D-8**: Accepted — backend implemented 2026-11-25 (Unity Cup scenario-level team-race slots)

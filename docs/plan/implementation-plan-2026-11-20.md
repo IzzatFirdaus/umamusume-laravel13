@@ -1,4 +1,12 @@
 # Trainer Desk - Consolidated Implementation Plan (2026-11-20)
+<!-- PLAN-CONTRACT
+plan: implementation-plan-2026-11-20
+status: in-progress
+slices: N0.1-N6.18,N7.1-N7.22
+superseded-by: —
+amended-by: —
+open: ND-1..ND-16 owner register; 63 slices; crosswalk
+-->
 
 > **For agentic workers:** execute task-by-task against the live tree. Steps use checkbox syntax where a slice carries them. Every slice closes on code plus quoted test/gate output, never on a progress report. Re-measure every premise before editing (AGENTS.md §2a, §9): this plan was written against a moving shared tree.
 
