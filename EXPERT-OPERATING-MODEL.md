@@ -35,29 +35,32 @@ Fullstack owns all repository-management: integration into `master`, branch sync
 resolution and worktree registration. Experts do not merge, rebase, synchronize or perform Git
 administration.
 
-## Docs-specific Git authority (V2.1 revision, 2026-11-26)
+## Docs Git authority (V2.1, owner-revised 2026-11-26)
 
-The Technical Documentation Engineer is authorized to independently execute
-Git operations within the assigned `docs` worktree, including `git status`,
-`git diff`, `git log`, `git show`, `git fetch`, `git add` with explicitly
-selected paths, `git commit`, and `git push` to the verified remote `docs`
-branch. Fullstack retains shared `master` integration authority.
+The Technical Documentation Engineer is authorized to autonomously inspect Git state, validate
+documentation, stage its own intended documentation files, and commit and push to its assigned
+`docs` branch. The earlier blanket Git prohibition and the mandatory Fullstack-controlled
+documentation commit are superseded.
 
-**Mandatory safeguards** (never relaxed):
+Docs commits published to the `docs` branch are **immutable delivery candidates**. Fullstack
+integrates an already-identified Docs commit into `master` by exact commit identity and verification
+evidence; a whole-worktree freeze is **not** required to review or integrate an identified commit.
+Fullstack retains shared `master` integration authority unless explicitly delegated.
 
-- Verify repository root, worktree residency, branch identity, HEAD, index and
-  pending changes before any Git mutation.
-- Stage only explicitly selected documentation paths; never `git add -A` or
-  `git add .` when unrelated changes are present.
+All safeguards remain in force:
+
+- Verify repository root, worktree residency, branch identity, HEAD, index and pending changes
+  before any Git mutation.
+- Stage only explicitly selected documentation paths; never `git add -A` or `git add .` when
+  unrelated changes are present.
 - Review the complete staged diff before each commit.
-- No `git reset --hard`, `git clean`, force-push, destructive checkout/restore,
-  branch deletion, shared history rewrite or worktree administration.
+- No destructive resets, no force-pushes, no history rewriting, no cross-worktree interference,
+  no unauthorized database operations, no `--no-verify` bypasses.
 - Do not discard predecessor changes.
 - Do not include application code changes in documentation commits.
 - Push only to the verified remote `docs` branch; inspect remote destination first.
 
-The previous blanket prohibition (original revision) is preserved as historical
-evidence. The destructive-reset incident is recorded in `docs/sitrep/`.
+See `AGENTS.md` and the Docs worktree `AGENTS.md` override.
 
 ## Controlled delivery
 
@@ -114,4 +117,4 @@ mechanism. Each Expert uses only its assigned identity (`coordinator`, `fullstac
   continue other independently achievable work.
 - If the connector is unavailable, use owner-mediated communication as fallback.
 
-See `AGENTS.md` §10a and `MCP_SETUP.md` §"Agent Chat MCP" for full details.
+See `AGENTS.md` §10b and `MCP_SETUP.md` §"TrainerDesk Agent Chat" for full details.

@@ -395,6 +395,10 @@ answer is already in context.
   `playwright.config.ts` / `tests/` — do not replace them with ad-hoc MCP calls.
 - **Filesystem MCP**: read-only, scoped to this repository. Prefer native Read/Grep/Glob; use it
   only when a tool needs an MCP-shaped file interface.
+- **Autonomous messaging**: the `trainerdesk-chat` MCP is the established cross-IDE protocol.
+  Follow `MCP_SETUP.md` §"TrainerDesk Agent Chat — shared mailbox" for room, directed recipients,
+  acknowledgment, incremental reads and authority limits. One shared mailbox serves every client
+  and linked worktree; a message never grants implementation, Git, database or operational authority.
 - **RTK**: rewrites shell commands for compact output. Registered as a user-level PreToolUse hook;
   it must receive stdin (a hook invoked without stdin blocks until timeout).
 - **Impeccable**: frontend design checks. The post-edit shim runs only for
@@ -410,7 +414,7 @@ Hook and MCP health: `node .tooling/hooks-preflight.mjs` (22 checks) and
 `node .tooling/hooks.test.mjs` (regression suite). Run both after changing any hook,
 `.claude/settings.json`, or MCP configuration.
 
-## 10a. Autonomous inter-agent communication
+## 10b. Autonomous inter-agent communication
 
 When `trainerdesk-chat` is available, Experts use it as the primary coordination
 mechanism. The protocol is permanent and does not require per-task owner
