@@ -265,6 +265,11 @@ class CockpitController extends Controller
         // Add Spirit Burst countdown for Unity Cup (Slice 2.2)
         $team['burst_countdown'] = $this->team->burstCountdown($run, $team);
 
+        // The Trainer-observed team-race countdown: same stored column the team panel reads, exposed
+        // at cockpit top level so the Team screen and the Cockpit never diverge on it. Null where the
+        // scenario has no team layer, so null travels rather than zero (D-220).
+        $teamRaceCountdown = $team['team_race_countdown'] ?? null;
+
         // Built once for the same reason: a run with no stored position derives one with a
         // `max(turn)` query, and three props read it.
         $position = $run->careerPosition();
@@ -277,6 +282,11 @@ class CockpitController extends Controller
             // The distinction crosses the wire because the header prints a named position and the
             // review screen reads the confidence map that rides the same value object.
             'careerPosition' => $position?->toArray(),
+            'team_race_countdown' => $teamRaceCountdown,
+            // `finals_countdown` rides the advisor's finale context (`turns_away`): turns until the
+            // scenario finale within the 5-turn window. A calendar-month event vs the team-race
+            // countdown's turn-grid count — never conflated (D03).
+            'finals_countdown' => $advice->finale_context === null ? null : ($advice->finale_context['turns_away'] ?? null),
             'hasImportedPosition' => $run->hasImportedPosition(),
             'scenarioCountdown' => $position?->scenarioCountdown,
             'gradeObjectives' => $run->gradeObjectives(),

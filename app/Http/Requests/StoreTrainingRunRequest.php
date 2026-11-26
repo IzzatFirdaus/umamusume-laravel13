@@ -203,6 +203,32 @@ class StoreTrainingRunRequest extends FormRequest
                     }
                 },
             ],
+            /*
+             * The team-race countdown, as the Trainer reads it off the Unity Cup panel. Only a
+             * scenario that composes `team_race` has a team race to count down toward, so a value on
+             * any other scenario is refused here rather than left to a model guard. `min:0` keeps a
+             * negative mistype out while null stays the honest "not observed" (D-220): zero means
+             * "this turn", not absence. No upper bound: no published rotation exists to bound it
+             * against.
+             */
+            'team_race_countdown' => [
+                'nullable',
+                'integer',
+                'min:0',
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if ($value === null || ! is_numeric($value)) {
+                        return;
+                    }
+
+                    $run = $this->route('run');
+                    $scenario = $this->input('scenario', $run instanceof TrainingRun ? $run->scenario : null);
+
+                    if ($scenario === null || $scenario === ''
+                        || config('scenarios.scenarios.'.$scenario.'.panels.team_race') !== true) {
+                        $fail('This scenario has no Unity Cup team race, so there is no countdown to record.');
+                    }
+                },
+            ],
             // The four ceilings the Trainer read off the client for this run (`ADR-0025`). This is the
             // identity form's write, so it is where a cap corrected mid-run is stored; the same rule set
             // guards the build target step, which is where a target above the scenario bound is entered
@@ -255,6 +281,23 @@ class StoreTrainingRunRequest extends FormRequest
 
             if ($rotation === 0 && $run->shop_resets_in !== null) {
                 $this->merge(['shop_resets_in' => null]);
+            }
+        }
+
+        /*
+         * The team-race countdown: a stored countdown is cleared when the payload switches the run
+         * to a scenario that does not compose `team_race` and says nothing about the countdown. The
+         * stored number would otherwise meet the scenario gate above as a 422 where a field error
+         * belongs. A payload that states a value is left untouched, so the rule refuses it instead.
+         */
+        if ($run instanceof TrainingRun && $this->missing('team_race_countdown')) {
+            $scenario = $this->input('scenario', $run->scenario);
+            $composesTeamRace = $scenario === null || $scenario === ''
+                ? false
+                : config('scenarios.scenarios.'.$scenario.'.panels.team_race', false) === true;
+
+            if (! $composesTeamRace && $run->team_race_countdown !== null) {
+                $this->merge(['team_race_countdown' => null]);
             }
         }
     }

@@ -12,6 +12,7 @@ use App\Models\RaceEntry;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Models\TurnEvent;
+use App\Services\Career\CareerReference;
 use App\Services\CareerCalendar;
 use App\Services\Scenario\FinaleReader;
 use Inertia\Inertia;
@@ -67,12 +68,19 @@ class TimelineController extends Controller
         $entries = $this->buildEntries($run);
         $origin = $this->originSection($run);
 
+        // Published reference material rides alongside the observed rail: labelled as reference, never
+        // mistaken for observed history. `standard_schedule` is the schedule sub-shape so the rail and
+        // the summary card can each read the slice they need from one computation.
+        $reference = CareerReference::forRun($run);
+
         return Inertia::render('Career/Timeline', [
             'run' => $this->runSection($run),
             'origin' => $origin,
             'entries' => $entries,
             'filters' => $this->filterSection($entries),
             'empty' => $entries === [] ? $this->emptyMessage($run, $origin) : null,
+            'reference' => $reference,
+            'standard_schedule' => $reference['schedule'],
             // DM-1: the grid is exactly `CareerCalendar::TURNS_PER_CAREER` turns and the finale block
             // sits outside it. Both travel so the rail can group by phase and print the finale without
             // numbering a row 73; the reader is `FinaleReader`, the same one the Cockpit and the Result
