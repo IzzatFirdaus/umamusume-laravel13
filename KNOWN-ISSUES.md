@@ -78,7 +78,9 @@ KI-126 CLOSED-WONTFIX — R8 declined; roster reopens only if R8 reopens
 KI-127 CLOSED (2026-11-18) — the fix landed at `1119e437` and this index row was never flipped: `TeamRaceFacilityPanel.vue` root is `class="card p-3"` with an `h2` capsule header, and `tests/browser/team-race-facility-panel.spec.ts` passes 2/2 at this HEAD including the axe scan. The panel is a dead registration (no scenario enables `team_race_facility`), so the composed-surface pin stays deferred as the body note records
 KI-128 CLOSED — Delete moved to its own footer door /training-runs/{run}/delete (C6b.3 lineage, peer landing); delete flow green in this session's cockpit-forms walk
 KI-129 CLOSED — affirmed 2026-11-10 per owner dispatch: the capsule is intentional on the scenario section, DESIGN.md:497 sanction stands; extension and removal rejected. No code change
-KI-169 OPEN — `TrainingRun::canChangeScenario()` undefined; 12 ScenarioImmutabilityTest failures (BAD METHOD CALL cluster) at master `6e17dca0` and `b9a714f2`. Pre-existing gap, NOT introduced by docs-merge code restore. Not release-qualifying until Backend/Fullstack implements `canChangeScenario()` on TrainingRun (or corrects the test contract). Reopen when method exists and cluster is green. See body below; docs/sitrep/CHECK7-FAILURE-TRIAGE-2026-11-26.md.
+KI-169 IMPLEMENTED, PENDING RELEASE VERIFICATION — `TrainingRun::canChangeScenario()` now exists at `app/Models/TrainingRun.php:571` (landed `94310152`, ancestor of `fd9f3e2e`), with two readers behind one predicate: the model's saving guard and `StoreTrainingRunRequest.php:69`. `CockpitController.php:401` publishes `can_change_scenario`. Targeted `ScenarioImmutabilityTest` reported 6 passed / 33 assertions (Coordinator msg#144, not re-executed here). NOT closed: the original 12-failure cluster was measured at `6e17dca0`/`b9a714f2`, and no clean full-suite run at a revision containing `94310152` has been reported. Both readers and both published props (`advisor_revision` `:321`, `can_change_scenario` `:401`) are present at `fd9f3e2e` (verified this session). See body below; docs/sitrep/CHECK7-FAILURE-TRIAGE-2026-11-26.md.
+KI-170 OPEN — `SeededProvenanceNoteRefreshTest` (11 cases, committed `6cc3ede1`) expects six seeder note/provenance behaviours that are not implemented: evidence-limit append, stale-note refresh, missing-note fill, trainee/card identity repair, Rosy Turn-67 limit append, Run-3 fixture-disclosure removal. Source-verified at `fd9f3e2e`: `UraFinaleRunsSeeder::importRun()` early-returns on existing `import_source`; `RosyDreamsRiceShowerSeeder:592` and `app/Actions/ImportHistoricalRun.php:38` store notes verbatim. Pre-existing test-ahead-of-implementation, NOT a Docs-merge/Fullstack regression. Release-blocking. Owner decision required: Backend implements the seeder features **or** the owner rules the test contract should be rewritten to verbatim-notes behaviour. One owner: Backend. Do not renumber. Filed from Coordinator msg#144.
+KI-170 OPEN — `SeededProvenanceNoteRefreshTest` (11 cases, committed `6cc3ede1`) expects six seeder note/provenance behaviours nothing implements: note-limit append, stale-note refresh, missing-note fill, trainee/card identity repair, Rosy Turn-67 limit, Run-3 disclosure removal. Source-verified 2026-11-27 at `fd9f3e2e`: `UraFinaleRunsSeeder::importRun()` early-returns on an existing `import_source`; `RosyDreamsRiceShowerSeeder:592` and `ImportHistoricalRun:38` store `notes` verbatim. Pre-existing test-ahead-of-implementation, NOT a Docs-merge regression; suite red; release-blocking. Owner decision required — Backend implements the seeder features OR the owner rules the test contract be rewritten to verbatim-notes. One implementation owner: Backend. See body below; Coordinator msg#144.
 KI-130 TERMINAL — not dispatched; index corrected 2026-11-17 (S2 P2): body: TERMINAL - owner ruling A (2026-10-25)
 KI-131 CLOSED — 9674180d + 20df32a6: run-scoped aria-labels on the two colliding steps; consumers re-pinned (support-deck, section-nav); cockpit-forms pin edited in a peer-dirty file and rides that file's landing
 KI-132 TERMINAL — two-key split ruled by owner; slice not dispatched here, scheduled separately; index corrected 2026-11-17 (S2 P2): body: TERMINAL - deferred to R1 payload-contract pass
@@ -5527,3 +5529,46 @@ Not release-qualifying until resolved.
 **Owner/assignment.** App model code — needs Backend/Fullstack to implement `canChangeScenario()` on
 `TrainingRun` (or correct the test contract if the method was renamed). No competing fix applied here;
 logged for assignment. Reopen when the method exists and the cluster is green.
+
+**Status correction (2026-11-27, Docs).** The method now exists. `TrainingRun::canChangeScenario()`
+landed at `app/Models/TrainingRun.php:571` in `94310152` (ancestor of `fd9f3e2e`), reading the loaded
+`turnEntries` collection when present so the cockpit's pinned query budget is not charged an extra
+`exists()`. Two readers sit behind one predicate: the model's saving guard and
+`app/Http/Requests/StoreTrainingRunRequest.php:69`. `CockpitController.php:401` publishes
+`can_change_scenario`, and `:321` publishes the sibling `advisor_revision` — both verified present at
+`fd9f3e2e` this session. `ScenarioImmutabilityTest` now carries 6 cases.
+
+This correction does **not** close the entry. The 12-failure cluster was measured at `6e17dca0` and
+`b9a714f2`, both of which predate the method. No clean full-suite run at a revision containing
+`94310152` has been reported to this register. Disposition is therefore **IMPLEMENTED, PENDING RELEASE
+VERIFICATION**: the source-level half is satisfied, the release-qualification half is not. A targeted
+green run is not a full-suite qualification — the surrounding clusters recorded in
+`docs/sitrep/CHECK7-FAILURE-TRIAGE-2026-11-26.md` (10 RouteNotFound, 9 false-is-true, 4 ErrorException,
+copy hygiene, query-budget 31-vs-29) are separate and unmeasured here.
+
+## KI-170 — `SeededProvenanceNoteRefreshTest` expects seeder note/provenance behaviour that is not implemented (6 red)
+
+**Symptom.** `tests/Feature/SeededProvenanceNoteRefreshTest.php` (11 cases, committed at `6cc3ede1`)
+asserts six behaviours the seeders do not provide: (a) the tracker evidence limit appended to every
+imported career note, (b) a stale seed-owned note refreshed on re-seed, (c) a missing note filled,
+(d) the seeded trainee/card pair repaired in place from the published card identity, (e) the Rosy
+Turn-67 endpoint limit appended, and (f) the short-lived Run-3 fixture disclosure removed while
+Trainer text survives. The file also asserts Trainer-edited notes are left untouched and that a second
+seed adds no rows.
+
+**Evidence (source-verified 2026-11-27 at `fd9f3e2e`).** `database/seeders/UraFinaleRunsSeeder.php`
+`importRun()` early-returns when `TrainingRun::where('import_source', $source)->exists()`, seeding only
+the deck fixture — so no note refresh, fill or identity repair path runs on re-seed.
+`database/seeders/RosyDreamsRiceShowerSeeder.php:592` passes a verbatim `notes` string through
+`ImportHistoricalRun`. `app/Actions/ImportHistoricalRun.php:38` stores `'notes' => $run['notes'] ?? null`
+verbatim. Nothing in that chain appends a limit, refreshes a stale note, or strips a disclosure.
+KI-171's scheduled-races fix **is** present in `RosyDreamsRiceShowerSeeder` (`RACES` const, `Entered`
+status for the two unfilled races), so it is not part of this defect.
+
+**Impact.** Pre-existing test-ahead-of-implementation, not a Docs-merge or Fullstack regression. The
+suite is red at `fd9f3e2e`. Release-blocking until resolved.
+
+**Owner/assignment.** Backend implements the seeder note/provenance features **or** the owner rules
+that the test contract should be rewritten to verbatim-notes behaviour. One implementation owner:
+Backend. Do not renumber. Filed from Coordinator msg#144 routing; not an accepted requirement and not
+an approved design.

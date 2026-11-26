@@ -1,15 +1,16 @@
 # TrainerDesk — Project Status
 
-**Status date:** 2026-11-26 (MYT, UTC+8)  
+**Status date:** 2026-11-27 (MYT, UTC+8)  
+**Status provenance (this revision, 2026-11-27):** Docs verified actual local Git state in the `docs` worktree and the registered worktrees at this checkpoint — not a report relay. The previously supplied Project copy pinned `3b9415c6` and is **older** than the observed `fd9f3e2e` checkpoint; its `3b9415c6` pin is retained as history, not as current tip. No application database access, no test execution, no runtime probe was performed for this revision.  
 **Application:** Trainer Desk / TrainerDesk  
 **Repository:** `D:\Projects\umamusume-laravel13` · [GitHub](https://github.com/IzzatFirdaus/umamusume-laravel13)  
 **Current version:** v3.0.0 pre-release  
 **Current phase:** Integration, residual implementation, safety remediation and release qualification  
 **Release disposition:** NOT QUALIFIED  
-**Operating model:** Five permanent WorkBuddy Experts; four specialist worktrees; binding V2.1 authority; V2.2 hybrid execution prompts  
-**Latest reported master checkpoint:** `3b9415c6` (VERIFIED by Docs 2026-11-26: actual `master` HEAD = `3b9415c6`; `origin/docs` fast-forwarded to match, effective diff empty)  
-**Earlier supplied published master pin:** `6e17dca086dae6eafbf8ed1fafb3a4d956b19e6f` (2026-11-26)  
-**Status provenance:** Original 23–26 November reports, V2.1 handoff and source/CI roadmap, reconciled with the supplied *TrainerDesk — Hybrid Expert Implementation Prompts V2.2*. The latter is a secondary account of newer Expert reports and assignments, not raw Git, test or MCP evidence. No fresh local or remote repository, MCP mailbox, database or runtime inspection was performed for this revision. Retain earlier pinned evidence as historical; establish actual current state at A1.
+**Operating model:** Eight participating Experts over five original V2.1 authorisations; four specialist worktrees; binding V2.1 authority; Autonomous AI Agent Prompt Collection V3  
+**Verified master checkpoint (this revision):** `fd9f3e2e` — `docs` worktree fast-forwarded to it, `0` ahead / `0` behind `origin/master`, working tree clean  
+**Superseded pins (history, not current tip):** `3b9415c6` (2026-11-26 report), `6e17dca086dae6eafbf8ed1fafb3a4d956b19e6f` (2026-11-26 published)  
+**Status provenance:** Docs measured local Git state directly at this checkpoint — `git rev-parse`, `git rev-list --left-right --count`, `git worktree list`, `sha256sum` of candidate files. MCP messages #132–#147 were read from the `trainerdesk` room. Earlier 23–26 November reports and the V2.2 prompt bundle are retained only where their claims are not superseded by this measurement. No application database access, no test execution, no operational process and no application code change was performed.
 
 ## 0. Read this first
 
@@ -59,16 +60,16 @@ Evidence labels: **PUB** = prior supplied report's pinned published source/remot
 
 | Item | Last evidenced position | Current disposition |
 |---|---|---|
-| Master | `3b9415c6` (V2.2 prompt bundle, REP via DOC); earlier `6e17dca086dae6eafbf8ed1fafb3a4d956b19e6f` (roadmap, PUB) | Newer reported checkpoint; exact full SHA, ancestry, publication and live tip UNKNOWN |
-| Docs merge regression | `67e7d947` (Docs merge), `23581aa2` (reported published master regression); restoration `57faa9de`, `b9a714f2` (REP via DOC) | Restoration reported; root cause, full effective diff, restoration completeness and current ancestry OPEN |
-| Docs contributions | `67e7d947`, `3f78662f`, `7b34a048` (REP via DOC) | Preserve legitimate documentation; verify exact trees and publication |
-| Frontend synchronization | `130e998e` (REP via DOC), preserve `186eb10b` | Recheck local branch/ancestry and actual source; producer evidence 34/271, rendered acceptance OPEN |
-| Backend frozen delivery | MCP #42 (REP via DOC) | Rejected pending synthetic-only fixture correction and independent authorization evidence |
-| Task #12 + Check #6 master merge | `0f58aefb57ebfcfbdcc7f1b558e460a6a732683e`; Backend `82786761` | Integrated/published; final safety acceptance conditional |
+| Master | `fd9f3e2e` (MEASURED 2026-11-27) | Local `master` HEAD and `origin/master` both at `fd9f3e2e`; `docs` fast-forwarded to it, 0/0. Published remote state beyond `origin` refs UNKNOWN |
+| Docs merge regression | `67e7d947` (Docs merge), `23581aa2` (reported published regression); restoration `57faa9de`, `b9a714f2` | Code restored and verified empty-diff against `6e17dca0` at `b9a714f2` (REP). Causal mechanism and root-cause acceptance still OPEN as a separate incident — restoration is not closure |
+| Docs contributions | `67e7d947`, `3f78662f`, `7b34a048`, `1db4aace`, `c185f30d`, `b88cc533` | All six are ancestors of `fd9f3e2e` (MEASURED). Preserve; no re-publication needed |
+| Frontend synchronization | `130e998e` (REP), preserve `186eb10b` | Local `frontend` worktree at `130e998e` (MEASURED via `git worktree list`). Rendered acceptance still OPEN; producer 34/271 is not rendered proof |
+| Backend frozen delivery | MCP #42 / #49 rejected; candidate re-reported #147 | Rejected for integration. Candidate identity moved again — see §4.1 and `SITREP-P0-DB-SAFETY-RECONCILIATION-2026-11-27.md` |
+| Task #12 + Check #6 master merge | `0f58aefb`; Backend `82786761` | Check #6 integrated/PASS. Task #12 **CONDITIONAL** — independent acceptance outstanding and identity-blocked |
 | Portable MCP V2 | `efdbafdef900a6c47f4a5213f795d9885b8b764b` | Integrated/published |
-| Docs | `4039b1ac1f9a8069dd500d52a482e037eba9fa4f`; ancestors `ccd3ada7`, `318d76fd`, `1f6f0257` | Published; at older cutoff 5 ahead/14 behind master, base `f820ada9`; current divergence UNKNOWN |
-| Earlier Backend final diff | `efdbafde...0f58aefb` | 10 paths, +407/-41 (not 9); actual newer diff requires inspection |
-| Local worktrees | Earlier Master/Fullstack `0f58aefb`, Backend `82786761`, FE `eabdf141`, Docs `4039b1ac`; newer reported FE `130e998e` and Backend frozen #42 | Historical REP only; current local HEAD/tree, dirty files, branches, stashes, remote refs and active writers UNKNOWN |
+| Docs | `fd9f3e2e` (MEASURED); ancestors include `4039b1ac`, `3f78662f`, `7b34a048` | Fast-forwarded to master at this checkpoint; 0 ahead / 0 behind `origin/master` |
+| Backend candidate (MEASURED 2026-11-27) | Worktree HEAD `962c85b5`; `DatabaseSafetyTest.php` `9f207474`, `AgentSessionIsolationTest.php` `ed634e9b`, `agent-run.php` `6382a533` | `8bc64e4a` (msg#133/#136/#137) and `6b72a6ab` (msg#145) both superseded. Unverified; not accepted |
+| Local worktrees (MEASURED 2026-11-27) | Master/Fullstack `fd9f3e2e`, Backend `962c85b5`, Frontend `130e998e`, Docs `fd9f3e2e`, `docs-delivery8` detached `1db4aace` | Current HEADs measured. Dirty-file state per worktree not audited here; no worktree modified by this revision |
 | Original programme | 250 organizational assignments: FE 62, BE 84, Docs 46, FS 58 | Original 730-line inventory unavailable; not a feature denominator; no aggregate completion count/percentage |
 | Destructive reset | Earlier discarded Backend Task #12 changes; recovery/reconstruction reported | A2 open until equivalence and unique recovery evidence established |
 
@@ -111,7 +112,13 @@ Task #12 and Check #6 were integrated at `0f58aefb`; FS-INT-3/L1 corrections exi
 
 **Do not rerun these suites unchanged, even read-only.** No genuine data snapshot as test fixture. Use unique synthetic simulated canonical plus scratch A/B and a private application context. Assert normalized actual target identity before bootstrap/opening, reject real path/aliases/symlink/URI, prevent inherited env/config cache/PDO fallback; verify launcher uses only disposable synthetic data. Prior 89/451 and 15/45 green reports cannot establish disposable-only execution. No new destructive mutation is proved solely by test source.
 
-**V2.2 delivery disposition:** message #42 is rejected for integration pending independently generated synthetic-only fixtures. The supplied prompts do not establish its exact file diff, tested SHA, executed commands, original tool receipt or database access history. Retrieve the actual delivery and coordinate reopening before modifying it. Explicitly prohibit VACUUM INTO, SQLite backup, file copying or any other fixture creation from genuine Trainer data. Supersede #42 with a reviewed frozen candidate and meaningful positive/negative controls; do not change the already-correct marker predicate simply to match a contradictory report. Reconcile explicit `"0"` test names and assertions against the actual tested revision.
+**Delivery disposition (2026-11-27, MCP #132–#147):** msg#42 and msg#49 are rejected for integration. Backend's corrected candidate is now committed at backend worktree HEAD `962c85b5`; measured identities are `DatabaseSafetyTest.php` `9f207474`, `AgentSessionIsolationTest.php` `ed634e9b`, `agent-run.php` `6382a533`. The isolation-test identity has moved three times (`8bc64e4a`, `6b72a6ab`, `ed634e9b`), so no verification may be carried across candidates. Fullstack's independent acceptance (msg#145) is outstanding and was blocked on exactly that identity drift.
+
+**Genuine access, not modification:** Backend reports (msg#132, recorded msg#136) execution of the unsafe master variants in the **primary checkout**, opening the genuine canonical read-only (`DB::connection()`, a `count()` query, `filesize()` reads, a ~4 MB WAL with recent mtime). **No genuine modification is established** — write paths were refused before mutation — but a main-file hash, a size or an integrity check cannot prove its absence, and the WAL content was not examined. `54 passed / 108 assertions` (msg#31) is **rejected as safe-execution evidence**; it is a regression count with no disposable-only proof.
+
+**`UMA_CANONICAL_DATABASE` identity confusion:** the override redefines the guard's protected file (`config/database-safety.php:67` → `DatabaseGuard::canonicalPath()` `:54–59` → `targetsCanonical()` `:112–118` → `AgentSessionGuard::onConnectionEstablished()` early return `:111–123`), and `agent-run.php:45–50` re-applies it from all three env sources before `canonicalPath()` resolves. Backend's "does not weaken genuine canonical protections" wording is **not accepted as written**. The fail-closed correction (strip/validate/refuse) is **PROPOSAL ONLY — not implemented, not approved, no ruling.** Protected canonical identity must stay distinct from synthetic fixture-source selection.
+
+**SQLite hash limit:** `dbbbd970…` is a hash of the main database file only. It is not WAL-consistent preservation; committed data may live in `database.sqlite-wal`. Consistent preservation copies the `sqlite` + `-wal` + `-shm` set with the application stopped, per `docs/sitrep/P0-CANONICAL-DB-PRESERVATION-PROCEDURE-2026-11-26.md`, and verifies offline on the copy. See `docs/sitrep/SITREP-P0-DB-SAFETY-RECONCILIATION-2026-11-27.md`.
 
 ### 4.2 Mandatory discriminating matrix
 
@@ -139,7 +146,7 @@ Record role, marker-source class, expected/resolved identity, exact decision, ex
 | #3 Browser identity | Final acceptance outstanding | FE: wrong server/port/role/DB/token/PID, occupied port, replacement worker/retry; private positive case |
 | #4 Maintenance authorization | Integrated, conditional | BE/FS: full matrix above |
 | #5 Expected identity | Prior PASS, revalidate affected paths | BE/FS: expected A vs B/cache/role |
-| #6 Fixture classification | Integrated; reported 8/29, coverage limited | BE: verify independent catalogue page vs API, fixture eligibility, provenance |
+| #6 Fixture classification | PASS — test committed + frozen + integrated (`82786761`, master `0f58aefb`); functional 35 passed/343 (msg#32) | BE/Docs: separate catalogue-page vs API behaviour and external real-record provenance still unproved; not a gate failure |
 | #7 Docs and classification | PARTIAL | Docs/Coordinator: dated reconciliation and failure disposition |
 | #8 Persistent data preservation | Historical structural PASS only; incident OPEN | FS/owner: bounded approved offline preservation; no repeat live probe |
 
@@ -158,6 +165,41 @@ Historical SQLite audit: CLI 3.54.1, PHP SQLite 3.53.2, WAL, integrity/FK checks
 The V2.2 prompts report that Docs merge `67e7d947` introduced unexpected application/tooling changes associated with published master regression `23581aa2`. Restoration is reported at `57faa9de`, `b9a714f2` and subsequent commits; the actual trees, parent diffs, changed paths and causal mechanism are not supplied in the prompt bundle. Do not infer that branch divergence alone caused the regression, or that restoration closes the incident. Preserve the legitimate documentation from `67e7d947`, `3f78662f` and `7b34a048`.
 
 Fullstack and Docs: inspect both parents, merge tree, conflict resolution and effective diff against the intended integration base; establish whether index manipulation, merge resolution or another mechanism caused stale application content/deletions. Verify restoration semantically against accepted contracts and current source. Any proposed Docs merge must demonstrate authorized documentation-only effective changes, preserve unrelated source/tooling, verify exact staged diff and resulting commit tree before publication. No indiscriminate unstaging of application merge results, force-push, history rewrite, competing Docs application repair or unreviewed mixed-scope merge. Coordinator records restoration and root-cause acceptance separately. Fullstack owns application/integration remediation; Docs owns documentation evidence and scoped publication. No new master-push permission.
+
+**Ancestry evidence, three named commits (MEASURED 2026-11-27).** All three are ancestors of
+`fd9f3e2e` (`git merge-base --is-ancestor` → true for each). Contents established by `git show --stat`:
+
+| Commit | Subject | Changed paths |
+|---|---|---|
+| `c185f30d` | record Backend msg#49 independently rejected | `docs/sitrep/DB-SAFETY-ACCEPTANCE-2026-11-25.md` (1 line), `project-status.md` (6 lines) |
+| `b88cc533` | relocate root markdown to `docs/` per AGENTS placement; KI-169 index row | 10 paths: 5 root `.md` moved to `docs/`, `KNOWN-ISSUES.md` +1, three new `docs/sitrep/` files, `docs/SESSION_HANDOFF-V2.1-2026-11-26.md` |
+| `1db4aace` | preserve `e8c370bc` disputed mechanics unresolved | 2 paths under `docs/audits/trainer-desk-v3-ux/scenario-research/`: `grand-concert-s9-s18-slices.md` +1, `scenario-information-gaps.md` +9 |
+
+All three are documentation-only. None touches application source, tooling or tests. The relocation in
+`b88cc533` is a move, not a deletion — the root copies no longer exist and the `docs/` copies are the
+tracked ones. The root `project-status.md` remains at repository root by explicit owner request and is
+**not** part of that relocation.
+
+## 4.6 Canonical documentation set — current state
+
+| Domain | Owner file | State |
+|---|---|---|
+| Product and capability | `docs/roadmap/PRODUCT-AND-CAPABILITY-ROADMAP.md` | Present |
+| Implementation order | `docs/roadmap/MASTER-IMPLEMENTATION-ROADMAP-2026-11-18.md` | Present; ordering authority |
+| Frontend and UX | `docs/roadmap/FRONTEND-AND-UX-ROADMAP.md` + `UI-UX-IMPLEMENTATION-ROADMAP-2026-11-18.md` | Present |
+| Quality and verification | `docs/roadmap/QUALITY-AND-VERIFICATION-ROADMAP.md` | Present |
+| V3 release | `docs/roadmap/V3-RELEASE-ROADMAP.md` | Present |
+
+Five domain roadmaps, one ordering authority, no competing roadmap created by this revision. The
+`docs/roadmap/` folder also retains historical roadmaps as record; they own no current execution order
+and are not alternatives to the MASTER file. `docs/roadmap/INDEX.md` is the folder entry point.
+
+Preserved source gates and conflicts, unchanged by this revision: Grand Concert S9–S18 slices remain
+BLOCKED_BY_EVIDENCE (no Lesson, Song, Live Bonus or Promotional Live representation); Trackblazer
+variant-selection remains unresolved (no source names aptitude-letter thresholds or base-vs-inherited
+precedence); Happy Meek retains its PARTIAL classification with the 5-vs-15 SP and 5-vs-6-win conflicts
+recorded rather than resolved. See `docs/audits/trainer-desk-v3-ux/scenario-research/` and the
+`scenario-information-gaps.md` conflict rows.
 
 ## 5. P0 Advisor regression and Windows CI
 

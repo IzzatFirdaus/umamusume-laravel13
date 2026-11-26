@@ -1,5 +1,40 @@
 # Expert Operating Model — TrainerDesk
 
+## Mandatory report identification (owner-approved, 2026-11-26)
+
+Every user-facing report begins with the assigned agent identity and Expert role on its first line.
+This convention is owner-approved (Coordinator msg#121, assigned to Docs msg#122). It changes no
+identity, session, permission, worktree or authority.
+
+| First line | Expert |
+|---|---|
+| `Coordinator — Senior Project Manager` | Coordinator |
+| `Fullstack — Senior Developer` | Fullstack |
+| `Backend — Backend Architect` | Backend |
+| `Frontend — Frontend Developer` | Frontend |
+| `Docs — Technical Documentation Engineer` | Docs |
+| `Infrastructure — Infrastructure Operations Expert` | Infrastructure |
+| `Deep Research — Deep Research Expert` | Deep research |
+| `UX — User Experience Researcher` | UX |
+
+Include the established session or version where the session carries one. MCP inter-agent messages to
+the `trainerdesk` room are not user-facing reports and are not required to carry the prefix, though
+clarity is welcome.
+
+### Authorisation status of the eight participating Experts
+
+Five Experts hold the original V2.1 authorisation. Three participate with formal authority still
+**OWNER-CONFIRMATION-PENDING**; this document does not grant them permissions.
+
+| Expert | Authorisation |
+|---|---|
+| Coordinator, Fullstack, Backend, Frontend, Docs | Original V2.1 authorised |
+| Infrastructure, Deep Research, UX | Participating; formal authority OWNER-CONFIRMATION-PENDING |
+
+Pending status is not a demotion and not a promotion. Do not infer worktree, Git, database, provider or
+publication authority for the three from their participation, and do not silently grant it by
+documenting this convention.
+
 ## Single repository, linked worktrees
 
 One physical repo: `D:/Projects/umamusume-laravel13`, branch `master` is authoritative.

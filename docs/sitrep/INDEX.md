@@ -27,6 +27,9 @@ This directory holds session reports and handoffs. Consolidated workstream repor
 | Tracker | Workstream | Date |
 |---|---|---|
 | [`DB-SAFETY-ACCEPTANCE-2026-11-25.md`](DB-SAFETY-ACCEPTANCE-2026-11-25.md) | Cross-agent database safety, eight checks | 2026-11-25 |
+| [`SITREP-P0-DB-SAFETY-RECONCILIATION-2026-11-27.md`](SITREP-P0-DB-SAFETY-RECONCILIATION-2026-11-27.md) | P0 reconciliation of MCP #132–#141: genuine read access, no established modification, candidate identity drift, `UMA_CANONICAL_DATABASE` identity confusion, WAL-vs-hash limit | 2026-11-27 |
+| [`2026-11-27-advisor-infrastructure-qualification.md`](2026-11-27-advisor-infrastructure-qualification.md) | Advisor infrastructure qualification: 81 tests / 325 assertions (attributed), corrected `terminate()` telemetry lifecycle, revision-gap and evaluator findings | 2026-11-27 |
+| [`SITREP-RESEARCH-ATTRIBUTION-2026-11-27.md`](SITREP-RESEARCH-ATTRIBUTION-2026-11-27.md) | Research attribution correction (#101–#110 = docs, not deep-research), `ux` identity, three undelivered Advisor artifacts | 2026-11-27 |
 
 ---
 
