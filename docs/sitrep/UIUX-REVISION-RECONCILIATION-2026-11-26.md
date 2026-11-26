@@ -1,15 +1,33 @@
-# UI/UX Revision Reconciliation — ND-1..ND-16 (2026-11-26)
+# UI/UX Revision Reconciliation — Nine Revision Areas vs ND-1..ND-16 (2026-11-26)
 
 **Author:** Technical Documentation Engineer
-**Scope:** Reconcile the nine original UI/UX revisions against authoritative owner decisions. Distinguish approved policy, review guidance and house rules. No functionality reopened.
+**Scope:** Reconcile the nine original UI/UX revision areas against authoritative owner decisions. Distinguish approved policy, review guidance and house rules. No functionality reopened.
 
 ## 1. What the "nine UI/UX revisions" are
 
-The original programme's "nine UI/UX revisions" resolve to the **ND-1..ND-16 owner-decision set** (ND-4 lives in the combined Area F packet `area-f-plan-n2-10-nd-4.txt`; the other fifteen are `area-j-nd-000N.txt`). These are the review-driven layout/behaviour reversals that require an owner ruling before a spec assertion is inverted. They are distinct from:
+The original programme's "nine UI/UX revisions" are **nine revision areas**, not the ND-1..ND-16 owner-decision set. The existence of sixteen ND decisions does **not** establish equivalence between the two sets; no authoritative mapping equates them. The nine areas are:
 
-- **House rules** — `AGENTS.md` §13 (UI/UX rules) + `DESIGN.md` tokens. Always binding, never owner-gated.
-- **Review guidance** — `docs/audits/2026-11-21-frontend-browser-review/`, `2026-11-22-frontend-browser-review/`, `2026-11-22-bento-design-language-review/`. Descriptive findings, not authority.
-- **Approved policy** — the ND packets once an owner ruling is recorded; until then each is OWNER-GATED.
+1. Typography hierarchy
+2. Semantic colours
+3. Spacing and surfaces
+4. Action hierarchy
+5. Perceptual grouping
+6. Purposeful motion
+7. Accessible interactive targets
+8. Dominant tasks
+9. Meaningful statistical identity
+
+These areas are distinct from, and must not be conflated with, the following categories:
+
+- **ND-1..ND-16 owner decisions** — review-driven layout/behaviour reversals requiring an owner ruling (ND-4 in `area-f-plan-n2-10-nd-4.txt`; others `area-j-nd-000N.txt`). Descriptive until an owner ruling is recorded.
+- **UI-1..UI-7** — a separate UI identifier series, not the nine areas and not the ND set.
+- **TOG supporting research** — descriptive research input; never mandatory requirement without owner authorization.
+- **DESIGN.md requirements** — design tokens and binding design rules.
+- **AGENTS.md house rules** — §13 UI/UX rules; always binding, never owner-gated.
+- **Technical review guidance** — `docs/audits/2026-11-21-frontend-browser-review/`, `2026-11-22-frontend-browser-review/`, `2026-11-22-bento-design-language-review/`. Descriptive findings, not authority.
+- **Owner-approved policies** — the ND packets once an owner ruling is recorded; until then each is OWNER-GATED.
+
+No equivalence between the nine areas and ND-1..16 is asserted. Historical owner decisions are not redefined.
 
 ## 2. ND set status (all OWNER-GATED, none silently applied)
 
