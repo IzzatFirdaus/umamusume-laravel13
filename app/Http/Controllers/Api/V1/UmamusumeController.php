@@ -28,6 +28,8 @@ class UmamusumeController extends Controller
         $searchKey = is_string($search) && $search !== '' ? $normalizer->normalize($search) : null;
 
         $umamusumes = Umamusume::with('aliases')
+            ->where('is_fixture', false)
+            ->when($statusValue === null, fn ($q) => $q->where('release_status', ReleaseStatus::GlobalReleased->value))
             ->when($statusValue !== null, fn ($q) => $q->where('release_status', $statusValue))
             ->when($searchKey !== null, fn ($q) => $q->where('match_key', 'like', "%{$searchKey}%"))
             ->orderBy('name')

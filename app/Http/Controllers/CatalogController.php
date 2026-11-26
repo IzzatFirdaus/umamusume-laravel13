@@ -117,6 +117,7 @@ class CatalogController extends Controller
 
         $query = Umamusume::query()
             ->with(['cards' => $this->cardScope($showUnconfirmed)])
+            ->where('is_fixture', false)
             ->when(! $showAllStatus && $statusEnum === null, fn (Builder $q): Builder => $q->where('release_status', ReleaseStatus::GlobalReleased->value))
             ->when($statusEnum !== null, fn (Builder $q): Builder => $q->where('release_status', $statusEnum->value))
             ->when($surface !== null, fn (Builder $q): Builder => $q->whereNotNull('aptitude_'.$surface))
@@ -214,6 +215,7 @@ class CatalogController extends Controller
             // one query for the number the count line prints, and `CatalogRosterTreeTest` holds that the
             // tree never grows a query per row.
             'totalCount' => $searchKey === null ? $total : Umamusume::query()
+                ->where('is_fixture', false)
                 ->when(! $showAllStatus && $statusEnum === null, fn (Builder $q): Builder => $q->where('release_status', ReleaseStatus::GlobalReleased->value))
                 ->when($statusEnum !== null, fn (Builder $q): Builder => $q->where('release_status', $statusEnum->value))
                 ->count(),

@@ -32,6 +32,7 @@ class UmamusumeResource extends JsonResource
             'jpDebutDate' => $this->jp_debut_date?->toDateString(),
             'globalDebutDate' => $this->global_debut_date?->toDateString(),
             'isManual' => $this->is_manual,
+            'isFixture' => $this->is_fixture,
             'aliases' => $this->whenLoaded('aliases', fn () => $this->aliases->map(fn (UmamusumeAlias $alias): array => [
                 'alias' => $alias->alias,
                 'language' => $alias->language->value,
