@@ -31,6 +31,12 @@ jobs:
       - uses: actions/setup-python@v6
         with:
           python-version: '3.12'
+      # Test-tool only: `tools/verify-backdrop.py` decodes the shipped plates and measures
+      # their contrast, so the fast gate needs a decoder and an array type. Not an application
+      # dependency and not carried by the installer; pinned so a decoder change cannot read as
+      # artwork drift.
+      - name: Install gate tool dependencies
+        run: python -m pip install --disable-pip-version-check -r tools/requirements-gates.txt
       - uses: actions/setup-node@v5
         with:
           node-version: '24'

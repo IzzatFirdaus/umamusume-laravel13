@@ -139,6 +139,18 @@ final readonly class AdvisorSnapshot
     }
 
     /**
+     * The revision a page and a response are compared on, read through the one fingerprint.
+     *
+     * Public so the cockpit can stamp the page with the same number the analysis carries
+     * (`runs.advisor-analysis`); a second implementation of the hash would let the two drift and
+     * the stale-answer check would compare two different things.
+     */
+    public static function revision(TrainingRun $run, ?TurnEntry $latest): string
+    {
+        return self::fingerprint($run, $latest);
+    }
+
+    /**
      * The fingerprint a cached answer is keyed on, and the value a response carries so a stale one
      * can be recognised.
      *

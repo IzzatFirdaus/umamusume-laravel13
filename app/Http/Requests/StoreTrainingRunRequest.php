@@ -55,7 +55,21 @@ class StoreTrainingRunRequest extends FormRequest
              * and no request change (D-240, owner ruling 2026-09-27 — validation at
              * the boundary instead of a migration to a foreign key).
              */
-            'scenario' => ['nullable', 'string', Rule::in(self::scenarios())],
+            'scenario' => ['nullable', 'string', Rule::in(self::scenarios()), function (string $attribute, mixed $value, Closure $fail): void {
+                // C05 (KI-169): the scenario is immutable from the first recorded turn. The model's
+                // saving guard refuses the same write, but a Form Request turns it into a field error
+                // the header form can render instead of a 500. Re-posting the run's own scenario is
+                // not a change and stays legal, which is what the header form does on every save.
+                $run = $this->route('run');
+
+                if (! $run instanceof TrainingRun || $value === null || $value === $run->scenario) {
+                    return;
+                }
+
+                if (! $run->canChangeScenario()) {
+                    $fail('The scenario cannot be changed after the first turn is recorded.');
+                }
+            }],
             'status' => ['required', Rule::enum(RunStatus::class)],
             'mode' => ['nullable', Rule::enum(RunMode::class)],
             'inheritance_parent_a_id' => ['nullable', 'integer', Rule::exists('umamusume', 'id')],

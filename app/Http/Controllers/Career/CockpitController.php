@@ -16,6 +16,7 @@ use App\Models\Skill;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
 use App\Services\Advisor\Advice;
+use App\Services\Advisor\AdvisorSnapshot;
 use App\Services\Advisor\NextDecision;
 use App\Services\Advisor\TrainerAdvisor;
 use App\Services\Career\RaceStripBuilder;
@@ -312,6 +313,12 @@ class CockpitController extends Controller
             'moodEffectTable' => config('uma.mood_effect'),
             'actions' => $this->actionSection($run, $advice),
             'advisor' => $this->advisorSection($advice, $run),
+            // The career revision the AI layer fingerprints with (`AdvisorSnapshot::revision()`), as a
+            // sibling of `advisor` rather than a key inside it: `advisor` is pinned to exactly
+            // `decision` and `finale` by `CareerCockpitTest`, and the page needs the number whether
+            // or not the AI switch is on — it describes the career, not the provider. The panel
+            // compares a response against it, which is how a same-turn edit is caught.
+            'advisor_revision' => AdvisorSnapshot::revision($run, $latest),
             // Our Grand Concert's five Performance types and what this run's turns recorded against
             // them (`docs/scenarios/07-grand-concert.md` §"The loop, in order"). A scenario the matrix
             // gives no Performance field answers `enabled: false` with the same key set, so the page
@@ -388,6 +395,10 @@ class CockpitController extends Controller
             // and the form re-posts the stored values it is not editing.
             'umamusume_id' => $run->umamusume_id,
             'scenario' => $run->scenario,
+            // C05 (KI-169): whether the header's scenario picker may still write. One reader
+            // (`TrainingRun::canChangeScenario()`) behind both this prop and the model's saving guard,
+            // so the disabled control and the refusal cannot disagree.
+            'can_change_scenario' => $run->canChangeScenario(),
             'scenario_label' => $run->hasScenario()
                 ? (string) config('scenarios.scenarios.'.$run->scenarioKey().'.label', $run->scenarioKey())
                 : 'No scenario set',
