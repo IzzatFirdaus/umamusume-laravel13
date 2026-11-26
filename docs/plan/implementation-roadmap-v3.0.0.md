@@ -17,6 +17,14 @@ Three contradictions in the SITREP I am **not** silently resolving — they are 
 ---
 
 # Trainer Desk v3.0.0 — Implementation Roadmap
+<!-- PLAN-CONTRACT
+plan: implementation-roadmap-v3.0.0
+status: landed
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 **Target:** a fully functional v3.0.0 where every user-facing surface renders correctly, every WCAG pair passes or is an owner-accepted carve-out, artwork is present on first install without manual intervention, and the test suite is green without infrastructure ambiguity.
 

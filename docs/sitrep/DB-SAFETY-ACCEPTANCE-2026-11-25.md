@@ -29,9 +29,9 @@ the evidence used to accept each check. Use PASS / PARTIAL / FAIL / BLOCKED only
 | #3 | BLOCKED | Static review of `tests/browser/server-router.php`, `tests/browser/browser-isolation-contract.spec.ts`, `tests/browser/support/server-identity.ts`; `docs/handoffs/frontend-check3-browser-identity-evidence.md` (executed at `b6e5120e`) | Evidence exists but predates the integrated safety implementation (`6aab6503` runtime identity re-check). **Must be re-verified by Frontend against master `1cb070f7`.** Not carried forward as unconditional |
 | #4 | PARTIAL | This tracker §Integration verification record 2026-11-26 (probes L1–L3) | Markerless isolated role + inherited ack on canonical re-target is now **REFUSED** (L3). Remaining: `DatabaseGuard::environment()` reads `$_SERVER` → `$_ENV` → `getenv()`, so a caller that sanitizes only `putenv()` leaves a stale `$_SERVER` value winning (L1 = `yes`). `tools/agent-run.php` clears all three, so the launcher path is closed; any other sanitizer must do the same |
 | #5 | PASS | This tracker §Integration verification record 2026-11-26 (probe P3–P5, isolated role, disposable scratch DBs) | Boot with expected=A GRANTED; post-boot switch to B REFUSED (`DatabaseSafetyViolation`); reconnect still REFUSED. Limitation (source-level, not a defect at this tree): a connection resolved *before* the role became isolated is cached and not re-checked (L2) |
-| #6 | PARTIAL | `docs/sitrep/DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md` §Check #6; `database/factories/UmamusumeFactory.php` | Docs provenance verified (28 source-backed names); Backend's dedicated regression evidence not yet attached. Separate Docs/Backend dependency |
-| #7 | PARTIAL | `docs/sitrep/DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md`; AGENTS.md §13/§13.5; `docs/INDEX.md`; this tracker | #1/#4/#5 now have Fullstack integration evidence attached; #3 re-verification and the full-suite 1,973-failure classification remain open. Not a blanket prerequisite for all checks |
-| #8 | PASS | This tracker §Check #8 verification record (fresh read-only probe output) | Structural preservation only — counts and identity match the 2026-11-25 backup (`umamusume`=135, `training_runs`=18, `roster_members`=0, `character_cards`=263, `race_entries`=39, `veterans`=8, `integrity_check`=ok, `foreign_key_check`=0). **Not** evidence of genuine gameplay restoration; AGENTS.md §13.5 wording still stale (routed to Docs #7) |
+| #6 | PARTIAL | `docs/sitrep/DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md` §Check #6; `database/factories/UmamusumeFactory.php` | Historical claim of 28 curated source-backed names NOT located in inspected factory/stashes; factory uses `Str::title(fake()->unique()->words(2, true))` with `is_fixture => true`, `catalogue()` opt-in, `manual()` sets `is_manual`. Classification implemented; curated identity provenance unverified. Backend regression evidence not attached. Separate Docs/Backend dependency; authoritative requirement definition pending Coordinator |
+| #7 | PARTIAL | `docs/sitrep/DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md`; AGENTS.md §11 (change-safety; §13 is UI/UX, no §13.5 exists); `docs/INDEX.md`; this tracker | #1/#4/#5 now have Fullstack integration evidence attached; #3 re-verification and the full-suite 1,973-failure classification remain open. Not a blanket prerequisite for all checks |
+| #8 | PASS | This tracker §Check #8 verification record (fresh read-only probe output) | Structural preservation only — counts and identity match the 2026-11-25 backup (`umamusume`=135, `training_runs`=18, `roster_members`=0, `character_cards`=263, `race_entries`=39, `veterans`=8, `integrity_check`=ok, `foreign_key_check`=0). **Not** evidence of genuine gameplay restoration; AGENTS.md has no DB-safety section with pinned counts (§11 is change-safety, §13 is UI/UX); the pinned-count wording does not exist (routed to Docs #7, FS-INT-6 closed as not-a-defect) |
 
 **Status vocabulary (2026-11-25):** `PENDING` = not yet worked; `PARTIAL` = some verified evidence landed, named blockers remain; `PASS` = all required evidence green and cited; `FAIL` = verified defect; `BLOCKED` = cannot proceed without owner/peer action. A check is never marked `PASS` on documentation alone or on the existence of a config/test file — only on executed, cited evidence. #7 is `PARTIAL`: documentation reconciliation landed, but #7 cannot close until Backend (#1/#4/#5) and Frontend (#3) implementation reports are attached and the full-suite failure triage is resolved.
 
@@ -230,8 +230,9 @@ detects catastrophic mutation without failing when the owner adds a genuine care
 edit: **7 passed (16 assertions)**. Other `toBe(18)` / `toBe(8)` / `toBe(135)` assertions in the tree
 belong to seeded, isolated-DB tests (deterministic seeder output) and are not canonical dependencies.
 
-**Note routed to Docs (#7):** AGENTS.md §13.5 still describes the pinned canonical inventory as an
-asserted fact; update that wording to structural invariants (owner of that file: Docs agent).
+**Note routed to Docs (#7) — resolved 2026-11-26:** AGENTS.md has no §13.5; §13 is UI/UX and §11 is
+change-safety. No pinned canonical inventory wording exists in AGENTS.md. FS-INT-6 closed as
+not-a-defect (no stale wording to fix).
 
 ---
 
@@ -268,11 +269,11 @@ So `UMA_EXPECTED_DATABASE` is executable protection **only at boot**, not on con
 
 ### Check #6 — Backend Architect + Docs — PARTIAL
 
-Docs provenance reviewed and independently supported: all 28 `UmamusumeFactory::$sourceNames` entries are curated source-backed names, `is_fixture => true` default with `catalogue()` opt-in, `is_manual` separate. Backend's dedicated factory regression evidence was not attached at review time.
+Docs provenance reviewed: the claimed 28 `UmamusumeFactory::$sourceNames` curated names were NOT located in the inspected factory or stashes. The factory generates fixture names via `Str::title(fake()->unique()->words(2, true))` with `is_fixture => true` default, `catalogue()` opt-in, `is_manual` separate. Classification is implemented; curated identity provenance is unverified. Backend's dedicated factory regression evidence was not attached at review time. Authoritative requirement definition pending Coordinator/Backend.
 
 ### Check #7 — Docs — PARTIAL
 
-Docs report reconciled AGENTS.md §13 against code and found no discrepancy; however they classify #7 as PARTIAL pending Backend #1/#4/#5 and Frontend #3 reports. One new discrepancy created by this session's Check #8 fix: AGENTS.md §13.5 still says the suites assert pinned canonical counts (`umamusume=135`, etc.); the boundary suite now asserts structural invariants. Routed to Docs.
+Docs report reconciled AGENTS.md §13 (UI/UX) and §11 (change-safety) against code and found no discrepancy; they classify #7 as PARTIAL pending Backend #1/#4/#5 and Frontend #3 reports. The claimed §13.5 pinned-count wording does not exist (FS-INT-6 closed as not-a-defect, 2026-11-26).
 
 ---
 
@@ -285,7 +286,7 @@ Docs report reconciled AGENTS.md §13 against code and found no discrepancy; how
 | FS-INT-3 | Maintenance ack inheritance disarms canonical boundary | Backend Architect | #4 | `CONNECTION_GRANTED count=135` vs `REFUSED` |
 | FS-INT-4 | Expected-DB identity not enforced on runtime switch A→B | Backend Architect | #5 | `RUNTIME_SWITCH=GRANTED` |
 | FS-INT-5 | Frontend browser identity run evidence not attached | Frontend Developer | #3 | Static review only at review time |
-| FS-INT-6 | AGENTS.md §13.5 pinned-count wording stale | Docs Engineer | #7 | Check #8 edit to `AgentSessionIsolationTest.php` |
+| FS-INT-6 | AGENTS.md §13.5 pinned-count wording stale | Docs Engineer | #7 | Closed 2026-11-26 as not-a-defect: AGENTS.md has no §13.5 and no pinned-count wording (§11 change-safety, §13 UI/UX) |
 
 ---
 
@@ -301,8 +302,8 @@ defects and one missing evidence package remain (FS-INT-1 … FS-INT-6).
 | #3 | Frontend Developer | BLOCKED | Identity probe + negative specs | Static review of router/spec/setup only | No executed browser evidence attached |
 | #4 | Backend Architect | FAIL | `AgentSessionGuard` ack path | `CONNECTION_GRANTED count=135` with inherited ack | Maintenance auth leaks into isolated workflow |
 | #5 | Backend Architect | PARTIAL | `assertMatchesExpected` at boot | Boot mismatch refused | Runtime A→B switch granted |
-| #6 | Backend Architect + Docs | PARTIAL | Source-backed factory, `is_fixture` | Docs provenance: 28/28 names verified | Backend regression evidence pending |
-| #7 | Technical Documentation Engineer | PARTIAL | AGENTS.md §13, this tracker | Docs reconciliation report | Peer reports pending; §13.5 wording stale |
+| #6 | Backend Architect + Docs | PARTIAL | Source-backed factory, `is_fixture` | Historical 28-name claim not located; factory classification implemented, curated provenance unverified | Backend regression evidence pending; authoritative requirement definition pending Coordinator |
+| #7 | Technical Documentation Engineer | PARTIAL | AGENTS.md §11/§13, this tracker | Docs reconciliation report | Peer reports pending; §13.5 not-a-defect closed (FS-INT-6) |
 | #8 | Fullstack Senior Developer | PASS | Read-only canonical verification | All 9 counts match; #141–145/#49–51 absent; #48 intact; integrity ok; FK 0; backups ok | None |
 
 **Required additional reporting:**
@@ -316,10 +317,10 @@ defects and one missing evidence package remain (FS-INT-1 … FS-INT-6).
 7. **Expected DB mismatch refusal:** boot-time mismatch refused; runtime A→B switch granted (FS-INT-4).
 8. **Maintenance auth inheritance protection:** not protected — ack inherited into isolated launcher and children (FS-INT-3).
 9. **Source-backed factory regression:** 28 curated names verified against committed catalog by Docs; `is_fixture` default true, `catalogue()` opt-in; Backend regression evidence pending.
-10. **Documentation reconciliation:** AGENTS.md §13 matches code except §13.5 pinned canonical counts, now stale after the Check #8 test fix (FS-INT-6).
+10. **Documentation reconciliation:** AGENTS.md §11 (change-safety) and §13 (UI/UX) match code; no §13.5 pinned-count wording exists (FS-INT-6 closed as not-a-defect, 2026-11-26).
 11. **Persistent database preservation:** fresh read-only run — 135 umamusume / 18 runs (9 active, 9 completed) / 8 veterans / 263 cards / 18 roster / 2 aliases / 96 profiles; #141–145 and #49–51 absent; run #48 = Rice Shower, unity_cup, Active; zero fixture/synthetic contamination; `integrity_check=ok`, `foreign_key_check=0`; both backups present and clean.
 12. **Files changed by each agent:** Fullstack — `docs/sitrep/DB-SAFETY-ACCEPTANCE-2026-11-25.md`, `docs/sitrep/INDEX.md`, `tests/Feature/AgentSessionIsolationTest.php`, removal of `tools/debug-events.php`, scratch probes under `.scratch-uma/`. Docs — `docs/sitrep/DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md` and tracker updates. Frontend — browser harness/spec/global-setup files (in progress). Backend — no new guard source landed during this review window.
-13. **Authorization requirements / blockers:** owner has not authorized Windows account or ACL changes; Backend must own FS-INT-1…4, Frontend must attach #3 run evidence, Docs must fix §13.5. No commit/push/deploy performed.
+13. **Authorization requirements / blockers:** owner has not authorized Windows account or ACL changes; Backend must own FS-INT-1…4, Frontend must attach #3 run evidence, Docs §13.5 closed as not-a-defect (FS-INT-6). No commit/push/deploy performed.
 14. **Application vs OS enforcement:** application refuses agent-shaped processes at connection resolution and guards destructive commands/writes; raw `new PDO`, external `sqlite3`, and direct file access are outside that boundary. All agents, `php artisan serve`, and the owner share `LENOVOLEGION\extremerazr` with Modify access to `database/`; no per-process filesystem separation exists without an owner-created account and ACL change.
 
 ---

@@ -132,13 +132,13 @@ npx playwright test tests/browser/<spec>.spec.ts --workers=1 --reporter=line
 
 | Source File | Source Section | Destination | Status |
 |-------------|----------------|-------------|--------|
-| `ui-ux-implementation-roadmap-2026-11-18.md` | Phases 0-5, KI-166, KI-167 | §1, §2 | Consolidated |
+| `UI-UX-IMPLEMENTATION-ROADMAP-2026-11-18.md` | Phases 0-5, KI-166, KI-167 | §1, §2 | Consolidated |
 | `frontend-rendered-verification-roadmap-2026-11-22.md` | Phases R0-R5 | §3 | Consolidated |
 | `project-roadmap-2026-11-16.md` | Phase B (browser truth) | §4 | Consolidated |
 | `project-roadmap-2026-11-16.md` | Phase A (register truth) | §5 | Consolidated |
 | `remaining-work-roadmap-2026-11-17.md` | Phase 2 (test-suite truth), Phase 3 (defects) | §4, §5 | Consolidated |
-| `execution-record-2026-11-18.md` | S2.2 (KI-167) | §2 | Conflict resolved |
-| `residual-verification-2026-11-18.md` | Browser-related slices | §4 | Consolidated |
+| `EXECUTION-RECORD-2026-11-18.md` | S2.2 (KI-167) | §2 | Conflict resolved |
+| `RESIDUAL-VERIFICATION-2026-11-18.md` | Browser-related slices | §4 | Consolidated |
 
 ---
 

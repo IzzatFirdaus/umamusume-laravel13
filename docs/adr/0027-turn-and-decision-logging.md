@@ -5,7 +5,7 @@
   code: built — migration 2026_10_10_200000_add_choice_and_corrections_to_turn_entries_table (ran, batch 5); turn_entries.choice, decision_snapshot, corrected_from, superseded_by; partial unique index on (training_run_id, turn) WHERE corrected_from IS NULL; lookup index on (training_run_id, turn); tests/Feature/TurnChoiceTest.php; tests/Feature/NextDecisionTest.php; tests/Feature/CareerCockpitTest.php; tests/Feature/CockpitObjectivesTest.php
   superseded-by: —
   amended-by: —
-  open: the decision's four columns have no writer — the shipped correction path (runs.turns.update) updates the turn row in place, so corrected_from/superseded_by stay null and the Timeline's corrected marker is read from updated_at; who writes a correction row, and from which screen, is undecided (2026-10-22 framework check)
+  open: writer recovered (2026-11-26) but executable acceptance NOT complete — updateTurn() appends a correction row (corrected_from set, original marked superseded_by, choice/decision_snapshot carried forward) and Career/TimelineController prints the chain (TrainingRunController.php:1184-1208, commits 1f52d6c7 / 9c5c343a); still unverified: repeated corrections on one turn, effective-reader filtering (superseded_by IS NULL) end to end, decision_snapshot point-in-time fidelity, down()/rollback guard, stale-revision read after multiple corrections; the 2026-10-22 no-writer check is superseded
 -->
 
 Status: **accepted** (owner delegation 2026-11-18 — "proceed with every owner gated tasks"; the original draft note is preserved in the contract above).
@@ -75,23 +75,22 @@ Source: `database/migrations/2026_10_10_200000_add_choice_and_corrections_to_tur
 
 ## Ledger
 
-- 2026-10-22 · **framework check against `docs/framework-ui-ux/` — the schema is built and the write
-  path is not.** The re-check table asks a change that moves what a user can undo against **H3** (user
+- 2026-10-22 · **framework check against `docs/framework-ui-ux/` — schema built, write path not at
+  that date.** The re-check table asks a change that moves what a user can undo against **H3** (user
   control and freedom), **SHR-6** (a committed turn is reversible from the screen that committed it),
   **TOG-6** (if undo is absent, the confirmation its absence forces must be present and named) and
-  **NRM-6** (can the user tell what happened). **What the check found is that this decision records the
-  shape of a history nothing writes.** The shipped correction path is `runs.turns.update` →
-  `TrainingRunController::updateTurn()`, whose whole write is `$turn->update($request->validated())`:
-  the row is amended in place, so `corrected_from` and `superseded_by` stay null on every corrected
-  turn, and the append-only history this ADR decided for — the one that would make a correction
-  *reversible* rather than destructive — never comes into being. The display side reads the older
-  mechanism instead: `Career/TimelineController` marks a turn corrected from `$turn->updated_at !== null`
-  and prints `Correction turn-N`, while `NextDecision::recordedAction()` filters on
-  `superseded_by IS NULL` and reads `corrected_from` from the same rows. **What that leaves the
-  Trainer is a correction that is not a reversal**: the Cockpit's manual correction can change a
-  committed turn's values, and the values it replaced are gone, which is the half SHR-6 names and the
-  half TOG-6's confirmation is supposed to cover. **Nothing here is repaired by this entry.** D-1a to
-  D-1d stand as written, the migration and its partial unique index are as described, and the decision
-  to preserve history is not withdrawn. What is owed is an owner ruling on the two questions the
-  decision set leaves open: whether `updateTurn` writes an append-only correction row (and what the
-  in-place update becomes), and what the user is shown when a committed turn is changed.
+  **NRM-6** (can the user tell what happened). At that date the shipped correction path
+  `runs.turns.update` → `TrainingRunController::updateTurn()` amended the row in place
+  (`$turn->update($request->validated())`), so `corrected_from` and `superseded_by` stayed null and
+  the append-only history never came into being. **Superseded by the 2026-11-26 recovery below.**
+- 2026-11-26 · **append-only writer recovered — write path now landed.** `updateTurn()` no longer
+  amends in place. It appends a new `TurnEntry` at the same turn number whose `corrected_from` points
+  at the row being corrected, marks that row `superseded_by`, and carries forward the corrected row's
+  `choice` and `decision_snapshot` so `NextDecision::recordedAction()` (which filters
+  `superseded_by IS NULL`) keeps reading the latest revision end to end. The partial unique index
+  (`corrected_from IS NULL`) allows exactly one original per turn and any number of corrections behind
+  it. The correction turns a failure into success and sheds the failure event in the same write
+  (NFR-4). Recovered from `TrainingRunController.php:1184-1208`; commits `1f52d6c7` / `9c5c343a`.
+  The two questions the 2026-10-22 entry left open (whether `updateTurn` writes an append-only
+  correction row, and what the user is shown) are now answered in code: it does, and
+  `Career/TimelineController` prints the corrected chain from the live rows.

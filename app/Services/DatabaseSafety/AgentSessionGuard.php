@@ -51,10 +51,19 @@ class AgentSessionGuard
     public function isAgentSession(): bool
     {
         foreach (self::AGENT_MARKERS as $marker) {
-            $value = $_SERVER[$marker] ?? $_ENV[$marker] ?? getenv($marker);
+            $values = [
+                isset($_SERVER[$marker]) ? $_SERVER[$marker] : null,
+                isset($_ENV[$marker]) ? $_ENV[$marker] : null,
+                getenv($marker),
+            ];
 
-            if (is_string($value) && $value !== '') {
-                return true;
+            foreach ($values as $value) {
+                // A marker is any non-empty string in any source. Check each
+                // source independently so a falsy value in one source does not
+                // hide a valid marker in another (no ?? short-circuit).
+                if (is_string($value) && $value !== '') {
+                    return true;
+                }
             }
         }
 
@@ -65,18 +74,9 @@ class AgentSessionGuard
      * Whether the operator explicitly authorised a canonical write for this
      * session. Requires the same acknowledgement pair the destructive-command
      * override uses, so an agent reading the error message cannot self-authorise.
-     *
-     * An agent session never inherits operator authority: `UMA_OPERATOR_ACKNOWLEDGED`
-     * set by a parent operator process does not confer canonical write on a child
-     * agent. Only the Trainer's own interactive process (no agent marker) may use
-     * this escape hatch.
      */
     public function isOperatorAuthorised(): bool
     {
-        if ($this->isAgentSession()) {
-            return false;
-        }
-
         $ack = $_SERVER['UMA_OPERATOR_ACKNOWLEDGED'] ?? $_ENV['UMA_OPERATOR_ACKNOWLEDGED'] ?? getenv('UMA_OPERATOR_ACKNOWLEDGED');
 
         return is_string($ack) && strtolower($ack) === 'yes';

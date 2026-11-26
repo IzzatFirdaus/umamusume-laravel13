@@ -1,4 +1,12 @@
 # Plan 3 of 4 - Defects with a named code site (phase 3)
+<!-- PLAN-CONTRACT
+plan: plan-defects-2026-11-17
+status: landed
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 **Pair:** `docs/roadmap/remaining-work-roadmap-2026-11-17.md` phase 3.
 **Depends on:** plan 1 phase 0 (the tree must build before a slice's test can run).

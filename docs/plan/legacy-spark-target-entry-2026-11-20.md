@@ -1,11 +1,12 @@
 # Legacy spark target entry: race-win and "+" sparks (2026-11-20)
-
-```text
-PLAN-CONTRACT
-  slices: []          # no roadmap slice owns this work; owner directed the plan and the fix on 2026-11-20
-  status: draft, then executable after the premise re-check in step 0
-  commit scope: none (owner has not authorized a commit)
-```
+<!-- PLAN-CONTRACT
+plan: legacy-spark-target-entry-2026-11-20
+status: drafted
+slices: —
+superseded-by: —
+amended-by: —
+open: no roadmap slice owns this work; owner directed the plan and the fix on 2026-11-20; executable premise re-check in step 0
+-->
 
 ## Goal
 

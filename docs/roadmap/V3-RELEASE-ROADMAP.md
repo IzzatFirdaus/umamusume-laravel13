@@ -114,8 +114,8 @@ Per `VERSION.md` release criteria. Runs after tag.
 | `project-roadmap-2026-11-16.md` | Phase C (7 conditions), Phase D (version/tag), §3 dependency graph | §1, §2, §5 | Consolidated |
 | `remaining-work-roadmap-2026-11-17.md` | Phase 5 (release bar), §5 owner decisions | §1, §2, §5, §6 | Consolidated |
 | `v3.0.0-implementation-roadmap-2026-11-16.md` | Phases R1-R4, Definition of Done | §1, §2, §3, §4 | Consolidated |
-| `master-implementation-roadmap-2026-11-18.md` | S4.1-S4.4, §16 acceptance | §1, §2, §5 | Consolidated |
-| `execution-record-2026-11-18.md` | S4.1-S4.4, N0.1 (D-5 approval) | §1, §2, §6 | Consolidated |
+| `MASTER-IMPLEMENTATION-ROADMAP-2026-11-18.md` | S4.1-S4.4, §16 acceptance | §1, §2, §5 | Consolidated |
+| `EXECUTION-RECORD-2026-11-18.md` | S4.1-S4.4, N0.1 (D-5 approval) | §1, §2, §6 | Consolidated |
 
 ---
 

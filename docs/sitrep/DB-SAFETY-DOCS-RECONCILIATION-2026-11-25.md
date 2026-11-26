@@ -20,7 +20,7 @@ Documentation now matches the implemented, verified behaviour. It does **not** c
 | `docs/sitrep/DB-SAFETY-ACCEPTANCE-2026-11-25.md` | #7 → PARTIAL with named blockers; added status vocabulary; durable 8-check record confirmed as the single tracker. |
 | `docs/sitrep/DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md` | This report (Check #7 evidence + Check #6 provenance + Check #2 markers). |
 
-AGENTS.md §13 already described the implemented boundary accurately at inspection; no edit required there beyond confirming it matches code (see classification below). No competing tracker created.
+AGENTS.md has no database-safety section: §13 is UI/UX, §11 is change-safety. The DB-safety boundary is implemented in code (`AgentSessionGuard`, `DatabaseGuard`, `SafeDatabaseManager`, `tools/agent-run.php`) but not documented in AGENTS.md. No edit required to AGENTS.md for this report; a future DB-safety section is a separate owner-gated decision. No competing tracker created.
 
 ---
 
@@ -51,11 +51,11 @@ Documentation must keep these separate; conflating them overstates protection.
 ## Remaining limitations (OS-level, not enforceable in-app)
 
 - Raw `new PDO('sqlite:...')`, Python/CLI `sqlite3`, or any external tool opening the file bypass every guard. Boundary is the app connection resolver, not the filesystem.
-- Windows finding (2026-11-25): all agent processes, `php artisan serve`, and the owner share one security identity (`LENOVOLEGION\extremerazr`) with inherited `Authenticated Users: Modify` on `database/`. **No universal database protection exists** while app and agents run under the same Windows identity. Stronger separation needs an owner-created low-privilege account + ACL — owner-gated, not applied. AGENTS.md §13.2 records this.
+- Windows finding (2026-11-25): all agent processes, `php artisan serve`, and the owner share one security identity (`LENOVOLEGION\extremerazr`) with inherited `Authenticated Users: Modify` on `database/`. **No universal database protection exists** while app and agents run under the same Windows identity. Stronger separation needs an owner-created low-privilege account + ACL — owner-gated, not applied. (AGENTS.md has no §13.2; this is recorded here and in the acceptance tracker.)
 
-## Classification summary (what AGENTS.md §13 says vs reality)
+## Classification summary (implemented code vs reality)
 
-| AGENTS.md §13 claim | Verdict |
+| Implemented boundary claim | Verdict |
 |---|---|
 | Fail-safe agent boundary primary, `ConnectionEstablished` | ACCURATE (code + test) |
 | SafeDatabaseManager never caches refused connection | ACCURATE (code) |
@@ -66,18 +66,18 @@ Documentation must keep these separate; conflating them overstates protection.
 | Canonical inventory `umamusume=135, runs=18, veterans=8` | ACCURATE (pinned in AgentSessionIsolationTest) |
 | OS-level not enforceable | ACCURATE |
 
-No discrepancy found between AGENTS.md §13 and the implemented code at inspection.
+No discrepancy found between the implemented code and the boundary behaviour at inspection. AGENTS.md does not document this boundary (no DB-safety section); that is a documentation gap, not a code discrepancy.
 
 ---
 
 ## Check #6 — Source-provenance findings (review only, no backend change)
 
-- **Curated names genuine.** All 28 names in `UmamusumeFactory::$sourceNames` verified present as `"name_en"` in the committed catalog `database/seeders/data/gametora-characters.897e63ea.json`. No Faker word-salad; no invented names.
-- **Global eligibility supported — release date populated and already past.** Catalog carries `release_en` (107 populated entries). Every curated name's `release_en` date is populated (a Global release date exists) **and** is already released: the latest `release_en` anywhere in the dataset is `2026-09-28`, earlier than the verification date `2026-11-25`. So each curated identity is an *already-released Global character*, not merely a character with a populated date. Factory rows default `release_status = ReleaseStatus::GlobalReleased`, consistent with the snapshot.
-  - **Dataset:** `database/seeders/data/gametora-characters.897e63ea.json`. **Verification date:** 2026-11-25.
-- **Fixture classification accurate.** `is_fixture` is a real column (`2026_11_24_130000_add_is_fixture_to_umamusume_table.php`, default `false`, indexed). Factory `definition()` sets `is_fixture => true`; `catalogue()` state opts back to `false`. `is_manual` is a separate column (default `false`, `manual()` state). The two are **not conflated** — migration docblock and AGENTS.md §13.4 both state `is_manual` marks the Trainer's own rows (opposite of the fixture exclusion).
-- **`catalogue()` state described accurately.** AGENTS.md §13.4 "A `catalogue()` state opt-in is available" matches `UmamusumeFactory::catalogue()`.
-- **Synthetic gameplay not presented as historical.** Factory rows are fabricated trainees; a synthetic career on a genuine trainee is **not** provenance-marked by the column — that distinction is carried by DB isolation (scratch vs canonical), exactly as AGENTS.md §13.4 states. No source doc presents synthetic runs as historical gameplay.
+- **Curated names claim NOT verified — property absent.** The claimed 28 names in `UmamusumeFactory::$sourceNames` do not exist: the factory has no `$sourceNames` property. `definition()` generates fixture names via `Str::title(fake()->unique()->words(2, true))`. The historical 28-name curated-pool claim is preserved as historical evidence but is not supported by the inspected factory or stashes. No replacement pool invented.
+- **Global eligibility — dataset-level only.** Catalog carries `release_en` (107 populated entries); latest `release_en` is `2026-09-28`, earlier than verification date `2026-11-25`. This supports the dataset, not a curated 28-name subset (which was not located).
+  - **Dataset:** `database/seeders/data/gametora-characters.897e63ea.json`. **Verification date:** 2026-11-25 (rechecked 2026-11-26).
+- **Fixture classification accurate.** `is_fixture` is a real column (`2026_11_24_130000_add_is_fixture_to_umamusume_table.php`, default `false`, indexed). Factory `definition()` sets `is_fixture => true`; `catalogue()` state opts back to `false`. `is_manual` is a separate column (default `false`, `manual()` state). The two are **not conflated**. (AGENTS.md has no §13.4; §13 is UI/UX, §11 is change-safety — DB-safety section does not exist.)
+- **`catalogue()` state described accurately.** `UmamusumeFactory::catalogue()` exists and opts `is_fixture => false`.
+- **Synthetic gameplay not presented as historical.** Factory rows are fabricated trainees; a synthetic career on a genuine trainee is **not** provenance-marked by the column — that distinction is carried by DB isolation (scratch vs canonical). No source doc presents synthetic runs as historical gameplay.
 - **Provenance taxonomy preserved.** Published mechanics (`UMAMUSUME_REFERENCE.md`, tier-cited), catalog identities (GameTora export, tier B), client-observed gameplay (`[Rosy_Dreams]Rice_Shower_Unity-Cup.md` §1 frame observations), derived info, synthetic fixtures, and unknown history remain distinct. Unity Cup doc explicitly keeps catalog-sourced vs client-read skill lists separate (§ lines ~513-514) and marks single-source claims (tier B, not promoted to A without a second source).
 
 No external fetch required: every material claim was verifiable against the committed snapshot. No unresolved source disagreement surfaced within this review's scope. Full historical game-domain audit not repeated (per constraints).
