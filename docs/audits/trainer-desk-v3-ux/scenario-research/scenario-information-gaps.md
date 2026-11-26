@@ -148,6 +148,15 @@ twice with two labels and is a finding regardless of the ruling. The walk should
    the cap of the stat dueled`, so the page is faithfully printing the config, and the config is the stale layer.
 2. **The SP figures are right** and both sources agree: 30 on a win, 15 on a loss [B1][C1].
 
+   > **Historical evidence (preserved unresolved — commit `e8c370bc`, 2026-11-25).** An earlier
+   > evidence pass recorded the duel reward as *contested*, not settled: GameTora reported 30 SP on a
+   > win and **5 SP on a loss** (vs 15 in the config and in [B1][C1]); GameTora additionally reported
+   > **+4 maximum Energy** on a win (uncorroborated by any other source); and wins-to-MAX were
+   > contested (GameTora five, Game8 six, config `escalation_wins => 6`). The current text above
+   > follows [B1][C1]; the GameTora figures are retained here as an unresolved source disagreement,
+   > not silently discarded. No surface should print an Energy reward until a second source or a
+   > client capture confirms it. See the wins-to-MAX row in §1 table (still open).
+
 **Ruling needed:** whether the fix is a config edit (`duel.win.gains`) or a page edit, and whether the cap figure
 should be `+4` (the client's number, sourced) or the current qualitative phrase.
 

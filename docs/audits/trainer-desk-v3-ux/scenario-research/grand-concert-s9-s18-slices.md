@@ -12,6 +12,7 @@ lifecycle and UI slices in group depend on foundation. foundation slices
 | Songs | S11 | S12 | S13 |
 | Live Bonus | S14 | S15 | — |
 | Promotional Lives | S16 | S17 | S18 |
+> **Lessons S8/S11 dependency inconsistency (preserved unresolved — commit `e8c370bc`).** The table above lists the Lessons foundation as **S11 (Songs Evidence)**, but S9 and S10 are gated on **Slice 8 (Lessons Evidence + Foundation)** — two different foundations for the same group. S8 is "Lessons Evidence + Foundation" (closed, no Lesson representation exists); S11 is "Songs Evidence + Foundation". Whether Lessons lifecycle/UI depend on S8 or S11 is unresolved; do not silently pick one. This is distinct from the S16 self-dependency (resolved below): S16 was a circular gate, this is a cross-reference ambiguity between two real foundation slices.
 > **S16 self-dependency resolved.** earlier summary stated S16 was "Gated on Slice 16 closing
 gate" — circular dependency. S16 **foundation** slice Promotional Lives; it
 > blocked by absence Promotional Live representation and need schema change,
