@@ -243,6 +243,7 @@ class Umamusume extends Model
             'jp_debut_date' => 'date',
             'global_debut_date' => 'date',
             'is_manual' => 'boolean',
+            'is_fixture' => 'boolean',
         ];
     }
 }

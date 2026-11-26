@@ -23,7 +23,7 @@ use Illuminate\Database\Events\ConnectionEstablished;
  * against session copies under `.scratch-uma/agent-sessions/`.
  */
 beforeEach(function () {
-    Config::set('database-safety.canonical', 'D:/Projects/umamusume-laravel13/database/database.sqlite');
+    Config::set('database-safety.canonical', base_path('database/database.sqlite'));
     Config::set('database-safety.isolated_roles', ['isolated', 'test', 'browser', 'scratch', 'e2']);
 });
 

@@ -34,7 +34,7 @@ use Inertia\Testing\AssertableInertia as Assert;
  */
 
 it('nests each card under its trainee', function (): void {
-    $goldShip = Umamusume::factory()->create([
+    $goldShip = Umamusume::factory()->catalogue()->create([
         'name' => 'Gold Ship', 'slug' => 'gold-ship', 'name_ja' => 'ゴールドシップ',
     ]);
     CharacterCard::factory()->create([
@@ -61,7 +61,7 @@ it('nests each card under its trainee', function (): void {
 });
 
 it('orders the debut first, then by Global release date ascending', function (): void {
-    $teio = Umamusume::factory()->create([
+    $teio = Umamusume::factory()->catalogue()->create([
         'name' => 'Tokai Teio', 'slug' => 'tokai-teio', 'match_key' => 'tokaiteio',
     ]);
     foreach ([
@@ -97,7 +97,7 @@ it('orders the debut first, then by Global release date ascending', function ():
 });
 
 it('never prints a bare zero when a trainee has no forms', function (): void {
-    Umamusume::factory()->create([
+    Umamusume::factory()->catalogue()->create([
         'name' => 'Cardless One', 'slug' => 'cardless-one', 'match_key' => 'cardlessone',
     ]);
 
@@ -112,7 +112,7 @@ it('never prints a bare zero when a trainee has no forms', function (): void {
 });
 
 it('hides a card only the Tier B source attests, unless asked', function (): void {
-    $u = Umamusume::factory()->create(['name' => 'Fine Motion', 'slug' => 'fine-motion']);
+    $u = Umamusume::factory()->catalogue()->create(['name' => 'Fine Motion', 'slug' => 'fine-motion']);
     CharacterCard::factory()->confirmed()->create([
         'umamusume_id' => $u->id, 'card_id' => 112001, 'title' => '[Seen Twice]', 'is_debut_form' => true,
     ]);
@@ -134,8 +134,8 @@ it('hides a card only the Tier B source attests, unless asked', function (): voi
 });
 
 it('defaults the release status filter to released on Global', function (): void {
-    Umamusume::factory()->create(['name' => 'Global One', 'slug' => 'global-one']);
-    Umamusume::factory()->japanOnly()->create(['name' => 'Japan One', 'slug' => 'japan-one']);
+    Umamusume::factory()->catalogue()->create(['name' => 'Global One', 'slug' => 'global-one']);
+    Umamusume::factory()->catalogue()->japanOnly()->create(['name' => 'Japan One', 'slug' => 'japan-one']);
 
     $html = test()->get('/umamusume')->assertOk()->getContent();
     expect($html)->toContain('Global One')->and($html)->not->toContain('Japan One');
@@ -149,13 +149,13 @@ it('filters the tree by a card title', function (): void {
     // `match_key` is stated, not left to the factory's faker name, so the only clause
     // that can possibly answer `ruin` is the card-title one. The trainee-name path is
     // pinned by the ordering test and the badge test, each of which searches a name.
-    $goldShip = Umamusume::factory()->create([
+    $goldShip = Umamusume::factory()->catalogue()->create([
         'name' => 'Gold Ship', 'slug' => 'gold-ship', 'match_key' => 'goldship',
     ]);
     CharacterCard::factory()->create([
         'umamusume_id' => $goldShip->id, 'card_id' => 100702, 'title' => '[RUN! RUIN! LAUNCHER!]',
     ]);
-    Umamusume::factory()->create(['name' => 'Unrelated One', 'slug' => 'unrelated-one', 'match_key' => 'unrelatedone']);
+    Umamusume::factory()->catalogue()->create(['name' => 'Unrelated One', 'slug' => 'unrelated-one', 'match_key' => 'unrelatedone']);
 
     // The card matches, so its trainee is the row that appears. The empty state still
     // says "No Umamusume match" when nothing at all matches, so that stays true.
@@ -166,10 +166,10 @@ it('filters the tree by a card title', function (): void {
 });
 
 it('treats LIKE metacharacters in a search term as literal text', function (): void {
-    Umamusume::factory()->create([
+    Umamusume::factory()->catalogue()->create([
         'name' => 'Vodka', 'slug' => 'vodka', 'match_key' => 'vodka', 'name_ja' => 'ウオッカ',
     ]);
-    Umamusume::factory()->create([
+    Umamusume::factory()->catalogue()->create([
         'name' => 'Tokai Teio', 'slug' => 'tokai-teio', 'match_key' => 'tokaiteio',
     ]);
 
@@ -191,7 +191,7 @@ it('keeps the card tree intact through the database cache store', function (): v
     config(['cache.default' => 'database']);
     Cache::flush();
 
-    $u = Umamusume::factory()->create(['name' => 'Agnes Digital', 'slug' => 'agnes-digital']);
+    $u = Umamusume::factory()->catalogue()->create(['name' => 'Agnes Digital', 'slug' => 'agnes-digital']);
     CharacterCard::factory()->create([
         'umamusume_id' => $u->id, 'card_id' => 110102, 'title' => '[Full-Color Fangirling]', 'is_debut_form' => true,
     ]);
@@ -208,7 +208,7 @@ it('loads the tree in a fixed number of queries, not one per trainee', function 
     // inventing a millisecond figure: forms arrive eager-loaded with the page, so the
     // query count cannot grow with the number of trainees or forms on screen.
     foreach (range(1, 4) as $index) {
-        $trainee = Umamusume::factory()->create([
+        $trainee = Umamusume::factory()->catalogue()->create([
             'name' => "Form Counted {$index}", 'slug' => "form-counted-{$index}",
         ]);
         CharacterCard::factory()->count(3)->create(['umamusume_id' => $trainee->id]);
@@ -239,7 +239,7 @@ it('loads the tree in a fixed number of queries, not one per trainee', function 
 })->group('perf');
 
 it('reads a trainee badge off the cards the filter let through', function (): void {
-    $nature = Umamusume::factory()->create([
+    $nature = Umamusume::factory()->catalogue()->create([
         'name' => 'Nice Nature', 'slug' => 'nice-nature', 'match_key' => 'nicenature',
     ]);
     CharacterCard::factory()->confirmed()->create([
@@ -270,7 +270,7 @@ it('reads a trainee badge off the cards the filter let through', function (): vo
 });
 
 it('never serves a page cached for one term to another term sharing its key', function (): void {
-    Umamusume::factory()->create([
+    Umamusume::factory()->catalogue()->create([
         'name' => 'Tokai Teio', 'slug' => 'tokai-teio', 'match_key' => 'tokaiteio',
     ]);
     // A display name the one-word term reads verbatim and the double-spaced one does
@@ -279,7 +279,7 @@ it('never serves a page cached for one term to another term sharing its key', fu
     // also matched on the name string, this row's presence would depend on which of the
     // two warmed the shared key. (Titles and aliases do read display strings, folded -
     // this row has neither, so the cache-key argument is untouched.)
-    Umamusume::factory()->create([
+    Umamusume::factory()->catalogue()->create([
         'name' => 'Tokaiteio Lookalike', 'slug' => 'tokaiteio-lookalike', 'match_key' => 'lookalike',
     ]);
 
@@ -291,10 +291,10 @@ it('never serves a page cached for one term to another term sharing its key', fu
 });
 
 it('keeps the active filters on every pagination link', function (): void {
-    Umamusume::factory()->create([
+    Umamusume::factory()->catalogue()->create([
         'name' => 'Tokai Teio', 'slug' => 'tokai-teio', 'match_key' => 'tokaiteio',
     ]);
-    Umamusume::factory()->create([
+    Umamusume::factory()->catalogue()->create([
         'name' => 'Teio Alternate', 'slug' => 'teio-alternate', 'match_key' => 'teioalternate',
     ]);
 
@@ -319,7 +319,7 @@ it('keeps the active filters on every pagination link', function (): void {
 });
 
 it('finds a trainee through a two-word card epithet', function (): void {
-    $goldShip = Umamusume::factory()->create([
+    $goldShip = Umamusume::factory()->catalogue()->create([
         'name' => 'Gold Ship', 'slug' => 'gold-ship', 'match_key' => 'goldship',
     ]);
     CharacterCard::factory()->create([
@@ -338,7 +338,7 @@ it('finds a trainee through a two-word card epithet', function (): void {
 });
 
 it('finds a trainee through a hyphenated card epithet', function (): void {
-    $digital = Umamusume::factory()->create([
+    $digital = Umamusume::factory()->catalogue()->create([
         'name' => 'Agnes Digital', 'slug' => 'agnes-digital', 'match_key' => 'agnesdigital',
     ]);
     CharacterCard::factory()->create([
@@ -355,7 +355,7 @@ it('finds a trainee through a hyphenated card epithet', function (): void {
 });
 
 it('finds a trainee through a two-word alias', function (): void {
-    $nature = Umamusume::factory()->create([
+    $nature = Umamusume::factory()->catalogue()->create([
         'name' => 'Nice Nature', 'slug' => 'nice-nature', 'match_key' => 'nicenature',
     ]);
     // A fixture surface form, not attested data: aliases in this table are the alternate
@@ -392,7 +392,7 @@ it('finds a trainee through a two-word alias', function (): void {
  */
 
 it('lists the trainee\'s forms on her detail page', function (): void {
-    $u = Umamusume::factory()->create(['name' => 'Mejiro McQueen', 'slug' => 'mejiro-mcqueen']);
+    $u = Umamusume::factory()->catalogue()->create(['name' => 'Mejiro McQueen', 'slug' => 'mejiro-mcqueen']);
     CharacterCard::factory()->create([
         'umamusume_id' => $u->id, 'card_id' => 101301, 'title' => '[Frontline Elegance]',
         'rarity' => CardRarity::ThreeStar, 'global_release_date' => '2025-11-06', 'is_debut_form' => true,
@@ -407,7 +407,7 @@ it('lists the trainee\'s forms on her detail page', function (): void {
 });
 
 it('names the source and the fetch date instead of the seeded-data line', function (): void {
-    $u = Umamusume::factory()->create(['name' => 'Silence Suzuka', 'slug' => 'silence-suzuka']);
+    $u = Umamusume::factory()->catalogue()->create(['name' => 'Silence Suzuka', 'slug' => 'silence-suzuka']);
     DataSource::factory()->create([
         'umamusume_id' => $u->id,
         'source_key' => 'gametora-character-cards',
@@ -434,7 +434,7 @@ it('resolves no provenance for a hand-entered record', function (): void {
 });
 
 it('keeps an unconfirmed card out of the detail list unless asked', function (): void {
-    $u = Umamusume::factory()->create(['name' => 'Vodka', 'slug' => 'vodka']);
+    $u = Umamusume::factory()->catalogue()->create(['name' => 'Vodka', 'slug' => 'vodka']);
     CharacterCard::factory()->unconfirmed()->create([
         'umamusume_id' => $u->id, 'card_id' => 199901, 'title' => '[Solo Sourced]', 'is_debut_form' => true,
     ]);
@@ -455,7 +455,7 @@ it('keeps an unconfirmed card out of the detail list unless asked', function ():
 });
 
 it('names each card the source its own row was read from', function (): void {
-    $u = Umamusume::factory()->create(['name' => 'Mayano Top Gun', 'slug' => 'mayano-top-gun']);
+    $u = Umamusume::factory()->catalogue()->create(['name' => 'Mayano Top Gun', 'slug' => 'mayano-top-gun']);
     CharacterCard::factory()->create([
         'umamusume_id' => $u->id,
         'card_id' => 199902,
@@ -490,7 +490,7 @@ it('names the snapshot it was read from, and the URL where there is none', funct
     // Two cards on one trainee, with pinned release dates so the two rows settle in one order.
     // A trainee the suite already uses, deliberately: a fixture name is copy this repository
     // owns rather than verbatim source data, so it must not add a hit to the `lore-code` gate.
-    $u = Umamusume::factory()->create(['name' => 'Special Week', 'slug' => 'special-week']);
+    $u = Umamusume::factory()->catalogue()->create(['name' => 'Special Week', 'slug' => 'special-week']);
     CharacterCard::factory()->create([
         'umamusume_id' => $u->id,
         'card_id' => 199903,
@@ -521,7 +521,7 @@ it('says forms are hidden rather than that none were recorded', function (): voi
     // Constraint C: a filtered value gets the truth, not a false absence. Two solo-sourced
     // forms is the whole fixture, so the page re-counts from it, and the section cannot read
     // "No Global costume cards recorded" while rows sit behind the filter.
-    $u = Umamusume::factory()->create(['name' => 'Gold Ship', 'slug' => 'gold-ship-detail']);
+    $u = Umamusume::factory()->catalogue()->create(['name' => 'Gold Ship', 'slug' => 'gold-ship-detail']);
     CharacterCard::factory()->unconfirmed()->create([
         'umamusume_id' => $u->id, 'card_id' => 199905, 'title' => '[Hidden Alpha]',
     ]);
@@ -549,7 +549,7 @@ it('reads a card on the display date and keeps a date-only value date-only', fun
     // conversion can tell apart, and Mar 1 is the release date the fixture states.
     config(['uma.display_timezone' => 'Asia/Tokyo']);
 
-    $u = Umamusume::factory()->create(['name' => 'Winning Ticket', 'slug' => 'winning-ticket']);
+    $u = Umamusume::factory()->catalogue()->create(['name' => 'Winning Ticket', 'slug' => 'winning-ticket']);
     CharacterCard::factory()->create([
         'umamusume_id' => $u->id,
         'card_id' => 199907,
@@ -570,7 +570,7 @@ it('reads a card on the display date and keeps a date-only value date-only', fun
 });
 
 it('names each form rarity through the shared chip rather than a second badge', function (): void {
-    $u = Umamusume::factory()->create(['name' => 'Mejiro McQueen', 'slug' => 'mcqueen-second-form']);
+    $u = Umamusume::factory()->catalogue()->create(['name' => 'Mejiro McQueen', 'slug' => 'mcqueen-second-form']);
     CharacterCard::factory()->create([
         'umamusume_id' => $u->id, 'card_id' => 101302, 'title' => '[Second Form]',
         'rarity' => CardRarity::TwoStar,
@@ -593,7 +593,7 @@ it('names each form rarity through the shared chip rather than a second badge', 
  */
 
 it('reduces the ten aptitude letters to the strongest one on each axis', function (): void {
-    $u = Umamusume::factory()->create(['name' => 'Aptitude One', 'slug' => 'aptitude-one']);
+    $u = Umamusume::factory()->catalogue()->create(['name' => 'Aptitude One', 'slug' => 'aptitude-one']);
     $u->forceFill([
         'aptitude_turf' => 'A', 'aptitude_dirt' => 'B',
         'aptitude_sprint' => 'C', 'aptitude_mile' => 'B', 'aptitude_medium' => 'A', 'aptitude_long' => 'E',
@@ -617,7 +617,7 @@ it('reduces the ten aptitude letters to the strongest one on each axis', functio
 });
 
 it('reports no aptitude summary rather than three empty pills', function (): void {
-    Umamusume::factory()->create(['name' => 'No Aptitudes', 'slug' => 'no-aptitudes']);
+    Umamusume::factory()->catalogue()->create(['name' => 'No Aptitudes', 'slug' => 'no-aptitudes']);
 
     test()->get('/umamusume')
         ->assertOk()
@@ -625,7 +625,7 @@ it('reports no aptitude summary rather than three empty pills', function (): voi
 });
 
 it('names the form the card shows and that form\'s own rarity', function (): void {
-    $u = Umamusume::factory()->create(['name' => 'Gold Ship', 'slug' => 'gold-ship-card']);
+    $u = Umamusume::factory()->catalogue()->create(['name' => 'Gold Ship', 'slug' => 'gold-ship-card']);
     CharacterCard::factory()->create([
         'umamusume_id' => $u->id, 'card_id' => 100701, 'title' => '[Red Strife]',
         'rarity' => CardRarity::TwoStar, 'is_debut_form' => true,
