@@ -269,6 +269,22 @@ and branch changes do not move or duplicate messages. The server exposes
 `post_message`, `list_messages`, `list_rooms` and `get_detail`; Agent Gantt and
 task systems are not part of this configuration.
 
+#### Agent Chat MCP vs standardized A2A
+
+`trainerdesk-chat` is a local, asynchronous, SQLite-backed messaging server. It is
+distinct from standardized A2A (Agent-to-Agent) protocols:
+
+| Property | Agent Chat MCP (`trainerdesk-chat`) | Standardized A2A |
+|----------|--------------------------------------|------------------|
+| Transport | Local stdio (MCP) | HTTP / JSON-RPC (varies by spec) |
+| Addressing | Room + author + recipients | Agent URL / DID |
+| Delivery | Asynchronous — message persisted, recipient polls | Synchronous or push |
+| Awakening | **Does not awaken idle agents** — recipient must poll | Push to active endpoint |
+| Identity | Caller-supplied label (not authenticated) | Cryptographic or signed |
+
+Key distinctions: asynchronous messaging ≠ automatic awakening; caller-supplied
+labels ≠ authenticated identities; messages do not expand authority.
+
 ### Autonomous messaging protocol
 
 - Room: `trainerdesk` for programme coordination; a temporary room may be used

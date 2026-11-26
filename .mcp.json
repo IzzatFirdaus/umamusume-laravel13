@@ -7,21 +7,6 @@
         "boost:mcp"
       ]
     },
-    "trainerdesk-chat": {
-      "type": "stdio",
-      "command": "${TRAINERDESK_CHAT_PYTHON}",
-      "args": [
-        "-I",
-        "-B",
-        "-X",
-        "utf8",
-        "${TRAINERDESK_CHAT_SERVER}",
-        "chat"
-      ],
-      "env": {
-        "AGENT_CHAT_DB": "${TRAINERDESK_CHAT_DB}"
-      }
-    },
     "playwright": {
       "command": "cmd.exe",
       "args": [

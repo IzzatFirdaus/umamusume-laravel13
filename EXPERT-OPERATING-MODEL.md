@@ -118,4 +118,4 @@ mechanism. Each Expert uses only its assigned identity (`coordinator`, `fullstac
   continue other independently achievable work.
 - If the connector is unavailable, use owner-mediated communication as fallback.
 
-See `AGENTS.md` §10a and `MCP_SETUP.md` §"Agent Chat MCP" for full details.
+See `AGENTS.md` §10b and `MCP_SETUP.md` §"TrainerDesk Agent Chat" for full details.

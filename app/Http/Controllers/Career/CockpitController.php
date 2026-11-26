@@ -11,9 +11,9 @@ use App\Enums\TurnChoice;
 use App\Http\Controllers\Controller;
 use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
-use App\Models\RosterMember;
 use App\Models\Skill;
 use App\Models\TrainingRun;
+use App\Models\RosterMember;
 use App\Models\TurnEntry;
 use App\Services\Advisor\Advice;
 use App\Services\Advisor\NextDecision;
@@ -949,7 +949,7 @@ class CockpitController extends Controller
         // KI-173: a `Scheduled` row is the calendar slot, not an observed entry decision, so it
         // settles no obligation. Counting it would print `completed` for a race nobody has run.
         $entered = $run->raceEntries
-            ->filter(fn (RaceEntry $entry): bool => $entry->status->recordsEntry() === true)
+            ->filter(fn (RaceEntry $entry): bool => $entry->status?->recordsEntry() === true)
             ->pluck('race_catalog_slot_id')
             ->filter()
             ->all();

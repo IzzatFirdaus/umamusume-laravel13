@@ -414,7 +414,7 @@ Hook and MCP health: `node .tooling/hooks-preflight.mjs` (22 checks) and
 `node .tooling/hooks.test.mjs` (regression suite). Run both after changing any hook,
 `.claude/settings.json`, or MCP configuration.
 
-## 10a. Autonomous inter-agent communication
+## 10b. Autonomous inter-agent communication
 
 When `trainerdesk-chat` is available, Experts use it as the primary coordination
 mechanism. The protocol is permanent and does not require per-task owner

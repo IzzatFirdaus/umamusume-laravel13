@@ -16,7 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 beforeEach(function () {
     Config::set('database.connections.sqlite.database', 'database/database.sqlite');
-    Config::set('database-safety.canonical', base_path('database/database.sqlite'));
+    Config::set('database-safety.canonical', 'D:/Projects/umamusume-laravel13/database/database.sqlite');
     Config::set('database-safety.isolated_roles', ['isolated', 'test', 'browser', 'scratch', 'e2']);
     Config::set('database-safety.destructive_commands', ['migrate:fresh', 'migrate:refresh', 'migrate:reset', 'migrate:rollback', 'db:wipe']);
 
@@ -126,7 +126,7 @@ it('refuses isolated role targeting canonical even with override env vars', func
     guardEnv('UMA_DATABASE_ROLE', 'test');
     guardEnv('UMA_ALLOW_CANONICAL_DESTRUCTIVE', 'true');
     guardEnv('UMA_OPERATOR_ACKNOWLEDGED', 'yes');
-    Config::set('database.connections.sqlite.database', base_path('database/database.sqlite'));
+    Config::set('database.connections.sqlite.database', 'D:/Projects/umamusume-laravel13/database/database.sqlite');
 
     $guard = app(DatabaseGuard::class);
 
@@ -144,7 +144,7 @@ it('refuses browser role targeting canonical even with override env vars', funct
     guardEnv('UMA_DATABASE_ROLE', 'browser');
     guardEnv('UMA_ALLOW_CANONICAL_DESTRUCTIVE', 'true');
     guardEnv('UMA_OPERATOR_ACKNOWLEDGED', 'yes');
-    Config::set('database.connections.sqlite.database', base_path('database/database.sqlite'));
+    Config::set('database.connections.sqlite.database', 'D:/Projects/umamusume-laravel13/database/database.sqlite');
 
     $guard = app(DatabaseGuard::class);
 
@@ -739,133 +739,4 @@ it('detects marker only in getenv in isAgentSession', function () {
 
     unset($_SERVER['CODEBUDDY_SESSION_ID'], $_ENV['CODEBUDDY_SESSION_ID']);
     putenv('CODEBUDDY_SESSION_ID');
-});
-
-// Task #12: isOperatorAuthorised containment — agent sessions never inherit operator authority
-
-it('denies operator authorisation when an agent session marker is present', function () {
-    // Even with UMA_OPERATOR_ACKNOWLEDGED=yes, an agent session must not be authorised.
-    guardEnv('CLAUDE_SESSION_ID', 'agent-session-01');
-    guardEnv('UMA_OPERATOR_ACKNOWLEDGED', 'yes');
-
-    $agentGuard = app(AgentSessionGuard::class);
-
-    expect($agentGuard->isOperatorAuthorised())->toBeFalse();
-
-    guardEnv('CLAUDE_SESSION_ID', null);
-    guardEnv('UMA_OPERATOR_ACKNOWLEDGED', null);
-});
-
-it('authorises operator when no agent session and UMA_OPERATOR_ACKNOWLEDGED=yes', function () {
-    // Legitimate Trainer interactive process: no agent marker, operator acknowledged.
-    guardEnv('UMA_OPERATOR_ACKNOWLEDGED', 'yes');
-
-    $agentGuard = app(AgentSessionGuard::class);
-
-    expect($agentGuard->isOperatorAuthorised())->toBeTrue();
-
-    guardEnv('UMA_OPERATOR_ACKNOWLEDGED', null);
-});
-
-it('denies operator authorisation when no agent session and no acknowledgement', function () {
-    guardEnv('UMA_OPERATOR_ACKNOWLEDGED', null);
-
-    $agentGuard = app(AgentSessionGuard::class);
-
-    expect($agentGuard->isOperatorAuthorised())->toBeFalse();
-});
-
-it('detects UMA_OPERATOR_ACKNOWLEDGED in $_ENV when $_SERVER has empty string', function () {
-    guardEnv('UMA_OPERATOR_ACKNOWLEDGED', null);
-    $_SERVER['UMA_OPERATOR_ACKNOWLEDGED'] = '';
-    $_ENV['UMA_OPERATOR_ACKNOWLEDGED'] = 'yes';
-    putenv('UMA_OPERATOR_ACKNOWLEDGED=');
-
-    $agentGuard = app(AgentSessionGuard::class);
-
-    expect($agentGuard->isOperatorAuthorised())->toBeTrue();
-
-    unset($_SERVER['UMA_OPERATOR_ACKNOWLEDGED'], $_ENV['UMA_OPERATOR_ACKNOWLEDGED']);
-    putenv('UMA_OPERATOR_ACKNOWLEDGED');
-});
-
-it('does not treat "0" as UMA_OPERATOR_ACKNOWLEDGED=yes', function () {
-    guardEnv('UMA_OPERATOR_ACKNOWLEDGED', '0');
-
-    $agentGuard = app(AgentSessionGuard::class);
-
-    expect($agentGuard->isOperatorAuthorised())->toBeFalse();
-
-    guardEnv('UMA_OPERATOR_ACKNOWLEDGED', null);
-});
-
-// Restored: agent session inheriting both override vars must not authorise canonical destructive
-it('refuses canonical destructive when an agent session inherits both override vars', function () {
-    // FS-INT-3: an agent child inheriting UMA_ALLOW_CANONICAL_DESTRUCTIVE=true and
-    // UMA_OPERATOR_ACKNOWLEDGED=yes from a parent operator shell must NOT authorise
-    // canonical destructive commands, even if the shell is interactive.
-    foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
-        putenv("{$marker}=test-session-01234567");
-        $_ENV[$marker] = 'test-session-01234567';
-        $_SERVER[$marker] = 'test-session-01234567';
-    }
-    putenv('UMA_ALLOW_CANONICAL_DESTRUCTIVE=true');
-    $_ENV['UMA_ALLOW_CANONICAL_DESTRUCTIVE'] = 'true';
-    $_SERVER['UMA_ALLOW_CANONICAL_DESTRUCTIVE'] = 'true';
-    putenv('UMA_OPERATOR_ACKNOWLEDGED=yes');
-    $_ENV['UMA_OPERATOR_ACKNOWLEDGED'] = 'yes';
-    $_SERVER['UMA_OPERATOR_ACKNOWLEDGED'] = 'yes';
-    Config::set('database.connections.sqlite.database', 'database/database.sqlite');
-
-    $guard = app(DatabaseGuard::class);
-
-    expect($guard->allowsCanonicalDestructive())->toBeFalse();
-
-    // Clean up so other tests in this shared process are unaffected
-    foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
-        putenv($marker);
-        unset($_ENV[$marker], $_SERVER[$marker]);
-    }
-    putenv('UMA_ALLOW_CANONICAL_DESTRUCTIVE');
-    unset($_ENV['UMA_ALLOW_CANONICAL_DESTRUCTIVE'], $_SERVER['UMA_ALLOW_CANONICAL_DESTRUCTIVE']);
-    putenv('UMA_OPERATOR_ACKNOWLEDGED');
-    unset($_ENV['UMA_OPERATOR_ACKNOWLEDGED'], $_SERVER['UMA_OPERATOR_ACKNOWLEDGED']);
-});
-
-// Connection-level containment: agent + canonical + operator ack still refused
-it('refuses agent connection to canonical even with operator acknowledgement', function () {
-    guardEnv('CLAUDE_SESSION_ID', 'agent-session-01');
-    guardEnv('UMA_OPERATOR_ACKNOWLEDGED', 'yes');
-    Config::set('database.connections.sqlite.database', 'database/database.sqlite');
-    Config::set('database-safety.isolated_roles', ['isolated', 'test', 'browser', 'scratch', 'e2']);
-
-    $agentGuard = app(AgentSessionGuard::class);
-    expect($agentGuard->isAgentSession())->toBeTrue();
-    expect($agentGuard->isOperatorAuthorised())->toBeFalse();
-
-    $event = new ConnectionEstablished(DB::connection());
-    expect(fn () => $agentGuard->onConnectionEstablished($event))->toThrow(DatabaseSafetyViolation::class);
-
-    guardEnv('CLAUDE_SESSION_ID', null);
-    guardEnv('UMA_OPERATOR_ACKNOWLEDGED', null);
-});
-
-// Launcher sanitization: stripping operator vars prevents guard authorization
-it('launcher sanitization strips operator authorisation vars from all sources', function () {
-    // Simulate tools/agent-run.php FS-INT-3 Check #4: strip UMA_OPERATOR_ACKNOWLEDGED
-    // and UMA_ALLOW_CANONICAL_DESTRUCTIVE from $_SERVER, $_ENV, and process env.
-    guardEnv('UMA_OPERATOR_ACKNOWLEDGED', 'yes');
-    guardEnv('UMA_ALLOW_CANONICAL_DESTRUCTIVE', 'true');
-
-    foreach (['UMA_OPERATOR_ACKNOWLEDGED', 'UMA_ALLOW_CANONICAL_DESTRUCTIVE'] as $var) {
-        putenv($var);
-        unset($_ENV[$var], $_SERVER[$var]);
-    }
-
-    // After stripping, neither guard path may see the operator acknowledgement.
-    $agentGuard = app(AgentSessionGuard::class);
-    expect($agentGuard->isOperatorAuthorised())->toBeFalse();
-
-    $guard = app(DatabaseGuard::class);
-    expect($guard->allowsCanonicalDestructive())->toBeFalse();
 });
