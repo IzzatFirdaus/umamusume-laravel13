@@ -61,7 +61,10 @@ use Illuminate\Support\Collection;
  *     extreme_bursts_count: int|null,
  *     current_spirit_proxy: int|null,
  *     combined_bursts: int|null,
- *     burst_band: string|null
+ *     burst_band: string|null,
+ *     team_race_calendar: list<array{source_key: string, label: string, entry: array{status: string, placement: int|null, circles: int|null}|null}>,
+ *     team_race_countdown: int|null,
+ *     observed_member_count: int|null
  * }
  */
 final class TeamPanelBuilder

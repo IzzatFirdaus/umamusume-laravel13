@@ -137,6 +137,11 @@ Homestead.yaml
 /.scratch-uma/
 /.local-browsers/
 /.scratch-merge-preserve/
+# Backend recovery agent scratch artifacts (recovery workspace state, not project state)
+/.scratch-be-approved.txt
+/.scratch-be-index2
+/.scratch-be-new.txt
+
 # A one-off driver script written to the repo ROOT rather than into `.scratch-uma/<session>/`.
 # `AGENTS.md` §9 requires session artifacts to live in that session's own subdirectory and holds only
 # directories at the `.scratch-uma/` root; this file predates the rule being followed. Ignored by name
@@ -176,6 +181,13 @@ Homestead.yaml
 /docs/game-screenshots/
 /docs/design-research/**/*.png
 docs/vibe_images/
+
+# Runtime-generated artifacts (removed from tracking during consolidation)
+/app/private/advisor-index/*.sqlite
+!/app/private/advisor-index/advisor.sqlite
+/storage/scheduler.log.err
+/database/_scan_scratch.php
+/wip-sources.txt
 
 # Scratch & temporary development scripts
 tools/tmp_*
