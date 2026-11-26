@@ -6,6 +6,7 @@ use App\Providers\DatabaseGuardServiceProvider;
 use App\Services\DatabaseSafety\AgentSessionGuard;
 use App\Services\DatabaseSafety\DatabaseGuard;
 use Illuminate\Console\Events\CommandStarting;
+use Illuminate\Database\Connection;
 use Illuminate\Database\Events\ConnectionEstablished;
 use Illuminate\Database\Model;
 use Illuminate\Events\Dispatcher;
@@ -62,6 +63,14 @@ function guardEnv(string $name, ?string $value): void
  */
 afterEach(function () {
     Config::set('database.connections.sqlite.database', ':memory:');
+
+    // FS-INT-2: clear the shared in-memory PDO and migration flag so the next
+    // Feature test in this process gets a fresh :memory: database instead of
+    // reusing one left migrated (or mid-transaction) by this suite. Without
+    // this, forward-order combined runs hit "table migrations already exists"
+    // and "cannot VACUUM from within a transaction".
+    Illuminate\Foundation\Testing\RefreshDatabaseState::$inMemoryConnections = [];
+    Illuminate\Foundation\Testing\RefreshDatabaseState::$migrated = false;
 
     foreach (['UMA_DATABASE_ROLE', 'UMA_ALLOW_CANONICAL_DESTRUCTIVE', 'UMA_OPERATOR_ACKNOWLEDGED', 'UMA_EXPECTED_DATABASE'] as $name) {
         putenv($name);
@@ -549,6 +558,57 @@ PHP);
     expect($line)->toContain('count=');
     expect($line)->not->toContain('REFUSED');
     expect($line)->not->toContain('DatabaseSafetyViolation');
+});
+
+it('refuses expected-DB mismatch on runtime switch A to B', function () {
+    // FS-INT-4: an isolated role that named UMA_EXPECTED_DATABASE=A at boot must
+    // be refused when the resolved DB switches to B after boot. assertMatchesExpected
+    // only runs at boot; this test exercises the runtime re-check through
+    // SafeDatabaseManager::connection().
+    $scratchA = '/tmp/fs-int4-scratch-a-'.uniqid().'.sqlite';
+    $scratchB = '/tmp/fs-int4-scratch-b-'.uniqid().'.sqlite';
+    touch($scratchA);
+    touch($scratchB);
+
+    guardEnv('UMA_DATABASE_ROLE', 'test');
+    guardEnv('UMA_EXPECTED_DATABASE', $scratchA);
+    Config::set('database.connections.sqlite.database', $scratchA);
+
+    $db = app('db');
+    expect($db)->toBeInstanceOf(SafeDatabaseManager::class);
+    expect(app(DatabaseGuard::class)->isIsolatedRole())->toBeTrue();
+
+    // Boot with A matching expected: connection resolves and the re-check passes.
+    $db->connection();
+
+    // Runtime switch to B: the resolved path no longer matches UMA_EXPECTED_DATABASE.
+    Config::set('database.connections.sqlite.database', $scratchB);
+
+    expect(fn () => $db->connection())->toThrow(DatabaseSafetyViolation::class);
+
+    // Cleanup
+    foreach ([$scratchA, $scratchB] as $path) {
+        if (file_exists($path)) {
+            unlink($path);
+        }
+    }
+});
+
+it('allows expected-DB match on runtime re-check', function () {
+    // Same scratch DB before and after boot: the runtime re-check passes.
+    $scratch = '/tmp/fs-int4-scratch-match-'.uniqid().'.sqlite';
+    touch($scratch);
+
+    guardEnv('UMA_DATABASE_ROLE', 'test');
+    guardEnv('UMA_EXPECTED_DATABASE', $scratch);
+    Config::set('database.connections.sqlite.database', $scratch);
+
+    $db = app('db');
+    expect($db->connection())->toBeInstanceOf(Connection::class);
+
+    if (file_exists($scratch)) {
+        unlink($scratch);
+    }
 });
 
 it('rejected operations leave the protected database unchanged', function () {

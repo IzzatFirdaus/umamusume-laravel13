@@ -48,6 +48,17 @@ class UraFinaleRunsSeeder extends Seeder
     private const int URA_FINAL_SLOT = 410;
 
     /**
+     * Public so `CareerReferenceEnrichmentTest` can materialise the card FK prerequisites straight
+     * from this table instead of duplicating ids. The 17 entries collapse to 10 unique card ids,
+     * matching the ten configured tracker-card forms.
+     *
+     * @var array<int>
+     */
+    public const array CAREER_CARDS = [
+        100301, 100302, 100401, 100801, 100901, 101401, 101501, 101701, 102301, 105602,
+    ];
+
+    /**
      * Catalog ids for non-URA races that exist in race_catalog_slots on this tree.
      * Races without a catalog slot (Negishi S., February S., Elm S., Hanshin
      * Daishoten, etc.) are recorded in `notes` only, not as race_entries.

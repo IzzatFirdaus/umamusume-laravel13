@@ -10,6 +10,7 @@ use App\Enums\TraineeGoalType;
 use App\Models\PreseasonRound;
 use App\Models\RaceCatalogSlot;
 use App\Models\RaceEntry;
+use App\Models\ScenarioSlot;
 use App\Models\TraineeGoal;
 use App\Models\TrainingRun;
 use App\Models\TurnEntry;
@@ -664,6 +665,22 @@ final class TeamPanelBuilder
             'roster' => $roster,
             'race_guidance' => is_numeric($margin) ? (int) $margin : null,
             'race_entries' => $entries,
+            // G-33: the five seeded Unity Cup team-race slots and this run's recorded result
+            // against each, oldest round first. Absent round = no entry recorded (null), never a
+            // loss. Null when the scenario does not compose `team_race`.
+            'team_race_calendar' => $run->composesPanel('team_race')
+                ? $this->teamRaceCalendar($run)
+                : [],
+            // The Trainer-observed countdown to the next team race (turns, not calendar date).
+            // Null until stated; zero means "this turn". Null when no team layer.
+            'team_race_countdown' => $run->composesPanel('team_race')
+                ? $run->team_race_countdown
+                : null,
+            // Roster size the Trainer last observed for this run. Independent of `roster` row
+            // count; null = unrecorded, never inferred from stored rows.
+            'observed_member_count' => $run->composesPanel('team_race')
+                ? $run->observed_member_count
+                : null,
             'bands' => $bands,
             // Section 13.6: the panel rendered the band figures with no carrier and no low-band caveat, so a
             // reader could not tell whose bands they are or that two published band sets disagree at the
@@ -836,6 +853,45 @@ final class TeamPanelBuilder
                 'No column records who this run fields in each category, so the board states the ask and not the run.',
             ],
         ];
+    }
+
+    /**
+     * The five seeded Unity Cup team-race slots in calendar order, each carrying this run's recorded
+     * result against that slot (or null when nothing was recorded).
+     *
+     * Anchors are month+half (not career turn); `is_mandatory=false`, `tier=null`, `fans_needed=null`.
+     * Provenance rides on the slot row itself (`source_url`, `snapshot_path`, `fetched_at`,
+     * `source_timezone`). The run's `race_entries` are a different fact and are attached here by slot
+     * id only — no distance is stored on a team-race row, so no distance is printed.
+     *
+     * @return list<array{source_key: string, label: string, entry: array{status: string, placement: int|null, circles: int|null}|null}>
+     */
+    private function teamRaceCalendar(TrainingRun $run): array
+    {
+        $slots = ScenarioSlot::where('scenario_key', $run->scenarioKey())
+            ->where('kind', 'team_race')
+            ->orderBy('sort_order')
+            ->get();
+
+        /** @var array<int, RaceEntry> $bySlot */
+        $bySlot = $run->raceEntries
+            ->whereNotNull('scenario_slot_id')
+            ->keyBy('scenario_slot_id')
+            ->all();
+
+        return $slots->map(function (ScenarioSlot $slot) use ($bySlot): array {
+            $entry = $bySlot[$slot->id] ?? null;
+
+            return [
+                'source_key' => $slot->source_key,
+                'label' => $slot->slot_label,
+                'entry' => $entry === null ? null : [
+                    'status' => $entry->status->value,
+                    'placement' => $entry->placement,
+                    'circles' => $entry->circles,
+                ],
+            ];
+        })->values()->all();
     }
 
     /**
