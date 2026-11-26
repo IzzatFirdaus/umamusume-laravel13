@@ -83,6 +83,22 @@ Require evidence that a process assigned scratch database A is refused access to
 Verify source-backed factory regression protection and fixture classification. Review the Docs
 agent's provenance findings.
 
+### Resolved requirement (Coordinator, 2026-11-26) — status still PARTIAL
+
+No accepted mandatory curated pool of 28 genuine Global-eligible fixture identities has been established. The authoritative coordination disposition is:
+
+- Factory rows default to `is_fixture=true`.
+- `catalogue()` explicitly opts into `is_fixture=false`.
+- `is_manual` remains independently classified.
+- Synthetic fixtures remain distinguishable from genuine source-backed catalogue rows.
+- Fixtures remain excluded from applicable catalogue queries and user-facing collections.
+- Global eligibility is supported by applicable source records.
+- Current focused executable evidence remains required.
+
+Dataset-level source availability is distinct from individual character and card-variant eligibility. The original historical 28-name assertion is preserved as an unsupported historical claim; no replacement identity pool is invented.
+
+**Executable evidence (Fullstack, 2026-11-26, msg#2):** Backend's `tests/Feature/Check6FixtureClassificationTest.php` (183 lines, 8 tests) run in the backend worktree @ `d9bf146b`: **8 passed / 29 assertions**. Coverage: `is_fixture` default true, `catalogue()` opt-out, `is_manual` independence, fixture exclusion from API v1 + user collections, `isFixture` resource flag, `release_status` eligibility, identity-vs-card-variant. This is the focused regression evidence the Docs provenance review previously lacked. Status advances to **PARTIAL → PENDING-INTEGRATION**: the seven distinctions are now executable-verified, but the test file is untracked and not yet committed/frozen by Backend. Check #6 advances to **PASS** only after Backend commits + freezes the file and Fullstack integrates it. No replacement identity pool invented; historical 28-name claim preserved unsupported.
+
 ## Check #7 — Documentation reconciliation (Technical Documentation Engineer)
 
 Verify the reconciled documentation accurately reflects implemented and tested behaviour. Confirm all
@@ -267,9 +283,11 @@ Probe with two seeded scratch DBs A and B:
 
 So `UMA_EXPECTED_DATABASE` is executable protection **only at boot**, not on connection resolution. The requirement that a process assigned A be refused access to B is not met for runtime switches. `uma:db-guard` and the browser harness re-check identity on demand, but the application boundary does not. Routed to Backend Architect.
 
-### Check #6 — Backend Architect + Docs — PARTIAL
+### Check #6 — Backend Architect + Docs — PARTIAL → PENDING-INTEGRATION
 
-Docs provenance reviewed: the claimed 28 `UmamusumeFactory::$sourceNames` curated names were NOT located in the inspected factory or stashes. The factory generates fixture names via `Str::title(fake()->unique()->words(2, true))` with `is_fixture => true` default, `catalogue()` opt-in, `is_manual` separate. Classification is implemented; curated identity provenance is unverified. Backend's dedicated factory regression evidence was not attached at review time. Authoritative requirement definition pending Coordinator/Backend.
+Docs provenance reviewed: the claimed 28 `UmamusumeFactory::$sourceNames` curated names were NOT located in the inspected factory or stashes. The factory generates fixture names via `Str::title(fake()->unique()->words(2, true))` with `is_fixture => true` default, `catalogue()` opt-in, `is_manual` separate. Classification is implemented; curated identity provenance is unverified. Authoritative requirement (Coordinator disposition 2026-11-26): no mandatory curated 28-name pool exists; the seven distinctions (synthetic factory classification, explicit catalogue classification, independent manual classification, genuine source-backed provenance, applicable catalogue exclusion, actual source-record Global eligibility, distinct character/card-variant eligibility) are the established requirement.
+
+**Executable evidence (Fullstack msg#2, 2026-11-26):** `tests/Feature/Check6FixtureClassificationTest.php` (Backend @ `d9bf146b`, 8 tests / 29 assertions, all passing) verifies all seven distinctions. Status advances to PENDING-INTEGRATION; promotion to PASS requires Backend to commit + freeze the (untracked) test file and Fullstack to integrate it. Historical 28-name claim preserved unsupported; no invented identities.
 
 ### Check #7 — Docs — PARTIAL
 
@@ -302,7 +320,7 @@ defects and one missing evidence package remain (FS-INT-1 … FS-INT-6).
 | #3 | Frontend Developer | BLOCKED | Identity probe + negative specs | Static review of router/spec/setup only | No executed browser evidence attached |
 | #4 | Backend Architect | FAIL | `AgentSessionGuard` ack path | `CONNECTION_GRANTED count=135` with inherited ack | Maintenance auth leaks into isolated workflow |
 | #5 | Backend Architect | PARTIAL | `assertMatchesExpected` at boot | Boot mismatch refused | Runtime A→B switch granted |
-| #6 | Backend Architect + Docs | PARTIAL | Source-backed factory, `is_fixture` | Historical 28-name claim not located; factory classification implemented, curated provenance unverified | Backend regression evidence pending; authoritative requirement definition pending Coordinator |
+| #6 | Backend Architect + Docs | PARTIAL | Source-backed factory, `is_fixture` | Historical 28-name claim not located (unsupported historical assertion); factory classification implemented | Requirement resolved by Coordinator 2026-11-26 (no mandatory curated 28 pool; is_fixture default true / catalogue() opt-in / is_manual independent); Backend focused executable evidence pending |
 | #7 | Technical Documentation Engineer | PARTIAL | AGENTS.md §11/§13, this tracker | Docs reconciliation report | Peer reports pending; §13.5 not-a-defect closed (FS-INT-6) |
 | #8 | Fullstack Senior Developer | PASS | Read-only canonical verification | All 9 counts match; #141–145/#49–51 absent; #48 intact; integrity ok; FK 0; backups ok | None |
 
@@ -316,7 +334,7 @@ defects and one missing evidence package remain (FS-INT-1 … FS-INT-6).
 6. **Browser identity:** harness-only probe digests resolved DB path, checks role/token/loopback; negative specs reviewed statically; no executed evidence from Frontend (FS-INT-5).
 7. **Expected DB mismatch refusal:** boot-time mismatch refused; runtime A→B switch granted (FS-INT-4).
 8. **Maintenance auth inheritance protection:** not protected — ack inherited into isolated launcher and children (FS-INT-3).
-9. **Source-backed factory regression:** 28 curated names verified against committed catalog by Docs; `is_fixture` default true, `catalogue()` opt-in; Backend regression evidence pending.
+9. **Source-backed factory regression:** the historical "28 curated Global-eligible fixture identities" claim is **NOT located** and is preserved as an unsupported historical assertion (no `$sourceNames` pool; `UmamusumeFactory::definition()` uses synthetic Faker names). Coordinator disposition (2026-11-26) resolved the requirement: no accepted mandatory curated pool of 28 genuine identities exists; factory rows default `is_fixture=true`, `catalogue()` explicitly opts into `is_fixture=false`, `is_manual` stays independently classified, synthetic fixtures stay distinguishable from genuine source-backed catalogue rows, fixtures stay excluded from applicable catalogue/user-facing collections, and Global eligibility is supported by applicable source records (dataset-level availability is distinct from individual character/card-variant eligibility). `is_fixture` default true + `catalogue()` opt-in implemented; Backend focused executable regression evidence now supplied (Fullstack msg#2, 2026-11-26: `tests/Feature/Check6FixtureClassificationTest.php` @ `d9bf146b`, 8 tests / 29 assertions passing, covering all seven distinctions) — Check #6 advances PARTIAL → PENDING-INTEGRATION, promotion to PASS gated on Backend commit + freeze of the untracked test file and Fullstack integration.
 10. **Documentation reconciliation:** AGENTS.md §11 (change-safety) and §13 (UI/UX) match code; no §13.5 pinned-count wording exists (FS-INT-6 closed as not-a-defect, 2026-11-26).
 11. **Persistent database preservation:** fresh read-only run — 135 umamusume / 18 runs (9 active, 9 completed) / 8 veterans / 263 cards / 18 roster / 2 aliases / 96 profiles; #141–145 and #49–51 absent; run #48 = Rice Shower, unity_cup, Active; zero fixture/synthetic contamination; `integrity_check=ok`, `foreign_key_check=0`; both backups present and clean.
 12. **Files changed by each agent:** Fullstack — `docs/sitrep/DB-SAFETY-ACCEPTANCE-2026-11-25.md`, `docs/sitrep/INDEX.md`, `tests/Feature/AgentSessionIsolationTest.php`, removal of `tools/debug-events.php`, scratch probes under `.scratch-uma/`. Docs — `docs/sitrep/DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md` and tracker updates. Frontend — browser harness/spec/global-setup files (in progress). Backend — no new guard source landed during this review window.
