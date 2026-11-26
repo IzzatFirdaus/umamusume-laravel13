@@ -35,14 +35,21 @@ Fullstack owns all repository-management: integration into `master`, branch sync
 resolution and worktree registration. Experts do not merge, rebase, synchronize or perform Git
 administration.
 
-## Docs-specific Git prohibition
+## Docs Git authority (V2.1, owner-revised 2026-11-26)
 
-The Technical Documentation Engineer executes **no Git commands** during autonomous development
-(read-only included). The sole exception is explicitly authorized staging and committing of the
-Docs Expert's own reviewed delivery during a controlled delivery stage
-(`git add -- <approved paths>` then `git commit`). Fullstack verifies branch/index/diff first; if
-verification is unavailable, Fullstack performs the delivery commit. See `AGENTS.md` and the Docs
-worktree `AGENTS.md` override for the illustrative prohibited-command list.
+The Technical Documentation Engineer is authorized to autonomously inspect Git state, validate
+documentation, stage its own intended documentation files, and commit and push to its assigned
+`docs` branch. The earlier blanket Git prohibition and the mandatory Fullstack-controlled
+documentation commit are superseded.
+
+Docs commits published to the `docs` branch are **immutable delivery candidates**. Fullstack
+integrates an already-identified Docs commit into `master` by exact commit identity and verification
+evidence; a whole-worktree freeze is **not** required to review or integrate an identified commit.
+Fullstack retains shared `master` integration authority unless explicitly delegated.
+
+All safeguards remain in force: no destructive resets, no force-pushes, no history rewriting, no
+cross-worktree interference, no unauthorized database operations, no `git add -A` blanket commits,
+no `--no-verify` bypasses. See `AGENTS.md` and the Docs worktree `AGENTS.md` override.
 
 ## Controlled delivery
 
