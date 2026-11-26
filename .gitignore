@@ -145,6 +145,13 @@ Homestead.yaml
 # Isolated git worktrees. One is created per parallel dispatch so a peer's uncommitted edits cannot be
 # swept into a commit or baked into a bundle; none of them is history material.
 /.worktrees/
+# Agent-harness runtime state. `.headroom/` holds the memory-graph SQLite databases a local tool
+# writes beside the repo; `storage/scheduler.pid` is the dev scheduler's pid file. Both are per-machine
+# runtime artifacts: the 2026-11-26 host checkpoint (`52f36129`) swept them into history, which is
+# exactly the class of file this rule exists to keep out. Ignored, not deleted — they are not this
+# repo's history material and another session may still be writing them.
+/.headroom/
+/storage/scheduler.pid
 /testing
 /database/*.sqlite*
 *.sql

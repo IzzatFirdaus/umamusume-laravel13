@@ -139,6 +139,30 @@ class StoreTrainingRunRequest extends FormRequest
              */
             'unity_trainings_count' => ['nullable', 'integer', 'min:0'],
             'spirit_bursts_count' => ['nullable', 'integer', 'min:0'],
+            /*
+             * The team size the Trainer last observed off the Unity Cup panel. Entered, never derived:
+             * nothing here counts roster rows, so twenty observed beside eighteen stored rows is an
+             * honest gap the panel names rather than collapses (D-220). Only a scenario that composes
+             * `team_race` has a team to observe, so a value on any other scenario is refused here.
+             */
+            'observed_member_count' => [
+                'nullable',
+                'integer',
+                'min:0',
+                function (string $attribute, mixed $value, Closure $fail): void {
+                    if ($value === null || ! is_numeric($value)) {
+                        return;
+                    }
+
+                    $run = $this->route('run');
+                    $scenario = $this->input('scenario', $run instanceof TrainingRun ? $run->scenario : null);
+
+                    if ($scenario === null || $scenario === ''
+                        || config('scenarios.scenarios.'.$scenario.'.panels.team_race') !== true) {
+                        $fail('This scenario has no Unity Cup team, so there is no observed member count to record.');
+                    }
+                },
+            ],
             // KI-133's manual proxy: one aggregate for the whole team; `min:0` keeps a negative
             // mistype out while the D-220 rules keep "not stated" and zero distinct.
             'current_spirit_proxy' => ['nullable', 'integer', 'min:0'],
@@ -298,6 +322,23 @@ class StoreTrainingRunRequest extends FormRequest
 
             if (! $composesTeamRace && $run->team_race_countdown !== null) {
                 $this->merge(['team_race_countdown' => null]);
+            }
+        }
+
+        /*
+         * The observed member count: a stored observation is cleared when the payload switches the
+         * run to a scenario that does not compose `team_race` and says nothing about the count. The
+         * stored number would otherwise meet the scenario gate above as a 422 where a field error
+         * belongs. A payload that states a value is left untouched, so the rule refuses it instead.
+         */
+        if ($run instanceof TrainingRun && $this->missing('observed_member_count')) {
+            $scenario = $this->input('scenario', $run->scenario);
+            $composesTeamRace = $scenario === null || $scenario === ''
+                ? false
+                : config('scenarios.scenarios.'.$scenario.'.panels.team_race', false) === true;
+
+            if (! $composesTeamRace && $run->observed_member_count !== null) {
+                $this->merge(['observed_member_count' => null]);
             }
         }
     }
