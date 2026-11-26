@@ -11,6 +11,7 @@ use App\Http\Requests\VeteranSearchRequest;
 use App\Models\TrainingRun;
 use App\Models\Umamusume;
 use App\Models\Veteran;
+use App\Services\Career\CareerReference;
 use App\Services\Legacy\VeteranRow;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -169,6 +170,9 @@ final class VeteranController extends Controller
                 'skills' => $run->skills->count(),
                 'races' => $run->raceEntries->count(),
             ],
+            // Published reference for this career: card, profile, skills, schedule, mechanics, events.
+            // Labelled as reference, never observed history; null fields are named absences.
+            'reference' => CareerReference::forRun($run),
             // The two parents, as the run records them. The six-node graph is not re-rendered here:
             // `components/legacy/AncestryNode.vue` is an editable node (pick control, options, field
             // errors) and mapping it read-only would be a second copy of `Legacy/Builder.vue`'s shape.
