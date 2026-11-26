@@ -17,6 +17,23 @@ The game-mechanics sync. Four Round-5 defects corrected against `UMAMUSUME_REFER
 lock schema cleanup, and Independent Training (§1.1.7) built end to end. The reference is the ground
 truth for mechanics; the two ADRs that contradicted it were amended rather than obeyed.
 
+### Added
+
+- **Autonomous inter-agent communication protocol** - `AGENTS.md` §10a establishes permanent
+  `trainerdesk-chat` MCP coordination: mandatory inbox checks at execution boundaries, outbound
+  message triggers, message types, and rules distinguishing coordination data from authorization.
+- **Agent Chat MCP documentation** - `MCP_SETUP.md` §"Agent Chat MCP" documents `trainerdesk-chat`
+  configuration, the A2A distinction (local stdio vs HTTP/JSON-RPC, async vs push, no idle-agent
+  awakening, caller-supplied labels), and incremental retrieval.
+- **Docs V2.1 Git authority** - `EXPERT-OPERATING-MODEL.md` revised: Docs independently executes
+  `git status/diff/log/show/fetch/add/commit/push` on assigned `docs` branch with mandatory
+  safeguards (explicit path staging, diff review, no destructive operations, predecessor preservation).
+  Fullstack retains `master` integration authority.
+- **Check #6 executable evidence reconciliation** - `DB-SAFETY-ACCEPTANCE-2026-11-25.md` and
+  `SESSION_HANDOFF.md` updated: Check #6 PARTIAL → PENDING-INTEGRATION on Fullstack-verified
+  `Check6FixtureClassificationTest.php` (8 tests / 29 assertions @ `d9bf146b`). Historical 28-name
+  claim preserved unsupported. PASS gated on Backend commit + freeze + Fullstack integration.
+
 ### Changed
 
 - **Docs folder map** - `docs/INDEX.md` added as the docs-tree placement router; `AGENTS.md` §3 map,
