@@ -233,7 +233,7 @@ tools/                    lore.php (lore gate), gate.py (design-artifact gate), 
 | `CLAUDE.md`                             | Coding rules for assistants                                                                                                           |
 | `KNOWN-ISSUES.md`                       | Pointer; defect register KI-01..KI-56 is archived in `docs/research-scratch/AUDIT-AND-VERIFICATION.md`; the root file carries KI-57 onward.   |
 | `docs/adr/README.md`                    | ADR index (`ADR-0001` to `ADR-0027`; 0027 is Proposed) with the errata convention                                                                       |
-| `MCP_SETUP.md`                         | MCP client configuration: where each client reads its servers, and the host gotchas that make a correct-looking config fail silently     |
+| `MCP_SETUP.md`                         | MCP client configuration: where each client reads its servers, host gotchas, and Agent Chat MCP (`trainerdesk-chat`) cross-IDE setup    |
 | `docs/research-scratch/SLICE-RECORDS.md` section `## execution-ledger-2026-10-17.md` | The append-only dispatch ledger: one numbered section per dispatch, with the gates run, the decisions taken and what was deferred |
 | `docs/UMAMUSUME_REFERENCE.md`           | Source-cited mechanics reference; live-ops claims are dated snapshots                                                                 |
 | `docs/scenarios/`                       | Per-scenario playing guides                                                                                                           |
