@@ -3,7 +3,6 @@
 use App\Enums\RunStatus;
 use App\Models\RosterMember;
 use App\Models\TrainingRun;
-use App\Models\Umamusume;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Inertia\Testing\AssertableInertia as Assert;
 use Tests\TestCase;
