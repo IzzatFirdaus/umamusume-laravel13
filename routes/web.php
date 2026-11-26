@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Career\AdvisorAnalysisController;
 use App\Http\Controllers\Career\BuildTargetController;
 use App\Http\Controllers\Career\CockpitController;
 use App\Http\Controllers\Career\DeckSelectController;
@@ -146,6 +147,14 @@ Route::get('/training-runs/{run}', [TrainingRunController::class, 'redirect'])->
  * cannot collide, because the cockpit's path carries an extra segment.
  */
 Route::get('/training-runs/{run}/cockpit', [CockpitController::class, 'show'])->name('runs.cockpit');
+/*
+ * The Advisor AI read (`ADR-0038`, accepted 2026-11-25). Its own route rather than a cockpit key:
+ * `CareerCockpitTest` pins the `advisor` prop to exactly `decision` and `finale`, and widening it
+ * would make every render pay for a layer that is off by default. Off answers 404, not an empty
+ * payload; read-only, so a failed analysis leaves the career byte-identical.
+ */
+Route::get('/training-runs/{run}/advisor-analysis', [AdvisorAnalysisController::class, 'show'])
+    ->name('runs.advisor-analysis');
 /*
  * The run-identity door (`C6b.1`, KI-144). The Cockpit's `Run identity` fields get a page of their
  * own so the cockpit can retire the `Career tools` disclosure it hosted them in. It is a READ: every

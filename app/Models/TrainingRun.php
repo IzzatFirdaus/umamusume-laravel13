@@ -151,6 +151,16 @@ class TrainingRun extends Model
     protected static function booted(): void
     {
         static::saving(function (self $run): void {
+            // C05 (KI-169): the scenario is immutable from the first recorded turn. Checked here
+            // rather than only in the Form Request because this is the boundary every writer passes
+            // — a seeder, an import, a command — and the request is not. `isDirty` keeps a re-post of
+            // the same scenario legal, which is what the header edit form does on every save.
+            if ($run->isDirty('scenario') && $run->turnEntries()->exists()) {
+                throw new \RuntimeException(
+                    'Cannot change scenario on run ['.$run->id.'] after its first recorded turn.',
+                );
+            }
+
             // R6-48: the column's vocabulary is validated here, at the model boundary, not by a DB
             // enum (owner ruling 2026-11-15). `TeamRankPayload::LETTERS` is the one owner of the
             // league's letters, so even a writer that is not a Form Request cannot store one the
@@ -548,6 +558,29 @@ class TrainingRun extends Model
     }
 
     /**
+     * Whether this run's scenario may still be changed (C05, KI-169).
+     *
+     * The scenario is immutable from the first recorded turn onward: every scenario-aware panel
+     * resolves from that key, so a mid-career change would re-label a history that was recorded
+     * under another scenario's rules. Before any turn exists the column is still editable, which is
+     * the wizard's own correction window.
+     *
+     * One reader for both boundaries — the model's saving guard and the HTTP validator — so the two
+     * cannot disagree about the same run.
+     */
+    public function canChangeScenario(): bool
+    {
+        // The loaded collection when the caller already has it, the way `stripValues()` reads it: the
+        // cockpit eager-loads `turnEntries` and prints this prop on every render, so an unconditional
+        // `exists()` would add a query to a screen whose budget is pinned (`CockpitQueryBudgetTest`).
+        if ($this->relationLoaded('turnEntries')) {
+            return $this->turnEntries->isEmpty();
+        }
+
+        return ! $this->turnEntries()->exists();
+    }
+
+    /**
      * Whether the Trainer has actually chosen a scenario.
      *
      * Distinct from `scenarioKey()`, which falls back to the baseline so the
@@ -750,8 +783,14 @@ class TrainingRun extends Model
      */
     public function nextTurnNumber(): int
     {
+        // The loaded collection when the caller already holds it, the same way
+        // `canChangeScenario()` reads it: the cockpit eager-loads `turnEntries` and three of its
+        // props ask this, so an unconditional `max(turn)` would charge the screen a query per read
+        // on a budget `CockpitQueryBudgetTest` pins.
         /** @var int|string|null $max */
-        $max = $this->turnEntries()->max('turn');
+        $max = $this->relationLoaded('turnEntries')
+            ? $this->turnEntries->max('turn')
+            : $this->turnEntries()->max('turn');
 
         if ($max !== null && (int) $max >= 1) {
             return (int) $max + 1;

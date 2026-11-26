@@ -169,6 +169,12 @@ jobs:
         with:
           python-version: '3.12'
 
+      # Test-tool only: the fast gate's `verify-backdrop` step decodes the shipped plates
+      # and measures their contrast. Not an application dependency, not carried by the
+      # installer; pinned so a decoder change cannot read as artwork drift.
+      - name: Install gate tool dependencies
+        run: python -m pip install --disable-pip-version-check -r tools/requirements-gates.txt
+
       - name: Setup Node.js 24
         uses: actions/setup-node@v5
         with:
