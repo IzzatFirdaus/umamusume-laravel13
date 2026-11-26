@@ -5,7 +5,7 @@
   code: built — migration 2026_10_10_200000_add_choice_and_corrections_to_turn_entries_table (ran, batch 5); turn_entries.choice, decision_snapshot, corrected_from, superseded_by; partial unique index on (training_run_id, turn) WHERE corrected_from IS NULL; lookup index on (training_run_id, turn); tests/Feature/TurnChoiceTest.php; tests/Feature/NextDecisionTest.php; tests/Feature/CareerCockpitTest.php; tests/Feature/CockpitObjectivesTest.php
   superseded-by: —
   amended-by: —
-  open: the decision's four columns have no writer — the shipped correction path (runs.turns.update) updates the turn row in place, so corrected_from/superseded_by stay null and the Timeline's corrected marker is read from updated_at; who writes a correction row, and from which screen, is undecided (2026-10-22 framework check)
+  open: writer recovered (2026-11-26) but executable acceptance NOT complete — updateTurn() appends a correction row (corrected_from set, original marked superseded_by, choice/decision_snapshot carried forward) and Career/TimelineController prints the chain (TrainingRunController.php:1184-1208, commits 1f52d6c7 / 9c5c343a); still unverified: repeated corrections on one turn, effective-reader filtering (superseded_by IS NULL) end to end, decision_snapshot point-in-time fidelity, down()/rollback guard, stale-revision read after multiple corrections; the 2026-10-22 no-writer check is superseded
 -->
 
 Status: **accepted** (owner delegation 2026-11-18 — "proceed with every owner gated tasks"; the original draft note is preserved in the contract above).

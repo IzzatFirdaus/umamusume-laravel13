@@ -28,7 +28,7 @@ Higher wins; code wins over a stale rule (`.ai/rules/index.md`).
 | Human owner | task | Highest; cannot relax quality bar without written ruling |
 | Quality bar | `docs/research-scratch/GOVERNANCE.md` §CONSTRAINTS.md | Never weakened |
 | Gate registry | `GOVERNANCE.md` §GATE-REGISTRY.md | How gates run |
-| Binding decisions | `docs/adr/0001`-`0027` | Accepted binds; Proposed does not |
+| Binding decisions | `docs/adr/0001`-`0039` | Accepted binds; Proposed does not |
 | Product truth | `PRD.md` | users, FRs, §6 non-goals |
 | System design | `ARCHITECTURE.md` over `ARCHITECTURE-ESSENTIALS.md` | digest loses |
 | Screen behavior | `SCREEN_SPEC.md` §8 | per-screen states |
@@ -63,7 +63,7 @@ No new markdown in repo root; new docs go into `docs/research-scratch/` masters 
 | `DESIGN.md` | visual system |
 | `SCREEN_SPEC.md` | screen inventory, states, workflows, §8 authority |
 | `CHANGELOG.md` | notable changes, Keep a Changelog |
-| `EXPERT-OPERATING-MODEL.md` | operating model, branch assignments, single-active-writer |
+| `EXPERT-OPERATING-MODEL.md` | operating model, branch assignments, parallel linked-worktree model (supersedes single-active-writer) |
 | `docs/research-scratch/GOVERNANCE.md` | quality bar C-1..C-9, gate registry, risk record |
 | `KNOWN-ISSUES.md` | live defect register `KI-nn` |
 | `README.md` | onboarding, commands, routes, docs |
@@ -76,7 +76,7 @@ No new markdown in repo root; new docs go into `docs/research-scratch/` masters 
 | `docs/scenarios/01,02,03,07,08,09` | per-scenario guides (08 JP-only, don't import) |
 | `PRODUCT.md` | generated; don't hand-edit |
 | `docs/deprecated/` | retired legacy PDFs; not a source |
-| `docs/adr/` | Architecture Decision Records (0001-0037); `docs/adr/README.md` is the derived index, Accepted binds only |
+| `docs/adr/` | Architecture Decision Records (0001-0039); `docs/adr/README.md` is the derived index, Accepted binds only |
 | `docs/audits/` | Repository audits only (browser observations, RS-UC audits, UX walks); dated dirs, register in `docs/audits/INDEX.md` |
 | `docs/archive/` | Superseded artifacts (mockups, screenshots, captures); not a source |
 | `docs/game-screenshots/` | Raw Global client screenshots; reference only |
