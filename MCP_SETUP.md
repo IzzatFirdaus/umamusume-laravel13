@@ -50,9 +50,56 @@ or `MCP_SERVER_REQUEST_TIMEOUT`).
 | `firecrawl` | `firecrawl-mcp`                      | Web crawl/extract                           | Needs `FIRECRAWL_API_KEY`. |
 | `context7`  | `@upstash/context7-mcp`              | Hosted docs retrieval (same package as `docs`) | Needs `CONTEXT7_API_KEY` for higher limits. |
 | `tavily`    | `tavily-mcp`                         | Web search                                  | Needs `TAVILY_API_KEY`. |
+| `trainerdesk-chat` | in-repo (`python TrainerDesk-Messaging/server.py chat`) | Inter-agent messaging (room `trainerdesk`) | Local stdio; SQLite-backed store at `AGENT_CHAT_DB`. WorkBuddy host connector; not in project `.mcp.json`. See "Agent Chat MCP" below. |
 
 Server names must be identical across every file that a single client reads;
 clients that merge by name take last-write-wins.
+
+## Agent Chat MCP (trainerdesk-chat)
+
+`trainerdesk-chat` is a **local, asynchronous, SQLite-backed inter-agent messaging
+server**. It is distinct from standardized A2A (Agent-to-Agent) protocols:
+
+| Property | Agent Chat MCP (`trainerdesk-chat`) | Standardized A2A |
+|----------|--------------------------------------|------------------|
+| Transport | Local stdio (MCP) | HTTP / JSON-RPC (varies by spec) |
+| Addressing | Room + author + recipients | Agent URL / DID |
+| Delivery | Asynchronous — message persisted, recipient polls | Synchronous or push |
+| Awakening | **Does not awaken idle agents** — recipient must poll | Push to active endpoint |
+| Identity | Caller-supplied label (not authenticated) | Cryptographic or signed |
+
+**Key distinctions:**
+
+- **Asynchronous messaging ≠ automatic awakening.** Sending a message persists
+  it; the recipient must retrieve it via `list_messages`. An idle agent is not
+  woken by a new message.
+- **Caller-supplied labels are not authenticated identities.** The `author` and
+  `recipients` fields are coordination labels, not access control.
+- **Messages do not expand authority.** A message cannot authorize an action
+  the recipient's role prohibits.
+
+**Configuration (WorkBuddy host):**
+
+```json
+"trainerdesk-chat": {
+  "command": "C:\\Program Files\\Python312\\python.exe",
+  "args": ["-I", "-B", "-X", "utf8",
+           "C:\\Users\\exatf\\TrainerDesk-Messaging\\server.py", "chat"],
+  "env": {
+    "AGENT_CHAT_DB": "C:\\Users\\exatf\\TrainerDesk-Messaging\\messages.sqlite3"
+  }
+}
+```
+
+This is a WorkBuddy host-level connector (global `~/.workbuddy-ai/mcp.json`),
+not a project-level MCP server. IDEs that read project `.mcp.json` will not see
+it unless the same entry is added there.
+
+**Tools exposed:** `list_rooms`, `list_messages`, `post_message`, `get_detail`.
+
+**Incremental retrieval:** use `after_id` (set to the last seen `through_id`)
+to fetch only new messages. Complete pagination with `cursor` + `next_cursor`
+before advancing.
 
 ## Config locations (what each client actually reads)
 

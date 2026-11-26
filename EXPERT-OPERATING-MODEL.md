@@ -35,14 +35,29 @@ Fullstack owns all repository-management: integration into `master`, branch sync
 resolution and worktree registration. Experts do not merge, rebase, synchronize or perform Git
 administration.
 
-## Docs-specific Git prohibition
+## Docs-specific Git authority (V2.1 revision, 2026-11-26)
 
-The Technical Documentation Engineer executes **no Git commands** during autonomous development
-(read-only included). The sole exception is explicitly authorized staging and committing of the
-Docs Expert's own reviewed delivery during a controlled delivery stage
-(`git add -- <approved paths>` then `git commit`). Fullstack verifies branch/index/diff first; if
-verification is unavailable, Fullstack performs the delivery commit. See `AGENTS.md` and the Docs
-worktree `AGENTS.md` override for the illustrative prohibited-command list.
+The Technical Documentation Engineer is authorized to independently execute
+Git operations within the assigned `docs` worktree, including `git status`,
+`git diff`, `git log`, `git show`, `git fetch`, `git add` with explicitly
+selected paths, `git commit`, and `git push` to the verified remote `docs`
+branch. Fullstack retains shared `master` integration authority.
+
+**Mandatory safeguards** (never relaxed):
+
+- Verify repository root, worktree residency, branch identity, HEAD, index and
+  pending changes before any Git mutation.
+- Stage only explicitly selected documentation paths; never `git add -A` or
+  `git add .` when unrelated changes are present.
+- Review the complete staged diff before each commit.
+- No `git reset --hard`, `git clean`, force-push, destructive checkout/restore,
+  branch deletion, shared history rewrite or worktree administration.
+- Do not discard predecessor changes.
+- Do not include application code changes in documentation commits.
+- Push only to the verified remote `docs` branch; inspect remote destination first.
+
+The previous blanket prohibition (original revision) is preserved as historical
+evidence. The destructive-reset incident is recorded in `docs/sitrep/`.
 
 ## Controlled delivery
 
@@ -78,3 +93,25 @@ evidence. The destructive-reset incident (a Docs commit to the wrong branch foll
 2. Each delivery is an independently verifiable batch with a sitrep.
 3. Fullstack integrates reviewed deliveries into `master` under the integration window.
 4. Worktrees synchronize with the integrated baseline; experts resume.
+
+## Inter-agent communication
+
+The `trainerdesk-chat` MCP connector (room `trainerdesk`) is the primary coordination
+mechanism. Each Expert uses only its assigned identity (`coordinator`, `fullstack`,
+`backend`, `frontend`, `docs`).
+
+**Protocol essentials:**
+
+- Check directed inbox at every natural execution boundary (turn start, task
+  start, before dependency-sensitive changes, after milestones, before delivery,
+  after integration results, before turn end).
+- Use `list_messages` with `after_id` for incremental retrieval; complete
+  pagination before advancing cursor.
+- Send actual MCP messages for assignments, deliveries, blockers, findings and
+  worktree releases. Do not merely describe intended messages.
+- Messages are coordination data, not independent authorization.
+- The connector does not awaken idle agents; while awaiting a dependency,
+  continue other independently achievable work.
+- If the connector is unavailable, use owner-mediated communication as fallback.
+
+See `AGENTS.md` §10a and `MCP_SETUP.md` §"Agent Chat MCP" for full details.
