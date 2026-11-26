@@ -1,0 +1,12 @@
+# Test-tool-only dependencies for the repository gates (tools/gates.sh).
+#
+# `tools/verify-backdrop.py` decodes the shipped WebP plates and re-measures their
+# luminance, so it needs a decoder and an array type. These are NOT application
+# dependencies: nothing under app/ or resources/ imports them, and the packaged
+# installer does not carry them.
+#
+# Pinned because the check is a contrast measurement: a Pillow minor bump that
+# changed WebP chroma upsampling would move the measured value without any plate
+# changing, and the gate would report drift that is not in the artwork.
+numpy==2.1.3
+Pillow==11.0.0

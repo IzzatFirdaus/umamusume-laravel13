@@ -12,6 +12,7 @@
  * inside `defineProps<>` (see `resources/js/types.ts` and `Cockpit.vue`'s scenario forward).
  */
 import NextDecision from './NextDecision.vue';
+import AdvisorAnalysisPanel from './AdvisorAnalysisPanel.vue';
 
 const props = withDefaults(
     defineProps<{
@@ -24,8 +25,12 @@ const props = withDefaults(
         currentTurn?: number | null;
         /** Forwarded to the objectives table, whose scenario-scoped group is headed with this name. */
         scenarioLabel?: string | null;
+        /** The cockpit's own `run_url`, the one server-supplied address this run has. */
+        runUrl?: string | null;
+        /** The page's `advisor_revision`, compared against the revision a response carries. */
+        careerRevision?: string | null;
     }>(),
-    { raceUrl: null, timelineUrl: null, currentTurn: null, scenarioLabel: null },
+    { raceUrl: null, timelineUrl: null, currentTurn: null, scenarioLabel: null, runUrl: null, careerRevision: null },
 );
 </script>
 
@@ -49,6 +54,14 @@ const props = withDefaults(
             :timeline-url="props.timelineUrl"
             :current-turn="props.currentTurn"
             :scenario-label="props.scenarioLabel"
+        />
+
+        <AdvisorAnalysisPanel
+            v-if="props.runUrl"
+            class="mt-3"
+            :run-url="props.runUrl"
+            :current-turn="props.currentTurn"
+            :career-revision="props.careerRevision"
         />
 
         <p class="mt-3 text-xs text-ink-muted">

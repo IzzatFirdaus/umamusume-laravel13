@@ -236,6 +236,12 @@ const props = defineProps<{
         decision: Record<string, unknown>;
         finale: { label: string; state: string; turns_away: number | null } | null;
     };
+    /**
+     * The career revision the AI layer fingerprints with, a sibling of `advisor` rather than a key
+     * inside it (`advisor` is a recorded two-key contract). The panel compares a response against
+     * this, which is how a same-turn edit is caught; it describes the career, not the provider.
+     */
+    advisor_revision: string;
     // The strip's own shape is declared at `components/career/RunRaceStrip.vue`, the one place that
     // reads it. The page forwards the bundle untouched, the way it forwarded the calendar cells.
     raceStrip: Record<string, unknown>;
@@ -1140,6 +1146,8 @@ const jumpToShop = (): void => {
                         :timeline-url="props.run.timeline_url"
                         :current-turn="props.header.turn === 0 ? null : props.header.turn"
                         :scenario-label="props.run.scenario_label"
+                        :run-url="props.run.run_url"
+                        :career-revision="props.advisor_revision"
                     />
                 </div>
 

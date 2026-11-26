@@ -93,17 +93,22 @@ it('reads the cockpit in a fixed number of queries, not one per turn or race', f
         static fn (array $query): bool => ! shellQuery($query),
     ));
 
-    // Twenty-nine cockpit-owned queries at twelve logged turns, and the same number at forty: the
+    // Twenty-seven cockpit-owned queries at twelve logged turns, and the same number at forty: the
     // run fetch, the eager loads (`umamusume`, `characterCard`, `turnEntries`, `race_entries` and its
     // three links, `deck_slots`), the joined `turn_events`, the calendar/goal/position passes behind
     // the scenario section, and the C05 `can_change_scenario` existence check the run section adds.
     // None of them keys off how many turns or races the run holds, which is the regression this file
     // exists to catch.
-    expect(count($cockpit))->toBe(29)
+    //
+    // The figure was 29 when the run section's `can_change_scenario` and the advisor revision both
+    // re-queried `max(turn)`; `TrainingRun::nextTurnNumber()` and `canChangeScenario()` now reuse the
+    // eager-loaded `turnEntries`, which removed two. The ceiling is the measured steady state, not a
+    // target: a change that adds a query here is a change that must justify itself.
+    expect(count($cockpit))->toBe(27)
         // Four belong to the shell — three preference reads and the active-career count — exactly as
         // `CatalogRosterTreeTest` records for the catalogue index. A page that grew a turn must not
         // grow one of them either.
-        ->and(count($log))->toBe(33);
+        ->and(count($log))->toBe(31);
 })->group('perf');
 
 it('holds the same query budget when the turn log is longer', function (): void {
@@ -129,8 +134,8 @@ it('holds the same query budget when the turn log is longer', function (): void 
         static fn (array $query): bool => ! shellQuery($query),
     ));
 
-    // Twelve turns and forty land on the same twenty-nine, so no part of the read scales with the
+    // Twelve turns and forty land on the same twenty-seven, so no part of the read scales with the
     // length of the log rather than merely with the number of races on it.
-    expect(count($shortQueries))->toBe(29)
-        ->and(count($longQueries))->toBe(29);
+    expect(count($shortQueries))->toBe(27)
+        ->and(count($longQueries))->toBe(27);
 })->group('perf');
