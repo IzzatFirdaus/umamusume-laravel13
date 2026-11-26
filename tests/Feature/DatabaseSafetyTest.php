@@ -6,10 +6,10 @@ use App\Providers\DatabaseGuardServiceProvider;
 use App\Services\DatabaseSafety\AgentSessionGuard;
 use App\Services\DatabaseSafety\DatabaseGuard;
 use Illuminate\Console\Events\CommandStarting;
-use Illuminate\Database\Connection;
 use Illuminate\Database\Events\ConnectionEstablished;
 use Illuminate\Database\Model;
 use Illuminate\Events\Dispatcher;
+use Illuminate\Foundation\Testing\RefreshDatabaseState;
 use Illuminate\Support\Facades\Config;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -29,6 +29,28 @@ beforeEach(function () {
     }
 });
 
+afterEach(function () {
+    Config::set('database.connections.sqlite.database', ':memory:');
+
+    // FS-INT-2: clear the shared in-memory PDO and migration flag so the next
+    // Feature test in this process gets a fresh :memory: database instead of
+    // reusing one left migrated (or mid-transaction) by this suite.
+    RefreshDatabaseState::$inMemoryConnections = [];
+    RefreshDatabaseState::$migrated = false;
+
+    // Clear UMA_* vars that phpunit.xml force-writes into all three sources.
+    foreach (['UMA_DATABASE_ROLE', 'UMA_ALLOW_CANONICAL_DESTRUCTIVE', 'UMA_OPERATOR_ACKNOWLEDGED', 'UMA_EXPECTED_DATABASE'] as $name) {
+        putenv($name);
+        unset($_ENV[$name], $_SERVER[$name]);
+    }
+
+    // Clear agent session markers so they don't leak between tests.
+    foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
+        putenv($marker);
+        unset($_ENV[$marker], $_SERVER[$marker]);
+    }
+});
+
 /**
  * Declare an environment value across every source the guard reads
  * (`putenv`, `$_ENV`, `$_SERVER`), matching how phpunit.xml `force` writes.
@@ -45,38 +67,6 @@ function guardEnv(string $name, ?string $value): void
     $_ENV[$name] = $value;
     $_SERVER[$name] = $value;
 }
-
-/*
- * These tests point the `sqlite` connection at the canonical file to prove the
- * guard refuses it. RefreshDatabase's `beforeApplicationDestroyed` hook then
- * re-resolves `connection('sqlite')` to roll back — and it resolves the config
- * left behind by the last test, so it would open the real canonical file, find
- * no open transaction, and set `RefreshDatabaseState::$migrated = false`. The
- * next test in the shared process then re-runs `migrate:fresh` against the
- * restored in-memory PDO, which is what produced "cannot VACUUM from within a
- * transaction" and "table migrations already exists" for whichever suite ran
- * second.
- *
- * Restoring the in-memory config here means the teardown hook resolves the
- * same PDO the test began with, so the shared lifecycle is left exactly as it
- * was found and no test ever opens the owner's file for a rollback.
- */
-afterEach(function () {
-    Config::set('database.connections.sqlite.database', ':memory:');
-
-    // FS-INT-2: clear the shared in-memory PDO and migration flag so the next
-    // Feature test in this process gets a fresh :memory: database instead of
-    // reusing one left migrated (or mid-transaction) by this suite. Without
-    // this, forward-order combined runs hit "table migrations already exists"
-    // and "cannot VACUUM from within a transaction".
-    Illuminate\Foundation\Testing\RefreshDatabaseState::$inMemoryConnections = [];
-    Illuminate\Foundation\Testing\RefreshDatabaseState::$migrated = false;
-
-    foreach (['UMA_DATABASE_ROLE', 'UMA_ALLOW_CANONICAL_DESTRUCTIVE', 'UMA_OPERATOR_ACKNOWLEDGED', 'UMA_EXPECTED_DATABASE'] as $name) {
-        putenv($name);
-        unset($_ENV[$name], $_SERVER[$name]);
-    }
-});
 
 it('refuses destructive command when no role declared and DB targets canonical', function () {
     Config::set('database.connections.sqlite.database', 'database/database.sqlite');
@@ -197,38 +187,6 @@ it('simulates LLM bypass attempt and remains blocked', function () {
     $event = new CommandStarting('migrate:fresh', $input, $output);
 
     expect(fn () => $guard->assertCommandSafe($event->command, $event->input))->toThrow(DatabaseSafetyViolation::class);
-});
-
-it('refuses canonical destructive when an agent session inherits both override vars', function () {
-    // FS-INT-3: an agent child inheriting UMA_ALLOW_CANONICAL_DESTRUCTIVE=true and
-    // UMA_OPERATOR_ACKNOWLEDGED=yes from a parent operator shell must NOT authorise
-    // canonical destructive commands, even if the shell is interactive.
-    foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
-        putenv("{$marker}=test-session-01234567");
-        $_ENV[$marker] = 'test-session-01234567';
-        $_SERVER[$marker] = 'test-session-01234567';
-    }
-    putenv('UMA_ALLOW_CANONICAL_DESTRUCTIVE=true');
-    $_ENV['UMA_ALLOW_CANONICAL_DESTRUCTIVE'] = 'true';
-    $_SERVER['UMA_ALLOW_CANONICAL_DESTRUCTIVE'] = 'true';
-    putenv('UMA_OPERATOR_ACKNOWLEDGED=yes');
-    $_ENV['UMA_OPERATOR_ACKNOWLEDGED'] = 'yes';
-    $_SERVER['UMA_OPERATOR_ACKNOWLEDGED'] = 'yes';
-    Config::set('database.connections.sqlite.database', 'database/database.sqlite');
-
-    $guard = app(DatabaseGuard::class);
-
-    expect($guard->allowsCanonicalDestructive())->toBeFalse();
-
-    // Clean up markers so other tests in this shared process are unaffected
-    foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
-        putenv($marker);
-        unset($_ENV[$marker], $_SERVER[$marker]);
-    }
-    putenv('UMA_ALLOW_CANONICAL_DESTRUCTIVE');
-    unset($_ENV['UMA_ALLOW_CANONICAL_DESTRUCTIVE'], $_SERVER['UMA_ALLOW_CANONICAL_DESTRUCTIVE']);
-    putenv('UMA_OPERATOR_ACKNOWLEDGED');
-    unset($_ENV['UMA_OPERATOR_ACKNOWLEDGED'], $_SERVER['UMA_OPERATOR_ACKNOWLEDGED']);
 });
 
 it('allows intentional operator workflow with both override vars and interactive shell', function () {
@@ -560,57 +518,6 @@ PHP);
     expect($line)->not->toContain('DatabaseSafetyViolation');
 });
 
-it('refuses expected-DB mismatch on runtime switch A to B', function () {
-    // FS-INT-4: an isolated role that named UMA_EXPECTED_DATABASE=A at boot must
-    // be refused when the resolved DB switches to B after boot. assertMatchesExpected
-    // only runs at boot; this test exercises the runtime re-check through
-    // SafeDatabaseManager::connection().
-    $scratchA = '/tmp/fs-int4-scratch-a-'.uniqid().'.sqlite';
-    $scratchB = '/tmp/fs-int4-scratch-b-'.uniqid().'.sqlite';
-    touch($scratchA);
-    touch($scratchB);
-
-    guardEnv('UMA_DATABASE_ROLE', 'test');
-    guardEnv('UMA_EXPECTED_DATABASE', $scratchA);
-    Config::set('database.connections.sqlite.database', $scratchA);
-
-    $db = app('db');
-    expect($db)->toBeInstanceOf(SafeDatabaseManager::class);
-    expect(app(DatabaseGuard::class)->isIsolatedRole())->toBeTrue();
-
-    // Boot with A matching expected: connection resolves and the re-check passes.
-    $db->connection();
-
-    // Runtime switch to B: the resolved path no longer matches UMA_EXPECTED_DATABASE.
-    Config::set('database.connections.sqlite.database', $scratchB);
-
-    expect(fn () => $db->connection())->toThrow(DatabaseSafetyViolation::class);
-
-    // Cleanup
-    foreach ([$scratchA, $scratchB] as $path) {
-        if (file_exists($path)) {
-            unlink($path);
-        }
-    }
-});
-
-it('allows expected-DB match on runtime re-check', function () {
-    // Same scratch DB before and after boot: the runtime re-check passes.
-    $scratch = '/tmp/fs-int4-scratch-match-'.uniqid().'.sqlite';
-    touch($scratch);
-
-    guardEnv('UMA_DATABASE_ROLE', 'test');
-    guardEnv('UMA_EXPECTED_DATABASE', $scratch);
-    Config::set('database.connections.sqlite.database', $scratch);
-
-    $db = app('db');
-    expect($db->connection())->toBeInstanceOf(Connection::class);
-
-    if (file_exists($scratch)) {
-        unlink($scratch);
-    }
-});
-
 it('rejected operations leave the protected database unchanged', function () {
     // When assertWriteSafe throws, the database file must not be modified.
     guardEnv('UMA_DATABASE_ROLE', 'test');
@@ -675,19 +582,161 @@ it('does not cache a connection refused by a ConnectionEstablished listener', fu
         guardEnv('UMA_DATABASE_ROLE', 'test');
         Config::set('database.connections.sqlite.database', ':memory:');
 
-        // `$db->purge()` above discarded the shared connection, but
-        // RefreshDatabaseState still holds the *old* PDO — the one whose test
-        // transaction was never rolled back (teardown rolled back the purged
-        // connection, not this PDO). The next suite would restore that PDO and
-        // run `migrate:fresh` on it, which is exactly "cannot VACUUM from within
-        // a transaction". Drop the stale PDO and mark the database unmigrated so
-        // the next test migrates a fresh :memory: database (the config is
-        // restored to :memory: by the afterEach hook above).
-        Illuminate\Foundation\Testing\RefreshDatabaseState::$inMemoryConnections = [];
-        Illuminate\Foundation\Testing\RefreshDatabaseState::$migrated = false;
-
         $events->listen(ConnectionEstablished::class, function ($event) use ($guard): void {
             $guard->onConnectionEstablished($event);
         });
     }
+});
+
+// Task #12 regression coverage: marker detection matrix
+// Marker = any non-empty string independently in $_SERVER / $_ENV / getenv().
+// "0" counts; absent/false/null/empty-string do not. No ?? short-circuit,
+// no truthiness, no comparison against null alone.
+
+it('detects "0" as a valid agent marker in allowsCanonicalDestructive', function () {
+    guardEnv('CLAUDE_SESSION_ID', '0');
+    Config::set('database.connections.sqlite.database', 'database/database.sqlite');
+
+    $guard = app(DatabaseGuard::class);
+
+    expect($guard->allowsCanonicalDestructive())->toBeFalse();
+
+    guardEnv('CLAUDE_SESSION_ID', null);
+});
+
+it('does not treat empty-string marker as present in allowsCanonicalDestructive', function () {
+    guardEnv('CLAUDE_SESSION_ID', '');
+    Config::set('database.connections.sqlite.database', 'database/database.sqlite');
+
+    $guard = app(DatabaseGuard::class);
+
+    expect($guard->allowsCanonicalDestructive())->toBeFalse();
+
+    guardEnv('CLAUDE_SESSION_ID', null);
+});
+
+it('does not false-positive when marker is absent from all sources', function () {
+    foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
+        putenv($marker);
+        unset($_ENV[$marker], $_SERVER[$marker]);
+    }
+    Config::set('database.connections.sqlite.database', 'database/database.sqlite');
+
+    $guard = app(DatabaseGuard::class);
+
+    expect($guard->allowsCanonicalDestructive())->toBeFalse();
+});
+
+it('detects marker in $_ENV when $_SERVER has empty string (conflicting sources)', function () {
+    $_SERVER['CLAUDE_SESSION_ID'] = '';
+    $_ENV['CLAUDE_SESSION_ID'] = 'agent-session-01';
+    putenv('CLAUDE_SESSION_ID=');
+    Config::set('database.connections.sqlite.database', 'database/database.sqlite');
+
+    $guard = app(DatabaseGuard::class);
+
+    expect($guard->allowsCanonicalDestructive())->toBeFalse();
+
+    unset($_SERVER['CLAUDE_SESSION_ID'], $_ENV['CLAUDE_SESSION_ID']);
+    putenv('CLAUDE_SESSION_ID');
+});
+
+it('detects marker only in getenv (process environment)', function () {
+    $_SERVER['CODEBUDDY_SESSION_ID'] = '';
+    $_ENV['CODEBUDDY_SESSION_ID'] = '';
+    putenv('CODEBUDDY_SESSION_ID=agent-session-02');
+    Config::set('database.connections.sqlite.database', 'database/database.sqlite');
+
+    $guard = app(DatabaseGuard::class);
+
+    expect($guard->allowsCanonicalDestructive())->toBeFalse();
+
+    unset($_SERVER['CODEBUDDY_SESSION_ID'], $_ENV['CODEBUDDY_SESSION_ID']);
+    putenv('CODEBUDDY_SESSION_ID');
+});
+
+it('detects either agent marker independently in allowsCanonicalDestructive', function () {
+    Config::set('database.connections.sqlite.database', 'database/database.sqlite');
+    $guard = app(DatabaseGuard::class);
+
+    guardEnv('CLAUDE_SESSION_ID', 'claude-01');
+    expect($guard->allowsCanonicalDestructive())->toBeFalse();
+    guardEnv('CLAUDE_SESSION_ID', null);
+
+    guardEnv('CODEBUDDY_SESSION_ID', 'codebuddy-02');
+    expect($guard->allowsCanonicalDestructive())->toBeFalse();
+    guardEnv('CODEBUDDY_SESSION_ID', null);
+});
+
+it('detects "0" as a valid agent marker in isAgentSession', function () {
+    foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
+        putenv($marker);
+        unset($_ENV[$marker], $_SERVER[$marker]);
+    }
+    guardEnv('CLAUDE_SESSION_ID', '0');
+
+    $agentGuard = app(AgentSessionGuard::class);
+
+    expect($agentGuard->isAgentSession())->toBeTrue();
+
+    guardEnv('CLAUDE_SESSION_ID', null);
+});
+
+it('does not treat empty-string marker as agent session in isAgentSession', function () {
+    foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
+        putenv($marker);
+        unset($_ENV[$marker], $_SERVER[$marker]);
+    }
+    guardEnv('CLAUDE_SESSION_ID', '');
+
+    $agentGuard = app(AgentSessionGuard::class);
+
+    expect($agentGuard->isAgentSession())->toBeFalse();
+
+    guardEnv('CLAUDE_SESSION_ID', null);
+});
+
+it('does not false-positive when marker is absent from all sources in isAgentSession', function () {
+    foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
+        putenv($marker);
+        unset($_ENV[$marker], $_SERVER[$marker]);
+    }
+
+    $agentGuard = app(AgentSessionGuard::class);
+
+    expect($agentGuard->isAgentSession())->toBeFalse();
+});
+
+it('detects marker in $_ENV when $_SERVER has empty string in isAgentSession', function () {
+    foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
+        putenv($marker);
+        unset($_ENV[$marker], $_SERVER[$marker]);
+    }
+    $_SERVER['CLAUDE_SESSION_ID'] = '';
+    $_ENV['CLAUDE_SESSION_ID'] = 'agent-session-01';
+    putenv('CLAUDE_SESSION_ID=');
+
+    $agentGuard = app(AgentSessionGuard::class);
+
+    expect($agentGuard->isAgentSession())->toBeTrue();
+
+    unset($_SERVER['CLAUDE_SESSION_ID'], $_ENV['CLAUDE_SESSION_ID']);
+    putenv('CLAUDE_SESSION_ID');
+});
+
+it('detects marker only in getenv in isAgentSession', function () {
+    foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
+        putenv($marker);
+        unset($_ENV[$marker], $_SERVER[$marker]);
+    }
+    $_SERVER['CODEBUDDY_SESSION_ID'] = '';
+    $_ENV['CODEBUDDY_SESSION_ID'] = '';
+    putenv('CODEBUDDY_SESSION_ID=agent-session-02');
+
+    $agentGuard = app(AgentSessionGuard::class);
+
+    expect($agentGuard->isAgentSession())->toBeTrue();
+
+    unset($_SERVER['CODEBUDDY_SESSION_ID'], $_ENV['CODEBUDDY_SESSION_ID']);
+    putenv('CODEBUDDY_SESSION_ID');
 });

@@ -147,8 +147,21 @@ class DatabaseGuard
         // authorise canonical destructive commands. Only the Trainer's own
         // interactive process (no agent marker) may use this escape hatch.
         foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
-            if ($_SERVER[$marker] ?? $_ENV[$marker] ?? getenv($marker) !== null) {
-                return false;
+            $values = [
+                isset($_SERVER[$marker]) ? $_SERVER[$marker] : null,
+                isset($_ENV[$marker]) ? $_ENV[$marker] : null,
+                getenv($marker),
+            ];
+
+            foreach ($values as $value) {
+                // A marker is any non-empty string in any source. "0" counts;
+                // absent/false/null/empty-string do not. Check each source
+                // independently so a falsy value in one source does not hide a
+                // valid marker in another (no ?? short-circuit, no truthiness,
+                // no comparison against null alone).
+                if (is_string($value) && $value !== '') {
+                    return false;
+                }
             }
         }
 
@@ -237,10 +250,10 @@ class DatabaseGuard
     /**
      * Refuse any write when an isolated role targets the canonical file.
      *
-     * This is the last check before a mutation lands — the factory path, the
-     * seeder path, Query Builder and Eloquent mass operations all funnel
-     * through it. A process that declared an isolated role (and so claimed it is
-     * not the interactive app) may not write real data, full stop.
+     * This is the last check before a mutation lands — the factory path, seeder
+     * path, Query Builder and Eloquent mass operations all funnel through it.
+     * A process that declared an isolated role (and so claimed it is not the
+     * interactive app) may not write the real data, full stop.
      */
     public function assertWriteSafe(string $context): void
     {
@@ -249,8 +262,8 @@ class DatabaseGuard
         }
 
         throw new DatabaseSafetyViolation(
-            "{$context}: UMA_DATABASE_ROLE={$this->role()} but DB_DATABASE resolves the canonical "
-            ."development database {$this->canonicalPath()}. An isolated role may not write real "
+            "{$context}: UMA_DATABASE_ROLE={$this->role()} but DB_DATABASE resolves to the canonical "
+            ."development database {$this->canonicalPath()}. An isolated role may not write the real "
             .'data; point DB_DATABASE at an absolute scratch path.'
         );
     }
