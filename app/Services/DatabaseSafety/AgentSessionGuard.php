@@ -77,9 +77,31 @@ class AgentSessionGuard
      */
     public function isOperatorAuthorised(): bool
     {
-        $ack = $_SERVER['UMA_OPERATOR_ACKNOWLEDGED'] ?? $_ENV['UMA_OPERATOR_ACKNOWLEDGED'] ?? getenv('UMA_OPERATOR_ACKNOWLEDGED');
+        // An agent session never inherits operator authority. Even when a parent
+        // operator shell set UMA_OPERATOR_ACKNOWLEDGED=yes, a child agent process
+        // must not be able to use it to authorise a canonical write. This denial
+        // is independent of the caller: isAgentSession() already returned true
+        // before isOperatorAuthorised() is reached, so this is the containment
+        // boundary that keeps the operator escape hatch for the Trainer only.
+        if ($this->isAgentSession()) {
+            return false;
+        }
 
-        return is_string($ack) && strtolower($ack) === 'yes';
+        $values = [
+            isset($_SERVER['UMA_OPERATOR_ACKNOWLEDGED']) ? $_SERVER['UMA_OPERATOR_ACKNOWLEDGED'] : null,
+            isset($_ENV['UMA_OPERATOR_ACKNOWLEDGED']) ? $_ENV['UMA_OPERATOR_ACKNOWLEDGED'] : null,
+            getenv('UMA_OPERATOR_ACKNOWLEDGED'),
+        ];
+
+        foreach ($values as $value) {
+            // Check each source independently. No ?? short-circuit: an empty
+            // string in $_SERVER must not hide 'yes' in $_ENV or getenv().
+            if (is_string($value) && strtolower($value) === 'yes') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -108,8 +130,21 @@ class AgentSessionGuard
             return;
         }
 
-        $session = (string) ($_SERVER['CODEBUDDY_SESSION_ID'] ?? $_SERVER['CLAUDE_SESSION_ID']
-            ?? $_ENV['CODEBUDDY_SESSION_ID'] ?? $_ENV['CLAUDE_SESSION_ID'] ?? 'unknown');
+        $session = 'unknown';
+        foreach (['CODEBUDDY_SESSION_ID', 'CLAUDE_SESSION_ID'] as $marker) {
+            $values = [
+                isset($_SERVER[$marker]) ? $_SERVER[$marker] : null,
+                isset($_ENV[$marker]) ? $_ENV[$marker] : null,
+                getenv($marker),
+            ];
+
+            foreach ($values as $value) {
+                if (is_string($value) && $value !== '') {
+                    $session = $value;
+                    break 2;
+                }
+            }
+        }
 
         throw new DatabaseSafetyViolation(
             'Agent session ['.substr($session, 0, 8).'] established a connection to the canonical development '

@@ -44,8 +44,21 @@ $repo = dirname(__DIR__);
 
 // Session identity: the agent session marker when present, else the PID, so
 // concurrent agent sessions never share a scratch file (acceptance test G.7).
-$sessionId = ($_SERVER['CLAUDE_SESSION_ID'] ?? $_SERVER['CODEBUDDY_SESSION_ID']
-    ?? $_ENV['CLAUDE_SESSION_ID'] ?? $_ENV['CODEBUDDY_SESSION_ID'] ?? null);
+$sessionId = null;
+foreach (['CLAUDE_SESSION_ID', 'CODEBUDDY_SESSION_ID'] as $marker) {
+    $values = [
+        isset($_SERVER[$marker]) ? $_SERVER[$marker] : null,
+        isset($_ENV[$marker]) ? $_ENV[$marker] : null,
+        getenv($marker),
+    ];
+
+    foreach ($values as $value) {
+        if (is_string($value) && $value !== '') {
+            $sessionId = $value;
+            break 2;
+        }
+    }
+}
 $sessionKey = $sessionId !== null ? substr((string) $sessionId, 0, 8) : 'pid-'.getmypid();
 
 $scratchDir = $repo.'/.scratch-uma/agent-sessions';
