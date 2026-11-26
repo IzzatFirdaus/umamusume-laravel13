@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Database;
 
+use App\Exceptions\DatabaseSafetyViolation;
+use App\Services\DatabaseSafety\DatabaseGuard;
 use Illuminate\Database\Connection;
 use Illuminate\Database\DatabaseManager;
 use Throwable;
@@ -23,6 +25,10 @@ use Throwable;
  * throws, so a refused connection is never reused by a later call in the same
  * process. It is bound as the container's `db` service by
  * `DatabaseGuardServiceProvider` and requires no framework (vendor) edits.
+ *
+ * It also re-checks the expected-database identity on every resolution
+ * (FS-INT-4): an isolated role that named `UMA_EXPECTED_DATABASE` at boot must
+ * not be allowed to switch to a different scratch database after boot.
  */
 class SafeDatabaseManager extends DatabaseManager
 {
@@ -36,7 +42,7 @@ class SafeDatabaseManager extends DatabaseManager
     public function connection($name = null)
     {
         try {
-            return parent::connection($name);
+            $connection = parent::connection($name);
         } catch (Throwable $e) {
             $name = $name ?? $this->getDefaultConnection();
 
@@ -47,5 +53,20 @@ class SafeDatabaseManager extends DatabaseManager
 
             throw $e;
         }
+
+        // Runtime expected-DB identity re-check: a post-boot config switch A→B
+        // must not silently serve a connection whose resolved path no longer
+        // matches UMA_EXPECTED_DATABASE.
+        try {
+            $this->app->make(DatabaseGuard::class)
+                ->assertExpectedDatabaseStill('SafeDatabaseManager::connection', $name ?? $this->getDefaultConnection());
+        } catch (DatabaseSafetyViolation $e) {
+            $name = $name ?? $this->getDefaultConnection();
+            $this->purge($name);
+
+            throw $e;
+        }
+
+        return $connection;
     }
 }

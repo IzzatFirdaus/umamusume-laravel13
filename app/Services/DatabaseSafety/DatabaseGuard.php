@@ -335,6 +335,42 @@ class DatabaseGuard
     }
 
     /**
+     * Runtime re-check of the expected-database identity on every connection
+     * resolution. A process that declared an isolated role and named an expected
+     * database at boot must not be allowed to switch to a different database
+     * after boot without the guard refusing. Called from
+     * `SafeDatabaseManager::connection()` so a post-boot config switch A→B is
+     * refused rather than granted (FS-INT-4).
+     *
+     * The interactive app (no isolated role) is not bound by this: it may point
+     * wherever it wants.
+     */
+    public function assertExpectedDatabaseStill(string $context, ?string $connectionName = null): void
+    {
+        if (! $this->isIsolatedRole()) {
+            return;
+        }
+
+        $expected = $this->environment('UMA_EXPECTED_DATABASE');
+
+        if ($expected === false || ! $this->isFileBacked($connectionName)) {
+            return;
+        }
+
+        $actual = $this->resolvedPath($connectionName);
+
+        if ($this->sameFile($actual, $expected)) {
+            return;
+        }
+
+        throw new DatabaseSafetyViolation(
+            "{$context}: UMA_EXPECTED_DATABASE={$expected} but DB_DATABASE resolves to {$actual} after a "
+            .'runtime config switch. An isolated role must keep the database it was started with; '
+            .'reboot with the intended database instead.'
+        );
+    }
+
+    /**
      * Resolve a database path to a comparable absolute form.
      */
     private function normalize(string $path): string
