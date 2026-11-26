@@ -5507,3 +5507,22 @@ owner-supplied client capture first.
 **What closure does not cover.** A future client capture changes the ruling; this row reopens only when
 the owner records one. The scenario-detail surface's absence disclosure itself is covered by
 `ScenarioPanelTest` and is green.
+
+---
+
+## KI-169 — ScenarioImmutabilityTest: `TrainingRun::canChangeScenario()` undefined (12 failures)
+
+**Symptom.** `php vendor/bin/pest tests/Feature/ScenarioImmutabilityTest.php` → `BadMethodCallException:
+Call to undefined method App\Models\TrainingRun::canChangeScenario()`. 12 of the 50 full-suite failures
+(see `docs/sitrep/CHECK7-FAILURE-TRIAGE-2026-11-26.md`) are this one cluster.
+
+**Evidence.** `grep -rn canChangeScenario app/` returns nothing; the method is absent at master `6e17dca0`
+and current `b9a714f2` — pre-existing gap, NOT introduced by the 2026-11-26 docs-merge code restore.
+Tests call `$run->canChangeScenario()` / expect cockpit prop `can_change_scenario`.
+
+**Impact.** Scenario-immutability guard (ADR scenario lock after first turn) is unverified; 12 tests red.
+Not release-qualifying until resolved.
+
+**Owner/assignment.** App model code — needs Backend/Fullstack to implement `canChangeScenario()` on
+`TrainingRun` (or correct the test contract if the method was renamed). No competing fix applied here;
+logged for assignment. Reopen when the method exists and the cluster is green.
