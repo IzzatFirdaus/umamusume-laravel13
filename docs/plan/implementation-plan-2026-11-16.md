@@ -1,4 +1,12 @@
 # Implementation Plan — 2026-11-16 (pairs `docs/roadmap/implementation-roadmap-2026-11-16.md`)
+<!-- PLAN-CONTRACT
+plan: implementation-plan-2026-11-16
+status: superseded
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 > **SUPERSEDED 2026-11-16** by docs/plan/project-plan-2026-11-16.md. P0–P5 slices closed; see §1 new roadmap for evidence.
 

@@ -1,4 +1,12 @@
 # Session 4 finish plan — P7.3 hold package (confirmed findings)
+<!-- PLAN-CONTRACT
+plan: finish-plan-2026-11-17
+status: superseded
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 Repo: D:/Projects/umamusume-laravel13 | branch master | HEAD be8893a25879acad04935a3aeb47c5c38ed84517
 Dirty: 108 D / 50 M / 49 ?? (peer deletions dominate: jev-inspect/ subproject, docs/audits/). Nothing staged, committed, or pushed this session.

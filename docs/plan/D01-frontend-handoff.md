@@ -1,4 +1,12 @@
 # D01 frontend handoff — roster CRUD needs one backend line
+<!-- PLAN-CONTRACT
+plan: D01-frontend-handoff
+status: landed
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 ## What the frontend ships
 

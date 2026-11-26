@@ -1,4 +1,12 @@
 # Plan 2 of 4 - Test-suite and tooling truth (phase 2)
+<!-- PLAN-CONTRACT
+plan: plan-truth-gates-2026-11-17
+status: landed
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 **Pair:** `docs/roadmap/remaining-work-roadmap-2026-11-17.md` phase 2.
 **Depends on:** plan 1 (phases 0.x must be landed first; a sweep on an uninstallable tree measures nothing).

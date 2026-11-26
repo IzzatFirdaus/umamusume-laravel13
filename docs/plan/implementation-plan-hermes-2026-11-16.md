@@ -1,4 +1,12 @@
 # Implementation Plan — Hermes session, 2026-11-16 (pairs with `docs/roadmap/implementation-roadmap-hermes-2026-11-16.md`)
+<!-- PLAN-CONTRACT
+plan: implementation-plan-hermes-2026-11-16
+status: landed
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 **Goal.** Execute every remaining slice from HEAD `d417a9a5` to a shipped `v3.0.0`, with each slice's
 completion proven by a command rather than described in prose.

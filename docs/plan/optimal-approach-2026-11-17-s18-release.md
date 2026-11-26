@@ -1,4 +1,12 @@
 # Optimal Implementation Approach — S18 follow-through to a v3.0.0 tag
+<!-- PLAN-CONTRACT
+plan: optimal-approach-2026-11-17-s18-release
+status: landed
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 **Date:** 2026-11-17 · **Tree:** `be8893a2` (local `master`) · **Target:** `v3.0.0` on `origin/master`
 **Supersedes:** `docs/roadmap/v3.0.0-release-plan-2026-11-17.md` §0's divergence figures and §P2 (PR #26 is

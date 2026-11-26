@@ -1,4 +1,12 @@
 # Plan 1 of 4 - Land the tree (phase 0) and repair doc truth (phase 1)
+<!-- PLAN-CONTRACT
+plan: plan-tree-truth-2026-11-17
+status: landed
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 **Pair:** `docs/roadmap/remaining-work-roadmap-2026-11-17.md` phase 0 and phase 1.
 **Measured at:** `HEAD be8893a2`, `origin/master 0bb3efd0`, 2026-11-17.

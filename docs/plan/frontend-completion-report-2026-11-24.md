@@ -1,4 +1,12 @@
 # Frontend implementation — completion report
+<!-- PLAN-CONTRACT
+plan: frontend-completion-report-2026-11-24
+status: landed
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 ## D01 — Unity Cup roster management (persistent, ≤20 members, CRUD)
 
