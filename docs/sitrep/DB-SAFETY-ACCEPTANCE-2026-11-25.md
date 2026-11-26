@@ -24,14 +24,14 @@ the evidence used to accept each check. Use PASS / PARTIAL / FAIL / BLOCKED only
 
 | Check | Status | Evidence location | Remaining limitation |
 |---|---|---|---|
-| #1 | FAIL | This tracker §Integration review record; Laravel v13.42.0 pristine upstream vs local vendor diff; combined suite runs | Temporary vendor patch still present in `vendor/.../DatabaseManager.php`; combined safety suites fail in forward order (7 × `table "migrations" already exists`). Both routed to Backend Architect |
-| #2 | PARTIAL | This tracker §Check #2 verification record; `docs/sitrep/DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md` §Check #2 | Backend and Frontend runtime environments not directly observed by this session (no verified access to their sessions); maintenance auth leak defect routed to Backend #4 |
-| #3 | BLOCKED | Static review of `tests/browser/server-router.php`, `tests/browser/browser-isolation-contract.spec.ts`, `tests/browser/support/server-identity.ts` | Frontend implementation present but no executed browser verification report landed at review time; no independent browser run (concurrent agent editing the same files) |
-| #4 | FAIL | This tracker §Check #2 verification record (maintenance inheritance probe) | `UMA_OPERATOR_ACKNOWLEDGED=yes` inherited into isolated launcher disarms connection boundary on canonical re-target — proven. Routed to Backend Architect |
-| #5 | PARTIAL | This tracker §Integration review record (expected-DB probe) | Boot-time mismatch refused; runtime switch A→B after boot granted. Routed to Backend Architect |
-| #6 | PARTIAL | `docs/sitrep/DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md` §Check #6; `database/factories/UmamusumeFactory.php` | Docs provenance verified (28 source-backed names); Backend's dedicated regression evidence not yet attached |
-| #7 | PARTIAL | `docs/sitrep/DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md`; AGENTS.md §13/§13.5; `docs/INDEX.md`; this tracker | Follow-up pass done (provenance dates, six-category terminology, runtime handoff, full-suite framing, discoverability). Still Awaiting Backend #1/#4/#5 + Frontend #3 implementation reports. Full-suite 1,973-failure run = unresolved integration finding (not 1,973 defects; Fullstack owns classification); not a blanket prerequisite for all checks. No full Pest run (doc-only scope). |
-| #8 | PASS | This tracker §Check #8 verification record (fresh read-only probe output) | None found. Fixed canonical counts removed from the boundary suite; AGENTS.md §13.5 wording now stale (routed to Docs #7) |
+| #1 | PASS | This tracker §Integration verification record 2026-11-26 (master `1cb070f7`); `vendor/.../DatabaseManager.php` has zero `DatabaseGuard`/`assertWriteSafe` matches (pristine); combined forward-order run 87 passed / 581 assertions | None found at this tree. The temporary vendor patch is gone; `SafeDatabaseManager` is the bound `db` service and a refused connection is purged (probe P5: reconnect after refusal = REFUSED) |
+| #2 | PARTIAL | This tracker §Check #2 verification record; `docs/sitrep/DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md` §Check #2 | Backend and Frontend runtime environments not directly observed by this session (no verified access to their sessions); maintenance auth leak narrowed to the env-precedence limitation now recorded under #4 |
+| #3 | BLOCKED | Static review of `tests/browser/server-router.php`, `tests/browser/browser-isolation-contract.spec.ts`, `tests/browser/support/server-identity.ts`; `docs/handoffs/frontend-check3-browser-identity-evidence.md` (executed at `b6e5120e`) | Evidence exists but predates the integrated safety implementation (`6aab6503` runtime identity re-check). **Must be re-verified by Frontend against master `1cb070f7`.** Not carried forward as unconditional |
+| #4 | PARTIAL | This tracker §Integration verification record 2026-11-26 (probes L1–L3) | Markerless isolated role + inherited ack on canonical re-target is now **REFUSED** (L3). Remaining: `DatabaseGuard::environment()` reads `$_SERVER` → `$_ENV` → `getenv()`, so a caller that sanitizes only `putenv()` leaves a stale `$_SERVER` value winning (L1 = `yes`). `tools/agent-run.php` clears all three, so the launcher path is closed; any other sanitizer must do the same |
+| #5 | PASS | This tracker §Integration verification record 2026-11-26 (probe P3–P5, isolated role, disposable scratch DBs) | Boot with expected=A GRANTED; post-boot switch to B REFUSED (`DatabaseSafetyViolation`); reconnect still REFUSED. Limitation (source-level, not a defect at this tree): a connection resolved *before* the role became isolated is cached and not re-checked (L2) |
+| #6 | PARTIAL | `docs/sitrep/DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md` §Check #6; `database/factories/UmamusumeFactory.php` | Docs provenance verified (28 source-backed names); Backend's dedicated regression evidence not yet attached. Separate Docs/Backend dependency |
+| #7 | PARTIAL | `docs/sitrep/DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md`; AGENTS.md §13/§13.5; `docs/INDEX.md`; this tracker | #1/#4/#5 now have Fullstack integration evidence attached; #3 re-verification and the full-suite 1,973-failure classification remain open. Not a blanket prerequisite for all checks |
+| #8 | PASS | This tracker §Check #8 verification record (fresh read-only probe output) | Structural preservation only — counts and identity match the 2026-11-25 backup (`umamusume`=135, `training_runs`=18, `roster_members`=0, `character_cards`=263, `race_entries`=39, `veterans`=8, `integrity_check`=ok, `foreign_key_check`=0). **Not** evidence of genuine gameplay restoration; AGENTS.md §13.5 wording still stale (routed to Docs #7) |
 
 **Status vocabulary (2026-11-25):** `PENDING` = not yet worked; `PARTIAL` = some verified evidence landed, named blockers remain; `PASS` = all required evidence green and cited; `FAIL` = verified defect; `BLOCKED` = cannot proceed without owner/peer action. A check is never marked `PASS` on documentation alone or on the existence of a config/test file — only on executed, cited evidence. #7 is `PARTIAL`: documentation reconciliation landed, but #7 cannot close until Backend (#1/#4/#5) and Frontend (#3) implementation reports are attached and the full-suite failure triage is resolved.
 
@@ -475,3 +475,51 @@ authorization (step 11 of the recovery report).
 **Recovery blockers:** FS-INT-1b (write-boundary implementation absent from all refs; only `stash@{1}` holds it),
 FS-INT-2, FS-INT-3, FS-INT-4, FS-INT-5, Check #6, Check #3 preflight registration, Check #2 final integration,
 Check #7 peer reports.
+
+---
+
+## Integration verification record (Fullstack Senior Developer, 2026-11-26)
+
+**Authority.** Coordinator-granted exclusive Fullstack integration window after Backend released
+`backend`. Baseline before integration: master `8a9d4f8d` (tree `42120b30`), backend `52f36129`
+(tree `facb29af`), fullstack `49ca49a3`, frontend `6bd24a95`, docs `9cc74e62` (all three tree
+`42120b30`).
+
+**Method.** Fast-forward master to the reviewed `6aab6503`, then one explicit-staging commit for the
+legitimate Task #10 content preserved in the automatic host checkpoint `52f36129`. No wholesale merge
+of the checkpoint, no reset, no rebase, no history rewrite. Checkpoint preserved as branch
+`backend-checkpoint-52f36129`.
+
+**Master result.** `1cb070f7`, tree `2b46aa43`.
+
+**Executed evidence (this tree).**
+
+| Command | Exit | Result |
+|---|---:|---|
+| `./vendor/bin/pest tests/Feature/{TeamRaceCountdownTest,ObservedMemberCountTest,UnityCupTeamRaceSlotTest,CareerReferenceEnrichmentTest,CockpitTeamPanelTest}.php` | 0 | 49 passed / 491 assertions |
+| `./vendor/bin/pest tests/Feature/{DatabaseSafetyTest,AgentSessionIsolationTest}.php` | 0 | 38 passed / 90 assertions |
+| Combined forward order, all seven suites | 0 | 87 passed / 581 assertions, 135s |
+| `phpstan analyse --memory-limit=1G` (isolated scratch DB) | 0 | 2 findings, both pre-existing at `8a9d4f8d` |
+| `pint --test` on changed files | 0 | PASS after fixes |
+
+**Narrow safety probes (disposable scratch DBs, no canonical access).**
+
+- P3/P4/P5 — boot with `UMA_EXPECTED_DATABASE=A` GRANTED; post-boot switch to B REFUSED
+  (`DatabaseSafetyViolation`); reconnect after refusal still REFUSED (cache eviction holds).
+- L1 — `environment()` precedence `$_SERVER` → `$_ENV` → `getenv()`: a `putenv()`-only sanitizer
+  leaves a stale `$_SERVER` value winning. `tools/agent-run.php` clears all three, so the launcher
+  path is closed; recorded as the remaining #4 limitation.
+- L2 — a connection resolved before the role became isolated is cached and not re-checked
+  (source-level limitation, not a defect at this tree).
+- L3 — markerless isolated role + inherited `UMA_OPERATOR_ACKNOWLEDGED=yes` on canonical re-target:
+  REFUSED.
+
+**Canonical database.** Read-only counts unchanged from the 2026-11-25 backup; `integrity_check=ok`,
+`foreign_key_check=0`. No operational migration, no gameplay mutation.
+
+**Excluded from master.** `.headroom/*.db`, `storage/scheduler.pid`, `SESSION_HANDOFF-2026-11-26.md`,
+`SESSION_HANDOFF_261126.md`, `.recovery-2026-11-25/`. Runtime artifacts are now ignored by
+`.gitignore` (single-sourced) so an automatic checkpoint cannot re-sweep them.
+
+**Open at handoff.** #3 Frontend re-verification against `1cb070f7`; #6 Docs/Backend fixture
+provenance; #7 full-suite 1,973-failure classification; #4 env-precedence sanitizer audit.
