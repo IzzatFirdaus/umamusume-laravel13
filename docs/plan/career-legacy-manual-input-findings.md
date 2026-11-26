@@ -1,4 +1,12 @@
 # Career setup wizard: legacy manual input — findings
+<!-- PLAN-CONTRACT
+plan: career-legacy-manual-input-findings
+status: landed
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 ## Issue
 

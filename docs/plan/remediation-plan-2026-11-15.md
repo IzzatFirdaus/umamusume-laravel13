@@ -1,4 +1,12 @@
 # Remediation plan - audit findings of 2026-11-15 (transfer 500s, schema drift, form 500s, state wipes)
+<!-- PLAN-CONTRACT
+plan: remediation-plan-2026-11-15
+status: dropped
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 Status: proposal, awaiting owner approval. No `app/`, `database/`, or `resources/` file has been
 modified. This document is the only deliverable of this pass.

@@ -49,7 +49,7 @@ Based on the Grand Concert implementation plan (`Our-Grand-Concert-plan.md`, ver
 
 ## Slice 16 — Promotional Lives Evidence + Foundation
 - **Status**: BLOCKED BY EVIDENCE
-- **Gate**: Gated on Slice 16 closing the gate: no Promotional Live representation exists and no table can hold the series without a schema change
+- **Gate**: Gated on evidence, not on Slice 16: no Promotional Live representation exists and no table can hold the series without a schema change
 - **Evidence**: No Promotional Live representation exists; no table can hold the series without a schema change; the event's own noun is official (Promo Concert)
 - **Related**: `SCREEN_SPEC.md` §7-23; Promotional Lives; event noun is official
 

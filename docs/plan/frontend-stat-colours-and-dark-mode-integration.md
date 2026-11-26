@@ -1,4 +1,12 @@
 # Frontend Stat Colours & Dark Mode Integration Plan
+<!-- PLAN-CONTRACT
+plan: frontend-stat-colours-and-dark-mode-integration
+status: landed
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 2026-11-14. Audit-derived plan; no code written. One material premise correction up front, then the
 plan the tree actually needs. Evidence: `file:line` throughout; every ratio computed (WCAG 2.x,

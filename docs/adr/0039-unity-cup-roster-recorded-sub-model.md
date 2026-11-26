@@ -1,11 +1,11 @@
 # ADR-0039: The Unity Cup team roster is a recorded sub-model, never the six-card deck
 
 <!-- ADR-CONTRACT
-  decision: accepted (owner delegation 2026-11-18, "proceed with every owner gated tasks") — the twenty characters who train alongside the trainee are a recorded sub-model: `roster_members` (one row per member per run), written by its own controller, and the Cockpit's `roster` read-out is that table; the six `deck_slots` stay the support-card deck (ADR-0014) and the two are never merged
+  decision: accepted (owner delegation 2026-11-18, "proceed with every owner gated tasks") — the twenty characters observed training alongside the trainee (eighteen documented in the source) are a recorded sub-model: `roster_members` (one row per member per run), written by its own controller, and the Cockpit's `roster` read-out is that table; the six `deck_slots` stay the support-card deck (ADR-0014) and the two are never merged
   code: built — migration 2026_11_24_120000_create_roster_members_table (with down()); App\Models\RosterMember (booted() saving guard, MAX_MEMBERS = 20, ACES_PER_DISTANCE = 1), App\Enums\RosterDistance, App\Http\Controllers\Career\RosterMemberController, App\Http\Requests\Career\StoreRosterMemberRequest, TrainingRun::rosterMembers(); CockpitController::rosterSection() reads the recorded roster; tests/Feature/CockpitRosterTest.php, RosterSeederReRunTest.php, RosterMemberTest.php, RosterDoesNotTouchTeamRankTest.php, RosterMembersForeignKeyRepairTest.php
   superseded-by: —
   amended-by: —
-  open: the member's per-skill list (A-0.14 / KI-126) stays unrecorded — this ADR stores the roster and its five columns, not a skill table; the twenty-slot roster carries a `20 / 20` counter whose denominator is the client's own display figure, not a row this tool must fill, so a short roster renders the count against 20 and never a fabricated member
+  open: the member's per-skill list (A-0.14 / KI-126) stays unrecorded and declined (CLOSED-WONTFIX) — this ADR stores the roster and its five columns, not a skill table; the twenty-slot roster carries a `20 / 20` counter whose denominator is the client's own display figure, not a row this tool must fill, so a short roster renders the count against 20 and never a fabricated member
 -->
 
 Status: **accepted** (owner delegation 2026-11-18, "proceed with every owner gated tasks").
@@ -28,6 +28,12 @@ support-card characters appear *as teammates* while the rest arrive as Guest R c
 `ADR-0029` A-0.13 had already filed the counter gap ("The 20/20 counter counts a stored roster the
 tool does not hold (the derived deck roster is 6, not 18)") and D-6 of that ADR named the missing
 PRD anchor as the open item. This ADR is the ruling D-6 asked for: a roster table at run grain.
+
+**Observed vs documented count.** The Unity Cup source shows a `20 / 20` counter, but only eighteen
+distinct members are documented by name across the cited source sections; the remaining two slots are
+observed in the client counter but not individually recorded. This ADR records the roster mechanism
+and its five columns; it does not invent the two undocumented members. The `observed_member_count`
+prop names the recorded total against the client's 20.
 
 ## Decision
 
@@ -67,9 +73,10 @@ nothing is stored; it never invents members to reach twenty.
 
 - **No merge with the deck.** `deck_slots` is the support-card deck (`ADR-0014`); `roster_members`
   is the team roster. A surface that needs both reads both, and neither is ever rendered as the other.
-- **No per-skill roster table.** A-0.14 / KI-126's `team_roster_member_skill` stays unrecorded; this
-  ADR stores the member's five stats and grade, not her skill list. Re-opening A-0.14 needs its own
-  slice and its own schema bundle.
+- **No per-skill roster table.** A-0.14 / KI-126's `team_roster_member_skill` stays unrecorded and
+  declined (CLOSED-WONTFIX, R8); this ADR stores the member's five stats and grade, not her skill
+  list. Re-opening A-0.14 needs its own slice and its own schema bundle, and would reverse a closed
+  disposition.
 - **No back-fill from the deck.** Writing `roster_members` for a legacy run from its `deck_slots`
   would record the deck's six as if they were the twenty, which is the conflation this ADR retires.
 - **No new `20 / 20` counter semantics.** The denominator is the client's display figure, not a

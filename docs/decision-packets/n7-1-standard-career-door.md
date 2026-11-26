@@ -9,7 +9,8 @@
 **Related**: `docs/plan/trainerdesk-complete-uiux-implementation-plan-2026-11-20.md`; `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md`; `PLAN-REGISTRY-2026-11-23.md`; `flows-career-creation.md` §§1–4
 
 ## Authority
-**Accepted 2026-11-25**: Phase 7 slices selectively absorbed into MASTER roadmap; only already-authorized slices retained; undocumented slices documented as separate track per owner ruling; N7.1 is an already-authorized slice
+**Accepted 2026-11-25**: Phase 7 slices selectively absorbed into the MASTER roadmap
+(`docs/roadmap/MASTER-IMPLEMENTATION-ROADMAP-2026-11-18.md`); only already-authorized slices retained; undocumented slices documented as separate track per owner ruling; N7.1 is an already-authorized slice
 
 **Previous Ruling**: 
 - From `TASK-OWNERSHIP-CROSSWALK-2026-11-23.md:52`: `Nov20-N:N7.1–N7.22` | Same (Phase 7) | — | Owner-gated | **Accepted — Phase 7 slices selectively absorbed into MASTER roadmap 2026-11-25**

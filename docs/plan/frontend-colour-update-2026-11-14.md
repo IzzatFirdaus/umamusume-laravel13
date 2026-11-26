@@ -1,4 +1,12 @@
 # Frontend colour-update plan
+<!-- PLAN-CONTRACT
+plan: frontend-colour-update-2026-11-14
+status: landed
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 2026-11-14. Authored from the grey-parity audit (`docs/audits/grey-parity/`, sign-off in `06`,
 verdict "audit stands with erratum") plus fresh tree measurements at `d8238c87`. Plan only —

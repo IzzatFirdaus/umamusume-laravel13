@@ -127,9 +127,9 @@ An owner-gated row is a decision request, not approval to implement.
 | `implementation-roadmap-2026-11-17-s18.md` | S18-01..S18-10 | §1, §4 | Consolidated |
 | `implementation-roadmap-2026-11-16.md` | P5.1, P5.2, P5.3, P5.5 | §5 | Consolidated |
 | `v3.0.0-release-plan-2026-11-17.md` | P1-P6 prioritized slices | §5, §7 | Consolidated |
-| `execution-record-2026-11-18.md` | S0-S4 execution record | §5, §6, §7 | Consolidated |
-| `residual-verification-2026-11-18.md` | §Slice 3.8 (Trackblazer/URA Finale) | §1 | Consolidated |
-| `master-implementation-roadmap-2026-11-18.md` | S3.1-S3.5, S4.1-S4.4 | §3, §6 | Consolidated |
+| `EXECUTION-RECORD-2026-11-18.md` | S0-S4 execution record | §5, §6, §7 | Consolidated |
+| `RESIDUAL-VERIFICATION-2026-11-18.md` | §Slice 3.8 (Trackblazer/URA Finale) | §1 | Consolidated |
+| `MASTER-IMPLEMENTATION-ROADMAP-2026-11-18.md` | S3.1-S3.5, S4.1-S4.4 | §3, §6 | Consolidated |
 
 ---
 

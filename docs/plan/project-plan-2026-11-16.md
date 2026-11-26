@@ -1,4 +1,12 @@
 # Project Implementation Plan — 2026-11-16
+<!-- PLAN-CONTRACT
+plan: project-plan-2026-11-16
+status: landed
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 Pairs `docs/roadmap/project-roadmap-2026-11-16.md`. The roadmap states what remains and why; this file
 states how, with the exact command whose output is the evidence.

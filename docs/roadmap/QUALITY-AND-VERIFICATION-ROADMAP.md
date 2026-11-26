@@ -124,13 +124,13 @@
 
 | Source File | Source Section | Destination | Status |
 |-------------|----------------|-------------|--------|
-| `residual-verification-2026-11-18.md` | §Slice 2.5 (KI-114), §Slice 2.6 (citation ratchet), §Slice 4.1 (register closeout) | §2, §4, §5 | Consolidated |
-| `execution-record-2026-11-18.md` | S1.1-S1.3, S2.3 (KI-114), S4.1-S4.4 | §1, §2, §4, §5 | Consolidated |
+| `RESIDUAL-VERIFICATION-2026-11-18.md` | §Slice 2.5 (KI-114), §Slice 2.6 (citation ratchet), §Slice 4.1 (register closeout) | §2, §4, §5 | Consolidated |
+| `EXECUTION-RECORD-2026-11-18.md` | S1.1-S1.3, S2.3 (KI-114), S4.1-S4.4 | §1, §2, §4, §5 | Consolidated |
 | `project-roadmap-2026-11-16.md` | Phase A, B, C, §0 measurements | §1, §3, §5 | Consolidated |
 | `remaining-work-roadmap-2026-11-17.md` | Phase 1 (register), Phase 2 (test truth), §0 gate state | §1, §2, §3, §5 | Consolidated |
 | `v3.0.0-implementation-roadmap-2026-11-16.md` | Phases R1-R4, Definition of Done | §1, §2, §5 | Consolidated |
-| `implementation-roadmap-2026-11-18.md` | §2.5 (KI-114 OPEN claim) | §4 | Conflict resolved |
-| `master-implementation-roadmap-2026-11-18.md` | §12 (verification command ref), §16 (acceptance) | §3, §5 | Consolidated |
+| `IMPLEMENTATION-ROADMAP-2026-11-18.md` | §2.5 (KI-114 OPEN claim) | §4 | Conflict resolved |
+| `MASTER-IMPLEMENTATION-ROADMAP-2026-11-18.md` | §12 (verification command ref), §16 (acceptance) | §3, §5 | Consolidated |
 
 ---
 

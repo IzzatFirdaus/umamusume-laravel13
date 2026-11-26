@@ -1,4 +1,12 @@
 # Plan 4 of 4 - Capability gaps and the release bar (phases 4-5)
+<!-- PLAN-CONTRACT
+plan: plan-capability-release-2026-11-17
+status: landed
+slices: —
+superseded-by: —
+amended-by: —
+open: —
+-->
 
 **Pair:** `docs/roadmap/remaining-work-roadmap-2026-11-17.md` phases 4 and 5.
 **Depends on:** plan 1 (phase 0), plan 2 (phase 2 - the browser sweep is release condition 2).
