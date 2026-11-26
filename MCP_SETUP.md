@@ -7,6 +7,12 @@ make a correct-looking config silently fail.
 > Corrected 2026-10-12. The previous version assumed a single `.mcp.json` was
 > read by "opencode and other MCP-capable clients". It is not: each client reads
 > a different file in a different schema. See "Config locations" below.
+>
+> Updated 2026-11-26 for the cross-IDE Agent Chat rollout. The tracked
+> workspace-root `.mcp.json` is the portable foundation for Claude Code and
+> VS Code / GitHub Copilot; Cursor and Codex need local adapters because their
+> project files are client-specific or machine-local. All adapters point at one
+> shared mailbox. See "TrainerDesk Agent Chat — shared mailbox" below.
 
 ## Windows spawn rules (read this first)
 
@@ -43,6 +49,7 @@ or `MCP_SERVER_REQUEST_TIMEOUT`).
 | `git`       | `@cyanheads/git-mcp-server`          | Inspect history, status, diffs, blame       | `GIT_BASE_DIR` restricts every operation to the project tree. The server also exposes write tools (`git_commit`, `git_push`); never invoke them without an explicit user request. |
 | `docs`      | `@upstash/context7-mcp`              | Retrieve indexed library/framework docs     | Read-only document retrieval. Optional `CONTEXT7_API_KEY` raises the anonymous rate limit. |
 | `laravel-boost` | in-repo (`php artisan boost:mcp`)  | Laravel version-specific docs and code search | Project-local stdio server, no network. Installed via `laravel/boost` (require-dev). |
+| `trainerdesk-chat` | pinned v2.0.0 Agent Chat (`server.py`) | Cross-IDE autonomous messaging | One stdio server, one absolute SQLite mailbox outside every worktree; no network, no auth identities. |
 | `gitkraken` | `@gitkraken/gk`                      | Git history, issues, PRs, multi-repo workflows | Project-local `gk mcp` over stdio. Cloud tools (issues, PRs) need `gk auth login` first. |
 | `sequentialthinking` | `@modelcontextprotocol/server-sequential-thinking` | Structured step-by-step reasoning | No env. |
 | `memory`    | `@modelcontextprotocol/server-memory` | Persistent knowledge graph across sessions | `MEMORY_FILE_PATH` points at `%USERPROFILE%/.memory/memory.json`. |
@@ -58,19 +65,24 @@ clients that merge by name take last-write-wins.
 
 | Client | Project file | Global file | Schema key |
 | ------ | ------------ | ----------- | ---------- |
+| WorkBuddy AI | none documented (UI Custom Connector) | `~/.workbuddy-ai/mcp.json` | `mcpServers` |
 | Kilo (CLI + VS Code extension) | `kilo.json` (root), `opencode.json` (root, legacy) | `~/.config/kilo/kilo.json`, `~/.config/kilo/kilo.jsonc` | `mcp` |
 | Claude Code | `.mcp.json` | `~/.claude.json` | `mcpServers` |
-| VS Code / GitHub Copilot | `.vscode/mcp.json` | `%APPDATA%\Code\User\mcp.json` | `servers` |
+| VS Code / GitHub Copilot | workspace-root `.mcp.json` (native; experimental setting) and legacy `.vscode/mcp.json` | `%APPDATA%\Code\User\mcp.json` | `mcpServers` / `servers` |
 | GitHub Copilot CLI | - | `~/.copilot/mcp-config.json` | `mcpServers` |
 | opencode | `opencode.json` (root), `.opencode/opencode.json` | `~/.config/opencode/opencode.json(c)` | `mcp` |
 | Cursor | `.cursor/mcp.json` | `~/.cursor/mcp.json` (absent) | `mcpServers` |
 | Kiro | `.kiro/settings/mcp.json` | `%APPDATA%\Kiro\User\settings.json` (no MCP) | `mcpServers` |
 | Trae | `.trae/mcp.json` | `%APPDATA%\Trae\User\...` | `mcpServers` |
 | JetBrains Junie | `.junie/mcp/mcp.json` | - | `mcpServers` |
-| Codex | `.codex/config.toml` | `~/.codex/config.toml` | `[mcp_servers.*]` |
+| Codex CLI / IDE extension | `.codex/config.toml` (trusted project only) | `~/.codex/config.toml` | `[mcp_servers.*]` |
 | Grok | `.grok/config.toml` | - | `[mcp_servers.*]` |
 | Qoder | - | `~/.qoder/settings.json` | `mcpServers` |
 | Crush (Charm) | `crush.json` (root) | `%LOCALAPPDATA%\crush\crush.json` (no MCP) | `mcp` |
+
+Workspace-root `.mcp.json` is confirmed by current Claude Code and Copilot
+documentation. The older `.vscode/mcp.json` `servers` schema remains valid for
+the editor-managed Local harness but is no longer the recommended destination.
 
 **Kilo is the important exception.** Kilo does **not** read `.mcp.json`,
 `.vscode/mcp.json`, `.opencode/opencode.json`, `.claude/`, `.cursor/`, or any
