@@ -21,6 +21,16 @@ Reconciled against `MASTER-IMPLEMENTATION-ROADMAP-2026-11-18.md`, the decision p
 - N7.2–N7.22 — OWNER-GATED; packets already record vocabulary/requirement status and "only already-authorized slices retained per MASTER absorption". Preserved; no silent approval. N7.2 two-position vocabulary (Position A/B) remains owner-gated.
 - No competing roadmap created; MASTER untouched.
 
+## 2b. Check #6 documentation reconciliation (Coordinator requirement resolved 2026-11-26)
+
+- **`docs/sitrep/DB-SAFETY-ACCEPTANCE-2026-11-25.md`** — Check #6 updated: added "Resolved requirement (Coordinator, 2026-11-26)" subsection (factory default `is_fixture=true`; `catalogue()` opts `is_fixture=false`; `is_manual` independent; synthetic distinguishable from genuine source-backed rows; fixtures excluded from applicable catalogue/user-facing collections; Global eligibility from source records; dataset-level ≠ per-character/card-variant). Summary row #6 and item 9 corrected: 28-name claim = unsupported historical assertion (no `$sourceNames`; Faker names); no replacement pool. Status kept **PARTIAL** pending focused executable evidence.
+- **`docs/sitrep/DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md`** — added matching "Requirement resolved" bullet; 28-name claim preserved as unsupported; PARTIAL kept.
+
+## 2c. Accessibility / Unity Cup — verified no drift (no edit)
+
+- DESIGN.md / AGENTS §13: WCAG 2.2 AA distinguished from house rules (44px house vs 24px SC 2.5.8), themes Azure Daybreak / Midnight Circuit / EVA-01 purple-first intact; unverified contrast rows already marked skipped (no compliance claim). No demonstrated inconsistency.
+- Unity Cup / Career: D-8/D-9/D-10 + ADR-0039 delivered; D-9 numbering divergence recorded; nullable caps/aptitudes covered by ADR-0015/0025/0004. No new drift.
+
 ## 3. Verified no drift (no edit)
 
 - ADR-0029 / A-0.12: accepted (R4 2026-10-25); A-0.12 owner-gated PROPOSED packet consistent; no new ruling.
@@ -39,9 +49,11 @@ Reconciled against `MASTER-IMPLEMENTATION-ROADMAP-2026-11-18.md`, the decision p
 - Intended paths:
   - `docs/adr/0027-turn-and-decision-logging.md`
   - `AGENTS.md`
+  - `docs/sitrep/DB-SAFETY-ACCEPTANCE-2026-11-25.md`
+  - `docs/sitrep/DB-SAFETY-DOCS-RECONCILIATION-2026-11-25.md`
   - `docs/sitrep/SITREP-DOCS-RESUME-2026-11-26.md` (this file)
 - Needs separate review: none.
 - Delegated to Fullstack: run Git-dependent validators; verify branch/index/diff; controlled commit + integrate to master + sync worktree.
-- Remaining (source/owner-dependent): Check #6 requirement (Coordinator/Backend); N7.2+ owner rulings; Areas L–P definitions; Trackblazer/Happy Meek evidence; Unity Cup/Career reconciliation; Source Ledger; accessibility docs.
+- Remaining (source/owner-dependent): Check #6 focused executable evidence (Backend) — kept PARTIAL; N7.2+ owner rulings; Areas L–P definitions; Trackblazer/Happy Meek evidence; Source Ledger five-state executable acceptance (Frontend); accessibility executable verification (Frontend).
 - Readiness: frozen for Fullstack verification.
 - Next actionable: Source Ledger / provenance contract reconciliation (TD-08 five-state, N2.11 source-channel metadata, N6.2 Supplies, N6.6 truthful absence reasons, BO-003 fixture exclusion) against `frontend-database-sources-contract.md` + audits; then accessibility/design-system doc consistency (WCAG 2.2 AA, nine revision areas) against DESIGN.md.
