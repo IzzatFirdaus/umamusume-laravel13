@@ -72,6 +72,7 @@ No discrepancy found between the implemented code and the boundary behaviour at 
 
 ## Check #6 — Source-provenance findings (review only, no backend change)
 
+<<<<<<< HEAD
 - **Curated names claim NOT verified — property absent.** The claimed 28 names in `UmamusumeFactory::$sourceNames` do not exist: the factory has no `$sourceNames` property. `definition()` generates fixture names via `Str::title(fake()->unique()->words(2, true))`. The historical 28-name curated-pool claim is preserved as historical evidence but is not supported by the inspected factory or stashes. No replacement pool invented.
 - **Global eligibility — dataset-level only.** Catalog carries `release_en` (107 populated entries); latest `release_en` is `2026-09-28`, earlier than verification date `2026-11-25`. This supports the dataset, not a curated 28-name subset (which was not located).
   - **Dataset:** `database/seeders/data/gametora-characters.897e63ea.json`. **Verification date:** 2026-11-25 (rechecked 2026-11-26).
@@ -81,6 +82,8 @@ No discrepancy found between the implemented code and the boundary behaviour at 
 - **Provenance taxonomy preserved.** Published mechanics (`UMAMUSUME_REFERENCE.md`, tier-cited), catalog identities (GameTora export, tier B), client-observed gameplay (`[Rosy_Dreams]Rice_Shower_Unity-Cup.md` §1 frame observations), derived info, synthetic fixtures, and unknown history remain distinct. Unity Cup doc explicitly keeps catalog-sourced vs client-read skill lists separate (§ lines ~513-514) and marks single-source claims (tier B, not promoted to A without a second source).
 
 - **Requirement resolved (Coordinator, 2026-11-26).** No accepted mandatory curated pool of 28 genuine Global-eligible fixture identities has been established. Disposition: factory rows default `is_fixture=true`; `catalogue()` explicitly opts `is_fixture=false`; `is_manual` stays independently classified; synthetic fixtures stay distinguishable from genuine source-backed catalogue rows; fixtures stay excluded from applicable catalogue queries and user-facing collections; Global eligibility is supported by applicable source records. Dataset-level source availability is distinct from individual character and card-variant eligibility. The 28-name claim remains an unsupported historical assertion; no replacement pool invented. **Check #6 remains PARTIAL** pending focused integrated executable evidence.
+
+- **Executable evidence (Fullstack msg#2, 2026-11-26).** Backend's `tests/Feature/Check6FixtureClassificationTest.php` (8 tests / 29 assertions, all passing @ `d9bf146b`) verifies the seven distinctions. Status: PARTIAL → PENDING-INTEGRATION; PASS gate = Backend commit+freeze the untracked test file + Fullstack integrate.
 
 No external fetch required: every material claim was verifiable against the committed snapshot. No unresolved source disagreement surfaced within this review's scope. Full historical game-domain audit not repeated (per constraints).
 
