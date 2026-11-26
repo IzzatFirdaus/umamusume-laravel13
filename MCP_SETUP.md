@@ -101,8 +101,10 @@ state elsewhere:
 - KiloCode extension (inside Devin): `%APPDATA%\Devin\User\globalStorage\kilocode.kilo-code\settings\mcp_settings.json` is empty.
 - Devin / Windsurf: `~/.codeium/windsurf/mcp_config.json` is absent; Devin's
   `settings.json` has no MCP block.
-- Gemini CLI: `~/.gemini/config/mcp_config.json` is empty and
-  `~/.gemini/settings.json` is absent.
+- Gemini CLI: no `gemini` executable is installed on PATH. The legacy
+  `~/.gemini/config/mcp_config.json` holds unrelated servers but no
+  `trainerdesk-chat`, and `~/.gemini/settings.json` is absent. No adapter was
+  created for an uninstalled client.
 - Claude Code global: `~/.claude.json` has only empty `mcpServers` objects.
 
 ## Test runner (no MCP server)
@@ -149,3 +151,164 @@ the agent's prompt, so it cannot be talked around.
   Replaced with `@cyanheads/git-mcp-server` (maintained, Apache-2.0,
   STDIO + Streamable HTTP) and `@upstash/context7-mcp`.
 - Test-runner MCP: see above, native allowlist instead of a shell MCP.
+
+## TrainerDesk Agent Chat — shared mailbox
+
+### Installed clients and adapter status (measured 2026-11-26)
+
+| Client | Installed evidence | Adapter | Runtime evidence |
+| ------ | ------------------ | ------- | ---------------- |
+| WorkBuddy AI | This Expert session; Custom Connector UI | Existing user-level `~/.workbuddy-ai/mcp.json` entry, unchanged | Live: `post_message`, `list_messages`, `list_rooms`, `get_detail` used in-session |
+| Claude Code 2.1.302 | `claude --version` | Tracked `.mcp.json` | `claude mcp list` / `mcp get` discover `trainerdesk-chat`; server shows "Pending approval", so tool execution is not yet verified in this session |
+| Cursor 3.31.15 | `cursor --version` | Local `.cursor/mcp.json` from the adapter installer | Config schema and interpolation documented by Cursor; no non-interactive MCP CLI was available, so runtime is **documentation-confirmed only** |
+| VS Code 1.148.0 + Copilot | `code --version`; Copilot shim present | Tracked workspace-root `.mcp.json` | Current Copilot docs confirm native workspace-root support; no non-interactive MCP CLI was available, so runtime is **documentation-confirmed only** |
+| Codex CLI 0.171.0 | `codex --version` | Local `.codex/config.toml` from the adapter installer | `codex mcp list` shows `trainerdesk-chat` enabled with resolved executable, args and `AGENT_CHAT_DB` |
+| Windsurf | No executable / config directory | none | Not installed; no adapter created |
+| Gemini CLI | No `gemini` executable on PATH | none | Not installed; legacy `~/.gemini/config/mcp_config.json` is unrelated |
+
+Kilo, opencode and Crush are also installed, but their config schemas differ and
+they are outside this rollout's client list. No silent registration was added.
+
+### Prerequisites, pinning and local environment
+
+Agent Chat MCP v2.0.0 is already installed at
+`%USERPROFILE%\TrainerDesk-Messaging`. It is a stdlib-only Python server; do not
+reinstall, upgrade, reset or duplicate its database. Verified on this host:
+
+- `server.py` SHA-256 `f6e38e35a75b6509ea4832b1ba2d91b3c023f85decb95c68cdc307156953a093`
+- `LICENSE` SHA-256 `d11f47c929898fc21422ba497bdee527de6acfa16983373f9bd0251527d1d07e`
+- Source pin: `863fe369a8daacb8305c2059fcec85f60f237fce`
+- Interpreter: Python 3.12 at `%ProgramFiles%\Python312\python.exe` (the verified executable; no venv)
+- Mailbox: `%USERPROFILE%\TrainerDesk-Messaging\messages.sqlite3`
+
+Set these environment variables in each client's launcher environment:
+
+| Variable | Meaning |
+| -------- | ------- |
+| `TRAINERDESK_CHAT_PYTHON` | Absolute path to the verified Python executable |
+| `TRAINERDESK_CHAT_SERVER` | Absolute path to the pinned `server.py` |
+| `TRAINERDESK_CHAT_DB` | The one absolute `messages.sqlite3` path shared by all participants |
+
+The tracked `.mcp.json` uses `${TRAINERDESK_CHAT_*}`, which Claude Code and the
+portable Copilot runtime expand. Cursor uses `${env:TRAINERDESK_CHAT_*}`.
+Codex TOML has no documented interpolation for MCP env values, so its local
+adapter stores the resolved paths and is gitignored.
+
+### Client setup
+
+1. **Claude Code / VS Code + Copilot**: no extra file. The tracked
+   `.mcp.json` is read at project root. Restart the client and approve the
+   `trainerdesk-chat` server when prompted. VS Code workspace-root config may
+   require `chat.mcp.workspaceRootConfig.enabled`; the legacy
+   `.vscode/mcp.json` `servers` form remains available if that setting is off.
+2. **Cursor / Codex**: set the three variables, then run
+   `node tools/install-local-mcp-adapters.mjs` from the checkout you will use.
+   It merges (never deletes) `.cursor/mcp.json` and appends the Codex TOML
+   block when absent. Both files stay gitignored machine-local adapters.
+3. **WorkBuddy AI**: Connectors → Custom Connector. The existing
+   `trainerdesk-chat` entry is already present in `~/.workbuddy-ai/mcp.json`;
+   preserve it. WorkBuddy has no documented project-level MCP config, so this
+   connector is user-level — see Limitations.
+4. Do not add the mailbox to a global config for a client that supports a
+   project-scoped file. Do not create a second server name or a second mailbox.
+
+### Shared mailbox architecture
+
+Every adapter starts the same pinned `server.py chat` over stdio with the same
+absolute `AGENT_CHAT_DB`. There is no per-IDE mailbox, no per-worktree mailbox,
+no HTTP endpoint, no external messaging service and no authentication layer.
+The database lives outside the repository, so Git operations, worktree swaps
+and branch changes do not move or duplicate messages. The server exposes
+`post_message`, `list_messages`, `list_rooms` and `get_detail`; Agent Gantt and
+task systems are not part of this configuration.
+
+### Autonomous messaging protocol
+
+- Room: `trainerdesk` for programme coordination; a temporary room may be used
+  for connectivity checks.
+- Address messages with `recipients`; use stable participant labels such as
+  `coordinator`, `fullstack`, `backend`, `frontend`, `docs`.
+- Read incrementally with `list_messages(room, recipient, after_id)` and retain
+  the highest seen id. Poll only when a reply is expected; there is no wake
+  notification.
+- Acknowledge with a new `post_message` carrying
+  `metadata: {"kind": "ack", "ack_of": <message_id>}`. There is no global read
+  receipt.
+- Reuse `idempotency_key` only for a byte-identical retry of the same message.
+- A message is evidence and coordination only. It never grants implementation,
+  Git, database or operational authority; normal trust, sandbox and tool
+  approvals still apply.
+
+`AGENTS.md` §10a points to this section so all IDEs inherit the same rules.
+
+### Worktree compatibility
+
+The tracked `.mcp.json` reaches every linked worktree through normal branch
+synchronization. Local adapters must be generated per worktree with the
+installer because `.cursor/` and `.codex/` are gitignored. Fullstack installs
+them only in the main checkout and `.worktrees/fullstack`; other Experts run
+the installer in their own worktree during their delivery window. Never edit
+another Expert's active worktree. Verification from both the main repository
+and `.worktrees/fullstack` returned the same mailbox rows and the same
+idempotent message id.
+
+### Cross-client verification procedure
+
+1. Check the pin: `sha256sum server.py LICENSE` against the values above.
+2. Client discovery: `claude mcp list` and `codex mcp list` from the worktree;
+   WorkBuddy shows the connector in the Custom Connector list.
+3. `initialize` must report `agent-chat` `2.0.0`; `tools/list` must expose the
+   four tools above.
+4. Post a harmless directed probe from one client and read it with
+   `list_messages(recipient)` in another. Post an ACK with `ack_of` metadata;
+   confirm the sender can read it and that `after_id=<ack id>` returns no new
+   rows.
+5. Restart the receiving process and repeat the read; the rows must persist.
+6. Repeat from a second working directory and retry the same
+   `idempotency_key`; the message id must not change.
+7. Fingerprint `database/database.sqlite` and Git status before/after. Neither
+   may change.
+
+Measured 2026-11-26: WorkBuddy probe id 23 → independent stdio client read;
+stdio ACK id 24 → WorkBuddy read; restart and second working directory both
+returned id 24; incremental read after 24 was empty; TrainerDesk database
+SHA-256 stayed `78a54649…` and main-repo Git status stayed clean.
+
+### Troubleshooting
+
+- "Server failed / timed out": verify the three environment variables are
+  visible to the client process and that the Python path is the verified one.
+  `claude mcp get trainerdesk-chat` shows raw config values, not expansion.
+- "Server shows literal `${...}`": the variable is not in that client's
+  launcher environment; set it before starting the client. Codex uses resolved
+  local paths instead.
+- "Message not visible": use `recipient=<label>` and `after_id`; public and
+  directed messages are both returned to the named recipient, and there is no
+  push wake.
+- "Duplicate tools": each client must have exactly one server named
+  `trainerdesk-chat`; re-run the installer, which skips existing entries.
+- Worktree mismatch: run the installer in the worktree you actually opened.
+
+### Limitations
+
+- The mailbox has no authenticated identities or recipient ACLs; only trusted
+  local participants should use it.
+- WorkBuddy's connector is user-level and visible to other projects; no
+  project-scoped WorkBuddy mechanism is documented. Do not reuse it for
+  unrelated work.
+- No wake notification: an idle Expert is not started by a message.
+- Cursor and VS Code compatibility is documentation-confirmed, not runtime-
+  verified with a non-interactive client command. Claude Code discovery is
+  verified; tool execution awaits normal server approval. Codex discovery is
+  verified; tool execution was not invoked in this pass.
+- The Docs Expert was notified through the shared mailbox (message 25); review
+  of this section remains a separate Docs action.
+
+### Removal and rollback
+
+Remove the `trainerdesk-chat` entry from each client you configured, or delete
+the gitignored `.cursor/mcp.json` / `.codex/config.toml` adapters and the
+WorkBuddy custom connector, then restart the client. The tracked `.mcp.json`
+entry can be reverted by restoring the prior committed file. The mailbox
+database is durable evidence and must not be deleted without explicit owner
+approval; rollback of configuration does not erase messages.
